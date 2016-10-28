@@ -15,6 +15,7 @@ Access to these variables is available from the ahdtop object in all forms.
 <script type="text/javascript">
 function activate_AHDtop()
 {
+  // test input
    if ( typeof window.opener == "object" &&
         window.opener != null )
       window.opener = null;
