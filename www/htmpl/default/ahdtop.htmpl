@@ -7,6 +7,7 @@ Access to these variables is available from the ahdtop object in all forms.
 * DO NOT MODIFY THIS FILE!  This file is not migrated for new releases or
 * Service Packs, and your modifications can be lost.  You can use the file
 * ahdtop_site.htmpl for site modifications to variables required in ahdtop.
+* test input
 ***************************************************************************
 </PDM_IF>
 <PDM_PRAGMA RELEASE=110>
