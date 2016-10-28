@@ -1,0 +1,58 @@
+<PDM_IF 0>
+
+DESCRIPTION:
+   Define metadata attributes for an extension table.
+
+PROCEDURE:
+Step 1:
+   For each attribute in the extension table, add a PDM_MACRO statement like the line below after the line marked "INSERT ATTRIBUTES HERE".  
+   
+   <PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+   
+  Replace each of the keyword strings below as follows: 
+   ***EXTENSION***    => Extension table name associated with a family 
+   ***HEADING***      => Heading label for attribute, displayed in Versioning detail view
+   ***ATTRIBUTE***    => Extension object attribute name
+   ***HELP***	      => Brief description of the attribute 
+
+   Example: The code below defines the metadata for the family which uses the widget extension table that has two attributes:
+      <PDM_MACRO name=cmdbMetadata category="Attributes" extension="widget" attr="number" heading="Number of Widgets" help="brief description of number attribute">
+      <PDM_MACRO name=cmdbMetadata category="Attributes" extension="widget" attr="size"   heading="Widget Size" help="brief description of size attribute">
+   
+   If the extension table refers to other tables, you may need to use the advanced form of the cmdbMetadata macro.  Consult the
+   macro source for details on using the currentcivalue and standardcivalue arguments.
+ 
+Step 2:   
+   Save this file as cmdb_metadata_***EXTENSION***.htmpl, where ***EXTENSION*** 
+   is replaced by the extension table name.  For example, cmdb_metadata_widget.htmpl.
+
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>	
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>	
+
+<!-- ---------------------------- -->
+<!-- INSERT ATTRIBUTES BELOW HERE -->
+<!-- ---------------------------- -->
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="projektor" heading="Projektor" help="Projektor">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="projektor_przenosny" heading="Projektor przenosny" help="Projektor przenosny">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="naglosnienie" heading="Naglosnienie" help="Naglosnienie">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="videokonferencja" heading="Wideokonferencja" help="Wideokonferencja">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="tablica_suchoscieralna" heading="Tablica suchoscieralna" help="Tablica suchoscieralna">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="flipchart" heading="Flipchart" help="Flipchart">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="ekran" heading="Ekran" help="Ekran">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="telekonferencja" heading="telekonferencja" help="telekonferencja">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="monitor" heading="Monitor" help="Monitor">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="ekran" heading="Ekran" help="Ekran">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="wifi" heading="WiFi" help="wifi">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="ekran" heading="Ekran" help="Ekran">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="pojemnosc_konferencyjna" heading="Pojemnosc konferencyjna" help="Pojemnosc konferencyjna">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="pojemnosc_teatralna" heading="Pojemnosc teatralna" help="Pojemnosc teatralna">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zadm_sa_ko" attr="dodatkowe_miejsca" heading="Dodatkowe miejsca" help="Dodatkowe miejsca">
+<!-- ---------------------------- -->
+<!-- INSERT ATTRIBUTES ABOVE HERE -->
+<!-- ---------------------------- -->
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>
+
+Telekonferencja
+Telekonferencja

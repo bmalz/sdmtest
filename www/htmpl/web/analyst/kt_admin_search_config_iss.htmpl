@@ -1,0 +1,187 @@
+<PDM_IF 0>
+kt_admin_search_config.htmpl
+WHEN PRESENTED:
+    When we need to display the kt_sd integration admin screen
+VARIABLES:
+    
+    object  
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+var lSDMappingListID="";
+var sSDMappingListDefault="";
+var sSDMappingListValue = "$prop.SD_SEARCH_CONFIG_ISS";
+var m_lAutoSearchID = "";
+var m_lAutoSearchValue = "$prop.SD_AUTO_SEARCH_ISS";
+var m_lAutoSearchDefault = "";
+
+<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0 AND (PROPERTY_NAME = 'SD_SEARCH_CONFIG_ISS' or PROPERTY_NAME = 'SD_AUTO_SEARCH_ISS')" ESC_STYLE=C>
+	<PDM_IF "$ciProps.PROPERTY_NAME" == "SD_SEARCH_CONFIG_ISS">
+		lSDMappingListID = "$ciProps.id";
+		sSDMappingListDefault = "$ciProps.PROPERTY_DEFAULT";
+	</PDM_IF>
+	<PDM_IF "$ciProps.PROPERTY_NAME" == "SD_AUTO_SEARCH_ISS">
+		m_lAutoSearchID = "$ciProps.id";
+		m_lAutoSearchDefault = "$ciProps.PROPERTY_DEFAULT";
+		m_lAutoSearchValue = "$ciProps.PROPERTY_VALUE";
+	</PDM_IF>	
+</PDM_LIST>
+
+function chkOther(e){
+	//alert(e);
+	var cb=document.frmSearchConfig[e];
+	if(e=="summary")
+	{
+		if(cb.checked==true)
+		{
+			document.frmSearchConfig["description"].checked=false;
+		} else {
+			document.frmSearchConfig["description"].checked=true;
+		}
+	}
+
+	if(e=="description")
+	{
+		if(cb.checked==true)
+		{
+			document.frmSearchConfig["summary"].checked=false;
+		} else {
+			document.frmSearchConfig["summary"].checked=true;
+		}
+	}
+}
+
+</script>
+</head>
+<body class="detailro" onload="frmSearchConfigOnLoad();" onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<form id="frmSearchConfig" name="frmSearchConfig">
+<table cellSpacing="0" cellPadding="0" width="100%" class="page_header gn_container_no_border">
+	<tr>
+	
+<PDM_IF "$env.NX_CMDB" == "NOTSTANDALONE">
+		<td align="left" width="99%">Service Desk/CMDB Integration</td>
+<PDM_ELSE>
+		<td align="left" width="99%">Service Desk Integration</td>
+</PDM_IF>
+
+		<td align="left" width="1%">
+			<div align="right">
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					<PDM_MACRO NAME=btnStartRow >
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						<PDM_MACRO NAME=button
+							id="btnSave" 
+							caption="Save[S]" 
+							func="cmdOK_Click('frmSearchConfig')"
+							disabled="no"
+							width=0
+							hotkey_name="Save[S]" 
+							Tooltip="Save[S]" >
+
+						<PDM_MACRO NAME=button
+							id="btnResetDefault" 
+							caption="Reset Defaults" 
+							func="cmdResetDef_Click('frmSearchConfig')"
+							disabled="no"
+							width=0
+							hotkey_name="Reset_Defaults" 
+							Tooltip="Reset Defaults" >
+
+					}
+					<PDM_MACRO NAME=btnEndRow >
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table cellspacing="0" cellpadding="0" width="100%" class="gn_container_no_border">
+	<tr>
+		<td>
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+					<td class="page_section_header_center"><span  class="page_section_header_text" >Issue Search Configuration</span></td>
+					<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+<table width="100%" align="center" cellspacing="0" cellpadding="0" class="gn_container_no_border">	
+	<tr>
+		<td>
+			<table width="100%" cellspacing="1" cellpadding="0" class="table gn_background_color_15">
+				<tr>
+<PDM_IF "$env.NX_CMDB" == "NOTSTANDALONE">
+					<td width="20%" class="table_column_header_background"><span class="table_column_header_text_small">Service Desk/CMDB Field</span></td>
+<PDM_ELSE>
+					<td width="20%" class="table_column_header_background"><span class="table_column_header_text_small">Service Desk Field</span></td>
+</PDM_IF>
+					<td width="30%" class="table_column_header_background"><span class="table_column_header_text_small">Use this information</span></td>
+				</tr>
+			</table>
+			<table width="100%" cellspacing="1" cellpadding="0" class="table">
+				<tr class="table_row">
+					<td width="20%" class="data"><div align="left"><label for="cbsummary">Summary</label></div></td>
+					<td width="30%" class="data"><div align="center"><input tabIndex="100" type="checkbox" id="cbsummary" name="summary" class="data" onclick="chkOther('summary')" ></div></td>
+				</tr>
+				<tr class="table_banded_row">
+					<td width="20%" class="data"><div align="left"><label for="cbdescription">Description</label></div></td>
+					<td width="30%" class="data"><div align="center"><input tabIndex="100" type="checkbox" id="cbdescription" name="description" class="data"  onclick="chkOther('description')"></div></td>
+				</tr>
+				<tr class="table_row">
+					<td width="20%" class="data"><div align="left"><label for="cbaffected_resource">Configuration Item</label></div></td>
+					<td width="30%" class="data"><div align="center"><input tabIndex="100" type="checkbox" id="cbaffected_resource" name="affected_resource" class="data" ></div></td>
+				</tr>
+				<tr class="table_banded_row">
+					<td width="20%" class="data"><div align="left"><label for="cbpriority">Priority</label></div></td>
+					<td width="30%" class="data"><div align="center"><input tabIndex="100" type="checkbox" id="cbpriority" name="priority" class="data" ></div></td>
+				</tr>
+				<tr class="table_row">
+					<td width="20%" class="data"><div align="left"><label for="cbcategory">Category</label></div></td>
+					<td width="30%" class="data"><div align="center"><input tabIndex="100" type="checkbox" id="cbcategory" name="category" class="data" ></div></td>
+				</tr>
+				<tr class="table_banded_row">
+					<td width="20%" class="data"><div align="left"><label for="cbrootcause">Root Cause</label></div></td>
+					<td width="30%" class="data"><div align="center"><input tabIndex="100" type="checkbox" id="cbrootcause" name="rootcause" class="data" ></div></td>
+				</tr>
+				<tr class="table_row">
+					<td width="20%" class="data"><div align="left"><label for="cbproduct">Product</label></div></td>
+					<td width="30%" class="data"><div align="center"><input tabIndex="100" type="checkbox" id="cbproduct" name="product" class="data" ></div></td>
+				</tr>
+				<!-- to add additional fields, repeat the above 4 lines -->
+				<!-- name=attribute name, id=cb+attribute name -->
+				<!-- then update the loadFilterArr assignments in detail_iss.htmpl -->
+			</table>		
+			<br>
+			<div align="left" class="data"><label for="AutoSearch"><b><input tabIndex="100" type="checkbox" id="AutoSearch" name="AutoSearch" class="data">Automatically run search when the Knowledge tab of an issue is selected.</b></label></div>
+		</td>
+	</tr>
+</table>
+<script>
+	endScrollbar();
+</script>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

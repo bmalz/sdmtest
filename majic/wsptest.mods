@@ -1,0 +1,4413 @@
+////////////////////////////////////////////////////////////////////////
+// File:      wsptest.mods
+// Publish Date: 12.11.2013 22:32
+// Publish User: orlen\PODKOWAK
+// Description:
+//   CA SD schema modifications maintained by Web Screen Painter.
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   acc_lvls
+////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   alg
+////////////////////////////////////////////////////////////////////////
+
+OBJECT alg {
+  ATTRIBUTES Act_Log {
+    zfirma INTEGER // Widoczny dla firmy zewnętrznej
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zresolution_code SREL resocode;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   attached_sla
+////////////////////////////////////////////////////////////////////////
+
+OBJECT attached_sla {
+  ATTRIBUTES Attached_SLA {
+    zforfz INTEGER // dla F-Z
+      {
+      ON_NEW DEFAULT 0;
+      };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   aty
+////////////////////////////////////////////////////////////////////////
+
+OBJECT aty {
+  ATTRIBUTES Act_Type {
+    ztask_events BREL lrel_aty_events aty DYNAMIC {
+    DOMSET MLIST_DYNAMIC;
+    WHERE "aty = ? AND evt.obj_type = 'ztask'";
+    };
+    ztask_flag SREL bool;
+    ztask_notify_info SREL macro;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   chg
+////////////////////////////////////////////////////////////////////////
+
+OBJECT chg {
+  ATTRIBUTES Change_Request {
+    zAdditionalInfo STRING 400
+      
+      DISPLAY_NAME "Additional Info";
+    zJustificationForUrgency STRING 400
+      
+      DISPLAY_NAME "Justification Fo rUrgency";
+    zRFCFinancialBenefits SREL zRFCFinancialBenefits
+      
+      DISPLAY_NAME "RFC Financial Benefits";
+    zRFCImactOnSecurity SREL zRFCImactOnSecurity
+      
+      DISPLAY_NAME "Imact On Security";
+    zRFCImprovingTheImage SREL zRFCImprovingTheImage // SRel_Attr_Entry chg.zRFCImprovingTheImage
+      
+      DISPLAY_NAME "Improving The Image";
+    zRFCNeedForLaw SREL zRFCNeedForLaw
+      
+      DISPLAY_NAME "RFC Need For Law";
+    zRFCTargetTime DATE;
+    zVendor SREL cnt
+      
+      DISPLAY_NAME "Vendor";
+    zanalistStar DATE
+      
+      DISPLAY_NAME "Analist Star Date Time";
+    zapproval_flag SREL actbool
+      
+      DISPLAY_NAME "Approval flag"
+      {
+      ON_NEW DEFAULT 1;
+      };
+    zcategory SREL zchgcategory;
+    zchcategory INTEGER
+      
+      DISPLAY_NAME "Category ID";
+    zchgcat SREL zchgcat // SRel_Attr_Entry chg.zchgcat
+      
+      DISPLAY_NAME "Category";
+    zchgclass SREL zchgclass
+      
+      DISPLAY_NAME "Change Class";
+    zchgcode SREL zchgcode
+      
+      DISPLAY_NAME "Code";
+    zchgimpact SREL zchgimp
+      
+      DISPLAY_NAME "Impact";
+    zchgresource SREL zchgresource
+      
+      DISPLAY_NAME "Resource";
+    zchgtype SREL zchgcategory
+      
+      DISPLAY_NAME "Change Type";
+    zchgurgency SREL zchgurl
+      
+      DISPLAY_NAME "Urgency";
+    zfzstatus SREL tskstat; // Status dla firmy zewnętrznej
+    zinitmanager SREL cnt;
+    ztask QREL ztask DYNAMIC {
+        WHERE "parentPERSID = ? " ;
+        PARAM_NAMES { persistent_id } ;
+        };
+  };
+};
+
+MODIFY chg status
+{
+    REQUIRED;
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   chgcat
+////////////////////////////////////////////////////////////////////////
+
+OBJECT chgcat {
+  ATTRIBUTES Change_Category {
+    zChangeClass SREL zchgclass
+      
+      DISPLAY_NAME "Change Class ";
+    zSubstantiveAdministrator SREL cnt
+      
+      DISPLAY_NAME "Substantive Administrator";
+    zType SREL zchgclstype
+      
+      DISPLAY_NAME "Change Category Type";
+    zusluga SREL nr
+      
+      DISPLAY_NAME "Usluga techniczna";
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ci_twa_ci
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ci_twa_ci {
+  ATTRIBUTES ci_twa_ci {
+    ztyp_lokalizacji STRING 255;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   cnote
+////////////////////////////////////////////////////////////////////////
+
+OBJECT cnote {
+  ATTRIBUTES Note_Board {
+    zBottom SREL actbool
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zHelpDeskType SREL zHelpDeskType
+      REQUIRED 
+      DISPLAY_NAME "HelpDesk Type";
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   cnt
+////////////////////////////////////////////////////////////////////////
+
+OBJECT cnt {
+  ATTRIBUTES usp_contact SECONDARY {
+    zArea SREL zArea
+      
+      DISPLAY_NAME "Area";
+    zHelpDeskType SREL zHelpDeskType
+      
+      DISPLAY_NAME "HelpDesk  Type";
+    zNRE STRING 10;
+    zaccept_by_sms INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zaccept_by_sms_terms INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zakceptujacy INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zcompany_root STRING 255;
+    zflat_rate_internet STRING 255;
+    zmanager2 SREL cnt
+      
+      DISPLAY_NAME "Manager2";
+    zmiddle_name_alt STRING 255;
+    zprevious_nre STRING 255;
+    zsubstitution_additionalinfo STRING 4000; // dodatkowe informacje
+    zsubstitution_enddate DATE; // data obowiazywania zastepstwa
+    zsubstitution_person SREL cnt; // osoba zastepujaca
+    zuserAccountControl INTEGER; // do usunięcia!
+    zwyl INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   cost_cntr
+////////////////////////////////////////////////////////////////////////
+
+OBJECT cost_cntr {
+  ATTRIBUTES ca_resource_cost_center {
+    zcnt SREL cnt;
+    zkod STRING 10;
+    zorg SREL org;
+    zparent_cost_cntr SREL cost_cntr;
+  };
+};
+
+MODIFY cost_cntr name
+{
+    REQUIRED;
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   cr
+////////////////////////////////////////////////////////////////////////
+
+OBJECT cr {
+  ATTRIBUTES Call_Req {
+    zActionNumbers INTEGER
+      {
+      ON_NEW DEFAULT 1;
+      };
+    zAdditionalInfo STRING 400
+      
+      DISPLAY_NAME "Additional Info";
+    zJustificationForUrgency STRING 400
+      
+      DISPLAY_NAME "Justification For Urgency";
+    zRFCFinancialBenefits SREL zRFCFinancialBenefits
+      
+      DISPLAY_NAME "RFC Financial Benefits";
+    zRFCImactOnSecurity SREL zRFCImactOnSecurity
+      
+      DISPLAY_NAME "RFC Imact On Security";
+    zRFCImprovingTheImage SREL zRFCImprovingTheImage
+      
+      DISPLAY_NAME "RFC Improving The Image";
+    zRFCNeedForLaw SREL zRFCNeedForLaw // SRel_Attr_Entry cr.zRFCNeedForLaw
+      
+      DISPLAY_NAME "RFC Need For Law";
+    zRFCTargetTime DATE
+      
+      DISPLAY_NAME "RFC Target Time";
+    zRaportowany SREL actbool
+      
+      DISPLAY_NAME "Raportowany"
+      {
+      ON_NEW DEFAULT 1;
+      };
+    zacctype1 SREL zacctypes;
+    zacctype2 SREL zacctypes;
+    zacctype3 SREL zacctypes;
+    zacctype4 SREL zacctypes;
+    zapproval_flag SREL actbool
+      
+      DISPLAY_NAME "Approval flag"
+      {
+      ON_NEW DEFAULT 1;
+      };
+    zcallid STRING 100;
+    zcntref1rules SREL zas;
+    zcntref2rules SREL zas;
+    zcntref3rules SREL zas;
+    zcntref4rules SREL zas;
+    zcorIN SREL zCorrespondenceIncome;
+    zcorOUT SREL zCorrespondanceOucome;
+    zcustomer STRING 256;
+    zfz SREL org // Firma zewnętrzna
+      {
+      ON_POST_VAL site_set_zfzsdsc( category ) 80;
+      };
+    zfzsdsc SREL sdsc // SRel_Attr_Entry cr.zfzsdsc
+      
+      DISPLAY_NAME "F-Z Poziom usługi"
+      {
+      ON_POST_VAL site_set_sla( ) 80;
+      };
+    zfzsla SREL zSLA; // Firma zewnętrzna - Umowa SLA
+    zfzstatus SREL tskstat; // Status dla firmy zewnętrznej
+    zfztermin_realizacji DATE;
+    zgroup1 SREL grp;
+    zgroup1rules SREL zas;
+    zgroup2 SREL grp;
+    zgroup2rules SREL zas;
+    zgroup3 SREL grp;
+    zgroup3rules SREL zas;
+    zgroup4 SREL grp;
+    zgroup4rules SREL zas;
+    zinitmanager SREL cnt;
+    zisRecurrenceReservation INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zisRoomReservation INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zkatering SREL zrodzaj_kateringu;
+    zloc SREL loc;
+    zlvl STRING 1;
+    zmanager1 SREL cnt;
+    zmanager2 SREL cnt; // SRel_Attr_Entry cr.zmanager2
+    zmanager3 SREL cnt;
+    zmanager4 SREL cnt;
+    zmpk SREL cost_cntr
+      
+      DISPLAY_NAME "MPK";
+    zphone_number STRING 20;
+    zprzyczyna SREL zprzyczyna;
+    zreport INTEGER
+      {
+      ON_NEW DEFAULT 1;
+      };
+    zrozwiazanie STRING 4000;
+    zsdsc SREL sdsc // SRel_Attr_Entry cr.zsdsc
+      
+      DISPLAY_NAME "Poziom usługi"
+      {
+      ON_POST_VAL site_set_sla( ) 80;
+      };
+    zsla SREL zSLA // SRel_Attr_Entry cr.zsla
+      
+      DISPLAY_NAME "SLA";
+    ztask QREL ztask DYNAMIC {
+        WHERE "parentPERSID = ? " ;
+        PARAM_NAMES { persistent_id } ;
+        };
+    ztermin_realizacji DATE;
+    zuwagifz STRING 4000 // Uwagi do firmy zewnętrznej
+      
+      DISPLAY_NAME "uwagiFZ";
+  };
+};
+
+MODIFY cr category
+{
+    REQUIRED;
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   cr_prp
+////////////////////////////////////////////////////////////////////////
+
+OBJECT cr_prp {
+  ATTRIBUTES Req_Property {
+    zdlugoscpola INTEGER;
+    zegar INTEGER;
+    zhtml INTEGER;
+    zkalendarz INTEGER;
+    zliczba INTEGER;
+    zobjekt STRING 255;
+    zobjektwartosc STRING 255;
+    zodnosnik INTEGER;
+    zodnosniktyp STRING 255;
+    zpoletekstowe INTEGER;
+    zsekcja INTEGER;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   cr_prptpl
+////////////////////////////////////////////////////////////////////////
+
+OBJECT cr_prptpl {
+  ATTRIBUTES Req_Property_Template {
+    zdlugoscpola INTEGER;
+    zegar INTEGER;
+    zhtml INTEGER;
+    zkalendarz INTEGER;
+    zliczba INTEGER;
+    zobjekt STRING 255;
+    zobjektwartosc STRING 255;
+    zodnosnik INTEGER;
+    zodnosniktyp STRING 255;
+    zpoletekstowe INTEGER;
+    zsekcja INTEGER;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   crs
+////////////////////////////////////////////////////////////////////////
+
+OBJECT crs {
+  ATTRIBUTES Cr_Status {
+    zss_sym STRING 60
+      REQUIRED;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   entservx
+////////////////////////////////////////////////////////////////////////
+
+OBJECT entservx {
+  ATTRIBUTES entservx {
+    zAdjustedServiceCost INTEGER
+      
+      DISPLAY_NAME "Adjusted Service Cost";
+    zBusinessServiceKind SREL zBusinessServiceKind // SRel_Attr_Entry entservx.zBusinessServiceKind
+      
+      DISPLAY_NAME "Business Service Kind";
+    zBusinessServiceType SREL zBusinessServiceType
+      
+      DISPLAY_NAME "Business Service Type";
+    zCurrencyType SREL zCurrencyType
+      
+      DISPLAY_NAME "Currency Type";
+    zFinansialService SREL actbool
+      
+      DISPLAY_NAME "Finansial Service";
+    zPlannedServiceCost INTEGER
+      
+      DISPLAY_NAME "Planned Service Cost";
+    zServiceOwner SREL cnt
+      
+      DISPLAY_NAME "Service Owner";
+    zServicePackage SREL actbool
+      
+      DISPLAY_NAME "Service Package";
+    zSettlementPeriod SREL zSettlementPeriod
+      
+      DISPLAY_NAME "Settlement  Period";
+    zSeverity SREL sev
+      
+      DISPLAY_NAME "Severity";
+    zmethodOfSettlement SREL zMethodOfSettlement
+      
+      DISPLAY_NAME "Method Of Settlement";
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   evt
+////////////////////////////////////////////////////////////////////////
+
+OBJECT evt {
+  ATTRIBUTES Events {
+    zpriority SREL pri;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   loc
+////////////////////////////////////////////////////////////////////////
+
+OBJECT loc {
+  ATTRIBUTES ca_location {
+    zisGasStation INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    znazwa_integratora STRING 255;
+    zregion STRING 255;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   nr
+////////////////////////////////////////////////////////////////////////
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+    zMPK SREL cost_cntr;
+    zadministrator_group SREL grp
+      
+      DISPLAY_NAME "Administrator grupa";
+    zdescription_long STRING 4000
+      
+      DISPLAY_NAME "Uwagi";
+    zdostawca SREL vendor;
+    zidentification_number STRING 255
+      
+      DISPLAY_NAME "Identyfikator";
+    zliquidation_protocol_nr STRING 255
+      
+      DISPLAY_NAME "Protokół likwidacji";
+    zlokalizacja SREL ci_location
+      
+      DISPLAY_NAME "lokalizacja";
+    zmodel STRING 255;
+    znoticeperiod STRING 60
+      
+      DISPLAY_NAME "Notice Period";
+    znr_inwentarzowy STRING 20; // numer inwentarzowy z SAP
+    znumer_ot STRING 255
+      
+      DISPLAY_NAME "numer OT";
+    zproducent SREL producent;
+    zsap_inne STRING 4000; // inne informacje z SAP
+    zvalue_net DOUBLE
+      
+      DISPLAY_NAME "Wartość netto";
+    zvalue_net_string STRING 10;
+    zvalue_start DOUBLE
+      
+      DISPLAY_NAME "Wartość początkowa";
+    zvalue_start_string STRING 10;
+    zvice_billing_contact_uuid SREL cnt
+      
+      DISPLAY_NAME "vice_billing_contact_uuid";
+    zvice_support_contact1_uuid SREL cnt
+      
+      DISPLAY_NAME "vice_support_contact1_uuid";
+  };
+};
+
+MODIFY nr acquire_date
+{
+    DISPLAY_NAME "Data przyjęcia";
+};
+
+MODIFY nr contact_1
+{
+    DISPLAY_NAME "Administrator kontakt";
+};
+
+MODIFY nr delete_flag
+{
+    REQUIRED;
+    DISPLAY_NAME "Status CMDB";
+};
+
+MODIFY nr dns_name
+{
+    DISPLAY_NAME "Nazwa DNS";
+};
+
+MODIFY nr mac_address
+{
+    DISPLAY_NAME "Adres MAC";
+};
+
+MODIFY nr resource_contact
+{
+    DISPLAY_NAME "Użytkownik główny";
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   org
+////////////////////////////////////////////////////////////////////////
+
+OBJECT org {
+  ATTRIBUTES usp_organization SECONDARY {
+    zfz INTEGER
+      
+      DISPLAY_NAME "Firma zewnętrzna"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    zgroup SREL grp;
+    zid STRING 8;
+    zmpk SREL cost_cntr;
+    zparent_org SREL org;
+  };
+};
+
+MODIFY org contact
+{
+    DISPLAY_NAME "Menedzer komorki";
+};
+
+MODIFY org delete_flag
+{
+    REQUIRED;
+    DISPLAY_NAME "Status";
+};
+
+MODIFY org org_num
+{
+    DISPLAY_NAME "Kod";
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   pcat
+////////////////////////////////////////////////////////////////////////
+
+OBJECT pcat {
+  ATTRIBUTES Prob_Category {
+    zacctype1 SREL zacctypes;
+    zacctype2 SREL zacctypes;
+    zacctype3 SREL zacctypes;
+    zacctype4 SREL zacctypes;
+    zchgCatRel SREL chgcat
+      
+      DISPLAY_NAME "Change Category";
+    zchg_flag INTEGER
+      
+      DISPLAY_NAME "Change Flag"
+      {
+      ON_NEW DEFAULT 1;
+      };
+    zcntref1rules SREL zas;
+    zcntref2rules SREL zas;
+    zcntref3rules SREL zas;
+    zcntrefrules SREL zas;
+    zdesc STRING 1; // Do usunięcia
+    zfzsdsc SREL sdsc; // Poziom obsługi dla F-Z
+    zgroup1 SREL grp;
+    zgroup1rules SREL zas;
+    zgroup2 SREL grp;
+    zgroup2rules SREL zas;
+    zgroup3 SREL grp;
+    zgroup3rules SREL zas;
+    zgroup4 SREL grp;
+    zgroup4rules SREL zas;
+    zgrouprules STRING 1;
+    zguidesc STRING 500;
+    zimage STRING 255;
+    zimpact SREL imp
+      
+      DISPLAY_NAME "Impact";
+    zmanager1 SREL cnt;
+    zmanager2 SREL cnt;
+    zmanager3 SREL cnt;
+    zmanager4 SREL cnt;
+    zsc_url STRING 255;
+    zsort INTEGER;
+    zusluga SREL nr
+      
+      DISPLAY_NAME "Usluga techniczna";
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   rc
+////////////////////////////////////////////////////////////////////////
+
+OBJECT rc {
+  ATTRIBUTES Rootcause {
+    zTyp STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Typ";
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   resocode
+////////////////////////////////////////////////////////////////////////
+
+OBJECT resocode {
+  ATTRIBUTES usp_resolution_code {
+    zTyp STRING 60
+      
+      DISPLAY_NAME "Typ";
+    zcrs SREL crs;
+    zidrozwiazania STRING 10;
+    zidtabeli STRING 10;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   sdsc
+////////////////////////////////////////////////////////////////////////
+
+OBJECT sdsc {
+  ATTRIBUTES Service_Desc {
+    zsla SREL zSLA
+      
+      DISPLAY_NAME "SLA";
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   svc_contract (Usługa)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT svc_contract {
+  DISPLAY_NAME "Usługa";
+
+  ATTRIBUTES Service_Contract {
+    zfz SREL org; // F-Z
+    znoticePeriod STRING 60
+      
+      DISPLAY_NAME "notice Period";
+    zscopeCallCenter STRING 600
+      
+      DISPLAY_NAME "Scope Call Center";
+    zscopeCallCenterBool INTEGER
+      
+      DISPLAY_NAME "Scope Call Center Bool";
+    zscopeExternalSupport STRING 600
+      
+      DISPLAY_NAME "Scope External Support";
+    zscopeExternalSupportBool INTEGER
+      
+      DISPLAY_NAME "Scope External Support Bool";
+    zscopeITDepartment STRING 600
+      
+      DISPLAY_NAME "ScopeITDepartment";
+    zscopeITDepartmentBool INTEGER
+      
+      DISPLAY_NAME "Scope IT Department Bool";
+    zusluga SREL nr // SRel_Attr_Entry svc_contract.zusluga
+      
+      DISPLAY_NAME "Usluga biznesowa";
+    zuslugaTechniczna SREL nr
+      
+      DISPLAY_NAME "Usluga Techniczna";
+  };
+
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   tskty
+////////////////////////////////////////////////////////////////////////
+
+OBJECT tskty {
+  ATTRIBUTES Task_Type {
+    zparent_type STRING 3;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   vendor
+////////////////////////////////////////////////////////////////////////
+
+OBJECT vendor {
+  ATTRIBUTES ca_company {
+    zusluga SREL entservx;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zArea (Area)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zArea {
+  DISPLAY_NAME "Area";
+
+  ATTRIBUTES zArea {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 400
+      
+      DISPLAY_NAME "Description";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Area ";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zArea {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zBusinessServiceKind (Business Service Kind)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zBusinessServiceKind {
+  DISPLAY_NAME "Business Service Kind";
+
+  ATTRIBUTES zBusinessServiceKind {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Business Service Kind";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zBusinessServiceKind {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zBusinessServiceType (Business Service Type)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zBusinessServiceType {
+  DISPLAY_NAME "Business Service Type";
+
+  ATTRIBUTES zBusinessServiceType {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Business Service Type";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zBusinessServiceType {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zContractors (Contractors)
+// Description: Fac_Attr_Entry zContractors
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zContractors {
+  DISPLAY_NAME "Contractors";
+
+  ATTRIBUTES zContractors {
+    Building STRING 10;
+    City STRING 255;
+    Country STRING 255;
+    CountryRef SREL country // SRel_Attr_Entry zContractors.CountryRef
+      {
+      ON_NEW DEFAULT 197;
+      };
+    PostCode STRING 255;
+    Room STRING 10;
+    Street STRING 255;
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 255
+      REQUIRED 
+      DISPLAY_NAME "Contractors";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zContractors {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zCorrespondanceOucome (Correspondance Oucome)
+// Description: Fac_Attr_Entry zCorrespondanceOucome
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zCorrespondanceOucome {
+  DISPLAY_GROUP "stored_query";
+
+  DISPLAY_NAME "Correspondance Oucome";
+
+  ATTRIBUTES zCorrespondanceOucome {
+    AbbreviationCmpny SREL zhrcmpny;
+    Abroad INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    Building STRING 10;
+    City STRING 255;
+    CorrespondanceLetterType SREL zCorrespondenceLetterType;
+    Country STRING 255;
+    CountryRef SREL country;
+    Department STRING 255;
+    Description STRING 500;
+    FeedbackConfirmation INTEGER;
+    LetterNumber STRING 255;
+    Name STRING 255;
+    Note STRING 500;
+    OutcomeDate DATE
+      REQUIRED
+      {
+      ON_NEW DEFAULT NOW;
+      };
+    PostCode STRING 255;
+    Recipient SREL zContractors; // SRel_Attr_Entry zCorrespondanceOucome.Recipient
+    Room STRING 10;
+    SenderEmployee SREL cnt;
+    SenderOrganization SREL org;
+    Street STRING 255;
+    Surname STRING 255;
+    cr SREL cr; // SRel_Attr_Entry zCorrespondanceOucome.cr
+    delete_flag SREL actbool // SRel_Attr_Entry zCorrespondanceOucome.delete_flag
+      
+      DISPLAY_NAME "status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    ref_num STRING 30
+      WRITE_NEW 
+      DISPLAY_NAME "Correspondance Oucome #";
+    sym STRING 255
+      
+      DISPLAY_NAME "Correspondance Oucome";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zCorrespondanceOucome {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ref_num;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zCorrespondence
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zCorrespondence {
+  ATTRIBUTES zCorrespondence {
+    CorrespondenceLetter SREL zCorrespondenceLetterType;
+    Description STRING 500;
+    INIncomeDate DATE;
+    INRecipientEmployee SREL cnt;
+    INRecipientOrganization SREL org;
+    INSender SREL zContractors;
+    INSenderCity STRING 255;
+    INSenderCountry STRING 255;
+    INSenderPostCode STRING 255;
+    INSenderStreet STRING 255;
+    LetterNumber STRING 255;
+    Note STRING 500;
+    OUTOutcomeDate INTEGER;
+    OUTRecipient SREL zContractors;
+    OUTRecipientCity STRING 255;
+    OUTRecipientCountry STRING 255;
+    OUTRecipientPostCode STRING 255;
+    OUTRecipientStreet STRING 255;
+    OUTSenderEmployee SREL cnt;
+    OUTSenderOrganization SREL org;
+    Type SREL zCorrespondenceType;
+    sym STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zCorrespondence {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zCorrespondenceIncome (Correspondence Income)
+// Description: Fac_Attr_Entry zCorrespondenceIncome
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zCorrespondenceIncome {
+  DISPLAY_NAME "Correspondence Income";
+
+  ATTRIBUTES zCorrespondenceIncome {
+    AbbreviationCmpny SREL zhrcmpny;
+    Abroad INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    Building STRING 10;
+    City STRING 255;
+    CorrespondanceLetterType SREL zCorrespondenceLetterType;
+    Country STRING 255;
+    CountryRef SREL country;
+    Department STRING 255;
+    Description STRING 500;
+    FeedbackConfirmation INTEGER;
+    IncomeDate DATE
+      REQUIRED
+      {
+      ON_NEW DEFAULT NOW;
+      };
+    LetterNumber STRING 255;
+    Name STRING 255;
+    Note STRING 500;
+    PostCode STRING 255;
+    RecipientEmployee SREL cnt;
+    RecipientOrganization SREL org;
+    Room STRING 10;
+    Sender SREL zContractors; // SRel_Attr_Entry zCorrespondenceIncome.Sender
+    Street STRING 255;
+    Surname STRING 255;
+    cr SREL cr; // SRel_Attr_Entry zCorrespondenceIncome.cr
+    delete_flag SREL actbool
+      REQUIRED 
+      DISPLAY_NAME "status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    ref_num STRING 30
+      WRITE_NEW 
+      DISPLAY_NAME "Correspondance Income #";
+    sym STRING 255
+      
+      DISPLAY_NAME "Correspondence Income";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zCorrespondenceIncome {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ref_num;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zCorrespondenceLetterType
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zCorrespondenceLetterType {
+  ATTRIBUTES zCorrespondenceLetterType {
+    delete_flag SREL actbool
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zCorrespondenceLetterType {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zCorrespondenceType
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zCorrespondenceType {
+  ATTRIBUTES zCorrespondenceType {
+    sym STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zCorrespondenceType {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zCurrencyType (Currency Type)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zCurrencyType {
+  DISPLAY_NAME "Currency Type";
+
+  ATTRIBUTES zCurrencyType {
+    delete_flag SREL actbool // SRel_Attr_Entry zCurrencyType.delete_flag
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Currency Type";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zCurrencyType {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zHelpDeskType (Help Desk Type)
+// Description: Fac_Attr_Entry zHelpDeskType
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zHelpDeskType {
+  DISPLAY_NAME "Help Desk Type";
+
+  ATTRIBUTES zHelpDeskType {
+    delete_flag SREL actbool // SRel_Attr_Entry zHelpDeskType.delete_flag
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 400
+      
+      DISPLAY_NAME "Description";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "HelpDesk Type";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zHelpDeskType {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zMethodOfSettlement (Method Of Settlement)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zMethodOfSettlement {
+  DISPLAY_NAME "Method Of Settlement";
+
+  ATTRIBUTES zMethodOfSettlement {
+    delete_flag SREL actbool
+      REQUIRED 
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Method of settlement";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zMethodOfSettlement {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zRFCFinancialBenefits (RFC Financial Benefits)
+// Description: Fac_Attr_Entry zRFCFinancialBenefits
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zRFCFinancialBenefits {
+  DISPLAY_NAME "RFC Financial Benefits";
+
+  ATTRIBUTES zRFCFinancialBenefits {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Financial Benefits";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zRFCFinancialBenefits {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zRFCImactOnSecurity (RFC Imact On Security)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zRFCImactOnSecurity {
+  DISPLAY_NAME "RFC Imact On Security";
+
+  ATTRIBUTES zRFCImactOnSecurity {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "RFC Impact on Security";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zRFCImactOnSecurity {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zRFCImprovingTheImage (RFC Improving The Image)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zRFCImprovingTheImage {
+  DISPLAY_NAME "RFC Improving The Image";
+
+  ATTRIBUTES zRFCImprovingTheImage {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "RFC Improving The Image";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zRFCImprovingTheImage {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zRFCNeedForLaw (RFC Need For Law)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zRFCNeedForLaw {
+  DISPLAY_NAME "RFC Need For Law";
+
+  ATTRIBUTES zRFCNeedForLaw {
+    delete_flag SREL actbool
+      REQUIRED 
+      DISPLAY_NAME "Status";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "RFC Need For Law";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zRFCNeedForLaw {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zSLA (SLA)
+// Description: Umowa SLA
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zSLA {
+  DISPLAY_NAME "SLA";
+
+  TENANT_OPTIONAL;
+  ATTRIBUTES zSLA {
+    delete_flag SREL actbool
+      REQUIRED;
+    forfz INTEGER // Dla F-Z
+      {
+      ON_NEW DEFAULT 0;
+      };
+    fz SREL org;
+    sym STRING 80
+      REQUIRED;
+    usluga SREL svc_contract;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt TENANCY_UNRESTRICTED { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zSLA {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zServiceClassDictionary (Service Class Dictionary)
+// Description: Fac_Attr_Entry zServiceClassDictionary
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zServiceClassDictionary {
+  DISPLAY_NAME "Service Class Dictionary";
+
+  ATTRIBUTES zServiceClassDictionary {
+    Decription STRING 600;
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Service Class ";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zServiceClassDictionary {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zServiceTypeDictionary (Service Type Dictionary)
+// Description: Fac_Attr_Entry zServiceTypeDictionary
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zServiceTypeDictionary {
+  DISPLAY_NAME "Service Type Dictionary";
+
+  ATTRIBUTES zServiceTypeDictionary {
+    Description STRING 600;
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Service Type";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zServiceTypeDictionary {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zSettlementPeriod (Settlement Period)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zSettlementPeriod {
+  DISPLAY_NAME "Settlement Period";
+
+  ATTRIBUTES zSettlementPeriod {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Symbol";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zSettlementPeriod {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zacctypes
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zacctypes {
+  ATTRIBUTES zacctypes {
+    sym STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zacctypes {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zadm_br_we_wy (Administracja Bramka wejscia wyjscia)
+// Description: Administracja Bramka wejscia wyjscia
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zadm_br_we_wy {
+  DISPLAY_NAME "Administracja Bramka wejscia wyjscia";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zadm_br_we_wy {
+    name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zadm_br_we_wy {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zadm_br_we_wy BREL zadm_br_we_wy id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zadm_dep (Administracja.Depozytariusze)
+// Description: Administracja.Depozytariusze
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zadm_dep {
+  DISPLAY_NAME "Administracja.Depozytariusze";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zadm_dep {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zadm_dep {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zadm_dep BREL zadm_dep id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zadm_lok (Administracja.Lokalizacja)
+// Description: Administracja.Lokalizacja
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zadm_lok {
+  DISPLAY_NAME "Administracja.Lokalizacja";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zadm_lok {
+    catering_email_address STRING 255
+      { UI_INFO "AUDITLOG";};
+    catering_email_content STRING 4000
+      { UI_INFO "AUDITLOG";};
+    dzialka STRING 255
+      
+      DISPLAY_NAME "Działka" { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    obszar SREL ci_location
+      
+      DISPLAY_NAME "Lokalizacja obszaru" { UI_INFO "AUDITLOG";};
+    rodzic SREL ci_location // SRel_Attr_Entry zadm_lok.rodzic
+      
+      DISPLAY_NAME "Lokalizacja rodzica" { UI_INFO "AUDITLOG";};
+    typ_lokalizacji SREL ztyp_lokalizacji // SRel_Attr_Entry zadm_lok.typ_lokalizacji
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zadm_lok {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zadm_lok BREL zadm_lok id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zadm_sa_ko (Administracja.Sala konferencyjna)
+// Description: Administracja.Sala konferencyjna
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zadm_sa_ko {
+  DISPLAY_NAME "Administracja.Sala konferencyjna";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zadm_sa_ko {
+    dodatkowe_miejsca INTEGER
+      
+      DISPLAY_NAME "Dodatkowe miejsca" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ekran INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    flipchart INTEGER
+      
+      DISPLAY_NAME "Flipchart" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    monitor INTEGER
+      
+      DISPLAY_NAME "Monitor" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    naglosnienie INTEGER
+      
+      DISPLAY_NAME "Nagłośnienie" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    pojemnosc_konferencyjna INTEGER
+      
+      DISPLAY_NAME "Pojemność konferencyjna" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    pojemnosc_teatralna INTEGER
+      
+      DISPLAY_NAME "Pojemność teatralna" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    projektor INTEGER
+      
+      DISPLAY_NAME "Projektor" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    projektor_przenosny INTEGER
+      
+      DISPLAY_NAME "Projektor przenośny" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    tablica_suchoscieralna INTEGER
+      
+      DISPLAY_NAME "Tablica suchościeralna" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    telekonferencja INTEGER
+      
+      DISPLAY_NAME "Telekonferencja" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    videokonferencja INTEGER
+      
+      DISPLAY_NAME "Videokonferencja" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    wifi INTEGER
+      
+      DISPLAY_NAME "WiFi" { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+  };
+
+  FACTORY zadm_sa_ko {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zadm_sa_ko BREL zadm_sa_ko id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zas
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zas {
+  ATTRIBUTES zas {
+    sym STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zas {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zchgcategory (Chanage Category)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zchgcategory {
+  DISPLAY_NAME "Chanage Category";
+
+  ATTRIBUTES zchgcategory {
+    delete_flag SREL actbool
+      REQUIRED 
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Change Category";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zchgcategory {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zchgclass (Change Class)
+// Description: Fac_Attr_Entry zchgclass
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zchgclass {
+  DISPLAY_NAME "Change Class";
+
+  ATTRIBUTES zchgclass {
+    delete_flag SREL actbool
+      
+      DISPLAY_NAME "Status";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Change Class";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zchgclass {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zchgclstype (Change Category Type)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zchgclstype {
+  DISPLAY_NAME "Change Category Type";
+
+  ATTRIBUTES zchgclstype {
+    chgclstype STRING 255;
+    delete_flag del SREL actbool // SRel_Attr_Entry chgtype.delete_flag
+      REQUIRED 
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Description";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Symbol";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zchgclstype {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zchgcode (Change Code)
+// Description: Fac_Attr_Entry zchgcode
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zchgcode {
+  DISPLAY_NAME "Change Code";
+
+  ATTRIBUTES zchgcode {
+    delete_flag del SREL actbool // SRel_Attr_Entry chgtype.delete_flag
+      REQUIRED 
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 100;
+    sym Symbol STRING 60
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zchgcode {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zchgimp (Change Impact)
+// Description: Fac_Attr_Entry zchgimp
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zchgimp {
+  DISPLAY_NAME "Change Impact";
+
+  ATTRIBUTES zchgimp {
+    delete_flag del SREL actbool // SRel_Attr_Entry chgtype.delete_flag
+      REQUIRED 
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 100
+      
+      DISPLAY_NAME "Description";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Symbol";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zchgimp {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zchgresource (Change Resource)
+// Description: Fac_Attr_Entry zchgresource
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zchgresource {
+  DISPLAY_NAME "Change Resource";
+
+  ATTRIBUTES zchgresource {
+    delete_flag del SREL actbool
+      REQUIRED 
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 1000
+      
+      DISPLAY_NAME "Description";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Resource";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zchgresource {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zchgurl (Change Urgency)
+// Description: Fac_Attr_Entry zchgurl
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zchgurl {
+  DISPLAY_NAME "Change Urgency";
+
+  ATTRIBUTES zchgurl {
+    delete_flag SREL actbool // SRel_Attr_Entry chgtype.delete_flag
+      REQUIRED 
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 1000
+      
+      DISPLAY_NAME "Description";
+    sym STRING 60
+      REQUIRED 
+      DISPLAY_NAME "Symbol";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zchgurl {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zfav_pcat
+// Description: Fac_Attr_Entry zfav_pcat
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zfav_pcat {
+  ATTRIBUTES zfav_pcat {
+    cnt SREL cnt
+      REQUIRED;
+    delete_flag SREL actbool
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    pcat SREL pcat
+      REQUIRED;
+    status SREL actbool // do usuniecia!
+      {
+      ON_NEW DEFAULT 0;
+      };
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zfav_pcat {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zhrcmpny
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zhrcmpny {
+  ATTRIBUTES zhrcmpny {
+    abbreviation STRING 255
+      REQUIRED;
+    delete_flag SREL actbool
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zhrcmpny {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zinf_se_fi (Infrastruktura.Serwer fizyczny)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zinf_se_fi {
+  DISPLAY_NAME "Infrastruktura.Serwer fizyczny";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zinf_se_fi {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip2 STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip3 STRING 15
+      { UI_INFO "AUDITLOG";};
+    cache_procesora STRING 20
+      { UI_INFO "AUDITLOG";};
+    cd_dvd INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    data_ostatniego_uruchomienia STRING 20
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    hosting INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ht_active INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ilosc_kart_fc INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_kart_sieciowych INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_procesorow INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_ram INTEGER // w MB
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 256;
+      };
+    ilosc_rdzeni_cpu INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_slotow_pamieci INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_uzytych_slotow_pamieci INTEGER
+      { UI_INFO "AUDITLOG";};
+    lokalizacja_logiczna SREL zlista_lokalizacji_logicznych
+      { UI_INFO "AUDITLOG";};
+    predkosc_procesora STRING 20
+      { UI_INFO "AUDITLOG";};
+    rozmiar_hdd INTEGER // w GB
+      { UI_INFO "AUDITLOG";};
+    rozmiar_hdd_string STRING 255
+      { UI_INFO "AUDITLOG";};
+    tryb_monitorowania SREL ztryb_monitorowania
+      { UI_INFO "AUDITLOG";};
+    typ SREL ztyp_serwera
+      { UI_INFO "AUDITLOG";};
+    typ_procesora SREL ztyp_procesora
+      { UI_INFO "AUDITLOG";};
+    wersja STRING 255
+      { UI_INFO "AUDITLOG";};
+    wersja_bios STRING 255
+      { UI_INFO "AUDITLOG";};
+    wersja_esx STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zinf_se_fi {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zinf_se_fi BREL zinf_se_fi id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zinf_se_wi (Infrastruktura.Serwer wirtualny)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zinf_se_wi {
+  DISPLAY_NAME "Infrastruktura.Serwer wirtualny";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zinf_se_wi {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip2 STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip3 STRING 15
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    hdd10_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd10_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd1_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd1_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd2_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd2_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd3_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd3_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd4_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd4_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd5_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd5_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd6_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd6_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd7_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd7_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd8_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd8_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hdd9_datastore SREL zlista_datastore
+      { UI_INFO "AUDITLOG";};
+    hdd9_rozmiar STRING 50
+      { UI_INFO "AUDITLOG";};
+    hosting INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ilosc_cpu INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_ram INTEGER // w MB
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 256;
+      };
+    lokalizacja_logiczna SREL zlista_lokalizacji_logicznych
+      { UI_INFO "AUDITLOG";};
+    nazwa_datacenter STRING 255
+      { UI_INFO "AUDITLOG";};
+    nazwa_klastra_wirt STRING 255
+      { UI_INFO "AUDITLOG";};
+    nazwa_vswitcha STRING 255
+      { UI_INFO "AUDITLOG";};
+    sciezka_vmx STRING 4000
+      { UI_INFO "AUDITLOG";};
+    stan STRING 3
+      
+      DISPLAY_NAME "on / off" { UI_INFO "AUDITLOG";};
+    system_operacyjny SREL zlista_os
+      { UI_INFO "AUDITLOG";};
+    tryb_monitorowania SREL ztryb_monitorowania
+      { UI_INFO "AUDITLOG";};
+    wersja_hardware STRING 20
+      { UI_INFO "AUDITLOG";};
+    zaalokowowana_przestrzen STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zinf_se_wi {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zinf_se_wi BREL zinf_se_wi id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zinf_ur_si (Infrastruktura.Urzadzenie sieciowe)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zinf_ur_si {
+  DISPLAY_NAME "Infrastruktura.Urzadzenie sieciowe";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zinf_ur_si {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    first_time_seen STRING 20
+      { UI_INFO "AUDITLOG";};
+    poll_status STRING 255
+      { UI_INFO "AUDITLOG";};
+    polled_ip_address STRING 15
+      { UI_INFO "AUDITLOG";};
+    typ SREL ztyp_urzadzenia_siec
+      { UI_INFO "AUDITLOG";};
+    version STRING 20
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zinf_ur_si {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zinf_ur_si BREL zinf_ur_si id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zinteg_AD_OUs
+// Description: Lista wykluczonych OU z integracji z AD
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zinteg_AD_OUs {
+  ATTRIBUTES zinteg_AD_OUs {
+    delete_flag SREL actbool
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    name STRING 400
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zinteg_AD_OUs {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zipfon_settype (IPFon Set Type)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zipfon_settype {
+  DISPLAY_NAME "IPFon Set Type";
+
+  ATTRIBUTES zipfon_settype {
+    ex_name STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zipfon_settype {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlista_datastore
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlista_datastore {
+  ATTRIBUTES zlista_datastore {
+    nazwa STRING 300;
+    pojemnosc STRING 50;
+    sciezka STRING 4000;
+    wolne_miejsce STRING 50;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlista_datastore {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlista_lokalizacji_logicznych
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlista_lokalizacji_logicznych {
+  ATTRIBUTES zlista_lokalizacji_logicznych {
+    ex_name STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlista_lokalizacji_logicznych {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlista_os
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlista_os {
+  ATTRIBUTES zlista_os {
+    ex_name STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlista_os {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_attachment_nrs
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_attachment_nrs {
+  ATTRIBUTES zlrel_attachment_nrs {
+    attmnt SREL attmnt;
+    nr SREL nr
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_attachment_nrs {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "ci";
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_cnt_loc
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_cnt_loc {
+  ATTRIBUTES zlrel_cnt_loc {
+    cnt SREL cnt
+      REQUIRED;
+    loc SREL loc
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_cnt_loc {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_cr_cnt
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_cr_cnt {
+  ATTRIBUTES zlrel_cr_cnt {
+    cnt SREL cnt;
+    cr SREL cr;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_cr_cnt {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_cr_cnt1
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_cr_cnt1 {
+  ATTRIBUTES zlrel_cr_cnt1 {
+    cnt SREL cnt;
+    cr SREL cr;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_cr_cnt1 {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_cr_cnt2
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_cr_cnt2 {
+  ATTRIBUTES zlrel_cr_cnt2 {
+    cnt SREL cnt;
+    cr SREL cr;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_cr_cnt2 {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_cr_cnt3
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_cr_cnt3 {
+  ATTRIBUTES zlrel_cr_cnt3 {
+    cnt SREL cnt;
+    cr SREL cr;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_cr_cnt3 {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_cr_correspondence_in
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_cr_correspondence_in {
+  ATTRIBUTES zlrel_cr_correspondence_in {
+    correspondence_in SREL zCorrespondenceIncome;
+    cr SREL cr;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_cr_correspondence_in {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_cr_correspondence_ou
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_cr_correspondence_ou {
+  ATTRIBUTES zlrel_cr_correspondence_ou {
+    correspondence_out SREL zCorrespondanceOucome;
+    cr SREL cr;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_cr_correspondence_ou {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_org_kontr
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_org_kontr {
+  ATTRIBUTES zlrel_org_kontr {
+    kontr SREL svc_contract;
+    org SREL org;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_org_kontr {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_pcat_cnt
+// Description: Fac_Attr_Entry zlrel_pcat_cnt
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_pcat_cnt {
+  ATTRIBUTES zlrel_pcat_cnt {
+    cnt SREL cnt;
+    lvl STRING 1;
+    pcat SREL pcat;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_pcat_cnt {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "reference";
+    REL_ATTR id;
+    COMMON_NAME id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_pcat_cnt1
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_pcat_cnt1 {
+  ATTRIBUTES zlrel_pcat_cnt1 {
+    cnt SREL cnt;
+    pcat SREL pcat;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_pcat_cnt1 {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_pcat_cnt2
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_pcat_cnt2 {
+  ATTRIBUTES zlrel_pcat_cnt2 {
+    cnt SREL cnt;
+    pcat SREL pcat;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_pcat_cnt2 {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_pcat_cnt3
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_pcat_cnt3 {
+  ATTRIBUTES zlrel_pcat_cnt3 {
+    cnt SREL cnt;
+    pcat SREL pcat;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_pcat_cnt3 {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zlrel_zsla_site
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zlrel_zsla_site {
+  ATTRIBUTES zlrel_zsla_site {
+    site SREL site;
+    zsla SREL zSLA;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zlrel_zsla_site {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   znr_user
+// Description: Fac_Attr_Entry znr_user
+////////////////////////////////////////////////////////////////////////
+
+OBJECT znr_user {
+  ATTRIBUTES znr_user {
+    class STRING 100
+      REQUIRED;
+    cnt SREL cnt // SRel_Attr_Entry znr_user.cnt
+      REQUIRED;
+    delete_flag SREL actbool // SRel_Attr_Entry znr_user.delete_flag
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    nr SREL nr;
+    resource_name STRING 100
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY znr_user {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME resource_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zpop_pcat
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zpop_pcat {
+  ATTRIBUTES zpop_pcat {
+    delete_flag SREL actbool
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    org SREL org
+      REQUIRED;
+    pcat SREL pcat
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zpop_pcat {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zprzyczyna
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zprzyczyna {
+  ATTRIBUTES zprzyczyna {
+    idprzyczyny STRING 10;
+    idtabeli STRING 10;
+    sym STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zprzyczyna {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zrodzaj_drukarki
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zrodzaj_drukarki {
+  ATTRIBUTES zrodzaj_drukarki {
+    ex_name STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zrodzaj_drukarki {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zrodzaj_kateringu
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zrodzaj_kateringu {
+  ATTRIBUTES zrodzaj_kateringu {
+    ex_name STRING 500;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zrodzaj_kateringu {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zrodzaj_monitora
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zrodzaj_monitora {
+  ATTRIBUTES zrodzaj_monitora {
+    ex_name STRING 50
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zrodzaj_monitora {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zrodzaj_wydruku
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zrodzaj_wydruku {
+  ATTRIBUTES zrodzaj_wydruku {
+    ex_name STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zrodzaj_wydruku {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zrozmiar_monitora
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zrozmiar_monitora {
+  ATTRIBUTES zrozmiar_monitora {
+    ex_name STRING 255
+      REQUIRED;
+    monitor_size DOUBLE
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zrozmiar_monitora {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_cz_kk (Stacja Paliw.Czytnik KK)
+// Description: Stacja Paliw.Czytnik KK
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_cz_kk {
+  DISPLAY_NAME "Stacja Paliw.Czytnik KK";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_cz_kk {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_cz_kk {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_cz_kk BREL zst_pa_cz_kk id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_dr_fa (Stacja Paliw.Drukarka Faktur)
+// Description: Stacja Paliw.Drukarka Faktur
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_dr_fa {
+  DISPLAY_NAME "Stacja Paliw.Drukarka Faktur";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_dr_fa {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_dr_fa {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_dr_fa BREL zst_pa_dr_fa id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_dr_fi (Stacja Paliw.Drukarka Fiskalna)
+// Description: Stacja Paliw.Drukarka Fiskalna
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_dr_fi {
+  DISPLAY_NAME "Stacja Paliw.Drukarka Fiskalna";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_dr_fi {
+    czas_ostatniego_raportu STRING 255
+      { UI_INFO "AUDITLOG";};
+    drukarka_rezerwowa INTEGER
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    ilosc_raportow STRING 255
+      { UI_INFO "AUDITLOG";};
+    komunikacja INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    miejscowosc STRING 255
+      { UI_INFO "AUDITLOG";};
+    typ STRING 255
+      { UI_INFO "AUDITLOG";};
+    ulica STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_dr_fi {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_dr_fi BREL zst_pa_dr_fi id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_dr_mf (Stacja Paliw.Drukarka MFP)
+// Description: Stacja Paliw.Drukarka MFP
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_dr_mf {
+  DISPLAY_NAME "Stacja Paliw.Drukarka MFP";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_dr_mf {
+    adres_ip STRING 255
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    ilosc_tonera STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_dr_mf {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_dr_mf BREL zst_pa_dr_mf id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_dys (Stacja Paliw.Dystrybutor)
+// Description: Stacja Paliw.Dystrybutor
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_dys {
+  DISPLAY_NAME "Stacja Paliw.Dystrybutor";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_dys {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_dys {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_dys BREL zst_pa_dys id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_ko_bos (Stacja Paliw.Komputer BOS)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_ko_bos {
+  DISPLAY_NAME "Stacja Paliw.Komputer BOS";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_ko_bos {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip2 STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip3 STRING 15
+      { UI_INFO "AUDITLOG";};
+    cd_dvd INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    ilosc_procesorow INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_ram INTEGER // w MB
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 256;
+      };
+    karta_sieciowa INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    monitor_nazwa STRING 255
+      { UI_INFO "AUDITLOG";};
+    monitor_rozmiar STRING 30
+      { UI_INFO "AUDITLOG";};
+    procesor SREL ztyp_procesora
+      { UI_INFO "AUDITLOG";};
+    rozmiar_hdd INTEGER // w GB
+      { UI_INFO "AUDITLOG";};
+    typ SREL ztyp_komputera
+      { UI_INFO "AUDITLOG";};
+    zegar_cpu STRING 20
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_ko_bos {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_ko_bos BREL zst_pa_ko_bos id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_ko_da (Stacja Paliw.Kolektor danych)
+// Description: Stacja Paliw.Kolektor danych
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_ko_da {
+  DISPLAY_NAME "Stacja Paliw.Kolektor danych";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_ko_da {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    nr_kolektora STRING 255
+      { UI_INFO "AUDITLOG";};
+    typ_kolektora STRING 255
+      { UI_INFO "AUDITLOG";};
+    wersja_aplikacji STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_ko_da {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_ko_da BREL zst_pa_ko_da id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_ko_pos (Stacja Paliw.Komputer POS)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_ko_pos {
+  DISPLAY_NAME "Stacja Paliw.Komputer POS";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_ko_pos {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip2 STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip3 STRING 15
+      { UI_INFO "AUDITLOG";};
+    cd_dvd INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    ilosc_procesorow INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_ram INTEGER // w MB
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 256;
+      };
+    karta_sieciowa INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    monitor_nazwa STRING 255
+      { UI_INFO "AUDITLOG";};
+    monitor_rozmiar STRING 30
+      { UI_INFO "AUDITLOG";};
+    procesor SREL ztyp_procesora
+      { UI_INFO "AUDITLOG";};
+    rozmiar_hdd INTEGER // w GB
+      { UI_INFO "AUDITLOG";};
+    typ SREL ztyp_komputera
+      { UI_INFO "AUDITLOG";};
+    zegar_cpu STRING 20
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_ko_pos {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_ko_pos BREL zst_pa_ko_pos id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_pin (Stacja Paliw.PinPad)
+// Description: Stacja Paliw.PinPad
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_pin {
+  DISPLAY_NAME "Stacja Paliw.PinPad";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_pin {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    status STRING 255
+      { UI_INFO "AUDITLOG";};
+    wersja STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_pin {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_pin BREL zst_pa_pin id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_se_sp (Stacja Paliw.Serwer SP)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_se_sp {
+  DISPLAY_NAME "Stacja Paliw.Serwer SP";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_se_sp {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip2 STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip3 STRING 15
+      { UI_INFO "AUDITLOG";};
+    cd_dvd INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    ilosc_procesorow INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_ram INTEGER // w MB
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 256;
+      };
+    karta_sieciowa INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    monitor_nazwa STRING 255
+      { UI_INFO "AUDITLOG";};
+    monitor_rozmiar STRING 30
+      { UI_INFO "AUDITLOG";};
+    procesor SREL ztyp_procesora
+      { UI_INFO "AUDITLOG";};
+    rozmiar_hdd INTEGER // w GB
+      { UI_INFO "AUDITLOG";};
+    typ SREL ztyp_komputera
+      { UI_INFO "AUDITLOG";};
+    zegar_cpu STRING 20
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_se_sp {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_se_sp BREL zst_pa_se_sp id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_st_dy (Stacja Paliw.Sterownik dystrybutorów)
+// Description: Stacja Paliw.Sterownik dystrybutorów
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_st_dy {
+  DISPLAY_NAME "Stacja Paliw.Sterownik dystrybutorów";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_st_dy {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_st_dy {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_st_dy BREL zst_pa_st_dy id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_st_so (Stacja Paliw.Sterownik sond)
+// Description: Stacja Paliw.Sterownik sond
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_st_so {
+  DISPLAY_NAME "Stacja Paliw.Sterownik sond";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_st_so {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_st_so {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_st_so BREL zst_pa_st_so id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_szu (Stacja Paliw.Szuflada)
+// Description: Stacja Paliw.Szuflada
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_szu {
+  DISPLAY_NAME "Stacja Paliw.Szuflada";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_szu {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_szu {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_szu BREL zst_pa_szu id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_te_ka_pl (Stacja Paliw.Terminal Kart Płatniczych)
+// Description: Stacja Paliw.Terminal Kart Płatniczych
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_te_ka_pl {
+  DISPLAY_NAME "Stacja Paliw.Terminal Kart Płatniczych";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_te_ka_pl {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    maska_modulu STRING 255 // jakie uslugi sa uruchomione
+      { UI_INFO "AUDITLOG";};
+    merchaddr1 STRING 255
+      { UI_INFO "AUDITLOG";};
+    merchaddr2 STRING 255
+      { UI_INFO "AUDITLOG";};
+    merchname STRING 255
+      { UI_INFO "AUDITLOG";};
+    pos_id STRING 255 // tid 2
+      { UI_INFO "AUDITLOG";};
+    rodzaj_terminala STRING 255 // tid
+      { UI_INFO "AUDITLOG";};
+    wersja_terminala STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_te_ka_pl {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_te_ka_pl BREL zst_pa_te_ka_pl id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_ups (Stacja Paliw.UPS)
+// Description: Stacja Paliw.UPS
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_ups {
+  DISPLAY_NAME "Stacja Paliw.UPS";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_ups {
+    czas_baterii STRING 255
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    naladowanie STRING 255
+      { UI_INFO "AUDITLOG";};
+    napiecie_wejsciowe STRING 255
+      { UI_INFO "AUDITLOG";};
+    obciazenie STRING 255
+      { UI_INFO "AUDITLOG";};
+    status STRING 255
+      { UI_INFO "AUDITLOG";};
+    wymiana_baterii STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_ups {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_ups BREL zst_pa_ups id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_pa_we_ce (Stacja Paliw.Weryfikator cen)
+// Description: Stacja Paliw.Weryfikator cen
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_pa_we_ce {
+  DISPLAY_NAME "Stacja Paliw.Weryfikator cen";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_pa_we_ce {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_pa_we_ce {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_pa_we_ce BREL zst_pa_we_ce id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_ro_dru (Stanowisko robocze.Drukarka)
+// Description: Stanowisko robocze.Drukarka
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_ro_dru {
+  DISPLAY_NAME "Stanowisko robocze.Drukarka";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_ro_dru {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    lan INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    lpt INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    management_url STRING 1000
+      { UI_INFO "AUDITLOG";};
+    rodzaj_drukarki SREL zrodzaj_drukarki
+      
+      DISPLAY_NAME "Rodzaj drukarki" { UI_INFO "AUDITLOG";};
+    rodzaj_wydruku SREL zrodzaj_wydruku
+      { UI_INFO "AUDITLOG";};
+    usb INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+  };
+
+  FACTORY zst_ro_dru {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_ro_dru BREL zst_ro_dru id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_ro_kom (Stanowisko robocze.Komputer)
+// Description: Stanowisko robocze.Komputer
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_ro_kom {
+  DISPLAY_NAME "Stanowisko robocze.Komputer";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_ro_kom {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip2 STRING 15
+      { UI_INFO "AUDITLOG";};
+    adres_ip3 STRING 15
+      { UI_INFO "AUDITLOG";};
+    cd_dvd INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    ilosc_procesorow INTEGER // od 1 do 16
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 1;
+      };
+    ilosc_ram INTEGER // w MB
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 256;
+      };
+    karta_sieciowa INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    monitor_nazwa STRING 255
+      { UI_INFO "AUDITLOG";};
+    monitor_rozmiar STRING 30
+      { UI_INFO "AUDITLOG";};
+    procesor SREL ztyp_procesora
+      { UI_INFO "AUDITLOG";};
+    rozmiar_hdd INTEGER // w BG
+      { UI_INFO "AUDITLOG";};
+    rozmiar_hdd_string STRING 255
+      { UI_INFO "AUDITLOG";};
+    typ SREL ztyp_komputera
+      { UI_INFO "AUDITLOG";};
+    zegar_cpu STRING 20
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY zst_ro_kom {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_ro_kom BREL zst_ro_kom id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_ro_mon (Stanowisko robocze.Monitor)
+// Description: Stanowisko robocze.Monitor
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_ro_mon {
+  DISPLAY_NAME "Stanowisko robocze.Monitor";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_ro_mon {
+    dvi INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    hdmi INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    rodzaj SREL zrodzaj_monitora
+      { UI_INFO "AUDITLOG";};
+    rozmiar SREL zrozmiar_monitora
+      { UI_INFO "AUDITLOG";};
+    usb INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    vga INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+  };
+
+  FACTORY zst_ro_mon {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_ro_mon BREL zst_ro_mon id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_ro_ska (Stanowisko robocze.Skaner)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_ro_ska {
+  DISPLAY_NAME "Stanowisko robocze.Skaner";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_ro_ska {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    lpt INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    typ SREL ztyp_skanera
+      { UI_INFO "AUDITLOG";};
+    usb INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+  };
+
+  FACTORY zst_ro_ska {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_ro_ska BREL zst_ro_ska id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   zst_ro_ur_wi (Stanowisko robocze.Urzadzenie wielofunkcyjne)
+// Description: Stanowisko robocze.Urzadzenie wielofunkcyjne
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zst_ro_ur_wi {
+  DISPLAY_NAME "Stanowisko robocze.Urzadzenie wielofunkcyjne";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES zst_ro_ur_wi {
+    adres_ip STRING 15
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    faks INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    ksero INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    lan INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    lpt INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    management_url STRING 1000
+      { UI_INFO "AUDITLOG";};
+    rodzaj_drukarki SREL zrodzaj_drukarki
+      { UI_INFO "AUDITLOG";};
+    rodzaj_wydruku SREL zrodzaj_wydruku
+      { UI_INFO "AUDITLOG";};
+    skaner INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+    usb INTEGER
+      { UI_INFO "AUDITLOG";
+      ON_NEW DEFAULT 0;
+      };
+  };
+
+  FACTORY zst_ro_ur_wi {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_zst_ro_ur_wi BREL zst_ro_ur_wi id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztask (Task)
+// Description: Fac_Attr_Entry ztask
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztask {
+  DISPLAY_GROUP "macro event stored_query object_notify a";
+
+  DISPLAY_NAME "Task";
+
+  ATTRIBUTES ztask {
+    actual_duration DURATION
+      
+      DISPLAY_NAME "Actual Duration"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    asset SREL nr;
+    assignee SREL cnt
+      SERVICE_PROVIDER_ELIGIBLE 
+      DISPLAY_NAME "Assignee";
+    assignee_agt SREL agt;
+    attached_events QREL atev DYNAMIC {
+    	WHERE "obj_id = ? " ;
+    	PARAM_NAMES { persisent_id } ;
+    	};
+    audit_userid SREL cnt;
+    chg SREL chg;
+    closecode SREL ztaskclosecode
+      
+      DISPLAY_NAME "Close Code";
+    comments STRING 1000
+      
+      DISPLAY_NAME "Comments";
+    completion_date DATE
+      
+      DISPLAY_NAME "Completion date"
+      {
+      ON_PRE_VAL check_dates(start_date,completion_date) 80;
+      };
+    cost INTEGER
+      
+      DISPLAY_NAME "Cost"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    cr SREL cr;
+    creator SREL cnt
+      
+      DISPLAY_NAME "Creator"
+      {
+      ON_NEW DEFAULT USER;
+      };
+    date_created DATE
+      
+      DISPLAY_NAME "Created date"
+      {
+      ON_NEW DEFAULT NOW;
+      };
+    del SREL actbool
+      
+      DISPLAY_NAME "delete_flag"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    deliveredServices STRING 1000
+      
+      DISPLAY_NAME "Delivered Services";
+    description STRING 1000
+      
+      DISPLAY_NAME "Description";
+    done_by SREL cnt
+      
+      DISPLAY_NAME "Done by";
+    est_completion_date DATE
+      
+      DISPLAY_NAME "Estimated completion date"
+      {
+      ON_PRE_VAL check_date(start_date,est_completion_date) 80;
+      };
+    est_cost INTEGER
+      
+      DISPLAY_NAME "Estimated cost"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    est_duration DURATION
+      
+      DISPLAY_NAME "Estimated duration"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    expertise INTEGER
+      
+      DISPLAY_NAME "Expertise"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    group_task INTEGER
+      
+      DISPLAY_NAME "Group task"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    installedSoftware STRING 1000
+      
+      DISPLAY_NAME "Installed Software";
+    laborCost INTEGER
+      
+      DISPLAY_NAME "Labor Cost";
+    pamtask INTEGER
+      {
+      ON_NEW DEFAULT 0;
+      };
+    parentPERSID STRING 30;
+    partsCost STRING 50
+      
+      DISPLAY_NAME "Parts cost";
+    rate INTEGER
+      
+      DISPLAY_NAME "Rate";
+    sdgroup SREL grp
+      
+      DISPLAY_NAME "Group";
+    sequence INTEGER
+      REQUIRED;
+    spenttime STRING 50
+      
+      DISPLAY_NAME "Spent Time";
+    start_date DATE;
+    status SREL tskstat // SRel_Attr_Entry ztask.status
+      
+      DISPLAY_NAME "Status"
+      {
+      ON_NEW DEFAULT "WAIT";
+      ON_POST_VAL site_att_cr_evt( ) 51 FILTER ( task == 'CRAPPTSK' && pamtask == 1 );
+      };
+    task SREL tskty
+      
+      DISPLAY_NAME "Task";
+    taskType INTEGER; // nie używać
+    taskType2 SREL ztasktype;
+    usedParts STRING 1000
+      
+      DISPLAY_NAME "Used Parts";
+    web_url DERIVED ("$(NX_WEB_LINK_URL#%s#ztask)id=" id);
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztask {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "ztask";
+    REL_ATTR id;
+    COMMON_NAME description;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztaskclosecode (Task Close Code)
+// Description: Fac_Attr_Entry ztaskclosecode
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztaskclosecode {
+  DISPLAY_NAME "Task Close Code";
+
+  ATTRIBUTES ztaskclosecode {
+    del SREL actbool
+      
+      DISPLAY_NAME "delete_flag";
+    sym STRING 100
+      REQUIRED 
+      DISPLAY_NAME "Task Close Code";
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztaskclosecode {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztasktype (Task Type)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztasktype {
+  DISPLAY_NAME "Task Type";
+
+  ATTRIBUTES ztasktype {
+    del SREL actbool // SRel_Attr_Entry ztasktype.del
+      
+      DISPLAY_NAME "delete_flag"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sym STRING 60
+      REQUIRED;
+    task SREL tskty // SRel_Attr_Entry ztasktype.task
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztasktype {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztel_bla (Telekomunikacja.BlackBerry)
+// Description: Telekomunikacja.BlackBerry
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztel_bla {
+  DISPLAY_NAME "Telekomunikacja.BlackBerry";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES ztel_bla {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    link_opis STRING 1000
+      
+      DISPLAY_NAME "link do opisu i parametrów" { UI_INFO "AUDITLOG";};
+    model STRING 255
+      { UI_INFO "AUDITLOG";};
+    obraz STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY ztel_bla {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_ztel_bla BREL ztel_bla id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztel_te_ip (Telekomunikacja.Telefon IP)
+// Description: Telekomunikacja.Telefon IP
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztel_te_ip {
+  DISPLAY_NAME "Telekomunikacja.Telefon IP";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES ztel_te_ip {
+    directory_first_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    phonebook_first_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    phonebook_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    set_type SREL zipfon_settype // SRel_Attr_Entry ztel_te_ip.set_type
+      
+      DISPLAY_NAME "Set Type" { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY ztel_te_ip {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_ztel_te_ip BREL ztel_te_ip id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztel_te_ko (Telekomunikacja.Telefon komórkowy)
+// Description: Telekomunikacja.Telefon komórkowy
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztel_te_ko {
+  DISPLAY_NAME "Telekomunikacja.Telefon komórkowy";
+  DISPLAY_GROUP "assetx";
+  EXTENSION_OF nr;
+  ATTRIBUTES ztel_te_ko {
+    ex_name STRING 255
+      { UI_INFO "AUDITLOG";};
+    link_opis STRING 1000
+      
+      DISPLAY_NAME "link do opisu i parametrów" { UI_INFO "AUDITLOG";};
+    model STRING 255
+      { UI_INFO "AUDITLOG";};
+    obraz STRING 255
+      { UI_INFO "AUDITLOG";};
+  };
+
+  FACTORY ztel_te_ko {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+  METHODS {
+    create_extension_copy( object, uuid, int );
+  };
+};
+
+OBJECT nr {
+  ATTRIBUTES usp_owned_resource SECONDARY {
+      assoc_ztel_te_ko BREL ztel_te_ko id DYNAMIC { UI_INFO "dtlTextbox"; };
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztryb_monitorowania
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztryb_monitorowania {
+  ATTRIBUTES ztryb_monitorowania {
+    ex_name STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztryb_monitorowania {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztyp_komputera
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztyp_komputera {
+  ATTRIBUTES ztyp_komputera {
+    ex_name STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztyp_komputera {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztyp_lokalizacji
+// Description: Fac_Attr_Entry ztyp_lokalizacji
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztyp_lokalizacji {
+  ATTRIBUTES ztyp_lokalizacji {
+    ex_name STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztyp_lokalizacji {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "inventory";
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztyp_procesora
+// Description: Fac_Attr_Entry ztyp_procesora
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztyp_procesora {
+  ATTRIBUTES ztyp_procesora {
+    ex_name STRING 255
+      REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztyp_procesora {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztyp_serwera
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztyp_serwera {
+  ATTRIBUTES ztyp_serwera {
+    ex_name STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztyp_serwera {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztyp_skanera
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztyp_skanera {
+  ATTRIBUTES ztyp_skanera {
+    ex_name STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztyp_skanera {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Factory:   ztyp_urzadzenia_siec
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztyp_urzadzenia_siec {
+  ATTRIBUTES ztyp_urzadzenia_siec {
+    ex_name STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztyp_urzadzenia_siec {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+    COMMON_NAME ex_name;
+  };
+};

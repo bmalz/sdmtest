@@ -1,0 +1,83 @@
+<PDM_IF 0>
+nr_cmdb_har_maix_tab.htmpl
+WHEN PRESENTED:
+    Display Hardware.Mainframe family attributes of the selected CI
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+
+History:
+       24-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_har_maix.htmpl" where="family.extension_name='har_maix'" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr=bm_status factory=bms lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Pamięć zainstalowana" attr=assoc_har_maix.phys_mem>
+<PDM_MACRO name=dtlTextbox hdr="Pojemność pamięci" attr=assoc_har_maix.mem_capacity>
+<PDM_MACRO name=dtlTextbox hdr="Pojemność dysku" attr=assoc_har_maix.hard_drive_capacity>
+<PDM_MACRO name=dtlTextbox hdr="Typ procesora" attr=assoc_har_maix.proc_type>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Prędkość procesora" attr=assoc_har_maix.proc_spd>
+<PDM_MACRO name=dtlTextbox hdr="Typ dysku" attr=assoc_har_maix.disk_type>
+<PDM_MACRO name=dtlTextbox hdr="MIPS" attr=assoc_har_maix.num_mips>
+<PDM_MACRO name=dtlDate hdr="Data aktywacji" attr=assoc_har_maix.active_date>
+<PDM_MACRO name=dtlDate hdr="Data wycofania" attr=assoc_har_maix.retire_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Priorytet CI" attr=assoc_har_maix.ci_priority maxlength=3>
+<PDM_MACRO name=dtlTextbox hdr="SLA" attr=assoc_har_maix.SLA>
+<PDM_MACRO name=dtlTextbox hdr="Dzierżawiony czy w posiadaniu?" attr=assoc_har_maix.leased_or_owned_status>
+<PDM_MACRO name=dtlTextbox hdr="Kod projektu" attr=assoc_har_maix.proj_code>
+<PDM_MACRO name=dtlTextbox hdr="Numer kontraktu" attr=assoc_har_maix.contract_number>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data początku dzierżawy" attr=assoc_har_maix.lease_effective_date>
+<PDM_MACRO name=dtlDate hdr="Data końca dzierżawy" attr=assoc_har_maix.lease_termination_date>
+<PDM_MACRO name=dtlDate hdr="Data odnowienia dzierżawy" attr=assoc_har_maix.lease_renewal_date>
+<PDM_MACRO name=dtlTextbox hdr="Miesięczny koszt dzierżawy" attr=assoc_har_maix.lease_cost_per_month>
+<PDM_IF "$env.NX_CMDB_PURCHASEAMT" == "INT">
+<PDM_MACRO name=dtlTextbox hdr="Zakupiona ilość" attr=assoc_har_maix.purchase_amount>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Zakupiona ilość" attr=assoc_har_maix.purchase_amountc>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Typ utrzymania" attr=assoc_har_maix.mtce_type>
+<PDM_MACRO name=dtlTextbox hdr="Okres utrzymania" attr=assoc_har_maix.maintenance_period>
+<PDM_MACRO name=dtlTextbox hdr="Numer kontraktu utrzymania" attr=assoc_har_maix.mtce_contract_number>
+<PDM_MACRO name=dtlTextbox hdr="Opłata utrzymaniowa" attr=assoc_har_maix.maintenance_fee>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(Number)$Id: nr_cmdb_har_maix_tab.htmpl,v 1.1 2006/03/06 18:55:12 poibr01 Exp $
+</PDM_IF>

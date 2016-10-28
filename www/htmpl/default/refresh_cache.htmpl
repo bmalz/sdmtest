@@ -1,0 +1,104 @@
+<html lang="en"><PDM_IF 0>
+	refresh_cache.htmpl
+	WHEN PRESENTED:
+	    When the browser cache needs to be refreshed
+</PDM_IF>
+	<head>
+<PDM_PRAGMA RELEASE=110>
+<head>
+<META HTTP-EQUIV="pragma" CONTENT="no-cache">
+<title>$ProductName Browser Cache Refresh Required</title>
+</head>
+<body>
+<div style='text-align: center'>
+<h2>Browser Cache Refresh Required</h2>
+</div>
+The $ProductName server has recently been updated, and you may have
+outdated files in your browser cache.  Please clear your browser cache
+before clicking on the link below to begin your session.
+<p>
+<script>
+<!--
+if ( navigator.appName.indexOf("Microsoft") != -1 ) {
+   var txt = "To clear the browser cache:" +
+             "<ol>" + 
+	     "<li>Select Tools->Internet Options."; 
+   if (navigator.appVersion.indexOf("7.0")!= -1)
+   {
+	txt += "<li>Press the \"Delete ...\" button on the popup form." +
+               "<li>Press the \"Delete files...\" button on the popup form." +
+               "<li>Press the \"Yes\" button on the confirmation prompt." +
+               "</ol>";
+   }
+   else {
+        txt += "<li>Press the \"Delete Files...\" button on the popup form." +
+               "<li>Press the \"OK\" button on the confirmation prompt." +
+               "</ol>";
+   }
+}
+else if ( navigator.appName == "Netscape" || navigator.appName == "Mozilla") {
+
+   if (navigator.appVersion.indexOf("Safari")!= -1) {
+      var txt = "To clear the browser cache:" +
+                "<ol>" +
+                "<li>Select Edit->Empty Cache." +
+                "<li>Press the \"Empty\" button on the popup form." +
+                "</ol>";
+   }
+   else {
+      var txt = "To clear the browser cache:" +
+                "<ol>" +
+                "<li>Select Tools->Clear Private Data." +
+                "<li>Ensure that the \"Cache\" checkbox is checked." +
+                "<li>Press the \"Clear Private Data Now\" button on the popup form." +
+                "</ol>";
+   }
+}
+else {
+   var txt = "Please refer to your browser help to determine how to clear the cache.";
+}
+   document.write(txt);
+//-->
+</script>
+<noscript>
+<p>
+The method of clearing your browser cache depends on the browser.
+<h3>Internet Explorer IE7</h3>
+To clear your browser cache:
+<ol>
+<li>Select Tools->Internet Options.
+<li>Press the "Delete ..." button on the popup form.
+<li>Press the "Delete files..." button on the popup form.
+<li>Press the "Yes" button on the confirmation prompt.
+</ol>
+<h3>Internet Explorer</h3>
+To clear your browser cache:
+<ol>
+<li>Select Tools->Internet Options.
+<li>Press the "Delete Files..." button on the popup form.
+<li>Press the "OK" button on the confirmation prompt.
+</ol>
+<H3>Firefox</h3>
+To clear your browser cache:
+<ol>
+<li>Select Tools->Clear Private Data.
+<li>Ensure that the "Cache" checkbox is checked.
+<li>Press the "Clear Private Data Now" button on the popup form.
+</ol>
+<H3>Safari</h3>
+To clear your browser cache:
+<ol>
+<li>Select Edit->Empty Cache.
+<li>Press the "Empty" button on the popup form.
+</ol>
+<h3>Other Browsers</h3>
+Consult your browser documentation.
+</noscript>
+<p>
+After you have cleared the cache, click on the link below to start your $ProductName session.
+<p>
+<div style='text-align: center'>
+<a href="$cgi?SID=$SESSION.SID+FID=123+OP=DISPLAY_FORM+HTMPL=$prop.main_form">Continue to $ProductName</a>
+</div>
+</body>
+</html>

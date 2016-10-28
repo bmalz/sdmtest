@@ -1,0 +1,315 @@
+<PDM_IF 0>
+***************************************************************************
+* DO NOT MODIFY THIS FILE!  This file is not migrated for new releases or
+* Service Packs, and your modifications can be lost.  You can use the file
+* std_head_site.htmpl for site modifications.
+***************************************************************************
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2003 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  analyst/std_head.htmpl 
+// Created:
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains JavaScript and other HTML that
+//    appears in the <head>...</head> section of every page.
+////////////////////////////////////////////////////////////////////////////
+@(#)$Id: std_head.htmpl ASPEN.11 2011/03/29 11:27:04 ralje02 Exp $
+
+</PDM_IF>
+<!-- BEGIN analyst/std_head.htmpl -->
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<!-- START: Set window title -->
+<SCRIPT LANGUAGE="JavaScript">
+<pdm_if "$prop.WSPHOST" != "" && "$prop.DebugScript" != "1">
+window.onerror=wspsuppress;
+function wspsuppress( msg, url, line )
+{
+  if ( ! confirm( msgtext("Cannot_perform_this_operation_") ) )
+    alert( msgtext("Complete_setup_of_the_proper_e", "$prop.form_name", msg, url, line ) );
+  return true;
+}
+</pdm_if>
+var cfgCgi = "$cgi";
+var cfgFID = "$prop.FID";
+var cfgSID = "$SESSION.SID";
+if ( typeof ahdtop == "object" && ahdtop != null ){
+var cfgFormTitle = ahdtop.cfgFormTitle;
+}
+else{
+var q=cfgCgi + "?OP=DISPLAY_FORM+SID=" + cfgSID + "+FID=" + cfgFID + "+HTMPL=" + 'session_refused.htmpl';
+parent.location=q;
+}
+var propFactory = "$prop.factory";
+var propFormName = "$prop.form_name";
+var propFormName1 = "$prop.form_name_1";
+var propFormName2 = "$prop.form_name_2";
+var propFormName3 = "$prop.form_name_3";
+var propFormRelease = "$prop.release" - 0;
+var cfgContext = '<PDM_FMT ESC_STYLE=C PAD=NO>${Context:}</PDM_FMT>';
+var jq = jQuery.noConflict();
+<pdm_if "$prop.factory" == "nr" && "$args.is_asset" == "1" && "$prop.form_name_1" == "detail" && "$env.NX_ALLOW_UNRESTRICTED_ASSET_UPD" != "Yes">
+	var ufam_restricted=1; 
+</pdm_if>
+<PDM_IF "$FRONTPAGE" == "1">
+var FrontPage = 1;
+var cfgUserAuth = 2;
+<PDM_ELSE>
+var cfgUserAuth = ${UserAuth:0};
+</PDM_IF>
+<PDM_IF "${SESSION.scrolling:}" == "auto" || "${SESSION.scrolling:}" == "no">
+if ( typeof ahdtop == "object" && ahdtop != null )
+  ahdtop.cstScrolling = "$SESSION.scrolling";
+</PDM_IF>
+<PDM_IF "$prop.form_name_1" != "quiesce">
+var qpWin = find_popup_window("quiescePending");
+<PDM_IF "${SESSION.SHUTDOWN_TIME:0}" != "0">
+if ( qpWin == null ) {
+  var qpWinName = get_popup_window_name("quiescePending");
+  var quiesceUrl = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+                   "OP=DISPLAY_FORM+HTMPL=quiesce_pending.htmpl";
+  var qpWin = preparePopup( quiesceUrl, "quiescePending",
+                            "resizable", 750, 200, "", true );
+  if ( qpWin != null ) {
+    qpWin.name = qpWinName;
+    register_window( qpWin );
+  }
+}
+<PDM_ELSE>
+if ( qpWin != null )
+  qpWin.close();
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.form_name_1" != "delayed">
+<PDM_IF "${SESSION.COMPLETED_DELAYED_CONNECTIONS:0}" != "0">
+var delayedWin = find_popup_window("delayedResponses");
+if ( delayedWin == null ) {
+  var delayedWinName = get_popup_window_name("delayedResponses");
+  var delayedConnUrl = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+                      "OP=DISPLAY_FORM+HTMPL=delayed_responses_received.htmpl";
+  var delayedWin = preparePopup( delayedConnUrl, "delayedResponses",
+                                 "resizable", 750, 250, "", true );
+  if ( delayedWin != null ) {
+    delayedWin.name = delayedWinName;
+    register_window( delayedWin );
+  }
+}
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.factory" == "wf" || "$prop.factory" == "iss_wf">
+var reopen_id = 0;
+<PDM_LIST PREFIX=list FACTORY=tskstat LENGTH=1 WHERE="code='REOPEN'">
+	reopen_id = $list.id;
+</PDM_LIST>
+</PDM_IF>
+var cfgMOPreviewMode = "$args.KEEP.MO_PREVIEW_MODE" - 0;
+var cfgMOPreviewDelayTime = "$SESSION.MouseoverPreviewDelayTime" - 0;
+var mo_preview_def_obj = void(0);
+var edit_form = 0, editing = 0;
+var propBusy = "$prop.busy";
+if (propFormRelease < 60)
+    propBusy= "no";
+std_head_setup(propBusy,"$args.KEEP.ForLrel");
+if ( show_header ) {
+<PDM_IF "$prop.form_name_1" == "detail" && "$prop.form_name_3" == "edit">
+   edit_form = 1;
+   editing = ( "$args.id" != "0" );
+</PDM_IF>
+}
+else {
+<PDM_IF "$prop.release" == "">
+	<PDM_IF "$prop.form_name" == "pdm_graph.htmpl">
+	form_title = "($prop.key) $prop.filename";
+	<PDM_ELIF "$prop.form_name" == "bin_form_np.htmpl">
+	form_title = "Announcements";
+	<PDM_ELIF "$prop.form_name" == "v30_date_helper.htmpl">
+	form_title = "Date Helper";
+	<PDM_ELSE>
+		<PDM_IF "$prop.form_name_1" == "detail">		
+		// Do not display this header for the detail screen
+		// A CA UI standard header is displayed in detail_form.js for detail screens
+	show_header = 0;
+	if ( typeof propKey != "string" )
+		propKey = "$prop.key";
+			<PDM_IF "$prop.form_name_3" != "edit">
+	form_title = propKey + " $prop.filename " + "Detail";
+	       <PDM_ELSE>
+	edit_form = 1
+	editing = ( "$args.id" != "0" );
+	if ( "$args.id" != "0" &&
+		 "${args.NEW_CHANGE:}" != "1" )
+		form_title = propKey + " Update $prop.filename";
+	else
+		form_title = "Create New $prop.filename";
+	       </PDM_IF>
+	   <PDM_ELIF "$prop.form_name_1" == "list">
+		   // Do not display this header for the list screen
+		   // A CA UI standard header is displayed in resultset.js for list screens
+	       show_header = 0;
+	if ( typeof cfgFileTitle != "string" ||
+		 cfgFileTitle.length == 0 )
+		cfgFileTitle="$prop.filename";
+		
+	var template_title = "";
+	if ( "${args.use_template:}" == "1" )
+		template_title = "Template  ";
+	if ( "${current:n/a}" == "n/a" )
+	{
+		if ( "${args.KEEP.IsProfileBrowser:}" == "1" )
+			form_title = "Quick Profile Contact Search";
+		else
+			form_title = cfgFileTitle + " " + template_title + "Search";
+	}
+	else
+		form_title = cfgFileTitle + " " + template_title + "List";
+	    </PDM_IF>
+	</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$prop.form_name_1" == "detail">
+   // Do not display this header for the detail screen
+   // A CA UI standard header is displayed in detail_form.js for detail screens
+   show_header = 0;
+   <PDM_IF "$prop.form_name_3" == "edit">
+   edit_form = 1
+   editing = ( "$args.id" != "0" );
+      <PDM_IF "$args.id" == "0" || "${args.NEW_CHANGE:}" == "1">
+   form_title = ( typeof hdrTitleNew == "string" ? hdrTitleNew : "Create New ?" );
+      <PDM_ELSE>
+          <PDM_IF "$args.template_name" != "">
+   form_title = ( typeof hdrTitleTempl == "string" ? hdrTitleTempl : "Template ?" );
+          <PDM_ELSE>
+   form_title = ( typeof hdrTitleUpd == "string" ? hdrTitleUpd : "Update ?" );
+          </PDM_IF>
+      </PDM_IF>
+   <PDM_ELSE>
+       <PDM_IF "$args.template_name" != "">
+   form_title = ( typeof hdrTitleTempl == "string" ? hdrTitleTempl : "Template ?" );
+       <PDM_ELSE>
+   form_title = ( typeof hdrTitle == "string" ? hdrTitle : "" );
+       </PDM_IF>
+   </PDM_IF>
+   <PDM_IF "$prop.factory" == "wf" || "$prop.factory" == "iss_wf">
+      function allow_wf_edit() {
+         if ("$args.status.allow_task_update" == "1") {
+            return true;
+         }
+         if ("$args.status.task_complete" == "1" && reopen_id != 0) {
+            var has_reopen = false;
+            <PDM_LIST SOURCE=args.behavior_templates PREFIX=list WHERE=" " FACTORY=bhvtpl>
+               if($list.context_attrval==reopen_id) { has_reopen=true; }
+            </PDM_LIST>
+            if (has_reopen) {
+                  return true;
+            }
+         }
+         return false;
+      }
+   </PDM_IF>
+<PDM_ELIF "$prop.form_name_1" == "list">
+   show_header = 0;
+   <PDM_IF "${args.use_template:}" == "1">
+   form_title = ( typeof hdrTitleTempl == "string" ? hdrTitleTempl : "Template ?" );
+   <PDM_ELIF "${current:n/a}" != "n/a">
+   form_title = ( typeof hdrTitleList == "string" ? hdrTitleList : "List ?" );
+   <PDM_ELSE>
+   form_title = ( typeof hdrTitle == "string" ? hdrTitle : "" );
+   </PDM_IF>
+<PDM_ELIF "$prop.form_name_1" == "preview">
+   show_header = 0;
+   <PDM_IF "$args.template_name" != "">
+      form_title = ( typeof hdrTitleTempl == "string" ? hdrTitleTempl : "Template ?" );
+   <PDM_ELSE>
+      form_title = ( typeof hdrTitle == "string" ? hdrTitle : "" );
+   </PDM_IF>
+<PDM_ELSE>
+   form_title = ( typeof hdrTitle == "string" ? hdrTitle : "" );
+</PDM_IF>
+</PDM_IF>
+}
+
+var cfgSkipInitialFocus = "$args.KEEP.SkipInitialFocus";
+var propGLType = "${args.KEEP.GLType:}";
+
+var factoryDisplayName = "${args.DISPLAY_NAME:}";
+<PDM_IF "$prop.factory" == "cr">
+    factoryDisplayName = msgtext("Request");				// Request
+    var reqType = "$args.type";
+    if(reqType=="I") factoryDisplayName = msgtext("Incident");	// Incident
+    if(reqType=="P") factoryDisplayName = msgtext("Problem");	// Problem
+</PDM_IF>
+
+var argCommonNameAttr = "${args.COMMON_NAME_ATTR:}";
+var saveAckMsgObjectName = '<PDM_FMT ESC_STYLE=C PAD=NO>${args.COMMON_NAME:}</PDM_FMT>';
+var argMakeCopy='${args.KEEP.MAKE_COPY:}';
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$prop.form_name" != "profile_browser.htmpl" &&  "$prop.form_name" != "usq_update.htmpl">
+<PDM_IF "$prop.DebugSource" != "1">
+<PDM_IF "$prop.NoRClickMenu" == "1">
+disable_right_click(false);
+<PDM_ELSE>
+disable_right_click();
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+if ( typeof form_title == "string" && form_title.length > 0 && ! propIframe )
+   setWindowTitle(form_title);
+if ( typeof window.parent.refresh_window_list == "function" )
+   window.parent.refresh_window_list();
+   
+var argAddlWhere = "${args.KEEP.ADDITIONAL_WHERE:}";
+// Set the select_lrel flag if the form is for the LREL update,
+// so we can properly cancel the LREL update if the window is closed.  
+var select_lrel = "$args.KEEP.ForLrel";
+</SCRIPT>
+<PDM_IF "$prop.form_name_1" == "list" || "$prop.listForm" == "1" >
+<SCRIPT LANGUAGE="JavaScript">
+var argDurationList = '${args.duration_list:}';
+var argBackfillField = '${args.KEEP.backfill_field:}';
+var argBackfillForm = '${args.KEEP.backfill_form:}';
+var argBackfillAttr = '${args.KEEP.backfill_attr:}';
+var argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+var argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+var argSaveSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.KEEP.save_sql_clause</PDM_FMT>';
+var argXtraQbe = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.XTRA_QBE</PDM_FMT>';
+var argSortKeys = '${args.sort_keys:}';
+var argCurSortKey = '${args.KEEP.cur_sort_key:}';
+var argListSortCol = '${args.KEEP.prev_sort_col_value:}';	
+var argListOrderBy = '${args.KEEP.prev_order_by_value:}';
+var argDomsetName = '${args.KEEP.prev_domset_name:}';	
+var cfgListAll = "${LIST_ALL:}";
+var servletURL = "${env.NX_SERVLET_SERVER_URL}";
+var argInitSearch = '${args.init_search}';	
+
+<PDM_IF "${current:n/a}" == "n/a">
+var searchFilterInitialState = "show";
+<PDM_ELSE>
+var cfgCurrent = '$current';
+var cfgTotal = '$total';
+var cfgRecordCount = '$record_count';
+var cfgStart = '$start';
+var cfgLength = '$length';
+</PDM_IF>
+var cfgIsPopup = '${args.KEEP.IsPopUp:}';
+var cfgUseTemplate = '${args.use_template:}';
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE=tenant_include.htmpl>
+<PDM_INCLUDE FILE="std_head_site.htmpl">
+<!-- END analyst/std_head.htmpl -->

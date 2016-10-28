@@ -1,0 +1,79 @@
+<PDM_IF 0>
+detail_alg.htmpl
+WHEN PRESENTED:
+    When the app needs input to create a new Activity Log.
+INTENT:
+    Capture user input for a new Activity Log, create a Activity Log
+    when submitted.
+VARIABLES:
+    string	image	    The location of the image directory as 
+			    specified in the config file.
+    object alg   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/cm.maj for the
+                            definition of attributes for 'OBJECT alg'
+    int   	logged_in   A flag to say we have a user login object.
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="EDIT_HTMPL=detail_alg_edit.htmpl+ACTIVITY_LOG_TYPE=LOG+PERSID={cr:}+FACTORY=cr+OP=UPDATE" factory=alg>
+<SCRIPT LANGUAGE="JavaScript">	
+	<PDM_IF "$args.KEEP.fromIncident" == "1">
+var hdrTitleUpd ="Dodaj komentarz do Incydentu $args.ref_num";
+<PDM_ELSE>
+var hdrTitleUpd ="Dodaj komentarz do Wniosku $args.ref_num";  
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var edit_form = 1;
+if ( ! _browser.supportsLayers )
+document.writeln('<scr' + 'ipt language="JavaScript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+</SCRIPT>
+</HEAD>
+<BODY onUnload="unload_check()" class=emp>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var maxSize=new Array("SET.alg.description","Description", $args.alg.LENGTH_description);
+</SCRIPT>
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+<PDM_MACRO name=dtlForm factory=alg>
+</SCRIPT>
+	  
+<PDM_IF "" == "$args.alg.call_req_id" && "$prop.WSPHOST" == "">
+<!-- This should not be a problem for editing existing Activity Logs,
+     but may show up when creating new Logs... -->
+<SPAN class=labeltext>
+HTMPL coding error.  Expecting call_req_id to be pre_set in the form
+or link that invoked this page
+</SPAN>
+<PDM_ELSE>
+<INPUT TYPE=HIDDEN NAME=SET.alg.call_req_id VALUE=$args.alg.call_req_id>
+<INPUT TYPE=HIDDEN NAME=SET.alg.analyst VALUE=$cst.id>
+<INPUT TYPE=HIDDEN NAME=SET.alg.internal VALUE=0>
+<INPUT TYPE=HIDDEN NAME=SET.alg.type VALUE=LOG>
+<INPUT TYPE=hidden NAME=FACTORY VALUE=cr>
+<INPUT TYPE=hidden NAME=SET.id VALUE="$args.id">
+<INPUT TYPE=hidden NAME=OP VALUE="UPDATE">
+
+
+<SCRIPT LANGUAGE="JavaScript">					
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=alg.description colspan=3 rows=8 size=80 spellchk=no>
+</SCRIPT>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>	
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_alg.htmpl FWr1.3 2008/5/9 16:46:55 versa01 Exp $;
+</PDM_IF>

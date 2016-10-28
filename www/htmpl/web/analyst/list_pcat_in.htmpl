@@ -1,0 +1,83 @@
+<PDM_IF 0>
+list_pcat_in.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Request Area (for ITIL filtered by in_flag)
+INTENT:
+    Display the list of Request Area with in_flag set to 1
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object pcat_list list The list object containing the Request Area
+                        See $NX_ROOT/bopcfg/majic/cm.maj for the
+                        definition of attributes for 'OBJECT pcat'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=list factory=pcat>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Incident Area Search";
+var hdrTitleList = "Incident Area List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var rptName = new Array("pcatsum.rpt", "pcatdtl.rpt");
+var cfgCanEdit = false;
+</script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Incident Area">
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=sfStart extracreateurl="KEEP.FLD_NOT_TO_RESET=in_flag" factory=pcat_in>
+document.write('<input type=hidden name=SERVICE_CST value=${args.KEEP.SERVICE_CST:}>');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfDropdown hdr="Typ serwisowy" attr=service_type factory=sdsc>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfLookup hdr="Organizacja" attr=organization factory=org>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=3 size=60>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown attr="ss_include" factory=bool>
+<PDM_MACRO name=sfTextbox attr=ss_sym>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var msgFoundNone = "No incident areas found";
+var msgFound1 = "1 incident area found";
+var msgFound = "%1 incident areas found";
+var msgFoundMore = "%1 incident areas found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired incident area";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=ss_include>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=ss_sym>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_pcat_in.htmpl ASPEN.2 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>

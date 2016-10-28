@@ -1,0 +1,147 @@
+<PDM_IF 0>
+list_sdsc_map.htmpl
+WHEN PRESENTED:
+	When we need to display a list of SLA Contract Maps. 
+	This form is a bit special - sdsc_map is a general-purpose
+	mapping object and can associate any object type with a svc_contract
+	and a service type.  Primary purpose of this form is to use the
+	Edit in List feature to mass update mappings.
+	
+	Caller has to at least pass in
+	KEEP.MAP_FACTORY.  See script below for other KEEP variables to specify.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script LANGUAGE="JavaScript">
+var mapFac = "$args.KEEP.MAP_FACTORY";
+if (mapFac.length <= 0) alert("MAP_FACTORY not specified!");
+
+<PDM_IF "$args.KEEP.MAP_FACTORY" == "pri">
+   var hdrTitle = "Mapped Priority Search";
+   var hdrTitleList = "Mapped Priority List";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "urg">
+   var hdrTitle = "Mapped Urgency Search";
+   var hdrTitleList = "Mapped Urgency List";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "cnt">
+   var hdrTitle = "Mapped Contact Search";
+   var hdrTitleList = "Mapped Contact List";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "grp">
+   var hdrTitle = "Mapped Group Search";
+   var hdrTitleList = "Mapped Group List";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "nr">
+   var hdrTitle = "Mapped Configuration Item Search";
+   var hdrTitleList = "Mapped Configuration Item List";
+<PDM_ELSE>
+   var hdrTitle = "SLA Map Search";
+   var hdrTitleList = "SLA Map List";
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+
+var restrictContract = "$args.KEEP.SVC_CONTRACT_ID";
+var restrictContractSym = <PDM_FMT ESC_STYLE=C PAD=NO>"$args.KEEP.SVC_CONTRACT_SYM"</PDM_FMT>;
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></script>
+<script LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<script LANGUAGE="JavaScript">
+
+<PDM_MACRO name=sfStart create=false export=no factory=sdsc_map>
+document.write('<input type="hidden" name="QBE.EQ.map_contract.id" value="$args.QBE.EQ.map_contract.id">');
+document.write('<input type="hidden" name="KEEP.MAP_FACTORY" value="$args.KEEP.MAP_FACTORY">');
+
+function contract_display_val() {
+   return restrictContractSym;
+}
+function objType_display_val() {
+<PDM_IF "$args.KEEP.MAP_FACTORY" == "pri">
+   return "Priority";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "urg">
+   return "Urgency";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "cnt">
+   return "Contact";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "grp">
+   return "Group";
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "nr">
+   return "Configuration Item";
+<PDM_ELSE>
+   return "SLA Map";
+</PDM_IF>
+}
+function servType_extraURL() {
+   var sf_extra_url = "ADDITIONAL_WHERE=owning_contract=$args.KEEP.SVC_CONTRACT_ID+KEEP.SVC_CONTRACT_ID=$args.KEEP.SVC_CONTRACT_ID" +
+                      "+KEEP.SVC_CONTRACT_SYM=" + nx_escape(restrictContractSym);
+   return sf_extra_url;
+}
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Typ serwisowy" attr="map_sdsc" extraurl="javascript:servType_extraURL();" factory=sdsc>
+<PDM_MACRO name=sfTextbox hdr="Kontrakt" attr="map_contract" disabled="yes" display_value="javascript:contract_display_val()" qbe_condition="EQ" value="$args.KEEP.SVC_CONTRACT_ID">
+<PDM_MACRO name=sfTextbox hdr="Typ obiektu" attr=map_persid disabled=yes display_value="javascript:objType_display_val();" qbe_condition="IN" value="$args.KEEP.MAP_FACTORY:%">
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script LANGUAGE="JavaScript">
+<pdm_jscript file=list_edit.js>
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_IF "$args.KEEP.MAP_FACTORY" == "pri">
+<PDM_MACRO name=elsEditReadonly attr_name="_mapped_pri.sym" header="Priority" startrow="yes">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "urg">
+<PDM_MACRO name=elsEditReadonly attr_name="_mapped_urg.sym" header="Urgency" startrow="yes">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "cnt">
+<PDM_MACRO name=elsEditReadonly attr_name="_mapped_cnt.combo_name" header="Contact" startrow="yes">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "grp">
+<PDM_MACRO name=elsEditReadonly attr_name="_mapped_grp.combo_name" header="Group" startrow="yes">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "nr">
+<PDM_MACRO name=elsEditReadonly attr_name="_mapped_nr.name" header="Configuration Item" startrow="yes">
+</PDM_IF>
+<PDM_MACRO name=elsEditField attr_name="map_sdsc.sym" endrow="yes" extraurl="javascript:servType_extraURL();" header="Service Type">
+<PDM_MACRO name=elsEndEdit>
+
+var msgFoundNone = "No maps found";
+var msgFound1 = "1 map found";
+var msgFound = "%1 maps found";
+var msgFoundMore = "%1 maps found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired map";
+
+<PDM_IF "$args.KEEP.IS_EDIT" != "edit">
+function resultSetCustomContextAddMiddle(ctxMenu) {
+   ctxMenu.addItem(msgtext("Delete"),"delete_sdsc_map(self.activePersid)");
+}
+</PDM_IF>
+<PDM_MACRO name=lsStart>
+<PDM_IF "$args.KEEP.MAP_FACTORY" == "cnt">
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=_mapped_cnt.combo_name link=yes sort="no">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "nr">
+<PDM_MACRO name=lsCol hdr="Element konfiguracji" attr=_mapped_nr.name link=yes sort="no">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "pri">
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=_mapped_pri.sym link=yes sort="no">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "grp">
+<PDM_MACRO name=lsCol hdr="Grupa" attr=_mapped_grp.combo_name link=yes sort="no">
+<PDM_ELIF "$args.KEEP.MAP_FACTORY" == "urg">
+<PDM_MACRO name=lsCol hdr="Pilność" attr=_mapped_urg.sym link=yes sort="no">
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=_mapped_cnt.combo_name link=yes sort="no">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Typ serwisowy" attr=map_sdsc.sym sort="no">
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_sdsc_map.htmpl ASPEN.3 2011/10/19 17:59:26 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

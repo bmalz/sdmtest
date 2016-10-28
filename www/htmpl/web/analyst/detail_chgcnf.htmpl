@@ -1,0 +1,111 @@
+<PDM_IF 0>
+$Id: detail_chgcnf.htmpl,v 1.2 2006/11/08 00:14:03 olsjo01 Exp $
+detail_chgcnf.htmpl
+WHEN PRESENTED:
+	When we need to display a Change Conflict .
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Change Conflict Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Change Conflict "</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Change Conflict $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function showSourceChange(value)
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + source_chg + "')\">" + source_chg_num + "</A>" ;
+	return(reshtml);
+}
+
+function showConflictChange(value)
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + conflict_chg + "')\">" + conflict_chg_num + "</A>" ;
+	return(reshtml);
+}
+
+function showConflictCi(value)
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + conflict_ci + "')\">" + conflict_ci_name + "</A>" ;
+	return(reshtml);
+}
+
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Change Conflict" key="$args.sym">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+var source_chg;
+var source_chg_num;
+var conflict_chg;
+var conflict_chg_num;
+var conflict_ci;
+var conflict_ci_name;
+
+<PDM_LIST PREFIX=source_list FACTORY=chgcnf_chg WHERE="conflict=$args.id AND is_cause=1" ESC_STYLE=C>
+source_chg="$source_list.change.persistent_id";
+source_chg_num="$source_list.change.chg_ref_num";
+conflict_ci="nr:" + "$source_list.conflict.conflict_ci.id";
+conflict_ci_name="$source_list.conflict.conflict_ci.name";
+</PDM_LIST>
+
+<PDM_LIST PREFIX=conflict_list FACTORY=chgcnf_chg WHERE="conflict=$args.id AND is_cause=0" ESC_STYLE=C>
+conflict_chg="$conflict_list.change.persistent_id";
+conflict_chg_num="$conflict_list.change.chg_ref_num";
+</PDM_LIST>
+
+<PDM_MACRO name=dtlForm factory=chgcnf>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Typ konfliktu" attr="conflict_type">
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Status konfliktu" attr="conflict_status" lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis typu konfliktu" attr="conflict_type.description" colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zmiana" attr="source_change" fmtfunc=showSourceChange>
+<PDM_MACRO name=dtlReadonly hdr="Zmiana w konflikcie" attr="conflict_change" fmtfunc=showConflictChange>
+<PDM_MACRO name=dtlReadonly hdr="Dotknięty CI" attr="conflict_ci" fmtfunc=showConflictCi>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Konflikt zaczyna się" attr="conflict_begin">
+<PDM_MACRO name=dtlDateReadonly hdr="Konflikt kończy się" attr="conflict_end">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarze" attr="comments" colspan=3 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data utworzenia" attr="creation_dt">
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

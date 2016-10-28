@@ -1,0 +1,32 @@
+<PDM_IF 0>
+iss_lr.htmpl
+WHEN PRESENTED:
+    When we need to display the Notification History for a single Activity Log (e.g. Manual Notify)
+INTENT:
+    Display error message due to the fact that Employees/Customers should not have access to view
+    this information
+VARIABLES:
+    object  chg  args	The Change Order object we are displaying
+</PDM_IF>
+<html lang="en"><head>
+<PDM_WSP preview=no>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<title>AHD04483: Security Access Violation</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="messages">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<div style='text-align: center'>
+<H1>Error</H1>
+<p>
+<img src="$CAisd/img/bar.gif" width="90%" HEIGHT="4" alt="Bar">
+<p>
+<b>AHD04482: Security setting prevents this operation. See Administrator for detail.</b>
+</div>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+"@(#)$Id: chg_lr.htmpl ASPEN.2 2010/11/16 13:07:57 saima01 Exp $"
+</PDM_IF>

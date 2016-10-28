@@ -1,0 +1,72 @@
+<PDM_IF 0>
+$Id: list_response.htmpl,v 1.3 2006/11/10 23:46:38 hu Exp $
+list_crs.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Personalized Responses.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Personalized Response Search";
+var hdrTitleList = "Personalized Response List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("responsesum.rpt", "response.rpt");
+var cfgCanEdit = true;
+if(typeof ahdtop != "undefined" && typeof ahdtop.toolbarTab != "undefined" && ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].code=='sd')
+	var cfgCanCopy = false;
+else
+	var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+var admin_acc = $ACCESS.admin;
+var argCstID = "$cst.id";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Personalized Response">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF $ACCESS.FAC_response \> 1>
+<PDM_MACRO name=sfStart factory=response>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=response>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+if (admin_acc > 1) {
+  
+<PDM_MACRO name=sfLookup hdr="Właściciel odpowiedzi" attr=response_owner factory=cnt>
+} else {
+   searchFilterTextDisabled("Response Owner", "response_owner", 20, "$cst.id","$cst.combo_name", "EQ");
+}
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Odpowiedź" attr=response colspan=3 size=60>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No responses found";
+var msgFound1 = "1 response found";
+var msgFound = "%1 responses found";
+var msgFoundMore = "%1 responses found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired response";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Odpowiedź" attr=response keeplinks=yes>
+<PDM_MACRO name=lsCol hdr="Właściciel odpowiedzi" attr=response_owner>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

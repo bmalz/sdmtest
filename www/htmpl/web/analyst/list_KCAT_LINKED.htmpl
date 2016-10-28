@@ -1,0 +1,89 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a category linked to a document under the categories tab of a document
+INTENT:
+    Display category linked to a document under the categories tab of a document
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Category link Search";//Not Used
+var hdrTitleList = "Category link List";//Not Used
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("&{factory}sum.rpt", "&{factory}dtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kd_tabs.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+var arrFields = new Array;
+var tCount = 0;
+var nCount =0;
+var nAttrCount=0;
+
+	nAttrCount = 4;
+	var msgFoundNone = "No Category Links found";
+	var msgFound1 = "1 Category Link found";
+	var msgFound = "%1 Category Links found";
+	var msgFoundMore = "%1 Category Links found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Category Link";
+	var nPrimaryIndex = 0;
+	if ( typeof parent.parent.GetPrimaryIndex != "undefined" )
+      nPrimaryIndex = parent.parent.GetPrimaryIndex();
+
+	//Note: This function is used for list macro
+	function IncludeLink(value)
+	{
+		if ("$args.KEEP.IS_EDIT" == "edit")
+		{
+			rs.showDataWithLink("", value);
+		}
+		else
+		{
+			rs.data(value);
+		}
+	}
+
+	<pdm_macro name=lsStart search_type=GET_DOB>
+	<pdm_macro name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.id}</PDM_FMT>'">  
+	<pdm_macro name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.id}</PDM_FMT>'">  
+	<pdm_macro name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.CAPTION}</PDM_FMT>'">  
+	<pdm_macro name=lsWrite text="arrFields[nCount++] = '<PDM_FMT ESC_STYLE=C>@{list.INDEX_PATH}</PDM_FMT>'">  		
+	<pdm_macro name=lsCol hdr="Nazwa klasyfikacji" attr=CAPTION  exportfmt=ShowLink link=yes>
+	<pdm_macro name=lsCol hdr="Ścieżka klasyfikacji" attr=INDEX_PATH sort=no>
+	<pdm_macro name=lsEnd>
+	  
+	rs.fitSmallWin=true;  
+	  
+	var ctxMenu=new ContextMenu("idMenuTabCategory");
+	<PDM_IF "$args.KEEP.IS_EDIT" == "edit">
+		rs.setLinkOnclick(function(){ViewCategory(self.activeRow);});
+		ctxMenu.addItem("Set as Primary Category", "InnerSetPrimaryIndex(self.activeRow);");
+		ctxMenu.addItem("Remove this Category", "InnerRemoveCategoryLink(self.activeRow)");
+		ctxMenu.finish();
+		//
+		//Added to allow right click context menu on tenanted documents
+		//RO Context menu is here as its overrides menu in resultset.js that changes the context menu if multi-tenency is on
+		var ctxMenuRO = new ContextMenu("idMenuTabCategory");
+		ctxMenuRO.addItem("Set as Primary Category", "InnerSetPrimaryIndex(self.activeRow);");
+		ctxMenuRO.addItem("Remove this Category", "InnerRemoveCategoryLink(self.activeRow)");
+		ctxMenuRO.finish();
+	</PDM_IF>
+	
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

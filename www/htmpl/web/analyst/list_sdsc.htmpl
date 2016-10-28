@@ -1,0 +1,118 @@
+<PDM_IF 0>
+$Id: list_sdsc.htmpl,v 1.4 2007/01/04 22:55:13 tuach01 Exp $
+list_sdsc.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Service Types.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Service Type Search";
+var hdrTitleList = "Service Type List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("sdscsum.rpt", "sdscdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+
+// These keep variable specify a service contract to match on.
+// To specify searching for only public sdsc objects (that is,
+// where sdsc.owning_contract IS NULL) set SVC_CONTRACT_ID to a *single*
+// digit (say 0).  This is required so the QBE stuff actually searches
+// for NULL.
+
+var restrictContract = "$args.KEEP.SVC_CONTRACT_ID";
+var restrictContractSym = '<PDM_FMT ESC_STYLE=C PAD=NO>$args.KEEP.SVC_CONTRACT_SYM</PDM_FMT>';
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Service Type">
+
+
+<!-- Are we displayed within a Contract? -->
+<PDM_IF "$args.KEEP.CONTRACT_CONTEXT" != "">
+	<table>
+	<th width=100% align="right">
+	<td width=100% align="right">
+	<script>
+	
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Add Private Service Type" Func="create_new('sdsc', false, '', '', 'PRESET=owning_contract:$args.KEEP.CONTRACT_CONTEXT')" hotkey_name="Add Private Service Type" ID="ADD_PRIVATE_SDSC" Width=0>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+	</script>
+	</td></table>
+</PDM_IF>
+
+<script type="text/javascript">
+<PDM_IF 0>
+// The first condition is for when this list form is embedded in a tab of a contract, the second is 
+// for when it is popped up from the "Organization's Service Type (always applied)" lookup on the 
+// contract detail form.  The last covers all other cases.
+</PDM_IF>
+<PDM_IF "$args.KEEP.CONTRACT_CONTEXT" != "">
+<PDM_MACRO name=sfStart create=false factory=sdsc>
+<PDM_ELIF "$args.KEEP.SVC_CONTRACT_ID" != "" && $args.KEEP.SVC_CONTRACT_ID \> 0>
+<PDM_MACRO name=sfStart extracreateurl="PRESET=owning_contract:$args.KEEP.SVC_CONTRACT_ID" factory=sdsc>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=sdsc>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfLookup hdr="Strefa czasowa" attr=timezone>
+
+if (typeof restrictContract == "string" && restrictContract.length > 0) {
+	
+	// Write out disabled filter item to remind us why search is restricted.
+	if (restrictContract.length > 1) {
+		searchFilterTextDisabled("Owning Contract", "owning_contract", 10, restrictContract, restrictContractSym, "EQ");
+		
+	} else {
+		// Search for 'owning_contract IS NULL'
+		searchFilterTextDisabled("Owning Contract", "owning_contract", 10, restrictContract, restrictContractSym, "NU");
+		
+	}
+} else {
+	// Otherwise provide option to filter results for private/public sdsc's.
+	searchFilterDropdown("Defined by Contract?","","",
+		"Yes","(owning_contract IS NOT NULL)",
+		"No","(owning_contract IS NULL)");
+}
+
+<PDM_IF "$args.KEEP.CONTRACT_CONTEXT" != "">
+	var autoRefreshWindows = new Object();
+	document.write('<input type="hidden" name=KEEP.CONTRACT_CONTEXT value=${args.KEEP.CONTRACT_CONTEXT:}>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No service types found";
+var msgFound1 = "1 service type found";
+var msgFound = "%1 service types found";
+var msgFoundMore = "%1 service types found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired service type";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportFmt=ShowLink link=yes sort="sym ASC, tenant ASC" startrow="no">
+<PDM_MACRO name=lsCol hdr="Umowa SLA" attr="zsla" startrow="no">
+<PDM_MACRO name=lsCol hdr="Opis" attr=description startrow="no" width=50>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag startrow="no">
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_WSP>

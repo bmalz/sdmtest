@@ -1,0 +1,34 @@
+<PDM_IF 0>
+@(#)$Id: keit_tmpl_name_tab.htmpl ASPEN.1 2010/10/26 14:37:59 saima01 Exp $
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=keit_tmpl_name_tab" factory=KEIT_TEMPLATES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Name/Description Tab">
+<PDM_FORM NAME="frmDTLRO">
+
+<SCRIPT>
+<PDM_MACRO name=tabBanner title="Name/Description">
+</SCRIPT>
+
+<SCRIPT>
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa szablonu" attr="TEMPLATE_NAME" size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="DESCRIPTION" rows=2 size=80>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+
+</BODY>
+</HTML>

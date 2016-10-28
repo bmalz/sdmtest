@@ -1,0 +1,203 @@
+<PDM_IF 0>
+$Id: list_BU_TRANS.htmpl,v 1.6 2007/01/15 09:09:08 raies01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of rating info from Report Card.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.opener" == "my_recent_docs">
+	var hdrTitle = "My Recent Documents Search";
+	var hdrTitleList = "My Recent Documents List";
+<PDM_ELSE>
+	var hdrTitle = "Document Rating Search: Document ID - $args.DOC_ID";
+	var hdrTitleList = "Document Rating List: Document ID - $args.KEEP.DOC_ID";
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_menus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+function window_onload()
+{
+	UpdateSubmenusOnCreation();
+}
+</SCRIPT>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list" onload="window_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="bu_trans" header=no>
+	
+<SCRIPT>
+var sObjType = "";
+var sObjID = "";
+var RefNum = "";
+
+<PDM_MACRO name=sfStart create=false factory=BU_TRANS>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Tytuł" attr=DOC_ID.TITLE size=50>
+<PDM_MACRO name=sfDate hdr="Data najwcześniejszego trafienia" attr=BU_DATE qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Data najpóźniejszego trafienia" attr=BU_DATE qbe_condition=LE>
+</SCRIPT>
+<input type=hidden name=QBE.EQ.USER_ID id=QBE.EQ.USER_ID value="$args.QBE.EQ.USER_ID">
+<SCRIPT>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No records found";
+var msgFound1 = "1 record found";
+var msgFound = "%1 records found";
+var msgFoundMore = "%1 records found.  Displaying %2 through %3";
+var imgPath='$CAisd' + '/img/';
+var img = "";
+var doctype = "";
+//Used for BU_RATING field
+function FormatRating(value)
+{
+	var newvalue = "";
+	if (value > 2)
+	{
+		newvalue = "Very Helpful";
+	}
+	else if (value > 0)
+	{
+		newvalue = "Somewhat Helpful";
+	}
+	else
+	{
+		newvalue = "Not Helpful at all";
+	}
+	rs.data(newvalue);
+}
+
+function FormatRatingExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("Not Helpful at all") + ",1," + msgtext("Somewhat Helpful") + ",2," 
+	+ msgtext("Somewhat Helpful") + ",OTHERWISE," + msgtext("Very Helpful");
+}
+
+//Used for HIT_NO_VOTE filed
+function FormatYesNo(value)
+{
+	var newvalue = "Yes";
+	if (value != 0)
+	{
+		newvalue = "No";
+	}
+	rs.data(newvalue);
+}
+
+function FormatYesNoExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("Yes") + ",OTHERWISE," + msgtext("No");
+}
+
+//Used for USER_SLV field
+function FormatDocSolved(value)
+{
+	var newvalue = "No";
+	if (sObjType != "")
+	{
+		newvalue = "N/A";
+	}
+	else if (value != 0)
+	{
+		newvalue = "Yes";
+	}
+	rs.data(newvalue);
+}
+
+//Used for TICKET_SLV field
+function FormatTicketSolved(value)
+{
+	var newvalue = "No";
+	if (sObjType == "")
+	{
+		newvalue = "N/A";
+	}
+	else if (value != 0)
+	{
+		newvalue = "Yes";
+	}
+	rs.data(newvalue);
+}
+
+//Used to open the ticket when used clicks on the ticket link in Ref Num column
+function FormatRefNum(value)
+{
+	var newvalue = "";
+	if (sObjType != "")
+	{
+		newvalue = "<a class=\"record\" href=\"javascript:rsShowDetailPopup('" + sObjType + ":" + sObjID + "')\">" + RefNum + "</a>";
+	}
+	rs.data(newvalue);
+}
+
+function CreateDocLink(value)
+{
+	var html = "<a class=record href='javascript:OpenDoc(" + doc_id + ")'>" + value + "</a>";
+	rs.data(html);
+	return;
+}
+function OpenDoc(doc_id)
+{
+OpenDocumentViewer(doc_id, 2, "search_tool", undefined, undefined, undefined, undefined, undefined, undefined);		
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="sObjType = ''">
+<PDM_MACRO name=lsWrite text="sObjID = ''">
+<PDM_MACRO name=lsWrite text="RefNum = ''">
+<PDM_MACRO name=lsWrite text="<PDM_LIST PREFIX=lsRatings FACTORY=event_log WHERE=\"event=15 and numdata1=@{list.id:0}\" ESC_STYLE=C>">
+<PDM_MACRO name=lsWrite text="sObjType = '@{lsRatings.sd_obj_type:}'">
+<PDM_MACRO name=lsWrite text="sObjID = '@{lsRatings.sd_obj_id:0}'">
+<PDM_MACRO name=lsWrite text="<PDM_IF '@{lsRatings.sd_obj_type:}' == 'cr'>">
+<PDM_MACRO name=lsWrite text="<PDM_LIST PREFIX=lsCrRef FACTORY=cr WHERE=\"persistent_id='cr:@{lsRatings.sd_obj_id:0}'\" ESC_STYLE=C>">
+<PDM_MACRO name=lsWrite text="RefNum = '@{lsCrRef.ref_num:}'">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsWrite text="<PDM_ELIF '@{lsRatings.sd_obj_type:}' == 'iss'>">
+<PDM_MACRO name=lsWrite text="<PDM_LIST PREFIX=lsIssRef FACTORY=iss WHERE=\"persistent_id='iss:@{lsRatings.sd_obj_id:0}'\" ESC_STYLE=C>">
+<PDM_MACRO name=lsWrite text="RefNum = '@{lsIssRef.ref_num:}'">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsWrite text="</PDM_IF>">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsWrite both=yes text="pdm_if '@{args.KEEP.opener}' == 'my_recent_docs'">
+<PDM_MACRO name=lsWrite text="var doc_id = '@{list.DOC_ID.id}'">
+<PDM_MACRO name=lsWrite text="doctype = \"@{list.DOC_ID.DOC_TYPE_ID:0}\";">
+<PDM_MACRO name=lsWrite both=yes text="if (doctype == '2') img = imgPath + 'tree.gif'; else img = imgPath + 'doc.gif';">
+<PDM_MACRO name=lsCol hdr="Tytuł" attr="DOC_ID.TITLE" disp_entities=yes export=no fmtfunc=CreateDocLink img=img sort=no>
+<PDM_MACRO name=lsWrite both=yes text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Data trafienia" attr=BU_DATE sort=DESC>
+<PDM_MACRO name=lsWrite both=yes text="pdm_if '@{args.KEEP.opener}' != 'my_recent_docs'">
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=USER_ID.combo_name>
+<PDM_MACRO name=lsCol hdr="Typ kontaktu" attr=USER_ID.type.sym sort=no>
+<PDM_MACRO name=lsWrite both=yes text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Głosuj" attr=BU_RATING exportfmt=FormatRatingExp fmtfunc=FormatRating sort=no>
+<PDM_MACRO name=lsWrite both=yes text="pdm_if '@{args.KEEP.opener}' != 'my_recent_docs'">
+<PDM_MACRO name=lsCol hdr="Użytkownik głosował" attr=HIT_NO_VOTE exportfmt=FormatYesNoExp fmtfunc=FormatYesNo justify=center sort=no>
+<PDM_MACRO name=lsCol hdr="Dokument rozwiązał problem" attr=USER_SLV export=no fmtfunc=FormatDocSolved justify=center sort=no>
+<PDM_MACRO name=lsCol hdr="Solucja rozwiązała zgłoszenie" attr=TICKET_SLV export=no fmtfunc=FormatTicketSolved justify=center sort=no uid=yesno>
+<PDM_MACRO name=lsCol hdr="Numer" attr=TICKET_SLV export=no fmtfunc=FormatRefNum sort=no uid=default>
+<PDM_MACRO name=lsWrite both=yes text="/pdm_if">
+<PDM_MACRO name=lsEnd factory=BU_TRANS>
+
+var ctxMenu=new ContextMenu("idMenuRating");
+ctxMenu.addItem( msgtext("Print_Form%1...", " " + window.propFormName), "CAisdPrint();"); 
+ctxMenu.addItem( msgtext("Help_on_This_Window..."), "help_on_form('"+window.propFormName+"')");
+ctxMenu.finish();
+</SCRIPT>
+
+</PDM_IF>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

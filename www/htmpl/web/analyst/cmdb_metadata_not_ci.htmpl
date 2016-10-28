@@ -1,0 +1,132 @@
+<PDM_IF 0>
+Purpose:
+   This file defines versioning metadata for non-CI objects 
+
+History:
+   01/19/2012 mckpe04/tomjo02 - Initial Version 
+</PDM_IF>
+
+// Show generic versioning view for non-CIs objects.
+cmdbIsGenericVersioningView = true;
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+	
+<PDM_IF $prop.factory == "ci_verification_policy">
+    // CACF ci_verification_policy object metadata
+    
+    <PDM_MACRO name=cmdbMetadata attr="sequence"                                                      category="Policy Description"     heading="Sequence"                             help="Specifies the Priority of the policy - only the matching policy with the lowest sequence number is in effect for the attribute update"             >
+    <PDM_MACRO name=cmdbMetadata attr="name"                                                          category="Policy Description"     heading="Policy Name"                          help="Specifies the name of the policy"          >
+    <PDM_MACRO name=cmdbMetadata attr="delete_flag"        currentcivalue=${args.delete_flag.sym}     category="Policy Description"     heading="Active?"                              help="Active: Is active and displays in display lists (the default).  Inactive: Is not active and does not appear in display lists"          >
+    <PDM_MACRO name=cmdbMetadata attr="description"                                                   category="Policy Description"     heading="Description"                          help="Specifies the description of the policy"   >
+                                                                                                                                                                                                                         
+    <PDM_MACRO name=cmdbMetadata attr="isvariance"         currentcivalue=${args.isvariance.sym}      category="Change Order Alignment" heading="Change Orders With Specifications"    help="YES: Indicates that a policy is in effect when there is a change specification for the attribute"           >
+    <PDM_MACRO name=cmdbMetadata attr="isnotverifiable"    currentcivalue=${args.isnotverifiable.sym} category="Change Order Alignment" heading="Change Orders Without Specifications" help="YES: Indicates that a policy is in effect for when there are only change orders with no change specifications"      >
+    <PDM_MACRO name=cmdbMetadata attr="isrogue_insert"     currentcivalue=${args.isrogue_insert.sym}  category="Change Order Alignment" heading="Rogue Insert"                         help="YES: Indicates that a policy is in effect if there is an insert"       >
+    <PDM_MACRO name=cmdbMetadata attr="isrogue_update"     currentcivalue=${args.isrogue_update.sym}  category="Change Order Alignment" heading="Rogue Update"                         help="YES: Indicates that a policy is in effect for an update with no matching change specification"       >
+                                                                                                                                                                                                                         
+    <PDM_MACRO name=cmdbMetadata attr="attribute_name"     currentcivalue=${args.attribute_name.attribute_label} category="Transaction Filters" heading="Managed Attribute"            help="Specifies that this policy only applies to attribute names that match this pattern">
+    <PDM_MACRO name=cmdbMetadata attr="rolename_pattern"                                              category="Transaction Filters"    heading="Role Pattern"                         help="Specifies that this policy only applies to roles that match this pattern"     >
+    <PDM_MACRO name=cmdbMetadata attr="mdr_name_pattern"                                              category="Transaction Filters"    heading="MDR Name Pattern"                     help="Specifies that this policy only applies to MDR names that match this pattern"     >
+    <PDM_MACRO name=cmdbMetadata attr="mdr_class_pattern"                                             category="Transaction Filters"    heading="MDR Class Pattern"                    help="Specifies that this policy only applies to MDR classes that match this pattern"    >
+    
+    <PDM_MACRO name=cmdbMetadata attr="ci_name_pattern"                                               category="CI Filters"             heading="CI Name Pattern"                      help="Specifies that this policy only applies to CI names that match this pattern"      >
+    <PDM_MACRO name=cmdbMetadata attr="class_pattern"                                                 category="CI Filters"             heading="Class Pattern"                        help="Specifies that this policy only applies to CI classes that match this pattern"        >
+    <PDM_MACRO name=cmdbMetadata attr="priority"           currentcivalue=${args.priority.sym}        category="CI Filters"             heading="Priority"                             help="Specifies that this policy only applies to CIs that match this priority"             >
+    <PDM_MACRO name=cmdbMetadata attr="service_type"       currentcivalue=${args.service_type.sym}    category="CI Filters"             heading="Service Type"                         help="Specifies that this policy only applies to CIs that match this service type"         >
+    <PDM_MACRO name=cmdbMetadata attr="location_pattern"                                              category="CI Filters"             heading="Location Pattern"                     help="Specifies that this policy only applies to locations that match this pattern"     >
+                                                                                                                                                                                                                         
+    <PDM_MACRO name=cmdbMetadata attr="action"             currentcivalue=${args.action.name}         category="Action"                 heading="Update Behavior"                      help="Specifies the action taken on in-bound transactions when the policy is in effect"               >
+    <PDM_MACRO name=cmdbMetadata attr="write_twa"          currentcivalue=${args.write_twa.name}      category="Action"                 heading="Write Data To TWA"                    help="Always: Writes transactions to the TWA. Never: Does not write to the TWA"            >
+    <PDM_MACRO name=cmdbMetadata attr="write_incident"     currentcivalue=${args.write_incident.sym}  category="Action"                 heading="Create Incident"                      help="YES: Creates an incident when a variance is detected"       >
+    <PDM_MACRO name=cmdbMetadata attr="incident_template"  currentcivalue=${args.incident_template.template_name}  category="Action"    heading="Incident Template"                    help="Specifies the template used when creating an incident"    >
+    <PDM_MACRO name=cmdbMetadata attr="autoclose_incident" currentcivalue=${args.autoclose_incident.sym} category="Action"              heading="Close Incident After Verification"    help="YES: Automatically close incidents when all data is verified"   >
+    <PDM_MACRO name=cmdbMetadata attr="log_only_mode"      currentcivalue=${args.log_only_mode.sym}   category="Action"                 heading="Log Only Mode"                        help="YES: Simulation mode - Writes policy actions to the standard log but not acted upon and no policy actions are executed.  NO: Specifies that policy actions are in effect"        >
+                                                                                                                                                                                                                        
+    <PDM_MACRO name=cmdbMetadata attr="start_date"                                                    category="Scheduling"             heading="Activation Date"                      help="Indicates that this policy will be ignored before this date"           > 
+    cmdbAttrDataType["start_date"] = "7";                                                                                                                                                                                        
+    <PDM_MACRO name=cmdbMetadata attr="end_date"                                                      category="Scheduling"             heading="Deactivation Date"                    help="Indicates that this policy will be ignore after this date"             > 
+    cmdbAttrDataType["end_date"] = "7";
+    
+<PDM_ELIF $prop.factory == "ci_planned_change">
+    // CACF ci_planned_change object metadata
+    
+    <PDM_MACRO name=cmdbMetadata attr="chg"                currentcivalue=${args.chg.chg_ref_num}     category="Identification"         heading="Change Order"                         help="Specifies the Change Order for the change specification"                          >
+    <PDM_MACRO name=cmdbMetadata attr="ci"                 currentcivalue=${args.ci.name}             category="Identification"         heading="CI Name"                              help="Specifies the CI associated with this change specification"                           >
+    <PDM_MACRO name=cmdbMetadata attr="delete_flag"        currentcivalue=${args.delete_flag.sym}     category="Identification"         heading="Active?"                              help="Active: Is active and displays in display lists (the default).  Inactive: Is not active and does not appear in display lists"                  >
+    <PDM_MACRO name=cmdbMetadata attr="description"                                                   category="Identification"         heading="Description"                          help="The description of the change specification"   >
+    
+    <PDM_MACRO name=cmdbMetadata attr="status"             currentcivalue=${args.status.name}         category="Verification Status"    heading="Verify Status"                        help="Indicates the status of the change specification"                       >
+    <PDM_MACRO name=cmdbMetadata attr="incident"           currentcivalue=${args.incident.ref_num}    category="Verification Status"    heading="Incident"                             help="Specifies that the incident created due to a failed verification"                     >
+    <PDM_MACRO name=cmdbMetadata attr="last_verification_policy" currentcivalue=${args.last_verification_policy.name}  category="Verification Status" heading="Last Verification Policy" help="Specifies the most recent policy that controlled the update for this change specification"   >
+    <PDM_MACRO name=cmdbMetadata attr="ci_twa_ci"          currentcivalue=${args.ci_twa_ci.name}      category="Verification Status"    heading="TWA"                                  help="Specifies the TWA entry created when processing the change specification"                    >
+    <PDM_MACRO name=cmdbMetadata attr="verification_msg"                                              category="Verification Status"    heading="Verification Message"                 help="Specifies the most recent verification message for this change specification"             >
+    
+    <PDM_MACRO name=cmdbMetadata attr="attribute_name"     currentcivalue=${args.attribute_name.attribute_label} category="Attribute Level Change Details" heading="Managed Attribute" help="Specifies the attribute for the change specification">
+    <PDM_MACRO name=cmdbMetadata attr="attribute_value_planned"                                       category="Attribute Level Change Details" heading="Planned Value"                help="Specifies the value of the attribute which was expected after the implementation of the change has completed"      >
+    <PDM_MACRO name=cmdbMetadata attr="attribute_value_discovered"                                    category="Attribute Level Change Details" heading="Last Discovered Value"        help="Specifies the most recent value of the attribute provided by an MDR"   >
+    <PDM_MACRO name=cmdbMetadata attr="attribute_value_original"                                      category="Attribute Level Change Details" heading="Original Value"               help="Specifies the value of the attribute when the change specification was initially created"     >
+    
+    // Set the object name expected by versioning since the name attribute is not defined for planned changes
+    <PDM_IF $args.chg.chg_ref_num != "0">
+       <PDM_SET args.name="Change Order">
+       <PDM_SET args.name+=" $args.chg.chg_ref_num ">
+       <PDM_SET args.name+="Change Specification">
+    <PDM_ELSE>
+       <PDM_SET args.name="Change Specification">
+    </PDM_IF>
+    
+<PDM_ELIF $prop.factory == "ci_managed_attribute">
+    // CACF ci_managed_attribute object metadata
+
+    <PDM_MACRO name=cmdbMetadata attr="attribute_name"                                                category="Attribute Information" heading="Attribute Name"          help="Specifies the name of the attribute defined in the CI, as described in the CMDB Technical Reference Guide" >
+    <PDM_MACRO name=cmdbMetadata attr="attribute_label"                                               category="Attribute Information" heading="Attribute Label"         help="Specifies the descriptive label to be shown for the attribute"                  >
+    <PDM_MACRO name=cmdbMetadata attr="initial_status"  currentcivalue=${args.initial_status.name}    category="Attribute Information" heading="Initial Verify Status"   help="Indicates the default change specification status for a new change specification involving this attribute"                   >
+    <PDM_MACRO name=cmdbMetadata attr="description"                                                   category="Attribute Information" heading="Description"             help="Specifies the description of the managed attribute"    >
+    <PDM_MACRO name=cmdbMetadata attr="case_sensitive"  currentcivalue=${args.case_sensitive.sym}     category="Attribute Information" heading="Case Sensitive"          help="YES: Indicates that change specification comparisons for this attribute are case sensitive"                   >
+    <PDM_MACRO name=cmdbMetadata attr="delete_flag"     currentcivalue=${args.delete_flag.sym}        category="Attribute Information" heading="Active?"                 help="Active: Is active and displays in display lists (the default).  Inactive: Is not active and does not appear in display lists"                      >
+    
+    // Set the object name expected by versioning since the name attribute is not defined for managed attributes
+    <PDM_SET args.name="Managed Attribute">
+    <PDM_IF $args.id != "0">
+       <PDM_SET args.name+=" $args.attribute_label">
+    </PDM_IF>
+    
+<PDM_ELIF $prop.factory == "ci_managed_chgstat">
+    // CACF ci_managed_chgstat object metadata
+
+    <PDM_MACRO name=cmdbMetadata attr="code"                  currentcivalue=${args.code.sym}                  category="Change State Information" heading="Change Order Status"                        help="Specifies the change order status that this managed change state applies to"   >
+    <PDM_MACRO name=cmdbMetadata attr="can_edit_criteria"     currentcivalue=${args.can_edit_criteria.sym}     category="Change State Information" heading="Change Specifications Editable"             help="YES: Allow updates to change specifications for change orders in this state"     >
+    <PDM_MACRO name=cmdbMetadata attr="verification_active"   currentcivalue=${args.verification_active.sym}   category="Change State Information" heading="Change Verification Active"                 help="YES: Change specifications are verified when a change order is in this state - NO:  Changes to CIs when change orders are in this state are considered Rogue changes"   >
+    <PDM_MACRO name=cmdbMetadata attr="autopromote_chg"       currentcivalue=${args.autopromote_chg.sym}       category="Change State Information" heading="Promote Change Order After Verification"    help="YES: Automatically promote change orders to the next state after all change specifications have reached a final state"       >
+    <PDM_MACRO name=cmdbMetadata attr="show_override_buttons" currentcivalue=${args.show_override_buttons.sym} category="Change State Information" heading="Show Change Specification Override Buttons" help="YES: Enable the user to override a change specification when a change order is being verified" >
+    <PDM_MACRO name=cmdbMetadata attr="is_implementation"     currentcivalue=${args.is_implementation.sym}     category="Change State Information" heading="Implementation State"                       help="YES: Indicates this state is to be used while change orders are being implemented and do not create incidents for rogue changes"     >
+    <PDM_MACRO name=cmdbMetadata attr="delete_flag"           currentcivalue=${args.delete_flag.sym}           category="Change State Information" heading="Active?"                                    help="Active: Is active and displays in display lists (the default).  Inactive: Is not active and does not appear in display lists"           >
+    
+    // Set the object name expected by versioning since the name attribute is not defined for managed change state
+    <PDM_SET args.name="Managed Change State">
+    <PDM_IF $args.id != "0">
+       <PDM_SET args.name+=" $args.code.sym">
+    </PDM_IF>
+    
+</PDM_IF>
+
+// Replace any invalid data types with type string (2)
+var curAttrName;
+for ( curAttrName in cmdbAttrDataType )
+{
+    if ( typeof cmdbAttrDataType[curAttrName] == "undefined" || 
+         cmdbAttrDataType[curAttrName] == ""                 ||
+         cmdbAttrDataType[curAttrName].search( "-1" ) != -1 )
+    {
+        // Set to string data value 
+        cmdbAttrDataType[curAttrName] = "2";
+    }
+}
+
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>
+
+<PDM_IF 0>
+@(#)$Id: cmdb_metadata_not_ci.htmpl ASPEN.10 2012/04/13 12:06:23 tomjo02 Exp $;
+</PDM_IF>
+

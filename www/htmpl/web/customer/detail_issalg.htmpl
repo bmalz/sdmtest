@@ -1,0 +1,83 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  detail_issalg.htmpl
+// Created: 12/05/2005
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+////////////////////////////////////////////////////////////////////////////
+// "@(#)$Id: detail_issalg.htmpl ASPEN.1 2010/11/15 16:40:43 saima01 Exp $";
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="EDIT_HTMPL=detail_issalg_edit.htmpl+ACTIVITY_LOG_TYPE=LOG+PERSID={iss:}+FACTORY=iss+OP=UPDATE" factory=issalg>
+<html lang="en">	<head>
+<script type="text/javascript">
+		var hdrTitleUpd ="Add Comment to Issue $args.ref_num";  
+</script>		
+<PDM_INCLUDE FILE="std_head.htmpl">
+
+		<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+		<script type="text/javascript">
+		var edit_form = 1;
+		if ( ! _browser.supportsLayers )
+   		document.writeln('<scr' + 'ipt type="text/javascript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+		</script>
+	</head>
+	<body class="detailro" onunload="unload_check()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+		<script type="text/javascript">
+		<!--
+			var maxSize=new Array("SET.issalg.description","Description", $args.issalg.LENGTH_description);
+		//-->
+		</script>
+<center>
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+<PDM_MACRO name=dtlForm factory=issalg>
+</script>
+<PDM_IF "" == "$args.issalg.issue_id" && "$prop.WSPHOST" == "">
+<!-- This should not be a problem for editing existing Activity Logs,
+     but may show up when creating new Logs... -->
+					<span class="labeltext">
+						HTMPL coding error.  Expecting issue_id to be pre_set in the form
+						or link that invoked this page
+					</span>
+<PDM_ELSE>
+					<input type="hidden" name=SET.issalg.issue_id value=$args.issalg.issue_id>
+					<input type="hidden" name=SET.issalg.analyst value=$cst.id>
+					<input type="hidden" name=SET.issalg.internal value=0>
+					<input type="hidden" name=SET.issalg.type value=LOG>
+					<input type="hidden" name=FACTORY value=cr>
+					<input type="hidden" name=SET.id value="$args.id">
+					<input type="hidden" name=OP value="UPDATE">
+<script type="text/javascript">					
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=issalg.description colspan=3 rows=8 size=80 spellchk=yes>
+</script>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>		
+<PDM_INCLUDE FILE=std_footer.htmpl>
+	</body>
+</html>
+

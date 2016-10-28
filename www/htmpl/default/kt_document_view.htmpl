@@ -1,0 +1,666 @@
+<PDM_IF 0>
+@(#)$Id: kt_document_view.htmpl ASPEN.12 2012/03/16 13:09:45 putsr02 Exp $
+WHEN PRESENTED:
+    When we need to display a detail of a single Knowledge Document
+
+    Structure:
+      The layout of this is specified in the document template (stored in
+      $args.KD_DOCUMENT_TEMPLATE).  Users with tke Knowledge Tools product
+      can create or modify document templates with the Administration function
+      Knowledge>Documents>Document Templates.  Keyword Search users are restricted
+      to a single template.
+
+      The Solution Survey section of the form comes from file kt_solution_survey.htmpl.
+      The Comment section of this form comes from file kt_comment_box.htmpl.
+</PDM_IF>
+<html lang="pl"><head>
+
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+	if("$args.opener" == "simple")
+		var form_title = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Dokument: $args.TITLE</PDM_FMT>';
+	else
+	{
+		<PDM_IF "$args.ACTIVE_STATE" != "200">
+			var hdrTitle = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Dokument: $args.TITLE</PDM_FMT>';	
+		<PDM_ELSE>
+			var hdrTitle = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Forum: $args.TITLE</PDM_FMT>';			 
+		</PDM_IF>
+	}	
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl filename="Knowledge Document">
+<div id=divHead name=divHead>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/toolbar.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_reply.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kd_viewer_sd_integ.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/html_editor.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/comboname.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_document_view.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msg_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</div>
+<script type="text/javascript">
+	argPersistentID = "$args.persistent_id";
+	var rptName = new Array("issuesum.rpt", "issuedtl.rpt");
+	var argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+	var argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+	var cfgDateFormatNoTime = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format_no_time</PDM_FMT>';
+	var m_opener = "$args.opener";
+	var m_args_open_mode = "$args.open_mode";
+	//OpenDocLink function variables
+	var m_prop_disable_kd_links = "$prop.disable_kd_links";
+	var m_args_opener = "$args.opener";
+	ahdframeset.suppressGoButton = false;
+	var m_bUpdateDurationIntervalSet = false;//Boolean to indicate if the update duration interval is set
+	
+</script>
+<script type="text/javascript">
+	//consts
+	var DURATION_TIMEOUT = 60;		// Timeout for first duration update
+	var DURATION_INTERVAL = 120;	// Interval for periodical duration update
+
+    //member vars
+    var m_sBookmarkCaption;
+    var m_iBookmarkID=0; 
+    var m_sSubscribeCaption;
+    var m_iNotificationID=0;
+    var m_iFrameLoaded=0;
+    var m_lBUID=0;
+    var m_SD_LAUNCHED = "$args.SD_LAUNCHED"; //used by OpenDocumentViewer function
+    var m_LAUNCHED_ITIL = "$args.LAUNCHED_ITIL"; //used by OpenDocumentViewer function
+    var m_bRated = 0;
+    var m_bCommented = 0;
+    var m_bCreateTicket = false;			//used by CreateNewTicket function
+	var m_bCreateTicketBasedOnKD = false;	//used by CreateNewTicket function
+	var m_OpenTicketText;
+	var m_OpenTicketBasedOnDocText;
+	var m_OpenTicketText2;
+	var m_OpenTicketBasedOnDocText2;
+	var m_bEditClicked = false;
+	var m_bDontOpenSurvey = false;	// if to open survey when closing a document
+	//the TreeID is passed in in args from list_KD, but in 
+	//args.KEEP from list_architect_KDs - so check for both
+	var m_TreeID = "$args.KEEP.TreeID";
+	if (m_TreeID == null || m_TreeID == "")
+		m_TreeID = "$args.TreeID";
+
+	// in case of screen reader window_onload event is called twice
+	// and we need to return from it on the second time
+	var m_bOnloadCalled = 0;	
+	
+    //these vars are not actually used, they just ensure proper retrieval
+    //of these values in the include files
+    var date_a = '$args.CREATION_DATE_INT_DATE';
+    var date_b = '$args.MODIFY_DATE_INT_DATE';
+    var date_c = '$args.START_DATE_INT_DATE';
+    var date_d = '$args.EXPIRATION_DATE_INT_DATE';
+    var date_e = '$args.EXPIRATION_DATE_INT_DATE';
+    var date_f = '$args.REVIEW_DATE_INT_DATE';
+    var date_g = '$args.LAST_ACCEPTED_DATE_INT_DATE';
+    var date_h = '$args.PUBLISHED_DATE_INT_DATE';
+    //    
+    var m_bAllow_OpenTicket = ahdtop.CanUserPerformAction("ROLE_OPEN_TICKET");
+    var m_bAllow_TicketBasedOnDoc = ahdtop.CanUserPerformAction("ROLE_TICKET_BASED_ON_DOC");
+    var m_bAllow_Bookmark = ahdtop.CanUserPerformAction("ROLE_BOOKMARKS");
+    //
+    var KDTenant = "";
+	<PDM_IF "${args.tenant:n/a}" != "n/a">
+		KDTenant = "$args.tenant";
+	</PDM_IF>
+	<PDM_IF "$args.tenant" == "">
+		tenantName= msgtext("global_(shared)");
+     <PDM_ELSE>
+		tenantName="$args.tenant.name"
+     </PDM_IF>
+	//
+    // Active state
+    var m_iActiveState = '$args.ACTIVE_STATE'; 
+    // Document type-ID
+    var m_iDocTypeID ='$args.DOC_TYPE_ID';
+    // Document ID
+    var m_iID = '$args.id';
+    // Tree ID
+    var m_iTreeID = '$args.KEEP.TreeID';
+    // Reduce Popups setting
+    var m_nReducePopups = '$args.KEEP.cstReducePopups';
+    // SD Launched
+    var m_nSDLaunched = '$args.SD_LAUNCHED';
+    // ITIL Launched
+    var m_nLaunchedITIL = '$args.LAUNCHED_ITIL';
+	// Ticket Factory
+	var m_nTicketFactory = '$args.TICKET_FACTORY';
+	// Paths ID
+	var m_iPathsID = '$args.PATH_IDS';
+	// Vote Count
+	var m_iVoteCount = '$args.VOTE_COUNT';
+	// Average Rating
+	var m_iAvgRating = '$args.AVG_RATING';
+	// Solution Survey How Helpful
+	var m_nSlnSrvHowHelpful = '$prop.SOL_SURV_HOW_HELPFUL';
+    // Solution Survey Vote Summary
+   var m_nSlnSrvVoteSum = '$prop.SOL_SURV_VOTE_SUMMARY';
+   //ITIL
+   var m_n_NX_OTB_MARKET = '$env.NX_OTB_MARKET';
+   //KD Version
+   var m_lVerCount = '$args.VER_COUNT';
+   // Indicates when a Knowledge Document has been refreshed
+   var m_bKDRefresh = false;
+ 
+   var m_UserPref_doc = "cr"; //This should be either request or an issue   
+   <PDM_LIST PREFIX=role FACTORY=role WHERE="id=$SESSION.ROLE_ID" ESC_STYLE=C PAD=NO>
+		<PDM_IF "$role.pref_doc" == "2">
+			m_UserPref_doc = "iss";
+		<PDM_ELSE>
+			m_UserPref_doc = "cr";
+		</PDM_IF>
+	</PDM_LIST>
+	var m_bBoth_Req_Tickets = false;
+	var m_n_Guest_User= '$prop.guest_user';
+	var m_n_EMPLOYEE_INTF_INCIDENT_SUPPORT='$env.NX_EMPLOYEE_INTF_INCIDENT_SUPPORT';
+	var m_n_GUEST_INTF_INCIDENT_SUPPORT='$env.NX_GUEST_INTF_INCIDENT_SUPPORT';
+	var m_n_Ticket_Type = 'R';
+	var m_n_REWORK_VER="$args.REWORK_VER";
+	
+	var m_n_STATUS=	<PDM_FMT ESC_STYLE=C>"$args.STATUS_ID.STATUS"</PDM_FMT>;
+	var m_n_ANALYST_PREFERRED_TICKET =<PDM_FMT ESC_STYLE=C>'$env.NX_ANALYST_PREFERRED_TICKET'</PDM_FMT>;
+
+	var b_Print_Version = "$args.printable";	//used by Printable Version
+	if (b_Print_Version == null || b_Print_Version == "") 
+		b_Print_Version=false; 
+	
+	if (typeof b_Print_Version == "string" && b_Print_Version != "")
+		switch (b_Print_Version )
+		{		
+			case "false":
+				b_Print_Version = false;
+			break;
+			case "true":
+				b_Print_Version = true;
+			break;
+		}
+
+// bTenantCanComment added to use in kt_comment_box.htmpl solution_survey_onunload()
+var bTenantCanComment=true;
+
+    <PDM_IF "$args.DOC_TYPE_ID" == 2>
+    	if ('$prop.TREE_OPEN_MODE' == '0' && ahdframeset.Loaded != 1)
+		{
+			ahdframeset.Loaded = 1;
+			DocumentView();
+		}
+	</PDM_IF>
+	
+	if("$args.opener" != "simple")
+		startScrollbar();
+	
+    function window_onload()
+    {
+		// in case of screen reader window_onload event is called twice
+		// and we need to return from it on the second time
+		if (m_bOnloadCalled)
+			return;	
+
+		m_bOnloadCalled = 1;
+
+		if(document.getElementById("tblRateAndComments") != null)
+		{
+			if (typeof bTenantCanComment != "undefined" && bTenantCanComment)
+			{
+				document.getElementById("tblRateAndComments").style.display = "";
+			}
+		}
+
+		if(ahdtop.ticketObj.isActive) // if self service is on
+		{
+			ahdtop.ticketObj.hitKD("$args.id","$args.BUID",0,0); //add credit to these kd
+		}
+			
+		createPageOptionsBoxHotKey();
+		createMainKDFrameHotKey();
+		ahdframeset.NodeFrameLoaded = 1;
+		
+		<PDM_IF "$args.opener" == "simple" && "$args.after_hit" == "1">
+			ahdtop.UpdateMyRecentDocs("$args.id", "$args.TITLE");
+		</PDM_IF>	
+		
+	if (!b_Print_Version && ahdtop.ISFullKT())
+	{			
+		setVoteSummary();
+		<PDM_IF "$args.RATED" != "">
+			m_bRated = $args.RATED;
+		</PDM_IF>
+		if ( m_bRated )
+		{	
+			setRateText();
+		}
+		<PDM_IF "$args.COMMENTED" != "">
+			m_bCommented = $args.COMMENTED;	
+		</PDM_IF>
+		if ( m_bCommented )
+		{
+			document.getElementById("spnFeedBack").innerHTML = "<br>Thank you for commenting on this document.";
+		}
+	}
+		<PDM_IF "$args.BUID" != "" && "$args.BUID" != 0>
+			m_lBUID = "$args.BUID";	
+		</PDM_IF>
+		<PDM_IF 0>
+			Do not process the bookmark button if the user is a guest
+		</PDM_IF>
+		<PDM_IF "$prop.guest_user" != 1>
+			//set bookmark caption
+			if ( ahdtop.cfgNX_KT == "Yes")
+			{
+				<PDM_IF "$args.ACTIVE_STATE" != "200">
+					if(document.getElementById("bookmarkCaption") != null && m_bAllow_Bookmark) //bookmarks are disabled for KWS
+					{
+						GetBookmarkCaption();
+						var bookmarkCaption = document.getElementById("bookmarkCaption");
+					    bookmarkCaption.innerHTML = m_sBookmarkCaption;
+					}
+				</PDM_IF>
+				if(document.getElementById("subscribeCaption") != null ) //notifications are disabled for KWS
+				{
+					GetSubscribeCaption();
+					var subscribeCaption = document.getElementById("subscribeCaption");
+				    subscribeCaption.innerHTML = m_sSubscribeCaption;	
+				}				
+			}
+		</PDM_IF>
+		<PDM_IF "$args.SOLUTION_OF" != "">
+			var sUnlinkText;
+			//inside rate & comment box
+			sUnlinkText = GetUnlinkSolutionHTML();
+			sUnlinkText = sUnlinkText.split("Click").join("&nbsp;Click");
+			document.getElementById("spUnlinkSol").innerHTML = sUnlinkText;
+			//on document template 		
+			sUnlinkText = GetUnlinkSolutionHTML();	
+			sUnlinkText = sUnlinkText.split("the").join("the&nbsp;<br>");
+			document.getElementById("spnDocSolutionLink").innerHTML = sUnlinkText;
+		</PDM_IF>
+
+		<PDM_IF "$args.SD_LAUNCHED" != "">
+			if(typeof ahdtop.ticketObj == "object" && ahdtop.ticketObj.isActive)
+			{
+				var sLinkText;
+				//on document template 	
+				sLinkText = GetLinkSolutionHTML();
+				sLinkText = sLinkText.split("Click").join("&nbsp;Click");
+				sLinkText = sLinkText.split("this").join("this&nbsp;<br>&nbsp;");
+				sLinkText = sLinkText.split("solution").join("solution&nbsp;<br>&nbsp;");		
+				document.getElementById("spnDocSolutionLink").innerHTML = sLinkText;
+			}
+		</PDM_IF>
+	//do not set captions for Print Version
+	if (!b_Print_Version && ahdtop.ISFullKT() && 
+		document.getElementById("tblRateAndComments").style.display == "") 
+	{
+		var rateCommentCaption = document.getElementById("RateCommentCaption");
+		slCommentType_onchange();
+		//if admin setting doesn't allow adding comment and not a forum then allow comments
+		<PDM_IF $prop.SUBMIT_COMMENTS == "1" && "$args.ACTIVE_STATE" != "200">
+			rateCommentCaption.innerHTML = "Rate & Comment"
+		</PDM_IF>	
+	}
+		//dt viewer stuff
+		<PDM_IF "$args.DOC_TYPE_ID" == 2>
+			ahdframeset.Loaded = 1;
+			
+			if (ahdframeset.Reload == 1)
+			{
+				if ('$args.Frameset' == '1')
+				{
+					var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+							  "+OP=DISPLAY_FORM+HTMPL=kt_dtview_list.htmpl";
+					parent.frmDTUserList.location.href = url;
+				}
+				ahdframeset.Reload = 0;
+				ahdframeset.NodePos = 2;
+				ahdframeset.NodeCounter = 2;
+				LoadNode(ahdframeset.LinkId);
+				return false;
+			}
+			
+			if ('$args.ShowDocumentView' != '1')
+			{
+				SetButtonsState();
+				if ( parent.parent.name != "role_main" && '$args.OpenMode' != "simple" )
+				{
+					parent.document.getElementById("frmMainFrameset").cols = "30%,*";
+				}
+				else
+				{
+					parent.document.getElementById("frmMainFrameset").cols = "1,*";
+				}
+			}
+			else
+			{
+				parent.document.getElementById("frmMainFrameset").cols = "1,*";
+			}
+				
+			if ('$args.Frameset' == '1')
+			{
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+						  "+OP=DISPLAY_FORM+HTMPL=kt_dtview_list.htmpl";
+				parent.frmDTUserList.location.href = url;
+			}
+		</PDM_IF>
+		//end dt viewer stuff
+		
+		// Timeout for first duration update
+		var lDurationTimeout = 0;
+		var sDurationTimeout = "$env.KNOWLEDGE_DURATION_TIMEOUT";
+		if (sDurationTimeout != "" && sDurationTimeout != "0")
+			lDurationTimeout = parseInt(sDurationTimeout);
+		else 
+			lDurationTimeout = DURATION_TIMEOUT;
+		window.setTimeout("UpdateDuration()", lDurationTimeout*1000);
+		
+    }
+    
+    
+    function DocumentView()
+	{
+		m_bDontOpenSurvey = true;	// don't open survey
+		
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+                  "+OP=SHOW_DETAIL+PERSID=KD:$args.id" + 
+                  "+HTMPL=kt_document_view.htmpl" +
+                  "+KEEP.TreeID=" + m_TreeID + 
+                  "+KEEP.cstReducePopups=$args.KEEP.cstReducePopups" + 
+                  "+reload=$args.reload" +
+                  "+opener=$args.opener"+
+                  "+open_mode=$args.open_mode"+
+                  "+BUID=" + m_lBUID +
+                  "+ShowDocumentView=1" +
+				  "+SD_LAUNCHED=$args.SD_LAUNCHED" + 
+				  "+TICKET_FACTORY=$args.TICKET_FACTORY" +
+				  "+LAUNCHED_ITIL=$args.LAUNCHED_ITIL" +
+				  "+SOLUTION_OF=$args.SOLUTION_OF" +
+				  "+SOLUTION_OF_ID=$args.SOLUTION_OF_ID";
+		replace_page(url);
+	}
+
+function UpdateDuration()
+{
+	var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+			   "+OP=KT_UPDATE_DURATION+BUID=" + m_lBUID;
+
+	SyncAjaxCall(sURL);
+	if (!m_bUpdateDurationIntervalSet)
+	{
+		m_bUpdateDurationIntervalSet = true;
+		// Interval for periodical duration update
+		var lDurationInterval = 0;
+		var sDurationInterval = "$env.KNOWLEDGE_DURATION_INTERVAL";
+		if (sDurationInterval != "" && sDurationInterval != "0")
+			lDurationInterval = parseInt(sDurationInterval);
+		else 
+			lDurationInterval = DURATION_INTERVAL;
+		window.setInterval("UpdateDuration()", lDurationInterval*1000);
+	}
+}
+//
+// function will be called before printing
+//
+function OnBeforePrint()
+{
+	var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + 
+			   "+OP=KT_PRINT_DOCUMENT+DOC_ID=" + m_iID + "+VER_COUNT=" + m_lVerCount;
+			   
+	SyncAjaxCall(sURL);
+}
+//
+// function will be called before a Knowledge Document is refreshed
+//
+function OnBeforeKDRefresh()
+{
+    m_bKDRefresh = true;
+}
+//
+// intercept a logout request before logout execution occurs
+//
+var unloadExecuted = false;
+var force_survey = '$prop.SOL_SURV_FORCE_VOTE';
+function OnBeforeLogout() {
+    if(!unloadExecuted && force_survey == 1) {
+        unloadExecuted = true;
+		DoExit(true);
+		return false;
+    }
+	else {
+		return true;
+	}
+}
+function DoExit(bLogoutAfter) {
+        UpdateDuration();
+        solution_survey_onunload(false, bLogoutAfter);
+		ahdframeset.OnBeforeLogout = void(0);
+}
+ahdframeset.OnBeforeLogout = OnBeforeLogout;
+</script>
+
+</head>
+<body id=docBody onload="window_onload()" onunload="if(!unloadExecuted){DoExit(false);}">
+<PDM_IF "$prop.MultiTenancy" == "on">
+	<table cellpadding=2px>	
+		<tr>
+			<td>
+			<script>
+				document.writeln("<span class='labeltext'><b>Tenant:</b></span>&nbsp;<span class='table_data'>" + tenantName + "</span>");
+			</script>
+			</td>
+		</tr>
+	</table>
+</PDM_IF>
+<PDM_IF"$args.printable" == "true">
+<PDM_IF 0>
+		allow "print" if printable Version
+	
+</PDM_IF>
+	<div class="SuppressPrintDisplay" align="center"><br>
+		<table>
+			<tr>	
+																			
+				<td valign='top'   align='center'> 	
+						<script type="text/javascript">																		
+						ImgBtnCreate("btnPrint", "Print", "CAisdPrint()", true); // print KD
+						</script>
+				</td>
+				
+			</tr>
+		</table>
+	</div>
+</PDM_IF>
+<PDM_IF "$args.KEEP.POPUP_NAME" != "" && "$args.printable" != "true">
+		<PDM_INCLUDE FILE=std_body.htmpl filename="Dokument" header=no menubar=kt_popup>
+	
+<PDM_ELIF "$args.printable" != "true">
+		<PDM_INCLUDE FILE=std_body.htmpl filename="Dokument" header=no>
+	
+</PDM_IF>
+
+
+<table class=alertmsg id=alertmsg style="display:none" width="100%">
+<tbody><tr><td id=alertmsgText></td></tr></tbody></table>
+
+
+<PDM_INCLUDE FILE=self_service_include.htmpl status=20 page="KDPAGE">
+
+<script type="text/javascript">
+</script>
+<a id="TopOfPage" href="javascript:void(0)"></a>
+<div id=divBody name=divBody>
+<div class='inset_broder_2'>
+<table class='gn_container_no_border' cellSpacing='0' cellPadding='0' width='100%'>
+	
+<PDM_IF "$args.DOC_TYPE_ID" == "2" && "$args.ShowDocumentView" != "1"> 
+		<tr>
+			<td>
+				<pdm_include FILE=kt_dtview_navbar.htmpl>
+			</td>	
+		</tr>
+	
+</PDM_IF>
+</table>
+<table class='gn_container_no_border' cellSpacing='0' cellPadding='0' width='100%'>
+	<tr>	
+		<td id='colDocTemplate' valign=top width='80%'>
+			
+<PDM_IF "$args.DOC_TYPE_ID" == "2" && "$args.ShowDocumentView" != "1"> 
+				<script>
+				
+<PDM_MACRO name=dtlHTMLEditbox attr=res_cache preview=cache_only>
+				</script>
+				<pdm_include FILE=kt_dtview_node.htmpl NODE_ID=$args.NODE_ID KD_ID=$args.id event_log_textdata1=$args.event_log_textdata1>
+			
+<PDM_ELSE>
+<PDM_IF "$args.ACTIVE_STATE" != "200">
+					<PDM_INCLUDE FILE=kt_document_template.htmpl disable_kd_links=$args.disable_kd_links disable_kcat_links=$args.disable_kcat_links disable_attachments=$args.disable_attachments ShowDocumentView=$args.ShowDocumentView disable_related_tickets=false>
+				
+<PDM_ELSE>
+					<script>
+					
+<PDM_MACRO name=dtlHTMLEditbox attr=res_cache preview=cache_only>
+					</script>
+					<PDM_INCLUDE FILE=kt_qa_thread.htmpl>
+				
+</PDM_IF>
+</PDM_IF>
+		</td>		
+		<td id='colDocProperties' valign=top width='20%'>	
+			<table width=100% class='page_header gn_container_no_border' cellSpacing=0 cellpadding=0>
+				<tr height="25">		
+					<td>
+						<h2 class='page_header_title'>
+						<span>
+							&nbsp;
+						</span>
+						</h2>						
+					</td>
+				</tr>
+			</table>	
+			<script type="text/javascript">
+			setTicketType(); //used from kt_document_view.js
+			</script>		
+		
+<PDM_IF "$args.printable" != true>				
+			<table width=100% class='gn_container_no_border' cellSpacing=0 cellpadding=0>
+				<tr>		
+					<td>
+						<PDM_INCLUDE FILE=kt_document_options.htmpl>
+					</td>
+				</tr>
+				
+<PDM_IF "$args.SOLUTION_OF" != "" || "$args.SD_LAUNCHED" != "">
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
+				<tr>
+					<td nowrap width="100%" class='table_banded_row doc_solution'>
+						<span id=spnDocSolutionLink name=spnDocSolutionLink class=data>
+						</span>
+					</td>	
+				</tr>
+				
+</PDM_IF>
+<PDM_IF "$prop.SOL_SURV_VOTE_SUMMARY" == "1">
+				<tr>
+					<td>&nbsp;</td>
+				<tr>
+				<tr>
+					<td nowrap width="100%">
+						<span id=spnVoteSummary name=spnVoteSummary class=data>
+						</span>
+					</td>	
+				</tr>
+			
+</PDM_IF>	
+			</table>
+		
+</PDM_IF>
+			<br/>
+				
+			
+<PDM_IF "$args.opener" == "simple">							
+				<PDM_FORM name="keywordSearch" method="post">
+					<input type="hidden" name="OP" value="SEARCH">
+					<input type="hidden" name="FACTORY" value="KD">
+					<input type="hidden" name="HTMPL" value="list_KD.htmpl">
+					<input type="hidden" name="DOMSET" value="$args.KEEP.DOMSET">
+					<input type="hidden" name="QBE.EQ.ebr_search_type" value="$args.KEEP.QBE.EQ.ebr_search_type">
+					<input type="hidden" name="QBE.EQ.ebr_match_type" value="$args.KEEP.QBE.EQ.ebr_match_type">
+					<input type="hidden" name="QBE.EQ.ebr_search_in" value="$args.KEEP.QBE.EQ.ebr_search_in">
+					<input type="hidden" name="QBE.EQ.ebr_fuzziness" value="$args.KEEP.QBE.EQ.ebr_fuzziness">
+					<input type="hidden" name="QBE.EQ.ebr_primary_order" value="$args.KEEP.QBE.EQ.ebr_primary_order">
+					<input type="hidden" name="QBE.EQ.ebr_order_direction" value="$args.KEEP.QBE.EQ.ebr_order_direction">
+					<input type="hidden" name="QBE.IN.ebr_search_text" value="$args.KEEP.QBE.IN.ebr_search_text">
+					<input type="hidden" name="ADDITIONAL_WHERE" value="$args.KEEP.ADDITIONAL_WHERE">
+					<input type="hidden" name="KEEP.cur_sort_key" value="$args.KEEP.cur_sort_key">
+					<input type="hidden" name="KEEP.categoryID" value="$args.KEEP.categoryID">
+					<input type="hidden" name="KEEP.relationalID" value="$args.KEEP.relationalID">
+					<input type="hidden" name="KEEP.categoryPath" value="$args.KEEP.categoryPath">
+					<input type="hidden" name="KEEP.initial_ebr" value="$args.KEEP.initial_ebr">
+				</PDM_FORM>
+			
+</PDM_IF>
+			<br>	
+		</td>
+	</tr>
+</table>
+<PDM_IF "$args.printable" != true >
+	<table width=100% id="tblRateAndComments" name="tblRateAndComments" style="display:none">	
+		<tr>
+			<td>
+				<a class='clsTextNavyBold11px' href="javascript:ScrollIntoView('TopOfPage')"><img align=absmiddle class='gn_container_no_border' src="$CAisd/img/arrow_up_yellow.png"><span>Back to Top</span></a>	
+				
+<PDM_IF "$args.COMMENTED" == "1" || "$args.RATED" == "1" >
+					<PDM_INCLUDE FILE=kt_comment_box.htmpl disable="true">
+				
+<PDM_ELIF "$args.BUID" == "">
+						<PDM_INCLUDE FILE=kt_comment_box.htmpl disable="true" allowtxt="true">
+				
+<PDM_ELSE>
+<PDM_IF "$args.disable_comment" == "true" || "$args.disable_solution_survey" == "true">
+						<PDM_INCLUDE FILE=kt_comment_box.htmpl disable="true">
+					
+<PDM_ELSE>
+						<PDM_INCLUDE FILE=kt_comment_box.htmpl disable="false">
+					
+</PDM_IF>
+</PDM_IF>
+				<span id=spnFeedBack name=spnFeedBack class="clsCaption"></span>
+				<tr><td>&nbsp;</td></tr>
+				<tr><td>&nbsp;</td></tr>
+			</td>
+		</tr>
+	</table>
+</PDM_IF>
+</div>
+</div>
+<a id="BottomOfPage" href="javascript:void(0)"></a>
+
+<PDM_IF 0>This form is to focus on this page when clicking edit</PDM_IF>
+<PDM_IF "$args.opener" != "simple">
+	<script type="text/javascript">
+	
+<PDM_MACRO name=dtlForm factory=KD skip_tenant_hdr=true skiphdr=yes>
+<PDM_MACRO name=dtlStart center=noscroll>
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	
+<PDM_MACRO name=dtlEnd>
+</PDM_IF>
+
+<div style="display:none" id=divData></div>
+<PDM_INCLUDE FILE=std_footer_nojquery.htmpl>
+</body>
+</html>
+<PDM_WSP>

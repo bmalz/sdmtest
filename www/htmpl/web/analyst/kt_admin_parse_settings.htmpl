@@ -1,0 +1,216 @@
+<PDM_IF 0>
+@(#)$Id: kt_admin_parse_settings.htmpl ASPEN.1 2010/08/19 16:41:22 taoyu02 Exp $
+WHEN PRESENTED:
+    When we need to display and change ebr properties
+VARIABLES:
+    
+    object  O_EBR_PROPERTIES args	The o_ebr_noise_words or o_ebr_arconyms object we are displaying.
+							See $NX_ROOT/site/mods/majic/kt.mod : OBJECT O_EBR_NOISE_WORDS or O_EBR_ACRONYMS
+							for the definition of attributes for 'OBJECT o_ebr_noise_words or o_ebr_acronyms'
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var cfgNX_EBR_VERSION = "$env.NX_EBR_VERSION";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script>
+var iDefValue = new Array(0,0,0,0,0,0,0,0);	//Default Value from the database
+var iRealValue = new Array(0,0,0,0,0,0,0,0);	//Value Display on the page
+var strDBID = new Array("","","","","","","","");	//Databse ID for each record
+var sReindexValue = "";
+var lReindexDBID = 0;
+
+<PDM_LIST PREFIX=ebr FACTORY=EBR_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+		<PDM_IF "$ebr.PROPERTY_NAME" == "MAX_SEARCH_KEYWORDS">
+			strDBID[0] = "$ebr.id";
+			iRealValue[0] = "$ebr.PROPERTY_VALUE";
+			iDefValue[0] = "$ebr.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ebr.PROPERTY_NAME" == "LANGUAGE">
+			strDBID[1] = "$ebr.id";
+			iRealValue[1] = "$ebr.PROPERTY_VALUE_ADM";
+			iDefValue[1] = "$ebr.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ebr.PROPERTY_NAME" == "VALID_CHAR_RANGE">
+			strDBID[2] = "$ebr.id";
+			iRealValue[2] = "$ebr.PROPERTY_VALUE_ADM";
+			iDefValue[2] = "$ebr.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ebr.PROPERTY_NAME" == "REMOVE_NEAR_DUPLICATED">
+			strDBID[3] = "$ebr.id";
+			iRealValue[3] = "$ebr.PROPERTY_VALUE_ADM";
+			iDefValue[3] = "$ebr.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ebr.PROPERTY_NAME" == "REMOVE_NOISE_WORDS">
+			strDBID[4] = "$ebr.id";
+			iRealValue[4] = "$ebr.PROPERTY_VALUE_ADM";
+			iDefValue[4] = "$ebr.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ebr.PROPERTY_NAME" == "SPECIAL_TERMS">
+			strDBID[5] = "$ebr.id";
+			iRealValue[5] = "$ebr.PROPERTY_VALUE_ADM";
+			iDefValue[5] = "$ebr.PROPERTY_DEFAULT";
+		</PDM_IF>		
+		m_sDBValues = iRealValue[1] + "," + iRealValue[2] + "," + iRealValue[3] + "," + iRealValue[4] + "," + iRealValue[5];
+</PDM_LIST>
+<PDM_LIST PREFIX=list FACTORY=USP_PROPERTIES WHERE="PROPERTY_NAME='EBR_REINDEX_REQUIRED'" ESC_STYLE=C>
+	sReindexValue = "$list.PROPERTY_VALUE";
+	lReindexDBID = "$list.id";
+</PDM_LIST>
+</script>
+</head>
+<body class=detailro onload="frmParseSettingsOnLoad();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="o_ebr_properties" header=no>
+<form>
+<table cellSpacing=0 cellPadding=0 width='100%' class="page_header gn_container_no_border">
+	<tr>
+		<td align=left width='99%'>Search</script>
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmParseSettings')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmParseSettings')",true, "", msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table width="100%" cellspacing="0" cellpadding="0" class="gn_container_no_border">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center"><span  class="page_section_header_text" >Parse Settings</span></td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class=page_section>
+<table width="99%" class="gn_container_no_border" cellspacing="0" cellpadding="0" summary="Knowledge Search parse settings">
+	<tr>
+		<PDM_IF "$env.NX_EBR_VERSION" != "SEARCH_ENGINE">
+		<td width=24%>
+			<span class="label"><label for="txtMaxSearchWords">Maximum Search Keywords</label></span>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		<td width=24%>
+			<span class="label"><label for="slctLanguage">Language</label></span>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		</PDM_IF>
+		<td width=24%>
+			<span class="label"><label for="txtCharRange">Valid Character Range</label></span>
+		</td>
+	</tr>
+	<tr>
+		<PDM_IF "$env.NX_EBR_VERSION" != "SEARCH_ENGINE">
+		<td width=24%>
+			<input tabindex=100 type="text" id="txtMaxSearchWords" name="txtMaxSearchWords" class="data" size="4" maxlength="3" onfocus="this.className='focusField';" onblur="this.className='';">
+			<PDM_IF 0>
+				<select tabindex=100 class="data" id="slctMaxSearchWords" name="slctMaxSearchWords">
+					<option value=5>5</option>
+					<option value=6>6</option>
+					<option value=7>7</option>
+					<option value=8>8</option>
+					<option value=9>9</option>
+					<option value=10>10</option>
+				</select>
+			</PDM_IF>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		<td width=24%>
+			<select tabindex=100 class="data" id="slctLanguage" name="slctLanguage">
+				<option value=1>English</option>
+				<option value=2>Other European</option>
+				<PDM_LIST PREFIX=ebr FACTORY=EBR_PROPERTIES WHERE="PROPERTY_NAME='ALLOW_JAPANESE'" ESC_STYLE=C>
+					<PDM_IF "$ebr.PROPERTY_VALUE" == "1">
+						<option value=5>Japanese</option>
+					</PDM_IF>
+				</PDM_LIST>				
+				<option value=4>Korean</option>
+				<option value=3>Other Far East</option>
+			</select>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		</PDM_IF>
+		<td width=24%>
+			<input tabindex=100 type="text" id="txtCharRange" name="txtCharRange" class="data" size="20" onfocus="this.className='focusField';" onblur="this.className='';">
+		</td>
+	</tr>
+	<PDM_IF "$env.NX_EBR_VERSION" != "SEARCH_ENGINE">
+	<tr>
+		<td width=24%>
+			<span class="label"><label for="slctRemoveDup">Remove Similar Words</label></span>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		<td width=24%>
+			<span class="label"><label for="slctNoiseWords">Remove Noise Words</label></span>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		<td width=24%>
+			<span class="label"><label for="slctSpecialTerms">Recognize Special Terms</label></span>
+		</td>
+	</tr>
+	<tr>
+		<td width=24%>
+			<select tabindex=100 class="data" id="slctRemoveDup" name="slctRemoveDup">
+				<option value=1>YES</option>
+				<option value=0>NO</option>
+			</select>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		<td width=24%>
+			<select tabindex=100 class="data" id="slctNoiseWords" name="slctNoiseWords">
+				<option value=1>YES</option>
+				<option value=0>NO</option>
+			</select>
+		</td>
+		<td width=4%>
+			&nbsp;
+		</td>
+		<td width=24%>
+			<select tabindex=100 class="data" id="slctSpecialTerms" name="slctSpecialTerms">
+				<option value=1>YES</option>
+				<option value=0>NO</option>
+			</select>
+		</td>
+	</tr>
+	</PDM_IF>
+</table>
+</div>
+<script>
+	endScrollbar();
+</script>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<PDM_IF 0>
+list_ztask.htmpl
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie zadań";
+var hdrTitleList = "Lista zadań";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("ztasksum.rpt", "ztaskedtl.rpt");
+var cfgCanEdit = true;
+var exim_taskCount = 0;
+
+if("$args.KEEP.ParentPersid" != "") {
+	//var enableExtraBtn = true;
+	// cfgExtraButton = new Array("Utwórz", "CreateTask()", enableExtraBtn);
+	<PDM_IF "$args.KEEP.InnerTaskOnly" == "1">
+		//cfgExtraButtonBefore = new Array("Utwórz zadanie wewnętrzne", "CreateTask('CRINTTSK')");
+		cfgExtraButton = new Array("Utwórz zadanie wewnętrzne", "CreateTask('CRINTTSK')", true);
+	<PDM_ELSE>
+		cfgExtraButtonBefore = new Array("Utwórz zadanie akceptacyjne", "CreateTask('CRAPPTSK')", 
+										 "Utwórz dla firmy zew.", "CreateTask('CREXTTSK')", 
+										 "Utwórz zadanie wewnętrzne", "CreateTask('CRINTTSK')");
+	</PDM_IF>
+}
+
+//, 'KEEP.defaultSequence=' + exim_taskCount
+// 20131023 bmalz @ e-xim
+function CreateTask(t) {
+	var PersId = '$args.KEEP.ParentPersid';
+	var Factory = PersId.split(':');
+
+	if (Factory.length > 0) {
+		if (Factory[0].toLowerCase() == "cr") {
+			popup_window('', 'CREATE_NEW', 0, 0, 
+			    'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+			    'FACTORY=ztask', 
+			    '', 
+			    'PRESET=parentPERSID:$args.KEEP.ParentPersid', 'PRESET=cr:' + Factory[1], 'KEEP.ParentType=cr', 'KEEP.ETaskType=' + t, 
+			    'PRESET=task:' + t, 'KEEP.defaultSequence=' + (exim_taskCount+10));
+		} else if (Factory[0].toLowerCase() == "chg") {
+			popup_window('', 'CREATE_NEW', 0, 0, 
+			    'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+			    'FACTORY=ztask', 
+			    '', 
+			    'PRESET=parentPERSID:$args.KEEP.ParentPersid', 'PRESET=chg:' + Factory[1], 'KEEP.ParentType=chg', 'KEEP.ETaskType=' + t,
+			    'PRESET=task:' + t, 'KEEP.defaultSequence=' + (exim_taskCount+10));
+		}
+	}
+}
+
+jq(document).ready(function() {
+	var tbl = jq('#sfButtonTable').find('table:eq(2)');
+	tbl.find('tr').prepend('<td style="width: 170px;"></td>');
+});
+
+function create_task_link(v) {
+	alert(v);
+	rs.data("");
+}
+
+
+function exim_incrementCounter(value) {
+	if(parseInt(value) > exim_taskCount) {
+		// exim_taskCount += 10;
+		exim_taskCount = parseInt(value);
+	}
+	rs.data(value);
+}
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Task">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=ztask>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=task.sym addPercent="">
+<PDM_MACRO name=sfDropdown hdr="Typ" attr=task lookup="no">
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status lookup="no">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono zadań";
+  var msgFound1 = "Znaleziono 1 zadanie";
+  var msgFound = "Znaleziono %1 zadań";
+  var msgFoundMore = "Znaleziono %1 zadań. Wyświetlane %2 z %3";
+  var msgSelect = "Kliknij aby wybrać dane zadanie";
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence fmtfunc=exim_incrementCounter sort="ASC" startrow="no">
+<PDM_MACRO name=lsCol hdr="Zadanie" attr=task exportFmt=ShowLink link=yes startrow="no">
+// jak jest chg to tasktype2
+var exim_tt = "$args.KEEP.exim_objType";
+<PDM_MACRO name=lsWrite text="if(exim_tt == 'chg') {">
+	
+<PDM_MACRO name=lsCol hdr="Typ zadania" attr=taskType2 exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsWrite text="}">
+<PDM_MACRO name=lsCol hdr="Treść" attr=comments exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Przypisana grupa" attr=sdgroup exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Przypisany" attr=assignee_agt exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Przewidywany czas realizacji" attr=est_completion_date exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=status startrow="no">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP mode=edit>
+<PDM_IF 0>
+@(#)$Id: list_ztask.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,85 @@
+void cnt::ldap_dn_change( ... )
+{
+	string method;
+	method="cnt::ldap_dn_change()";
+
+	logf(SIGNIFICANT, "Starting %s with: %s", method, ldap_dn);
+	
+	object zinteg_AD_OUs;
+	send_wait(0, top_object(), "call_attr", "zinteg_AD_OUs", "sync_fetch", "MLIST_STATIC", "delete_flag = 0", -1, 0);
+	if(msg_error())
+	{
+		logf(ERROR, "%s: Error on sync_fetch", method);
+		return;
+	}
+	zinteg_AD_OUs = msg[0];
+	int count;
+	count = msg[1];
+	logf(SIGNIFICANT, "Found %d zinteg_AD_OUs", count);
+	int i;
+	object zinteg_AD_OU;
+	for(i = 0; i < count; i++)
+	{
+		send_wait(0, zinteg_AD_OUs, "dob_by_index", "DEFAULT", i, i);
+		if(msg_error())
+		{
+			logf( ERROR, "%s: Error on dob_by_index for znr_user: '%s'", method, msg[0] );
+			return;
+		}
+		
+		zinteg_AD_OU = msg[0];
+		logf(SIGNIFICANT, "%d zinteg_AD_OU: %s", i, zinteg_AD_OU.name);
+		
+		if (sindex(this.ldap_dn, zinteg_AD_OU.name) > 0)
+		{
+			logf(SIGNIFICANT, "%s Wylaczam uzytkownika: %s (na podstawie OU: %s)", method, this.userid, zinteg_AD_OU.name);
+			this.zwyl = 1;
+			return;
+		}
+	}
+	this.zwyl = 0;
+}
+
+void cnt::ldap_inactive( ... )
+{
+	string method;
+	method="cnt::ldap_inactive()";
+
+	logf(SIGNIFICANT, "Starting %s with: %s", method, zuserAccountControl);
+	
+}
+test(...)
+{
+	logf(SIGNIFICANT, "test");
+	object zinteg_AD_OUs;
+	send_wait(0, top_object(), "call_attr", "zinteg_AD_OUs", "sync_fetch", "MLIST_STATIC", "delete_flag = 0", -1, 0);
+	if(msg_error())
+	{
+		logf(ERROR, "%s: Error on sync_fetch", method);
+		return;
+	}
+	zinteg_AD_OUs = msg[0];
+	int count;
+	count = msg[1];
+	logf(SIGNIFICANT, "Found %d zinteg_AD_OUs", count);
+	int i;
+	int ldap_dn_length;
+	object zinteg_AD_OU;
+	for(i = 0; i < count; i++)
+	{
+		send_wait(0, zinteg_AD_OUs, "dob_by_index", "DEFAULT", i, i);
+		if(msg_error())
+		{
+			logf( ERROR, "%s: Error on dob_by_index for znr_user: '%s'", method, msg[0] );
+			return;
+		}
+		
+		zinteg_AD_OU = msg[0];
+		
+		ldap_dn_length = strlen(zinteg_AD_OU.name);
+		
+		logf(SIGNIFICANT, "%d zinteg_AD_OU: %s dlugosc: %d", i, zinteg_AD_OU.name, ldap_dn_length);
+		
+		logf(SIGNIFICANT, "sindex: %d", sindex(zinteg_AD_OU.name, "CN=Users,DC=exim,DC=local"));
+	}
+}

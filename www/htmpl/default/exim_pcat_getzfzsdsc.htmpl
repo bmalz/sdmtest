@@ -1,0 +1,21 @@
+<PDM_IF 0>
+20131023 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+</HEAD>
+<BODY>
+<SCRIPT>
+alert("exim_pcat_getzfzsdsc");
+	if (typeof GetZfzsdsc == "function")
+	{
+		GetZfzsdsc("$args.zfzsdsc.sym", "$args.zfzsdsc.code");
+	}
+	if (typeof showfZFZzsdscDesc == "function")
+	{
+		alert("found showfZFZzsdscDesc");
+		showfZFZzsdscDesc("$args.zfzsdsc.description");
+	}
+</SCRIPT>
+hidden frame, nothing to do here.
+</BODY>
+</HTML>

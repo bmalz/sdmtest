@@ -1,0 +1,55 @@
+<pdm_if 0>
+$Id: profile_browser_frameset.htmpl,v 1.2 2006/11/14 22:29:37 jenji01 Exp $
+WHEN PRESENTED:
+    Used as PDM_INCLUDE to create the profile browser frameset
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_telecentrum.htmpl+PERSID={cnt:}">
+<!-- Start of profile_browser_frameset.htmpl -->
+function doClose() { return true; }
+
+var FromGoBtn = "${args.KEEP.FromGoBtn:}";
+in_persid = "$args.PERSID";
+var scratchpad_desc = "";
+var scratchpad_category = "";
+var CategoryID = "";
+var CategoryType = "";
+var CategorySym = "";
+var scratchpad_size = 240;
+if ( _browser.isIE )
+   scratchpad_size = 230;
+var globalsd="$args.GLOBALSD";
+var propRoleMenubar = "$prop.role_menubar";
+if (in_content_frame)
+{
+    if ( typeof ahdtop == "object" )
+    {
+	ahdtop.AHD_Windows["profile_browser"] = window;
+        ahdtop.AHD_Windows["profile_browser"].exclude_from_win_list = true;
+        ahdtop.AHD_Windows["profile_browser"].exclude_from_win_close = true;
+	ahdtop.pb_initial_persid = "search";
+    }
+}
+
+if (globalsd=="yes") {
+   if ( typeof ahdtop == "object" )
+      ahdtop.AHD_Windows["profile_browser"] = window;
+   document.writeln('<FRAMESET ROWS="*,' + scratchpad_size +
+                    '" FRAMEBORDER="0" FRAMESPACING="2" BORDER="0" onUnload="cancel_window()">');
+}
+else {
+   document.writeln('<FRAMESET FRAMESPACING=0 MARGINHEIGHT=0 MARGINWIDTH=0 ROWS="*,' + scratchpad_size +
+                    '" onUnload="cancel_window()">');
+}
+
+	document.writeln('<FRAMESET COLS="230,*" FRAMEBORDER=1 onLoad="profile_start(in_persid,FromGoBtn)">');
+	document.writeln('<FRAME style="border: 1px #8B939A solid;" SRC="$CAisd/html/empty.html" NAME=menu MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=1 SCROLLING="$SESSION.scrolling" title="Profile Links">');
+	document.writeln('<FRAME style="border: 1px #8B939A solid;" SRC="$CAisd/html/empty.html" NAME=page MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO SCROLLING="$SESSION.scrolling" title="Profile Data">');
+	document.writeln('</FRAMESET>');
+	document.writeln('<FRAMESET COLS="400,*" FRAMEBORDER=1>');
+	document.writeln('<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_categories.htmpl" NAME=categories SCROLLING="auto" MARGINHEIGHT=2 MARGINWIDTH=0 FRAMEBORDER=1 title="Categories" id="categories">');
+	document.writeln('<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=scratchpad.htmpl+SD_LAUNCHED=${args.SD_LAUNCHED:}+KEEP.POPUP_NAME=' + window.name + '+prop.role_menubar=$prop.role_menubar" NAME=scratchpad SCROLLING="auto" MARGINHEIGHT=2 MARGINWIDTH=0 FRAMEBORDER=NO title="Scratchpad">');
+	document.writeln('</FRAMESET>');
+document.writeln("</FRAMESET>");
+
+<!-- End of profile_browser_frameset.htmpl -->

@@ -1,0 +1,58 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_metadata_header.htmpl
+//
+// Purpose: Provides the header definition of the getCMDBMetaData() function used
+//          by Versioning and and Transaction Work Area (twa) features for metadata.
+//
+//
+// 10-Jun-2009 tomjo02 SCO 23497 CMDB r12.1 Reconciliation PES 05629 - Initial version
+// 22-Jul-2009 tomjo02 SCO 26226 CMDBf Federation Viewer support, added cmdbAttrDataType 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Enable function header/array declarations for Versioning and only once for twa setup mode
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$prop.twa_setup" == "" || "$prop.twa_setup" == "process_metadata_header" >
+
+function getCMDBMetaData()
+{
+	var i;
+	var who;
+	var longDate;
+	var what;
+	var intDate;
+	var mdr;
+	var attribute;
+	var newvalue;
+	var oldvalue;
+	var cmdbCategory;
+	var cmdbHeading;
+	var cmdbCommon;
+	var cmdbAttrHelp;
+	var cmdbCurrentValue;
+	var cmdbDBColumn;
+	var cmdbAttrDataType;
+
+	who = new Array();
+	longDate = new Array();
+	what = new Array();
+	intDate = new Array();
+	mdr = new Array();
+	attribute = new Array();
+	newvalue = new Array();
+	oldvalue = new Array();
+	cmdbCategory = new Array();
+	cmdbHeading = new Array();
+	cmdbCommon = new Array();
+	cmdbAttrHelp = new Array();
+	cmdbCurrentValue = new Array();
+	cmdbDBColumn = new Array();
+	cmdbAttrDataType = new Array();
+	i = -1;
+    
+</PDM_IF>
+

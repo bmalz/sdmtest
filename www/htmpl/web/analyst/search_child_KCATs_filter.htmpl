@@ -1,0 +1,95 @@
+<pdm_pragma release=110>
+<pdm_wsp mode=general preview=kt_architect.htmpl>
+//begin search also in child categories checkbox
+<PDM_MACRO NAME=sfStartRow>
+</script>
+<td colspan='4'>
+<input type='checkbox' class='labeltext' name='cb_child_KCATs' id='cb_child_KCATs'
+       onFocus="searchFilterFocus('cb_child_KCATs')"
+       onBlur="searchFilterBlur('cb_child_KCATs')"
+       tabindex=100 onchange='cb_child_KCATs_change()'>
+<span class='title3text gn_text_small'><label for="cb_child_KCATS">Search in child categories</label></span>
+<input type='hidden' name='ebr_primary_order_holder' id='ebr_primary_order_holder'>
+<script type="text/javascript">
+
+//
+var m_bAND = false;
+//version for string manipulation, not yet implemented
+function cb_child_KCATs_change()
+{	
+	var lKCATId = ahdframe.parent.getCurrentIndex();
+			
+	var sKCATPath = ahdframe.parent.getCurrentRelationalPath();
+	if(sKCATPath.indexOf("QBE") != -1 || sKCATPath.indexOf("ADDITIONAL_WHERE") != -1)
+	{
+		//is inbox, group inbox or unassigned
+		return;
+	}
+	
+	var sAdditionalWhere = 	getAdditionalWhereValue();
+	var sCatWhere = "DOC_LINKS.INDEX_ID=" +  lKCATId + " AND ACTIVE_STATE>=0";
+	var wc = "(DOC_LINKS.INDEX_ID=" + lKCATId + " or DOC_LINKS.RELATIONAL_ID like '" + sKCATPath + "-%'" + ") AND ACTIVE_STATE>=0";
+	
+	ahdtop.SetSearchInChildKCAT(document.getElementById("cb_child_KCATs").checked);
+	if(document.getElementById("cb_child_KCATs").checked)
+	{
+		if(sAdditionalWhere.indexOf(wc) != -1)
+			return;
+		else	
+			if(sAdditionalWhere == "")
+				setAdditionalWhereValue(wc);
+			else
+			{
+				//if ADDITIONAL_WHERE contains data from category click then
+				//replace that with new wc
+				if(sAdditionalWhere.indexOf(sCatWhere) != -1)
+				{
+					var temp = sAdditionalWhere.replace("DOC_LINKS.INDEX_ID=" +  lKCATId + " AND ACTIVE_STATE>=0", wc);
+					setAdditionalWhereValue(temp);
+				}
+				else
+				{
+					setAdditionalWhereValue(getAdditionalWhereValue() + " AND " + wc);
+					m_bAND = true;
+				}	
+			}	
+	}
+	else
+	{	
+		//checkbox unchecked, so remove where clause from the ADDITIONAL_WHERE
+		if(m_bAND)
+			var strRemoveWC = sAdditionalWhere.replace("AND " + wc, sCatWhere);
+		else
+			var strRemoveWC = sAdditionalWhere.replace(wc, sCatWhere);
+		setAdditionalWhereValue(strRemoveWC);
+	}
+}
+function getAdditionalWhereValue()
+{
+	for (var i=0; i < __search_filter.form.length; i++) 
+	{	
+		var form = __search_filter.form[i];
+		for (var k=0; k < form.length; k++) 
+		{
+			var element = form.elements[k];
+			if ( element.name == "ADDITIONAL_WHERE" ) 
+				return element.value;
+			}	
+	}
+}
+function setAdditionalWhereValue(sWC)
+{
+	for (var i=0; i < __search_filter.form.length; i++) 
+	{	
+		var form = __search_filter.form[i];
+		for (var k=0; k < form.length; k++) 
+		{
+			var element = form.elements[k];
+			if ( element.name == "ADDITIONAL_WHERE" ) 
+			{
+				element.value = sWC;
+				break;
+			}	
+		}	
+	}
+}

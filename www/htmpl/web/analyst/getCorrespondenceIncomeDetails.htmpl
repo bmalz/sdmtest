@@ -1,0 +1,17 @@
+<PDM_IF 0>
+	20131021 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+</HEAD>
+<BODY>
+<SCRIPT LANGUAGE="JavaScript">
+	GetContractors("$args.Street", "$args.PostCode", "$args.City", "$args.CountryRef.id", "$args.CountryRef.COMMON_NAME", "$args.Building", "$args.Room");
+	GetDetails("$args.Name", "$args.Surname", "$args.Department");
+	GetCr("$args.cr", "$args.cr.COMMON_NAME");
+	GetRecipient("$args.Sender", "$args.Sender.COMMON_NAME");
+	GetAbroad("$args.Abroad");
+</SCRIPT>
+hidden frame, nothing to do here.
+</BODY>
+</HTML>
+

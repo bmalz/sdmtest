@@ -1,0 +1,55 @@
+ <PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/02/03
+// Title  : cmdb_metadata_orgx.htmpl (family specific attributes)
+// 05-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+//                     Added standardcivalue and currentcivalue values that require special dot notation for SREL values.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_orgx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+NOTE: You must provide standardcivalue and currentcivalue values if the attribute displayed requires special dotted notation for SREL value.
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.name"            heading="Organization Name" help="Identifies the name of the organization">
+// Show the base_organization.name for the base_organization attribute, override standardcivalue and currentcivalue.
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization"                 heading="Base Organization" standardcivalue=${args.standard_ci.0.assoc_orgx.0.base_organization.name} currentcivalue=${args.assoc_orgx.base_organization.name} help="Specifies the organization that the CI represents">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.org_num"         heading="Organization Number" help="Identifies the organization number">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.phone_number"    heading="Phone Number" help="Identifies the phone number">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.alt_phone"       heading="Alt. Phone Number" help="Identifies the alternate phone number">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.fax_phone"       heading="Fax Number" help="Identifies the fax number">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.contact"         heading="Organization Contact" standardcivalue=${args.standard_ci.0.assoc_orgx.0.base_organization.contact.combo_name} currentcivalue=${args.assoc_orgx.base_organization.contact.combo_name} help="Identifies the organization's primary contact">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.email_addr"      heading="Email Address" help="Identifies the email address">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.pemail_addr"     heading="Pager Email Address" help="Identifies the pager email address">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.service_type"    heading="Service Type" standardcivalue=${args.standard_ci.0.assoc_orgx.0.base_organization.service_type.sym} currentcivalue=${args.assoc_orgx.base_organization.service_type.sym} help="Classic service type">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.owning_contract" heading="Service Contract" standardcivalue=${args.standard_ci.0.assoc_orgx.0.base_organization.owning_contract.sym} currentcivalue=${args.assoc_orgx.base_organization.owning_contract.sym} help="Service Contract">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.billing_code"    heading="Billing Code" standardcivalue=${args.standard_ci.0.assoc_orgx.0.base_organization.billing_code.name} currentcivalue=${args.assoc_orgx.base_organization.billing_code.name} help="Billing code">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.location"        heading="Location" standardcivalue=${args.standard_ci.0.assoc_orgx.0.base_organization.location.name} currentcivalue=${args.assoc_orgx.base_organization.location.name} help="Identifies the location of the organization">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="orgx" attr="base_organization.description"     heading="Description" help="Indicates the description of the organization">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

@@ -1,0 +1,154 @@
+<PDM_IF 0>
+$Id: list_showrole.htmpl
+list_showrole.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Roles.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Role Search";
+var hdrTitleList = "Role List";
+var showExtra = 0;
+var arrFields = new Array;
+var nCount = 0;
+
+//onload event
+function LoadGroups()
+{
+	document.getElementById("sf_1_0").value = '';//Additional where Parameter
+	document.getElementById("sf_1_0").size = 30;
+	// send the nCount to kt_permissions.js when the group list page itself loads everytime
+	// e.g. perform search causes the onload event
+	if (typeof parent.updateGroupsNo == "function")
+	{
+		window.setTimeout("parent.updateGroupsNo(" + nCount + ")",100);
+	}
+}
+
+//This gets call the first time from MakePermissionScreen() which is loading the permissions tab
+function bHasGroups()
+{
+	return nCount;
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onload="LoadGroups()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Role">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false export=no factory=role>
+document.writeln('<INPUT TYPE=hidden NAME=HTMPL VALUE=list_showrole.htmpl>');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa roli" attr=name colspan=2 size=30>
+argSearchWhereClause = '';
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<SCRIPT>
+
+//The function gets called from the search_filter.js when clicking on any button
+function OnBeforeFilterAction(which)
+{
+	if (document.getElementById("lstGroups") == null) 
+		return;
+	if (which =="toggle")
+	{
+		if (document.getElementById("lstGroups").size == 22 && showExtra == 0)
+		{
+			document.getElementById("lstGroups").size = 19; 
+		}
+		else if (document.getElementById("lstGroups").size == 22 && showExtra == 1)
+		{
+			document.getElementById("lstGroups").size = 16; 
+		}
+		else if (document.getElementById("lstGroups").size == 19 && showExtra == 0)
+		{
+			document.getElementById("lstGroups").size = 22; 	
+		}
+		else if (document.getElementById("lstGroups").size == 16 && showExtra == 1)
+		{
+			document.getElementById("lstGroups").size = 22;
+		}
+	}
+}
+
+//The function gets called from the search_filter.js when clicking on "More..." link
+function OnBeforeFilterMore(n)
+{
+	if (document.getElementById("lstGroups") == null) 
+		return;
+	if (document.getElementById("lstGroups").size == 19)
+	{
+	    document.getElementById("lstGroups").size =16; 
+	    showExtra = 1;
+	}
+	else
+	{
+		document.getElementById("lstGroups").size =19; 
+		showExtra = 0;
+	}
+}
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+	<SCRIPT LANGUAGE="JavaScript">
+	var rec_cnt = $record_count;
+	var start = $start;
+	var length = $length;
+        var end;
+	var html;
+	if (!rec_cnt)
+	{
+	    end = 0;
+	}
+	else 
+	{
+	    start += 1; 
+	    end = start + length - 1;
+	    if (rec_cnt < end) end = rec_cnt;
+	}
+
+	html = "<center><table style='width:98%' class=page_section_header_container>";
+	html += "<tr><td class='page_section_header_left'><img src='" + get_IMG_path("IMG_spacer") + "' class=page_section_header_left_img alt=''></td>";
+	html += "<td class='page_section_header_center'><span class='page_section_header_text'>&nbsp;</span></td>";
+	html += "<td class='page_section_header_right'>";
+	html += "</tr></table>"; 
+	docWriteln(html);
+	html = '<table style="width:98%;height:90%;font-size:0.7em">';
+	html += "<tr><td align=right valign=bottom NOWRAP>"; 
+	if (rec_cnt)
+	{
+	    html += gsub('<PDM_IF $total \> 1><center>$direct_index</PDM_IF>', "<center>", "") +
+		    '&nbsp;&nbsp;&nbsp;&nbsp;' +
+		    msgtext("%1-%2_of_%3", start, end, rec_cnt);
+	}
+	else 
+	{
+	    html += "0 match";
+	} 
+	html += "</td></tr>";
+	docWriteln(html);
+	
+	html = "<tr><td valign=top>"  	
+	html += '<SELECT MULTIPLE=true size=22 id=lstGroups name=lstGroups tabindex=100 style="width:100%;font-size:1.0em;" title="Role list search results">';
+	<PDM_LIST source=list start=$start length=$length esc_style=C>
+	    html += '<OPTION value=$list.id>' + 
+		    '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.name</PDM_FMT>' +
+		    '</OPTION>';
+	    nCount++;
+	</PDM_LIST>
+	html += '</SELECT></td></tr>';
+	html += '</table><center>';
+	docWriteln(html);
+	</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

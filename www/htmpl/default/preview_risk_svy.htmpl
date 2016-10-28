@@ -1,0 +1,131 @@
+<PDM_IF 0>
+preview_risk_svy.htmpl
+WHEN PRESENTED:
+    Administrator is viewing a preview of risk survey
+INTENT:
+    Preview of Risk Survey.
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  risk_svy_tpl  args	The Survey Template (risk_svy_tpl) object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/change.maj for the
+                        definition of attributes for 'OBJECT risk_svy_tpl'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="IS_ANALYST=1+OP=VIEW_SURVEY+CNT_ID={cnt}+SVY_ID={risk_svy_tpl}" factory=risk_svy_tpl>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Risk Survey"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var edit_form = 1;
+var totalMax = Number(0);
+var totalMin = Number(0);
+var localMax = 0;
+var localMin = 0;
+var i = 0;
+function cntr() {
+	i++;
+}
+function formatmessage(in_str,args)
+{
+	var m=in_str;
+	if((arguments.length>1)&& (m.indexOf("%")!=-1))
+	{
+		for(var i=1;i<arguments.length;i++)
+		m=m.replace(new RegExp("%"+i,"g"),"<b>"+arguments[i]+"</b>");
+	}
+	else if(m.indexOf("%")!=-1)
+		m=m.replace(new RegExp("%"+1,"g"),"<b>"+i+"</b>");
+	return m;
+}
+</script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+</head>
+<body onunload="unload_check()" class="editform">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script type="text/javascript">
+maxSize=new Array("SVY_COMMENT","$args.comment_label", $args.LENGTH_comment_label);
+</script>
+
+<form name=frm001>
+<input type="hidden" id="localMax" name="localMax" value="0">	
+<input type="hidden" id="localMin" name="localMin" value="-1">
+</form>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=risk_svy_tpl skiphdr=yes>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext value="Hello, $cst.first_name $cst.last_name,">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext keeptags=yes value="$args.description">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext dataclass=required showbarimg="yes" value="All questions require a response before submitting the survey">
+</script>
+
+<input type="hidden" name="FACTORY" value="risk_svy_tpl">
+<input type="hidden" name="SET.id"  value="$args.id">
+
+<script type="text/javascript">
+<PDM_LIST SOURCE=args.question_templates PREFIX=question>
+	cntr();
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext argumts="i" dataclass=required fmtmsg=formatmessage value="%1. $question.text">
+	<!-- the answers-->
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlSurvey factory="risk_svy_atpl" parentid="$question.id" parentmultiflag="$question.mult_resp_flag">
+<PDM_IF "$question.include_qcomment" == "1" >
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="$question.qcomment_label" attr="n/a" rows=4 size=60>
+</PDM_IF>
+	var tmp_localMax_hidden = document.getElementById("localMax").value;
+	totalMax = totalMax + Number(document.getElementById("localMax").value);
+	totalMin = totalMin + Number(document.getElementById("localMin").value);;
+
+	localMax = document.getElementById("localMax").value;
+	localMin = document.getElementById("localMin").value;
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext argumts="localMax,localMin" fmtmsg=formatmessage value="( Maximum weightage:%1, Minimun weightage:%2 )">
+	document.getElementById("localMax").value=Number(0);
+	document.getElementById("localMin").value=Number(-1);
+</PDM_LIST>
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext argumts="totalMax,totalMin" dataclass="detailro summary_data" fmtmsg=formatmessage value="Total Maximum weightage:%1,  Total Minimun weightage:%2">
+<PDM_IF 0>
+This spot is for extra user comments, if so 
+specified by the survey template.  The user comments
+MUST be in an input control named "SVY_COMMENT".
+</PDM_IF>
+<PDM_IF $args.include_comment>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="$args.comment_label" attr="n/a" rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext showbarimg="yes" value="">
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+

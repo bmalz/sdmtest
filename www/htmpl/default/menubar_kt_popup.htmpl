@@ -1,0 +1,105 @@
+<PDM_IF 0>
+@(#)$Id: menubar_kt_popup.htmpl ANDERSON.2 2009/05/21 14:37:33 taoyu02 Exp $
+WHEN PRESENTED:
+    Build the menu when Knowledge Document or Document View is a popup window.
+    This file is used for Document Editor - detail_KD.htmpl and Document Viewer - kt_document_view.htmpl
+    when they open as a popup window because there are some functions in their tabs are
+    not suitable for these popup windows. 
+    This menubar can be specified in the invocation of std_body.htmpl.
+
+////////////////////////////////////////////////////////////////////////
+// Administration Menubar
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_WSP mode=readonly preview="detail_KD.htmpl+prop.menubar=kt_popup" factory=KD>
+
+<PDM_MACRO name=startMenubar>
+<PDM_MACRO name=menubarItem label=File id=mFile>
+<PDM_IF 0>
+The "View" menu item contains only one sub-item ("Refresh") so there is no point
+showing the "View" item if your not gonna show the "Refresh" item in the EDIT screen.
+Move the condition below to the "refresh" menu-item if u add more items to the 
+"View" item.
+</PDM_IF>
+if (w.propFormName1 == "detail" && w.propFormName3 != "edit" ) { 
+<PDM_MACRO name=menubarItem label=View id=mView>
+}
+<PDM_MACRO name=menubarItem label=Window id=mWindow>
+<PDM_MACRO name=menubarItem label=Help id=mHelp>
+<PDM_MACRO name=endMenubar>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "File" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mFile>
+
+if ( w.cfgAccessAdmin >= 2 && 
+     (w.cfgUserAuth + 0) > 1 &&
+     w.ahdframeset != ahdtop &&
+     typeof w.ahdframeset.ahdframe._dtl == "object" &&
+     typeof w.ahdframeset.ahdframe.copy_from_parent != "undefined" ) {
+	
+<PDM_MACRO name=menuItem label=Copy function="make_copy()">
+}
+
+<PDM_MACRO name=menuItemLocal label="Print_Form..." function="CAisdPrint();" hotkey=n>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "View" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mView>
+<PDM_MACRO name=menuItemLocal label=Refresh function="refreshForm()">
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop ) {
+  if ( ahdtop.isLogReader ) {
+    
+<PDM_MACRO name=menuItem label="View_Log_Reader..." function="focus_main_window()">
+  }
+  else {
+    
+<PDM_MACRO name=menuItem label="View_Main_Page" function="focus_main_window()">
+  }
+}
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Help" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+	
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+<PDM_MACRO name=menuItem label="Support..." function="popupWithURL('http://ca.com/index.html', 1, 1)">
+
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+
+<PDM_MACRO name=endMenu>

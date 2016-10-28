@@ -1,0 +1,268 @@
+<PDM_IF 0>
+detail_event_log.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Event Log
+INTENT:
+    Display the detail info for Event Log
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Event Log Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Event Log"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Event Log $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+function OpenDocumentViewer(lDocID)
+{
+	var sFileName = 'kt_document_view.htmpl';
+		
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+	              "+OP=SHOW_DETAIL+PERSID=KD:" + lDocID + "+HTMPL=" + sFileName + 
+	              "+opener=user_view+disable_solution_survey=true+disable_comment=true+disable_kcat_links=true"+
+	              "+RELOAD_WIN=0+open_mode=2";
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",gobutton=no"+
+				",status=no";
+			
+	preparePopup(url, "DOC_VIEW_WIN" + lDocID, features, undefined, undefined, '');	
+}	
+
+function CreateKDLink(lDocId, sDocTitle)
+{
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" == "1">
+	return msgtext("Document_ID:") + lDocId + ", " + sDocTitle + ".";
+<PDM_ELSE>
+	var genMOPrevHtml = getMOPreviewEventHtml("KD:"+lDocId);
+	return "<a href=javascript:OpenDocumentViewer(" + lDocId + ")" + genMOPrevHtml + ">" + msgtext("Document_ID:") + lDocId + ", " + sDocTitle + ".</a>"
+</PDM_IF>
+}
+
+function SearchLogView(nLogId)
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+               "+OP=SHOW_DETAIL+PERSID=EBR_LOG:" + nLogId +
+               "+HTMPL=detail_EBR_LOG.htmpl";
+
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",gobutton=no"+
+				",status=no";
+			
+	preparePopup(url, "EVT_VIEW_WIN" + nLogId, features, undefined, undefined, '');	
+}
+
+function CreateSearchLogLink(nLogId)
+{
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" == "1">
+	return msgtext("More_Info...");
+<PDM_ELSE>
+	var genMOPrevHtml = getMOPreviewEventHtml("EBR_LOG:"+nLogId);
+	return "<a href=javascript:SearchLogView(" + nLogId + ") " + genMOPrevHtml + ">" + msgtext("More_Info...") + "</a>"
+</PDM_IF>
+}
+
+function GetScheduleConflictText(startDate, endDate, message)
+{
+	return msgtext( "Change_schedule_conflict_info", date_to_string( startDate ),  date_to_string( endDate ) ) + "\n" + message;
+}
+
+</SCRIPT>
+</HEAD>
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Event Log" key="$args.sym">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=event_log>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zalogowania" attr=log_time>
+<PDM_MACRO name=dtlLookupReadonly hdr="Kontakt" attr=session.contact>
+<PDM_MACRO name=dtlReadonly hdr="Typ zdarzenia" attr=event.description colspan=2>
+<PDM_MACRO name=dtlStartRow>
+var objLink;
+<PDM_IF "$args.sd_obj_id" <= 0>
+	detailRowHdr("Associated Object Type", 2);
+	detailSetReadonlyRowData("obj_type","");
+	detailRowHdr("Associated Object", 2);
+	detailSetReadonlyRowData("assoc_obj","");
+	detailWriteRow();
+<PDM_ELIF "$args.sd_obj_type" == "chg">
+	<PDM_LIST ESC_STYLE=js factory=chg PREFIX=list where="id=$args.sd_obj_id">
+	objLink = "<SPAN class=detailro><A" + detailNextID() +
+			" HREF=\"javascript:showDetailWithPersid('$list.persistent_id')\">$list.chg_ref_num</A></SPAN>";     
+	detailRowHdr("Associated Object Type", 2);  
+	detailSetReadonlyRowData("obj_type","Change Order");
+	detailRowHdr("Associated Object", 2);  
+	detailSetReadonlyRowData("assoc_obj",objLink);
+	detailWriteRow();
+	</PDM_LIST>
+<PDM_ELSE>
+<PDM_IF "$args.sd_obj_type" == "iss">
+		<PDM_LIST ESC_STYLE=js factory="$args.sd_obj_type" PREFIX=list where="id=$args.sd_obj_id">
+			objLink = "<SPAN class=detailro><A" + detailNextID() +
+					" HREF=\"javascript:showDetailWithPersid('$list.persistent_id')\">$list.ref_num</A></SPAN>";        
+			detailRowHdr("Associated Object Type", 2);
+			detailSetReadonlyRowData("obj_type","Issue");  
+			detailRowHdr("Associated Object", 2);  
+			detailSetReadonlyRowData("assoc_obj",objLink);
+			detailWriteRow();
+		</PDM_LIST>
+	
+<PDM_ELIF "$args.sd_obj_type" == "cnt">
+		var does_nothing;
+	
+<PDM_ELSE>		
+		<PDM_LIST ESC_STYLE=js factory="$args.sd_obj_type" PREFIX=list where="id=$args.sd_obj_id">
+		objLink = "<SPAN class=detailro><A" + detailNextID() +
+				" HREF=\"javascript:showDetailWithPersid('$list.persistent_id')\">$list.ref_num</A></SPAN>";        
+		detailRowHdr("Associated Object Type", 2);
+		
+<PDM_IF  "$list.type" == "P">
+			detailSetReadonlyRowData("obj_type","Problem");
+		
+<PDM_ELIF "$list.type" == "I">
+			detailSetReadonlyRowData("obj_type","Incident");
+		
+<PDM_ELSE>
+			detailSetReadonlyRowData("obj_type","Call Request");
+		
+</PDM_IF>
+		detailRowHdr("Associated Object", 2);  
+		detailSetReadonlyRowData("assoc_obj",objLink);
+		detailWriteRow();
+		</PDM_LIST>
+	
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Szczegóły dokumetu bazy wiedzy" attr=kd colspan=4>
+<PDM_MACRO name=dtlStartRow>
+	var sDetails = "";
+	var textdata2 = "";
+
+	
+<PDM_IF "$args.event.code" == "SEARCH">	
+	<PDM_LIST ESC_STYLE=js PREFIX=ebr_lst FACTORY=EBR_LOG WHERE="id=$args.numdata1">
+		sDetails = msgtext("Search_Text:_'%1'_with_%2_docu", nx_unescape("$ebr_lst.SEARCH_TEXT"), "$ebr_lst.NUM_MATCHES");
+		
+<PDM_IF '$ebr_lst.FILTER_DATA' != ''>
+			sDetails += "<BR>" + CreateSearchLogLink($args.numdata1);
+		
+</PDM_IF>
+	</PDM_LIST>
+	
+	
+<PDM_ELIF "$args.event.code" == "KD_RATE">
+	<PDM_LIST ESC_STYLE=js PREFIX=kd_rate FACTORY=BU_TRANS WHERE="id=$args.numdata1">
+	sDetails = CreateKDLink($args.kd, "$args.kd.TITLE");
+	sDetails = sDetails + "<BR>";
+	if ($kd_rate.BU_RATING == 0)
+	sDetails = sDetails + "Rating: Not helpful at all.";		
+	else if ($kd_rate.BU_RATING == 2)
+	sDetails = sDetails + "Rating: Somewhat helpful.";			
+	else if ($kd_rate.BU_RATING == 4)
+	sDetails = sDetails + "Rating: Very helpful.";
+	</PDM_LIST>	
+	
+	
+<PDM_ELIF "$args.event.code" == "FAQ">
+	<PDM_LIST ESC_STYLE=js PREFIX=faq FACTORY=KCAT WHERE="id=$args.numdata1">
+	sDetails = "Category: " + "$faq.CAPTION";
+	</PDM_LIST>
+
+	
+<PDM_ELIF "$args.event.code" == "KD_COMMENT">
+	<PDM_LIST ESC_STYLE=js PREFIX=comments FACTORY=O_COMMENTS WHERE="id=$args.numdata1">
+	sDetails = CreateKDLink($args.kd, "$args.kd.TITLE");
+	sDetails += "<BR>comment: "  + "$comments.COMMENT_TEXT";
+	</PDM_LIST>
+	
+	
+<PDM_ELIF "$args.event.code" == "KD_BOOKMARK" || "$args.event.code" == "KD_CREATE" || "$args.event.code" == "KD_OPEN" ||
+		  "$args.event.code" == "LINK" || "$args.event.code" == "UNLINK" || "$args.event.code" == "KD_REJECT">
+	sDetails = CreateKDLink($args.kd, "$args.kd.TITLE");
+	
+	
+<PDM_ELIF "$args.event.code" == "EMAIL">
+	sDetails = CreateKDLink($args.kd, "$args.kd.TITLE");
+	sDetails += "<BR>";
+	sDetails += "Emailed to: " + "$args.textdata1";
+
+	
+<PDM_ELIF "$args.event.code" == "CR_CREATE" || "$args.event.code" == "ISS_CREATE" || "$args.event.code" == "CHG_CREATE">
+		sDetails += "Summary: " + "$args.textdata1";
+
+	
+<PDM_ELIF "$args.event.code" == "DEP_ATTR_CTL">
+		sDetails += "Summary: " + "$args.textdata1"+ " "+"$args.textdata2";
+
+	
+<PDM_ELIF "$args.event.code" == "ST_RULE_VIOL">
+		sDetails += "$args.textdata1"+ "<BR>" + "$args.textdata2";
+
+	
+<PDM_ELIF "$args.event.code" == "LOGOUT">
+	if ($args.numdata1 == 0)
+	sDetails = sDetails + "Logout Reason: Normal";		
+	else if ($args.numdata1 == 1)
+	sDetails = sDetails + "Logout Reason: Timeout";			
+	else if ($args.numdata1 == 2)
+	sDetails = sDetails + "Logout Reason: Abnormal";
+
+	
+<PDM_ELIF "$args.event.code" == "CHG_CONFLICT">
+	sDetails += "Number of Conflicts detected: " + "$args.numdata1";
+
+	
+<PDM_ELIF "$args.event.code" == "CHG_SCH_CNFL">
+		sDetails = GetScheduleConflictText($args.numdata1, $args.numdata2, "$args.textdata1");
+
+	
+<PDM_ELIF "$args.event.code" == "TERMS_ACC" || "$args.event.code" == "TERMS_REJ">
+		<PDM_LIST ESC_STYLE=js PREFIX=tou FACTORY=ca_tou WHERE="id=U'$args.textdata1'" DOMSET="MLIST_STATIC">
+			sDetails = "Terms of Usage: " + "$tou.name";
+		</PDM_LIST>
+		<PDM_LIST ESC_STYLE=js PREFIX=ten FACTORY=tenant WHERE="id=U'$args.textdata2'" DOMSET="MLIST_STATIC">
+			sDetails += "\nFrom Tenant: " + "$ten.name";
+		</PDM_LIST>
+
+	
+</PDM_IF>
+	
+	detailRowHdr("Event Detail", 4);
+	detailSetReadonlyRowData("evt_details",sDetails);
+	detailWriteRow();			
+	
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_event_log.htmpl ASPEN.1 2011/01/19 08:31:26 ralje02 Exp $;
+</PDM_IF>
+<PDM_WSP>

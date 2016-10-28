@@ -1,0 +1,174 @@
+<PDM_IF 0>
+bin_form_np.htmpl
+WHEN PRESENTED:
+    A possible form to show as a left-side menu bar when using frames
+INTENT:
+    This menu presents call and problem options together
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user
+    object ACCESS           List containing the user's access to the various
+                            function groups
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="OP=menu">
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Announcements";
+</SCRIPT>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<script type="text/javascript"> 
+function OpenDocumentViewer(doc_id)
+{
+	// Open document in the main screen
+	var fid = fid_generator();
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid + "+OP=SHOW_DETAIL+PERSID=KD:" + doc_id + "+HTMPL=kt_document_view.htmpl+opener=simple+open_mode=0";
+	url += "+KEEP.DOMSET=KD_list_web_BU_RESULT_DESC";
+	url += "+KEEP.cur_sort_key=BU_RESULT";
+	url += "+KEEP.initial_ebr=0";
+	document.location.href = url;	
+}
+
+var cfgProductName = "$ProductName";
+var cfgProductID = "$ProductID";
+</SCRIPT>
+
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE="std_body.htmpl">
+		<SCRIPT LANGUAGE="JavaScript">
+		  document.writeln("<TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>");
+		  document.writeln("<TR height=25>");
+		  document.writeln("<TD align=left width='100%'>" + "Announcements" + "</TD>");
+		  document.writeln("</TR>");
+		  document.writeln("</TABLE>");
+		  document.writeln("<BR>");
+		   </SCRIPT>
+<TABLE ID=tb1501 CLASS=normalTxt>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+
+<PDM_IF "$prop.guest_user" != 1>
+<!-- Employee User -->
+	<PDM_IF $cst.location == "" && $cst.organization == "" >
+    		<PDM_IF $prop.view_internal == 1> 
+  			<PDM_LIST prefix=list factory=cnote where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>
+		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_excludeinternal_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>
+		</PDM_IF>
+	<PDM_ELIF $cst.location == "" && $cst.organization != "" >
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>
+   		</PDM_IF>
+   	<PDM_ELIF $cst.location != "" && $cst.organization == "" >
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b>$<script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>
+   		</PDM_IF>
+   	<PDM_ELSE>
+  
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_excludeinternal_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+			</PDM_LIST>
+   		</PDM_IF>
+   	</PDM_IF>
+   		  		
+<PDM_ELSE>
+<!-- Guest User -->
+	<PDM_LIST PREFIX=list FACTORY=cnote WHERE="active=1 AND (organization IS NULL AND location IS NULL)" DOMSET=cnote_list_desc_excludeinternal_static length=$prop.AnnouncementLength>
+		  	<PDM_IF "$list.cnote_type" == "1" >
+				<P CLASS=advisory><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrAdvisory</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELIF "$list.cnote_type" == "2" >
+				<P CLASS=emergency><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script>$prop.IndRdrEmergency</b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>		
+			<PDM_ELSE>
+				<P><b><script>date_to_string('$list.posted_date_INT_DATE',1);</script></b><br><PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>	
+			</PDM_IF>
+	</PDM_LIST>
+</PDM_IF>
+</td>
+</tr>
+</table>
+</PDM_FORM>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: bin_form_np.htmpl ASPEN.2 2012/02/29 16:25:59 dhara04 Exp $
+</PDM_IF>
+

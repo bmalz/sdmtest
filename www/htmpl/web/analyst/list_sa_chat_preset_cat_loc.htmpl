@@ -1,0 +1,82 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Localized Chat Preset Group Search";
+			var hdrTitleList = "Localized Chat Preset Group List";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=sfStart button="false" factory="sa_chat_preset_cat_loc">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="name" size=40>
+<PDM_MACRO name=sfEnd>
+			var edit_field_count = 0;
+		</SCRIPT>
+		<PDM_FORM NAME="frmFID">
+		</PDM_FORM>
+		
+		
+<PDM_IF "$args.KEEP.PAGE_CREATE_MODE" == 0 >
+	
+    	<TABLE align=center cellpading=0>
+          <TH class=labeltext>Chat Preset Group needs to be saved before Localized strings can be set</TH>
+      </TABLE>
+
+		
+</PDM_IF>
+<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+  				<pdm_jscript file=list_edit.js>
+
+				startListEdit(__search_filter);
+				listEditStartRow();
+				listEditField("name");
+				listEditEndRow();
+				endListEdit();
+				
+  				var msgFoundNone = "No Enabled Localizations Found";
+ 	 			var msgFound1 = "1 Localized Chat Preset Group Name Found";
+  				var msgFound = "%1 Localized Chat Preset Group Names";
+  				var msgFoundMore = "%1 Localized Chat Preset Group Names Found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired Chat Preset Group Name";
+  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Lokalizacja" attr="localizationID" link="no">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="name" link="no">
+<PDM_MACRO name=lsEnd>
+
+                                ctxMenu = void(0);
+
+  				var ctxMenu = void(0);
+  				
+  				
+<PDM_IF "$args.KEEP.PAGE_CREATE_MODE" == 0 >			
+  				  ImgBtnEnableButton("btnEdit", false);
+  	      
+</PDM_IF>
+  				
+  			</script>
+		
+</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>
+<PDM_WSP>

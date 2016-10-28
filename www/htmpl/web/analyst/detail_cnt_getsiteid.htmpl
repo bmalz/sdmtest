@@ -1,0 +1,31 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "AEU Detail";
+var hdrTitleUpd = "N/A";
+var hdrTitleNew = "N/A";
+var hdrTitleTempl = "N/A";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	var frm = "";
+	if ( !parent.cai_main )
+	{
+		frm = parent.ahdframe;
+	}
+	else { frm = parent.cai_main; }
+    if (typeof frm.GetCustomerLocSiteId == "function")
+    {
+        frm.GetCustomerLocSiteId("$args.location.site.id");
+    }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+</BODY>
+</HTML>

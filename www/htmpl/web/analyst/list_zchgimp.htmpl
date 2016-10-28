@@ -1,0 +1,63 @@
+<PDM_IF 0>
+list_zchimp.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Change Impact
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie Wpływu Zmiany";
+var hdrTitleList = "Lista Wpływów Zmiany";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zchgimpsum.rpt", "zchgimpedtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Change Impact">
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=sfStart factory=zchgimp>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=zchgimp>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Typ" attr=sym>
+<PDM_MACRO name=sfDropdown attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Change Types found";
+  var msgFound1 = "1 Change Type found";
+  var msgFound = "%1 Change Types found";
+  var msgFoundMore = "%1 Change Types found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Change Type";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Typ" attr=sym exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_zchgimp.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

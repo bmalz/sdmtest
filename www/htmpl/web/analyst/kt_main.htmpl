@@ -1,0 +1,200 @@
+<html lang="en"><PDM_IF 0>
+$Id: kt_main.htmpl,v 1.4 2006/11/20 18:50:29 mccda04 Exp $
+	WHEN PRESENTED:
+	    As the knowledge tab of the main page
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="OP=MENU+NBTAB=kt">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.IsPopUp" == "1">
+	var ahdframeset = window;
+	var form_title = "Category Browse";
+<PDM_ELSE>	
+	var ahdframeset = ahdtop;    
+</PDM_IF>  
+var _sKCATPath = <PDM_FMT ESC_STYLE=C KEEPTAGS=YES>"$args.KCAT_REL_PATH"</PDM_FMT>;
+var ahdframe;
+var kcategoryframe;
+
+var m_CurrentIndex = 1;
+var m_CurrentRelationalPath = "1";
+var m_CurrentIndexPath = "TOP";
+var m_CurrentIndexCaption = "TOP";
+var m_lTreeId = -1;
+var m_sSearchWhereClause = "";
+var m_sPreviousSearchUrl = "";
+
+// Used by inner frames to determine if they are inside a popup or not
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+
+//
+function setCurrentIndex(IndexId)
+{
+	m_CurrentIndex = IndexId;
+}
+//
+function getCurrentIndex()
+{
+	return m_CurrentIndex;
+}
+//
+function setCurrentIndexPath(sIndexPath)
+{
+	m_CurrentIndexPath = sIndexPath;
+}
+//
+function getCurrentIndexPath()
+{
+	return m_CurrentIndexPath;
+}
+// 
+function setCurrentRelationalPath(sRelationalIDs)
+{
+	m_CurrentRelationalPath = sRelationalIDs;
+}
+function getCurrentRelationalPath()
+{
+	return m_CurrentRelationalPath;
+}
+//
+function getCurrentIndexCaption()
+{
+	return m_CurrentIndexCaption;
+}
+function setCurrentIndexCaption(sCaption)
+{
+	m_CurrentIndexCaption = sCaption;
+}
+//
+function setTreeId(lTreeID)
+{
+	m_lTreeId = lTreeID;
+}
+//
+function getTreeId()
+{
+	return m_lTreeId;
+}
+//
+function setSearchWhereClause(sWhere)
+{
+	m_sSearchWhereClause = sWhere;
+}
+//
+function getSearchWhereClause()
+{
+	return m_sSearchWhereClause;
+}
+function setPreviousSearchUrl(sSearchUrl)
+{
+	m_sPreviousSearchUrl = sSearchUrl;
+}
+//
+function getPreviousSearchUrl()
+{
+	return m_sPreviousSearchUrl;
+}
+
+function frameset_loaded()
+{
+	if (ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].id=="kt")
+	{
+		ahdframe = window.kdlist;
+		ahdframeset.ahdframe = ahdframe;
+	}
+   
+   if (typeof window.categorytree != "undefined") {
+       var categoryTreeUrl = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1234+HTMPL=load_wait.htmpl" +
+		"+KEEP.cstm_scbd_id=$args.KEEP.cstm_scbd_id+KEEP.new_htmpl=kt_faq_tree.htmpl" + 
+		"+KEEP.FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME+KEEP.KCAT_ID=$args.KCAT_ID+KEEP.KCAT_REL_ID=$args.KCAT_REL_ID" + 
+		"+KEEP.TargetKCATRelID=$args.KCAT_REL_ID" + 
+		"+KEEP.KCAT_REL_PATH=$args.KCAT_REL_PATH+KEEP.SD_LAUNCHED=$args.SD_LAUNCHED+KEEP.LAUNCHED_ITIL=$args.LAUNCHED_ITIL" + 
+		"+KEEP.wait_msg=2000+KEEP.IsPopUp=$args.KEEP.IsPopUp+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME";
+       window.categorytree.document.location.replace(categoryTreeUrl); 
+   }
+   
+   //JH - SDT 28195
+   if ("$args.QBE.IN.ebr_search_text" != "")
+   {
+		ahdtop.SearchFromURL = "QBE.IN.ebr_search_text=" + "$args.QBE.IN.ebr_search_text";
+   }
+   if (("$args.TargetCategory" == "" || "$args.TargetCategory" == null) && ("$args.TargetCategoryID" == "" || "$args.TargetCategoryID" == null ))
+   {
+		ahdtop.NoCategory = 1;
+   }
+   <PDM_IF "$prop.SEARCH_TOOLS_OPENER" == "2" && "$args.KEEP.IsPopUp" != "1" && "$prop.browser" != "IE" && "$env.NX_KT" == "Yes">
+   	if (typeof window.kdlist != "undefined") 
+	{
+		var kdlistUrl = "$cgi?OP=SHOW_DETAIL+SID=$args.SID+FID=$args.FID+PERSID=KD:$prop.SEARCH_TOOLS_OPEN_TREE_ID+HTMPL=kt_document_view.htmpl+opener=search_tools+open_mode=2";
+		window.kdlist.document.location.replace(kdlistUrl); 
+    }
+    </PDM_IF>
+}
+<pdm_include file=menubar_kt.htmpl>
+</script>
+</HEAD>
+<PDM_IF "$args.KEEP.IsPopUp" == "1">
+	<PDM_IF "$prop.browser" != "IE">
+		<FRAMESET ROWS="28,21,*" onLoad="frameset_loaded()">     
+	<PDM_ELSE>
+		<FRAMESET ROWS="28,21,*" onLoad="frameset_loaded()" FRAMEBORDER="0" FRAMESPACING="0"> 
+	</PDM_IF>		
+	<FRAME SRC="$CAisd/html/kt_main_banner.html" NAME=banner NORESIZE SCROLLING=no FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0 title="CA logo - read only">
+<PDM_ELSE>
+	<PDM_IF "$prop.browser" != "IE">
+		<FRAMESET ROWS='<PDM_IF "$SESSION.usingScreenReader" == "1">28<PDM_ELSE>23</PDM_IF>,*' onLoad="frameset_loaded()">     
+	<PDM_ELSE>
+		<FRAMESET ROWS='<PDM_IF "$SESSION.usingScreenReader" == "1">28<PDM_ELSE>23</PDM_IF>,*' onLoad="frameset_loaded()" FRAMEBORDER="0" FRAMESPACING="0"> 
+	</PDM_IF>
+</PDM_IF>
+
+<FRAME SRC="$CAisd/html/menubar.html" id='menubar' NAME=menubar SCROLLING=no NORESIZE FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0 title="Menu bar">
+		
+<PDM_IF "$env.NX_KT" == "Yes">
+	<PDM_IF "$prop.browser" != "IE">
+		<FRAMESET COLS="240,*" FRAMESPACING="3">
+			 <FRAME NAME=categorytree scrolling=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 BORDER=0
+	<PDM_ELSE>
+		<FRAMESET COLS="240,*" FRAMESPACING="2">
+			<FRAME NAME=categorytree style="border:1px #8B939A solid;padding-left:5px;padding-top:5px" scrolling=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 BORDER=0
+	</PDM_IF>
+			SRC="$CAisd/html/empty.html" title="Hidden frame - do not navigate here">
+</PDM_IF>
+         							
+	<PDM_IF "$prop.SupportR50" == "no">
+		<FRAME NAME=kdlist style="border: 1px #8B939A solid;" scrolling=$SESSION.scrolling marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0
+	<PDM_ELSE
+		<FRAME NAME=kdlist style="border: 1px #8B939A solid;" SCROLLING=auto marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0
+	</PDM_IF>
+	
+	<PDM_IF "$env.NX_KT" == "Yes">
+		<PDM_IF 0>
+			If the SEARCH_TOOLS_OPENER property is set to 2 and the window is not a popup - the Category Browse window, 
+			we want to open a knowledge document tree by default. The ID of this document is specified in the 
+			property SEARCH_TOOLS_OPEN_TREE_ID.
+		</PDM_IF>
+		<PDM_IF "$prop.SEARCH_TOOLS_OPENER" == "2" && "$args.KEEP.IsPopUp" != "1" && "$prop.browser" == "IE">
+							SRC="$cgi?OP=SHOW_DETAIL+SID=$args.SID+FID=$args.FID+FACTORY=KD+PERSID=KD:$prop.SEARCH_TOOLS_OPEN_TREE_ID+HTMPL=kt_document_view.htmpl+opener=search_tools+open_mode=2">
+		<PDM_ELSE>
+							SRC="$CAisd/html/empty.html" title="Knowledge Management main">
+		</PDM_IF>
+			</FRAMESET>
+		</FRAMESET>
+	<PDM_ELSE>
+							src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=list_KD.htmpl" title="Knowledge Management main">
+			</FRAMESET>
+	</PDM_IF>	  
+</HTML>

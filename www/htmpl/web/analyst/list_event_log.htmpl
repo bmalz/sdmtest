@@ -1,0 +1,463 @@
+<PDM_IF 0>
+@(#)$Id: list_event_log.htmpl ASPEN.2 2011/10/19 11:41:44 visan03 Exp $
+WHEN PRESENTED:
+	When we need to display event log.
+</PDM_IF>	
+<html lang="en"><HEAD>
+<pdm_pragma release=110> 
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Dziennik zdarzeń";
+var hdrTitleList = "Lista zdarzeń";
+var bOnTicket = false;
+<PDM_IF '$args.p_sd_obj_type' == 'iss'>
+	<PDM_IF '$args.p_sd_obj_id' != ''>
+		bOnTicket = true;
+		<PDM_LIST PREFIX=issInfo FACTORY=iss WHERE="id=$args.p_sd_obj_id" ESC_STYLE=C>
+		<PDM_IF "$args.sd_create_session" != "">
+		    hdrTitle = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Event Log for issue: $issInfo.ref_num and session: $args.sd_create_session"</PDM_FMT>;
+		    hdrTitleList = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Events List for issue: $issInfo.ref_num and session: $args.sd_create_session"</PDM_FMT>;
+		<PDM_ELSE>
+		    hdrTitle = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Event Log for issue: $issInfo.ref_num"</PDM_FMT>;
+		    hdrTitleList = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Events List for issue: $issInfo.ref_num"</PDM_FMT>;
+		</PDM_IF>
+		</PDM_LIST>
+	</PDM_IF>
+<PDM_ELIF '$args.p_sd_obj_type' == 'cr'>
+	<PDM_IF '$args.p_sd_obj_id' != ''>
+		bOnTicket = true;
+		<PDM_LIST PREFIX=crInfo FACTORY=cr WHERE="id=$args.p_sd_obj_id" ESC_STYLE=C>
+		<PDM_IF "$args.KEEP.p_sd_cr_type" == "">
+		<PDM_IF "$args.sd_create_session" != "">
+			hdrTitle = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Event Log for Request: $crInfo.ref_num and session: $args.sd_create_session"</PDM_FMT>;
+			hdrTitleList = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Events List for Request: $crInfo.ref_num and session: $args.sd_create_session"</PDM_FMT>;
+		<PDM_ELSE>
+			hdrTitle = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Event Log for Request: $crInfo.ref_num"</PDM_FMT>;
+			hdrTitleList = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Events List for Request: $crInfo.ref_num"</PDM_FMT>;
+		</PDM_IF>
+		<PDM_ELSE>
+		<PDM_IF "$args.sd_create_session" != "">
+			hdrTitle = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Event Log for $args.KEEP.p_sd_cr_type: $crInfo.ref_num and session: $args.sd_create_session"</PDM_FMT>;
+			hdrTitleList = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Events List for $args.KEEP.p_sd_cr_type: $crInfo.ref_num and session: $args.sd_create_session"</PDM_FMT>;
+		<PDM_ELSE>
+			hdrTitle = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Event Log for $args.KEEP.p_sd_cr_type: $crInfo.ref_num"</PDM_FMT>;
+			hdrTitleList = <PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>"Events List for $args.KEEP.p_sd_cr_type: $crInfo.ref_num"</PDM_FMT>;
+		</PDM_IF>
+		</PDM_IF>
+		</PDM_LIST>
+	</PDM_IF>
+</PDM_IF>
+<PDM_IF "$args.sd_create_session" != "">
+	if (!bOnTicket)
+	{
+	    hdrTitle = "Event Log for session: $args.sd_create_session";
+	    hdrTitleList = "Events List for session: $args.sd_create_session";
+	}
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = false;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/architect_filter.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Log Event">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=event_log>
+<PDM_IF "$args.sd_create_session" != "">
+	</SCRIPT>
+	<input type=hidden name="QBE.EQ.session" value='$args.sd_create_session'>
+	<SCRIPT>
+</PDM_IF>
+<PDM_IF "$args.p_sd_obj_type" != "">
+	</SCRIPT>
+	<input type=hidden name="QBE.EQ.sd_obj_type" value='$args.p_sd_obj_type'>
+	<input type=hidden name="QBE.EQ.sd_obj_id" value='$args.p_sd_obj_id'>
+	<SCRIPT>
+<PDM_ELSE>
+	</SCRIPT>
+	<input type=hidden name="QBE.EQ.sd_obj_type" value='$args.QBE.EQ.sd_obj_type'>
+	<input type=hidden name="QBE.EQ.sd_obj_id" value='$args.QBE.EQ.sd_obj_id'>
+	<SCRIPT>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Typ zdarzenia" attr=event>
+<PDM_IF 0>//Only show the field if a value isn't hard-coded for it, otherwise hard-code the value.</PDM_IF>
+<PDM_IF "$args.KEEP.session_contact_id" == "">
+<PDM_MACRO name=sfLookup hdr="Kontakt" attr=session.contact factory=cnt>
+<PDM_ELSE>
+    document.writeln('<INPUT TYPE=hidden NAME=QBE.EQ.session.contact.id VALUE=$args.KEEP.session_contact_id>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data logowania zdarzenia" attr=log_time qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data logowania zdarzenia" attr=log_time qbe_condition=LE>
+</SCRIPT>
+<input type=hidden name=sd_create_session value="$args.sd_create_session">
+<input type=hidden name=p_sd_obj_type value="$args.p_sd_obj_type">
+<input type=hidden name=p_sd_obj_id value="$args.p_sd_obj_id">
+<INPUT TYPE=HIDDEN NAME="QBE.GE.id" VALUE=0>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+	<SCRIPT LANGUAGE="JavaScript">
+	var msgFoundNone = "Nie znaleziono zdarzeń";
+	var msgFound1 = "Znaleziono 1 zdarzenie";
+	var msgFound = "Znaleziono %1 zdarzeń";
+	var msgFoundMore = "Znaleziono %1 zdarzeń.  Lista %2 do %3";
+	var msgSelect = "Click to select desired event";
+	var sDetails = "";
+	
+	function fmtDetails(value)
+	{
+		rs.data(sDetails);
+	}
+	
+	
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="sDetails  = '';">
+<PDM_MACRO name=lsCol hdr="Data" attr=log_time exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=session.contact>
+<PDM_IF  "$prop.MultiTenancy" == "on">
+<PDM_MACRO name=lsCol hdr="User's Tenant" attr=session.contact.tenant sort="no">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Typ dostępu" attr=session.contact.access_type sort="no">
+<PDM_MACRO name=lsCol hdr="Zdarzenie" attr=event.description>
+<PDM_MACRO name=lsWrite text="var date = '@{list.log_time:0}';">
+<PDM_MACRO name=lsWrite text="var contact = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.session.contact.combo_name:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var description = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.event.description:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var event_val = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.event:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var event_code =	'<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.event.code:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var sd_obj_type =	'<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.sd_obj_type:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var sd_obj_id = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.sd_obj_id:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var kd = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var numdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata1:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.textdata1:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.textdata2:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.event.code:}' == 'SEARCH'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=ebr_lst FACTORY=EBR_LOG WHERE=\"id=@{list.numdata1:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{ebr_lst.NUM_MATCHES:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{ebr_lst.SEARCH_TEXT:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails = msgtext(\"Search_Text:_'%1'_with_%2_docu\", textdata1, numdata2);">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{ebr_lst.BEST_IDS:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="if(numdata2 != '0') { sDetails += '<BR>' + CreateTopTenLink(textdata2,numdata2); }">
+<PDM_MACRO name=lsWrite text="pdm_if '@{ebr_lst.FILTER_DATA:}' != ''">
+<PDM_MACRO name=lsWrite text="sDetails += '<BR>' + CreateSearchLogLink(numdata1);">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'KD_OPEN'">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="sDetails  = CreateKDLink(kd, textdata1);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=bu_trans_lst FACTORY=BU_TRANS WHERE=\"id=@{list.numdata1:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Duration: @{bu_trans_lst.kd_duration:0}';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'KD_RATE'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=kd_rate FACTORY=BU_TRANS WHERE=\"id=@{list.numdata1:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="numdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{kd_rate.BU_RATING:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="lRate = numdata1;">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, textdata1);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="sDetails = sDetails + '<BR>';">
+<PDM_MACRO name=lsWrite text="if (lRate == 0){">
+<PDM_MACRO name=lsWrite text="sDetails = sDetails + \"Rating: 'Not helpful at all'.\";}">
+<PDM_MACRO name=lsWrite text="if (lRate == 2){">
+<PDM_MACRO name=lsWrite text="sDetails = sDetails + \"Rating: 'Somewhat helpful'.\";}">
+<PDM_MACRO name=lsWrite text="if (lRate == 4){">
+<PDM_MACRO name=lsWrite text="sDetails = sDetails + \"Rating: 'Very helpful'.\";}">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'DT_NAVIGATE'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=dt_node FACTORY=ES_NODES WHERE=\"id=@{list.numdata1:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="var sTreeTitle = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{dt_node.TREE_ID.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{dt_node.NODE_SHORT_DESC:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, sTreeTitle);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Node: ' + CreateDTLink(kd,textdata1,textdata2);">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'FAQ'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=faq FACTORY=KCAT WHERE=\"id=@{list.numdata1:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{faq.CAPTION:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="sDetails = \"Category: \" + textdata1;">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'KD_COMMENT'">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=comments FACTORY=O_COMMENTS WHERE=\"id=@{list.numdata1:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{comments.COMMENT_TEXT}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, textdata1);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="sDetails += '<BR>comment:'  + textdata2;">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'KD_BOOKMARK'">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, textdata1);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'EMAIL'">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, textdata2);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="sDetails += '<BR>';">
+<PDM_MACRO name=lsWrite text="sDetails += \"Emailed to:\" + textdata1;">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'KD_PRNT'">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, textdata2);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'CR_CREATE'  ||
+                                               '@{list.event.code:}' == 'ISS_CREATE' ||
+                                               '@{list.event.code:}' == 'CHG_CREATE' || 
+                                               '@{list.event.code:}' == 'DEP_ATTR_CTL' || 
+                                               '@{list.event.code:}' == 'ST_RULE_VIOL'">
+<PDM_MACRO name=lsWrite text="var sSummary = ''">
+<PDM_MACRO name=lsWrite text="var sTicketType = '';">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.sd_obj_type:}' == 'iss'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_iss FACTORY=iss WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_iss.ref_num:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_iss.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Issue:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.sd_obj_type:}' == 'chg'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_chg FACTORY=chg WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_chg.chg_ref_num:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_chg.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Change Order:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_cr  FACTORY=cr  WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_cr.ref_num:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_cr.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_if '@{link_cr.type}' == 'I'">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Incident:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{link_cr.type}' == 'P'">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Problem:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Request:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite both=yes text="if (typeof(sSummary) != 'undefined' && sSummary != ' ') {">
+<PDM_MACRO name=lsWrite text="var sTicketTitle = sTicketType + textdata2 + ', ' + sSummary;">
+<PDM_MACRO name=lsWrite both=yes text="} else {">
+<PDM_MACRO name=lsWrite text="var sTicketTitle = sTicketType + textdata2;">
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite text="var sPersid = '@{list.sd_obj_type}:@{list.sd_obj_id}'">
+<PDM_MACRO name=lsWrite both=yes text="pdm_if \"@{args.QBE.EQ.sd_obj_id}\" == ''">
+<PDM_MACRO name=lsWrite text="sDetails = CreateTicketLink(sPersid, sTicketTitle);">
+<PDM_MACRO name=lsWrite both=yes text="pdm_else">
+<PDM_MACRO name=lsWrite text="sDetails = sTicketTitle;">
+<PDM_MACRO name=lsWrite both=yes text="/pdm_if">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'TICK_SEARCH'">
+<PDM_MACRO name=lsWrite text="sDetails = 'Search Ticket Type: ' + textdata1">
+<PDM_MACRO name=lsWrite text="numdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata1:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Tickets Found: ' + numdata1">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'KD_CREATE'">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, textdata1);">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'KD_DELETE'">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDText(kd, textdata1);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'CHG_CONFLICT'">
+<PDM_MACRO name=lsWrite text="sDetails = \"Conflicts Detected: \" + numdata1;">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'CHG_SCH_CNFL'">
+<PDM_MACRO name=lsWrite text="sDetails = CreateScheduleConflictText(numdata1, numdata2, textdata1);">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'TERMS_ACC' || '@{list.event.code:}' == 'TERMS_REJ'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=tou FACTORY=ca_tou WHERE=\"id=U'@{list.textdata1:}'\" ESC_STYLE=C DOMSET=\"MLIST_STATIC\"">
+<PDM_MACRO name=lsWrite text="sDetails = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{tou.name:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'LINK' || '@{list.event.code:}' == 'UNLINK' || '@{list.event.code:}' == 'KD_REJECT'">
+<PDM_MACRO name=lsWrite text="textdata1 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.kd.TITLE:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="var sSummary = ''">
+<PDM_MACRO name=lsWrite text="var sTicketType = '';">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.sd_obj_type:}' == 'iss'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_iss FACTORY=iss WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_iss.ref_num:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_iss.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Issue:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.sd_obj_type:}' == 'chg'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_chg FACTORY=chg WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_chg.chg_ref_num:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_chg.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Change Order:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_cr  FACTORY=cr  WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_cr.ref_num:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_cr.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_if '@{link_cr.type}' == 'I'">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Incident:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{link_cr.type}' == 'P'">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Problem:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Request:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="sDetails = CreateKDLink(kd, textdata1);">
+<PDM_MACRO name=lsWrite text="numdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.numdata2:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>Version: ' + numdata2">
+<PDM_MACRO name=lsWrite text="var sTicketTitle = sTicketType + textdata2 + ', ' + sSummary;">
+<PDM_MACRO name=lsWrite text="var sPersid = '@{list.sd_obj_type}:@{list.sd_obj_id}'">
+<PDM_MACRO name=lsWrite text="sDetails += '<br>' + CreateTicketLink(sPersid, sTicketTitle);">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.event.code:}' == 'TICK_OPEN' ">
+<PDM_MACRO name=lsWrite text="var sSummary = ''">
+<PDM_MACRO name=lsWrite text="var sTicketType = '';">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.sd_obj_type:}' == 'iss'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_iss FACTORY=iss WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_iss.ref_num:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_iss.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Issue:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.sd_obj_type:}' == 'chg'">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_chg FACTORY=chg WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_chg.chg_ref_num:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_chg.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Change Order:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="PDM_LIST PREFIX=link_cr  FACTORY=cr  WHERE=\"id=@{list.sd_obj_id:0}\" ESC_STYLE=C">
+<PDM_MACRO name=lsWrite text="textdata2 = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_cr.ref_num:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="sSummary = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{link_cr.summary:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_if '@{link_cr.type}' == 'I'">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Incident:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{link_cr.type}' == 'P'">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Problem:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="sTicketType = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>Request:</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="/PDM_LIST">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="var sTicketTitle = sTicketType + textdata2 + ', ' + sSummary;">
+<PDM_MACRO name=lsWrite text="var sPersid = '@{list.sd_obj_type}:@{list.sd_obj_id}'">
+<PDM_MACRO name=lsWrite text="sDetails = CreateTicketLink(sPersid, sTicketTitle);">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Szczegóły" attr=event.code export=no fmtfunc=fmtDetails sort=no>
+<PDM_MACRO name=lsEnd>
+		
+function OpenDocumentViewer(lDocID, sTreePath)
+{
+	var sFileName = 'kt_document_view.htmpl';
+		
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+	              "+OP=SHOW_DETAIL+PERSID=KD:" + lDocID + "+HTMPL=" + sFileName + 
+	              "+opener=user_view+disable_solution_survey=true+disable_comment=true+disable_kcat_links=true"+
+	              "+RELOAD_WIN=0+open_mode=2";
+	              
+	if ( typeof sTreePath == "string")
+	{
+		url += "+PATH_IDS=" + sTreePath;
+	
+	}
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",gobutton=no"+
+				",status=no";
+	
+	preparePopup(url, "DOC_VIEW_WIN" + lDocID, features, undefined, undefined, '');	
+}	
+
+function CreateKDLink(lDocId, sDocTitle)
+{
+	return "<a href=javascript:OpenDocumentViewer(" + lDocId + ")>" + msgtext("Document_ID:") + lDocId + ", " + sDocTitle + ".</a>";
+}
+
+function CreateKDText(lDocId, sDocTitle)
+{
+	return msgtext("Document_ID:") + lDocId + ", " + sDocTitle + ".";
+}
+
+function CreateDTLink(lDocId, sPathIDs, sNode)
+{
+	//var sRetVal = "<a href=javascript:OpenDocumentViewer(" + lDocId + ",'PATH_IDS=" + sPathIDs + "')>" + sNode + ".</a>";
+	var sRetVal = "<a href=javascript:OpenDocumentViewer(" + lDocId + ",'" + sPathIDs + "')>" + sNode + ".</a>";
+	return sRetVal;
+}
+
+function SearchLogView(nLogId)
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+               "+OP=SHOW_DETAIL+PERSID=EBR_LOG:" + nLogId +
+               "+HTMPL=detail_EBR_LOG.htmpl";
+
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",gobutton=no"+
+				",status=no";
+			
+	preparePopup(url, "EVT_VIEW_WIN" + nLogId, features, undefined, undefined, '');	
+}
+
+function CreateSearchLogLink(nLogId)
+{
+	return "<a href=javascript:SearchLogView(" + nLogId + ")>" + msgtext("More_Info...") + "</a>";
+}
+
+function CreateTicketLink(sPersId, sTitle)
+{
+	return "<a href=javascript:showDetail('" + sPersId + "')>" + sTitle + "</a>";
+}
+
+function CreateScheduleConflictText(startDate, endDate, message)
+{
+	return msgtext( "Change_schedule_conflict_info", date_to_string( startDate ),  date_to_string( endDate ) );
+}
+
+function SearchTopTen(BestIds)
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+               "+OP=SEARCH+FACTORY=KD+ADDITIONAL_WHERE=id IN("+BestIds+")" 
+               +"+KEEP.IsPopUp=1";
+
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",gobutton=no"+
+				",status=no";
+			
+	preparePopup(url, "EVT_VIEW_WIN" + BestIds, features, undefined, undefined, '');	
+}
+
+function CreateTopTenLink(BestIds,results)
+{
+	
+	var arBestIds = BestIds.split(" ");
+	var ids;
+	for (var i = 0; i < arBestIds.length; i++)
+ 	{
+ 		if (i==0)
+ 			ids=arBestIds[i];
+ 		else if(arBestIds[i]!="") 			
+ 			ids+= "," + arBestIds[i];
+	}
+	if (results>10)
+		return "<a href=javascript:SearchTopTen('" + ids + "')> " + msgtext("Top_Ten_Results") + " </a>";
+	else 
+		return "<a href=javascript:SearchTopTen('" + ids + "')> " + msgtext("Results") + " </a>";
+
+}
+
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,71 @@
+<PDM_IF 0>
+macro_cnt_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=macro_cnt_tab" factory=macro>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<BODY class=detailro OnUnload="cancel_any_lrel_update()" onLoad="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<BODY class=detailro OnUnload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+function add_button_to_tab_banner(){
+ImgBtnRow();
+ImgBtnCreate("UPDATE_LREL1", "Update_Contacts", "update_lrel('macro', '$args.persistent_id', 'cnt', 'att_cntlist',  'Contacts', 'Notification Recipients', '')", true, 0);
+ImgBtnEndRow();
+}
+tab_banner("Contact List",true);
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_IF "$args.id" == 0>
+detailStartRow("Center");
+detailRowHdr("Macro needs to be saved first before a contact can be attached to it");
+<PDM_MACRO name=dtlEndTable>
+ImgBtnDisableButton("UPDATE_LREL1");
+</PDM_IF>
+</PDM_IF>
+docWriteln("<TABLE ID=tbl502 CLASS=tab summary='Contact List'>");
+docWriteln("<TR>");
+docWriteln("<th scope=col CLASS=results ALIGN=left>Name</TH>");
+docWriteln("</TR>");
+
+<PDM_IF $args.att_cntlist.length == 0>
+<PDM_MACRO name=dtlStartRow>    
+docWriteln("<TD ALIGN=middle class=detailro>");  
+docWriteln("No Contacts Attached");
+docWriteln("</TD>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_ELSE>
+var counter=0;
+<PDM_LIST SOURCE=args.att_cntlist ESC_STYLE=C>
+			var sClass;
+			if(counter%2)
+				sClass = "results1";
+			else
+				sClass = "results0";
+			counter++;
+			var strHTML="<TR class=" + sClass +  ">";
+			
+docWriteln(strHTML); 
+docWriteln("<TD VALIGN=TOP class=detailroTab>");
+docWriteln("<A" + detailNextID() +
+           " HREF=\"javascript:showDetailWithPersid('$args.att_cntlist.persistent_id')\">$args.att_cntlist.combo_name</A>");
+docWriteln("</TD>");
+docWriteln("</TR>");
+</PDM_LIST>
+docWriteln("</TABLE>");
+</PDM_IF>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: macro_cnt_tab.htmpl FWr1.1 2007/2/23 21:36:56 jenji01 Exp $;
+</PDM_IF>

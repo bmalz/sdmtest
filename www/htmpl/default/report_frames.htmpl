@@ -1,0 +1,97 @@
+<PDM_IF 0>
+$Id: report_frames.htmpl,v 1.4 2007/01/09 01:50:40 jenji01 Exp $
+	WHEN PRESENTED:
+	   Show a report in a frame  
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/report.js"></script>
+<title>$prop.Formtitle</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ajax.js"></script>
+<script>
+var ahdframeset = ahdtop;
+var cfgCAISD = "$CAisd";
+var title_val = "$args.report_title";
+var cfgUserType = "analyst";
+function show_report_list()
+{
+    var tab_id = getCurrTabID();
+    var role_id = ahdframeset.cfgCurrentRoleID;
+    if (tab_id == "" ||  
+	typeof role_id == "undefined")
+    {
+	alertmsg("Failed_to_show_the_report_list");
+	return;
+    }
+    var url = "$cgi?SID=$SESSION.SID+FID=$prop.FID+OP=DISPLAY_FORM" + 
+	      "+FACTORY=role_web_form" + 
+	      "+role_id=" + role_id + 
+	      "+tab_id=" + tab_id + 
+	      "+frame_name=" + window.name + 
+	      "+report_name=" + nx_escape(title_val) + 
+	      "+HTMPL=role_web_form.htmpl";
+
+    if (ahdtop.cstReducePopups == true) 
+    {
+	if (window.name == "Frame1_admin")
+	    parent.save_prev_Frame1_admin_url = window.location.href;
+        else
+     	    parent.save_prev_Frame2_admin_url = window.location.href;
+    }
+
+    var features = "directories=no" + 
+		   ",location=no" +
+		   ",status=no" + 
+		   ",toolbar=no,menubar=no";
+		
+    preparePopup(url, "report_list", features, 700, 400, "MENUBAR=no+GOBUTTON=no+WELCOMEBANNER=no"); 
+}
+
+function frameset_loaded()
+{
+    var func = "parent.ahdframe." + parent.name + "." + window.name + ".got_bo_info";
+    // If display a report form without the InfoView button, adjust func
+    if (parent.name != "show_rpts")
+    {
+	ahdtop.ahdframe = parent;
+	func = "parent.ahdframe." + window.name + ".got_bo_info";
+    }
+    
+    if (typeof ahdtop.ahdframe.form_title != "string" ||
+	ahdtop.ahdframe.form_title.length == 0)
+    {
+	ahdtop.ahdframe.form_title = ahdtop.cfgFormTitle + " - " + "Web Report";
+	setWindowTitle(ahdtop.ahdframe.form_title, 1);
+    }
+    ahdtop.sd_get_bo_info(func); 
+}
+
+function got_bo_info(bo_token)
+{
+	var frm = document.getElementById("report_url");
+    var web_form_url = "$args.web_form_url";
+	web_form_url = web_form_url + "&token=" + bo_token;
+    var rpt_url = resolveWebFormVars(web_form_url);
+    // Use GET
+	frm.src = rpt_url;
+}
+</script>
+</head>
+<script>
+<PDM_IF  "$prop.browser" != "IE">
+    <PDM_MACRO NAME=startFrameset ID="frameset1" rows="25,*" onload="frameset_loaded();">
+<PDM_ELSE>
+    <PDM_MACRO NAME=startFrameset ID="frameset1" rows="23,*" border=0 onload="frameset_loaded();">
+</PDM_IF>
+<PDM_MACRO NAME=frame ID="report_title" frame_name="report_title" web_form_url="$CAisd/html/report_title.html" noresize=true scrolling=no style="border: 1px #8B939A solid;" FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0 title="Report title">
+<PDM_MACRO NAME=frame ID="report_url" frame_name="report_url" scrolling=no web_form_url="$CAisd/html/empty.html" style="border: 1px #8B939A solid;" FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0 title="Report">
+<PDM_MACRO NAME=endFrameset>
+</script>
+</html>
+

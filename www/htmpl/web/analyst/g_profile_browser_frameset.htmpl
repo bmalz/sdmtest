@@ -1,0 +1,46 @@
+<PDM_IF 0>
+$Id: g_profile_browser_frameset.htmpl,v 1.2 2006/11/15 18:52:53 tooda01 Exp $
+WHEN PRESENTED:
+    Used as PDM_INCLUDE to create the global profile browser frameset
+</PDM_IF>
+
+<PDM_PRAGMA RELEASE=110>
+
+<!-- Start of g_profile_browser_frameset.htmpl -->
+
+scratchpad_size = 280;
+
+function doClose() { return true; }
+
+<pdm_include file=menubar_sd.htmpl>
+
+in_persid = "$args.PERSID";
+var popup_name = "+KEEP.POPUP_NAME=" + window.name; 
+if (in_content_frame)
+{
+    if ( typeof ahdtop == "object" )
+    {
+	ahdtop.AHD_Windows["g_profile_browser"] = window;
+	ahdtop.g_pb_initial_persid = "search";
+    }
+    popup_name = "";
+}
+
+document.writeln('<FRAMESET MARGINHEIGHT=0 MARGINWIDTH=0 ROWS="*,' + scratchpad_size + '">');
+<PDM_IF "$prop.browser" != "IE">
+document.writeln('<FRAMESET cols="200,*" FRAMEBORDER=1 onLoad="g_profile_start(in_persid)">');
+document.writeln('<FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=g_profile_jump.htmpl' + popup_name + '" FRAMEBORDER=1 SCROLLING=auto NAME=menu title="Profile Links Menu">');
+document.writeln('<FRAME SRC="$CAisd/html/empty.html" SCROLLING=auto NAME=page title="Profile Data">');
+document.writeln('</FRAMESET>');
+document.writeln('<FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=g_profile_scratchpad.htmpl+KEEP.POPUP_NAME=' + window.name + '" NAME=scratchpad SCROLLING=auto marginheight=2 marginwidth=0 FRAMEBORDER=0 BORDER=0 title="Scratchpad">');
+<PDM_ELSE>
+document.writeln('<FRAMESET cols="200,*" FRAMEBORDER=NO FRAMESPACING="2" BORDER=NO onLoad="g_profile_start(in_persid)">');
+document.writeln('<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=g_profile_jump.htmpl' + popup_name + '" NAME=menu SCROLLING=auto marginheight=2 marginwidth=0 FRAMEBORDER=0 BORDER=0 title="Profile Links Menu">');
+document.writeln('<FRAME style="border: 1px #8B939A solid;" SRC="$CAisd/html/empty.html" scrolling=auto NAME=page MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title="Profile Data">');
+document.writeln('</FRAMESET>');
+document.writeln('<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=g_profile_scratchpad.htmpl+KEEP.POPUP_NAME=' + window.name + '" NAME=scratchpad SCROLLING=auto marginheight=2 marginwidth=0 FRAMEBORDER=0 BORDER=0 title="Scratchpad">');
+</PDM_IF>
+document.writeln("</FRAMESET>");
+
+<!-- End of g_profile_browser_frameset.htmpl -->
+

@@ -1,0 +1,31 @@
+<PDM_IF 0>
+sa_unavailable.htmpl
+WHEN PRESENTED:
+   When Support Automation has not been installed and configured with CA Service Desk.
+</PDM_IF>
+<PDM_IF 0>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<TITLE>Support Automation Unavailable</TITLE>
+</HEAD>
+<BODY>
+</PDM_IF>
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+	document.body.className="";
+	set_action_in_progress(ACTN_COMPLETE);
+	document.writeln(generate_logo_product_name_html());
+</SCRIPT>
+<H1>Support Automation Unavailable</H1>
+</CENTER>
+CA Support Automation must be configured before using the Support Automation tab. In addition, the Support Automation options must be set by the Administrator. For more information on this feature please refer to the section in the Implementation Guide on installing the CA Support Automation feature.
+<PDM_IF 0>
+</BODY>
+</HTML>
+</PDM_IF>
+<PDM_IF 0>
+@(#)$Id: sa_unavailable.htmpl ANDERSON.2 2009/12/03 15:37:54 lamke01 Exp $
+</PDM_IF>

@@ -1,0 +1,116 @@
+<PDM_IF 0>
+cnote_tracker.htmpl
+WHEN PRESENTED:
+    Loaded into a hidden frame on the main page
+INTENT:
+    Polls the server for new/revised announcements
+VARIABLES:
+    
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no menubar=no>
+<script type="text/javascript">
+
+ahdtop = get_ahdtop();
+if ( typeof ahdtop == "object" && ahdtop != null) {
+	ahdtop.set_cnote_date();
+} else {
+	alert("no ahd top for announcement tracking!");
+}
+
+var cnote_popup_winname = "cnote_notif";
+
+// Assumes we're sorted in descending order...
+var latest_date = null;
+
+// Our announcement polling...in minutes.
+var t_int = "$prop.UpdatedAnnouncementsPopup";
+if (t_int.length > 0) {
+	window.setInterval("cnote_timeout()", t_int * 60000);
+}
+
+var doNotSetFocus = 1;
+
+function cnote_timeout() {
+	window.location.reload();
+}
+
+// Popup an "update announcements" list.
+function do_popup(last_posted_date) {
+	popup_window(cnote_popup_winname, "bin_form_np.htmpl", popupWidth(MEDIUM_POPUP), popupHeight(MEDIUM_POPUP), "scrollbars=no", "KEEP.NEW_CNOTE_NOTIF=1", "KEEP.CNOTE_LATEST_DATE=" + last_posted_date);
+}
+
+</script>
+
+<!-- This sets cnote_where and cnote_domset page variables -->
+<pdm_macro name=cnoteWC>
+
+<pdm_if $prop.view_internal == 1>
+<PDM_LIST prefix=list factory=cnote where="$args.cnote_where" domset="cnote_list_desc_static" length=$prop.AnnouncementLength>
+	<script type="text/javascript"> 
+		// Get the most recent announcement date.
+		if (null == latest_date || $list.posted_date_INT_DATE > latest_date) {
+			latest_date = $list.posted_date_INT_DATE;
+		}
+	</script>	
+</PDM_LIST>	
+<pdm_else>
+<PDM_LIST prefix=list factory=cnote where="$args.cnote_where" domset="cnote_list_desc_excludeinternal_static" length=$prop.AnnouncementLength>
+	<script type="text/javascript"> 
+		// Get the most recent announcement date.
+		if (null == latest_date || $list.posted_date_INT_DATE > latest_date) {
+			latest_date = $list.posted_date_INT_DATE;
+		}
+	</script>	
+</PDM_LIST>	
+</pdm_if>
+
+		
+<PDM_INCLUDE FILE=std_footer.htmpl>
+
+<script type="text/javascript">
+
+// If we found an announcement with a date later than one recorded in ahdtop,
+// pop it.
+
+var notif_up = 0;
+if (find_popup_window(cnote_popup_winname) != null) notif_up = 1;
+
+// Notification window used to be up, but no longer.  Reset our popup tracking date
+if (!notif_up && ahdtop.last_popup_date >= 0) {
+	ahdtop.last_popup_date = -1;
+}
+
+if (ahdtop.get_last_cnote_date() >= 0 && latest_date > ahdtop.get_last_cnote_date()) {
+
+	//  Ordering here is important now, so we get the right date
+	//  If the popup is already open, keep showing new cnotes until the user "resets" the date by either closing the popup
+	//  or doing View-Announcements.
+	if (!notif_up) {
+		ahdtop.last_popup_date = ahdtop.get_last_cnote_date();
+		do_popup(ahdtop.get_last_cnote_date());
+	} else {
+		do_popup(ahdtop.last_popup_date);
+	}
+}
+
+//  Cope with race condition of this form and bin_form_np fetching cnotes..
+//	Effectively disables the first popup attempt when everything is initially loaded,
+//	assuming ahdtop.latest_cnote_date is initialized to -1.
+if (ahdtop.get_last_cnote_date() < 0) ahdtop.set_cnote_date(0);
+</script>
+
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: cnote_tracker.htmpl ASPEN.1 2011/04/08 14:54:22 taoyu02 Exp $
+</PDM_IF>
+
+

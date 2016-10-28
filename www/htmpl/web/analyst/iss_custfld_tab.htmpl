@@ -1,0 +1,51 @@
+<PDM_IF 0>
+iss_custfld_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Issue 
+INTENT:
+    Display a notebook page for iss plan task.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=iss_custfld_tab" factory=iss>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Plan">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=tabBanner title="Custom Fields">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlCheckbox hdr="Flaga 1" attr=flag1>
+<PDM_MACRO name=dtlCheckbox hdr="Flaga 2" attr=flag2>
+<PDM_MACRO name=dtlCheckbox hdr="Flaga 3" attr=flag3>
+<PDM_MACRO name=dtlCheckbox hdr="Flaga 4" attr=flag4>
+<PDM_MACRO name=dtlCheckbox hdr="Flaga 5" attr=flag5>
+<PDM_MACRO name=dtlCheckbox hdr="Flaga 6" attr=flag6>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Użytkownik1" attr=user1 colspan=2>
+<PDM_MACRO name=dtlTextbox hdr="Użytkownik2" attr=user2 colspan=2>
+<PDM_MACRO name=dtlTextbox hdr="Użytkownik3" attr=user3 colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: iss_custfld_tab.htmpl ASPEN.1 2010/10/25 15:59:39 saima01 Exp $
+</PDM_IF>

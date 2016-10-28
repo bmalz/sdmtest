@@ -1,0 +1,76 @@
+<PDM_IF 0>
+@(#)$Id: kt_architect_delete_KD.htmpl FWr1.1 2007/2/23 21:32:29 jenji01 Exp $
+WHEN PRESENTED:
+    when deletingKnowledge Documents
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview=no>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+	var hdrTitle = "Delete Documents";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl header=no>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></script>
+<script type="text/javascript">
+
+function Cancel()
+{
+	top.close();
+}
+function OK()
+{
+	if (typeof top.opener == "object" && typeof top.opener.doDelete != "undefined")
+	{
+		if("$args.PREV_OP" == "LIST_ALL")
+			top.opener.doDelete(2);
+		else
+		{
+			if(document.forms["frmMain"].elements["chkDocs"][0].checked)
+				top.opener.doDelete(1);
+			else
+				top.opener.doDelete(2);
+		}		
+	}
+	top.close();	
+}
+</script>
+</HEAD>
+<BODY border="0" topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Delete Documents" logo=no>
+<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0 class=page_header>
+	<TR height=25>			
+		<TD width="99%" align=left>Delete Documents</TD>
+		<TD align=right>
+			<script type="text/javascript">
+				ImgBtnRow(0);    
+				ImgBtnCreate("idOK","OK", "OK();", 1);
+				ImgBtnCreate("idCancel","Cancel", "Cancel();", 1); 
+				ImgBtnEndRow();
+			</script>
+		</TD>
+	</TR>
+</TABLE>
+<form id=frmMain name=frmMain onsubmit="return false">
+<br>
+<table width=100%>
+	<TR>
+		<TD>
+			<PDM_IF "$args.PREV_OP" == "LIST_ALL">
+				<span class="clsText" >&nbsp;&nbsp;Are you sure want to delete all $args.RECORD_COUNT documents in this list?</span>
+			<PDM_ELSE>
+				<input type=radio id=chkDocs name=chkDocs checked><span onclick="chkDocs[0].click();" class="clsText" style="cursor:pointer;">Delete the $args.BUFFER_SIZE documents currently displayed</span><br>
+				<input type=radio id=chkDocs name=chkDocs><span onclick="chkDocs[1].click();" class="clsText" style="cursor:pointer;">Delete all $args.RECORD_COUNT documents retrieved</span><br>
+			</PDM_IF>	
+		</TD>
+	</TR>
+</TABLE>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

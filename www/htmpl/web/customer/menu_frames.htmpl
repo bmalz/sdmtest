@@ -1,0 +1,127 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  menu_frames.htmpl
+// Created: 08/12/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//	This file creates the default frameset for the customer interface.
+//	If $prop.initial_load is provided, the content frame loads the
+//	appropriate form.  If not, the content frame loads home.htmpl.
+////////////////////////////////////////////////////////////////////////////
+// $Id: menu_frames.htmpl,v 1.3 2006/11/09 18:08:58 ricma09 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="OP=menu">
+<html lang="en">	<head>
+<PDM_INCLUDE FILE=styles.htmpl>
+		<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/fid_gen.js"></script>
+<PDM_IF "$prop.initial_load:}" != "">
+		<script>
+			/* If the opener of this window has a get_ahdtop function, we use it to see if this window is the result
+			 * of that window... this implies that we're using a self-service interface.
+			 */
+			var initial_load = "$prop.initial_load";
+			if ((initial_load.indexOf("OP=SHOW_DETAIL") != -1 && initial_load.indexOf("KEEP.IsPopUp") != -1) &&
+				(typeof window.opener == "object") &&
+				(window.opener != window.self) &&
+				((typeof window.opener.get_ahdtop == "object") || (typeof window.opener.get_ahdtop == "function")) &&
+				(typeof window.opener.get_ahdtop() == "object") &&
+				(window.name == "ci_search"))
+			{
+				// Since we're here, it means that we got here because the user decided to create an issue
+				// via KT.
+				// That also implies that we're in a new window. That's bad!
+				var orig_ahdtop = window.opener.get_ahdtop();
+
+				initial_load = String("$prop.initial_load").replace(/\+KEEP\.IsPopUp=[0-9]+/, "");
+				var url = orig_ahdtop.cfgCgi +
+						  "?SID=" + orig_ahdtop.cfgSID +
+						  "+FID=" + String(fid_generator());
+				if (initial_load[0] != "+")
+					url += "+";
+				url += initial_load;
+				orig_ahdtop.cai_main.location.href = url;
+				window.close();
+			}
+			
+			function frameset_loaded()
+			{		
+				// This property is required to be set for the knowledge document viewer						
+				ahdtop.ahdframe = window.cai_main;
+			}
+		</script>
+</PDM_IF>
+<PDM_INCLUDE FILE=ahdtop.htmpl>
+		<SCRIPT LANGUAGE="Javascript">
+			var ahdframeset = ahdtop;
+		</SCRIPT>
+        <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<PDM_IF "$prop.FormTitle" != "">
+		<title>$prop.FormTitle</title>
+<PDM_ELSE>
+		<title>$ProductName</title>
+</PDM_IF>
+		<script language="JavaScript" src="$CAisd/scripts/antiecho.js"></script>
+		<script language="JavaScript">redirect_if_echo('menu_frames.htmpl');</script>
+		<SCRIPT language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+		<SCRIPT>
+		// All available hidden frames that could be used for 
+		// issuing the url in the background.
+		// For customer web, there are only two frames
+		var work_frames = new Array("workframe","workframe1");
+		var work_frame_mgr = void(0);
+		var cfgWorkFrameTimeout = "$prop.WorkFrameTimeout";
+		<PDM_IF "$prop.URL_CI" != "">
+		var ciSearchWindow = get_popup_window_name("ci_window");
+		var propUrlCi = "$prop.URL_CI";
+		</PDM_IF>
+        setTimeoutWarning();
+		</SCRIPT>
+	</head>
+	<frameset rows="50,*,1,1" frameborder=0 framespacing=0 border=0 onLoad="frameset_loaded()" onUnload="closing_main_window()">
+		<FRAME SRC="$CAisd/html/gobtn.html" NAME=gobtn NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title="C A logo - read only">
+	
+	<PDM_IF "$prop.initial_load" == "">
+		<FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=5+HTMPL=home.htmpl" NAME=cai_main  marginheight=0 marginwidth=0 frameborder=1 title="Main">
+	<PDM_ELIF "$prop.guest_user" == 1>
+		<FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=5+HTMPL=home.htmpl" NAME=cai_main  marginheight=0 marginwidth=0 frameborder=1 title="Main">
+	<PDM_IF 0><!--initial_load will be menu_frames if we use portal - avoid!! --></PDM_IF>
+	<PDM_ELIF "$prop.initial_load" : "[pP][oO][rR][tT][aA][lL][sS][eE][sS][sS][iI][oO][nN].*">
+		<FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=home.htmpl" NAME=cai_main  marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title="Main">
+	<PDM_ELSE>
+		<FRAME SRC="$cgi?SID=$SESSION.SID+FID=5+$prop.initial_load_last_use" NAME=cai_main   marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title="Main">
+	</PDM_IF>
+
+         <frame src="$CAisd/html/empty.html" name=workframe frameborder=0 noresize marginheight=0 marginwidth=0 scrolling=no title="Hidden frame - do not navigate here">
+         <frame src="$CAisd/html/empty.html" noresize name=workframe1 frameborder=0 marginheight=0 marginwidth=0 scrolling=no title="Hidden frame - do not navigate here">
+	</FRAMESET>
+	<NOFRAMES>
+         <H2>Frames-Compatible Browser Required</H2>
+         This web interface requires a browser that supports frames, such as the latest version of one of the following browsers.
+         <ul>
+         <li><A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A></li>
+         <li><A ID=lnk004 href=http://www.mozilla.org>Mozilla</A></li>
+         <li><A ID=lnk005 href=http://www.netscape.com>Netscape</A></li>
+         </ul>
+	</NOFRAMES>
+</HTML>
+

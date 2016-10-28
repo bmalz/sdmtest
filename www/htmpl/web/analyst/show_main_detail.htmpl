@@ -1,0 +1,213 @@
+<PDM_IF 0>
+@(#)$Id: show_main_detail.htmpl RESILIENCE.1 2010/03/10 11:29:06 bohda01 Exp $
+show_main_detail.htmpl
+WHEN PRESENTED:
+        When we want to close a popup window and refocus on the main detail
+        after a successful update.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<SCRIPT LANGUAGE="JavaScript">
+form_title = "Processing...";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.ACCUMULATE" == "">
+var for_accumulate = 0;
+<PDM_ELIF "$prop.factory" != "iss" && "$prop.factory" != "chg">
+var for_accumulate = 0;
+<PDM_ELSE>
+var for_accumulate = 1;
+var est_cost = "$args.bf_est_cost";
+var cost = "$args.bf_cost";
+var est_total_time = "$args.bf_est_total_time";
+var actual_total_time = "$args.bf_actual_total_time";
+</PDM_IF>
+var argPersistentID = "${args.persistent_id:}";
+var argID = "${args.id:}";
+<pdm_if "${args.KEEP.is_contact:}" != "1">
+var is3FieldContact = false;
+var argCommonName = '<PDM_FMT ESC_STYLE=C PAD=NO>${args.COMMON_NAME_VOLATILE:}</PDM_FMT>';
+<pdm_else>
+var is3FieldContact = true;
+var argCommonName = "${args.last_name:}@|@${args.first_name:}@|@${args.middle_name:}@|@${args.id:}@|@${args.combo_name}";
+</pdm_if>
+var argRelAttr = '<PDM_FMT ESC_STYLE=C PAD=NO>${args.REL_ATTR_VOLATILE:}</PDM_FMT>';
+var AlertMsg = '<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>';
+if ( AlertMsg.length > 0 && AlertMsg != "updateOK" ) {
+   AlertMsg = AlertMsg.replace(/\&lt;br\&gt;/gi,"<BR>");
+}
+var RefreshCnote = "$args.KEEP.refresh_cnote";
+var temporaryWindow =! ahdtop.cstReducePopups;
+function refresh_and_close()
+{
+  var bReloadOnTmpWin = false;
+  if (RefreshCnote == "1")
+  {
+    formatAlertMsg();
+    upd_specific_frame('sd','bin_form_np.htmpl');
+  }
+  else 
+  if ( typeof ahdframeset.top_splash == "object" &&
+       typeof ahdframeset.top_splash.next_persid == "string" ) {
+    var next_persid = ahdframeset.top_splash.next_persid;
+    if ( next_persid != "backfill" ) {
+      var do_reload = ( window.document.URL.indexOf("CANCEL") == -1 );
+                <PDM_IF "$args.KEEP.ADDL_URL" != "">
+                        var sAddURL =  "$args.KEEP.ADDL_URL";
+                <PDM_ELSE>
+                        var sAddURL = "";
+                </PDM_IF>
+				<PDM_IF "$args.KEEP.FOR_CAPREASON" != "">
+                        sAddURL +=  "+FOR_CAPREASON=$args.KEEP.FOR_CAPREASON";
+                </PDM_IF>
+          var bForceEdit = false;
+          <pdm_if "${args.KEEP.FORCE_EDIT:}" == "1">
+                bForceEdit = true;
+          </pdm_if>
+          
+          <pdm_if "$prop.FACTORY" == "KD_TASK">
+                bReloadOnTmpWin = true;
+                <pdm_if "$args.WF_ACTION" == "start_rework_version">
+                    <pdm_if "$args.SWITCH1" == "1">
+                    ahdframeset.top_splash.next_persid = "KD:$args.KD.VER_CROSS_REF_ID";
+                        ahdtop.saveKTAckMsgNum = 2229; // -Rework Version created for %1%2
+                    <pdm_else "$args.SWITCH1" == "0">
+                        ahdtop.saveKTAckMsgNum = 2227; // - %1 unpublished
+                  </pdm_if>
+                <pdm_elif "$args.WF_ACTION" == "cancel_rework_version">
+                  ahdtop.saveKTAckMsgNum = 2230; // - Rework Version Canceled for %1%2
+                <pdm_elif "$args.WF_ACTION" == "retire_kd">
+                  ahdtop.saveKTAckMsgNum = 2231; // -%1%2 retired
+                </pdm_if>
+          </pdm_if>
+
+		  <pdm_if "$prop.FACTORY" == "LONG_TEXTS">	// Reply or Update status in forums
+			if (ahdtop.cstReducePopups)
+			{
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+						"+OP=SHOW_DETAIL+PERSID=KD:$args.KD+HTMPL=kt_document_view.htmpl";
+				document.location.href = url;
+				return;
+			}
+		  </pdm_if>
+		                            
+      switchToDetail( ahdframeset.top_splash.next_persid,"",
+      do_reload, propGLType, void(0), void(0), sAddURL, bForceEdit, bReloadOnTmpWin);
+    }
+    else {
+      // Doing a backfill after Create New
+      var opnr = ahdframeset.opener;
+      if (!opnr.closed)
+      {
+        if ( typeof opnr.argBackfillAttr == "string" &&
+             opnr.argBackfillAttr == "persistent_id" )
+            argCommonName = argPersistentID;
+        if ( is3FieldContact ) {
+
+            opnr.backfill_cnt(argCommonName<PDM_IF "$prop.MultiTenancy" != "off">, argTenantId, argTenant</PDM_IF>);
+        }
+        else
+            opnr.backfill( argCommonName, argPersistentID, argRelAttr<PDM_IF "$prop.MultiTenancy" != "off">, argTenantId, argTenant</PDM_IF>);
+        var opnr_opnr = opnr.ahdframeset.opener;
+        opnr.close();
+        if ( opnr_opnr != null && typeof opnr_opnr == "object" )
+            opnr_opnr.focus();
+        // When collecting editing windows later, this 
+        // going away window can cause JS error. 
+        // Deregister here to remove it from window
+        // list. 
+        window.parent.deregister_window();
+      }
+    }
+  }
+  //if Save and Close done from a Knowlege Document then send the message to the list  page
+  <pdm_if "$prop.FACTORY" == "KD">
+  switchToDetail( "KD",argID,
+      true, "", void(0), void(0), "", false, false);
+  </pdm_if>
+  if ( parent.name != "AHDtop" )
+    window.parent.close();
+}
+var factory, id, obj_arr;
+// For using 5.0 form in 6.0
+if ( typeof ahdtop == "object" &&
+     typeof ahdtop.propSupportR50 == "string" && 
+     ahdtop.propSupportR50 != "no" &&
+     typeof ahdframeset.top_splash == "object" &&
+     typeof ahdframeset.top_splash.next_persid == "string" )
+{
+   factory = ahdframeset.top_splash.next_persid;
+   obj_arr = factory.split(":");
+   if (2 == obj_arr.length)
+   {
+    factory = obj_arr[0];
+    id = obj_arr[1];
+    // If it is "mix" (5.0 form and 6.0 form), it is possible 
+    // we have both flags (propSupportR50 and propFormRelease)
+    // set.
+    if ( parent.name != "AHDtop" &&
+         typeof propFormRelease == "number" &&
+         propFormRelease >= 60 ) {
+        refresh_and_close();                
+    }
+    else
+    {
+                var url = cfgCgi + "?SID=" + cfgSID +
+                               "+FID=" + cfgFID +
+                               "+OP=SHOW_DETAIL" +
+                               "+FACTORY=" + factory +
+                               "+PERSID=" + factory + "%3A" + id;
+                <PDM_IF "$args.KEEP.ADDL_URL" != "">
+                        url = url + "$args.KEEP.ADDL_URL";
+                </PDM_IF>
+                window.location.href = url;
+    }
+   }
+   ahdframeset.top_splash.next_persid = void(0);
+}
+else
+// for 5.5 form
+if ( typeof parent.opener == "object" &&
+     parent.opener != null &&
+     !parent.opener.closed &&
+    (parent.opener.propFormRelease == "undefined" || 
+     parent.opener.propFormRelease < 60))
+{ 
+    if ( typeof ahdtop == "object"  &&
+         typeof ahdframeset.top_splash == "object"  &&
+         typeof ahdframeset.top_splash.next_persid == "string" ) 
+    {
+        factory = ahdframeset.top_splash.next_persid;
+        obj_arr = factory.split(":");
+        if (2 == obj_arr.length)
+        {
+            factory = obj_arr[0];
+            id = obj_arr[1];
+            if ((parent.name != "AHDtop") && 
+                (typeof parent.opener.argID != "undefined") &&
+                (parent.opener.argID == id))
+            {
+                parent.opener.location.href = cfgCgi + "?SID=" + cfgSID +
+                                              "+FID=" + cfgFID +
+                                              "+OP=SHOW_DETAIL" +
+                                              "+FACTORY=" + factory +
+                                              "+PERSID=" + factory + "%3A" + id; 
+            }
+        }
+   }
+   window.parent.close();
+}
+// For 6.0 form
+else 
+{
+    refresh_and_close();
+}
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+</BODY>
+</HTML>

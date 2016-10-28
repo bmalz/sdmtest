@@ -1,0 +1,92 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show a list of change order states during which CACF is active.
+//
+// History:
+//    10/05/2011 Initial Version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Managed Change State Search";
+var hdrTitleList = "Managed Change State List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("ci_managed_chgstatsum.rpt", "ci_managed_chgstatdtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="ci_managed_chgstat">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status zmiany" attr="code">
+<PDM_MACRO name=sfDropdown hdr="Aktywna weryfikacja zmiany" attr="verification_active">
+<PDM_MACRO name=sfDropdown hdr="Stan implementacji" attr="is_implementation">
+<PDM_MACRO name=sfDropdown hdr="Specyfikacja zmiany edytowalna" attr="can_edit_criteria">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Promuj po weryfikacji" attr="autopromote_chg">
+<PDM_MACRO name=sfDropdown hdr="Show Override Buttons" attr="show_override_buttons">
+<PDM_MACRO name=sfDropdown hdr="Aktywne?" attr="delete_flag">
+<PDM_IF "ci_managed_chgstat" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Managed Change States found";
+  var msgFound1 = "1 Managed Change State found";
+  var msgFound = "%1 Managed Change State found";
+  var msgFoundMore = "%1 Managed Change States found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Managed Change State";
+  
+<PDM_MACRO name=lsStart>
+ 
+<PDM_JSCRIPT file=list_edit.js>
+      
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_MACRO name=elsEditField attr_name="code" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="verification_active">
+<PDM_MACRO name=elsEditField attr_name="is_implementation">
+<PDM_MACRO name=elsEditField attr_name="can_edit_criteria">
+<PDM_MACRO name=elsEditField attr_name="autopromote_chg">
+<PDM_MACRO name=elsEditField attr_name="show_override_buttons">
+<PDM_MACRO name=elsEditField attr_name="delete_flag">
+<PDM_MACRO name=elsEndEdit>
+<PDM_MACRO name=lsCol hdr="Status zmiany" attr="code" link="yes">
+<PDM_MACRO name=lsCol hdr="Aktywna weryfikacja zmiany" attr="verification_active">
+<PDM_MACRO name=lsCol hdr="Stan implementacji" attr="is_implementation">
+<PDM_MACRO name=lsCol hdr="Specyfikacja zmiany edytowalna" attr="can_edit_criteria">
+<PDM_MACRO name=lsCol hdr="Promuj po weryfikacji" attr="autopromote_chg">
+<PDM_MACRO name=lsCol hdr="Show Override Buttons" attr="show_override_buttons">
+<PDM_MACRO name=lsCol hdr="Aktywne?" attr="delete_flag">
+<PDM_MACRO name=lsEnd>
+  </script>	
+
+</PDM_IF>
+
+
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_ci_managed_chgstat.htmpl ASPEN.8 2012/04/13 12:06:23 tomjo02 Exp $;
+</PDM_IF>
+<PDM_WSP>

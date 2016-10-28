@@ -1,0 +1,130 @@
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=kd_attachments_tab" factory=KD>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Attachments";
+var hdrTitleList = "Attachments";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var m_nSkeletonId='$args.SkeletonId';
+var bEdit = "$args.KEEP.IS_EDIT";
+var nRepId;
+
+function Upload()
+{
+	nRepId = GetDefaultRepository(2, "$args.ParentTenant");  // attachments repository
+	UploadFile(nRepId, "QuickUpload");
+	
+}
+
+function RefreshFileList(nAttmntId)
+{
+	AddAttachmentLink("attmnt:" + nAttmntId, ahdframeset);
+}
+
+function AttachFilePage()
+{
+
+	var strURL="$cgi"+"?SID="+ "$args.SID" +
+	"+FID="+ "$args.FID" +
+	"+OP=DISPLAY_FORM" +
+	"+Library=ATTMNT_TAB" +
+	"+ParentTenant=" + "$args.ParentTenant" +	
+	"+HTMPL=kt_admin_attachments.htmpl";
+	
+	var features="directories=no"+
+		",location=no"+
+		",screenY=100px"+
+		",screenX=100px"+
+		",menubar=no"+
+		",height=460"+
+		",width=740"+
+		",status=no";	
+	preparePopup(strURL,"",features,undefined, undefined, 'GOBUTTON=no+MENUBAR=no');	
+}
+
+function Add_URL_Btn()
+{
+					docWriteln("<th>");
+					ImgBtnCreate("btnAddUrlLink", "Add URL Link", "AddURLLink();");
+					docWriteln("</th>");
+}
+
+</script>
+</head>
+
+<body onload="SetInitialURLLink()" topmargin=5>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Attachments Tab">
+<script>
+var edit_form = 1;
+var propFactory = "attmnt";
+<PDM_MACRO name=dtlForm button=false factory=attmnt onsubmit="return false;">
+<PDM_IF "$args.KEEP.IS_EDIT" == "edit">
+if(ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS"))
+{
+   
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Attach File" func="Upload()" hotkey_name="Attach_File" id="bnUpload">
+<PDM_MACRO name=button caption="Attach File From Library" func="AttachFilePage()" hotkey_name="Attach_File_From_Library" id="bnLibrary">
+<PDM_MACRO name=btnEndRow>
+}
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+var titleRepos = "Repositories";
+var titleFiles = "Files";
+var titleAttachments = "Attachments";
+var titleR_loc = "Repositories";
+var titleF_loc = "Files";
+var titleA_loc = "Attachments";
+if (!nonLatinFlag)
+{
+    titleR_loc = titleRepos;
+    titleF_loc = titleFiles;
+    titleA_loc = titleAttachments;
+}
+var actkeyRepos = registerActionKey("", titleR_loc,
+                                        setIframeFocus, "KTCatTree" );
+var actkeyFiles = registerActionKey("", titleF_loc,
+                                        setIframeFocus, "KTFiles" );
+var actkeyAttach = registerActionKey("", titleA_loc,
+                                         setIframeFocus, "KTAtachments" );
+if ( actkeyRepos != "" )
+  titleRepos = fmtLabelWithActkey( titleRepos, actkeyRepos );
+if ( actkeyFiles != "" )
+  titleFiles = fmtLabelWithActkey( titleFiles, actkeyFiles );
+if ( actkeyAttach != "" )
+  titleAttachments = fmtLabelWithActkey( titleAttachments, actkeyAttach );
+function setIframeFocus(id)
+{
+  var f = document.getElementById(id);
+  if ( f != null ) {
+    var e = f.contentWindow.document.getElementById("rslnk_0_0");
+    if ( e == null )
+      e = f.contentWindow.document.getElementById("s2ds");
+    if ( e != null )
+      e.focus();
+  }
+}
+<PDM_IF "$args.KEEP.IS_EDIT" == "edit">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="tekst linka URL" attr="n/a" id="txtUrlLink" jsbutton="Add_URL_Btn()" size=80>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList btntitle="Attachments List" frmname="KTAttachments" height=180 src="OP=SEARCH+FACTORY=attmnt+HTMPL=list_attmnt_KD.htmpl+QBE.NE.status=EMBD_LINK+QBE.EQ.KDS_ATTACHED.DOC_ID=$args.SkeletonId">
+<PDM_MACRO name=dtlEndTable>
+</script>	
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: kd_attachments_tab.htmpl ASPEN.3 2011/02/04 17:00:30 jenji01 Exp $;
+</PDM_IF>

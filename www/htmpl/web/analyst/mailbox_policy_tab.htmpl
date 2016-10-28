@@ -1,0 +1,28 @@
+<PDM_IF 0>
+mailbox_policy_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=mailbox_policy_tab" factory=mailbox>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="e-mail/Godzina" attr=email_address_per_hour>
+<PDM_MACRO name=dtlDropdown hdr="Loguj naruszenie" attr=log_policy_violation>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Lista włączeń" attr=inclusion_list rows=4 size=40>
+<PDM_MACRO name=dtlTextbox hdr="Lista wyłączeń" attr=exclusion_list rows=4 size=40>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: mailbox_policy_tab.htmpl ANDERSON.1 2009/08/10 16:34:34 versa01 Exp $
+</PDM_IF>

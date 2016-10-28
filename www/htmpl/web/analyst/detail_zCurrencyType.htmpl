@@ -1,0 +1,63 @@
+<PDM_IF 0>
+detail_zCurrencyType.htmpl
+WHEN PRESENTED:
+    When we need to display details of a Change Code
+</PDM_IF>
+
+<HTML lang="pl">
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Rodzaj waluty: ${args.COMMON_NAME} "</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizacja rodzaju waluty: ${args.COMMON_NAME} "</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie rodzaju waluty ${args.COMMON_NAME}"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory="zCurrencyType">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Waluta" attr="sym">
+<PDM_MACRO name=dtlDropdown attr="delete_flag">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data modyfikacji" attr=last_mod_dt>
+<PDM_MACRO name=dtlReadonly hdr="Osoba modyfikująca" attr=last_mod_by>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: detail_zCurrencyType.htmpl FWr1.0 2008/4/10 10:1:44 ralje02 Exp $
+</PDM_IF>
+<PDM_WSP>

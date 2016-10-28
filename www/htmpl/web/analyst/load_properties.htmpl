@@ -1,0 +1,1026 @@
+<PDM_IF 0>
+@(#)$Id: load_properties.htmpl ASPEN.4 2012/03/28 15:11:00 dhara04 Exp $
+WHEN PRESENTED:
+    Load current property values into the Properties tab of a cr, chg,
+    or iss editable form.
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/mouseover_preview.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+std_head_setup("no",0, 1);
+if ( typeof ahdframe == "object" &&  
+     typeof ahdframe._dtl == "object" &&  
+     typeof ahdframe._dtl.propertyRow == "number" ) {
+var AlertMsg = '<PDM_FMT ESC_STYLE=HTML PAD=NO>${AlertMsg:}</PDM_FMT>';
+if ( AlertMsg.length > 0 && AlertMsg != "updateOK" ) {
+   AlertMsg = AlertMsg.replace(/\&lt;br\&gt;/gi,"<BR>");
+   var alertmsg_field = ahdframe.document.getElementById("alertmsgText");
+   var catg_field = ahdframe.document.main_form.elements["KEY.category"];
+   if ( typeof catg_field == "object" &&
+        catg_field != null &&
+        catg_field.id.match(/df(_\d*_\d*)/) ) {
+      var hdr = ahdframe.document.getElementById("dflnk" + RegExp.\$1);
+      if ( hdr != null &&
+           typeof hdr.onclick != "undefined" ) {
+         alertmsg_field = null;
+	 // If we get an error, we like to cancel the save 
+	 // action, if there is one, issued by the user and 
+	 // simply do the popup.
+	 if (typeof ahdframe.resumeAction == "string" && 
+	     ahdframe.resumeAction.indexOf("detailSave") != -1)
+	    ahdframe.resumeAction = void(0);
+         ahdframe.set_action_in_progress(0);
+         hdr.onclick();
+      }
+   }
+   if ( alertmsg_field != null ) {
+      alertmsg_field.innerHTML = AlertMsg;
+      var e = ahdframe.document.getElementById("alertmsg");
+      if ( e != null )
+         e.style.display = "block";
+   }
+   try {
+     if ( ahdtop.cstUsingScreenReader )
+       ahdframe.alert(AlertMsg.replace(/<br>/ig,"\n"));
+   }
+   catch(e) {}
+}
+else 
+{
+    if ((typeof ahdframe.cat_validate_fld != "undefined") &&
+	(typeof ahdframe.cat_validate_fld.serverFoundError != "undefined"))
+    {
+	// Set the values for the category validation field, so 
+	// it can trun off error display. 
+	ahdframe.cat_validate_fld.serverFoundError = false;
+	ahdframe.cat_validate_fld.extErrorMsg = "";
+	var search_status_span = ahdframe.document.getElementById("search_status_span");
+	if (search_status_span != null)
+	{
+	    // Hide the search status under the field
+	    search_status_span.style.display = "none";
+	    // Remove the error from AlertMsg shown on top
+	    if (typeof ahdframe.AlertMsg == "string")
+	    {
+		var err_msg = search_status_span.innerHTML;
+		if ((err_msg.length > 0) &&
+		    (ahdframe.AlertMsg.length > 0))
+		{
+		    var msg_arr = ahdframe.AlertMsg.split("<BR>");
+		    ahdframe.AlertMsg = "";
+		    for (var i = 0; i < msg_arr.length; i++)
+		    {
+			if (!msg_arr[i].match(err_msg))
+			{
+			    if (ahdframe.AlertMsg.length > 0)    
+				ahdframe.AlertMsg += "<BR>" + msg_arr[i];
+			    else 
+				ahdframe.AlertMsg = msg_arr[i];
+			}
+		    }
+		    search_status_span.innerHTML = "";
+		    if (typeof ahdframe.detailValidate != "undefined")
+			ahdframe.detailValidate();
+		}
+	    }
+	}
+    }
+}
+_dtl = new DetailForm("defer");
+_dtl.rowNum = ahdframe._dtl.propertyRow;
+_dtl.propertyTabIndex = ahdframe._dtl.propertyTabFirstIndex;
+_dtl.tabIndex = ahdframe._dtl.propertyTabFirstIndex;
+detailStartRow("CLASS=tab");
+detailReadonlyFormRowHdr("Nazwa");
+detailReadonlyFormRowHdr("Wartość");
+detailReadonlyFormRowHdr("Przykład");
+detailEndHdrRow();
+
+<PDM_IF "" == "$args.prop0.id">
+   detailNoProperties(ahdframe._dtl.factory);
+<PDM_ELSE>
+   var valgrp0="";
+  <PDM_IF "$args.prop0.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop0.validation_rule" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop0.validation_type">
+   detailWriteProperty( 0, "$args.prop0.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop0.validation_type">
+   detailWriteProperty( 0, "$args.prop0.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+	// 20131003 bmalz @ e-xim
+   detailWriteProperty( 0, "$args.prop0.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop0.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop0.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop1.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop1.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop1.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop1.validation_type">
+   detailWriteProperty( 1, "$args.prop1.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop1.validation_type">
+   detailWriteProperty( 1, "$args.prop1.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 1, "$args.prop1.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop1.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop1.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// var item = '<PDM_SELECT NAME=SET.value ESC_STYLE=HTML FACTORY=prpval SELECTED="$args.validation_rule" SELECTED_SYM="$args.value.COMMON_NAME">';
+// var ins_pos = item.indexOf("NAME=");
+// if (ins_pos > 0) 
+// {
+//     _dtl.tabIndex++;
+//     item = item.substring(0, ins_pos) + " TABINDEX=" + _dtl.tabIndex + " " + item.substring(ins_pos, item.length);
+// }
+// detailStartRow();
+// detailRowHdr("Select Value 1", 1 , "$args.REQUIRED_value");
+// detailSetRowData(item)
+// detailEndRow();
+<PDM_IF "" != "$args.prop2.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop2.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop2.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop2.validation_type">
+   detailWriteProperty( 2, "$args.prop2.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop2.validation_type">
+   detailWriteProperty( 2, "$args.prop2.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 2, "$args.prop2.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop2.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop2.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop3.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop3.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop3.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop3.validation_type">
+   detailWriteProperty( 3, "$args.prop3.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop3.validation_type">
+   detailWriteProperty( 3, "$args.prop3.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 3, "$args.prop3.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop3.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop3.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop4.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop4.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop4.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop4.validation_type">
+   detailWriteProperty( 4, "$args.prop4.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop4.validation_type">
+   detailWriteProperty( 4, "$args.prop4.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 4, "$args.prop4.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop4.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop4.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop5.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop5.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop5.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop5.validation_type">
+   detailWriteProperty( 5, "$args.prop5.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop5.validation_type">
+   detailWriteProperty( 5, "$args.prop5.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 5, "$args.prop5.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop5.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop5.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop6.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop6.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop6.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop6.validation_type">
+   detailWriteProperty( 6, "$args.prop6.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop6.validation_type">
+   detailWriteProperty( 6, "$args.prop6.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 6, "$args.prop6.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop6.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop6.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop7.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop7.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop7.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop7.validation_type">
+   detailWriteProperty( 7, "$args.prop7.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop7.validation_type">
+   detailWriteProperty( 7, "$args.prop7.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 7, "$args.prop7.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop7.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop7.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop8.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop8.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop8.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop8.validation_type">
+   detailWriteProperty( 8, "$args.prop8.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop8.validation_type">
+   detailWriteProperty( 8, "$args.prop8.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 8, "$args.prop8.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop8.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop8.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop9.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop9.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop9.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop9.validation_type">
+   detailWriteProperty( 9, "$args.prop9.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop9.validation_type">
+   detailWriteProperty( 9, "$args.prop9.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 9, "$args.prop9.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop9.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop9.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop10.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop10.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop10.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop10.validation_type">
+   detailWriteProperty( 10, "$args.prop10.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop10.validation_type">
+   detailWriteProperty( 10, "$args.prop10.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 10, "$args.prop10.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop10.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop10.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop11.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop11.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop11.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+   </PDM_IF>
+<PDM_IF "100002" == "$args.prop11.validation_type">
+   detailWriteProperty( 11, "$args.prop11.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop11.validation_type">
+   detailWriteProperty( 11, "$args.prop11.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 11, "$args.prop11.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop11.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop11.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop12.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop12.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop12.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop12.validation_type">
+   detailWriteProperty( 12, "$args.prop12.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop12.validation_type">
+   detailWriteProperty( 12, "$args.prop12.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 12, "$args.prop12.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop12.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop12.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop13.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop13.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop13.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+   </PDM_IF>
+<PDM_IF "100002" == "$args.prop13.validation_type">
+   detailWriteProperty( 13, "$args.prop13.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop13.validation_type">
+   detailWriteProperty( 13, "$args.prop13.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 13, "$args.prop13.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop13.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop13.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop14.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop14.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop14.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop14.validation_type">
+   detailWriteProperty( 14, "$args.prop14.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop14.validation_type">
+   detailWriteProperty( 14, "$args.prop14.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 14, "$args.prop14.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop14.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop14.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop15.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop15.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop15.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop15.validation_type">
+   detailWriteProperty( 15, "$args.prop15.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop15.validation_type">
+   detailWriteProperty( 15, "$args.prop15.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 15, "$args.prop15.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop15.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop15.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop16.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop16.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop16.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop16.validation_type">
+   detailWriteProperty( 16, "$args.prop16.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop16.validation_type">
+   detailWriteProperty( 16, "$args.prop16.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 16, "$args.prop16.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop16.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop16.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop17.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop17.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop17.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop17.validation_type">
+   detailWriteProperty( 17, "$args.prop17.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop17.validation_type">
+   detailWriteProperty( 17, "$args.prop17.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 17, "$args.prop17.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop17.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop17.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop18.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop18.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop18.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop18.validation_type">
+   detailWriteProperty( 18, "$args.prop18.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop18.validation_type">
+   detailWriteProperty( 18, "$args.prop18.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 18, "$args.prop18.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop18.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop18.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop19.id">
+   var valgrp0="";
+   <PDM_IF "$args.prop19.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop19.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+   </PDM_IF>
+<PDM_IF "100002" == "$args.prop19.validation_type">
+   detailWriteProperty( 19, "$args.prop19.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop19.validation_type">
+   detailWriteProperty( 19, "$args.prop19.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 19, "$args.prop19.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop19.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop19.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop20.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop20.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop20.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop20.validation_type">
+   detailWriteProperty( 20, "$args.prop20.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop20.validation_type">
+   detailWriteProperty( 20, "$args.prop20.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 20, "$args.prop20.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop20.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop20.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop21.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop21.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop21.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+  </PDM_IF>
+<PDM_IF "100002" == "$args.prop21.validation_type">
+   detailWriteProperty( 21, "$args.prop21.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop21.validation_type">
+   detailWriteProperty( 21, "$args.prop21.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 21, "$args.prop21.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop21.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop21.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop22.id">
+   var valgrp0="";
+   <PDM_IF "$args.prop22.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop22.validation_rule.id" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+     </PDM_LIST>
+   </PDM_IF>
+<PDM_IF "100002" == "$args.prop22.validation_type">
+   detailWriteProperty( 22, "$args.prop22.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.sample</PDM_FMT>',
+	       'CHECKBOX');
+<PDM_ELIF "100003" == "$args.prop22.validation_type">
+   detailWriteProperty( 22, "$args.prop22.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.sample</PDM_FMT>',
+	       'SELECT', valgrp0);
+<PDM_ELSE>
+   detailWriteProperty( 22, "$args.prop22.required",
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.label</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.value</PDM_FMT>',
+               '<PDM_FMT ESC_STYLE=HTML PAD=NO>$args.prop22.sample</PDM_FMT>'
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.id = $args.category.id AND sequence = $args.prop22.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'','',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zegar</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=HTML PAD=NO>$zlist.zsekcja</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zpoletekstowe</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zdlugoscpola</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosnik</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zodnosniktyp</PDM_FMT>'
+				</PDM_LIST>
+				);
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF></PDM_IF></PDM_IF></PDM_IF></PDM_IF>
+</PDM_IF></PDM_IF></PDM_IF></PDM_IF></PDM_IF>
+</PDM_IF></PDM_IF></PDM_IF></PDM_IF></PDM_IF>
+</PDM_IF></PDM_IF></PDM_IF></PDM_IF></PDM_IF>
+</PDM_IF></PDM_IF></PDM_IF>
+detailEndTable();
+ahdframe.detailMergeProperties(_dtl);
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="ahdframe.reset_vals(document.prop_form)">
+<PDM_FORM NAME=prop_form>
+<INPUT TYPE=HIDDEN NAME=new_category VALUE=<PDM_FMT ESC_STYLE=JS2>"$args.category.sym"</PDM_FMT>>
+<INPUT TYPE=HIDDEN NAME=new_set_category VALUE="$args.category">
+<PDM_IF "$prop.MultiTenancy" == "on">
+<INPUT TYPE=HIDDEN NAME=tenantId VALUE="${args.category.tenant:}">
+<INPUT TYPE=HIDDEN NAME=tenantName VALUE="${args.category.tenant.name:}">
+<PDM_ELIF "$prop.MultiTenancy" == "setup">
+<PDM_IF "${cst.tenant:}" == "$prop.SERVICE_PROVIDER_UUID" && "$ACCESS.admin" != "0">
+<INPUT TYPE=HIDDEN NAME=tenantId VALUE="${args.category.tenant:}">
+<INPUT TYPE=HIDDEN NAME=tenantName VALUE="${args.category.tenant.name:}">
+</PDM_IF>
+</PDM_IF>
+<INPUT TYPE=HIDDEN NAME=assignee_lname_new VALUE="$args.assignee.last_name">
+<INPUT TYPE=HIDDEN NAME=assignee_fname_new VALUE="$args.assignee.first_name">
+<INPUT TYPE=HIDDEN NAME=assignee_mname_new VALUE="$args.assignee.middle_name">
+<INPUT TYPE=HIDDEN NAME=assignee_id_new VALUE="$args.assignee.id">
+<INPUT TYPE=HIDDEN NAME=group_lname_new VALUE="$args.group.last_name">
+<INPUT TYPE=HIDDEN NAME=group_id_new VALUE="$args.group.id">
+<INPUT TYPE=HIDDEN NAME=SET.category_contract_new VALUE="$args.category.owning_contract">
+
+<PDM_IF "$args.producer_id" == "chg">
+<INPUT TYPE=HIDDEN NAME="SET.organization_new" VALUE="$args.organization">
+<INPUT TYPE=HIDDEN NAME="KEY.organization_new" VALUE="$args.organization.name">
+<INPUT TYPE=HIDDEN NAME=cab_lname_new VALUE="$args.cab.last_name">
+<INPUT TYPE=HIDDEN NAME=cab_fname_new VALUE="$args.cab.first_name">
+<INPUT TYPE=HIDDEN NAME=cab_mname_new VALUE="$args.cab.middle_name">
+<INPUT TYPE=HIDDEN NAME="SET.chgtype_new" VALUE="$args.chgtype">
+<INPUT TYPE=HIDDEN NAME="KEY.chgtype_new" VALUE="$args.chgtype.sym">
+</PDM_IF>
+
+<PDM_IF "$args.producer_id" == "chg" || "$args.producer_id" == "iss" || "$args.producer_id" == "cr">
+	<INPUT TYPE=HIDDEN NAME="SET.catg_cawf_defid_new" VALUE="$args.category.cawf_defid">
+</PDM_IF>
+<PDM_IF "$args.SEARCH_STATUS_category" != "">
+<INPUT TYPE=HIDDEN NAME=do_popup VALUE="1">
+<PDM_ELSE>
+<INPUT TYPE=HIDDEN NAME=do_popup VALUE="0">
+</PDM_IF>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: load_properties.htmpl,v 1.3 2006/11/13 17:49:21 jenji01 Exp $
+</PDM_IF>

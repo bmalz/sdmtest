@@ -1,0 +1,308 @@
+<PDM_IF 0>
+@(#)$Id: menubar_kt.htmpl ANDERSON.2 2009/05/19 10:01:11 taoyu02 Exp $
+WHEN PRESENTED:
+    Build the Knowledge tab menubar.
+    This file is included in sd_kt.htmpl, and the function it
+    generates is used by any form in the Knowledge tab with no
+    explicit menubar specified in the invocation of std_body.htmpl.
+
+////////////////////////////////////////////////////////////////////////
+// Knowledge Menubar
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_WSP preview="OP=menu+NBTAB=kt">
+
+<PDM_MACRO name=startMenubar>
+
+<PDM_OBJECT>
+if ( w.propFormName == "list_KD.htmpl" ||w.propFormName == "list_EBR_LOG.htmpl"||w.propFormName == "list_BU_TRANS.htmpl") {
+<PDM_MACRO name=menubarItem label="File" id=mFile variable=__menuKnowledgeFile>
+}
+else {
+<PDM_MACRO name=menubarItem label="File" id=kt_popupFile>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( w.propFormName == "list_KD.htmpl" ||w.propFormName == "list_EBR_LOG.htmpl"||w.propFormName == "list_BU_TRANS.htmpl") {
+<PDM_MACRO name=menubarItem label="View" id=mView>
+}
+else {
+<PDM_MACRO name=menubarItem label="View" id=kt_popupView>
+}
+</PDM_OBJECT>
+
+	
+<PDM_OBJECT>
+if ( w.propFormName == "list_KD.htmpl") {
+<PDM_MACRO name=menubarItem label="Window" id=mWindow>
+}
+else {
+<PDM_MACRO name=menubarItem label="Window" id=kt_popupWindow>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( w.propFormName == "list_KD.htmpl") {
+<PDM_MACRO name=menubarItem label="Help" id=mHelp>
+}
+else {
+<PDM_MACRO name=menubarItem label="Help" id=kt_popupHelp>
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenubar>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Knowledge "File" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mFile>
+
+<PDM_OBJECT>
+if (ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE") || 
+		ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS"))
+{
+<PDM_MACRO name=menuItem label="New_Knowledge_Document" extended=true function="CreateKnowledgeDocument()" hotkey=K icon_name="new_document_16.png" id=m_itmCreateDoc tooltip="create a new knowledge document">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_KT" == "Yes">
+if (ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE") || 
+	ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS"))
+{
+<PDM_MACRO name=menuItem label="New_Knowledge_Tree_Document" extended=true function="CreateKnowledgeTree()" hotkey=T id=m_itmCreateTree>
+}
+</PDM_IF>
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_KT" == "Yes" && "$env.NX_KT_DISALLOW_FORUMS" != "Yes">
+if (ahdtop.CanUserPerformAction("ROLE_FORUM_SUBMIT"))
+{
+	var mf=ahdframeset.ahdframe;
+	if(mf.parent.m_CurrentIndex>0)
+	{
+		
+<PDM_MACRO name=menuItem label="New_Forum" extended=true function="CreateKnowledgeQA()" hotkey=Q icon_name="qa_FileType_16.png" id=m_itmCreateQA tooltip="create a new forum">
+	}
+}
+</PDM_IF>
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_KT" == "Yes" && "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+if (ahdtop.CanUserPerformAction("ROLE_FILE_EDIT"))
+{
+<PDM_MACRO name=menuItem label="New_Knowledge_File" extended=true function="CreateKnowledgeFile()" hotkey=F id=m_itmCreateFile>
+}
+</PDM_IF>
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItemLocal label="Print_Form..." function="JavaScript: CAisdPrint();" hotkey=n>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Knowledge "View" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mView>
+<PDM_MACRO name=menuItem label="Knowledge_Categories..." function="popupKnowledgeCategories()">
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=menuItem label="Knowledge_Report_Card..." function="popupKnowledgeReportCard()">
+</PDM_IF>          
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( typeof ahdtop.popup_req_time == "undefined" ) {
+<PDM_MACRO name=menuItem label="Response_Time_Statistics..." function="activateStatistics()">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( w.cfgAccessRef >= 2 ) {
+<PDM_MACRO name=menuItem label="Preferences..." function="showPreferences()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItemLocal label="Refresh" function="JavaScript:refreshForm()">
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Knowledge "Reports" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mReports>
+<PDM_MACRO name=menuItem label="Summary..." function="ahdtop.popup_report('\" + w.rptName[0] + \"','\" + nx_escape(w.argSearchSqlClause) + \"')">
+<PDM_MACRO name=menuItem label="Detail..." function="ahdtop.popup_report('\" + w.rptName[1] + \"','\" + nx_escape(w.argSearchSqlClause) + \"')">
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Knowledge "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+     ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Log_Reader..." function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+     ! ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Main_Page" function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Knowledge "Help" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+
+<PDM_OBJECT>
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+<PDM_MACRO name=menuItem label="Support..." function="popupWithURL('http://ca.com/index.html', 1, 1)">
+
+<PDM_OBJECT>
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// menu items when displaying the kt_popup menu (search screens)
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Knowledge "File" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=kt_popupFile>
+
+<PDM_OBJECT>
+if ( w.cfgAccessAdmin >= 2 && 
+     w.ahdframeset != ahdtop &&
+     typeof w.ahdframeset.ahdframe._dtl == "object" &&
+     typeof w.ahdframeset.ahdframe.copy_from_parent != "undefined" ) {
+<PDM_MACRO name=menuItem label="Copy" function="make_copy()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItemLocal label="Print_Form..." function="CAisdPrint();">
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "View" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=kt_popupView>
+<PDM_MACRO name=menuItem label="Knowledge_Categories..." function="popupKnowledgeCategories()">
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=menuItem label="Knowledge_Report_Card..." function="popupKnowledgeReportCard()">
+</PDM_IF>          
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( typeof ahdtop.popup_req_time == "undefined" ) {  
+<PDM_MACRO name=menuItem label="Response_Time_Statistics..." function="activateStatistics()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Preferences..." function="showPreferences()">
+
+<PDM_OBJECT>
+if (w.propFormName1 == "detail" && w.propFormName3 != "edit" ) { 
+	
+<PDM_MACRO name=menuItemLocal label="Refresh" function="refreshForm()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=kt_popupWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+     ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Log_Reader..." function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+     ! ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Main_Page" function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Help" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=kt_popupHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+<PDM_MACRO name=menuItem label="Help_on_Main_Window..." function="help_on_form('scoreboard.htmpl')">
+
+<PDM_OBJECT>
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+<PDM_MACRO name=menuItem label="Support..." function="popupWithURL('http://ca.com/index.html', 1, 1)">
+
+<PDM_OBJECT>
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no;scrollbars=no;resizable=no;status:no;help:no;scroll:no;')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no;scrollbars=no;resizable=no;status:no;help=no;')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>

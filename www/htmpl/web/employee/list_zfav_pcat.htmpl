@@ -1,0 +1,92 @@
+		
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<script>
+var hdrTitleList = "Lista ulubionych usług";
+
+function loadActions()
+{
+	parent.frames[0].window.document.getElementById('titleText').innerHTML = "ULUBIONE";
+}
+</script>	
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/GUI_favs.js"></script>
+<script>
+jq(document).ready(function () {
+	jq("img.contractContentTitle").click(function () {
+		jq(this).attr("src", "$CAisd/sitemods/img/favourite_loading.gif");
+		if(jq(this).attr("favService") == "false") {
+			AddAsFavourite('$cst.id', jq(this).attr("entity_id"));
+		} else {
+			RemoveFromFavourite('$cst.id', jq(this).attr("entity_id"));
+		}
+	});
+});
+</script>
+</HEAD>
+<BODY CLASS=emp onload="loadActions();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+	var msgFoundNone = "No requests found";
+	var msgFound1 = "1 request found";
+	var msgFound = "%1 requests found";
+	var msgFoundMore = "%1 requests found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired request";
+	var msgSelectAlg = "Click to select desired request and add a %1 activity log";
+	var ref_num_style;
+	var out = "";
+	out = '<form action="' + cfgCgi + '" method=POST name=fltrFormSubmit>\n' +
+            '<input type=hidden name=OP value=STORE_URL>\n' +
+			'<input type=hidden name="URLID">\n' +
+			'<input type=hidden name="URL">\n' +
+			'<input TYPE=hidden name="SID">\n' +
+			'<input TYPE=hidden name="FID">\n' +
+			'</FORM>\n';
+	document.writeln(out);
+	var zfav_pcatHTML = "";
+	var zfav_pcatCount = 0;
+		
+	zfav_pcatHTML += '<table class="ResultTable">';
+	
+	<PDM_LIST PREFIX=list FACTORY=zfav_pcat WHERE="cnt.id = U'$cst.id' AND delete_flag = 0" ORDER_BY = "pcat.ss_sym">
+		zfav_pcatHTML += '<tr>';
+		zfav_pcatHTML += '<td style="padding-left:10px; width: 20px;">';
+		zfav_pcatHTML += '<a href="#"><img entity_id="' + $list.pcat.id + '" favService="true" class="contractContentTitle" src="$CAisd/sitemods/img/favourite_enable.png" alt="Usuń z ulubionych"></a>';
+		zfav_pcatHTML += '</td>';
+		zfav_pcatHTML += '<td onclick="javascript:OpenContract(\'' + '$list.pcat.ss_sym' + '\');">';
+		
+		var cats = '$list.pcat.ss_sym'.split('.');
+		var catstr = "";
+		
+		for (i=0; i<cats.length; i++) {
+			if (i == cats.length - 1) {
+				catstr += '<span style="color:red; font-weight:bold;">' + cats[i] + '</span>';
+			} else {
+				catstr += '<span style="color:grey;">' + cats[i] + ' > </span>';
+			}
+		}
+		zfav_pcatHTML += catstr;
+		zfav_pcatHTML += '</td>';
+		zfav_pcatHTML += '</td>';
+		zfav_pcatCount++;
+	</PDM_LIST>
+
+	zfav_pcatHTML += "</table>";
+	if (zfav_pcatCount > 0)
+		document.writeln(zfav_pcatHTML);
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

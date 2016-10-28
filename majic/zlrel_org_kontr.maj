@@ -1,0 +1,11 @@
+OBJECT org {
+  ATTRIBUTES ca_organization {
+    zsvc_contracts BREL zlrel_org_kontr org { LREL kontr; };
+  };
+};
+
+OBJECT svc_contract {
+  ATTRIBUTES Service_Contract {
+    zorgs BREL zlrel_org_kontr kontr { LREL org; };
+  };
+};

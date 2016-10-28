@@ -1,0 +1,310 @@
+<PDM_IF 0>
+@(#)$Id: detail_KCAT.htmpl ASPEN.5 2011/01/10 14:51:37 ralje02 Exp $
+WHEN PRESENTED:
+    When adding or editing a category
+INTENT:
+    Adding or editing a category
+VARIABLES:
+    object  KCAT  args	The KCAT object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT KCAT
+						for the definition of attributes for 'OBJECT kcat'
+</PDM_IF>
+<html lang="en"><HEAD>
+<pdm_pragma release=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>$args.CAPTION</PDM_FMT>';
+var hdrTitleUpd = <PDM_FMT ESC_STYLE=C>"'$args.CAPTION' Update Category"</PDM_FMT>;
+var hdrTitleNew = "Create New Category"
+</SCRIPT>
+<pdm_include file=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/timer.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attevts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<script LANGUAGE="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script>
+<PDM_IF "$env.NX_KT" != "Yes">
+	_bHideTenantSelection = true;//Inactivate tenant selection for KWS
+</PDM_IF>
+var bLoadPermission_tab = 0;
+var iframePerm = null;
+function checkBeforeSave()
+{
+	var docElem = document.forms["main_form"].elements;
+	if(checkPermissions())
+	{
+		if (sOrigType != docElem["SET.PGROUP_TYPE"].value || 
+			sOrigRead != docElem["SET.READ_GROUP_LIST"].value || 
+			sOrigWrite != docElem["SET.WRITE_GROUP_LIST"].value)
+		{
+			if (m_bIsLargeDB == "1")
+			{
+				var sMsg =  msgtext("You_are_about_to_change_permis");//"You are about to change permission settings on this category.\n" + "Changing permission groups requires updating a large number of records and may take some time.\n" + "This operation is not recommended during peak time. Click OK to apply the changes or Cancel."
+				if (!confirm(sMsg))
+				{
+					return;
+				}
+				var url= cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=KT_CHECK_PERM_UPDATE_STS";
+				ahdframeset.workframe.location.href = url;
+				m_bCheckPermissionStsForEdit = false;
+				return;
+			}
+		}
+		detailSave();
+	}
+}
+var m_bCheckPermissionStsForEdit = true;//If checking the permission status for editing or before saving
+function checkBeforeEdit()
+{
+	var url= cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=KT_CHECK_PERM_UPDATE_STS";
+	ahdframeset.workframe.location.href = url;
+	m_bCheckPermissionStsForEdit = true;
+}
+function KT_REPLY(sOP, args)
+{
+	if (sOP == "KT_CHECK_PERM_UPDATE_STS")
+	{
+		if (args[0] != "0")
+		{
+			
+			var sMsg =  msgtext("A_Previous_Category_Permission");//"A Previous Category Permission update process has not been completed.\n"+"It is highly recommended to edit categories one at a time.\n"+"Would you still like to edit this category? Click OK to Edit or Cancel."
+			if (!confirm(sMsg))
+			{
+				return;
+			}
+			else
+			{
+				if (m_bCheckPermissionStsForEdit)
+				{
+					detailEdit();
+					//Suppressing the msg on the onload event, so the user will not get it twice
+					try
+					{
+						parent.CameFromReadOnlyWithWarning = "1";
+					}
+					catch(e)
+					{
+					}
+				}
+				else
+					detailSave();
+			}
+		}
+		else
+		{
+			if (m_bCheckPermissionStsForEdit)
+				detailEdit();
+			else
+				detailSave();
+		}
+	}
+}
+function checkPermissions()
+{
+	var docElem = document.forms["main_form"].elements;
+	if (bLoadPermission_tab == 0)
+	{
+		// the permissions are set by default only for a new category 
+		if ($args.id == 0 )
+		{
+			if ("$args.PARENT_ID" == "1")
+			{
+				docElem["SET.PERMISSION_INDEX_ID"].value = 0;
+			}
+			else
+			{
+				
+					docElem["SET.PERMISSION_INDEX_ID"].value = "$args.PARENT_ID";
+			}
+		}
+		return true;
+	}	
+	var lPermissionID = iframePerm.bInheritPermission();
+	if (lPermissionID)
+	{	
+		docElem["SET.PERMISSION_INDEX_ID"].value = lPermissionID;
+		docElem["SET.PGROUP_TYPE"].value = iframePerm.PgroupType();
+        docElem["SET.READ_GROUP_LIST"].value = iframePerm.ReadList();
+        docElem["SET.WRITE_GROUP_LIST"].value = iframePerm.WriteList();
+	}
+	else
+	{
+		docElem["SET.PERMISSION_INDEX_ID"].value = 0;
+		docElem["SET.PGROUP_TYPE"].value = iframePerm.PgroupType();
+		docElem["SET.READ_GROUP_LIST"].value = iframePerm.ReadList();
+		var sWritePerm = iframePerm.WriteList();
+		/* We don't need this check anymore as we support empty write selection from now
+		if (sWritePerm == -1)
+		{
+			alert("Please make sure at least one group has the write permission.");
+			return false;
+		}
+		*/
+		if(sWritePerm == -999)
+		{
+			alert("Please make sure the grant write permission is selected.");
+			return false;
+		}
+		docElem["SET.WRITE_GROUP_LIST"].value = iframePerm.WriteList();
+	}
+	return true;
+}
+
+function permissionTabLoaded()
+{
+	bLoadPermission_tab = 1;
+}
+
+function loadActions()
+{
+	if ( $args.id != 0 )
+	{
+		ahdtop.m_arrIsForumEnabled[$args.id] = "$args.ALLOW_QA" - 0;
+	}
+
+	iframePerm = window.frames["tabPermissions_iframe"];
+	if(propFormName3 == "edit")
+	{		
+		var sKcatCaption = '<PDM_FMT ESC_STYLE=C>$args.CAPTION</PDM_FMT>';
+		//Suppressing leading blanks
+		if ( sKcatCaption != "")
+		{
+			sKcatCaption = sKcatCaption.split(" ").join("");
+		}
+		if ( sKcatCaption == "")
+		{
+			parent.bEditing_New = true;
+		}
+		else
+		{
+			parent.bEditing_New = false;
+		}
+		//Getting the caller KT tree MacroID in the array.
+		var strHref = location.href;
+		var j = strHref.search("KTMacrolArrayNumber");
+		if (j>0)
+		{
+			j = j + "KTMacrolArrayNumber".length + 1;
+			var lNumber = strHref.substr(j,1);
+			parent.KTMacroNumber = lNumber;
+		}			
+		if (m_bcheck_perm_update_status == "1")
+		{
+			//Suppressing the msg on the onload event, so the user will not get it twice
+			var bComingFromEdit = false;
+			if (typeof parent.CameFromReadOnlyWithWarning != "undefined")
+			{
+				if (parent.CameFromReadOnlyWithWarning == "1")
+				{
+					bComingFromEdit = true;
+					parent.CameFromReadOnlyWithWarning = "0";
+				}
+			}	
+			if (!bComingFromEdit)
+			{
+				var sMsg =  msgtext("A_Previous_Category_Permission");//"A Previous Category Permission update process has not been completed.\n"+"It is highly recommended to edit categories one at a time.\n"+"Would you still like to edit this category? Click OK to Edit or Cancel."
+				if (!confirm(sMsg))
+				{
+					window.setTimeout("detailCancel();",10)
+				}
+			}
+		}		
+	}
+	else if(propFormName3 == "ro")
+	{	
+		var TreeMacroRef;
+		//Getting a reffrence to the tree macro and sending it a message to update the tree with the changes
+		if (ahdframeset == ahdtop)//supress popup options
+			TreeMacroRef = ahdframeset.kt_catTreeWindow[parent.KTMacroNumber];
+		else if (typeof parent.KTMacroNumber != "undefined")
+			TreeMacroRef = top.opener.ahdframeset.kt_catTreeWindow[parent.KTMacroNumber];
+		if (typeof TreeMacroRef != "undefined")
+		{
+			TreeMacroRef.UpdateTree($args.id, parent.bEditing_New, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$args.CAPTION</PDM_FMT>',$args.PARENT_ID-0,'$args.RELATIONAL_ID',$args.HAS_CHILDREN, '${args.tenant:}', '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>${args.tenant.name:}</PDM_FMT>');
+		}	
+	}
+}   
+
+function permissionTabReset()
+{	
+	// get_tab_id from web_tab.js	
+       var tabID = get_tab_id("Permissions");
+	// reload permissions tab	
+	tabReload(tabID);
+}
+
+function setTenants()
+{
+	<PDM_IF "$prop.MultiTenancy" != "off">
+		detailSetTenantFromPresetField( "PARENT_ID", '${args.PARENT_ID.tenant:}', '<PDM_FMT ESC_STYLE=C>${args.PARENT_ID.tenant.name:}</PDM_FMT>' );
+	</PDM_IF>
+}
+   
+</script>
+
+</HEAD>
+<BODY class=detailro onLoad="loadActions();setTenants();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="kcat" header=no>
+<script>	
+	
+<PDM_MACRO name=dtlForm button=false factory=KCAT>
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+		var m_bcheck_perm_update_status = "$args.CHECK_PERM_UPDATE_STATUS";
+		var m_bIsLargeDB = "$args.KT_LARGE_DB";
+<PDM_MACRO name=button caption="Save[s]" func="checkBeforeSave()" hotkey_name="Save[s]" id="btnSave">
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="detailCancel()" hotkey_name="Cancel[n]" id="btncncl">
+<PDM_MACRO name=button caption="Reset[r]" func="check_reset();detailReset();permissionTabReset()" hotkey_name="Reset[r]" id="btn003">
+<PDM_ELIF "$args.id" != "1" >
+		if (cfgUserAuth > 1)
+<PDM_MACRO name=button caption="Edit" func="checkBeforeEdit()" hotkey_name="Edit" id="btnEdit">
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+</script>
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" == "1">
+	<PDM_INCLUDE FILE=category_content_tab.htmpl>
+<PDM_ELSE>
+<PDM_IF "$prop.form_name_3" == "edit">
+	<INPUT TYPE=HIDDEN NAME="SET.PERMISSION_INDEX_ID" value='$args.PERMISSION_INDEX_ID'>
+	<INPUT TYPE=HIDDEN NAME="SET.PGROUP_TYPE" value="$args.READ_PGROUP.TYPE">
+	<INPUT TYPE=HIDDEN NAME="SET.READ_GROUP_LIST" value="$args.READ_GROUP_LIST">
+	<INPUT TYPE=HIDDEN NAME="SET.WRITE_GROUP_LIST" value="$args.WRITE_GROUP_LIST">
+	<script>
+		var sOrigType = "$args.PGROUP_TYPE";
+		var sOrigRead = "$args.READ_GROUP_LIST";
+		var sOrigWrite = "$args.WRITE_GROUP_LIST";
+	</script>
+</PDM_IF>
+
+<CENTER>
+<br>
+<PDM_MACRO name=startNotebook hdr="category_nb">
+<PDM_MACRO name=TAB title="Content" file="category_content_tab.htmpl">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=TAB title="Permissions" height=600 id=tabPermissions src="OP=DISPLAY_FORM+HTMPL=category_permissions_tab.htmpl+READ_PGROUP=$args.READ_PGROUP+WRITE_PGROUP=$args.WRITE_PGROUP+PERMISSION_INDEX_ID=$args.PERMISSION_INDEX_ID+PARENT_READ_PGROUP=$args.PARENT_ID.READ_PGROUP+PARENT_WRITE_PGROUP=$args.PARENT_ID.WRITE_PGROUP+PARENT_ID=$args.PARENT_ID+id=$args.id+KEEP.IS_EDIT=$prop.form_name_3">
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+
+<PDM_WSP>

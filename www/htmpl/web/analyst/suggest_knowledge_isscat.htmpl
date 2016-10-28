@@ -1,0 +1,210 @@
+<PDM_IF 0>
+suggest_knowledge_isscat.htmpl
+WHEN PRESENTED:
+    When we need to display Suggest Knowledge for Issue Categories
+INTENT:
+    Display the Suggest Knowledge for Issue Categories
+VARIABLES:
+    
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Suggest Knowledge for Issue Categories";
+var hdrTitleList = "Suggest Knowledge for Issue Categories";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin_suggest_knowledge.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script>
+//global vars
+var m_sugg_know_for_issue_categories = "$prop.SUGGEST_KNOWLEDGE_FOR_ISSUE_CATS";
+var m_selected_isscat_id = 0;
+var m_cfgTotal = 0;
+var m_ActCode = 1;
+var m_SuggestKnowledgeIsscat_default;
+var m_SuggestKnowledgeSelection;
+var m_SuggestKnowledgeIsscat_dbId;
+<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+	<PDM_IF "$ciProps.PROPERTY_NAME" == "SUGGEST_KNOWLEDGE_FOR_ISSUE_CATS">
+		m_SuggestKnowledgeIsscat_dbId = "$ciProps.id";
+		m_SuggestKnowledgeIsscat_default = "$ciProps.PROPERTY_DEFAULT";
+		m_SuggestKnowledgeSelection = "$ciProps.PROPERTY_VALUE";
+	</PDM_IF>	
+</PDM_LIST>	
+
+function SgtKnowledgeSelect() {
+   if (m_SuggestKnowledgeSelection == "-1") 
+   {
+      return "1";
+   }
+   else {
+      return "0";
+   }
+}
+
+function setActionCode() {
+   if (m_SuggestKnowledgeSelection == "1") 
+   {
+      return "0";
+   }
+   else {
+      return "1";
+   }
+}
+
+function set_action(obj){
+
+		if (obj.id=="SuggestKnowledge0")
+			LoadIssueCategories(1);
+		else
+			LoadIssueCategories(0);
+}
+
+function DisableSuggestClick()
+{
+					var bDisable = document.getElementById("DisableSuggest").checked;
+					if (bDisable)
+					{
+						LoadIssueCategories("-1");
+					}
+					else
+					{
+						var bSuggest = document.getElementById("SuggestKnowledge0").checked;
+						if (bSuggest)
+						{
+							LoadIssueCategories("1");
+						}
+						else
+						{
+							LoadIssueCategories("0");
+						}
+					}
+}
+//			
+
+function LoadIssueCategories(bSuggestKnowledge)
+{
+					if ( bSuggestKnowledge != "-1" )
+						set_action_in_progress(ACTN_LOADFORM);
+					//
+					if(typeof bSuggestKnowledge != "undefined")
+					{
+						m_SuggestKnowledgeSelection = bSuggestKnowledge;
+					}
+
+	   				var url = cfgCgi+"?SID="+cfgSID+"+FID=" + fid_generator();
+	   				//if suggest knowledge is checked, the list is for all request areasdon't have suggest knowledge (an exclusion list)
+	   				if (m_SuggestKnowledgeSelection == "-1")
+	   					url += "+OP=DISPLAY_FORM+HTMPL=empty.htmpl";
+	   				else
+	   				{
+	   					url += "+OP=SEARCH+FACTORY=isscat";
+	   					
+	   					if (m_SuggestKnowledgeSelection == "1")
+	   						url += "+ADDITIONAL_WHERE=" + nx_escape("suggest_knowledge=0 or suggest_knowledge IS NULL");
+	   					else
+	   						url += "+QBE.EQ.suggest_knowledge=1";
+	   					//
+	   					url += "+HTMPL=list_suggest_knowledge_isscat.htmpl";
+	   				}
+					//
+					// var odivIssueCats = document.getElementById("divIssueCats");	
+					var odivIssueCats = window.frames["divIssueCats"];
+					if (odivIssueCats != null)
+					{
+					   odivIssueCats.location.href = url;
+					}
+
+					//Disable / enable inputs and labels when suggest knowledge is disabled
+					var bEnable = true;
+					if (m_SuggestKnowledgeSelection == "-1")
+					{
+						bEnable = false;
+						
+					}
+					//Inputs and labels
+
+					DisableEnableById("SuggestKnowledge0", bEnable)
+					DisableEnableById("SuggestKnowledge1", bEnable)
+					DisableEnableById("header1", bEnable);
+					DisableEnableById("header2", bEnable);
+					
+					var radio_obj=document.getElementById("SuggestKnowledge0");		
+					var p_obj=radio_obj.parentElement;
+					var grp_obj=p_obj.parentElement;
+					grp_obj.disabled = !bEnable;
+					
+					// disabled property for SPAN element does not work in non-IE
+					// browsers. Changing the class of the SPAN elements to display 
+					// in disable mode.
+					if(!_browser.isIE)
+					{
+						var child_list = p_obj.childNodes;
+						var len = child_list.length;
+						for (var count=0; count<len; count++)
+						{
+							if(child_list[count].nodeName == "SPAN")
+							{
+								if (bEnable)
+									child_list[count].classList.remove("disableSuggest");
+								else
+									child_list[count].classList.add("disableSuggest");
+							}
+						}
+						
+						var header2_obj = document.getElementById("header2");
+						if (bEnable)
+							header2_obj.classList.remove("disableSuggest");
+						else
+							header2_obj.classList.add("disableSuggest");
+					}
+				}
+			</script>
+</head>
+<body onload="javacript:window_onload('isscat');">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Issue Category">
+			<script>
+var edit_form = 1;
+<PDM_MACRO name=dtlForm button=false factory=USP_PROPERTIES>
+if ( ahdtop.canEditAdminKT_MT() )
+{
+      
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Save" func="Save('isscat')" hotkey_name="Save[S]" id="btnSave" tabindex=110>
+<PDM_MACRO name=button caption="Reset Defaults" func="ResetDefaults('isscat')" hotkey_name="Reset_Defaults" id="btnResetDefault" tabindex=110>
+<PDM_MACRO name=btnEndRow>
+}
+
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow class="'page_section gn_container_no_border width_100'">
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="" attr="DisableSuggest" desc="<label for='DisableSuggest' class='label'>Do not suggest knowledge</label>" evt="onclick=\\\"DisableSuggestClick()\\\"" func="SgtKnowledgeSelect()" id=DisableSuggest padding=0 samecol=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext value=" ">
+
+m_ActCode=setActionCode();
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlRadio hdr="<span id=header2 >&nbsp;By default knowledge will be:<br> </span>" attr="n/a" actcode="\" + m_ActCode + \"" codename=SuggestKnowledge dataclass="label" evt="onclick=\\\"set_action(this)\\\"" id=SuggestKnowledge samerow=true title="By default knowledge will be:">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext value=" ">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList frmname="divIssueCats" src="$CAisd/html/empty.html">
+
+</script>	
+<PDM_MACRO name=dtlEnd>
+
+
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: suggest_knowledge_isscat.htmpl ASPEN.7 2012/04/18 15:26:45 upeha01 Exp $
+</PDM_IF>
+<PDM_WSP>

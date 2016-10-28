@@ -1,0 +1,37 @@
+<PDM_IF 0>
+imp_expl_tab_dflt.htmpl
+WHEN PRESENTED:
+    Default screen for the Impact Explorer
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.imp_expl_form_title" != "">
+var form_title = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.imp_expl_form_title"</PDM_FMT>;
+<PDM_ELSE>
+var form_title = <PDM_FMT PAD=NO ESC_STYLE=C>"Impact Explorer Interface"</PDM_FMT>;
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="main_form">
+<BR><BR><BR><BR><BR><BR><BR><BR><BR><BR>
+<center>
+<SCRIPT LANGUAGE="JavaScript">
+	  document.writeln(generate_logo_product_name_html());
+</SCRIPT>
+</center>
+
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+
+</HTML>
+<PDM_IF 0>
+@(#)$Id: imp_expl_tab_dflt.htmpl ANDERSON.1 2009/10/27 09:30:14 ralje02 Exp $;
+</PDM_IF>

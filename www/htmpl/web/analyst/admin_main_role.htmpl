@@ -1,0 +1,85 @@
+<PDM_IF 0>
+admin_main_role.htmpl
+	WHEN PRESENTED:
+	   As the ticketing tab of the admin main page
+</PDM_IF>
+<html lang="en"><PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="OP=MENU+NBTAB=adm">
+<HEAD>
+<script language=javascript>
+//global vars
+//should these be empty or set to top?
+var m_CurrentIndex = 100;
+var m_CurrentIndexPath = "Administration";
+
+var test_cache = new Array();
+
+
+function testobj(nid,nname)
+{
+this.nid=nid;
+this.nname=nname;
+}
+//
+function setCurrentIndex(IndexId)
+{
+	m_CurrentIndex = IndexId;
+}
+//
+function getCurrentIndex()
+{
+	return m_CurrentIndex;
+}
+//
+function setCurrentIndexPath(sIndexPath)
+{
+	m_CurrentIndexPath = sIndexPath;
+}
+//
+function getCurrentIndexPath()
+{
+	return m_CurrentIndexPath;
+}
+// 
+
+
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+
+var ahdframeset = ( window.name == "cai_main" ? window : ahdtop );
+var ahdframe;
+function frameset_loaded()
+{
+    ahdframe = window.frmAdmin;
+    ahdframeset.ahdframe = ahdframe;
+    if (typeof parent.ahdframe == "object")
+	parent.ahdframe = ahdframe;
+    if (typeof parent.ahdframeset == "object")
+	parent.ahdframeset.ahdframe = ahdframe;	
+}
+
+</script>
+</HEAD>
+<SCRIPT>
+<PDM_IF "$prop.browser" != "IE">
+    <PDM_MACRO NAME=startFrameset id=frameset1 cols="240,*" border=3 FRAMEBORDER=1 onload="frameset_loaded()">	
+<PDM_ELSE>
+    <PDM_MACRO NAME=startFrameset id=frameset1 cols="240,*" border=2 onload="frameset_loaded()">	
+</PDM_IF>
+<PDM_IF "$prop.browser" != "IE">
+    <PDM_MACRO NAME=frame id=frmAdmTree frame_name=frmAdmTree web_form_url="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=menu_tree.htmpl+menu_name=$args.KEEP.tree_code+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" style="border:1px #8B939A solid;padding-left:5px;padding-top:5px" SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=1 title="Hidden frame - do not navigate here">
+    <PDM_MACRO NAME=frame id=frmAdmin frame_name=frmAdmin web_form_url="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=admin_tab_dflt.htmpl" style="border: 1px #8B939A solid;"  SCROLLING=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 title="Main administration frame">
+<PDM_ELSE>
+    <PDM_MACRO NAME=frame id=frmAdmTree frame_name=frmAdmTree web_form_url="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=menu_tree.htmpl+menu_name=$args.KEEP.tree_code+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" style="border:1px #8B939A solid;padding-left:5px;padding-top:5px" SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 title="Hidden frame - do not navigate here">
+    <PDM_MACRO NAME=frame id=frmAdmin frame_name=frmAdmin web_form_url="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=admin_tab_dflt.htmpl" style="border: 1px #8B939A solid;"  SCROLLING=$SESSION.scrolling MARGINHEIGHT=0 FRAMEBORDER=0 MARGINWIDTH=0 title="Main administration frame">
+</PDM_IF>
+<PDM_MACRO NAME=endFrameset>
+</SCRIPT>		
+</HTML>
+<PDM_IF 0>
+@(#)$Id: admin_main_role.htmpl ASPEN.1 2012/01/13 16:17:06 kumka02 Exp $;
+</PDM_IF>

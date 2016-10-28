@@ -1,0 +1,29 @@
+<PDM_IF 0>
+$Id: kt_main2.htmpl,v 1.3 2006/11/14 17:52:07 jenji01 Exp $
+	WHEN PRESENTED:
+	    As the Category Browse popup window from the inside a ticket on the Knowledg tab
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Category Browse";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+<SCRIPT>
+// Used by inner frames to determine if they are inside a popup or not
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+var ahdframeset = window;
+var _sKCATPath = <PDM_FMT ESC_STYLE=C KEEPTAGS=YES>"$args.KCAT_REL_PATH"</PDM_FMT>;
+</script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>	
+	<FRAMESET 
+	<PDM_IF "$prop.browser" != "IE">
+	    >     
+	<PDM_ELSE>
+		FRAMEBORDER="0" FRAMESPACING="0">
+	</PDM_IF>
+	<frame src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=kt_main3.htmpl+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+KCAT_REL_ID=$args.KCAT_REL_ID+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME+KEEP.IsPopUp=$args.KEEP.IsPopUp" NAME=ktmain_window style="border:0px" SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title="Hidden frame - do not navigate here">
+	</FRAMESET>	
+</HTML>

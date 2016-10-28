@@ -1,0 +1,71 @@
+<PDM_IF 0>
+20131011 bmalz @ e-xim
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<style>
+table.MenuBarTele {
+	padding: 5px;
+	font-family: verdana, arial, helvetica, sans-serif;
+	color: #666;
+	font-size: 14px;
+	font-weight: normal;
+	text-decoration: none;
+	margin-top: -4px;
+}
+</style>
+<script>
+var IsTelecentrum = 1;
+function BackTo() {
+	var url = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum" + <PDM_IF "$args.IsHR" == "1">"hr"<PDM_ELSE>""</PDM_IF> + ".htmpl+ShowList=1+PHONENUMBER=$args.PHONENUMBER+CALLID=$args.KEEP.CALLID";
+	ahdtop.product.frames[1].location.href = url;	// ie :(
+}
+
+function BackTele() {
+	if(typeof(ahdtop.frames[1].set_role(true)) != "") { };
+}
+
+</script>
+</HEAD>
+<BODY> 
+<PDM_IF "$args.PHONENUMBER" != "">
+	<PDM_IF "$args.CanReturn" == "1">
+		<table class="MenuBarTele">
+			<tr>
+				<td>
+					<script>ImgBtnCreate("btnUserProfile", "Powrót", "javascript:BackTo();", true, 0, "Powrót");</script>
+				</td>
+				<td>
+					Telefon: <span style="color: #DD3126; border-bottom: 1px dotted gray;">$args.PHONENUMBER</span>
+				</td>
+			</tr>
+		</table>
+	<PDM_ELSE>
+		<table class="MenuBarTele">
+			<tr>
+				<td>
+					<script>ImgBtnCreate("btnUserProfile", "Powrót", "javascript:BackTo();", true, 0, "Powrót");</script>
+				</td>
+				<td>
+					Telefon: <span style="color: #DD3126; border-bottom: 1px dotted gray;">$args.PHONENUMBER</span>
+				</td>
+			</tr>
+		</table>
+	</PDM_IF>
+</PDM_ELSE>
+	<table class="MenuBarTele">
+		<tr>
+			<td>
+				<script>ImgBtnCreate("btnUserProfile", "Powrót", "javascript:BackTele();", true, 0, "Powrót");</script>
+			</td>
+		</tr>
+	</table>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

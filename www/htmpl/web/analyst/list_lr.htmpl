@@ -1,0 +1,60 @@
+<PDM_IF 0>
+$Id: list_lr.htmpl,v 1.3 2006/11/09 22:21:15 taoyu02 Exp $
+list_lr.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Notifications.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Notification History Search";
+var hdrTitleList = "Notification History List";
+var fac = "$args.KEEP.attr_factory";
+if (fac == "nr") {
+form_title = "Notification History for $args.KEEP.name";
+}
+else if (fac == "cnt") {
+form_title = "Notification History for $args.KEEP.combo_name";
+}
+else {
+form_title = "Notification History for $args.KEEP.ref_num";
+}
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("no", "no");
+var cfgCanEdit = false;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No notifications found";
+var msgFound1 = "1 notification found";
+var msgFound = "%1 notifications found";
+var msgFoundMore = "%1 notifications found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired notification";
+<pdm_macro name=lsStart>
+<pdm_macro name=lsCol hdr="Nagłówek" attr=msg_hdr  exportfmt=ShowLink link=yes>
+<pdm_macro name=lsCol hdr="Data wysłania" attr=start_date sort=DESC>
+<pdm_macro name=lsCol hdr="Odbiorca" attr=contact.combo_name >
+<pdm_macro name=lsCol hdr="Pilność" attr=notify_method>
+<pdm_macro name=lsCol hdr="Metoda" attr=cmth_used>
+<pdm_macro name=lsCol hdr="Status" attr=status_shadow sort=no export=no>
+<pdm_macro name=lsCol attr=msg_text startrow=yes colspan=6>
+<pdm_macro name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

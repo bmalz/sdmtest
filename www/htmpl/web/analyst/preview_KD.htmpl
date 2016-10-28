@@ -1,0 +1,92 @@
+<PDM_IF 0>
+preview_KD.htmpl
+WHEN PRESENTED:
+   Mouseover Preview form for knowledge documents.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var docTitle = '<PDM_FMT ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+<PDM_IF "$args.ACTIVE_STATE" == "200">
+	<!-- Forum -->
+	if(docTitle.length > 50)
+		var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>...';
+	else	
+		var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>';
+<PDM_ELIF "$args.DOC_TYPE_ID" == "2">
+	if (docTitle.length > 50)
+		var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>... Tree Document';
+	else
+		var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT> Tree Document';
+<PDM_ELSE>
+	if (docTitle.length > 50)	
+		var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>... Document';
+	else
+		var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT> Document';	
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var iBuResult = "$args.BU_RESULT";
+var iAvgRating = "$args.AVG_RATING";
+var iVoteCount = "$args.VOTE_COUNT";
+</script>
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_KD.js"></script>
+</head>
+<body class=detailro onload="convertFAQRating();convertAVGRating()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=iss>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="ID" attr=id>
+<PDM_IF "$args.ACTIVE_STATE" != "200">
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr=STATUS_ID>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=QA_STATUS>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Główna klasyfikacja" attr=PRIMARY_INDEX.INDEX_PATH colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł" attr=TITLE colspan=4>
+<PDM_IF "$args.ACTIVE_STATE" != "200">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Podsumowanie" attr=SUMMARY colspan=4>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ACTIVE_STATE" != "200">
+<PDM_MACRO name=dtlReadonly hdr="Problem" attr=PROBLEM colspan=4>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Pytanie" attr=PROBLEM colspan=4>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Ocena FAQ" attr="BU_RESULT" id=faq_rating>
+<PDM_MACRO name=dtlReadonly hdr="Trafienia" attr=HITS>
+<PDM_MACRO name=dtlReadonly hdr="Średnia ocena" attr="AVG_RATING" id=avg_rating>
+<PDM_MACRO name=dtlReadonly hdr="Głosy użytkowników" attr=VOTE_COUNT>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Attachment Count" attr="n/a" value="$args.ATTMNT_LINKS.length">
+<PDM_MACRO name=dtlDateReadonly hdr="Data utworzenia" attr=CREATION_DATE time=no>
+<PDM_MACRO name=dtlDateReadonly hdr="Data modyfikacji" attr=MODIFY_DATE colspan=2 time=no>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: preview_KD.htmpl ASPEN.1 2011/01/06 15:59:26 ralje02 Exp $
+</PDM_IF>
+
+<PDM_WSP>

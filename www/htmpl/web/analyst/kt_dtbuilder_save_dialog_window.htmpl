@@ -1,0 +1,32 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Save";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_dtbuilder_save_dialog_window.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+
+<table border="0" width="100%" style="padding: 0px; margin: 0px">
+<tr><td>
+<LABEL id="lblMessage" class=label><PDM_IF 0>LOCALIZATION</PDM_IF>You have made changes to the tree.</LABEL>
+</td></tr><tr><td>
+<LABEL id="lblMessage" class=label><PDM_IF 0>LOCALIZATION</PDM_IF>Do you want to save the changes?</LABEL>
+</td></tr><tr><td>
+<SCRIPT>
+	ImgBtnRow();
+	ImgBtnCreate("bnYes", "Yes", "SaveAndClose();", "defer", 120);
+	ImgBtnCreate("bnNo", "No", "CloseWindow();", "defer", 120);
+	ImgBtnCreate("bnCancel","Cancel[n]","top.close();",true,get_local_int(1));
+	ImgBtnEndRow();
+</SCRIPT>   
+</td></tr>
+</table>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

@@ -1,0 +1,30 @@
+<PDM_IF 0>
+list_chg_trans.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Status Transitions for Change Order
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP factory=chg_trans preview="NBTAB=list_chg_trans">
+<html lang="en">
+<HEAD>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Change Order Transition Search";
+var hdrTitleList = "Change Order Transition List";
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+
+<PDM_INCLUDE FILE=list_trans_include.htmpl transFactory=chg_trans statFactory=chgstat>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

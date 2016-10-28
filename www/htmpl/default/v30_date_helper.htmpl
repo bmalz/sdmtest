@@ -1,0 +1,193 @@
+<PDM_IF 0>
+v30_date_helper.htmpl
+WHEN PRESENTED:
+    When we need to display a date helper.
+INTENT:
+    Display a date helepr form for user to enter the date in the correct format.
+VARIABLES:
+    string      image   The location of the image directory as specified in
+                            in the config file.
+    string      date_format The date format defined in the web.cfg file.
+    object      args.KEEP   The prefix for the variable that is used to carry 
+                            value between forms.       
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Date Helper";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/date_chooser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+
+<script type="text/javascript">
+var cfgDateFormat = "$date_format";
+function loadme() {
+
+	var myMama = window.opener;
+	if (myMama.closed) return; 
+	var thediv = document.getElementById("maindiv");
+	<PDM_IF '$args.KEEP.time'== 'no'>
+		show_calendar('$args.KEEP.form_name', '$args.KEEP.control_name', thediv, self, myMama, '$args.KEEP.time');
+	<PDM_ELSE>
+		show_calendar('$args.KEEP.form_name', '$args.KEEP.control_name', thediv, self, myMama);
+	</PDM_IF>
+}
+
+// Reflect date updates for the month/year selects - this is a callback defined in date_chooser.js
+function dateChanged(calObj) {
+
+	var mSel = document.getElementById("m_sel");
+	var ySel = document.getElementById("year_sel");
+	
+	
+	
+	// Set the year the hard way
+	var yearIdx = ySel.selectedIndex; 
+	for (var i = 0; i < ySel.options.length; i++) {
+		if (ySel.options[i].value == calObj.getYear()) {
+			yearIdx = i;
+			break;
+		}
+	}
+	
+	mSel.options[calObj.getMonth()].selected = true;
+	ySel.options[yearIdx].selected = true;
+
+
+}
+
+/*function GetlnkIndex(lnkname) { 
+	var lnkidx, i;
+
+	lnkidx = -1;	
+	if ( document.links.length ) { 
+		for ( i = 0; i < document.links.length -1; i++ ) { 
+			if ( document.links[i].name == lnkname ) {  
+				lnkidx = i;
+				break;
+			}
+		} 
+	}
+	
+	return lnkidx;
+}*/
+function FirstFocus()
+{
+var mSel = document.getElementById("m_sel");
+if ( mSel != null )
+  mSel.focus();
+}
+
+function loadActions()
+{
+  loadme();
+ FirstFocus();
+}
+
+function cancel_datehelper()
+{
+  if(typeof ahdtop.AHD_Windows[window.name] != "undefined" &&
+		!ahdtop.AHD_Windows[window.name].closed)
+  deregister_window(ahdtop.AHD_Windows[window.name]);
+}
+
+</script>
+</head>
+
+
+
+<body onload="loadActions()"  onbeforeunload='cancel_datehelper()' class="detailro">
+<script type="text/javascript">
+activateActionKeys();
+</script>
+
+<script type="text/javascript">
+<PDM_MACRO NAME=dtlForm button=false>
+<PDM_MACRO NAME=dtlStart center="noscroll">
+if ( ! ahdtop.cstUsingScreenReader )
+  docWriteln("<a href=\"javascript:void(0)\" onfocus='document.getElementById(\"imgBtn3\").focus()'></a>");
+docWriteln("<form id='mainform' name='mainform' onSubmit='return false;'>");
+docWriteln("<center>");
+docWriteln("<table cellspacing='2' cellpadding='2' summary='Selektor daty'>");
+docWriteln("<th align='left'></th>");
+docWriteln("<th align='left'><span class='labeltext'><label for='m_sel'>Miesiąc</label></span></th>");
+docWriteln("<th align='left'><span class='labeltext'><label for='year_sel'>Rok</label></span></th>");
+docWriteln("<th align='left'></th>");
+docWriteln("<tr><td>");	
+	
+    ImgBtnSetDefaultTabIndex(10);
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Poprzedni" hotkey_name="Poprzedni" id='btn003' width=0
+    func="prevMonth()">
+<PDM_MACRO NAME=btnEndRow>
+	
+docWriteln("</td>");
+docWriteln("<td><select id='m_sel' name='m_sel' tabindex='10' onfocus=\"this.className='focusField' \" onblur=\"this.className='' \" onchange=\"month_changed(this);\" >");
+
+	var rightnow = new Date();
+	var targetMo = rightnow.getMonth();
+	for (var z = 0; z < Calendar.Months.length; z++) {
+
+		if (z == targetMo) {
+			document.write("<option selected='selected' value=" + z + ">" + Calendar.Months[z]);
+		} else {
+			document.write("<option value=" + z + ">" + Calendar.Months[z]);
+		}
+		
+	}
+
+docWriteln("</select>");
+docWriteln("</td>");
+
+	<!--  hardcode year selection for now....-->
+docWriteln("<td>");
+docWriteln("<select id='year_sel'  name='year_sel' tabindex='10' onfocus=\"this.className='focusField' \" onblur=\"this.className='' \" onchange=\"year_changed(this);\">");
+
+	
+	var nowY = rightnow.getFullYear();
+
+	for (var z = nowY - 10; z < nowY + 10; z++) {
+
+		if (z == nowY) {
+			document.writeln("<option selected='selected' value=" + z + ">" + z);
+		} else {
+			document.writeln("<option value=" + z + ">" + z);
+		}
+	}
+
+docWriteln("</select>");
+docWriteln("<td>");
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Następny" hotkey_name="Następny" id='btn004' width=0 Tooltip="Następny miesiąc"
+    func="nextMonth()">
+<PDM_MACRO NAME=btnEndRow>
+docWriteln("</td>");
+docWriteln("</table>");
+
+docWriteln("<div id='maindiv'   name='maindiv'>");
+<!-- The calendar display goes here!! -->
+docWriteln("</div>");
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Ok[k]" hotkey_name="Ok[k]" id="btndflt" width=120
+    func="date_ok()">
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" id="btncncl" btnType="negative" width=120
+    func="cancelMe()">
+<PDM_MACRO NAME=btnEndRow>
+docWriteln("</center>");
+docWriteln("</form>");
+if ( ! ahdtop.cstUsingScreenReader )
+  docWriteln("<a href=\"javascript:void(0)\" tabindex='10' onfocus='FirstFocus()'></a>");
+<PDM_MACRO NAME=dtlEndTable>
+</script>
+
+<PDM_MACRO NAME=dtlEnd>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: v30_date_helper.htmpl ASPEN.1 2010/11/17 20:10:46 saima01 Exp $
+</PDM_IF>

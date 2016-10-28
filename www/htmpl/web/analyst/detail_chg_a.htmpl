@@ -1,0 +1,597 @@
+
+<PDM_IF 0>
+detail_chg.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Change
+INTENT:
+    Display the detail info for the Change
+VARIABLES:
+    string      image   The location of the image directory as specified in     
+                            in the config file.
+    object  chg  args   The Change object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm
+/opt/CApdm/bopcfg/majic/writer.maj:OBJECT chg {.maj for the
+                        definition of attributes for 'OBJECT chg'
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<style type="text/css">
+#invisible{
+visibility: hidden;
+}
+</style>
+<script type="text/javascript">
+var hdrTitle = "Szczegóły Zmiany $args.chg_ref_num";
+var hdrTitleUpd = "Aktualizacja Zmiany $args.chg_ref_num ";
+var hdrTitleNew = "Tworzenie Zmiany $args.chg_ref_num";
+var hdrTitleTempl = <PDM_FMT ESC_STYLE=C PAD=NO>'$args.chg_ref_num Szablon Zmiany $args.template_name Detail'</PDM_FMT>;
+
+//	This variable declaration should placed allways 
+//	before including std head htmpl
+var saveAckMsgExtra = "${args.trigger_message:}";
+var error_msg = '<PDM_FMT ESC_STYLE=JS2>$args.ERROR_MSG</PDM_FMT>';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var argHumantouchLog = "$args.KEEP.humantouch_log";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var cfgDateFormat = "$date_format";
+var argChgRefNum = "$args.chg_ref_num";
+var argID = "$args.id";
+var argActive = "$args.active";
+var cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+var cfgCheckAgtInAreaDef = "$env.NX_CHECK_ASSIGNEE_IN_AREA_DEFAULTS";
+var rptName = new Array("chgsum.rpt", "chg_itildtl.rpt");
+var argSearchSqlClause = "Change_Request.id = $args.id";
+var formEnduser = new Array("main_form","affected_contact");
+var prop_ref = "${prop_ref:}"; 
+var cawf_defid = "";
+var cawf_set;
+var isEditForm;
+var schedDuration = "$args.sched_duration";
+var is_co = true;
+var errmsg = '';
+var new_attmnts = new Array();
+
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=chg_trans transTrigger=1>
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/change_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/timer.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/track_asset.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/wf_visible.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/exim_mods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ajax.js"></script>
+<script type="text/javascript">
+function loadActions()
+{
+	if("$args.KEEP.from_calendar" == "1" && _dtl.edit){
+	document.main_form.elements["SET.sched_start_date"].value = "$args.KEEP.sched_start_date";
+	document.main_form.elements["SET.requestor"].value = "$args.KEEP.requestor_id";
+	document.main_form.elements["requestor_combo_name"].value = "$args.KEEP.combo_name";
+	}
+
+   if ( _dtl.edit ) {
+      save_initial_vals();
+   }
+
+   // SDT 22046 get around IE 5.5 problem by delaying call
+    if ( _dtl.edit ) {
+                load_from_scratchpad("$args.id", "$args.KEEP.FROM_PROF_BRWS");
+        }
+   // SDT 22898 need to fill in affected_contact if requestor is pre_loaded from scratchpad
+   if (  _dtl.edit && "$args.id" == 0  ) {
+      backfill_cnt_event();
+   }
+
+   alert_banner("$args.affected_contact");
+   
+   // Initializing arrays to store CIs associated with the change order
+   init_asset_array($args.asset.length);
+}
+
+var alert_banner_last="";
+var alert_banner_obj="chg";
+var alert_banner_attr="affected_contact";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+   cancel_any_lrel_update();
+}
+
+var aff_cnt_value = "";
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type, tenantId, tenantName )
+{
+   var setOrgId = 0;
+   var cat_related_cnt = 0; 
+
+   if ( typeof base_name != "string" ) {
+      form_name = "main_form";
+      base_name = "requestor";
+      caller_type = "";
+   }
+   if ( base_name == "requestor" ) {
+      var f = document.main_form;
+      if ( typeof f == "object" &&
+           typeof f.affected_contact_combo_name == "object" &&
+           typeof f.requestor_combo_name == "object" &&
+           ( f.affected_contact_combo_name.value == aff_cnt_value ||
+             f.affected_contact_combo_name.value == "" ) ) {
+         aff_cnt_value = f.requestor_combo_name.value; 
+         f.affected_contact_combo_name.value = aff_cnt_value;
+         f.affected_contact_fname.value = f.requestor_fname.value;
+         f.affected_contact_mname.value = f.requestor_mname.value;
+         f.affected_contact_lname.value = f.requestor_lname.value;
+         f.elements["SET.affected_contact"].value = f.elements["SET.requestor"].value;
+         f.elements["KEY.affected_contact"].value = f.elements["KEY.requestor"].value;
+	 cat_related_cnt = 1;
+         if ( f.elements["SET.affected_contact"].value != "" ) {
+            setOrgId = 1;
+            alert_banner(f.elements["SET.affected_contact"].value);
+         }
+         if ( typeof tenant == "string" && tenant.length > 0 )
+           detailSetTenant( "affected_contact", tenant, tenantName ); 
+         else if ( typeof _dtl.tenantImplyingFields == "object" ) {
+           detailSetTenant( "requestor", "", "" );
+           detailSetTenant( "affected_contact", "", "" );
+         }
+      }
+   }
+   if(base_name == "affected_contact") {
+	cat_related_cnt = 1;
+   	if(typeof cntID!="undefined" && cntID.length > 0) alert_banner(cntID);
+   }
+   if (_dtl.edit && !_dtl.skip_agt_check)
+   {
+        var f = void(0);
+        var r = form_name.match(/main_form([0-9]*)/);
+        if ( r != null ) {
+            if ( r[1].length == 0 )
+                f = _dtl.form[0];
+            else
+                f = _dtl.form[r[1]-0];
+        }
+        detailAgtCheck(f, base_name, cntID, prop_ref);
+   }
+   detailCntBackfill( form_name, base_name, lname, fname, mname,
+                      cntID, caller_type );
+              
+    if (cat_related_cnt && typeof cancel_cnt_lookup == "integer") 
+	cancel_cnt_lookup = 0;
+    // Contract enforcement:                  
+    if (ahdtop.cfgNX_CLASSIC_SLA_PROCESSING != 'Yes' &&
+	(cat_related_cnt  || setOrgId == 1 ) && typeof cntID != "undefined" && cntID.length > 1) 
+    {
+        upd_workframe("GET_SVC_CONTRACT", "new_customer=cnt:" + cntID,
+			  "func=parent.ahdframe.get_svc_callback");
+    }
+}
+
+
+function reset_field(target, newvalue ) { 
+	
+	// Reset a field on the main form to the newvalue passed in
+	if ( typeof document.main_form.elements[target]  == "object" ) {   
+		
+		if ( typeof newvalue == "undefined")  
+			document.main_form.elements[target].value = "";
+		else
+			document.main_form.elements[target].value = newvalue;
+			
+		detailClearSetField(document.main_form.elements[target]);
+
+	}
+		
+ }
+
+ function copy_from_chg()
+{
+    if ("$args.KEEP.MAKE_COPY" == "1")
+    {
+	var exceptions = new Array();
+	exceptions[0] = "SET.affected_contact";
+	exceptions[0] = "SET.requestor";
+	detailCopyEditForm(exceptions);
+    }
+}
+
+// detailExtraSaveButtons()
+// Provide extra save buttons for edit form
+function detailExtraSaveButtons(generate)
+{
+  var count = 0;
+  <PDM_IF "itil" == "$env.NX_OTB_MARKET" && $ACCESS.call_mgr == 2>
+  if ( cfgUserAuth \> 1 ) {
+    count++;
+    if ( generate )
+<PDM_MACRO NAME=button caption="Utwórz Incydent[!eaI]" hotkey_name="Create Incident[!eaI]" id="ITIL_INCIDENT" width=0 Tooltip="Zapisz i utwórz Incydent"
+    func="itil_incident()">
+  }
+  </PDM_IF>
+  return count;
+}
+   
+function itil_incident()
+{
+  parent.createIncident = true;
+  detailSave();
+}
+
+function validate_sched_duration(field)
+{
+  var s_duration = document.main_form.elements["SET.sched_duration"];
+  var s_start_date = field;
+  var s_start_date_val;
+   
+  if ( typeof field == "object" )
+  {
+    s_start_date_val = field.value;
+    }
+  else
+    s_start_date_val = s_start_date;
+    
+  if ((s_start_date_val.toString().length <= 0) && (s_duration.value != "00:00:00"))
+  {
+    s_duration.value = "00:00:00";
+    
+  }
+  
+}
+
+function show_risk_svy()
+{
+	// call to op=is_co to check if the change order is checked out already
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + "+OP=IS_CO+CNT_ID=" +
+				ahdtop.cstID + "+DOBID=" + $args.id + "+FAC=chg+RiskSurvey=1";
+				
+	SyncAjaxJSCall(url);
+	var features="directories=no,ahdmenu=no,location=no,height=650"+
+					",width=800,topsplash=no,resizable=yes,scrollbars=yes";
+	var frame_args="MENUBAR=no+GOBUTTON=no"+
+					"+WELCOMEBANNER=no";
+	var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+					"+FACTORY=risk_svy_tpl+OP=DO_RISK_SURVEY"+
+					"+CRID="+$args.id+"+CNT_ID=$cst.id"+
+					"+KEEP.IsPopUp=1+MENUBAR=NO";
+	
+	if(is_co == false)
+	{
+		preparePopup(url,"risk_survey",features,"","",frame_args);
+	}
+	else if(is_co == true)
+	{
+		AlertMsg=""; // reset the AlertMsg
+
+		var lockmsg = document.getElementById("recordlockmsg"); 
+		if ( lockmsg != null )
+		{
+			lockmsg.style.display = "none";
+		}
+
+		showAlertMsg(errmsg, false);
+	}
+}
+
+function schedule_validation()
+{
+	if ( error_msg == "updateOK" )
+	{
+		var stDate = "$args.sched_start_date_INT_DATE";
+		if( stDate=="" )
+			stDate=0;
+		var enDate = "$args.sched_end_date_INT_DATE";
+		if( enDate =="" )
+			enDate = 0;
+		/**
+		 * Skip schedule validation if start date or end date is empty.
+		 */
+		if(stDate == 0 || enDate == 0)
+		{
+			return;
+		}
+		// Call validation logic
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	      "+OP=VALIDATE_CHG_SCHEDULE+FACTORY=chg+sched_start_date="+stDate+
+		  "+sched_end_date="+enDate+"asset_length="+$args.asset.length+
+		  "+change_id="+$args.id;
+
+   	    if (ahdtop.cfgMultiTenancy == "on")
+        {
+            url += "+TENANT_ID=" + '$args.tenant';
+        }
+ 
+		set_action_in_progress(ACTN_SAVE);
+		try
+		{
+			error_msg = SyncAjaxCall( url );
+			//ajaxCallbackScriptExecuted = true;
+		}
+		catch(ex)
+		{
+			//When there are no windows, GET_BMWS returns balnk response
+			//without <script> tags, SyncAjaxJSCall throws exception if 
+			//<script> tag is not found.
+			// Since this is a valid situation and can be ignored
+		}
+
+		if( error_msg.indexOf("VALID_SCHEDULE") == -1 )
+		{
+			showAlertMsg( error_msg, true);
+		}
+		set_action_in_progress(ACTN_COMPLETE);
+	}
+}
+
+function set_call_back_flag()
+{
+	var flag=document.getElementById("SET.call_back_flag");
+	if(flag!=null)
+	flag.value="1";
+}
+</script>
+</head>
+<body class="detailro" onload="loadActions(); schedule_validation();" onunload="unloadActions()">
+
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<center>
+
+<form name="frm002">
+<input type="hidden" name=SET.requested_by value="$args.requestor">
+<input type="hidden" name=requested_by_combo_name value="$args.requestor.combo_name">
+<!-- SET.customer is the contact(affected end user) copied to Incident, created from this change order -->
+<input type="hidden" name=SET.customer value="$args.affected_contact">
+<input type="hidden" name=customer_combo_name value="$args.affected_contact.combo_name">
+<!-- SET.affected_contact is used when the contact(affected end user) is copied from quick profile- SCO42675 -->
+<input type="hidden" name=SET.affected_contact value="$args.affected_contact">
+<input type="hidden" name=affected_contact_combo_name value="$args.affected_contact.combo_name">
+<input type="hidden" name=SET.assignee value="$args.assignee">
+<input type="hidden" name=assignee_combo_name value="$args.assignee.combo_name">
+<input type="hidden" name=SET.group value="$args.group">
+<input type="hidden" name=group_combo_name value="$args.group.combo_name">
+<input type="hidden" name=SET.priority value="$args.priority">
+<input type="hidden" name=SET.impact value="$args.impact">
+<input type="hidden" name=SET.summary value=<PDM_FMT ESC_STYLE=JS2>"$args.summary"</PDM_FMT>>
+<input type="hidden" name=SET.description value=<PDM_FMT ESC_STYLE=JS2>"$args.description 
+(utworzone ze Zmiany nr $args.chg_ref_num)"</PDM_FMT>>
+</form>
+
+<script type="text/javascript">
+<PDM_IF "$prop.form_name_3" != "edit">
+if ( typeof parent.createIncident == "boolean" &&
+     parent.createIncident ) {
+  if (typeof ahdframeset.workframe == "object")
+    ahdframeset.workframe.SkipInitialFocus = "1";
+  create_new('cr',0,0,0, 'PRESET=type:I', 'PRESET=caused_by_chg:$args.id','INITFROM=frm002');
+
+}
+</PDM_IF>
+parent.createIncident = void(0);
+	
+<PDM_MACRO name=dtlForm factory=chg>
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_IF "$args.category.risk_survey" != "0">
+<PDM_IF "$args.submittedSurvey.length" != "0">
+<PDM_MACRO name=button Caption="Podgląd ankiety ryzyka" Func="show_risk_svy();" hotkey_name="Podgląd ankiety ryzyka" ID=btn002>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Ankieta Ryzyka" Func="show_risk_svy();" hotkey_name="Ankieta Ryzyk" ID=btn003>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button Caption="Podgląd profilu" Disabled="true" Func="if ( document.main_form['SET.affected_contact'].value != '' ) edit_profile_browser('id', document.main_form['SET.affected_contact'].value); else edit_profile_browser('combo_name', document.main_form['affected_contact_combo_name'].value)" hotkey_name="Quick Profile[Q]" ID=PROFILE_BROWSER>
+<PDM_ELSE>
+<PDM_IF "$args.category" != "" >
+<PDM_IF "$args.category.auto_assign" == "1" || "$args.category.auto_assign" == "2">
+<PDM_MACRO name=button Caption="Auto Assign" Func="re_auto_assign('$args.assignee','$args.group','$args.affected_contact','$args.category','$args.auto_assign','$args.persistent_id','$args.affected_resource','$args.category.auto_assign');" hotkey_name="Auto Assign" ID=btn010>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "itil" == "$env.NX_OTB_MARKET" && $ACCESS.call_mgr == 2>
+if ( cfgUserAuth \> 1 )
+	
+<PDM_MACRO name=button Caption="Utwórz Incydent[!eaI]" Func="create_new('cr',0,0,0, 'PRESET=type:I', 'PRESET=caused_by_chg:$args.id','INITFROM=frm002');" hotkey_name="Utwórz Incydent[!eaI]" ID=ITIL_INCIDENT>
+</PDM_IF>
+if ( cfgUserAuth \> 1 )
+	
+<PDM_MACRO name=button Caption="Podgląd profil" Func="profile_browser('$args.affected_contact.persistent_id');" hotkey_name="Podgląd profil[Q]" ID=PROFILE_BROWSER>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=button Caption="Użyj szablonu" Func="apply_template('frm001', 'SET.affected_contact', 'chg');" hotkey_name="Użyj szablonu[*Q]" ID=btn010>
+</PDM_IF>
+<PDM_IF "$args.active" == "1">
+<PDM_IF "$prop.form_name_3" == "ro" >
+	var argSchedStartDate = date_to_string("$args.sched_start_date_INT_DATE", 0, 0, "yes");
+	var argSchedDuration = "$args.sched_duration";
+	
+<PDM_MACRO name=button Caption="View Scheduler" Func="popup_schedule_dialog('detailCurrForm()', '','','');" hotkey_name="View Scheduler" ID=btn004>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Scheduler" Func="popup_schedule_dialog('detailCurrForm()', 'SET.sched_start_date','','');" hotkey_name="Scheduler" ID=btn004>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStart scroll=true>
+<PDM_IF "$prop.form_name_3" == "edit">
+</script>
+<input type="hidden" name=change_category value=0>
+<input type="hidden" name="SET.call_back_flag" value="$args.call_back_flag" id="SET.call_back_flag">
+<input type="hidden" name="NEW_ATTMNTS" id="NEW_ATTMNTS">
+<script type="text/javascript">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Zgłaszający" attr=requestor evt="onChange=\\\"backfill_cnt_event()\\\"">
+<PDM_MACRO name=dtlLookup hdr="Osoba dotknięta" attr=affected_contact>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja" attr=category autofill=no evt="onChange=\\\"change_category_func('chg',null,'chgcat')\\\"">
+<PDM_MACRO name=dtlDropdown hdr="Kod zmiany" attr=zchgcode autofill=no evt="onChange=\\\"change_category_func('chg',null,'chgcat')\\\"">
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=status>
+<PDM_MACRO name=dtlDropdown hdr="Kategoria" attr=chgtype initial="300">
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+<PDM_MACRO name=dtlStartExpRow label="Szczegóły Zmiany" colspan=6 exp_rows="1,2,3,4" form_name="detail_chg">
+//<PDM_MACRO name=dtlDropdown hdr="Planowany zasób" attr=zchgresource lookup=no>
+<PDM_IF "$env.NX_REQUIRE_CHANGE_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_IF "$env.NX_REQUIRE_CHANGE_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Właściciel" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Właściciel" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Akceptacja przez CAB" attr="cab_approval">
+<PDM_MACRO name=dtlLookup hdr="CAB" attr=cab>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Wpływ" attr=impact lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Pilność" attr=zchgurgency lookup=no>
+<PDM_MACRO name=dtlDate hdr="Oczekiwany termin realizacji" attr=need_by>
+var cbDateCheck = 0;
+if ( _dtl.edit)
+    cbDateCheck = 1;
+    
+if ( "$args.call_back_date_INT_DATE" != "" || ! _dtl.edit ) {
+   
+<PDM_MACRO name=dtlDate hdr="Termin kontaktu" attr=call_back_date>
+}
+else {
+	
+<PDM_MACRO name=dtlDateDropdown hdr="Termin kontaktu" attr="call_back_date" codename="callbackDates" evt="onBlur=\\\"set_call_back_flag()\\\"">
+}
+ 
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlHier hdr="Powód Zmiany " attr=rootcause evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+<PDM_MACRO name=dtlDropdown hdr="Organizacja" attr=organization link=yes>
+<PDM_MACRO name=dtlLookup hdr="Projekt" attr=project>
+<PDM_MACRO name=dtlDropdown hdr="Kod Zamknięcia" attr=closure_code>
+<PDM_MACRO name=dtlReadonly hdr="Ryzyko" attr=risk>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Aktywne" attr=active>
+<PDM_MACRO name=dtlDate hdr="Planowana data rozpoczęcia" attr=sched_start_date>
+<PDM_MACRO name=dtlTextbox hdr="Planowany termin realizacji" attr=sched_duration evt="onBlur='detailSyncEditForms(this);validate_duration_ts(this)';" size=15>
+<PDM_MACRO name=dtlDateReadonly hdr="Planowana data zakończenia" attr=sched_end_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartExpRow label="Opis Zmiany" colspan=5 exp_rows="1,2,3,4" form_name="detail_chg">
+<PDM_MACRO name=dtlTextbox hdr="Temat" attr=summary colspan=4 keeplinks=yes size=120 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=8 size=120 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+detailSetEventHandler("onBlur='detailSyncEditForms(this)';");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zarejestorwane przez" attr=log_agent>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rejestracji" attr=open_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rozwiązania" attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zamknięcia" attr=close_date colspan=2>
+</script>
+
+<!-- Must in in the main_form form -->
+<input type="hidden" name=catg_cawf_defid value="" size="20">
+
+<script type="text/javascript">
+
+<PDM_MACRO name=dtlEndTable>
+
+</script>
+
+	
+<PDM_MACRO name=startNotebook hdr=chg_nb>
+<PDM_MACRO name=startTabGroup title="Dodatkowe informacje">
+<PDM_MACRO name=tab title="Właściwości" file="xx_prop_tab.htmpl">
+<PDM_MACRO name=tab title="Czas/ Koszty" file="xx_candp_tab.htmpl">
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=chg+PERSID=$args.persistent_id+NO_DP=yes"></pdm_tab>
+	
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=chg+PERSID=$args.persistent_id+SDBP_FLAG=1"></pdm_tab>
+	
+<PDM_IF "$ProductID" != "htcs">
+<PDM_IF "$args.cawf_procid" != "">
+<PDM_MACRO name=tab title="Workflow Tasks" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.CAWorkflow+ARG0=getWorkflowInstance+ARG1=+ARG2=$args.category.cawf_defid+ARG3=$args.cawf_procid+ARG4=1+ARG5=1+HTMPL=workitems.htmpl">
+<PDM_ELIF "$args.caextwf_instance_id" != "">
+<PDM_MACRO name=tab title="Workflow Tasks" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.ItpamWorkflow+ARG0=getProcessInstanceLogs+ARG1=+ARG2=$args.caextwf_instance_id.instance_id+ARG3=1+OBJID=$args.caextwf_instance_id+END_DATE=$args.caextwf_instance_id.endtime+HTMPL=wfITPAMinstance.htmpl">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Workflow Tasks" file="xx_wf_tab.htmpl">
+</PDM_IF>
+<PDM_IF $ProductID != "htcs">
+<PDM_MACRO name=tab title="Service Type" file="xx_stype_tab.htmpl" id=stype>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=tab title="Konflikty" height=300 id=chgcnf src="OP=SEARCH+FACTORY=chgcnf_chg+QBE.EQ.change=$args.id+KEEP.argID=$args.id+KEEP.active=$args.active+KEEP.FORM_NAME=$prop.form_name_3+KEEP.schedEndDate=$args.sched_end_date+KEEP.schedStartDate=$args.sched_start_date"></pdm_tab>
+
+	
+<PDM_IF "$prop.form_name_3" == "edit" || "$args.template_name" != "">
+<PDM_MACRO name=tab title="Szablony" file="xx_template_tab.htmpl" filename=change>
+</PDM_IF>
+<PDM_MACRO name=startTabGroup title="Powiązane zgłoszenia">
+<PDM_MACRO name=tab title="Related Orders" file="chg_relchg_tab.htmpl" id=rel>
+<PDM_IF $ACCESS.call_mgr \> 0>
+<PDM_MACRO name=tab title="Incidents / Problems" height=300 id=rel src="OP=SEARCH+FACTORY=cr+QBE.EQ.change.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.ALWAYS_LIST_CR=1+KEEP.forChangeCrList=1+KEEP.CHG_ID=$args.id+KEEP.chgRefNum=$args.chg_ref_num+KEEP.UPD_LIST=cr_list+KEEP.UPD_ATTR=change">
+<PDM_MACRO name=tab title="Caused Requests" height=300 id=causedreq src="OP=SEARCH+FACTORY=cr+QBE.EQ.caused_by_chg.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.ALWAYS_LIST_CR=1+KEEP.forChangeCrList=1+KEEP.CHG_ID=$args.id+KEEP.chgRefNum=$args.chg_ref_num+KEEP.UPD_LIST=caused_cr_list+KEEP.UPD_ATTR=caused_by_chg">
+</PDM_IF>
+<PDM_MACRO name=startTabGroup title="Logs">
+<PDM_IF "$prop.view_internal" == "0">
+<PDM_MACRO name=tab title="Aktywności" height=300 id=alg src="OP=SEARCH+FACTORY=chgalg+QBE.EQ.change_id=$args.id+QBE.EQ.internal=0">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Aktywności" height=300 id=alg src="OP=SEARCH+FACTORY=chgalg+QBE.EQ.change_id=$args.id">
+</PDM_IF>
+<PDM_MACRO name=tab title="Event Log" height=300 src="OP=SEARCH+FACTORY=event_log+QBE.EQ.sd_obj_type=chg+QBE.EQ.sd_obj_id=$args.id">
+<PDM_MACRO name=tab title="Support Automation" height=300 src="OP=SEARCH+FACTORY=sa_event_history+QBE.EQ.sd_obj_id=$args.id+QBE.EQ.sd_obj_type=chg">
+<PDM_MACRO name=startTabGroup title="Configuration Management">
+<PDM_IF "$args.id" != "0">
+<PDM_IF $UserAuth \> 1 && 
+                $args.status.assoc_ci_managed_chgstat.0.can_edit_criteria == 1 >
+<PDM_IF "$prop.MultiTenancy" == "on">
+                <PDM_SET args.chg_info="KEEP.CHG_ID=$args.id+KEEP.TENANT_ID=$args.tenant">
+            
+<PDM_ELSE>
+                <PDM_SET args.chg_info="KEEP.CHG_ID=$args.id">
+            
+</PDM_IF>
+<PDM_ELSE>
+            <PDM_SET args.chg_info="KEEP.ALLOW_CREATE_CHG_SPEC=false+KEEP.CHG_ID=$args.id">
+        
+</PDM_IF>
+<PDM_MACRO name=tab title="Configuration Items" height=400 id=chgnr src="OP=SEARCH+FACTORY=nr+QBE.EQ.chgnr.chg.id=$args.wc_dob_id+KEEP.chgnr_chg_id=$args.wc_dob_id+KEEP.forCiTab=1+KEEP.TKT_PERSID=$args.persistent_id+KEEP.parentFac=$prop.factory+KEEP.assetCount=$args.asset.length+KEEP.chgRefNum=$args.chg_ref_num+$args.chg_info">
+<PDM_MACRO name=tab title="Change Specifications" height=400 id=verification_criteria src="OP=SEARCH+FACTORY=ci_planned_change+QBE.EQ.chg.id=$dob.id+KEEP.chgnr_chg_id=$args.wc_dob_id+KEEP.forCiTab=1+KEEP.TKT_PERSID=$args.persistent_id+KEEP.parentFac=$prop.factory+KEEP.assetCount=$args.asset.length+KEEP.chgRefNum=$args.chg_ref_num+$args.chg_info">
+<PDM_MACRO name=tab title="Verification Log" height=400 id=verification_log src="OP=SEARCH+FACTORY=ci_verification_log+QBE.EQ.ci_planned_change.chg.id=$args.id+KEEP.chg_id=$args.id+KEEP.parentFac=$prop.factory">
+<PDM_ELSE>
+        <PDM_SET args.keep_tab_msg="KEEP.TAB_MSG=This tab is inactive until the Change Order is saved+NO_DP=yes">
+        
+        <PDM_SET args.ci_keep_tab_banner="KEEP.TAB_BANNER=Configuration Item List">
+        
+<PDM_MACRO name=tab title="Configuration Items" height=100 id=chgnr src="OP=SHOW_DETAIL+HTMPL=cmdb_empty_tab.htmpl+FACTORY=cr+PERSID=$args.persistent_id+$args.ci_keep_tab_banner+$args.keep_tab_msg">  
+        
+        <PDM_SET args.criteria_keep_tab_banner="KEEP.TAB_BANNER=Change Specification List">
+        
+<PDM_MACRO name=tab title="Change Specifications" height=100 id=verification_criteria src="OP=SHOW_DETAIL+HTMPL=cmdb_empty_tab.htmpl+FACTORY=cr+PERSID=$args.persistent_id+$args.criteria_keep_tab_banner+$args.keep_tab_msg">  
+    
+        <PDM_SET args.log_keep_tab_banner="KEEP.TAB_BANNER=Verification Log List">
+        
+<PDM_MACRO name=tab title="Verification Log" height=100 id=verification_log src="OP=SHOW_DETAIL+HTMPL=cmdb_empty_tab.htmpl+FACTORY=cr+PERSID=$args.persistent_id+$args.log_keep_tab_banner+$args.keep_tab_msg">
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+<!-- must be in the main form-->
+<input type="hidden" name=category_contract value="$args.category.owning_contract">
+<input type="hidden" name=user_contract value="$args.affected_contact.organization.owning_contract">
+<input type="hidden" name=org_id value="$args.affected_contact.organization.id">
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_chg.htmpl ASPEN.33 2012/05/10 17:23:53 putsr02 Exp $
+</PDM_IF>
+<PDM_WSP>

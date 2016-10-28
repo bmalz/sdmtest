@@ -1,0 +1,152 @@
+<PDM_IF 0>
+detail_sdsc_map.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single service type mapping
+INTENT:
+    Display the detail info for the Service type map
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  sdsc_map  args	The Request Category object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm.maj for the
+                        definition of attributes for 'OBJECT sdsc_map'
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="detail_sdsc_map.htmpl+KEEP.fac=cnt">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Service Type Map Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Service Type Map"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Service Type Map "</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+function loadActions()
+{
+	if ( typeof ahdtop.cfgMultiTenancy == "string" && ahdtop.cfgMultiTenancy != "off" )
+		detailSetTenantFromPresetField("map_contract", "$args.KEEP.argTenantId", "$args.KEEP.argTenant");
+}
+</script>
+
+</head>
+
+<body class="detailro" onload="loadActions()" onunload="unloadActions()">
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="Service Type Map" key="$args.id">
+<center>
+
+<script language="JavaScript">
+ahdframeset.top_splash.next_persid = "svc_contract:$args.map_contract";
+function dtl_ServType_url() {
+   var servType_url = "ADDITIONAL_WHERE=owning_contract=$args.map_contract+KEEP.SVC_CONTRACT_ID=$args.map_contract" +
+                      "+KEEP.SVC_CONTRACT_SYM=" + nx_escape(<PDM_FMT ESC_STYLE=C PAD=NO>"$args.map_contract.sym"</PDM_FMT>);
+   return servType_url;
+}
+
+<PDM_MACRO name=dtlForm factory=sdsc_map>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.KEEP.REFRESH_PARENT" == "1">
+if (_dtl.edit) {
+	docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+}
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Dla kontaktu" attr=map_contract>
+<PDM_MACRO name=dtlStartRow>
+
+// The ADDITIONAL_WHERE is for autofill; the KEEP variables are for list_sdsc.htmpl
+<PDM_MACRO name=dtlLookup hdr="Typ serwisowy" attr=map_sdsc extraurl="javascript:dtl_ServType_url();">
+
+<!-- Write out our dummy lookup field based on incoming factory -->
+<PDM_IF "$args.KEEP.fac" == "cnt" || "$args.map_persid" : "cnt:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Kontakt" attr=_mapped_cnt>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Kontakt" attr=_mapped_cnt make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "pri" || "$args.map_persid" : "pri:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Priorytet" attr=_mapped_pri>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr=_mapped_pri make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "grp" || "$args.map_persid" : "grp:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Grupa" attr=_mapped_grp>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Grupa" attr=_mapped_grp extraurl="KEEP.type.id=2308" make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "urg" || "$args.map_persid" : "urg:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Pilność" attr=_mapped_urg>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Pilność" attr=_mapped_urg make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "pcat" || "$args.map_persid" : "pcat:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Klasyfikacja wniosku" attr=_mapped_pcat>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Klasyfikacja wniosku" attr=_mapped_pcat make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "chgcat" || "$args.map_persid" : "chgcat:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Klasyfikacja zmiany" attr=_mapped_chgcat>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Klasyfikacja zmiany" attr=_mapped_chgcat make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "isscat" || "$args.map_persid" : "isscat:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Issue Category" attr=_mapped_isscat>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Issue Category" attr=_mapped_isscat make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "nr" || "$args.map_persid" : "nr:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Element konfiguracji" attr=_mapped_nr>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Element konfiguracji" attr=_mapped_nr make_required=yes>
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.fac" == "org" || "$args.map_persid" : "org:*">
+<PDM_IF "$args.id" > "0">
+		
+<PDM_MACRO name=dtlLookupReadonly hdr="Organizacja" attr=_mapped_org>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Organizacja" attr=_mapped_org make_required=yes>
+</PDM_IF>
+<PDM_ELSE>
+document.writeln("Error - unhandled factory '$args.KEEP.fac' or '$args.map_persid'<br>");
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_sdsc_map.htmpl ASPEN.4 2010/11/09 11:54:26 ralje02 Exp $;
+</PDM_IF>

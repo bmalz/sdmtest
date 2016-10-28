@@ -1,0 +1,107 @@
+<PDM_IF 0>
+detail_CI_ACTIONS.htmpl
+WHEN PRESENTED:
+    When we need to edit a task and its status and assignee
+INTENT:
+    Edit a task
+VARIABLES:
+    
+    object  CI_ACTIONS  args	The CI_ACTION object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT CI_ACTIONS
+						for the definition of attributes for 'OBJECT CI_ACTIONS'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.ACTION_TITLE Task Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.ACTION_TITLE Update Task"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Task $args.ACTION_TITLE"</PDM_FMT>;
+</script>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var sOpener = "$args.KEEP.OPENER";
+var argID = "$args.id";
+var isEdit = "$args.KEEP.IS_EDIT";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+_bHideTenantSelection = true;//Inherit the tenant from the Approval Template - SCO 6350
+ahdframeset.top_splash.next_persid = "CI_WF_TEMPLATES:$args.WF_TEMPLATE_ID";
+</script>
+</head>
+<body class="detailro" onload="frmCiActionsOnLoad()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ciactions" header=no>
+<center>
+	<script>
+		
+<PDM_MACRO name=dtlForm factory=CI_ACTIONS>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zadanie" attr=ACTION_TITLE rows=1 size=60>
+<PDM_IF "$args.PREDEFINED" != "1">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=ANALYST_ID autofill=yes factory=agtgrp>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=STATUS_CURRENT_ID lookup=no whereclause="id<>70 and id<>80">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+		document.write("<tr></tr><th align='left' valign='baseline'>");
+		
+<PDM_IF "$args.id" == "0" >
+			document.write("<input type='hidden' name='HTMPL' value='show_main_detail.htmpl'>");
+		
+</PDM_IF>
+	</script>
+	
+	
+<PDM_IF 0>
+		The following PDM_IF statement is to make sure that before a new task is saved,
+		the Alternate Assignee list is not available. In addition, the PREDEFINED which is 
+		Create Knowledge Document will not show the Alternate Assignee list either
+	
+</PDM_IF>
+<PDM_IF "$args.id" != 0 && "$args.KEEP.MO_PREVIEW_MODE" != "1">
+<PDM_IF "$args.PREDEFINED" != "1">
+			<table width=95% class='gn_container_no_border gn_margin_minus_5'>
+				<tr height=160px>
+					<td>
+						<div class="assignee_list" name="divAssigneeList" id="divAssigneeList"></div>
+						<script>
+							LoadAssigneeList();
+							function LoadAssigneeList()
+							{
+								var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator() + 
+									"+OP=SEARCH+FACTORY=CI_ACTIONS_ALTERNATE+QBE.EQ.ACTION_ID=$args.id" + 
+									"+ADDITIONAL_WHERE=(CONTACT_TYPE != 100 OR CONTACT_TYPE IS NULL)" + 
+									"+ACTION_ID=$args.id+KEEP.USER_AUTH="+cfgUserAuth+"+KEEP.POPUP_NAME="+argPopupName+"+KEEP.templateTenant=$args.tenant";
+								var odivAssigneeList = document.getElementById("divAssigneeList");	
+								odivAssigneeList.innerHTML = "<iframe frameborder='0' scrolling='no' id='iFrmTaskList' name='iFrmTaskList' " + 
+								"height='100%' width='550px' title='Task List' " + 
+								"src='" + url + "'></iframe>";
+							}
+						</script>
+					<td>
+				</tr>
+			</table>
+		
+</PDM_IF>
+</PDM_IF>
+	
+	<script>
+		document.write("</th>");
+	
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

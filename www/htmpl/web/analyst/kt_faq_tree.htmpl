@@ -1,0 +1,657 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	The HTMPL interface that displays the hierarchical Knowledge category tree 
+	in the Knowledge tab - part of the overall FAQ/Search Tools interface
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="OP=MENU+NBTAB=kt">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script>
+var ahdframeset = parent.ahdframeset;
+var ahdframe = parent.ahdframe;
+
+/////////////////////////////////////////////////////////////////////
+//	Callback function for the event that occurs when the user
+//	navigates to a particular category.
+/////////////////////////////////////////////////////////////////////
+
+var bIsFirstload = false;
+var m_contentURL = "";
+function ShowEmptySearch()
+{
+	if(typeof ahdtop.SearchText != "undefined" && ahdtop.SearchText != "")
+	{
+		// @PM 20 Dec 2005
+		//ahdtop.upd_specific_frame("kt", "SEARCH", "FACTORY=KD", ahdtop.SearchText, "KEEP.search_type=SearchTools"); 
+		var ebrSearchOrAndExact;
+	    if (ahdtop.GetUSPPreferences("ONE_B_MATCH_TYPE") == "2")				
+		  ebrSearchOrAndExact = "ALL";
+	    else if (ahdtop.GetUSPPreferences("ONE_B_MATCH_TYPE") == "3")
+		  ebrSearchOrAndExact = "EXACT";
+	    else
+		  ebrSearchOrAndExact = "ANY";
+		  
+	    ahdtop.upd_specific_frame("kt", "SEARCH", "FACTORY=KD", ahdtop.SearchText, "QBE.EQ.ebr_search_type=KEYWORDS", "QBE.EQ.ebr_match_type=" +  ebrSearchOrAndExact , "QBE.EQ.ebr_primary_order=" + ahdtop.GetUSPPreferences("ONE_B_SEARCH_ORDER"), "DOMSET=KD_list_ebr_RELEVANCE"); 
+		// End of the @PM 20 Dec 2005
+		
+		ahdtop.SearchText = "";
+		return;
+	}
+
+	//Search did not specify category JH SDT 28195
+	if (typeof ahdtop.NoCategory != "undefined" && ahdtop.NoCategory == 1)
+	{
+		if(typeof ahdtop.SearchFromURL != "undefined" && ahdtop.SearchFromURL != "")
+		{
+			var contentUrl = SearchKTFromURL();
+			ahdframe.location.replace(contentUrl);	
+			ahdframe.parent.setPreviousSearchUrl(contentUrl);
+			ahdtop.NoCategory = 0;
+			return;
+		}
+	}
+				
+	var contentUrl = cfgCgi+"?SID="+cfgSID+
+		"+FID="+cfgFID+"+OP=SEARCH+FACTORY=KD" + 
+		"+KEEP.search_type=SearchTools" + 
+		"+KEEP.RowsPerPage=" + ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") + 
+		"+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL" + 
+		"+FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME+KEEP.IsPopUp=$args.KEEP.IsPopUp";
+		
+	ahdframe.location.replace(contentUrl);	
+	ahdframe.parent.setPreviousSearchUrl(contentUrl);	
+}
+//////////////////////////////////////////////////////////////////////////
+//FUNCTION CatTreeOnClickLast
+//	Repeat the CatTreeOnClick last click, using member variables
+//	
+//////////////////////////////////////////////////////////////////////////
+function CatTreeOnClickLast()
+{
+	CatTreeOnClick(m_lCurrCatIDLast, m_sCurrPathIDsLast, m_sCurrPathTextLast, m_ltreeIDLast, m_lrepositoryIDLast, m_sSortKeyLast);
+}
+//
+//member vaiables to indicate last folder attrubutes, to be use by CatTreeOnClickLast
+var m_lCurrCatIDLast = 0;
+var m_sCurrPathIDsLast = "";
+var m_sCurrPathTextLast = "";
+var m_ltreeIDLast = 0;
+var m_lrepositoryIDLast = 0;
+m_sSortKeyLast = "";
+
+function CatTreeOnClick(lCurrCatID, sCurrPathIDs, sCurrPathText, treeID, repositoryID, sortKey)
+{	if (lCurrCatID==-100) //if the top node was clicked
+		return;
+	//Strore Last call:
+	m_lCurrCatIDLast = lCurrCatID;
+	m_sCurrPathIDsLast = sCurrPathIDs;
+	m_sCurrPathTextLast = sCurrPathText;
+	m_ltreeIDLast = treeID;
+	m_lrepositoryIDLast = repositoryID;
+	m_sSortKeyLast = sortKey;
+	//
+	//empty ahdtop search variables
+	ahdframe.parent.curr_domset = "";
+    ahdframe.parent.curr_ebr_primary_order = "";
+    ahdframe.parent.curr_ebr_search_text = "";
+	// Record FAQ parameters in the Knowledge frame for use later on
+	ahdframe.parent.setCurrentIndex(lCurrCatID);
+	ahdframe.parent.setCurrentIndexPath(sCurrPathText);
+	ahdframe.parent.setCurrentRelationalPath(sCurrPathIDs);
+	
+	if (typeof sortKey == "undefined")
+		sortKey = "BU_RESULT";		
+	
+	var domset = "KD_list_web_";
+	// If the sortKey is ebr_serial_num, then we just returned from an EBR search.
+	// The default sort for an FAQ search is FAQ Rating (BU_RESULT)
+	if (sortKey == "ebr_serial_num")
+		sortKey = "BU_RESULT";
+		
+	domset += sortKey + "_DESC_blc";			
+	var DomsetQAandFiles = "KD_list_web_" + sortKey + "_DESC";// not use the BLC domset
+	
+	// Calculate the current category caption from the category path string
+	var pos = sCurrPathText.lastIndexOf(">");
+	var sCaption;
+	if (pos >= 0)
+		sCaption = sCurrPathText.substring(pos+1);
+	else
+		sCaption = "TOP";
+	ahdframe.parent.setCurrentIndexCaption(sCaption);
+	
+	var addlWhere = "";	
+	//"My Bookmarks" node selection	
+	if (lCurrCatID == -2) 
+	{
+		var contentUrl = cfgCgi+"?SID="+cfgSID+
+			"+FID="+cfgFID+"+OP=SEARCH+FACTORY=KD+QBE.EQ.BM_LINKS.USER_ID=$cst.id+DOMSET=" + domset + 
+			"+KEEP.cur_sort_key=" + sortKey + "+KEEP.search_type=BOOKMARKS+KEEP.IsPopUp=$args.KEEP.IsPopUp" +
+			"+KEEP.RowsPerPage=" + ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") +
+			"+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME";
+			
+		// If not allowed view non-published KDs
+		if (!ahdtop.m_bAllowViewNonPublished)
+		{
+			addlWhere = "+QBE.EQ.ACTIVE_STATE=0";
+		}
+		else
+		{
+			addlWhere = "+QBE.GE.ACTIVE_STATE=0";
+			addlWhere += "+QBE.LT.ACTIVE_STATE=100";
+			if(ahdtop.m_sDefNotStarted	== 1)
+				addlWhere += "+STATUS_NOT_STARTED=1";
+			addlWhere += "+ADDL_SELECTION=" + ahdtop.m_sDefStatusSelection;
+			addlWhere += "+ADDL_WHERE_HARDCODE=(" + ahdtop.m_sDefStatusWhereClause + ")";
+			addlWhere += "+ADDITIONAL_WHERE=(" + ahdtop.m_sDefStatusWhereClause + ")";
+		}
+		
+		contentUrl += "+" + addlWhere;
+		ahdframe.location.replace(contentUrl);
+		ahdframe.parent.setPreviousSearchUrl(contentUrl);
+		
+	}
+	//"New Documents" node selection
+	else if (lCurrCatID == -3) 
+	{
+		var MINUTE = 60 * 1000;
+		var HOUR = MINUTE * 60;
+		var DAY = HOUR * 24;
+
+		// Subtract prop.BU_DAYS_NEW from today's date to get the date
+		// to compare the published date of knowledge documents
+		var today = (new Date()).getTime();
+		<PDM_IF "$prop.BU_DAYS_NEW" == "">
+			var bu_days_new = 5;
+		<PDM_ELSE>
+			var bu_days_new = $prop.BU_DAYS_NEW;
+		</PDM_IF>
+		if (typeof bu_days_new == "number") {
+			var newDocDate = new Date(today - (bu_days_new * DAY));
+			newDocDate = newDocDate/1000; // Remove the milliseconds			
+			var newDocDateStr = date_to_string(newDocDate, false);
+
+			var contentUrl = cfgCgi+"?SID="+cfgSID+
+				"+FID="+cfgFID+"+OP=SEARCH+FACTORY=KD+QBE.GE.PUBLISHED_DATE=" + nx_escape(newDocDateStr) + "+DOMSET=" + domset + 
+				"+ADDITIONAL_WHERE=ACTIVE_STATE=0+KEEP.cur_sort_key=" + sortKey + "+KEEP.search_type=FAQ" +
+				"+event_log_on=1+event_log_type=KD_NEW+event_log_numdata1=0"+	//Activate the USP event Log
+				"+event_log_sd_persid=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL" +
+				"+KEEP.RowsPerPage=" + ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") + 
+				"+SD_LAUNCHED=$args.SD_LAUNCHED+FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME+KEEP.IsPopUp=$args.KEEP.IsPopUp";
+			ahdframe.location.replace(contentUrl);	
+			ahdframe.parent.setPreviousSearchUrl(contentUrl);
+		}
+	}
+	//"My Recent Documents" node selection
+	else if (lCurrCatID == -4) 
+	{
+		var contentUrl = cfgCgi+"?SID="+cfgSID+
+				"+FID="+cfgFID+"+OP=SEARCH+FACTORY=BU_TRANS+QBE.EQ.USER_ID=$cst.id+KEEP.opener=my_recent_docs";
+		ahdframe.location.replace(contentUrl);
+		ahdframe.parent.setPreviousSearchUrl(contentUrl);		
+	}
+	//"My Recent Searches" node selection
+	else if (lCurrCatID == -5) 
+	{
+		var contentUrl = cfgCgi+"?SID="+cfgSID+
+				"+FID="+cfgFID+"+OP=SEARCH+FACTORY=EBR_LOG+QBE.EQ.USER_ID="+ahdtop.cfgUserid+"+opener=my_recent_searches";
+		ahdframe.location.replace(contentUrl);
+		ahdframe.parent.setPreviousSearchUrl(contentUrl);		
+	}
+	// any category selection
+	else 
+	{					
+		// Redirect the kdlist frame to search for all knowledge documents
+		// with the follwing where clause:
+		// WHERE DOC_LINKS.RELATIONAL_ID = indexPath OR DOC_LINKS.RELATIONAL_ID = indexPath + "-%" AND STATUS_ID = 70
+		// : search for all knowledge documents that under the category 'index' and below in the category tree and
+		// only select those documents that are published.
+		
+		// The we are querying the Top category, we will have better performance if we do not apply a filter
+		// to the DOC_LINKS.RELATIONAL_ID field since it is not necessary.
+		
+		// If allowed view non-published KDs
+		if (!ahdtop.m_bAllowViewNonPublished)
+		{
+			addlWhere = "+QBE.EQ.ACTIVE_STATE=0";
+		}
+		else
+		{
+			addlWhere = "+QBE.GE.ACTIVE_STATE=0";
+			addlWhere += "+QBE.LT.ACTIVE_STATE=100";
+			if(ahdtop.m_sDefNotStarted	== 1)
+				addlWhere += "+STATUS_NOT_STARTED=1";
+			addlWhere += "+ADDL_SELECTION=" + ahdtop.m_sDefStatusSelection;
+			if(ahdtop.m_defaultWC != "")
+			{
+				addlWhere += "+ADDL_WHERE_HARDCODE=" + ahdtop.m_defaultWC + " AND (" + ahdtop.m_sDefStatusWhereClause + ")";
+				addlWhere += "+ADDITIONAL_WHERE=" + ahdtop.m_defaultWC + " AND (" + ahdtop.m_sDefStatusWhereClause + ")";
+			}
+			else
+			{	
+				addlWhere += "+ADDL_WHERE_HARDCODE=(" + ahdtop.m_sDefStatusWhereClause + ")";
+				addlWhere += "+ADDITIONAL_WHERE=(" + ahdtop.m_sDefStatusWhereClause + ")";
+			}	
+		}
+		var sKcatCriteria = "";
+		if (sCurrPathIDs != "1")
+		{
+			sKcatCriteria += "((DOC_LINKS.RELATIONAL_ID='" + sCurrPathIDs + 
+			"' OR DOC_LINKS.RELATIONAL_ID LIKE '" + sCurrPathIDs + escape("-%") + "'))";
+		}
+			
+		switch (ahdtop.m_KSType)
+		{
+			case "KD_QA":
+				var contentUrl = cfgCgi + "?SID=" + cfgSID +
+					"+KEEP.cur_sort_key=" + sortKey +
+					"+event_log_on=1+event_log_type=FAQ+event_log_numdata1=" + lCurrCatID + //Activate the USP event Log
+					"+event_log_sd_persid=$args.SD_LAUNCHED+KEEP.IsPopUp=$args.KEEP.IsPopUp" +
+					"+KEEP.RowsPerPage=" + ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") +
+					"+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME" +
+					"+FID=" + cfgFID + "+OP=SEARCH+FACTORY=KD_QA+ADDITIONAL_WHERE=" + sKcatCriteria + "+QBE.EQ.ACTIVE_STATE=200" +
+					"+KEEP.search_type=FAQ+HTMPL=list_KD.htmpl+DOMSET=" + DomsetQAandFiles;
+				ahdframe.location.replace(contentUrl);	
+				ahdframe.parent.setPreviousSearchUrl(contentUrl);
+				m_contentURL = contentUrl;
+				break;			
+
+			case "KD_FILE":
+				var contentUrl = cfgCgi + "?SID=" + cfgSID +
+					"+KEEP.cur_sort_key=" + sortKey +
+					"+event_log_on=1+event_log_type=FAQ+event_log_numdata1=" + lCurrCatID + //Activate the USP event Log
+					"+event_log_sd_persid=$args.SD_LAUNCHED+KEEP.IsPopUp=$args.KEEP.IsPopUp" +
+					"+KEEP.RowsPerPage=" + ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") +
+					"+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME" +
+					"+FID=" + cfgFID + "+OP=SEARCH+FACTORY=KD_FILE+ADDITIONAL_WHERE=" + sKcatCriteria +  "+QBE.EQ.ACTIVE_STATE=100" +
+					"+KEEP.search_type=FAQ+HTMPL=list_KD.htmpl+DOMSET=" + DomsetQAandFiles;
+				ahdframe.location.replace(contentUrl);	
+				ahdframe.parent.setPreviousSearchUrl(contentUrl);
+				m_contentURL = contentUrl;
+				break;					
+
+			case "KD_ALL":
+				addlWhere = "";
+				var sDefStatus = "";
+				// If allowed view non-published KDs
+				if (ahdtop.m_bAllowViewNonPublished)
+				{	
+					sDefStatus = "(" + ahdtop.m_sDefStatusWhereClause ;
+					if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH")) //enforcing permissions
+						sDefStatus += " AND NOT ACTIVE_STATE = 200";
+
+					if (!ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH")|| ahdtop.cfgEBRVersion != 'SEARCH_ENGINE')			
+						sDefStatus += " AND NOT ACTIVE_STATE = 100";
+						
+					if (ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+						sDefStatus += " OR ACTIVE_STATE = 200";
+					
+					if (ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH") && ahdtop.cfgEBRVersion == 'SEARCH_ENGINE')		
+						sDefStatus += " OR ACTIVE_STATE = 100";
+					sDefStatus += " )";
+				}
+				else
+				{ 
+					sDefStatus = "(ACTIVE_STATE=0 ";
+					if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH")) //enforcing permissions
+						sDefStatus += " AND NOT ACTIVE_STATE = 200";
+
+					if (!ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH"))			
+						sDefStatus += " AND NOT ACTIVE_STATE = 100";
+						
+					if (ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+						sDefStatus += " OR ACTIVE_STATE = 200";
+					
+					if (ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH"))			
+						sDefStatus += " OR ACTIVE_STATE = 100";
+					sDefStatus += " )";
+				}
+				addlWhere += "+ADDL_WHERE_HARDCODE=" + sDefStatus;
+				addlWhere += "+ADDITIONAL_WHERE=" + sDefStatus;
+				if ( sKcatCriteria != "" )
+					addlWhere += " AND " + sKcatCriteria;
+				//
+				var contentUrl = cfgCgi + "?SID=" + cfgSID +
+					"+KEEP.cur_sort_key=" + sortKey +
+					"+event_log_on=1+event_log_type=FAQ+event_log_numdata1=" + lCurrCatID + //Activate the USP event Log
+					"+event_log_sd_persid=$args.SD_LAUNCHED+KEEP.IsPopUp=$args.KEEP.IsPopUp" +
+					"+KEEP.RowsPerPage=" + ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") +
+					"+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME" +
+					"+FID=" + cfgFID + "+OP=SEARCH+FACTORY=KD_ALL+QBE.GE.ACTIVE_STATE=0+QBE.LT.ACTIVE_STATE=300" +
+					"+KEEP.search_type=FAQ+HTMPL=list_KD.htmpl+DOMSET=" + domset + addlWhere;
+				if (lCurrCatID > 0)
+				{
+					contentUrl += "+QBE.EQ.ebr_kcat_id=" + lCurrCatID + "+QBE.EQ.ebr_add_blc=1+QBE.EQ.ebr_faq_query=1";
+				}				
+				ahdframe.location.replace(contentUrl);	
+				ahdframe.parent.setPreviousSearchUrl(contentUrl);
+				m_contentURL = contentUrl;
+				break;					
+
+
+			case "KD":
+			default:
+				// If allowed view non-published KDs
+				if (!ahdtop.m_bAllowViewNonPublished)
+				{
+					addlWhere = "+QBE.EQ.ACTIVE_STATE=0";
+				}
+				else
+				{
+					addlWhere = "+QBE.GE.ACTIVE_STATE=0";
+					addlWhere += "+QBE.LT.ACTIVE_STATE=100";
+					if(ahdtop.m_sDefNotStarted	== 1)
+						addlWhere += "+STATUS_NOT_STARTED=1";
+					addlWhere += "+ADDL_SELECTION=" + ahdtop.m_sDefStatusSelection;
+					if(ahdtop.m_defaultWC != "")
+					{
+						addlWhere += "+ADDL_WHERE_HARDCODE=" + ahdtop.m_defaultWC + " AND (" + ahdtop.m_sDefStatusWhereClause + ")";
+						addlWhere += "+ADDITIONAL_WHERE=" + ahdtop.m_defaultWC + " AND (" + ahdtop.m_sDefStatusWhereClause + ")";
+					}
+					else
+					{	
+						addlWhere += "+ADDL_WHERE_HARDCODE=(" + ahdtop.m_sDefStatusWhereClause + ")";
+						addlWhere += "+ADDITIONAL_WHERE=(" + ahdtop.m_sDefStatusWhereClause + ")";
+					}	
+				}
+
+				if (sKcatCriteria != "")
+				{
+					if (ahdtop.m_bAllowViewNonPublished)
+					{
+						addlWhere += " AND ";
+					}
+					else
+					{
+						addlWhere += "+ADDITIONAL_WHERE=";
+					}
+					addlWhere += sKcatCriteria;
+				}
+				//JH - SDT 28195
+				if(typeof ahdtop.SearchFromURL != "undefined" && ahdtop.SearchFromURL != "")
+				{
+					var contentUrl = SearchKTFromURL();
+					contentUrl += addlWhere+ "+KEEP.cat_filter_type=current";
+					ahdframe.location.replace(contentUrl);	
+					ahdframe.parent.setPreviousSearchUrl(contentUrl);
+					m_contentURL = contentUrl;
+				}
+				else
+				{
+					var contentUrl = cfgCgi+"?SID="+cfgSID+
+						"+FID="+cfgFID+"+OP=SEARCH+FACTORY=KD+DOMSET=" + domset + addlWhere +
+						"+KEEP.cur_sort_key=" + sortKey + "+KEEP.search_type=FAQ" +
+						"+event_log_on=1+event_log_type=FAQ+event_log_numdata1=" + lCurrCatID+	//Activate the USP event Log
+						"+event_log_sd_persid=$args.SD_LAUNCHED+KEEP.IsPopUp=$args.KEEP.IsPopUp" +
+						"+KEEP.RowsPerPage=" + ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") +
+						"+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME";
+					if (lCurrCatID > -1)
+					{
+						<PDM_IF "$env.NX_SUPPRESS_FAQ_COUNT_ANALYST_UI" == "1">
+							contentUrl += "+NO_COUNT=1";
+						</PDM_IF>
+					}
+					if (lCurrCatID > 0)
+					{
+						contentUrl += "+QBE.EQ.ebr_kcat_id=" + lCurrCatID + "+QBE.EQ.ebr_add_blc=1+QBE.EQ.ebr_faq_query=1";
+					}				
+					ahdframe.location.replace(contentUrl);	
+					ahdframe.parent.setPreviousSearchUrl(contentUrl);
+					m_contentURL = contentUrl;
+				}
+				break;// end of KD object case
+		}
+	}
+}
+//
+function window_onload() {
+	var treeID = InitTree();		
+	ahdframe.parent.setTreeId(treeID);
+	<PDM_IF 0>
+		If the parameter KCAT_REL_ID has been passed in, then we want to open 
+		the category tree to a particular category. Wait for the
+		KTCatTreeAfterLoaded function to execute
+	</PDM_IF>
+		var sRelIDs = "$args.KCAT_REL_ID";
+		var sIndexPath = <PDM_FMT ESC_STYLE=C KEEPTAGS=YES>"$args.KCAT_REL_PATH"</PDM_FMT>;
+		if (sIndexPath == "" )
+		{
+			try //This is only available when launching the category browse
+			{
+			 sIndexPath = ahdframeset.frames["cai_main"]._sKCATPath
+			}
+			catch (e)
+			{
+			}
+		}
+
+	if ( sIndexPath == "" && sRelIDs == "" )
+	{
+		<PDM_IF 0>
+			If the SEARCH_TOOLS_OPENER property of the USP_PROPERTIES table is 2, then we will
+			open a document tree when this screen loads - therefore we do not want to
+			select the "Top" category by default in this case. 
+			If the Category Browse window is opening ($args.KEEP.IsPopUp = 1)then we do 
+			want to select the "Top" category.
+		</PDM_IF>
+		<PDM_IF "$prop.SEARCH_TOOLS_OPENER" != "2" || "$args.KEEP.IsPopUp" == "1">
+			ShowEmptySearch();
+		</PDM_IF>
+	}
+}
+
+var _bLoadedOnce = false;
+function KTCatTreeAfterLoaded()
+{
+	if (!_bLoadedOnce)
+	{
+		_bLoadedOnce = true;
+		var sRelIDs = "$args.KCAT_REL_ID";
+		var sIndexPath = <PDM_FMT ESC_STYLE=C KEEPTAGS=YES>"$args.KCAT_REL_PATH"</PDM_FMT>;
+		if (sIndexPath == "" )
+		{
+			try //This is only available when launching the category browse
+			{
+			 sIndexPath = ahdframeset.frames["cai_main"]._sKCATPath
+			}
+			catch(e)
+			{
+			}
+		}
+		if ( sRelIDs != "" && sIndexPath != "" )
+		{
+			bIsFirstload = false;
+			GoToKTCatTreePathId(sRelIDs, sIndexPath);
+		}
+		else if ( sRelIDs != "" )
+		{
+			bIsFirstload = false;
+			GoToKTCatTreePathId(sRelIDs); //the $args.TargetKCATRelID is used when use try to open FAQ from URL
+		}
+		
+	}
+}
+function SearchKTFromURL()
+{
+	var results;
+	var pos;
+	
+	//ahdframe.parent.location (http://machinename/CAisd/pdmweb.exe?OP=JUST_GRONK...)
+	//is what user typed in the URL and we need to make it as a string by adding ""
+	//so that we can use it for string manipulations
+	var sInitURL = "" + ahdframe.parent.location;
+		
+	//Find out where the "?" and take out the http://...and replace it with
+	//the standard cfgCgi
+	pos = sInitURL.indexOf("?");
+	sInitURL = cfgCgi + sInitURL.substring(pos, sInitURL.length)
+		
+	//Replace FID, the prevFid is 123 and it is used for kt_main.htmpl specifically,
+	//use the standard cfgFID
+	results = sInitURL.match(/\+FID=([^\+]+)/);
+	if (results != null)
+	{	
+		var newFID = "FID=" + cfgFID;
+		var prevFID = results[0];
+		pos = sInitURL.indexOf(prevFID);
+		sInitURL= sInitURL.substring(0, pos+1) + newFID + sInitURL.substring(pos+ prevFID.length);
+	}
+		
+	//Replace OP code, the prevOP is DISPLAY_FORM for loading the kt_main.htmpl,
+	//We need to replace it SEARCH
+	results = sInitURL.match(/\+OP=([^\+]+)/);
+	if (results != null)
+	{	
+		var newOP = "OP=SEARCH";
+		var prevOP = results[0];
+		pos = sInitURL.indexOf(prevOP);
+		sInitURL= sInitURL.substring(0, pos+1) + newOP + sInitURL.substring(pos+ prevOP.length);
+	}
+		
+	//Replace HTMPL to FACTORY; since the OP=SEARCH now, we need to specify the FACTORY
+	results = sInitURL.match(/\+HTMPL=([^\+]+)/);
+	if (results != null)
+	{	
+		var newHTMPL = "FACTORY=KD";
+		var prevHTMPL = results[0];
+		pos = sInitURL.indexOf(prevHTMPL);
+		sInitURL= sInitURL.substring(0, pos+1) + newHTMPL + sInitURL.substring(pos+ prevHTMPL.length);
+	}
+					
+	//Need to append the KEEP.search_type so that the Advanced Search button can display
+	sInitURL += "+KEEP.search_type=SearchTools";
+		
+	//Check what search type user has in the URL
+	results = sInitURL.match(/\+QBE.EQ.ebr_search_type=([^\+]+)/);
+	if (results != null)
+	{
+		pos = results[0].indexOf("=");
+		var	ebrSearchType = results[0].substring(pos+1,results[0].length);
+		if (ebrSearchType != "NLS" && ebrSearchType != "KEYWORDS")
+		{
+			alert(ebrSearchType + " is not a correct search type value for QBE.EQ.ebr_search_type.");
+			return;
+		}
+	}
+	else
+	{	
+		//if user did not specify in the URL, we use his/or default preferences
+		if (ahdtop.GetUSPPreferences("ONE_B_SEARCH_TYPE") == "0")
+			var	ebrSearchType = "NLS";
+		else
+			var	ebrSearchType = "KEYWORDS";
+		
+		sInitURL += "+QBE.EQ.ebr_search_type=" +  ebrSearchType; 
+	}
+		
+	//Check what match type user has in the URL
+	results = sInitURL.match(/\+QBE.EQ.ebr_match_type=([^\+]+)/);
+	if (results != null)
+	{
+		var pos = results[0].indexOf("=");
+		var	ebrSearchOrAndExact = results[0].substring(pos+1,results[0].length);
+		if (ebrSearchOrAndExact != "ALL" && ebrSearchOrAndExact != "EXACT" && ebrSearchOrAndExact != "ANY")
+		{
+			alert(ebrSearchOrAndExact + " is not a correct match type value for QBE.EQ.ebr_match_type.");
+			return;
+		}
+	}
+	else
+	{			
+		//if user did not specify in the URL, we use his/or default preferences
+		if (ahdtop.GetUSPPreferences("ONE_B_MATCH_TYPE") == "2")				
+			var	ebrSearchOrAndExact = "ALL";
+		else if (ahdtop.GetUSPPreferences("ONE_B_MATCH_TYPE") == "3")
+			var ebrSearchOrAndExact = "EXACT";
+		else
+			var ebrSearchOrAndExact = "ANY";
+		
+		sInitURL += "+QBE.EQ.ebr_match_type=" +  ebrSearchOrAndExact;
+		
+	}
+		
+	//Check what search field user has in the URL
+	results = sInitURL.match(/\+QBE.EQ.ebr_search_in=([^\+]+)/);
+	if (results != null)
+	{
+		var pos = results[0].indexOf("=");
+		var	ebrSearchFields = results[0].substring(pos+1,results[0].length);
+		if (!(ebrSearchFields >= 1 && ebrSearchFields <= 63))
+		{
+			alert(ebrSearchFields + " is not a correct value for QBE.EQ.ebr_search_in.");
+			return;
+		}
+	}
+	else
+	{
+		//if user did not specify in the URL, we use his/or default preferences
+		var ebrSearchFields = ahdtop.GetUSPPreferences("ONE_B_SEARCH_FIELDS");
+		sInitURL += "+QBE.EQ.ebr_search_in=" +  ebrSearchFields;
+	}
+	
+	//Check what sorting order user has in the URL
+	results = sInitURL.match(/\+QBE.EQ.ebr_primary_order=([^\+]+)/);
+	if (results != null)
+	{
+		var pos = results[0].indexOf("=");
+		var	ebrSortOrder = results[0].substring(pos+1,results[0].length);
+		if (ebrSortOrder != "RELEVANCE" && ebrSortOrder != "BU_RESULT" && ebrSortOrder != "HITS" && ebrSortOrder != "MODIFY_DATE")
+		{
+			alert(ebrSortOrder + " is not a correct value for QBE.EQ.ebr_primary_order.");
+			return;
+		}
+	}
+	else
+	{
+		//if user did not specify in the URL, we use his/or default preferences
+		var ebrSortOrder = ahdtop.GetUSPPreferences("ONE_B_SEARCH_ORDER");
+		sInitURL += "+QBE.EQ.ebr_primary_order="+  ebrSortOrder;
+	}
+	
+	//Check what domset user has in the URL
+	results = sInitURL.match(/\+DOMSET=([^\+]+)/);
+	if (results != null)
+	{
+		var pos = results[0].indexOf("=");
+		var sDomset = results[0].substring(pos+1,results[0].length);
+		if (sDomset != "KD_list_ebr_RELEVANCE" && sDomset != "KD_list_ebr_other_attributes")
+		{
+			alert(sDomset + " is not a correct value for DOMSET.");
+			return;
+		}
+	}
+	else
+	{	
+		if (ebrSortOrder.match("RELEVANCE"))
+			var sDomset = "KD_list_ebr_RELEVANCE";
+		else
+			var sDomset = "KD_list_ebr_other_attributes";
+		
+		sInitURL += "+DOMSET=" +  sDomset;
+	}
+			
+	ahdtop.SearchFromURL = "";
+	return sInitURL;
+}
+
+function getAlertMsgWindow_prv()
+{
+	return ahdframe;
+}
+</script>
+<PDM_MACRO NAME=kt_Categories_Tree menu=FAQ iframe=no>
+</head>
+
+<frameset rows="*,0" onload="window_onload()" frameborder=0 framespacing=0>
+<frame id=KTCatTree name=KTCatTree src="$CAisd/html/empty.html"
+       title="KT Category Tree">
+<frame id=KTCatData name=KTCatData src="$CAisd/html/empty.html"
+       title="Hidden frame - do not navigate here">
+</frameset>
+</HTML>

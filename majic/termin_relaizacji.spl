@@ -1,0 +1,395 @@
+void cr::set_termin_realizacji(...)
+{
+
+    string method;
+    method = "cr::set_termin_realizacji";
+    logf(TRACE,"%s: Started for %s", method, (string)argv[3]);
+	
+	
+	send_wait( 0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, argv[3], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+		return;
+	}
+	object cr;
+	cr = msg[0] ;
+	logf(TRACE, "cr ref_num: %s", cr.ref_num);
+	
+	object atevlist;
+	int atevlenght;
+	logf(TRACE, "%s: search for atevs: %s", method, format("obj_id='%s' AND status_flag=2",argv[3]));
+	send_wait( 0, top_object(), "call_attr", "atev", "sync_fetch", "MLIST_STATIC", format("obj_id='%s' AND status_flag=2",argv[3]), -1, 0 );
+	if ( msg_error() ) {
+            logf(ERROR, "%s: Search for atevs failed: %s", method, msg[0]);
+            return;
+        }
+	atevlist = msg[0];
+	atevlenght=msg[1];
+	logf(TRACE, "%s: got list of %d atevs atevs", method, atevlenght);
+	
+	int i, j, k;
+	object atev;
+	object evt;
+	date termin_realizacji;
+	termin_realizacji = (date)0;
+	
+	string wc;
+	object slalist;
+	int slalenght;
+	wc = format(" _mapped_cr = '%s'", cr.persistent_id);
+	logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+	send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+	slalist = msg[0];
+	slalenght =  msg[1];
+	object sla;
+	
+	for(i = 0; i < atevlenght; i++)
+	{
+		send_wait(0, atevlist, "dob_by_index", "DEFAULT", i, i);
+		if(msg_error())
+		{
+			logf( ERROR, "%s: Error on dob_by_index for atevlist: '%s'", method, msg[0] );
+			return;
+		}
+		
+		atev = msg[0];
+		logf(TRACE, "%s: event template %s", method, atev.event_tmpl);
+		for(j = 0; j < slalenght; j++)
+		{
+			send_wait(0, slalist, "dob_by_index", "DEFAULT", j, j);
+			if(msg_error())
+			{
+				logf( ERROR, "%s: Error on dob_by_index for slalist: '%s'", method, msg[0] );
+				return;
+			}
+			sla = msg[0];
+			logf(TRACE, "%s: SLA for F-Z: %i", method, sla.zforfz);
+			if (atev.owning_ast == sla.id && sla.zforfz != 1)
+			{
+				send_wait( 0, top_object(), "call_attr", "evt", "dob_by_persid", NULL, atev.event_tmpl, NULL, NULL );
+				if ( msg_error() ) {
+					logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+					return;
+				}
+				
+				evt = msg[0] ;
+				logf(TRACE, "evt priority: %s, violate_on_false: %d, violate_on_true: %d", evt.zpriority, evt.violate_on_false, evt.violate_on_true);
+				logf(TRACE, "cr priority: %s", cr.priority);		
+			
+				if (evt.zpriority == cr.priority && ( evt.violate_on_false == 1 || evt.violate_on_true == 1))
+				{
+					if (atev.fire_time > termin_realizacji)
+					{
+						termin_realizacji=atev.fire_time;
+						logf(TRACE, "new termin_realizacji: %s", (string)termin_realizacji);
+					}
+				}
+			}
+		}
+	}
+	logf(TRACE, "termin_realizacji: %s", (string)termin_realizacji);
+	object gl;
+	send_wait(0, top_object(), "get_co_group");
+		
+	gl = msg[0];
+
+	for(j = 0; j < 5; j++)
+			{
+				send_wait(1, gl, "checkout", cr);
+				if ( msg_error() ) {
+					logf(TRACE, "%s: Checking out cr failed! will retry in %i s", method, j);
+					sleep(j);
+				}
+				else {
+					j=6;
+				}
+			}
+	//send_wait(1, gl, "checkout", cr);
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on checkout cr: %s", method, (string)msg[0]);
+		return;
+	}
+	if ((int)termin_realizacji > 0)
+	{
+		send_wait(1, cr, "call_attr", "ztermin_realizacji", "set_val", termin_realizacji, "SURE_SET");
+	}
+	else
+	{
+		send_wait(1, cr, "call_attr", "ztermin_realizacji", "set_val", NULL, "SURE_SET");
+	}
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on change value: %s", method, msg[0]);
+		return;
+	}
+	logf(TRACE, "%s: Value changed - no error", method);
+
+	// Save change.
+	send_wait(0, gl, "checkin");
+	if( msg_error() ) {
+		logf(ERROR, "%s: Error on save: %s", method, (string)msg[0]);
+
+		send_wait(0, gl, "uncheck");
+		return;
+	}
+
+	logf(TRACE, "%s: Saved, Finished", method);
+}
+
+void cr::set_fztermin_realizacji(...)
+{
+
+    string method;
+    method = "cr::set_fztermin_realizacji";
+    logf(TRACE,"%s: Started for %s", method, (string)argv[3]);
+	
+	
+	send_wait( 0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, argv[3], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+		return;
+	}
+	object cr;
+	cr = msg[0] ;
+	logf(TRACE, "cr ref_num: %s", cr.ref_num);
+	
+	object atevlist;
+	int atevlenght;
+	logf(TRACE, "%s: search for atevs: %s", method, format("obj_id='%s' AND status_flag=2",argv[3]));
+	send_wait( 0, top_object(), "call_attr", "atev", "sync_fetch", "MLIST_STATIC", format("obj_id='%s' AND status_flag=2",argv[3]), -1, 0 );
+	if ( msg_error() ) {
+            logf(ERROR, "%s: Search for atevs failed: %s", method, msg[0]);
+            return;
+        }
+	atevlist = msg[0];
+	atevlenght=msg[1];
+	logf(TRACE, "%s: got list of %d atevs atevs", method, atevlenght);
+	
+	int i, j, k;
+	object atev;
+	object evt;
+	date termin_realizacji;
+	termin_realizacji = (date)0;
+	
+	string wc;
+	object slalist;
+	int slalenght;
+	wc = format(" _mapped_cr = '%s'", cr.persistent_id);
+	logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+	send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+	slalist = msg[0];
+	slalenght =  msg[1];
+	object sla;
+	
+	for(i = 0; i < atevlenght; i++)
+	{
+		send_wait(0, atevlist, "dob_by_index", "DEFAULT", i, i);
+		if(msg_error())
+		{
+			logf( ERROR, "%s: Error on dob_by_index for atevlist: '%s'", method, msg[0] );
+			return;
+		}
+		
+		atev = msg[0];
+		logf(TRACE, "%s: event template %s", method, atev.event_tmpl);
+		for(j = 0; j < slalenght; j++)
+		{
+			send_wait(0, slalist, "dob_by_index", "DEFAULT", j, j);
+			if(msg_error())
+			{
+				logf( ERROR, "%s: Error on dob_by_index for slalist: '%s'", method, msg[0] );
+				return;
+			}
+			sla = msg[0];
+			logf(TRACE, "%s: SLA for F-Z: %i", method, sla.zforfz);
+			if (atev.owning_ast == sla.id && sla.zforfz == 1)
+			{
+				send_wait( 0, top_object(), "call_attr", "evt", "dob_by_persid", NULL, atev.event_tmpl, NULL, NULL );
+				if ( msg_error() ) {
+					logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+					return;
+				}
+				
+				evt = msg[0] ;
+				logf(TRACE, "evt priority: %s, violate_on_false: %d, violate_on_true: %d", evt.zpriority, evt.violate_on_false, evt.violate_on_true);
+				logf(TRACE, "cr priority: %s", cr.priority);		
+			
+				if (evt.zpriority == cr.priority && ( evt.violate_on_false == 1 || evt.violate_on_true == 1))
+				{
+					if (atev.fire_time > termin_realizacji)
+					{
+						termin_realizacji=atev.fire_time;
+						logf(TRACE, "new termin_realizacji: %s", (string)termin_realizacji);
+					}
+				}
+			}
+		}
+	}
+	logf(TRACE, "F-Z termin_realizacji: %s", (string)termin_realizacji);
+	object gl;
+	send_wait(0, top_object(), "get_co_group");
+		
+	gl = msg[0];
+	for(j = 0; j < 5; j++)
+			{
+				send_wait(1, gl, "checkout", cr);
+				if ( msg_error() ) {
+					logf(TRACE, "%s: Checking out cr failed! will retry in %i s", method, j);
+					sleep(j);
+				}
+				else {
+					j=6;
+				}
+			}
+	//send_wait(1, gl, "checkout", cr);
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on checkout cr: %s", method, (string)msg[0]);
+		return;
+	}
+	if ((int)termin_realizacji > 0)
+	{
+		send_wait(1, cr, "call_attr", "zfztermin_realizacji", "set_val", termin_realizacji, "SURE_SET");
+	}
+	else
+	{
+		send_wait(1, cr, "call_attr", "zfztermin_realizacji", "set_val", NULL, "SURE_SET");
+	}
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on change value: %s", method, msg[0]);
+		return;
+	}
+	logf(TRACE, "%s: Value changed - no error", method);
+
+	// Save change.
+	send_wait(0, gl, "checkin");
+	if( msg_error() ) {
+		logf(ERROR, "%s: Error on save: %s", method, (string)msg[0]);
+
+		send_wait(0, gl, "uncheck");
+		return;
+	}
+
+	logf(TRACE, "%s: Saved, Finished", method);
+}
+
+test( ... )
+{
+    string method;
+    method = "cr::set_termin_realizacji";
+    logf(TRACE,"%s: Started for %s", method, "cr:400461");
+	
+	
+	send_wait( 0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, "cr:400461", NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+		return;
+	}
+	object cr;
+	cr = msg[0] ;
+	logf(TRACE, "cr ref_num: %s", cr.ref_num);
+	
+	object atevlist;
+	int atevlenght;
+	send_wait( 0, top_object(), "call_attr", "atev", "sync_fetch", "MLIST_STATIC", format("obj_id='%s' AND status_flag=2","cr:400461"), -1, 0 );
+	if ( msg_error() ) {
+            logf(ERROR, "%s: Search for atevs failed: %s", method, msg[0]);
+            return;
+        }
+	atevlist = msg[0];
+	atevlenght=msg[1];
+	logf(TRACE, "%s: got list of %d atevs", method, atevlenght);
+	
+	int i, j, k;
+	object atev;
+	object evt;
+	date termin_realizacji;
+	termin_realizacji = (date)0;
+	
+	string wc;
+	object slalist;
+	int slalenght;
+	wc = format(" _mapped_cr = '%s'", cr.persistent_id);
+	logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+	send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+	slalist = msg[0];
+	slalenght =  msg[1];
+	object sla;
+	
+	for(i = 0; i < atevlenght; i++)
+	{
+		send_wait(0, atevlist, "dob_by_index", "DEFAULT", i, i);
+		if(msg_error())
+		{
+			logf( ERROR, "%s: Error on dob_by_index for atevlist: '%s'", method, msg[0] );
+			return;
+		}
+		
+		atev = msg[0];
+		logf(TRACE, "%s: event template %s", method, atev.event_tmpl);
+		for(j = 0; j < slalenght; j++)
+		{
+			send_wait(0, slalist, "dob_by_index", "DEFAULT", j, j);
+			if(msg_error())
+			{
+				logf( ERROR, "%s: Error on dob_by_index for slalist: '%s'", method, msg[0] );
+				return;
+			}
+			sla = msg[0];
+			if (atev.owning_ast == sla.id)
+			{
+				send_wait( 0, top_object(), "call_attr", "evt", "dob_by_persid", NULL, atev.event_tmpl, NULL, NULL );
+				if ( msg_error() ) {
+					logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+					return;
+				}
+				
+				evt = msg[0] ;
+				logf(TRACE, "evt priority: %s, violate_on_false: %d, violate_on_true: %d", evt.zpriority, evt.violate_on_false, evt.violate_on_true);
+				logf(TRACE, "cr priority: %s", cr.priority);		
+			
+				if (evt.zpriority == cr.priority && ( evt.violate_on_false == 1 || evt.violate_on_true == 1))
+				{
+					if (atev.fire_time > termin_realizacji)
+					{
+						termin_realizacji=atev.fire_time;
+						logf(TRACE, "new termin_realizacji: %s", (string)termin_realizacji);
+					}
+				}
+			}
+		}
+	}
+	logf(TRACE, "termin_realizacji: %s", (string)termin_realizacji);
+	
+	send_wait(0, top_object(), "get_co_group");
+			
+	gl = msg[0];
+
+	send_wait(1, gl, "checkout", cr);
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on checkout cr: %s", method, (string)msg[0]);
+		return;
+	}
+	if ((int)termin_realizacji > 0)
+	{
+		send_wait(1, cr, "call_attr", "ztermin_realizacji", "set_val", termin_realizacji, "SURE_SET");
+	}
+	else
+	{
+		send_wait(1, cr, "call_attr", "ztermin_realizacji", "set_val", null, "SURE_SET");
+	}
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on change value: %s", method, msg[0]);
+		return;
+	}
+	logf(TRACE, "%s: Value changed - no error", method);
+
+	// Save change.
+	send_wait(0, gl, "checkin");
+	if( msg_error() ) {
+		logf(ERROR, "%s: Error on save: %s", method, (string)msg[0]);
+
+		send_wait(0, gl, "uncheck");
+		return;
+	}
+
+	logf(TRACE, "%s: Saved, Finished", method);
+}

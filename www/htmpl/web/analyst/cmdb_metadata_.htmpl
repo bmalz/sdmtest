@@ -1,0 +1,23 @@
+<PDM_IF 0>
+///////////////////////////////////////////////////////////////////////////////
+// Date   : 08/21/2008
+// Title  : cmdb_metadata_.htmpl - Supports metadata for non-cmdb families
+//
+// History:
+// 08/21/2008 tomjo02 - SCO 15991 added for non-cmdb family/class versioning support
+///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////
+// NOTE: This file is handles cases where no-extension table exists for the particular
+// family and/or class when the versioning tab is used by the detail_nr.htmpl form.
+//////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+	
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>	
+
+// NOTE: The cmdbMetadata macro statements are not listed since class/family does not have it's own extension table.
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>
+

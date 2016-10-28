@@ -1,0 +1,92 @@
+<PDM_IF 0>
+usq_update_tree.htmpl
+WHEN PRESENTED:
+    During scoreboard maintenance
+INTENT:
+    Display the current scoreboard in maintenance mode.
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user
+    object ACCESS           List containing the user's access to the various
+                            function groups
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="usq_update.htmpl+COPY_FROM=role%3a2402+USQ_OP=COPY_USQ">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Dostosowywanie Tablicy wyników";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT>
+//  indicate we're in maintainance mode
+// Must declare before fldrtree.js included.
+var maintain = 1;
+
+// RKM This is a stub implementation from fldrtree.js.  Relay the call
+// to the control frame.
+function maintainClickEvent() {
+	top.usq_update_control.tree_clicked();
+}
+
+function load_form() {
+	<PDM_IF "$args.KEEP.USQ_CHANGED" != "">
+		ahdtop.usq_changed="$args.KEEP.USQ_CHANGED";
+	</PDM_IF>
+
+	<PDM_IF "$args.KEEP.USQ_COPY_MADE" != "">
+		ahdtop.usq_copy_made="$args.KEEP.USQ_COPY_MADE";
+	</PDM_IF>
+
+        var control_frame=ahdframeset.frames["usq_update_control"];
+
+        if(exceed_scoreboard_limit)
+           control_frame.disable_options(true);
+        else
+           control_frame.disable_options(false);
+        
+        control_frame.FocusOnField();
+
+	parent.done_loading_form();
+}
+
+var usq_owner_sym = "$args.KEEP.USQ_OWNER_SYM";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fldrtree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/pdmqa.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+//
+// This function adds 'pdmqa' tags to the Customize Scoreboard 
+// ('usq_update_tree.htmpl') form to support form automation testing. It calls 
+// the user defined PdmQA  JavaScript Class/Object to do the actual work.   
+//
+function pdmqa() {
+  var PdmQA = "$PdmQA";
+  //
+  // If the 'PdmQA' variable is set to yes in 'web.cfg' write the 
+  // tags. Note by default (OTB) the 'PdmQA' variable is set to no.
+  //
+  if (PdmQA.toLowerCase() == "yes") {
+    Folder.pdmqa();
+  }
+}
+</SCRIPT>
+</HEAD>
+<BODY class=scbd onLoad="load_form();pdmqa();">
+<SCRIPT LANGUAGE="JavaScript">
+activateActionKeys();
+var actKey = registerActionKey( "x", "X", fldrtreeTabOff, "" ); 
+</SCRIPT>
+
+<H2>Wybierz Element</H2>
+</CENTER>
+<PDM_SCOREBOARD EDIT=YES USQ_OWNER="$args.KEEP.USQ_OWNER">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: usq_update_tree.htmpl ANDERSON.3 2010/02/01 09:11:00 laivi02 Exp $
+</PDM_IF>

@@ -1,0 +1,98 @@
+<PDM_IF 0>
+list_dcon.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Data Partition Constraints.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Data Partition Constraints Search";
+var hdrTitleList = "Data Partition Constraints List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("dconsum.rpt", "dcondtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+
+<PDM_IF "$args.KEEP.forDmnToDcon" == "1">
+    var autoRefreshWindows = new Object();
+    cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.DMN_ID" != "0" && $ACCESS.FAC_dmn \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("New_Constraint", "AddConstraint()", enableExtraBtn);
+
+    var argSym = "$args.KEEP.DMN_ID";
+    if( window.parent != null && typeof window.parent.argSym == "string") {
+        argSym = window.parent.argSym;
+    }
+    function AddConstraint() {
+        add_dmn_dcon("$args.KEEP.DMN_PERSID",argSym,"$args.KEEP.DMN_ID");
+    }
+</PDM_IF>
+
+</script>
+
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Data Partition Constraints">
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.forDmnToDcon" != "1" && $ACCESS.FAC_dcon \> 1>
+<PDM_MACRO name=sfStart factory=dcon>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=dcon>
+</PDM_IF>
+<PDM_IF "$args.KEEP.forDmnToDcon" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.dom_id" value="$args.QBE.EQ.dom_id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.forDmnToDcon" != "1">
+<PDM_MACRO name=sfLookup hdr="Partycja danych" attr=dom_id factory=dmn>
+</PDM_IF>
+<PDM_MACRO name=sfLookup hdr="Nazwa tabeli" attr=tbl_id factory=ctab>
+<PDM_MACRO name=sfDropdown hdr="Typ ograniczenia" attr=type>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No Data Partition Constraints found";
+var msgFound1 = "1 Data Partition Constraint found";
+var msgFound = "%1 Data Partition Constraints found";
+var msgFoundMore = "%1 Data Partition Constraints found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Data Partition Constraint";
+
+
+<PDM_IF "$args.KEEP.forDmnToDcon" == "1" && $ACCESS.FAC_dmn \> 1 && $ACCESS.FAC_dcon \> 1>
+function resultSetCustomContextAddMiddle(ctxMenu) {
+   ctxMenu.addItem(msgtext("Delete"),"delete_dmndcon(self.activePersid)");
+}
+</PDM_IF>
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Typ" attr=type exportfmt=ShowLink link=yes>
+<PDM_IF "$args.KEEP.forDmnToDcon" != "1" >
+<PDM_MACRO name=lsCol hdr="Partycja danych" attr=dom_id>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Tabela" attr=tbl_id>
+<PDM_MACRO name=lsCol hdr="Ograniczenia" attr=constraint_majic>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_dcon.htmpl ASPEN.4 2011/10/19 17:59:26 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

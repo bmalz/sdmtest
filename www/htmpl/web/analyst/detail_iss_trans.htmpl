@@ -1,0 +1,42 @@
+<PDM_IF 0>
+detail_iss_trans.htmpl
+WHEN PRESENTED:
+    When we need to display details of a Issue Status Transition
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP factory=iss_trans preview="NBTAB=detail_iss_trans">
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Issue Transition Detail";
+var hdrTitleUpd = "Update Issue Transition";
+var hdrTitleNew = "Create New Issue Transition";
+argPersistentID = "$args.persistent_id";
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+function loadActions()
+{
+	if ( typeof ahdtop.cfgMultiTenancy == "string" && ahdtop.cfgMultiTenancy != "off" )
+		detailSetTenantFromPresetField("status", "$args.KEEP.argTenantId", "$args.KEEP.argTenant");
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=detailro onLoad="loadActions()" onUnload="unloadActions()">
+
+<PDM_INCLUDE FILE=detail_trans_include.htmpl transFactory=iss_trans transDisplayName="Issue Transition" transStatus=issstat>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

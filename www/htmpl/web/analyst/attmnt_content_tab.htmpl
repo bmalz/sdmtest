@@ -1,0 +1,36 @@
+<PDM_IF 0>
+@(#)$Id: attmnt_content_tab.htmpl ASPEN.1 2010/10/29 14:51:51 saima01 Exp $
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=attmnt_content_tab" factory=attmnt_folder>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Content Tab">
+
+<PDM_FORM NAME="frmDTLRO">
+
+<SCRIPT>
+<PDM_MACRO name=tabBanner title="Contents">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=folder_name rows=1 size=110>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description rows=15 size=110>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: attmnt_content_tab.htmpl,v 1.2 2006/11/08 00:48:48 olsjo01 Exp $
+</PDM_IF>

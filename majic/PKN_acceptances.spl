@@ -1,0 +1,119 @@
+// 20130828 bmalz @ e-xim
+
+cr::acceptances_copy(...) {	
+	if(!is_null(customer.zmanager2)) {
+		send_wait(0, this, "call_attr", "zinitmanager", "set_val", customer.zmanager2, "INTERP");
+	} else {
+		send_wait(0, this, "call_attr", "zinitmanager", "set_val", customer.organization.contact, "INTERP");
+	}
+	if(!is_null(category)) {
+		//rewrite variables from pcat to cr
+		send_wait(0, this, "call_attr", "zacctype1", "set_val", category.zacctype1, "INTERP");
+		send_wait(0, this, "call_attr", "zacctype2", "set_val", category.zacctype2, "INTERP");
+		send_wait(0, this, "call_attr", "zacctype3", "set_val", category.zacctype3, "INTERP");
+		send_wait(0, this, "call_attr", "zacctype4", "set_val", category.zacctype4, "INTERP");
+		
+		send_wait(0, this, "call_attr", "zcntref1rules", "set_val", category.zcntrefrules, "INTERP");
+		send_wait(0, this, "call_attr", "zcntref2rules", "set_val", category.zcntref1rules, "INTERP");
+		send_wait(0, this, "call_attr", "zcntref3rules", "set_val", category.zcntref2rules, "INTERP");
+		send_wait(0, this, "call_attr", "zcntref4rules", "set_val", category.zcntref3rules, "INTERP");
+		
+		send_wait(0, this, "call_attr", "zgroup1", "set_val", category.zgroup1, "INTERP");
+		send_wait(0, this, "call_attr", "zgroup2", "set_val", category.zgroup2, "INTERP");
+		send_wait(0, this, "call_attr", "zgroup3", "set_val", category.zgroup3, "INTERP");
+		send_wait(0, this, "call_attr", "zgroup4", "set_val", category.zgroup4, "INTERP");
+		
+		send_wait(0, this, "call_attr", "zgroup1rules", "set_val", category.zgroup1rules, "INTERP");
+		send_wait(0, this, "call_attr", "zgroup2rules", "set_val", category.zgroup2rules, "INTERP");
+		send_wait(0, this, "call_attr", "zgroup3rules", "set_val", category.zgroup3rules, "INTERP");
+		send_wait(0, this, "call_attr", "zgroup4rules", "set_val", category.zgroup4rules, "INTERP");
+		
+		send_wait(0, this, "call_attr", "zmanager1", "set_val", category.zmanager1, "INTERP");
+		send_wait(0, this, "call_attr", "zmanager2", "set_val", category.zmanager2, "INTERP");
+		send_wait(0, this, "call_attr", "zmanager3", "set_val", category.zmanager3, "INTERP");
+		send_wait(0, this, "call_attr", "zmanager4", "set_val", category.zmanager4, "INTERP");
+		
+		send_wait(0, this, "call_attr", "zlvl", "set_val", category.zgrouprules, "INTERP");
+		
+		//rewrite lrels from zlrel_pcat_cnt to zlrel_cr_cnt
+		insert_lrel_cr_cnt("zlrel_pcat_cnt", category.persistent_id, "zlrel_cr_cnt", persistent_id);
+		insert_lrel_cr_cnt("zlrel_pcat_cnt1", category.persistent_id, "zlrel_cr_cnt1", persistent_id);
+		insert_lrel_cr_cnt("zlrel_pcat_cnt2", category.persistent_id, "zlrel_cr_cnt2", persistent_id);
+		insert_lrel_cr_cnt("zlrel_pcat_cnt3", category.persistent_id, "zlrel_cr_cnt3", persistent_id);
+		
+		logf(TRACE, "Rewrite from category to CR ended with success");
+	}
+}
+
+void insert_lrel_cr_cnt(...) {
+	//set variables
+	string SourceTable;
+	string CategoryPersistent_id;
+	string TargetTable;
+	string cr_id;
+	
+	SourceTable = argv[0];
+	CategoryPersistent_id = argv[1];
+	TargetTable = argv[2];
+	cr_id = argv[3];
+
+	//get list of zlrel_pcat_cnt items
+	send_wait(0, top_object(), "call_attr", SourceTable, "sync_fetch", "STATIC", "pcat = ?",  -1, 1, CategoryPersistent_id);
+	
+	object lrels;
+	object lrel_dob;
+	int lrels_count;
+	int i;
+	
+	lrels = msg[0];
+	lrels_count = msg[1];
+	
+	if(lrels_count > 0) {
+		for(i = (lrels_count-1); i >= 0; i--) {
+			//get item
+			send_wait( 0, lrels, "dob_by_index", "DEFAULT", i, i);
+			if (msg_error()) { 
+				logf(ERROR, "Error on dob_by_index: '%s'", msg[0]);
+				return; 
+			}
+			
+			lrel_dob = msg[0];
+			
+			logf(SIGNIFICANT, "Return %d, %d", i, lrel_dob.cnt);
+			
+			//create temporary object
+			object o_temp;
+			
+			send_wait(0, top_object(), "get_co_group");
+			if(msg_error())
+			{
+				logf(ERROR, "get_co_group: %s", msg[0]);
+				return;
+			}
+			
+			o_temp = msg[0];
+			
+			//set new object
+			send_wait(0, top_object(), "call_attr", TargetTable, "get_new_dob", NULL, NULL, o_temp);
+			if(msg_error()) 
+			{
+				logf(ERROR, "get_new_dob: %s", msg[0]);
+				return;
+			}
+			
+			object new_lrel;
+			new_lrel = msg[0];
+			
+			//set fields
+			new_lrel.cnt = lrel_dob.cnt;
+			new_lrel.cr = cr_id;
+			
+			//save lrel item
+			send_wait(0, o_temp, "checkin");
+			if(msg_error())
+			{
+				logf(ERROR, "checkin: %s", msg[0]);
+			}
+		}
+	}
+}

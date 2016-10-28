@@ -1,0 +1,46 @@
+<PDM_IF 0>
+@(#)$Id: export_data_popup.htmpl ASPEN.2 2010/11/20 01:23:34 saima01 Exp $
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var bopsid="$args.KEEP.bopsid";
+var factory="$args.KEEP.factory";
+var where="$args.KEEP.where";
+var sort="$args.KEEP.sort";
+var definition="1001";
+var variables="$args.KEEP.variables";
+var columns="$args.KEEP.columns";
+var servlet_path="$args.KEEP.url";
+</script>
+</head>
+<script type="text/javascript" src="$CAisd/scripts/search_filter.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ajax.js"></script>
+<body onload="SubmitExportForm();" topmargin=0>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" header="no">
+
+<table cellspacing=0 cellpadding=0 width='100%' class="page_header">
+<tr>
+
+<td align="left" width='99%'>Export File</td>
+
+<td align="right" width='1%'>
+	<script>
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" id="btncncl" btnType="negative"
+    func="submitExportCancel();">
+<PDM_MACRO NAME=btnEndRow>
+	</script>	  
+</td>
+</tr>
+</table>
+<PDM_INCLUDE FILE=export_data.htmpl Size=50>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+
+</script>
+</html>
+

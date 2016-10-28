@@ -1,0 +1,177 @@
+<PDM_IF 0>
+list_pcat.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Request Area
+INTENT:
+    Display the list of Request Area
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object pcat_list list The list object containing the Request Area
+                        See $NX_ROOT/bopcfg/majic/cm.maj for the
+                        definition of attributes for 'OBJECT pcat'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+
+var hdrTitle = "Wyszukanie klasyfikacji";
+var hdrTitleList = "Klasyfikacja Wniosków/Incydentów/Problemów";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var rptName = new Array("pcatsum.rpt", "pcatdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Klasyfikacja Wniosków/Zmian/Incydentów/Problemów">
+
+<script type="text/javascript">
+
+// Used for copying categories using the catg_copy form.  
+function backfill_event(affected_form_obj, affected_field, fillin, persid, rel_attr_val) {
+	if (affected_field != "KEY.category_copy") return;
+	// Pop fresh copy...
+	// We blank out service type, since the source category could be public, 
+	// we don't know what the service type should be.
+	make_copy(persid, "PRESET=owning_contract:$args.KEEP.CONTRACT_CONTEXT", "PRESET=service_type:");
+}
+</script>
+<form name=catg_copy>
+	<input type="hidden" name="KEY.category_copy">
+</form>
+
+<!-- Are we displayed within a Contract? -->
+<PDM_IF "$args.KEEP.CONTRACT_CONTEXT" != "">
+	<table>
+	<th width=100% align="right">
+	<td width=100% align="right">
+	<script>
+	
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=btnStartRow>
+		// Create a new, private category 
+<PDM_MACRO name=button Caption="Dodaj nową klasyfikację" Func="create_new('pcat', false, '', '', 'PRESET=owning_contract:$args.KEEP.CONTRACT_CONTEXT')" hotkey_name="" ID="ADD_ITIL_PRIVATE_PCAT" Width=0>
+<PDM_MACRO name=button Caption="Sklonuj klasyfikację" Func="do_catg_copy('pcat');" hotkey_name="" ID="ADD_ITIL_PRIVATE_PCAT_COPY" Width=0>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+	</script>
+	</td></table>
+</PDM_IF>
+
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.noSFBtns" == "1">
+<PDM_MACRO name=sfStart button=false export=no factory=pcat>
+<PDM_ELIF "$args.KEEP.CONTRACT_CONTEXT" != "" || $ACCESS.FAC_pcat < 2>
+<PDM_MACRO name=sfStart create=false factory=pcat>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=pcat>
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<input type="hidden" name=HTMPL value=update_lrel_pcat.htmpl>');
+</PDM_IF>
+document.write('<input type="hidden" name=SERVICE_CST value=${args.KEEP.SERVICE_CST:}>');
+<PDM_IF "$args.QBE.EQ.service_schedules.wrkshft.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_schedules.wrkshft.id" value="$args.QBE.EQ.service_schedules.wrkshft.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.service_grps.cnt.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_grps.cnt.id" value="$args.QBE.EQ.service_grps.cnt.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.service_locs.loc.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_locs.loc.id" value="$args.QBE.EQ.service_locs.loc.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.CONTRACT_CONTEXT" != "">
+	var autoRefreshWindows = new Object();
+	document.write('<input type="hidden" name=KEEP.CONTRACT_CONTEXT value=${args.KEEP.CONTRACT_CONTEXT:}>');
+	document.write('<input type="hidden" name="QBE.EQ.owning_contract" value=${args.KEEP.CONTRACT_CONTEXT:}>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+//<PDM_MACRO name=sfDropdown hdr="Typ serwisowy" attr=service_type factory=sdsc>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=sym>
+<PDM_MACRO name=sfStartRow>
+//<PDM_IF 0>
+//<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=agt>
+//</PDM_IF>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfLookup hdr="Organizacja" attr=organization factory=org>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+//searchFilterDropdown("ZDefined by Contract?","","",
+//"Yes","(owning_contract IS NOT NULL)",
+//"No","(owning_contract IS NULL)");
+<PDM_IF "$env.NX_SAP_GUID" != "">
+//	searchFilterDropdown("Send to SAP","sap_prop","","No","0","Yes","1");
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Wniosek","cr_flag","","NO","0","YES","1");
+searchFilterDropdown("Wniosek o zmianę","zchg_flag","","NO","0","YES","1");
+searchFilterDropdown("Incydent","in_flag","","NO","0","YES","1");
+searchFilterDropdown("Problem","pr_flag","","NO","0","YES","1");
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Widoczne w SelfService" attr="ss_include" factory=bool>
+<PDM_MACRO name=sfTextbox hdr="Opis w SelfService" attr=ss_sym>
+<PDM_MACRO name=sfEnd>
+
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "Brak klasyfikacji";
+var msgFound1 = "Znaleziono 1 klasyfikacje";
+var msgFound = "Znaleziono %1 klasyfikacji";
+var msgFoundMore = "Znaleziono %1 klasyfikacji.  Wyświetlane %2 z %3";
+var msgSelect = "Kliknij aby wybrać żądaną klasyfikację";
+
+function display_field_value(value)
+
+{
+  if ( value == "1" )
+
+     value = "YES";
+
+  else if ( value == "0" )
+
+     value = "NO";
+
+  rs.data(value);     
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Opis" attr=sym exportFmt=ShowLink link=yes sort="sym ASC, tenant ASC">
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=lsCol hdr="Wysłij do SAP" attr=sap_prop fmtfunc=display_field_value>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Widoczne w SelfService" attr=ss_include>
+<PDM_MACRO name=lsCol hdr="Opis w SelfService" attr=ss_sym>
+<PDM_MACRO name=lsCol hdr="Opis w GUI" attr=zguidesc>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsCol hdr="Wnioski" attr=cr_flag exportFmt=YesNo fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Wnioski o Zmianę" attr=zchg_flag exportFmt=YesNo fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Incydenty" attr=in_flag exportFmt=YesNo fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Problemy" attr=pr_flag exportFmt=YesNo fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=zsort>
+<PDM_MACRO name=lsCol attr=description colspan=8 startrow=yes>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_pcat.htmpl ASPEN.6 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

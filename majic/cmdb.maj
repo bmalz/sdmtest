@@ -1,0 +1,45 @@
+OBJECT ca_cmpny {
+	FACTORY vendor {
+        RESTRICT "company_type = 2700" { company_type = vendor };
+		STANDARD_LISTS {
+        SORT_BY "sym";
+        WHERE "delete_flag = 0" ;
+            MLIST OFF ;
+            RLIST OFF ;
+		};
+		REL_ATTR id ;
+        COMMON_NAME sym ;
+		FUNCTION_GROUP "ci_reference" ;
+	};
+};
+
+OBJECT ca_cmpny {
+	FACTORY producent {
+        RESTRICT "company_type = 1000010" { company_type = Producent };
+		STANDARD_LISTS {
+        SORT_BY "sym";
+        WHERE "delete_flag = 0" ;
+            MLIST OFF ;
+            RLIST OFF ;
+		};
+		REL_ATTR id ;
+        COMMON_NAME sym ;
+		FUNCTION_GROUP "ci_reference" ;
+	};
+};
+
+OBJECT nr {
+	FACTORY ci_location {
+        RESTRICT "class = 1000087" { class = Lokalizacja };
+		STANDARD_LISTS {
+        SORT_BY "name,system_name,mac_address";
+        WHERE "delete_flag = 0" ;
+            MLIST OFF ;
+            RLIST OFF ;
+    };
+
+    REL_ATTR  id ;
+    COMMON_NAME name ;
+    FUNCTION_GROUP "ci" ;
+	};
+};

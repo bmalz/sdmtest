@@ -1,0 +1,60 @@
+<PDM_IF 0>
+chg_accumulate.htmpl
+WHEN PRESENTED:
+    when the app needs to accumulate workflow costs and durations, and roll up to a
+    change order. User needs to decide whether to do just this Change order or
+    all child CO's.
+INTENT:
+    accumulate change workflow costs and durations.
+VARIABLES:
+    object chg args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/change.maj for the
+                            definition of attributes for 'OBJECT chg'
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT>
+var obj_name = "Change Order";
+var obj_id = "${args.chg_ref_num:}";
+edit_form=1;
+setWindowTitle(obj_id + " - Accumulate Change Order");
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+var cawf_procid = "$args.cawf_procid";
+</SCRIPT>
+</HEAD>
+<BODY onUnload="unload_check()" class=editform >
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<CENTER>
+<BR>
+<H1>Accumulate Change Order $args.chg_ref_num</H1>
+<PDM_FORM NAME="frm001" ONSUBMIT="return check_submit()">
+<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>
+<INPUT TYPE=hidden NAME=OP  VALUE="ACCUMULATE">
+<SCRIPT LANGUAGE="JavaScript">
+if (cawf_procid == "" ){
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+<PDM_MACRO NAME=button  caption="Accumulate this Change Order and All Children"  id=btn001 func="pdm_submit('frm001','ACCUMULATE_ALL')"  hotkey_name="Accumulate this Change Order and All Children">
+docWriteln("<BR>");
+<PDM_MACRO NAME=button  caption="Accumulate Only this Change Order"  id=btn002 func="pdm_submit('frm001','ACCUMULATE')"  hotkey_name="Accumulate Only this Change Order">
+docWriteln("<BR>");
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" id=btncncl btnType="negative" func="cancel_update('$prop.form_name_2','$args.id','show_main_detail.htmpl')" width=120>
+}
+else{
+	alertmsg("Accumulate_action_is_not_avail");  
+}      
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</CENTER>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: chg_accumulate.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>

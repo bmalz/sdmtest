@@ -1,0 +1,24 @@
+<PDM_IF 0>
+@(#)$Id: kt_document_view_simple.htmpl FWr1.1 2007/3/13 13:19:40 peeei01 Exp $
+WHEN PRESENTED:
+    When we need to display a detail of a single Knowledge Document when a user open from email link
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT>
+var cfgDateFormat = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format</PDM_FMT>';
+var cfgDateFormatNoTime = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format_no_time</PDM_FMT>';
+</SCRIPT>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/castyles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msg_cat.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/html_editor.js"></script>
+</HEAD>
+<BODY id=docBody>
+<IMG SRC="$CAisd/img/product_banner.png">
+<PDM_INCLUDE FILE=kt_document_template.htmpl showObj=true disable_kd_links=true disable_kcat_links=true disable_attachments=true disable_related_tickets=true disable_comment_links=true>
+</BODY>
+</HTML>

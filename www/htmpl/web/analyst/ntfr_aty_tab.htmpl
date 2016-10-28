@@ -1,0 +1,260 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Activity Notification Search";
+var hdrTitleList = "Activity Notification List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+//var rptName = new Array("&{factory}sum.rpt", "&{factory}dtl.rpt");
+var cfgCanEdit = false;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onLoad="return void(0);">
+<PDM_INCLUDE FILE=std_body.htmpl filename="aty list">
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCurrent = '$current';
+var cfgTotal = '$total';
+var cfgRecordCount = '$record_count';
+var cfgStart = '$start';
+var cfgLength = '$length';
+var cfgIsPopup = '$args.KEEP.IsPopUp';
+var argSearchWhereClause="";
+var cfgUseTemplate = "";
+var tenantSort = "no"; //By default all tenant columns are sortable. This variable is needed to make the
+						//tenant column not sortable
+<PDM_MACRO name=sfStart export=no factory="lrel">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="lattr" attr="lattr" size=20>
+<PDM_MACRO name=sfEnd>
+var sfButtonTable = document.getElementById("sfButtonTable");
+sfButtonTable.style.display = "none";
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<SCRIPT LANGUAGE="JavaScript">
+if ("${current:n/a}" != "n/a")
+{
+	var msgFoundNone = "No Activity Notifications found";
+	var msgFound1 = "1 Activity Notification found";
+	var msgFound = "%1 Activity Notifications found";
+	var msgFoundMore = "%1 Activity Notifications found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Activity Notification";                       
+
+	var dataSource = new Array();
+	var indx = 0;
+
+<PDM_LIST SOURCE=list ESC_STYLE=C>
+   if( "$args.KEEP.DISPLAY_FROM" =="cr")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="cr_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }
+   else if( "$args.KEEP.DISPLAY_FROM" =="chg")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="chg_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }
+   else if( "$args.KEEP.DISPLAY_FROM" =="iss")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="iss_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }
+   else if( "$args.KEEP.DISPLAY_FROM" =="mgs")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="mgs_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }
+   else if( "$args.KEEP.DISPLAY_FROM" =="KD")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="kd_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+    }  
+   else if( "$args.KEEP.DISPLAY_FROM" =="O_COMMENTS")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="kd_comment_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }        
+   else if( "$args.KEEP.DISPLAY_FROM" =="KT_REPORT_CARD")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="krc_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }  
+   else if( "$args.KEEP.DISPLAY_FROM" =="sa_notif")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="sa_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }
+   else if( "$args.KEEP.DISPLAY_FROM" =="cnt")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="cnt_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }
+   else if( "$args.KEEP.DISPLAY_FROM" =="nr")
+   {
+		<PDM_LIST PREFIX=tlist FACTORY=aty WHERE="ci_notify_info='$list.macro.persistent_id'" ESC_STYLE=C>
+			var recordData = new Object();
+			recordData["factory"] = "aty";
+			recordData["key"] = "$tlist.id";
+			recordData["persid"] = "$tlist.persistent_id";
+			recordData["relAttr"] = "$tlist.REL_ATTR";
+			recordData["sym"]="$tlist.sym";
+			recordData["description"]="$tlist.description";
+			
+<PDM_IF "$prop.MultiTenancy" != "off">
+				recordData["tenant"] = "$tlist.tenant";
+				recordData["tenantName"] = '<PDM_FMT ESC_STYLE=C>${tlist.tenant.COMMON_NAME:}</PDM_FMT>';
+			
+</PDM_IF>
+			dataSource[indx++] = recordData;
+		</PDM_LIST>
+   }        
+</PDM_LIST>
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym link=yes sort="no">
+<PDM_MACRO name=lsCol hdr="Opis" attr=description sort="no">
+<PDM_MACRO name=lsEnd alt_data_src=dataSource>
+}
+</SCRIPT>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

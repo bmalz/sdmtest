@@ -1,0 +1,66 @@
+<PDM_IF 0>
+DESCRIPTION:
+    Display the Attributes tab for the CI detail page, which is invoked by the detail_***EXTENSION***.htmpl form.
+    The steps below assume use of the Web Screen Painter (WSP)
+    
+PROCEDURE:
+    Step 1: To add an attribute, drag a control from the WSP Tool palette to the form area.
+    Step 2: Associate the control with a particular attribute by clicking on the attribute value and selecting an attribute name.
+            Note: All attributes must originate fron either the nr object or a single extension table.
+    Step 3: Repeat steps 1-2 for each attribute to be added to the form.
+    Step 4: Change the preview URL from "detail_xx.htmpl" to "detail_***EXTENSION***.htmpl",  where ***EXTENSION*** is the extension table name. 
+    Step 5: Save this file as nr_cmdb_***EXTENSION***_tab.htmpl,  where ***EXTENSION*** is the extension table name.
+    
+    After this file is saved, you must create cmdb_metadata_***EXTENSION***.htmpl
+    using the template file cmdb_metadata.template as a basis.
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_xx.htmpl" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/search_filter.js"></script> 
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+ 
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+tab_banner("Attributes",true)
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Jednostka organizacyjna" attr="org_bought_for_uuid">
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr="zlokalizacja">
+<PDM_MACRO name=dtlStartRow>
+detailDropdown("Projektor", "assoc_zadm_sa_ko.projektor", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.projektor", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+detailDropdown("Projektor przenosny", "assoc_zadm_sa_ko.projektor_przenosny", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.projektor_przenosny", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+detailDropdown("Nagłośnienie", "assoc_zadm_sa_ko.naglosnienie", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.naglosnienie", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+<PDM_MACRO name=dtlStartRow>
+detailDropdown("Videokonferencja", "assoc_zadm_sa_ko.videokonferencja", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.videokonferencja", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+detailDropdown("Tablica suchościeralna", "assoc_zadm_sa_ko.tablica_suchoscieralna", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.tablica_suchoscieralna", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+detailDropdown("Flipchart", "assoc_zadm_sa_ko.flipchart", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.flipchart", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+<PDM_MACRO name=dtlStartRow>
+detailDropdown("Ekran", "assoc_zadm_sa_ko.ekran", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.ekran", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+detailDropdown("Telekonferencja", "assoc_zadm_sa_ko.telekonferencja", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.telekonferencja", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+detailDropdown("Monitor", "assoc_zadm_sa_ko.monitor", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.monitor", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+<PDM_MACRO name=dtlStartRow>
+detailDropdown("WiFi", "assoc_zadm_sa_ko.wifi", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.wifi", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+<PDM_MACRO name=dtlTextbox hdr="Pojemność konferencyjna" attr="assoc_zadm_sa_ko.pojemnosc_konferencyjna">
+<PDM_MACRO name=dtlTextbox hdr="Pojemność teatralna" attr="assoc_zadm_sa_ko.pojemnosc_teatralna">
+<PDM_MACRO name=dtlStartRow>
+detailDropdown("Dodatkowe miejsca", "assoc_zadm_sa_ko.dodatkowe_miejsca", "", 1, 20, true, "", "$args.assoc_zadm_sa_ko.dodatkowe_miejsca", "yes:0:0", "sym", "", "", "", "no", "0", "", "0", "Tak", "1", "Nie", "0");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr="zdescription_long" colspan="3" rows="8" size="69">
+<PDM_MACRO NAME=dtlEndTable>
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+

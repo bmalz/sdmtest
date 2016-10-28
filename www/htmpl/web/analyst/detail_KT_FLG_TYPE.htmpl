@@ -1,0 +1,85 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.SYM Comment Type Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.SYM Update Comment Type"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Comment Type $args.SYM"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function preSaveTrigger()
+{
+	var doc = document.forms["main_form"].elements;
+	var iDays = parseInt(doc["SET.TIME_TO_COMPLETE"].value);
+	if (isNaN(iDays) || (iDays < 0))
+	{
+		alert("'Time to complete (Days)' value cannot be negative");
+		doc["SET.TIME_TO_COMPLETE"].focus();
+		return false;
+	}
+	if (iDays >1000)
+	{
+		alert("'Time to complete (Days)' value cannot be more than 1000");
+		doc["SET.TIME_TO_COMPLETE"].focus();
+		return false;
+	}
+	return true;
+}
+</SCRIPT>
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory="KT_FLG_TYPE">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr="SYM" size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="DESCRIPTION" rows=3 size=90>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Czas do wykoniania (dni)" attr="TIME_TO_COMPLETE" size=5>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Pokaż w widoku użytkownika" attr="SHOW_AS_COMMENT">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Wymagany Follow-up" attr="FOLLOW_UP">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_WSP>

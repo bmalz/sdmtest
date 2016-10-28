@@ -1,0 +1,35 @@
+/* Copyright (c) 2003 Computer Associates International, Inc */
+.accordion{width:89%;padding:5px;}
+.accordion h2{background-image:url('/CAisd/sitemods/img/toplevel_tab_unselected_center.png');margin:0;padding:5px 5px;font-size:12px;font-weight:bold;cursor:pointer;color:#FFFFFF;text-align:center;}
+.accordion h2:hover{text-decoration:underline;}
+.accordion .accText:hover{text-decoration:underline;}
+.accordion h2.current{cursor:default;background-image:url('/CAisd/sitemods/img/toplevel_tab_selected_center.png');}
+.accordion .pane{display:none;padding:0px;background-color:white;}
+.accordion .tabs{font-weight:normal;font-size:16px;color:#333333;}
+.accordion_tab_iframe{border:0px;width:100%;}
+.top_level_tab_table{border-spacing:0px;padding:0px;margin:0px;border-width:0px;border-collapse:collapse;border-bottom:0px solid #666;width:100%;}
+.sub_tab_table{border-spacing:0px;padding:0px;margin:0px;border-width:0px;border-collapse:collapse;border-bottom:0px solid #666;width:100%;}
+.outer_div{border-width:1px;}
+ul.tabs{list-style:none;margin:0!important;padding:0;border-left:1px solid #B3B9C4;border-right:1px solid #B3B9C4;border-top:1px solid #B3B9C4;height:27px;padding-right:10px;padding-left:10px;}
+ul.tabs li{float:left;text-indent:0;list-style-image:none!important;background-color:#FFFFFF;width:100%;}
+ul.tabs a{background-image:url('/CAisd/img/portal_tab_unselected_center.png');font-size:11px;display:block;height:22px;line-height:22px;text-align:center;text-decoration:none;color:#333333;padding-right:10px;padding-left:10px;position:left;top:1px;white-space:nowrap;}
+ul.outer_tabs{background-color:#BFC4C6;list-style:none;margin:0!important;padding-left:15px;padding-right:15px;padding-top:15px;padding-bottom:0px;border:0px;height:24px;}
+ul.outer_tabs table{border-collapse:collapse;border-spacing:0px;border-width:0px;margin-left:auto;margin-right:auto;padding:0px;}
+ul.outer_tabs li{text-indent:0;padding-right:2px;margin:0!important;list-style-image:none!important;border-bottom:0px;}
+ul.outer_tabs a{background-image:url('/CAisd/img/portal_tab_unselected_center.png');font-size:11px;display:block;height:25px;line-height:22px;text-align:center;text-decoration:none;color:#333333;padding-right:10px;padding-left:10px;top:1px;white-space:nowrap;}
+ul.outer_tabs a:hover{text-decoration:underline;}
+.acc_top_lvl_tab_right_unselected{width:9px;background:url('/CAisd/sitemods/img/toplevel_tab_unselected_right.png');}
+.acc_top_lvl_tab_left_unselected{width:9px;background:url('/CAisd/sitemods/img/toplevel_tab_unselected_left.png');}
+.acc_top_lvl_tab_center_unselected{width:9px;background:url('/CAisd/sitemods/img/toplevel_tab_unselected_center.png');}
+.acc_top_lvl_tab_right_selected{width:9px;background:url('/CAisd/sitemods/img/toplevel_tab_selected_right.png');}
+.acc_top_lvl_tab_left_selected{width:9px;background:url('/CAisd/sitemods/img/toplevel_tab_selected_left.png');}
+.acc_top_lvl_tab_center_selected{width:9px;background:url('/CAisd/sitemods/img/toplevel_tab_selected_center.png');}
+ul.tabs a:active{outline:none;color:#333333;}
+ul.tabs a:hover{text-decoration:underline;}
+ul.tabs a.current,ul.tabs a.current:hover,ul.tabs li.current a{cursor:default!important;color:#333333;background-image:url('/CAisd/img/portal_tab_selected_center.png');}
+ul.tabs td{height:22px;border-width:0px;padding:0px;white-space:nowrap;}
+ul.tabs td.acc_tab_left_unselected{width:10px;background-image:url('/CAisd/img/portal_tab_unselected_left.png');}
+ul.tabs td.acc_tab_right_unselected{width:10px;background-image:url('/CAisd/img/portal_tab_unselected_right.png');}
+ul.tabs td.acc_tab_left_current{width:10px;background-image:url('/CAisd/img/portal_tab_selected_left.png');}
+ul.tabs td.acc_tab_right_current{width:10px;background-image:url('/CAisd/img/portal_tab_selected_right.png');}
+.panes .pane{display:none;}

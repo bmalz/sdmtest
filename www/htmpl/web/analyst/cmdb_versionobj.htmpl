@@ -1,0 +1,110 @@
+<PDM_IF 0>
+Purpose:
+   This tab file defines all data to be used by generic object versioning into
+   javascript variables.
+
+
+Usage:
+   use PDM_INCLUDE file="cmdb_versionobj.htmpl"
+   
+   this will use the ci_audit table as a source of input data for the versioned object
+
+History:
+   11/29/2011 mckpe04 SCO 40888 - Initial version based heavily on cmdb_versioning.htmpl
+</PDM_IF>
+
+<PDM_JSCRIPT file=cmdb_versioning.js>
+<PDM_INCLUDE FILE="cmdb_metadata_not_ci.htmpl">
+function getCMDBData()
+{	
+
+var longDate      = new Array();
+var who           = new Array();
+var mdr           = new Array();
+var attribute     = new Array();
+var newvalue      = new Array();
+var oldvalue      = new Array();
+var intDate       = new Array();
+var what          = new Array();
+
+var cmdbCommon    = new Array();
+var cmdbHeading  = new Array();
+var cmdbCurrentValue = new Array();
+var cmdbCategory = new Array();
+var cmdbAttrHelp = new Array();
+var cmdbDBColumn = new Array();
+var cmdbAttrDataType = new Array();
+
+var versionNumber;
+var n;
+var i;
+
+i=-1;
+
+
+// Get cmdb meta data for versioning
+var result;
+result = getCMDBMetaData();
+//result=parent.cmdbMetaData;
+i=result[0];
+who=result[1];
+longDate=result[2];
+what=result[3];
+intDate=result[4];
+mdr=result[5];
+attribute=result[6];
+newvalue=result[7];
+oldvalue=result[8];
+cmdbCategory=result[9];
+cmdbHeading=result[10];
+cmdbCommon=result[11];
+cmdbCurrentValue=result[12];
+cmdbAttrHelp=result[13];
+cmdbDBColumn=result[14];
+cmdbAttrDataType=result[15];
+result=null;
+
+<PDM_IF "$env.NX_CMDB_VERSIONING_MAXROWS" == "" || "$env.NX_CMDB_VERSIONING_MAXROWS" == "0">
+  <PDM_SET args.versioning_maxrows="400">
+<PDM_ELSE>
+  <PDM_SET args.versioning_maxrows="$env.NX_CMDB_VERSIONING_MAXROWS">
+</PDM_IF>
+
+var num_nr_com_records = i;
+
+// append the asset log (CMDB Audit log)....
+// searching audit log for updates to ci named: $args.name LENGTH=$args.versioning_maxrows
+
+////////////////////////////////////////////////////
+<PDM_LIST FACTORY="ci_audit" ESC_STYLE="C" PREFIX="asset_log" 
+          WHERE="objectid = '$args.persistent_id'" 
+          ORDER_BY="last_mod_dt DESC" 
+          LENGTH="$args.versioning_maxrows">
+	i++;
+	who[i]       = "$asset_log.last_mod_by.combo_name";
+	// dont use longDate[i]  = 'asset_log.log_date' ;
+	what[i]      = "Field Updated";
+	attribute[i] = "$asset_log.attr_name";
+	newvalue[i]  = "$asset_log.new_value";
+	oldvalue[i]  = "$asset_log.old_value";
+	intDate[i]   = "$asset_log.last_mod_dt_INT_DATE";
+
+	// to do: add mdr support
+	mdr[i] = "";
+</PDM_LIST>
+
+
+
+
+/////////////////
+
+n=i+1;
+
+var cmdbdata;
+  cmdbdata = [longDate, who, mdr, attribute, newvalue, intDate, n, what, oldvalue, cmdbCommon, cmdbCategory, cmdbHeading,
+              cmdbCurrentValue, cmdbAttrHelp, cmdbDBColumn,
+              cmdbAttrDataType];
+
+return cmdbdata;
+}
+

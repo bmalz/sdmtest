@@ -1,0 +1,69 @@
+<PDM_IF 0>
+detail_role_go_form.htmpl
+WHEN PRESENTED:
+    When we need to display a details of a single Go Resource Relationship 
+INTENT:
+    Display the detail and edit info for the Go Resource Relationship  
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object role_go_form args	The Site object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/D:CA_SDAHDbase.maj for the
+                        definition of attributes for 'OBJECT role_go_form'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.web_form_obj.name Go Resource Relationship Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.web_form_obj.name Go Resource Relationship Update"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+ahdframeset.top_splash.next_persid = "$args.role_obj.persistent_id";
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=role_go_form>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Nazwa zasobu Idź" attr=web_form_obj>
+<PDM_MACRO name=dtlLookupReadonly hdr="Nazwa roli" attr=role_obj>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Pasek menu" attr=menu_bar_obj size=25>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Domyślnie" attr=is_default off="No" on="Yes">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

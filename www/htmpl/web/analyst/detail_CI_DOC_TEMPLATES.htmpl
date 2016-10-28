@@ -1,0 +1,156 @@
+<PDM_IF 0>
+detail_CI_DOC_TEMPLATES.htmpl
+WHEN PRESENTED:
+    When we need to edit a document template and its content
+INTENT:
+    Edit a Document Template
+VARIABLES:
+    
+    object  CI_DOC_TEMPLATES  args	The Document Template object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT CI_DOC_TEMPLATES
+						for the definition of attributes for 'OBJECT CI_DOC_TEMPLATES'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.TEMPLATE_NAME Document Template Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.TEMPLATE_NAME Update Document Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Document Template $args.TEMPLATE_NAME"</PDM_FMT>;
+</script>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var argTemplateName = "$args.KEEP.TEMPLNAME";
+var argSAVEID = "$args.KEEP.SAVEID"; //Pass this ID to get the info
+var argid = "$args.id";
+var lBannerHeight, sBannerHTML, sPageHTML;
+var iUserDefID,iPriority,iCreatedVia,iPrimaryIndex,iCurrentAction;
+var iShowCaption,iDOCID,iHits,iGuestOptionOff;
+var	iStatus,iDOCType,iDocTemplate,iWFTemplate,iBUResult;
+var iCreationDate,iModifyDate,iStartDate,iExpirationDate;
+var iReviewDate,iLastAcceptedDate,iPublishedDate;
+var iAuthor,iOwner,iSubjectExpert,iInitiator,iAssignee;
+var iSDProduct,iSDAsset,iSDRootCause,iSDPriority,iSDSeverity;
+var iSDImpact,iSDUrgency,iSDAcceptedHits;
+var iCustom1,iCustom2,iCustom3,iCustom4,iCustom5,iCustomNum1,iCustomNum2;
+var count = 0;
+
+function SaveTemplate(kd_id)
+{
+	if(("$args.DOC_ID" == "0" || "$args.DOC_ID" == "") &&
+		"$prop.form_name_3" == "edit")
+	{
+		var inpDocId = document.getElementById("SET.DOC_ID");
+		inpDocId.value = kd_id;
+		pdm_submit('main_form','UPDATE');
+	}	
+}
+function setDefValues()
+{
+	var url;
+	if("$args.DOC_ID" == "0" || "$args.DOC_ID" == "")
+	{
+		url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			"+OP=CREATE_NEW+FACTORY=KD" + 
+			"+PRESET=ACTIVE_STATE:300" + 
+			"+PRESET=DOC_TEMPLATE_ID:" + $args.id + 
+			"+HTMPL=detail_KD_template.htmpl" + 
+			"+RO_HTMPL=detail_KD_template.htmpl";
+	}
+	else
+	{
+		if("$prop.form_name_3" == "edit")
+		{
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+				"+OP=UPDATE+FACTORY=KD" + 
+				"+HTMPL=detail_KD_template.htmpl" + 
+				"+PERSID=KD:$args.DOC_ID" +
+				"+RO_HTMPL=detail_KD_template.htmpl";
+
+		}
+		else
+		{
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+				"+OP=SHOW_DETAIL" +
+				"+PERSID=KD:$args.DOC_ID" +  
+				"+HTMPL=detail_KD_template.htmpl" + 
+				"+HIDE_EDIT=1";
+		
+		}
+	}
+	var features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no";
+	preparePopup(url, "TEMPLATE_KD" + "$args.id", features, width=-(popupWidth(SMALL_POPUP)), height=popupHeight(SMALL_POPUP), 'GOBUTTON=no');
+}
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script>
+	//edit_form=1;
+</script>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+</head>
+<PDM_IF 0>We need to use setTimeout function. Otherwise the page HTML will be empty.</PDM_IF>
+<body onload=window.setTimeout("frmCiDocTemplatesOnLoad()",100)>
+<PDM_INCLUDE FILE=std_body.htmpl filename="doc_templates" header=no>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<center>
+	<script>
+		
+<PDM_IF $args.KEEP.SAVEID != "">
+			<PDM_LIST PREFIX=ciDocTempl FACTORY=CI_DOC_TEMPLATES WHERE="id=$args.KEEP.SAVEID" ESC_STYLE=C>
+				sPageHTML = '$ciDocTempl.PAGE_HTML';
+			</PDM_LIST>
+		
+</PDM_IF>
+	</script>
+	<script>		
+		
+<PDM_MACRO name=dtlForm button=false factory=CI_DOC_TEMPLATES>
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_IF "$args.id">
+<PDM_MACRO name=button caption="Set Default Values[D]" disabled="defer" func="setDefValues()" hotkey_name="Set Default Values[D]" id="btnDefValues">
+</PDM_IF>
+<PDM_MACRO name=button caption="Save[S]" disabled="defer" func="detailSave()" hotkey_name="Save[S]" id="btnSave">
+<PDM_MACRO name=button caption="Cancel[n]" func="detailCancel()" hotkey_name="Cancel[n]" id="btncncl">
+<PDM_MACRO name=button caption="Reset[R]" func="check_reset();detailReset();" hotkey_name="Reset[R]" id="btnReset">
+<PDM_ELSE>
+<PDM_IF "$args.DOC_ID" != "0">
+<PDM_MACRO name=button caption="View Default Values[V]" disabled="defer" func="setDefValues()" hotkey_name="View Default Values[V]" id="btnDefValues">
+</PDM_IF>		
+			if ( cfgUserAuth + 0 > 1 )
+			   
+<PDM_MACRO name=button caption="Edit[E]" func="detailEdit()" hotkey_name="Edit[E]" id="btnEdit">
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Szablon" attr=TEMPLATE_NAME colspan=4 rows=1 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Ukryj tytuł" attr="HIDE_T" colspan=1>
+<PDM_MACRO name=dtlCheckbox hdr="Ukryj podsumowanie" attr="HIDE_S" colspan=1>
+<PDM_MACRO name=dtlCheckbox hdr="Ukryj problem" attr="HIDE_P" colspan=1>
+<PDM_MACRO name=dtlCheckbox hdr="Ukryj rozwiązanie" attr="HIDE_R" colspan=1>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlHTMLEditBox hdr="Szczegół" attr=PAGE_HTML classname=gn_text_1dot5 colspan=4 optionid="viewMode1" rows=30 size=80 spellchk=no toolbar="tmpl">
+	</script>
+	<script>
+		
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	<input type="hidden" name="SET.DOC_ID" id="SET.DOC_ID" value="$args.DOC_ID">
+	
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

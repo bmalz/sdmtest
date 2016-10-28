@@ -1,0 +1,68 @@
+<PDM_IF 0>
+list_sa_queue.htmpl
+WHEN PRESENTED:
+    When we need to display a list of SA Queues (sa_queue factory)
+INTENT:
+    Display the list of SA Queues
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Queue Search";
+			var hdrTitleList = "Queue List";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=sfStart factory="sa_queue">
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.ForSAQueue" == "1" || "$args.KEEP.ForSATargetQueue" == "1">
+					document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_sa_queue.htmpl>');
+				
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="queueName" size=40>
+<PDM_MACRO name=sfTextbox hdr="Nazwa wyświetlana użytkownika końcowego" attr="customerDisplayName" size=40>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+<PDM_MACRO name=sfTextbox hdr="Status rekordu" attr="delete_flag" disabled=yes display_value="Active" qbe_condition=EQ value="0">
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="isActive">
+</PDM_IF>		
+				document.writeln('<INPUT TYPE=hidden NAME=QBE.EQ.is_special VALUE=0>');
+			
+<PDM_MACRO name=sfEnd>
+		</SCRIPT>
+		<PDM_FORM NAME="frmFID">
+		</PDM_FORM>
+		
+		
+<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+  				var msgFoundNone = "No Queues found";
+ 	 			var msgFound1 = "1 Queue found";
+  				var msgFound = "%1 Queues found";
+  				var msgFoundMore = "%1 Queues found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired Queue";
+  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="queueName" exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr="isDefault" link="no">
+<PDM_MACRO name=lsCol hdr="Status" attr="isActive" link="no">
+<PDM_MACRO name=lsEnd>
+  			</script>
+		
+</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>
+<PDM_WSP>

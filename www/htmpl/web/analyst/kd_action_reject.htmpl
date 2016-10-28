@@ -1,0 +1,210 @@
+<PDM_IF 0>
+$Id: kd_action_reject.htmpl,v 1.4 2007/01/04 23:11:52 tuach01 Exp $
+kd_action_reject.htmpl
+WHEN PRESENTED:
+	When we need to display a reject window for the document editor
+</PDM_IF>
+<html lang="en"><head>
+<script language="JavaScript">
+	var hdrTitle = "Reject Document ID: $args.KEEP.DOC_ID";
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="kd_action_reject.htmpl+KEEP.DOC_ID={KD}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kd_action.js"></script>
+<script>
+  var extraURL = ""; // extraURL is needed for MT case when need to limit the next assignee
+  <PDM_IF "$prop.MultiTenancy" == "on">
+    //Adding the tenant limitation to the list cnt page
+    <PDM_LIST PREFIX=kdMT factory="KD" WHERE="id=$args.KEEP.DOC_ID">
+      var sTenantID = "${kdMT.tenant:}"
+      var sTenantName = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>${kdMT.tenant.name:}</PDM_FMT>';
+	</PDM_LIST>
+	extraURL = "+KEEP.backfillFactory=KD+KEEP.objectTenant=$args.Tenant+KEEP.objectTenantName=" + nx_escape(sTenantName);
+  </PDM_IF>
+  var bAdminSelectedTask = false;
+  var bIsAdmin = 0;
+  var iActionID;
+  var strWinName = "$args.KEEP.POPUP_NAME";
+  var prevTaskLabel = null; 
+  var completedDateLabel = null; 
+  var doc = null; 
+  var w;
+  var edit_form = 1; 
+  
+  //Get the parent window reference
+  var sKDPersID = "KD:$args.KEEP.DOC_ID";
+  w = ahdtop.detailForms[sKDPersID].ahdframe;
+  
+  if (ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS")) {
+    bIsAdmin = 1;
+  }
+</script>
+</head>
+<body onLoad="frmRejectOnLoad();" class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no >
+<script>
+function ok() {
+  if (action_in_progress()) {
+    return;
+  }
+  
+  if (bIsAdmin == 1 && !bAdminSelectedTask) {
+    alert ("Task selection is required."); 
+    return;
+  }
+  
+  ahdtop.saveKTAckMsgNum = 2226; // - %1 rejected
+  
+  if (!checkLength()) {
+    return;
+  }
+  
+  var sAssigneeName = doc["ASSIGNEE_ID_combo_name"].value;
+  var sAssigneeID = doc["SET.ASSIGNEE_ID"].value;
+  var sComment = doc["SET.txtComment"].value;
+
+  //
+  // If the assignee input box has a name but no id, then we used the 
+  // matching id corresponding to the assignee new in the input box.  
+  //
+  if ( sAssigneeName.length != 0 && sAssigneeID.length == 0) {
+    sAssigneeName = document.getElementById("DEFAULT_ASSIGNEE_NAME").value;
+    sAssigneeID = document.getElementById("DEFAULT_ASSIGNEE_ID").value;
+  }
+
+  if ( sAssigneeName.length == 0 ) {
+    alertmsg("Please_add_an_assignee_before_1"); //("Please add an assignee before rejecting this document.");
+    doc["ASSIGNEE_ID_combo_name"].focus();
+    return;
+  }
+  
+  var res = confirm(msgtext("Are_you_sure_you_want_to_rejec", sAssigneeName)); //"Are you sure you want to reject this document to " + sAssigneeName + "?";
+  if (res) {
+    ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+    w.ahdframe.Reject(sAssigneeID, sComment, iActionID);
+  }	
+}
+function cancel() {
+  ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+function KT_REPLY(sOP,msg) { // Note this function is defined in the file "kd_action.js".
+  KT_ACTION_REJECT_ShowRejectTask(sOP, msg, prevTaskLabel, completedDateLabel, 
+                                  "Unexpected call to KT_REPLY (kd_action_reject.htmpl) with op code of:"
+                                 );
+}
+function frmRejectOnLoad() {
+  passWinName(); //Pass the reject window name to document editor
+  doc = document.main_form.elements;
+  
+  var url=cfgCgi+
+      "?SID="+cfgSID+
+      "+FID="+fid_generator()+
+      "+KEEP.DOC_ID=" + $args.KEEP.DOC_ID +
+      "+OP=KT_ACTION_REJECT";
+  ahdframeset.workframe.location.href = url;
+  
+  prevTaskLabel = document.getElementById("df_3_0").innerHTML;      // The initial label on the UI displaying the text "Previous Task".
+  completedDateLabel = document.getElementById("df_4_0").innerHTML; // The initial label on the UI displaying the text "Completed Date". 
+  
+  // This adds the deep blue bar to the page. 
+  var divTasksPageHdr = document.createElement("div");
+  divTasksPageHdr.innerHTML = pageHeader("Previous Tasks"); 
+  document.getElementById("divTasks").appendChild(divTasksPageHdr);
+  
+  // This adds 3 columns headers to the table containing the previous tasks.
+  var divTasksTableHdr = document.createElement("div");
+  divTasksTableHdr.innerHTML = tableHeader("Task Name", "Completed By", "Completed Date");
+  document.getElementById("divTasks").appendChild(divTasksTableHdr);
+  
+  document.getElementById("df_3_0").style.display="none";
+  document.getElementById("df_4_0").style.display="none";
+}
+function OnRowClick(objRow) {
+
+}
+function ShowRejectTask(actionID, actionName, userID, userName, completedDate) {
+  bAdminSelectedTask = true;
+  iActionID = actionID;
+  
+  // This displays the original label for the "Previous Task" on the UI with a new (comment continue on next line) 
+  document.getElementById("df_3_0").innerHTML = getHTMLLabel(prevTaskLabel) + actionName;   // value when the user clicks on the link. 
+  document.getElementById("df_3_0").style.display = "";                                     // Previous Tasks (Label and Value)
+  
+  document.getElementById("df_4_0").innerHTML = getHTMLLabel(completedDateLabel) + completedDate;
+  if (completedDate != "") {
+    document.getElementById("df_4_0").style.display = "";       // Show the Completed Date
+  } else {
+    document.getElementById("df_4_0").style.display = "none";   // Don't show the Completed Date
+  }
+  
+  document.getElementById("dflnk_5_0").style.display="";        // Assignee's link
+  document.getElementById("df_5_0").style.display="";           // Text box for the Assignee
+  document.getElementById("req_6_0").style.display="";          // The Comment label 
+  document.getElementById("df_6_0").style.display="";           // The Comment Box to input the comment
+  document.getElementById("divTasks").style.display="none";     // The div to hold the Blue Bar, Table Columns, and the Previous Tasks 
+  
+  doc["SET.ASSIGNEE_ID"].value = userID;
+  doc["ASSIGNEE_ID_combo_name"].value = userName; 
+}
+function passWinName() {
+  if ( typeof w.getWinName != "undefined" )
+  w.getWinName(strWinName, 2); //The getWinName() is in the detail_KD.js
+}
+function getHdrTitle() {
+  return nx_escape(w.hdrTitle);
+}
+function getCurrentTask() {
+  return nx_escape("$args.KEEP.CURRENT_ACTION");
+}
+function getCurrentStatus() {
+  return nx_escape("$args.KEEP.CURRENT_STATUS");
+}
+function getExtraURL() {
+  if (extraURL !="") {
+    return extraURL;
+  }
+  return "";
+}
+</script>
+<center>
+<script>
+<PDM_MACRO name=dtlForm button=false factory="USP_PROPERTIES">
+<PDM_MACRO name=button caption="OK[O]" disabled=defer func="ok()" hotkey_name="OK[O]" id=btnOK newrow="yes">
+<PDM_MACRO name=button caption="Cancel[a]" disabled=defer endrow="yes" func="cancel()" hotkey_name="Cancel[a]" id=btnCancel>
+<PDM_IF 0>
+  Important note: the ids for the UI components using the macros are created by position starting 
+  at 0, so adding new component or interchanges the existing components will break the code. If we 
+  need to interchange or add new UI component we will need to modify the code accordingly.  
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł" attr="n/a" fmtfunc=getHdrTitle inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecne zadanie" attr="n/a" fmtfunc=getCurrentTask inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr="n/a" fmtfunc=getCurrentStatus inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Poprzednie zadanie" attr="n/a" inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data skompletowania" attr="n/a" inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr="ASSIGNEE_ID" common_name_attr="combo_name" extraurl="javascript:getExtraURL();" factory=agtgrp>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="txtComment" maxlength=255 rows=5 size=50>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<input type=hidden name="DEFAULT_ASSIGNEE_NAME" id="DEFAULT_ASSIGNEE_NAME" /> 
+<input type=hidden name="DEFAULT_ASSIGNEE_ID" id="DEFAULT_ASSIGNEE_ID" />
+<PDM_MACRO name=dtlEnd>
+<div name="divTasks" id="divTasks">
+</div>
+</center>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+

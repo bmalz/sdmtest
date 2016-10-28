@@ -1,0 +1,116 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT>
+jq(document).ready(function () {
+	jq("#localizations tr").click(function () {
+		jq('#localizations tr').each(function() {
+			jq(this).removeClass('TelecentrumDataSelected');
+		});
+
+		jq(this).toggleClass('TelecentrumDataSelected');
+		parent.Selected_Localization = jq(this).attr('value');
+	});
+});
+
+var numberOf = 0;
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>
+	<tr>
+		<td align='left' width='99%'><h2 style='margin: 0px; font-size: 11px;'>Użytkownik</h2></td>
+		<td align='right' width='1%'></td>
+	</tr>
+</table>
+
+<table id="userinformation" style="width: 100%; font-size: 11px;">
+<PDM_LIST PREFIX=list FACTORY=cnt WHERE="id = U'$args.USERID'">
+	<tr><td class="TelecentrumUserLabel">NRE</td><td class="TelecentrumUserData">$list.zNRE</td></tr>
+	<tr><td class="TelecentrumUserLabel" style="width: 120px;">Osoba</td><td class="TelecentrumUserData"><span style="font-weight:bold;">$list.first_name $list.middle_name $list.last_name</span></td></tr>
+	<tr><td class="TelecentrumUserLabel">Identyfikator</td><td class="TelecentrumUserData">$list.userid</td></tr>
+	<tr><td class="TelecentrumUserLabel">Organizacja</td><td class="TelecentrumUserData">$list.organization.name</td></tr>
+	<tr><td class="TelecentrumUserLabel">Stanowisko</td><td class="TelecentrumUserData">$list.position</td></tr>
+	<tr><td class="TelecentrumUserLabel">Telefon</td><td class="TelecentrumUserData">$list.phone_number</td></tr>
+	<tr><td class="TelecentrumUserLabel">Email</td><td class="TelecentrumUserData">$list.email_address</td></tr>
+</PDM_LIST>
+</table>
+<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>
+	<tr>
+		<td align='left' width='99%'><h2 style='margin: 0px; font-size: 11px;'>Lokalizacje</h2></td>
+		<td align='right' width='1%'></td>
+	</tr>
+</table>
+<table id="localizations" class="ResultTable" style="width: 100%">
+<PDM_LIST PREFIX=list2 FACTORY=zlrel_cnt_loc WHERE="cnt.id = U'$args.USERID'" ESC=HTML>
+	<SCRIPT>
+	if (numberOf == 0) {
+		document.write('<tr class="TelecentrumData TelecentrumDataSelected" value=$list2.loc.id><td style="padding-left:5px;">$list2.loc.name</td><td>$list2.loc.address1</td><td>$list2.loc.city $list2.loc.country.name</td></tr>');
+		parent.Selected_Localization = '$list2.loc.id';
+	} else {
+		document.write('<tr class="TelecentrumData" value=$list2.loc.id><td style="padding-left:5px;">$list2.loc.name</td><td>$list2.loc.address1</td><td>$list2.loc.city $list2.loc.country.name</td></tr>');
+	}
+	numberOf++;
+	</SCRIPT>
+</PDM_LIST>
+</table>
+<SCRIPT>
+	if(numberOf == 0)
+		document.write('<div class="labeltext" style="width:100%; text-align:center; margin-top: 10px;">Brak lokalizacji</div>');
+
+	function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type, tenant, tenantName )
+	{
+		var url = "";
+
+		if(parent.IsHR == "1") {
+			url = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrumhr_frameset.htmpl+PHONENUMBER=" + parent.phone_number + "+KEEP.CALLID=" + parent.callid + "+UID=" + encodeURIComponent(cntID);
+		}
+
+		if(parent.IsIT == "1") {
+			url = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_frameset.htmpl+PHONENUMBER=" + parent.phone_number + "+KEEP.CALLID=" + parent.callid + "+UID=" + encodeURIComponent(cntID);
+		}
+
+		if(parent.IsADM == "1") {
+			url = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrumadm_frameset.htmpl+PHONENUMBER=" + parent.phone_number + "+KEEP.CALLID=" + parent.callid + "+UID=" + encodeURIComponent(cntID);
+		}
+		alert(url);
+		parent.document.location.href = url;
+	}
+</SCRIPT>
+<PDM_IF "$args.KEEP.ShowEdit" == "1">
+	<div style="width: 100%; font-align: right; float: right; padding-top: 10px;"><SCRIPT>ImgBtnCreate("btnUserProfile", "Edytuj profil użytkownika", "javascript:popup_window('UserDetail','UPDATE', 0, 0, 'ahdmenu=no,register=yes,resizable=yes,scrollbars=yes','FACTORY=cnt', 'HTMPL=detail_cnt.htmpl', 'PERSID=cnt:' + '$args.USERID')", true, 0, "Edytuj profil użytkownika");</SCRIPT></DIV>
+</PDM_IF>
+<div style="position: absolute; right: 70px; top: 2px; text-align: right; font-size: 11px;"><a class="sfLookup" href="javascript:popup_window('UserDetail','UPDATE', 0, 0, 'ahdmenu=no,register=yes,resizable=yes,scrollbars=yes','FACTORY=cnt', 'HTMPL=detail_cnt.htmpl', 'PERSID=cnt:' + '$args.USERID')">Edytuj</a></div>
+<div style="position: absolute; right: 2px; top: 2px; text-align: right; font-size: 11px;">
+	<form name=frm_comment onsubmit="return false;">
+		<a class="sfLookup" id="ASSIGNEE_ID_lookup_name" name="ASSIGNEE_ID_lookup_name" href="javascript:lookForUser('ASSIGNEE_ID', 'frm_comment', 'cnt','' )" title="Zmień użytkownika">
+		<img class="dtl_img_attr" src="/CAisd/img/lookup.gif" alt="Zmień użytkownika">
+		<span class="lookup" style="font-size:1.0em;">Zmień</span></a>
+		<input type="hidden" id="ASSIGNEE_ID_combo_name" name="ASSIGNEE_ID_combo_name" type="text" class="clsPaneData" style="font-size:1.0em;" size="18" onchange="cleanUser('ASSIGNEE_ID'); if (this.value != '') {lookForUser('ASSIGNEE_ID', 'frm_comment', 'cnt','');}">
+		<input type="hidden" id="SET.ASSIGNEE_ID" name="SET.ASSIGNEE_ID">
+		<input type="hidden" id="KEY.ASSIGNEE_ID" name="KEY.ASSIGNEE_ID">
+		<input type="hidden" id="ASSIGNEE_ID_lname" name="ASSIGNEE_ID_lname">
+		<input type="hidden" id="ASSIGNEE_ID_fname" name="ASSIGNEE_ID_fname">
+		<input type="hidden" id="ASSIGNEE_ID_mname" name="ASSIGNEE_ID_mname">
+	</form>
+</div>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

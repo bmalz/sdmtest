@@ -1,0 +1,53 @@
+<PDM_IF 0>
+
+DESCRIPTION:
+   Define metadata attributes for an extension table.
+
+PROCEDURE:
+Step 1:
+   For each attribute in the extension table, add a PDM_MACRO statement like the line below after the line marked "INSERT ATTRIBUTES HERE".  
+   
+   <PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+   
+  Replace each of the keyword strings below as follows: 
+   ***EXTENSION***    => Extension table name associated with a family 
+   ***HEADING***      => Heading label for attribute, displayed in Versioning detail view
+   ***ATTRIBUTE***    => Extension object attribute name
+   ***HELP***	      => Brief description of the attribute 
+
+   Example: The code below defines the metadata for the family which uses the widget extension table that has two attributes:
+      <PDM_MACRO name=cmdbMetadata category="Attributes" extension="widget" attr="number" heading="Number of Widgets" help="brief description of number attribute">
+      <PDM_MACRO name=cmdbMetadata category="Attributes" extension="widget" attr="size"   heading="Widget Size" help="brief description of size attribute">
+   
+   If the extension table refers to other tables, you may need to use the advanced form of the cmdbMetadata macro.  Consult the
+   macro source for details on using the currentcivalue and standardcivalue arguments.
+ 
+Step 2:   
+   Save this file as cmdb_metadata_***EXTENSION***.htmpl, where ***EXTENSION*** 
+   is replaced by the extension table name.  For example, cmdb_metadata_widget.htmpl.
+
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>	
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>	
+
+<!-- ---------------------------- -->
+<!-- INSERT ATTRIBUTES BELOW HERE -->
+<!-- ---------------------------- -->
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="typ" heading="Typ komputera" help="Typ komputera">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="procesor" heading="Typ procesora" help="Typ procesora">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="zegar_cpu" heading="Taktowanie CPU" help="Taktowanie CPU">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="ilosc_procesorow" heading="Ilość procesorów" help="Ilość procesorów">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="ilosc_ram" heading="Ilość RAM" help="Ilość RAM">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="rozmiar_hdd" heading="Rozmiar HDD" help="Rozmiar HDD">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="monitor_nazwa" heading="Monitor" help="Monitor">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="monitor_rozmiar" heading="Rozmiar monitora" help="Rozmiar monitora">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="cd_dvd" heading="CD-DVD" help="CD-DVD">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="karta_sieciowa" heading="Karta sieciowa" help="Karta sieciowa">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_ro_kom" attr="adres_ip" heading="Adres IP" help="Adres IP">
+<!-- ---------------------------- -->
+<!-- INSERT ATTRIBUTES ABOVE HERE -->
+<!-- ---------------------------- -->
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>
+

@@ -1,0 +1,182 @@
+<PDM_IF 0>
+list_cntalg.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Contact Activity Logs
+INTENT:
+    Display the list of Contact Activity Logs
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object cntalg_list list The list object containing the Contact Activity Log
+                        See $NX_ROOT/bopcfg/majic/??.maj for the
+                        definition of attributes for 'OBJECT cntalg'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT TYPE="text/javascript">
+
+var hdrTitle = "Wyszukiwanie czynności kontaktu";
+var hdrTitleList = "Lista czynności kontaktu";
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT TYPE="text/javascript">
+
+cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+argSaveSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.KEEP.save_sql_clause</PDM_FMT>';
+cfgUserid = '$cst.userid';
+cfgDateFormat = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format</PDM_FMT>';
+
+<PDM_IF "${current:n/a}" == "n/a">
+searchFilterInitialState = "show";
+<PDM_ELSE>
+var cfgCurrent = '$current';
+var cfgTotal = '$total';
+var cfgRecordCount = '$record_count';
+var cfgStart = '$start';
+var cfgLength = '$length';
+</PDM_IF>
+
+var cfgUseTemplate = '$args.use_template';
+var cfgIsPopup = '$args.KEEP.IsPopUp';
+var rptName = new Array("", "");
+var cfgCanEdit = true;
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT TYPE="text/javascript">
+var argCntPersid = "$args.QBE.EQ.cnt_id";
+var argCntId = argCntPersid.substr(argCntPersid.indexOf(":") + 1);
+<PDM_MACRO name=sfStart create=false factory=cntalg>
+document.write('<INPUT TYPE=hidden NAME="KEEP.cnt_id" VALUE="$args.KEEP.cnt_id">');			
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.cnt_id" VALUE="$args.QBE.EQ.cnt_id">');
+<PDM_IF $prop.view_internal == 0>	
+document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE="(internal = 0 OR internal IS NULL)">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data wpisu" attr=time_stamp qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data wpisu" attr=time_stamp qbe_condition=LE>
+<PDM_MACRO name=sfDropdown hdr="Typ aktywności" attr=type factory=aty>
+<PDM_MACRO name=sfLookup hdr="Utworzono przez" attr=analyst colspan=2 factory=cnt>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono czynności kontaktu";
+var msgFound1 = "Znaleziono 1 czynność kontaktu";
+var msgFound = "Znaleziono %1 czynności kontaktu";
+var msgFoundMore = "Znaleziono %1 czynności kontaktu.  Lista %2 do %3";
+var msgSelect = "Click to select desired contact activity log";
+
+var showInternalIcon;
+var listtypecode;
+var listtypesym;
+var listsession;
+var listcnt_id;
+function fmtType(value)
+{
+    if (0 == showInternalIcon.length)
+        showInternalIcon = "0";
+
+    if (listtypecode == "SBLIVELOG" || (listtypecode == "KTSOLN" && listsession!= "" ) ||
+        (listtypecode == "AUDTRAIL") ||
+        (listtypecode == "KTREJECT" && listsession!= "") ||
+        (listtypecode == "KTSUBMIT" && listsession!= ""))
+    {
+        var alghtml;
+        var argCRPersidEscaped = nx_escape(listcnt_id);
+        var arrtmp = listcnt_id.split(':');
+        var argID = arrtmp[1];
+        if (listtypecode == "SBLIVELOG")
+        {
+            alghtml = listtypesym;	
+        }
+        else if (listtypecode == "KTSOLN" || listtypecode == "KTREJECT" || listtypecode == "KTSUBMIT")
+        {
+            alghtml = "<A CLASS=record TITLE='Click to display Knowledge document " + listsession + 
+                "' HREF=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, " + 
+                "'directories=no,location=no,menubar=no,status=no,gobutton=no,menubar=no','PERSID=KD:" + listsession + "', " + 
+                "'HTMPL=kt_document_view.htmpl', 'opener=search_tools', 'open_mode=2', 'reload=1', " +
+                "'SOLUTION_OF=" + argCRPersidEscaped + "', 'disable_solution_survey=true', 'TICKET_FACTORY=cnt', " +
+                "'SOLUTION_OF_ID=" + argID + "','PATH_IDS=" + listaction_desc + "')\">\n";
+            alghtml += listtypesym;
+            alghtml += "</A>\n";
+        }
+        else 
+        {
+            alghtml = "<A CLASS=record TITLE='Click to display knowledge event' " + 
+                "HREF=\"javascript:popup_window('','SEARCH', 0, 0, 'directories=no,location=no,menubar=no,status=no', " + 
+                "'FACTORY=event_log', " +
+                "'QBE.EQ.session=" + listsession + "'" + 
+                ",'QBE.EQ.sd_obj_type=cnt'" +
+                ",'QBE.EQ.sd_obj_id=" + argCntId + "'" +
+                ",'p_sd_obj_type=cnt', 'p_sd_obj_id=" + argCntId + "', 'sd_create_session=" + listsession + "')\">\n";
+            alghtml += listtypesym;
+    		alghtml += "</A>\n";
+        }
+        if ("1" == showInternalIcon) {
+            alghtml += "&nbsp;&nbsp;<IMG SRC=$CAisd/img/glasses.gif TITLE='This is an internal log' border=0 alt='This is an internal log'>";
+        }
+        rs.data(alghtml);
+    } else {
+        var tmp = listtypesym;
+        if ("1" == showInternalIcon) {
+            tmp += "&nbsp;&nbsp;<IMG SRC=$CAisd/img/glasses.gif TITLE='This is an internal log' border=0 alt='This is an internal log'>";
+        }
+        rs.data(tmp);
+    }
+}
+
+function UnEscapeDesc(value)
+{
+    var ret;
+    ret =nx_unescape(value);
+    rs.data(ret);   
+}
+
+function showUser(value)
+{
+	var alghtml;
+
+	alghtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + analyst_persid + "')\">" + value + "</A>" ;
+	rs.data(alghtml);
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="showInternalIcon = \"@{list.internal:}\";">
+<PDM_MACRO name=lsWrite text="listtypecode = \"@{list.type.code:}\";">
+<PDM_MACRO name=lsWrite text="listtypesym = \"@{list.type.sym:}\";">
+<PDM_MACRO name=lsWrite text="listsession = \"\";">
+<PDM_MACRO name=lsWrite text="listcnt_id = \"@{list.cnt_id:}\";">
+<PDM_MACRO name=lsWrite text="listaction_desc = \"@{list.action_desc:}\";">
+<PDM_MACRO name=lsWrite text="var analyst_persid = \"@{list.analyst.persistent_id:}\";">
+<PDM_MACRO name=lsCol hdr="Typ" attr=type fmtfunc=fmtType link=yes sort=yes>
+<PDM_MACRO name=lsCol hdr="Utworzono przez" attr=analyst fmtfunc=showUser link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="On" attr=time_stamp>
+<PDM_MACRO name=lsCol hdr="Czas spędzony" attr=time_spent>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description escape=JS2 export=no fmtfunc=UnEscapeDesc max_char=140 sort=no>
+<PDM_MACRO name=lsCol attr=description colspan=4 escape=JS2 export=no fmtfunc=UnEscapeDesc justify="line" sort=no startrow=yes>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

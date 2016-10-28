@@ -1,0 +1,55 @@
+<PDM_IF 0>
+iss_lr.htmpl
+WHEN PRESENTED:
+    When we need to display the Notification History for a single Activity Log (e.g. Manual Notify)
+INTENT:
+    Display Notification History for Issue
+VARIABLES:
+    object  iss  args	The Issue object we are displaying
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "$args.ref_num Issue Notifications";
+var tooltip = "$args.ref_num Issue Detail";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script>
+function showObject(value)
+{
+	persid="$args.persistent_id";
+	refnum="$args.ref_num";
+	reshtml = "<a class=record href=\"javascript:showDetailWithPersid('" + persid + "')\">" + refnum + "</a>" ;
+	return(reshtml);
+}
+</script>
+</head>
+<body class="detailro">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=iss>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly attr=ref_num fmtfunc=showObject>
+<PDM_MACRO name=dtlReadonly attr=summary>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly attr=description colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr=notif_nb>
+<PDM_MACRO name=TAB title="Notification History" height=300 id=tabNotif src="OP=SEARCH+FACTORY=lr+QBE.EQ.cntxt_obj=$args.persistent_id+QBE.EQ.context_instance=issalg:$args.INSTANCE+KEEP.ref_num=$args.ref_num">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</center>
+</body>
+</html>
+<PDM_IF 0>
+"@(#)$Id: iss_lr.htmpl ASPEN.4 2010/10/14 18:34:21 manmu01 Exp $"
+</PDM_IF>
+<PDM_WSP>

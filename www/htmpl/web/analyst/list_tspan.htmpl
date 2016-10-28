@@ -1,0 +1,57 @@
+<PDM_IF 0>
+list_tspan.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Time Spans.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie okresów czasu";
+var hdrTitleList = "Lista okresów czasów";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("tspansum.rpt", "tspandtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Time Span">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=tspan>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Okres czasu" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=desc colspan=2 size=40>
+<PDM_MACRO name=sfTextbox hdr="" attr=id colspan=2 disabled=yes display_value="" qbe_condition="GE" size=20 value="1">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono okresów czasu";
+var msgFound1 = "Znaleziono 1 okres czasu";
+var msgFound = "Znaleziono %1 okres czasu";
+var msgFoundMore = "Znaleziono %1 okres czasu. Wyświetlane %2 z %3";
+var msgSelect = "Kliknij aby wybrać dany rekord";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Okres czasu" attr=sym exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Opis" attr=desc>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_tspan.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

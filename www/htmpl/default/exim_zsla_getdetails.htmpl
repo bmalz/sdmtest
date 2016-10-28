@@ -1,0 +1,23 @@
+<PDM_IF 0>
+	20130826 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+</HEAD>
+<BODY>
+<SCRIPT>
+    if (typeof SetzSLA == "function")
+    {
+		var zSLAId = '';
+		var zSLAName = '';
+		<PDM_LIST PREFIX=list1 FACTORY=zSLA WHERE="usluga.id=$args.OwningContractId">
+			<PDM_LIST PREFIX=list2 FACTORY=zlrel_zsla_site WHERE="site.id=$args.SiteId AND zsla.id=$list1.id">
+				zSLAId = '$list2.zsla.id';
+				zSLAName = '$list2.zsla.sym';
+			</PDM_LIST>
+		</PDM_LIST>
+        SetzSLA(zSLAId, zSLAName);
+    }
+</SCRIPT>
+hidden frame, nothing to do here.
+</BODY>
+</HTML>

@@ -1,0 +1,90 @@
+<html lang="en"><PDM_IF 0>
+$Id: sd_main.htmpl,v 1.3 2006/11/13 22:54:14 ricma09 Exp $
+	WHEN PRESENTED:
+	    As the ticketing tab of the main page
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="OP=MENU+NBTAB=sd">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+function frameset_loaded()
+{
+   if (ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].id=="sd")
+   {
+		ahdframe = window.cai_main;
+		ahdframeset.ahdframe = ahdframe;
+   }
+}
+<pdm_include file=menubar_sd.htmpl>
+</script>
+</HEAD>
+<PDM_IF "$prop.initial_popup" == "" && "$prop.browser" != "IE">
+		<FRAMESET ROWS='<PDM_IF "$SESSION.usingScreenReader" == "1">28<PDM_ELSE>23</PDM_IF>,*' onLoad='frameset_loaded()'>
+<PDM_ELSE>
+		<FRAMESET ROWS='<PDM_IF "$SESSION.usingScreenReader" == "1">28<PDM_ELSE>23</PDM_IF>,*' onLoad='frameset_loaded()' FRAMEBORDER='0' FRAMESPACING='0'> 
+</PDM_IF>
+		<FRAME SRC="$CAisd/html/menubar.html" NAME=menubar SCROLLING=no NORESIZE FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0 title="Menu bar">
+<PDM_IF "$prop.initial_popup" == "">
+<PDM_IF "$prop.browser" != "IE">	
+	<FRAMESET COLS="240,*,0" FRAMEBORDER="3">
+         <FRAME NAME=scoreboard scrolling=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border
+<PDM_ELSE>
+	<FRAMESET COLS="240,*,0" FRAMESPACING="2">
+         <FRAME NAME=scoreboard class=frame_border scrolling=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 
+</PDM_IF>
+                SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1234+HTMPL=load_wait.htmpl+KEEP.cstm_scbd_id=$args.KEEP.cstm_scbd_id+KEEP.new_htmpl=scoreboard.htmpl+KEEP.wait_msg=553" title="Scoreboard">
+</PDM_IF>        
+<PDM_IF "$prop.initial_popup" == "">
+						<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+		<FRAME NAME=cai_main class=frame_border scrolling=$SESSION.scrolling marginheight=0 marginwidth=0
+                   SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=bin_form_np.htmpl" title="CA CMDB main">
+            <PDM_ELIF "$env.NX_CMDB" == "NOTSTANDALONE">
+		<FRAME NAME=cai_main class=frame_border scrolling=$SESSION.scrolling marginheight=0 marginwidth=0
+                   SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=bin_form_np.htmpl" title="Service Desk/CA CMDB main">
+						<PDM_ELSE>
+		<FRAME NAME=cai_main class=frame_border scrolling=$SESSION.scrolling marginheight=0 marginwidth=0
+                   SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=bin_form_np.htmpl" title="Service Desk main">
+            </PDM_IF>                   
+            <pdm_if "$prop.UpdatedAnnouncementsPopup" != "">
+				<FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=cnote_tracker.htmpl+KEEP.CNOTE_TRACKER=1+BKGD=1" tabindex=-1 title="Hidden frame - do not navigate here">
+			</pdm_if>
+      </FRAMESET>
+<PDM_ELSE>
+						<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+            <FRAME NAME=cai_main scrolling=$SESSION.scrolling marginheight=0 marginwidth=0 class=gn_container_no_border FRAMEBORDER=0
+                   SRC="$cgi?SID=$SESSION.SID+FID=123+$prop.initial_load_last_use" title="CA CMDB main">
+            <PDM_ELIF "$env.NX_CMDB" == "NOTSTANDALONE">
+            <FRAME NAME=cai_main scrolling=$SESSION.scrolling marginheight=0 marginwidth=0 class=gn_container_no_border FRAMEBORDER=0
+                   SRC="$cgi?SID=$SESSION.SID+FID=123+$prop.initial_load_last_use" title="Service Desk/CA CMDB main">
+            <PDM_ELSE>
+            <FRAME NAME=cai_main scrolling=$SESSION.scrolling marginheight=0 marginwidth=0 class=gn_container_no_border FRAMEBORDER=0
+                   SRC="$cgi?SID=$SESSION.SID+FID=123+$prop.initial_load_last_use" title="Service Desk main">
+            </PDM_IF>
+</PDM_IF>
+		
+      <NOFRAMES>
+         <H2>Frames-Compatible Browser Required</H2>
+         This web interface requires a browser that supports frames, such as the latest version of one of the following browsers.
+         <ul>
+         <li><A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A></li>
+         <li><A ID=lnk004 href=http://www.mozilla.org>Mozilla</A></li>
+         <li><A ID=lnk005 href=http://www.netscape.com>Netscape</A></li>
+         </ul>
+      </NOFRAMES>
+   </FRAMESET>
+ </FRAMESET>
+</HTML>

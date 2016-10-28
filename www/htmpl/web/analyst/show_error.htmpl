@@ -1,0 +1,42 @@
+<PDM_IF 0>
+show_error.htmpl
+WHEN PRESENTED:
+    When we there is a error in AHD web server. 
+INTENT:
+    Display an error message in the message box and 
+    return user to the proper page.  
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fid_gen.js"></SCRIPT>
+<SCRIPT>
+    if ("$args.ERROR_MSG" != "")
+    {
+	alert("$args.ERROR_MSG ");
+    }
+    if (window.opener)
+    {
+	window.onload = window.close;
+    }
+    else 
+    if (window.parent.opener)
+    {
+	window.onload = window.parent.close;
+    }
+    else 
+    {
+        // top.location.href = "$cgi";
+        top.location.href = "$cgi?SID=" + $SESSION.SID + 
+			    "+FID=" + fid_generator() + 
+			    "+OP=MENU";
+    }
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: show_error.htmpl,v 1.2 2006/11/08 00:24:32 olsjo01 Exp $
+</PDM_IF>

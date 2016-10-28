@@ -1,0 +1,225 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Superseded CI Search";
+var hdrTitleList = "Superseded CI List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+
+//var rptName = new Array("ci_ambiguity_cisum.rpt", "ci_ambiguity_cidtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+
+<script language="JavaScript">
+   
+<PDM_IF 0>
+        Initialize CI search filter if NX_CI_FILTER is installed.
+        However, if the search value is changed by the user, 
+        do not reset it when the results are displayed.
+	KEEP.ci_filter variable is only to track if the user has click the search button,
+	         The variable name has no mapping to any of the search filter arguments.
+   
+</PDM_IF>
+   var ci_filter_default = "$args.KEEP.ci_filter";
+   
+<PDM_IF "$env.NX_CI_FILTER" == "Yes">
+     if ( ci_filter_default == "")
+       ci_filter_default = "Yes";
+   
+</PDM_IF>
+</script>
+
+<script language="JavaScript">
+function resultSetCustomContextAddMiddle(ctxMenu){
+    if ("$env.NX_SERVLET_SERVER_URL" != "") {
+        ctxMenu.addItem(msgtext("Asset_Viewer"),"invoke_ams_asset('$env.NX_SERVLET_SERVER_URL',self.activePersid.slice(3))");
+    }
+    
+<PDM_IF "$env.NX_CMDB" != "">
+        ctxMenu.addItem( msgtext("CMDBf_Viewer"),"openCmdbfViewer(self.activePersid)");
+    
+</PDM_IF>
+}
+
+var nr_extension_names = new Array;
+// Routine to launch the CMDBf Viewer using the persid and extension table name saved when generating asset list. 
+function openCmdbfViewer( persistent_id )
+{
+    var extension_name = "";
+    if ( typeof nr_extension_names[persistent_id] != "undefined" )
+    {
+        extension_name = nr_extension_names[persistent_id];
+    }
+    popup_window( 'Federation_Viewer_'+ persistent_id,'SHOW_DETAIL', 0, 0, '', 'PERSID=' + persistent_id, 
+                  'FACTORY=nr', 'prop.extension=' + extension_name, 'HTMPL=cmdb_federation_viewer.htmpl');
+}
+
+function OnAfterSearchFilter(url)
+{
+    
+<PDM_IF "$env.NX_CMDB" != "">
+        url+="&KEEP.ci_filter=No";
+    
+</PDM_IF>
+	return url;
+}
+
+function OnAfterFilterAction( action )
+   {
+        //When the user clicks over the Clear Filter; The is_ci dropdown should be default select to YES.
+	var nForm;
+        var curForm;
+        if ( action == "clear" )
+        {
+            for ( nForm = 0; nForm < __search_filter.form.length; nForm++ )
+            {
+                curForm = __search_filter.form[nForm];
+		
+<PDM_IF "$env.NX_CI_FILTER" == "Yes">
+		    if(typeof curForm.elements["QBE.EQ.is_ci"] == "object" )
+		    {
+		        curForm.elements["QBE.EQ.is_ci"].value = 1;
+                    }
+		
+</PDM_IF>
+            }
+        }
+    }
+</script>
+
+
+<script language="JavaScript">
+<PDM_MACRO name=sfStart create=false factory="superseded_ci">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="name" size=20>
+<PDM_MACRO name=sfDropdown hdr="Klasa" attr="class" factory=grc>
+<PDM_MACRO name=sfLookup hdr="Standardowy CI" attr="standard_ci" factory=nr>
+<PDM_MACRO name=sfTextbox hdr="Nazwa hosta" attr="system_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny" attr="serial_number" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="MAC adres" attr="mac_address" size=20>
+<PDM_MACRO name=sfTextbox hdr="Alternatywne ID CI" attr="asset_num" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa DNS" attr="dns_name" size=20>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_MACRO name=sfLookup hdr="Zastąpiony przez" attr=superseded_by>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Adres IP" attr="alarm_id" size=20>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja" attr="location.name" factory=loc>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="status" factory=rss>
+<PDM_MACRO name=sfDropdown hdr="Typ serwisowy" attr="service_type" factory=sdsc>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Asset" attr="is_asset">
+      if (ci_filter_default == "Yes")
+      {
+         
+<PDM_MACRO name=sfDropdown hdr="CI" attr="is_ci" default="YES">
+      }
+      else
+      {
+         
+<PDM_MACRO name=sfDropdown hdr="CI" attr="is_ci">
+      }
+</PDM_IF>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfLookup hdr="Kontakt" attr="resource_contact" factory=cnt>
+<PDM_MACRO name=sfLookup hdr="Producent" attr="manufacturer.sym" factory=ca_cmpny>
+<PDM_MACRO name=sfLookup hdr="Model" attr="model.sym" factory=mfrmod>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr="priority" factory=pri>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Wersja produktu" attr="product_version" size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer licencji" attr="license_number" size=20>
+<PDM_MACRO name=sfTextbox hdr="Adnotacja finansowa" attr="financial_num" size=20>
+<PDM_MACRO name=sfDropdown hdr="Rodzina" attr="family" factory=nrf>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfLookup hdr="Sprzedawca dostaw" attr="supplier" factory=ca_cmpny>
+<PDM_MACRO name=sfLookup hdr="Odpowiedzialny sprzedawcy" attr="vendor_restore" factory=ca_cmpny>
+<PDM_MACRO name=sfLookup hdr="Sprzedawca usług utrzymania" attr="vendor_repair" factory=ca_cmpny>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="MPK" attr="expense_code" factory=cost_cntr>
+<PDM_MACRO name=sfLookup hdr="Organizacja odpowiedzialna" attr="service_org.name" factory=org>
+<PDM_MACRO name=sfLookup hdr="Organizacja utrzymująca" attr="repair_org.name" factory=org>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data pozyskania" attr="acquire_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data pozyskania" attr="acquire_date" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data instalacji" attr="install_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data instalacji" attr="install_date" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data rozpoczęcia gwarancji" attr="warranty_start" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data rozpoczęcia gwarancji" attr="warranty_start" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data końca gwarancji" attr="warranty_end" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data końca gwarancji" attr="warranty_end" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data wygaśnięcia" attr="expiration_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data wygaśnięcia" attr="expiration_date" qbe_condition=LE>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+
+  <pdm_jscript file=list_edit.js>
+  
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_MACRO name=elsEditField attr_name="name" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="serial_number">
+<PDM_MACRO name=elsEditField attr_name="mac_address">
+<PDM_MACRO name=elsEditField attr_name="dns_name">
+<PDM_MACRO name=elsEditField attr_name="system_name">
+<PDM_MACRO name=elsEditField attr_name="asset_num">
+<PDM_MACRO name=elsEditField attr_name="delete_flag" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="superseded_by" endrow="yes">
+<PDM_MACRO name=elsEndEdit>
+
+  
+  var msgFoundNone = "No Superseded CIs found";
+  var msgFound1 = "1 Superseded CI found";
+  var msgFound = "%1 Superseded CIs found";
+  var msgFoundMore = "%1 Superseded CIs found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Superseded CI";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa systemowa" attr=system_name justify=left>
+<PDM_MACRO name=lsCol hdr="Nazwa DNS" attr=dns_name justify=left>
+<PDM_MACRO name=lsCol hdr="MAC adres" attr=mac_address justify=left>
+<PDM_MACRO name=lsCol hdr="Numer seryjny" attr=serial_number justify=left>
+<PDM_MACRO name=lsCol hdr="Alt Asset ID" attr=asset_num justify=left>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+<PDM_MACRO name=lsCol hdr="#Wniosków" attr=assoc_reqs display_attr=length justify="right" sort=no>
+<PDM_MACRO name=lsCol hdr="#Incydentów" attr=assoc_in display_attr=length justify="right" sort=no>
+<PDM_MACRO name=lsCol hdr="#Problemów" attr=assoc_pr display_attr=length justify="right" sort=no>
+<PDM_MACRO name=lsCol hdr="#Zmian" attr=chgnr display_attr=length justify="right" sort=no>
+<PDM_MACRO name=lsCol hdr="#Iss" attr=issnr display_attr=length justify="right" sort=no>
+</PDM_IF>
+<PDM_MACRO name=lsCol label="Superseded By" attr=superseded_by colspan=3 startrow=yes>
+<PDM_MACRO name=lsCol label="Active" attr="delete_flag" colspan=1>
+<PDM_MACRO name=lsCol label="Last Change" attr=last_mod colspan=3>
+<PDM_MACRO name=lsCol label="Last Mod By" attr=last_mod_by colspan=4>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=lsWrite text="nr_extension_names['@{list.persistent_id:0}'] = '@{list.family.extension_name:}'">
+</PDM_IF>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

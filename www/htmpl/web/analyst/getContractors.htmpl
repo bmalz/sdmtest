@@ -1,0 +1,15 @@
+<PDM_IF 0>
+	20130916 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+</HEAD>
+<BODY>
+<SCRIPT>
+	if (typeof GetContractors == "function") {
+		GetContractors("$args.Street", "$args.PostCode", "$args.City", "$args.CountryRef.id", "$args.CountryRef.COMMON_NAME", "$args.Building", "$args.Room");
+	}
+</SCRIPT>
+hidden frame, nothing to do here.
+</BODY>
+</HTML>
+

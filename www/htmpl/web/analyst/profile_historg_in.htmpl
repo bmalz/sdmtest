@@ -1,0 +1,134 @@
+<html lang="en"><PDM_IF 0>
+profile_historg_in.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="profile_browser.htmpl+PERSID={cnt:}+NBTAB=historg_in" factory=cnt>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = formatmsg("Organization Incident History for %1",parent.menu.organization);
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl listForm=1>
+<SCRIPT>
+
+var cfgContextSolution = true;
+var cfgCanEdit = true;
+var cfgContextActivities = true;
+var cfgUseTemplate = "";
+var show_header = 0;
+propFactory = "cr";
+
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$prop.MultiTenancy" == "on">
+if ( typeof parent.menu.tenantUserAuth == "number" &&
+     parent.menu.tenantUserAuth < 2 )
+  
+<PDM_MACRO name=sfStart create=false factory=in>
+else
+  
+<PDM_MACRO name=sfStart extracreateurl="PRESET=type:I@@tenant:$args.pbTenant" factory=in>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart extracreateurl="PRESET=type:I" factory=in>
+</PDM_IF>
+document.writeln('<INPUT TYPE=hidden NAME=HTMPL VALUE=profile_historg_in.htmpl>');
+
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Assignment Status","","",
+"Has assignee","(assignee IS NOT NULL)",
+"Has group","(group IS NOT NULL)",
+"Assignee or group","(assignee IS NOT NULL OR group IS NOT NULL)",
+"Assignee and group","(assignee IS NOT NULL AND group IS NOT NULL)",
+"Assignee; no group","(assignee IS NOT NULL AND group IS NULL)",
+"Group; no assignee","(assignee IS NULL AND group IS NOT NULL)",
+"No assignee","(assignee IS NULL)",
+"No group","(group IS NULL)",
+"No assignee; no group","(assignee IS NULL AND group IS NULL)",2);
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status factory=crs_in>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+searchFilterDropdown("SLA Violation","sla_violation","",
+"Yes", "(sla_violation > 0)",
+"No",  "(sla_violation = 0 OR sla_violation IS NULL)");
+<PDM_MACRO name=sfHier hdr="Klasyfikacja incydentu" attr="category.sym" factory=pcat_in>
+<PDM_MACRO name=sfLookup hdr="Dotknięty CI" attr=affected_resource.name factory=nr>
+<PDM_MACRO name=sfLookup hdr="Rejestrujący" attr=log_agent factory=cnt>
+
+docWriteln('<input TYPE="hidden" name="QBE.EQ.customer.organization" value="$args.QBE.EQ.customer.organization">');
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nazwa użytkownika końcowego" attr=customer colspan=2 factory=cnt>
+<PDM_MACRO name=sfTextbox hdr="User ID użytkownika końcowego" attr=customer.userid size=20>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja użytkownika końcowego" attr=customer.location.name factory=loc>
+<PDM_MACRO name=sfLookup hdr="Organizacja użytkownika końcowego" attr=customer.organization.name factory=org>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=impact factory=imp>
+<PDM_MACRO name=sfDropdown hdr="Typ serwisowy" attr=support_lev factory=sdsc>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas otwarcia" attr=open_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas otwarcia" attr=open_date qbe_condition=LE>
+<PDM_MACRO name=sfLookup hdr="Rodzic" attr=parent.ref_num factory=cr>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=urgency factory=urg>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas zamknięcia" attr=close_date qbe_condition=GE>
+<PDM_MACRO name=sfTextbox hdr="Podsumowanie incydentu" attr=summary colspan=2 size=42>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=active codename="act">
+searchFilterDropdown("Template","template_name","",
+"Yes","(template_name != ' ' AND template_name IS NOT NULL)",
+"No","(template_name = ' ' OR template_name IS NULL)");
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas zamknięcia" attr=close_date qbe_condition=LE>
+<PDM_MACRO name=sfTextbox hdr="Opis incydentu" attr=description colspan=2 size=42>
+<PDM_MACRO name=sfEnd>
+
+var msgFoundNone = "No incidents found";
+var msgFound1 = "1 incident found";
+var msgFound = "%1 incidents found";
+var msgFoundMore = "%1 incidents found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired incident";
+var ref_num_style;
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0' || \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_elif @{list.ttv_att_slas.length:0} != 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Incydent #" attr=ref_num exportfmt=ShowLink link=yes style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=DESC>
+<PDM_MACRO name=lsCol hdr="Prio" attr=priority sort=DESC>
+<PDM_MACRO name=lsCol hdr="Assignee / Customer" attr=assignee>
+<PDM_MACRO name=lsCol label="Summary" attr=summary colspan=4 startrow=yes width=50>
+<PDM_MACRO name=lsCol attr=customer>
+<PDM_MACRO name=lsEnd isticketfactory=1>
+</SCRIPT>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</CENTER>
+</BODY>
+</HTML>

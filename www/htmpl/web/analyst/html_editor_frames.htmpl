@@ -1,0 +1,36 @@
+<html lang="en"><HEAD>
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+
+var ahdframeset = ( window.name == "cai_main" ? window : ahdtop );
+var ahdframe;
+function frameset_loaded()
+{
+   ahdframe = window.frmAdmin;
+   ahdframeset.ahdframe = ahdframe;
+   // If condition is introduced to solve SCO 40908
+  if ( _browser.isIE )
+   menubar.__menuBar.setWinFocus(false);
+}
+
+<pdm_include file=menubar_html_editor.htmpl>
+
+</script>
+</HEAD>
+
+<FRAMESET ROWS="22,*" onLoad="frameset_loaded()">
+	<FRAME SRC="$CAisd/html/menubar.html" id=menubar NAME=menubar SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title="Menu bar editor">
+	<FRAMESET ROWS="*,40" FRAMEBORDER="0">
+		<FRAME id=frmHTML name=frmAdmin SRC="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=html_editor_toolbar.htmpl+persid=$args.persid+fieldName=$args.fieldName+divId=$args.divId+TB=$args.TB+tenant=$args.tenant+tenantName=$args.tenantName+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" FRAMEBORDER="no"  SCROLLING="auto" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0" FRAMEBORDER="0" BORDER="0" title="HTML Editor Tool Bar">
+		<FRAME id=frmAdmin1 name=frmAdmin1 style="border: 1px #8B939A solid;" src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=html_editor_tabs.htmpl+fieldName=$args.fieldName+divId=$args.divId"  SCROLLING=no FRAMEBORDER="no"  SCROLLING="auto" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0" FRAMEBORDER="0" BORDER="0" title="HTML Editor">			
+	</FRAMESET>
+</FRAMESET>
+		
+</HTML>
+<PDM_IF 0>
+@(#)$Id: html_editor_frames.htmpl ASPEN.3 2011/12/13 16:33:51 kumka02 Exp $;
+</PDM_IF>

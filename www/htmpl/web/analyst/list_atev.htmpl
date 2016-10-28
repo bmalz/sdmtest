@@ -1,0 +1,121 @@
+<PDM_IF 0>
+list_chg.htmpl
+WHEN PRESENTED:
+    When we need to display an Event History list
+INTENT:
+    Display the Event History list
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object atev list The list object containing the attached events
+                        See $NX_ROOT/bopcfg/majic/bopevt
+/opt/CApdm/bopcfg/majic/bopevt.maj:OBJECT atev { .maj for the
+                        definition of attributes for 'OBJECT atev'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie historii zdarzeń";
+var hdrTitleList = "Lista historia zdarzeń";
+form_title = "Historia zdarzeń";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("no", "no");
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attevts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=list>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Event History">
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono zdarzeń";
+var msgFound1 = "Znaleziono 1 zdarzeń";
+var msgFound = "Znaleziono %1 zdarzń";
+var msgFoundMore = "Znaleziono %1 zdarzń.  Wyświetlane %2 z %3";
+var msgSelect = "Wybierz aby przejść do obiektu";
+
+function aevt_get_attevt_status_text(evt_status)
+{
+
+var ret_text="Unknown";
+
+switch(evt_status)
+{
+case '0':
+ret_text=msgtext("Cancelled");
+break;
+case '1':
+ret_text=msgtext("Complete");
+break;
+case '2':
+ret_text=msgtext("Pending");
+break;
+case '3':
+ret_text=msgtext("Repeating");
+break;
+case '12':
+case '13':
+ret_text=msgtext("Delayed");
+break;
+}
+ rs.data(ret_text);
+}
+
+function aevt_get_attevt_status_textExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("Cancelled") + ",1," + msgtext("Complete") + ",2," + msgtext("Pending") + ",3," 
+	+ msgtext("Repeating") + ",12," + msgtext("Delayed") + ",13," + msgtext("Delayed") + ",OTHERWISE," + msgtext("Unknown");
+}
+
+function aevt_display_fire_time(fire_time)
+{
+    if(status_flag == '12')
+        rs.data(" ");
+    else
+        rs.data(fire_time);
+}
+
+<PDM_IF "$args.KEEP.obj_type" != "mgs">
+var cfgCanView = false;
+var cfgCanEdit = false;
+<pdm_macro name=lsStart>
+rs.anchors = false; // No links on list rows - we don't show details for atev.
+<pdm_macro name=lsCol hdr="Warunek" attr=event_tmpl.condition sort=no>
+<pdm_macro name=lsCol hdr="Zdarzenie" attr=event_tmpl>
+<pdm_macro name=lsCol hdr="Status" attr=status_flag fmtfunc=aevt_get_attevt_status_text exportFmt=aevt_get_attevt_status_textExp sort=no>
+<pdm_macro name=lsWrite text="var status_flag = '@{list.status_flag}';">
+<pdm_macro name=lsCol hdr="Czas sprawdzenia" attr=fire_time fmtfunc=aevt_display_fire_time export=no sort=no>
+<pdm_macro name=lsCol hdr="Czas wczytania" attr=last_mod_dt>
+<pdm_macro name=lsEnd>
+<PDM_ELSE>
+var cfgCanView = true;
+var cfgCanEdit = true;
+<pdm_macro name=lsStart>
+<pdm_macro name=lsCol hdr="Zdarzenie" attr=event_tmpl  exportfmt=ShowLink link=yes>
+<pdm_macro name=lsCol hdr="Status" attr=status_flag fmtfunc=aevt_get_attevt_status_text exportFmt=aevt_get_attevt_status_textExp sort=no>
+<pdm_macro name=lsCol hdr="Czas wczytania" attr=start_time>
+<pdm_macro name=lsCol hdr="Czas wystrzelenia" attr=fire_time>
+<pdm_macro name=lsCol hdr="Warunek" attr=event_tmpl.condition sort=no>
+<pdm_macro name=lsEnd>
+</pdm_if>
+</SCRIPT>
+<SPAN class=detailro>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</SPAN>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_atev.htmpl ANDERSON.3 2009/09/28 15:18:49 hu$ho01 Exp $
+</PDM_IF>

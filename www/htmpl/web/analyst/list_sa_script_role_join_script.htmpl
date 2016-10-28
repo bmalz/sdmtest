@@ -1,0 +1,72 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    1. As a tab on the sa script detail page with list of SA Roles allowed to run a specifc script 
+    2. As a tab on the sa_role detail page with list of SA Scripts allowed for that sa role
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en"><HEAD>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "ACL Search";
+var hdrTitleList = "ACL List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("&{factory}sum.rpt", "&{factory}dtl.rpt");
+var cfgCanEdit = true;
+cfgExtraButton=new Array("Update_Tasks", "update_tasks()",true);
+
+function update_tasks()
+{
+		update_with_lrel_style('sa_script', 'sa_script:$args.QBE.EQ.scriptID', 'sa_role', 'assigned_roles', 'Support Automation ACL Available', 'Support Automation ACL Assigned', '', 'KEEP.ForSAAssignedRole=1+HTMPL=update_lrel_sa_role.htmpl+QBE.GT.id=0+QBE.EQ.isAgent=1');
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="sa_script_role_join_script">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart button=false create=false export=no factory="sa_script_role_join_script">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Automatycznie uruchamiane" attr="autorun" factory=bool>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<SCRIPT LANGUAGE="JavaScript">
+<pdm_jscript file=list_edit.js>
+startListEdit(__search_filter);
+listEditStartRow();
+listEditField("autorun", "Auto Run");
+endListEdit();
+</SCRIPT>
+
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+    var msgFoundNone = "No ACLs found";
+    var msgFound1 = "1 ACL found";
+    var msgFound = "%1 ACLs found";
+    var msgFoundMore = "%1 ACLs found.  Displaying %2 through %3";
+    var msgSelect = "Click to select desired ACL";  
+
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="ACL" attr="roleID" sort="no">
+<PDM_MACRO name=lsCol hdr="Automatycznie uruchamiane" attr="autorun" sort="no">
+<PDM_MACRO name=lsEnd>
+
+  var ctxMenu = void(0);
+
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

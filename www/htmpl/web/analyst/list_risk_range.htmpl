@@ -1,0 +1,198 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	When we need to display a list of Risk Ranges.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Risk Range Search";
+var hdrTitleList = "Risk Range List";
+var autoRefreshWindows = new Object();
+
+var minarray = new Array();
+var maxarray = new Array();
+var riskarray = new Array();
+var arrayLength = parseInt(0);
+
+//Initialize the array
+<PDM_LIST FACTORY=risk_range where="owning_survey = $args.KEEP.id_from_svydetail" PREFIX=range>
+    minarray[arrayLength] = $range.min_val;
+    maxarray[arrayLength] = $range.max_val;
+    riskarray[arrayLength] = $range.risk_lvl.value;
+    arrayLength++;
+</PDM_LIST>
+
+// Update the minmum and maximum values of Risk range.
+function Update_Array()
+{
+    var i=0;
+    
+    //Read list items and Set the array list.
+    for (i=0; i < rs.records.length; i++)
+    {
+        var list_min_ele = document.getElementById("rs_" + i + "_min_val");
+        var list_max_ele = document.getElementById("rs_" + i + "_max_val");
+        
+        minarray[i] = parseInt(list_min_ele.innerHTML);
+        maxarray[i] = parseInt(list_max_ele.innerHTML);
+    }
+}
+
+// Check for overlap, Gaps in Risk Range if Risk level highest is first 
+// and numeric values of Risk range will be entered in Descending order. 
+// 1 -> Highest
+// 2 -> High
+// 3 -> Medium 
+// 4 -> Low
+// 5 -> No Risk
+function Validate_Risk_Range()
+{
+    var i=0;
+    var overlapMsg = "";
+    var gapMsg = "";
+    var msg = "";
+    var prevRiskLevel = "";
+    var prevMin = parseInt(0);
+    var prevMax = parseInt(0);
+
+    // Check for overlap, Gaps in risk range. 
+    for (i=0; i < arrayLength; i++)
+    {
+        var currMin = parseInt(minarray[i]);
+        var currMax = parseInt(maxarray[i]);
+        var currRiskLevel = riskarray[i];
+        if (i != 0)
+        {
+            var tempVal = parseInt(currMax) + 1;
+            //Check for overlap
+            if (prevMin != tempVal )
+            {
+                if (prevMin <= currMax) // Check for Overlap
+                {
+                    overlapMsg = formatmsg("%1 %2 and %3; ", overlapMsg, prevRiskLevel, currRiskLevel);
+                }
+                else // If no Overlap means its a gap
+                {
+                    gapMsg = formatmsg("%1 %2 and %3; ", gapMsg, prevRiskLevel, currRiskLevel);
+                }
+            }
+        }
+        prevMin = currMin;
+        prevMax = currMax;
+        prevRiskLevel = currRiskLevel;
+    }
+
+    if (overlapMsg != "")
+    {
+        msg = formatmsg("%1Ovelap found at Risk level %2", msg, overlapMsg);
+        if (gapMsg != "")
+            msg = formatmsg("%1<br>", msg);
+    }
+    if (gapMsg != "")
+    {
+        msg = formatmsg("%1Gap found at Risk level %2", msg, gapMsg);
+    }
+
+    return msg;
+}
+
+function preListEditSaveTrigger()
+{
+    var msg = "";
+    
+    //Update array list
+    Update_Array();
+    
+    //Check for gaps and overlaps in risk ranges.
+    msg = Validate_Risk_Range();
+    
+    if (msg.length == 0)
+    {
+        return true;
+    }
+    //Display error message in list box
+    var ListAlert = window.document.getElementById("leAlertMsg");
+    ListAlert.style.display="block";
+    ListAlert.innerHTML = msg;
+    adjScrollDivHeight();
+    
+    return false;
+}
+
+function showObject(value)
+{
+    var outhtml;
+    
+    //Create hyperlink from recieved data.
+    outhtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + risk_range_persid + "')\">" + value + "</A>" ;
+    if ("$args.KEEP.form_mode" == "edit")
+        rs.data(outhtml); //Display Data with hyperlink
+    else
+        rs.data(value); //Display Data without hyperlink
+}
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Risk Ranges">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=risk_range>
+document.write('<INPUT TYPE=hidden NAME="KEEP.id_from_svydetail" VALUE="$args.KEEP.id_from_svydetail">');
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.owning_survey" VALUE="$args.KEEP.id_from_svydetail">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag default="Active">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+
+ImgBtnHide("btndflt");// Hide Search button
+ImgBtnHide("btnClear"); // Hide Clear Filter button
+ImgBtnHide("btnShowHide"); // Hide Show/hide Filter button
+
+<PDM_IF "$args.KEEP.form_mode" == "edit" && $args.KEEP.id_from_svydetail != 0>
+    <pdm_jscript file=list_edit.js>
+    startListEdit(__search_filter);
+    listEditStartRow();
+    listEditReadonly("risk_lvl.sym", "Risk value");
+    listEditField("min_val", "Minimum Value", void(0), void(0), void(0), void(0), "$args.DATATYPE_min_val");
+    listEditField("max_val", "Maximum Value", void(0), void(0), void(0), void(0), "$args.DATATYPE_max_val");
+    listEditEndRow();
+    endListEdit();
+    ImgBtnHide("btnChangeAll"); // Hide Change all Button 
+<PDM_ELSE>
+    cfgCanEdit = false;
+    cfgCanView = false;
+</PDM_IF>
+
+var msgFoundNone = "No Risk Range found";
+var msgFound1 = "1 Risk Range found";
+var msgFound = "%1 Risk Ranges found";
+var msgFoundMore = "%1 Risk Ranges found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Risk Range";
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var risk_range_persid = \"@{list.persistent_id:}\";">
+<PDM_MACRO name=lsCol hdr="Poziom ryzyka" attr=risk_lvl.value>
+<PDM_MACRO name=lsCol hdr="Wartość ryzyka" attr=risk_lvl.sym export=no fmtfunc=showObject sort=no>
+<PDM_MACRO name=lsCol hdr="Minimalna wartość" attr=min_val>
+<PDM_MACRO name=lsCol hdr="Maksymalna wartość" attr=max_val>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP mode=edit>

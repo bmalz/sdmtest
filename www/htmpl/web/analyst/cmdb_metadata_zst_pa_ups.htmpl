@@ -1,0 +1,47 @@
+<PDM_IF 0>
+
+DESCRIPTION:
+   Define metadata attributes for an extension table.
+
+PROCEDURE:
+Step 1:
+   For each attribute in the extension table, add a PDM_MACRO statement like the line below after the line marked "INSERT ATTRIBUTES HERE".  
+   
+   <PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+   
+  Replace each of the keyword strings below as follows: 
+   ***EXTENSION***    => Extension table name associated with a family 
+   ***HEADING***      => Heading label for attribute, displayed in Versioning detail view
+   ***ATTRIBUTE***    => Extension object attribute name
+   ***HELP***	      => Brief description of the attribute 
+
+   Example: The code below defines the metadata for the family which uses the widget extension table that has two attributes:
+      <PDM_MACRO name=cmdbMetadata category="Attributes" extension="widget" attr="number" heading="Number of Widgets" help="brief description of number attribute">
+      <PDM_MACRO name=cmdbMetadata category="Attributes" extension="widget" attr="size"   heading="Widget Size" help="brief description of size attribute">
+   
+   If the extension table refers to other tables, you may need to use the advanced form of the cmdbMetadata macro.  Consult the
+   macro source for details on using the currentcivalue and standardcivalue arguments.
+ 
+Step 2:   
+   Save this file as cmdb_metadata_***EXTENSION***.htmpl, where ***EXTENSION*** 
+   is replaced by the extension table name.  For example, cmdb_metadata_widget.htmpl.
+
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>	
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>	
+
+<!-- ---------------------------- -->
+<!-- INSERT ATTRIBUTES BELOW HERE -->
+<!-- ---------------------------- -->
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_pa_ups" attr="status" heading="Status UPS" help="Status UPS">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_pa_ups" attr="napiecie_wejsciowe" heading="Napiecie wejsciowe" help="Napiecie wejsciowe">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_pa_ups" attr="naladowanie" heading="Naladowanie" help="Naladowanie">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_pa_ups" attr="obciazenie" heading="Obciazenie" help="Obciazenie">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_pa_ups" attr="czas_baterii" heading="Czas baterii" help="Czas baterii">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="zst_pa_ups" attr="wymiana_baterii" heading="Wymiana baterii" help="Wymiana baterii">
+<!-- ---------------------------- -->
+<!-- INSERT ATTRIBUTES ABOVE HERE -->
+<!-- ---------------------------- -->
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>
+

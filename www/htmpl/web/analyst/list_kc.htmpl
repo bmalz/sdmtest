@@ -1,0 +1,174 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a KPI (kc)
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "KPI Search";
+var hdrTitleList = "KPI List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="kc">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="kpi_name">
+<PDM_MACRO name=sfTextbox hdr="Wersja" attr="version_number">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+searchFilterDropdown("Type","type","",
+"System","0","Stored Query","1","SQL","2");
+searchFilterDropdown("Metric Type","metric_type","",
+"Count","0","Sum","1","Max","2","Duration","3");
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="description" colspan=2 size=60>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+
+  <pdm_jscript file=list_edit.js>
+  startListEdit(__search_filter);
+  listEditStartRow();
+  listEditField("delete_flag");
+  listEditReadonly("kpi_name", "KPI Name");
+  endListEdit();
+
+  var msgFoundNone = "No KPIs found";
+  var msgFound1 = "1 KPI found";
+  var msgFound = "%1 KPIs found";
+  var msgFoundMore = "%1 KPIs found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired KPI";
+
+
+var ctxMenuWithSub = new ContextMenu("kc_WithSub");
+ctxMenuWithSub.addItem(msgtext("View"),"rsShowDetailPopup(self.activePersid)");
+ctxMenuWithSub.addItem(msgtext("Edit"),"showEdit(self.activePersid)");
+<PDM_IF 0>
+ctxMenuWithSub.addItem(msgtext("Substitute"),"launch_substitute(self.activePersid)");
+</PDM_IF>
+ctxMenuWithSub.addItem(msgtext("Print_Form%1..."," "+window.propFormName),"CAisdPrint();");
+ctxMenuWithSub.addItem(msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')");
+ctxMenuWithSub.finish();
+
+
+var ctxMenuWithoutSub = new ContextMenu("kc_WithoutSub");
+ctxMenuWithSub.addItem(msgtext("View"),"rsShowDetailPopup(self.activePersid)");
+ctxMenuWithSub.addItem(msgtext("Edit"),"showEdit(self.activePersid)");
+ctxMenuWithSub.addItem(msgtext("Print_Form%1..."," "+window.propFormName),"CAisdPrint();");
+ctxMenuWithSub.addItem(msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')");
+ctxMenuWithSub.finish();
+
+<PDM_IF 0>
+function launch_substitute( persid )
+{
+	var features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",gobutton=no"+
+		",status=no";
+
+	var url = cfgCgi + 
+		"?SID=" + cfgSID +
+		"+FID=" + cfgFID + 
+		"+OP=MAKE_COPY" +
+		"+FACTORY=kc" + 
+		"+PERSID=" + persid +
+		"+METHOD=make_kc_copy" + 
+		"+KEEP.MAKE_COPY=1" +
+		"+RELOAD_WIN=0" +
+		"+KEEP.SUBSTITUTE=1";
+
+	preparePopup(url, persid, features); 
+}
+</PDM_IF>
+
+
+function rsRowClickOverride(objRow,EventName,row,event)
+{
+   if (rs.records[row].ctx_menu_flag == 0) {
+      ctxMenu = ctxMenuWithSub;
+      rsRowClick(objRow,EventName,row,event);
+   }
+   else {
+      ctxMenu = ctxMenuWithoutSub;
+      rsRowClick(objRow,EventName,row,event);
+   }
+}
+
+function list_kpi_type(value)
+{
+  if ( value == "0" )
+     value = "System";
+  else if ( value == "1" )
+     value = "Stored Query";
+  else if ( value == "2" )
+     value = "SQL";
+
+  rs.data(value);     
+}
+ 
+function list_metric_type(value)
+{
+  if ( value == "0" )
+     value = "Count";
+  else if ( value == "1" )
+     value = "Sum";
+  else if ( value == "2" )
+     value = "Max";
+  else if ( value == "3" )
+     value = "Duration";
+
+  rs.data(value);     
+}
+
+function list_kpi_typeExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("System") + ",1," + msgtext("Stored Query") + ",2," + msgtext("SQL");
+}
+
+function list_metric_typeExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("Count") + ",1," + msgtext("Sum") + ",2," + msgtext("Max") + ",3," + msgtext("Duration");
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa KPI" attr=kpi_name exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Typ" attr=type exportfmt=list_kpi_typeExp fmtfunc=list_kpi_type sort=no>
+<PDM_MACRO name=lsCol hdr="Wersja" attr=version_number>
+<PDM_MACRO name=lsCol hdr="Typ miary" attr=metric_type exportfmt=list_metric_typeExp fmtfunc=list_metric_type sort=no>
+<PDM_MACRO name=lsCol hdr="Czas odświeżania" attr=refresh_time>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.delete_flag.enum:0}\" == '0'">
+<PDM_MACRO name=lsWrite text="rs.currentRecord.ctx_menu_flag = 0;">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="rs.currentRecord.ctx_menu_flag = 1;">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_kc.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+
+<PDM_WSP>

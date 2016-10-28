@@ -1,0 +1,105 @@
+﻿<PDM_IF 0>
+	Created: 201305 bmalz @ e-xim
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="home.htmpl">
+<html lang="pl"><HEAD>
+<script>
+var form_title;
+var CategoryRoot; // 20130926 bmalz @ e-xim
+if ('$args.CONTRACT' == "") {
+	form_title = "Moje zgłoszenia";
+} else {
+	form_title = '$args.CONTRACT'.split('.').pop();
+	CategoryRoot = '$args.CONTRACT'.split('.')[0];
+}
+</script>
+</style>
+</style>
+<PDM_INCLUDE FILE="std_head.htmpl">		
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>	
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>	
+<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/exim_mods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+
+<script>
+	jq(document).ready(function () {
+		jq('#linkmenu').hide();
+
+		jq('form[name=search_form]').bind("submit", function() {
+			MySearch();
+			return false;
+		})
+	});
+
+	function MySearch() {
+		var phrase = jq('#SearchPhrase').val();
+		if(phrase.length > 0)
+			SearchMyCategory(phrase, jq('#SearchDateFrom').val(), jq('#SearchDateTo').val());
+	}
+
+jq(document).ready(function() {
+	jq('#SearchPhrase').keypress(function(e) {
+		if (e.which == 13) {
+			e.preventDefault();
+			MySearch();
+		}
+	});
+});
+</script>
+</head>
+<body>
+<PDM_INCLUDE FILE=self_service_include.htmpl status=0>
+<PDM_INCLUDE FILE="std_body.htmpl">
+<center>
+	<div id="SearchDiv" style="width: 60%; margin-top: 10px;">
+		<table border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>
+				<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>
+				<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>
+			</tr>
+			<tr>
+				<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>
+				<td valign="middle" style="width: 100%;">
+					<form name=search_form id=search_form style="font-size: 1em;">
+						<table class="contractContent" style="width: 100%;">
+							<tr>
+								<td colSpan="5" width="100%" valign="middle" class="MyItemsMenu">
+									<p class="contractContentTitle" style="font-size: 11px;">Wyszukiwarka</p>
+								</td>
+							</tr>
+							<tr>
+								<td colSpan="4"><input type="text" id="SearchPhrase" name="string" title="Szukaj" onfocus="this.className='focusField';" onblur="this.className='';" style="width: 100%; font-size: 1em;"></td>
+								<td style="padding-left: 5px;"><a id="imgSearchBtn" name="imgSearchBtn" class="button enabledattr buttonEnabled" title="Szukaj usługi" ondragstart="return false" onclick="" href="javascript:MySearch();"><span>Szukaj</span></a></td>
+							</tr>
+							<tr>
+								<th colSpan="5" style="padding-top: 10px;">Przedział czasowy</th>
+							</tr>
+							<tr>
+								<td width="15px">Od</td>
+								<td width="110px"><div style="display:inline-block;"><input id="SearchDateFrom" name="SearchDateFrom" title="Data od" style="font-size: 1em; width:80px; vertical-align: top;" readonly><input type="button" value="" style="margin-top: 2px; margin-left: 2px; width: 16px; height: 16px; vertical-align: top; background-image: url(/CAisd/sitemods/img/calendar.png); background-color: transparent; background-repeat: no-repeat; border: 0px; cursor: hand; cursor: pointer;" onclick="popup_date_helper('search_form','SearchDateFrom','no');"></div></td>
+								<td width="15px">Do</td>
+								<td width="110px"><div style="display:inline-block;"><input id="SearchDateTo" name="SearchDateTo" title="Data do" style="font-size: 1em; width:80px; vertical-align: top;" readonly><input type="button" value="" style="margin-top: 2px; margin-left: 2px; width: 16px; height: 16px; vertical-align: top; background-image: url(/CAisd/sitemods/img/calendar.png); background-color: transparent; background-repeat: no-repeat; border: 0px; cursor: hand; cursor: pointer;" onclick="popup_date_helper('search_form','SearchDateTo','no');"></div></td>
+								<td>&nbsp;</td>
+							</tr>
+						</table>
+					</form>
+				</td>
+				<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>
+			</tr>
+			<tr>
+				<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>
+				<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>
+				<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>
+			</tr>
+		</table>
+	</div>
+</center>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+	</body>
+	
+</html>

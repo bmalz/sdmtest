@@ -1,0 +1,66 @@
+<PDM_IF 0>
+//@(#)$Id: detail_KT_FILE_TYPE.htmpl ANDERSON.1 2009/06/15 18:11:37 bihtu01 Exp $
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły typu pliku $args.SYM "</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizownie typu pliku $args.SYM "</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie typu pliku $args.SYM"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=kt_tbl_cache.htmpl KT_FILE_TYPE=1>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=dtlForm>
+<PDM_MACRO NAME=dtlStart>
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlTextbox hdr="Typ" attr="SYM" size=70>
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlTextbox hdr="Rozszerzenie" attr="EXTENSION" make_required="yes">
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlTextbox hdr="Nazwa ikony" attr="ICON_NAME" make_required="yes">
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlReadonly hdr="Data modyfikacji" attr="last_mod_dt" colspan=2>
+<PDM_MACRO NAME=dtlReadonly hdr="Zmodyfikowane przez" attr="last_mod_by" colspan=2>
+</SCRIPT>
+<INPUT TYPE=hidden NAME="SET.obj_type" value="KD">
+<PDM_MACRO NAME=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+

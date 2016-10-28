@@ -1,0 +1,75 @@
+<PDM_IF 0>
+bsi_contract_attributes_by_metric.htmpl
+WHEN PRESENTED:
+     This htmpl file displays BSI's 'Modified Service Level by Contract vs. Target (current month)' report of a particular Contract,
+     BSI Contract is mapped to CMDB Contract family CI
+</PDM_IF>
+<html lang="en" style="overflow-x:hidden; overflow-y:auto"><head>
+<PDM_PRAGMA RELEASE=110>
+
+<pdm_wsp preview=no>
+
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+
+<script language="JavaScript">
+var m_fed_asset_id = nx_escape("$args.bsi_idmap.federated_asset_id");
+var m_mdr_id = nx_escape("$args.bsi_idmap.mdr_provider_id");
+</script>
+
+<script language="JavaScript" src="$CAisd/scripts/bsiajaxscripts.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+
+</head>
+<body class="list" scroll="yes">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+
+<PDM_FORM NAME="frmFID" button=false>
+</PDM_FORM>
+
+<script language="JavaScript">
+<PDM_MACRO name=tabBanner title="BSI Contract By Metric" add_btns=false>
+</script>
+<TABLE class=alertmsg id=alertmsg style='DISPLAY: none' width='100%'>
+<TBODY><TR><TD id=alertmsgText></TD></TR></TBODY></TABLE>
+<script>
+docWriteln("<table id=tbl2222 class='table'>");
+docWriteln("<tbody>");
+docWriteln("<tr>");
+docWriteln("<td class='labeltext' align='left' valign='middle'>");
+docWriteln("<B>Contract Party:&nbsp;</B>");
+docWriteln("</td>");
+docWriteln("<td align='left' valign='bottom'>");
+docWriteln("<input type=TEXT name=contract_party id=contract_party size=30 tabindex=100 tooltip='BSI Contract Party'>");
+docWriteln("</td>");
+docWriteln("<td align='left'>");
+<PDM_MACRO NAME=button caption="Refresh" hotkey_name="Refresh" id="btn001" tabindex=101 width=0 Tooltip="BSI Contract By Metric" func="bsiContractLevelComplianceByMetric()">
+docWriteln("</td>");
+docWriteln("</tr>");
+docWriteln("</tbody>");
+docWriteln("</table>");
+docWriteln("<div id='row_count_div_header' class='labeltext' summary='Table row count' align='right'>&nbsp;</div>");
+docWriteln("<table id=tbl8888 class='table' summary='BSI Contract By Metric' width='100%'>");
+docWriteln("<tbody id='tab_bsi_metric'>");
+docWriteln("<tr>");
+docWriteln("<th align='left' scope='col' class='results'>");
+docWriteln("Metric");
+docWriteln("</th>");
+docWriteln("<th align='left' scope='col' class='results'>");
+docWriteln("Violation");
+docWriteln("</th>");
+docWriteln("<th align='left' scope='col' class='results'>");
+docWriteln("Compliant");
+docWriteln("</th>");
+docWriteln("<th align='left' scope='col' class='results'>");
+docWriteln("Target");
+docWriteln("</th>");
+docWriteln("</tr>");
+docWriteln("</tbody>");
+docWriteln("</table>");
+docWriteln("<div id='row_count_div_footer' class='labeltext' summary='Table row count' align='right'>&nbsp;</div>");
+</script>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose:
+//    Shows the CACF Change Verification Policy settings in a notebook tab
+//
+// History:
+//   02/24/2012 tomjo02 Initial Version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_ci_verification_policy_attrs_tab.htmpl" factory=ci_verification_policy>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<center>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+<PDM_MACRO name=tabBanner title="Policy Settings">
+
+<!-- ------------------------------------------------------------------------------------------- -->
+<PDM_MACRO name=dtlStartExpRow label="Change Order Alignment" class=tab colspan=2 exp_rows="1,2" form_name="detail_ci_verification_policy">
+<PDM_MACRO name=dtlCheckbox hdr="Zmiana ze specyfikacją" attr=isvariance>
+<PDM_MACRO name=dtlCheckbox hdr="Zmiana bez specyfikacji" attr=isnotverifiable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Rogue Insert" attr=isrogue_insert>
+<PDM_MACRO name=dtlCheckbox hdr="Rogue Update" attr=isrogue_update>
+
+<!-- ------------------------------------------------------------------------------------------- -->
+<PDM_MACRO name=dtlStartExpRow label="Transaction Filters" class=tab colspan=2 exp_rows="1,2" form_name="detail_ci_verification_policy">
+<PDM_MACRO name=dtlDropdown hdr="Managed Attribute" attr="attribute_name" whereclause="delete_flag=0">
+<PDM_MACRO name=dtlTextbox hdr="Wzór roli" attr="rolename_pattern">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Wzór nazwy MDR" attr="mdr_name_pattern">
+<PDM_MACRO name=dtlTextbox hdr="Wzór klasy MDR" attr="mdr_class_pattern">
+
+<!-- ------------------------------------------------------------------------------------------- -->
+
+<PDM_MACRO name=dtlStartExpRow label="CI Filters" class=tab colspan=2 exp_rows="1,2,3" form_name="detail_ci_verification_policy">
+<PDM_MACRO name=dtlTextbox hdr="Wzór nazwy CI" attr="ci_name_pattern">
+<PDM_MACRO name=dtlTextbox hdr="Wzór klasy" attr="class_pattern">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr="priority">
+<PDM_MACRO name=dtlDropdown hdr="Typ serwisowy" attr="service_type">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Wzór lokalizacji" attr="location_pattern">
+
+<!-- ------------------------------------------------------------------------------------------- -->
+
+<PDM_MACRO name=dtlStartExpRow label="Action" class=tab colspan=2 exp_rows="1,2,3" form_name="detail_ci_verification_policy">
+<PDM_MACRO name=dtlDropdown hdr="Aktualizuj zachowanie" attr="action" make_required="yes">
+<PDM_MACRO name=dtlDropdown hdr="Zapisz datę do TWA" attr="write_twa" make_required="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Utwórz incydent" attr="write_incident" make_required="yes">
+<PDM_MACRO name=dtlDropdown hdr="Szablon incydentu" attr="incident_template">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zamknij incydent po weryfikacji" attr="autoclose_incident">
+<PDM_MACRO name=dtlCheckbox hdr="Tryb tylko logowania" attr="log_only_mode">
+
+<!-- ------------------------------------------------------------------------------------------- -->
+
+<PDM_MACRO name=dtlStartExpRow label="Scheduling" class=tab colspan=2 exp_rows="1" form_name="detail_ci_verification_policy">
+<PDM_MACRO name=dtlDate hdr="Data aktywacji" attr="start_date">
+<PDM_MACRO name=dtlDate hdr="Data dezaktywacji" attr="end_date">
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(Number)$Id: detail_ci_verification_policy.settings.htmpl,v 1.1 2012/03/16 18:55:12 tomjo02 Exp $
+</PDM_IF>

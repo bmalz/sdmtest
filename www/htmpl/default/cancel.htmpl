@@ -1,0 +1,16 @@
+<PDM_IF 0>
+@(#)$Id: cancel.htmpl ASPEN.1 2010/11/16 13:07:57 saima01 Exp $
+cancel.htmpl
+WHEN PRESENTED:
+	When a "cancel" link is clicked in a popup that doesn't have a history.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onload="window.close()">
+</body>
+</html>

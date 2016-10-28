@@ -1,0 +1,9 @@
+<PDM_IF 0>
+@(#)$Id: menubar_.htmpl,v 1.1 2006/11/01 17:38:21 olsjo01 Exp $
+WHEN PRESENTED:
+    Build the default menubar.
+    This file is included when the menubar argument is omitted on the
+    pdm_include for std_body.htmpl.
+</PDM_IF>
+
+<pdm_wsp preview=no>

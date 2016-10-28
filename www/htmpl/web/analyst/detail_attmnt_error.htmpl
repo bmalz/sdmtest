@@ -1,0 +1,38 @@
+<PDM_IF 0>
+$Id: detail_attmnt_error.htmpl,v 1.3 2006/11/10 23:22:49 olsjo01 Exp $
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="detail_attmnt_error.htmpl+OP=DISPLAY_FORM">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="attmnt_info" header=no>
+<CENTER>
+<BR>
+<BR>
+<PDM_IF "$args.ErrorCode" != "" >
+	<SPAN class=clsTextBlackBoldXsmallAbs>Błąd wczytywania pliku '$args.RelFilePath'.</SPAN>
+	<BR>
+	<SPAN class=clsTextBlackBoldXsmallAbs>'$args.Error'.</SPAN>
+<PDM_ELSE>
+	<SPAN class=clsTextBlackBoldXsmallAbs>Plik '$args.attmnt_name' został wczytany.</SPAN>
+</PDM_IF>
+<BR>
+<BR>
+<script>
+<PDM_MACRO NAME=btnStartRow padding=10>
+<PDM_MACRO NAME=button caption="Close" hotkey_name="Close" id="btnAddRepository"
+    func="top.opener.RefreshFileList();top.close();">
+<PDM_MACRO NAME=btnEndRow>
+</script>
+</CENTER>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+

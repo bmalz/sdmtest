@@ -1,0 +1,44 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/02/03
+// Title  : cmdb_metadata_slax.htmpl (family specific attributes)
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_slax_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="slax" attr="sla_id"          heading="Service Level Agreement ID" help="The unique name or other identifier for a Service Level Agreement CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="slax" attr="sla_category"    heading="Service Level Agreement Category" help="The high-level type designation for an application, service, SLA, or document">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="slax" attr="sla_type"        heading="Service Level Agreement Type" help="A description of the kind of Application, Contract, Document, Service, or SLA CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="slax" attr="sla_version"     heading="Service Level Agreement Version" help="A number or other identifier that indicates the current level (version) of an Application, Document, Service, or SLA CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="slax" attr="sla_date_active" heading="Service Level Agreement Activation Date" help="The date on which the Configuration Item was made available to users">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="slax" attr="sla_start_date"  heading="Service Level Agreement Start Date" help="The date on which a contract, document, service, or SLA becomes active">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="slax" attr="sla_end_date"    heading="Service Level Agreement End Date" help="The date on which an SLA expires or is no longer valid">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

@@ -1,0 +1,56 @@
+<PDM_IF 0>
+multiframe_reports_chg_manager.htmpl
+WHEN PRESENTED:
+    Used to load reports for the Change Order Manager Role
+</PDM_IF>
+
+<HTML lang="en">
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+function frameset_loaded()
+{
+    // If cai_main is defined, save it in ahdframe, 
+    // otherwise, the HTMPL page needs to figure out 
+    // how to set ahdframe.
+    if (typeof window.cai_main != "undefined")
+    {
+	ahdframe = window.cai_main;
+	ahdframeset.ahdframe = ahdframe;
+	if (typeof parent.ahdframe == "object")
+	    parent.ahdframe = ahdframe;
+	if (typeof parent.ahdframeset == "object")
+	    parent.ahdframeset.ahdframe = ahdframe;
+    }
+}
+</script>
+</HEAD>
+<PDM_IF "$env.NX_BO_SERVER_LOCATION" == "" || "$env.NX_BO_SERVER_CMS" == "">
+    <PDM_INCLUDE file=reports_unavailable.htmpl>
+<PDM_ELSE>
+    <SCRIPT>
+        <PDM_MACRO NAME=startFrameset id="frameset01_chg_manager" cols="50%,50%" border=2 onload="frameset_loaded();">
+        <PDM_MACRO NAME=frame id="Frame1_chg_manager" frame_name="Frame1_chg_manager" web_form_name="chg_aging_priority_status" title="Frame1_chg_manager" style="border: 1px #8B939A solid;" marginheight=0 marginwidth=0>
+        <PDM_MACRO NAME=frame id="Frame2_chg_manager" frame_name="Frame2_chg_manager" web_form_name="chg_fail_svctype_category" title="Frame2_chg_manager" style="border: 1px #8B939A solid;" marginheight=0 marginwidth=0>
+        <PDM_MACRO NAME=endFrameset>
+    </SCRIPT>
+</PDM_IF>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: multiframe_reports_chg_manager.htmpl FWr1.3 2008/7/15 8:54:39 ralje02 Exp $
+</PDM_IF>

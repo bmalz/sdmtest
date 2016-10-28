@@ -1,0 +1,228 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_reconciliation.htmpl
+//
+// Purpose: Loads the ambiguous CIs for the focal CI or TWA object for the Reconciliation tab
+//
+//
+// 13-Aug-2009 tomjo02 SCO 26513 & 26514 - CI and TWA Reconciliation Management Support - Initial version 
+// 04-Sep-2009 tomjo02 SCO 27909 - Changes to use WHERE clause built using the ambiguous_ci_where 
+//                                 local variable to handle quotes in condition values. 
+// 27-Oct-2009 tomjo02 SCO 29544 - Changed 'Not Ambiguous' flag label to 'Exclude Ambiguity'
+// 22-Jan-2010 tomjo02 SCO 31038 - Use attribute label override for column headers if specified in CI detail form.
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Save variables specific to the CI or TWA detail forms
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$prop.factory" == "ci_twa_ci" >
+  // Processing TWA detail form 
+  cmdbIsCIDetail = false;
+  cmdbCINotAmbiguous = false;
+  <PDM_SET args.do_query="1">
+  <PDM_IF "$args.tgt_id" == "" || "$args.tgt_id" == "0">
+    cmdbCIUUID = "0";
+  <PDM_ELSE>
+    cmdbCIUUID = "$args.tgt_id";
+  </PDM_IF>
+<PDM_ELSE>
+  // Processing CI detail form
+  cmdbIsCIDetail = true;
+  cmdbCINotAmbiguous = "$args.not_ambiguous";
+  <PDM_IF "$args.delete_flag" == "1" >
+    cmdbIsEditingAllowed = false;
+  <PDM_ELSE>
+    cmdbIsEditingAllowed = true;
+  </PDM_IF>
+  <PDM_IF "args.id" != "" && "$args.id" != "0" >
+    <PDM_IF 0>Only fetch the ambiguous CI list for existing CIs and that are not superseded</PDM_IF>
+    <PDM_SET args.do_query="1">
+    cmdbCIUUID = "$args.id";
+  <PDM_ELSE>
+    <PDM_SET args.do_query="0">
+    cmdbCIUUID = "0";
+  </PDM_IF>
+</PDM_IF>
+
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+// Show counters for requests, incidents, problems, changes and issues
+cmdbShowCounters = true; 
+<PDM_ELSE>
+cmdbShowCounters = false; 
+</PDM_IF>
+
+<PDM_IF  "$args.do_query" == "1">
+  <PDM_IF 0>
+  /////////////////////////////////////////////////////////////////////////////////
+  // Use WHERE clause in the args.ambiguous_ci_where local variable. This variable
+  // is updated on the server using the current cora attribute values in
+  // the CI and TWA objects, see cmdb.spl for update triggers that build the query.
+  // 
+  // Fetch CIs and save for table display and save counts: 
+  // nReq => requests 
+  // nInc => incidents
+  // nPrb => problems 
+  // nChg => changes 
+  // nIss => issues 
+  /////////////////////////////////////////////////////////////////////////////////
+  </PDM_IF>
+  // ambiguous_ci_where = [$args.ambiguous_ci_where]
+  var nReq = 0;
+  var nInc = 0;
+  var nPrb = 0;
+  var nChg = 0;
+  var nIss = 0;
+  <PDM_LIST FACTORY=nr PREFIX=list WHERE="$args.ambiguous_ci_where" ESC_STYLE=C>
+    <PDM_IF "$env.NX_CMDB" != "STANDALONE">
+      nReq = 0; 
+      nInc = 0;
+      nPrb = 0; 
+      nChg = 0;  
+      nIss = 0;   
+      <PDM_LIST FACTORY=cr PREFIX=crlist WHERE="affected_resource=U'$list.id' AND active=1 AND (type='R' OR type='' OR type='I' OR type='P' )" ESC_STYLE=C>
+        <PDM_IF "$crlist.type" == "R" || "$crlist.type" == ""> 
+        nReq++;
+        <PDM_ELIF "$crlist.type" == "I">  
+        nInc++;
+        <PDM_ELIF "$crlist.type" == "P">  
+        nPrb++;
+        </PDM_IF>
+      </PDM_LIST>
+      <PDM_LIST FACTORY=lrel_asset_chgnr PREFIX=chglist WHERE="nr=U'$list.id' " ESC_STYLE=C>
+        <PDM_IF 0>$chglist.nr <= Reference to variable needed for PDM_LIST to work</PDM_IF>
+        <PDM_IF "$chglist.nr" != "" > 
+          nChg++;
+        </PDM_IF>
+      </PDM_LIST>
+      <PDM_LIST FACTORY=lrel_asset_issnr PREFIX=isslist WHERE="nr=U'$list.id' " ESC_STYLE=C>
+        <PDM_IF 0>$isslist.nr <= Reference to variable needed for PDM_LIST to work</PDM_IF>
+        <PDM_IF "$isslist.nr" != "" > 
+          nIss++;
+        </PDM_IF>
+      </PDM_LIST>
+    </PDM_IF>
+    cmdbAddCI( 
+    <PDM_FMT ESC_STYLE=C>'$list.id'</PDM_FMT>, 
+    <PDM_FMT ESC_STYLE=C>'$list.name'</PDM_FMT>,
+    <PDM_FMT ESC_STYLE=C>'$list.mac_address'</PDM_FMT>,
+    <PDM_FMT ESC_STYLE=C>'$list.serial_number'</PDM_FMT>,
+    <PDM_FMT ESC_STYLE=C>'$list.asset_num'</PDM_FMT>,
+    <PDM_FMT ESC_STYLE=C>'$list.system_name'</PDM_FMT>,
+    <PDM_FMT ESC_STYLE=C>'$list.dns_name'</PDM_FMT>,
+    <PDM_FMT ESC_STYLE=C>'$list.class.type'</PDM_FMT>,
+    <PDM_FMT ESC_STYLE=C>'$list.family.sym'</PDM_FMT>,
+    nReq,nInc,nPrb,nChg,nIss   
+    <PDM_IF "$prop.MultiTenancy" == "off">
+      );
+    <PDM_ELSE>
+      ,<PDM_FMT ESC_STYLE=C>'$list.tenant.name'</PDM_FMT> );
+    </PDM_IF>
+  </PDM_LIST>
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// End of query processing (args.do_query == 1)
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+</PDM_IF>
+
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Save multi-tenancy display settings to show/hide "Tenant" or "Public" column
+// Logic below is based on other lists displayed in the product such as sdsc_chg_slatpl_tab.htmpl
+// 1) Show the "Tenant" column ("blank" for public CIs) if ACCESS.Tenant_Restriction is 
+//     0 => None - user can access all tenants
+//     2 => Tenant group - multiple-tenants
+// 2) If Single Tenant access (ACCESS.Tenant_Restriction = 1), 
+//     A) Show the the "Public" column if Tenant Administrator ($INTERFACE.tn_admin = 1)
+//        OR and has administrator access ($ACCESS.admin > 0)
+//     B) Don't show the the "Public" or "Public" columns for standard single tenant users.
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$prop.MultiTenancy" != "off">
+<PDM_IF '$ACCESS.Tenant_Restriction' != '1'>
+cmdbShowTenantColumn = true;
+cmdbShowPublicColumn = false;
+<PDM_ELIF '$INTERFACE.tn_admin' != '0' || '$ACCESS.admin' != '0'>
+cmdbShowTenantColumn = false;
+cmdbShowPublicColumn = true;
+<PDM_ELSE>
+cmdbShowTenantColumn = false;
+cmdbShowPublicColumn = false;
+</PDM_IF>
+</PDM_IF>
+
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Strings used in cmdb_reconciliation.js
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+cmdbCITableStrings["Reconciliation Tab CI List"] = "Reconciliation Tab CI List";
+cmdbCITableStrings["Click to select CI to supersede"] = "Click to select CI to supersede";
+cmdbCITableStrings["Disabled since already superseded"] = "Disabled since already superseded";
+cmdbCITableStrings["Supersede selected CIs"] = "Supersede selected CIs";
+cmdbCITableStrings["Exclude Ambiguity"] = "Exclude Ambiguity";
+cmdbCITableStrings["Name"] = "Name";
+cmdbCITableStrings["MAC Address"] = "MAC Address";
+cmdbCITableStrings["Serial Number"] = "Serial Number";
+cmdbCITableStrings["Alt CI ID"] = "Alt CI ID"; 
+cmdbCITableStrings["System Name"] = "System Name"; 
+cmdbCITableStrings["DNS Name"] = "DNS Name"; 
+cmdbCITableStrings["Class"] = "Class"; 
+cmdbCITableStrings["Family"] = "Family";
+cmdbCITableStrings["Unknown_error"] = "Unknown error occurred, see stdlog for errors"; 
+cmdbCITableStrings["All_CIs_have_been_processed"] = "All CIs have been processed, no action will occur";
+cmdbCITableStrings["Please_select_one_or_more_CIs"] = "Please select one or more CIs before clicking Supersede";
+cmdbCITableStrings["Set Target CI"] = "Set Target CI";
+cmdbCITableStrings["Please_select_one_CI"] = "Please select one CI before clicking Set Target CI";
+cmdbCITableStrings["There_are_no_ambiguous_CIs_found"] = "There are no ambiguous Configuration Items found";
+cmdbCITableStrings["Click_to_select_Target_CI"] = "Click to select Target CI";
+cmdbCITableStrings["There_are_no_CIs_found"] = "There are no Configuration Items found";
+cmdbCITableStrings["Supersede operation failed for CI"] = "Supersede operation failed for CI";
+cmdbCITableStrings["Supersede_operation_successful"] = "Supersede operation successful - The selected CIs are superseded by the current CI";
+cmdbCITableStrings["Tenant"] = "Tenant";
+cmdbCITableStrings["Public"] = "Public";
+cmdbCITableStrings["Yes"] = "Yes";
+cmdbCITableStrings["No"] = "No";
+cmdbCITableStrings["#Req"] = "#Req";
+cmdbCITableStrings["#Inc"] = "#Inc";
+cmdbCITableStrings["#Prb"] = "#Prb";
+cmdbCITableStrings["#Chg"] = "#Chg";
+cmdbCITableStrings["#Iss"] = "#Iss";
+
+
+<PDM_IF "$prop.factory" != "ci_twa_ci" >
+ <PDM_IF 0>
+ /////////////////////////////////////////////////////////////////////////////////
+ // For CIs, use attribute label override for column headers if specified on the CI detail form (see cmdb_detail.htmpl)
+ /////////////////////////////////////////////////////////////////////////////////
+ </PDM_IF>
+ 
+  <PDM_IF "$prop.LABEL_SYSTEM_NAME" != "">
+    cmdbCITableStrings["System Name"] = "$prop.LABEL_SYSTEM_NAME"; 
+  <PDM_ELIF "$prop.SHOW_SYSTEM_NAME_MULTILINE" == "YES">
+    cmdbCITableStrings["System Name"] = "System Name"; 
+  </PDM_ELSE>
+    cmdbCITableStrings["System Name"] = "Host Name"; 
+  </PDM_IF>
+  
+  <PDM_IF "$prop.LABEL_ALT_CI_ID" != "">
+    cmdbCITableStrings["Alt CI ID"] = "$prop.LABEL_ALT_CI_ID"; 
+  </PDM_IF>        
+  
+  <PDM_IF "$prop.LABEL_DNS_NAME" != "">
+    cmdbCITableStrings["DNS Name"] = "$prop.LABEL_DNS_NAME"; 
+  </PDM_IF>        
+  
+  <PDM_IF "$prop.LABEL_MAC_ADDRESS" != "">
+    cmdbCITableStrings["MAC Address"] = "$prop.LABEL_MAC_ADDRESS"; 
+  </PDM_IF>
+  
+</PDM_IF>
+
+

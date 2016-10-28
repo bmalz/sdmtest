@@ -1,0 +1,34 @@
+<PDM_IF 0>
+	20131022 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+</HEAD>
+<BODY>
+<SCRIPT>
+	if (typeof zcst_getmore == "function")
+    {
+        zcst_getmore("$args.billing_code.id", "$args.billing_code.name", "$args.email_address", "$args.phone_number", "$args.combo_name");
+    }
+	
+	if (typeof GetCustomerLocSiteId == "function")
+    {
+        GetCustomerLocSiteId("$args.location.site.id");
+    }
+
+	if (typeof GetOwningContracts == "function")
+    {
+		var Contracts = new Array();
+		<PDM_LIST PREFIX=list FACTORY=zlrel_org_kontr WHERE="org.id=U'$args.organization.id'">
+			Contracts.push("$list.kontr.id");
+		</PDM_LIST>
+        GetOwningContracts(Contracts);
+    }
+
+    if (typeof SetManager == "function") {
+    	SetManager("$args.organization.contact.COMMON_NAME", "$args.organization.contact.id");
+    }
+</SCRIPT>
+hidden frame, nothing to do here.
+</BODY>
+</HTML>
+

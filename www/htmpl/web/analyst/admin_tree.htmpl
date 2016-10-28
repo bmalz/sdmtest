@@ -1,0 +1,177 @@
+<PDM_IF 0>
+admin_tree.htmpl
+WHEN PRESENTED:
+	Htmpl for display the admin tree.     
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="OP=menu+NBTAB=adm">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+<script type="text/javascript" src=$CAisd/scripts/report.js></script>
+<script language=javascript>
+function CatTreeOnClick(lCurrCatID,sCurrPathText,sfile_name,flag,m_snew_file_name,isImage)
+{
+    ahdframe = window.parent.ahdframe;
+    ahdframe.parent.setCurrentIndex(lCurrCatID);
+    LoadSkeletons(lCurrCatID,sfile_name,flag,m_snew_file_name,isImage);
+}
+
+function LoadSkeletons(lCurrCatID,sfile_name,flag,m_snew_file_name,isImage)
+{
+// To solve the SDT 58903 "Cannot get the Knowledge Categoies to open off Windows 2003 with FireFox 1.5"
+// Knowledge Categories is opened here and not in kt_architect_init.htmpl.
+var sLCaseFileName = sfile_name;
+sLCaseFileName.toLowerCase();
+if ( sfile_name == "kt_architect_init.htmpl" )
+{
+	popupKnowledgeCategories();
+}
+if (flag==1)
+{
+	var found_already = false;
+	var found_at = -1;
+	
+	for(i = 0; i<ahdframe.parent.test_cache.length; i++)
+	{
+		if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+		{
+			found_already = true;
+			found_at = i;
+			break;
+		}
+	}
+	if(!found_already)
+	{		
+		var oldlen = ahdframe.parent.test_cache.length;
+		var ee = new ahdframe.parent.testobj(lCurrCatID, m_snew_file_name);
+		ahdframe.parent.test_cache.push(ee);
+	}
+	else
+	{
+		ahdframe.parent.test_cache[found_at].nname = m_snew_file_name;
+	}
+}
+    var index=sfile_name.indexOf("OP=");
+    var indexrpt=sfile_name.toLowerCase().indexOf(".rpt");
+
+    var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + "+";
+    var form = "";
+// keeping this check lCurrCatID==100 for now and changing its refrence to admin_tab_dflt.htmpl		
+
+		if(lCurrCatID==100 )
+		  form = "admin_tab_dflt.htmpl";		
+		else if (index != -1)
+		{
+			for(i = 0; i<ahdframe.parent.test_cache.length; i++)
+			{
+				if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+				{
+					sfile_name = ahdframe.parent.test_cache[i].nname;
+					break;
+				}
+			}	
+			if (lCurrCatID!=100 && sfile_name =="")
+             		 	form = "admin_empty.htmpl";             		 			
+			else
+             			 url += sfile_name;
+             		
+             		if (isImage != true )	 
+             		ExpandCollapseCurrNodeChilds();
+		
+		}
+		//  Need to load report processing instead of a url if the sfile_name extension is .rpt
+		else if (indexrpt != -1)
+		{				
+			for(i = 0; i<ahdframe.parent.test_cache.length; i++)
+			{
+				if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+				{
+					sfile_name = ahdframe.parent.test_cache[i].nname;					
+					break;
+				}
+			}
+			form = "admin_empty.htmpl";
+			if (lCurrCatID!=100 && sfile_name !="")	
+				popup_report(sfile_name,"");
+		}		
+
+		else
+		{				
+			for(i = 0; i<ahdframe.parent.test_cache.length; i++)
+			{
+				if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+				{
+					sfile_name = ahdframe.parent.test_cache[i].nname;					
+					break;
+				}
+			}
+			if (lCurrCatID!=100 && sfile_name =="")
+             			 form = "admin_empty.htmpl";		            			
+			else
+              			form = sfile_name;
+
+			if (isImage != true )              			
+              		ExpandCollapseCurrNodeChilds();
+		}	
+		if ( form != "" ) {
+          		 //SDT 34771 - click on the current admin node refreshes the admin page	
+         		 	 //if ( typeof ahdframe.propFormName == "string" &&
+          			 //     form == ahdframe.propFormName )
+           			//   return;
+           
+         		  // If OP is specified in the form name don't append OP=DISPLAY_FORM_HTMPL
+          
+          	 	   var op_found_index=form.indexOf("OP=");
+          	  	   if(op_found_index !=-1)
+           		       url+=form;
+            		   else
+          		        url += "OP=DISPLAY_FORM+HTMPL=" + form;
+        		}
+        		
+          if (lCurrCatID == 161) {
+            var bKTInstalled = "$env.NX_KT";
+            if ( (bKTInstalled == "No") ) {
+			   //no full KT
+			   url += "+QBE.NE.kd_flag=1";
+           }     
+         }     
+         
+         //append DOMSET=option_list to all individual option nodes under the "Option Manager" node
+         // so that these nodes can be sorted only by sym --- SDT 37259
+         var opt_nodes=url.indexOf("OP=SEARCH+FACTORY=options+QBE.EQ.app_name");
+         if(opt_nodes !=-1)
+         url+="+DOMSET=option_list";
+         
+         	
+    ahdframe.location=url;
+}
+
+function popupKnowledgeCategories() {
+  //ER added +RELOAD_WIN=0 so that window regains focus and doesn't reload into ahdframe
+  var form = "kt_architect.htmpl";
+  var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+            "+OP=DISPLAY_FORM+HTMPL=" + form +
+            "+KEEP.IsPopUp=1+RELOAD_WIN=0";
+  var features="directories=no"+
+            ",location=no"+
+            ",status=no";
+
+  // Force the popup of this screen by negating the width
+  preparePopup(url, "ARCHITECT", features, -1, 1, "MENUBAR=no");
+}
+
+</script>
+<PDM_MACRO NAME=kt_Categories_Tree menu="adm_tree" iframe=no>
+</HEAD>
+<frameset rows="*,0" onload= "InitTree('','','','admin')"
+          frameborder=0 framespacing=0>
+<frame id=KTCatTree name=KTCatTree src="$CAisd/html/empty.html"
+       title="Administration Functions Tree">
+<frame id=KTCatData name=KTCatData src="$CAisd/html/empty.html"
+       title="Hidden frame - do not navigate here">
+</frameset>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: admin_tree.htmpl ASPEN.1 2010/11/24 19:26:38 pstso01 Exp $;
+</PDM_IF>

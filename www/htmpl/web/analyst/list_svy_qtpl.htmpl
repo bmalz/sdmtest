@@ -1,0 +1,64 @@
+<PDM_IF 0>
+list_svy_qtpl.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Survey Questions
+INTENT:
+    Display the list of Survey Questions
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Survey Question Search";
+var hdrTitleList = "Survey Question List";
+var autoRefreshWindows = new Object();
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("", "");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Survey Questions">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=svy_qtpl>
+document.write('<INPUT TYPE=hidden NAME="KEEP.id_from_svydetail" VALUE="$args.KEEP.id_from_svydetail">');
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.owning_survey" VALUE="$args.KEEP.id_from_svydetail">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag default="Active">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+if ($args.KEEP.id_from_svydetail != 0)
+{ 
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Add Question" func="add_svy_qtpl_svy_tpl('$args.KEEP.id_from_svydetail')" hotkey_name="Add Question" id="btn203">
+<PDM_MACRO name=btnEndRow>
+}
+var msgFoundNone = "No  survey questions found";
+var msgFound1 = "1  survey question found";
+var msgFound = "%1  survey questions found";
+var msgFoundMore = "%1  survey questions found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired  survey question";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Pytanie" attr=text>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>;
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_svy_qtpl.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

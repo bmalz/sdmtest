@@ -1,0 +1,142 @@
+<PDM_IF 0>
+role_auth_tab.htmpl
+The Authoriation tab of the detail_role form.
+</PDM_IF>
+
+<html lang="en">
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Role Authorization">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+tab_banner("Authorization");
+
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlDropdown hdr="Grant Level" attr="grant_level" size=20 lookup=no>
+<PDM_MACRO NAME=dtlCheckbox hdr="View Internal Logs?" attr="view_internal" on="Yes" off="No" colspan=2>
+<PDM_MACRO NAME=dtlDropdown hdr="SA Access" attr="sa_access" size=20 lookup=no whereclause = "isActive = 1">
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlLookup hdr="Nazwa partycji danych" attr="data_partition" size=20>
+<PDM_MACRO NAME=dtlCheckbox hdr="Override Contact Data Partition?" attr="override_cnt_datapart" on="Yes" off="No" colspan=3>
+
+
+<PDM_IF "$prop.MultiTenancy" != "off">
+<PDM_MACRO NAME=dtlStartRow>
+detailRowHdr("");
+detailSetRowData("");
+detailWriteRow();
+
+<PDM_IF "$prop.MultiTenancy" != "off">
+<PDM_IF "$prop.MultiTenancy" == "on" || "$cst.tenant" == "$prop.SERVICE_PROVIDER_UUID" || "$prop.SERVICE_PROVIDER_UUID" == "00">
+
+<PDM_MACRO NAME=dtlStartRow>
+detailRowHdr("Multi-Tenancy Settings", 4);
+detailSetRowData("");
+detailWriteRow();
+
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlCheckbox hdr="Update Public?" attr="update_global" on="Yes" off="No">
+detailSetEventHandler("onChange='onChangeTenantAccess(this.value)'");
+detailDropdown("Tenant Access","tenant_access","role",1,20, 
+true,"",tenantAccess.toString(),
+"no",tenantAccess.toString(),
+tenantAccessName(tenantAccess, tenantAccessNames),
+"","","no","","",accessContactsTenant,
+"All Tenants",accessAllTenants,
+"Single Tenant",accessSingleTenant,
+"Tenant Group",accessTenantGroup,
+"Contact's Tenant",accessContactsTenant,
+"Contact's Tenant Group", accessContactsTenantGroup,
+"Contact's Subtenant Group", accessContactsSubtenantGroup,
+"Contact's Supertenant Group", accessContactsSupertenantGroup,
+"Contact's Related Tenant Group", accessContactsRelatedTenantGroup);
+
+<PDM_IF "$prop.form_name_3" == "edit" >
+
+   // These two dtlLookup calls are tied to the following lines that gets the fieldToValidate index.
+   // If the dtlLookup is moved on the form, you must move its corresponding "_dtl.fieldToValidate.length - 1"
+   // line.  These two fields must be marked with make_required="yes".
+   <PDM_MACRO NAME=dtlLookup hdr="Single Tenant" attr=single_tenant size=20 make_required="yes" colspan=2>
+   tenantFldNum = _dtl.fieldToValidate.length - 1;
+   <PDM_MACRO NAME=dtlLookup hdr="Tenant Group" attr=tenant_group size=20 make_required="yes" colspan=2>
+   groupFldNum = _dtl.fieldToValidate.length - 1;
+
+   <PDM_MACRO NAME=dtlStartRow>
+
+<PDM_ELSE>
+   if ( tenantAccess == accessSingleTenant ) {
+      <PDM_MACRO NAME=dtlLookupReadonly hdr="Single Tenant" attr=single_tenant colspan=2>
+   }
+   else if ( tenantAccess == accessTenantGroup ) {
+      <PDM_MACRO NAME=dtlLookupReadonly hdr="Tenant Group" attr=tenant_group colspan=2>
+   }
+</PDM_IF>
+
+
+<PDM_MACRO NAME=dtlStartRow>
+detailRowHdr(" ",1);
+detailSetRowData("");
+detailSetEventHandler("onChange='onChangeTenantWriteAccess(this.value)'");
+detailDropdown("Tenant Write Access","tenant_access_write","role",1,20, 
+true,"",tenantWriteAccess.toString(),
+"no",tenantWriteAccess.toString(),
+tenantAccessName(tenantWriteAccess, tenantAccessNames),
+"","","no","","",sameAsTenantAccess,
+"Same as Tenant Access",sameAsTenantAccess,
+"All Tenants",accessAllTenants,
+"Single Tenant",accessSingleTenant,
+"Tenant Group",accessTenantGroup,
+"Contact's Tenant",accessContactsTenant,
+"Contact's Tenant Group", accessContactsTenantGroup,
+"Contact's Subtenant Group", accessContactsSubtenantGroup,
+"Contact's Supertenant Group", accessContactsSupertenantGroup,
+"Contact's Related Tenant Group", accessContactsRelatedTenantGroup);
+
+<PDM_IF "$prop.form_name_3" == "edit" >
+
+   // These two dtlLookup calls are tied to the following lines that gets the fieldToValidate index.
+   // If the dtlLookup is moved on the form, you must move its corresponding "_dtl.fieldToValidate.length - 1"
+   // line.  These two fields must be marked with make_required="yes".
+   <PDM_MACRO NAME=dtlLookup hdr="Single Tenant" attr=single_tenant_write size=20 make_required="yes" colspan=2>
+   tenantWriteFldNum = _dtl.fieldToValidate.length - 1;
+
+   <PDM_MACRO NAME=dtlLookup hdr="Tenant Group" attr=tenant_group_write size=20 make_required="yes" colspan=2>
+   groupWriteFldNum = _dtl.fieldToValidate.length - 1;
+
+   <PDM_MACRO NAME=dtlStartRow>
+
+<PDM_ELSE>
+   if ( tenantWriteAccess == accessSingleTenant ) {
+      <PDM_MACRO NAME=dtlLookupReadonly hdr="Single Tenant" attr=single_tenant_write colspan=2>
+   }
+   else if ( tenantWriteAccess == accessTenantGroup ) {
+      <PDM_MACRO NAME=dtlLookupReadonly hdr="Tenant Group" attr=tenant_group_write colspan=2>
+   }
+</PDM_IF>
+
+</PDM_IF>
+
+</PDM_IF>
+</PDM_IF>
+
+<PDM_MACRO NAME=dtlEndTable>
+
+<PDM_IF "$prop.form_name_3" == "edit" >
+onChangeTenantAccess(tenantAccess);
+onChangeTenantWriteAccess(tenantWriteAccess);
+</PDM_IF>
+
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: role_auth_tab.htmpl ANDERSON.6 2010/01/06 14:31:25 sahra04 Exp $
+</PDM_IF>

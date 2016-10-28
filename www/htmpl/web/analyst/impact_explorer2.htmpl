@@ -1,0 +1,30 @@
+<html lang="en">
+<PDM_IF 0>
+WHEN PRESENTED:
+	From impact_explorer.htmpl.
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var ahdframeset = parent.ahdframeset;
+</SCRIPT>
+</HEAD>
+<body>
+<SCRIPT>
+document.write('<iframe style="width:100%;height:100%;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=$args.FID');
+document.write('+HTMPL=impact_explorer3.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME');
+document.write('+ticket_persid=$args.ticket_persid');
+document.write('+ci_id=$args.ci_id');
+document.write('" ');
+document.write('NAME=impact_explorer_menuOK SCROLLING=no MARGINHEIGHT=2 MARGINWIDTH=0 FRAMEBORDER=1 ');
+document.write('title="Hidden frame - do not navigate here">');
+document.writeln('This window requires iframe support</iframe>');
+</SCRIPT>
+</body>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: impact_explorer2.htmpl ANDERSON.3 2009/10/27 09:30:14 ralje02 Exp $;
+</PDM_IF>

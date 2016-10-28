@@ -1,0 +1,58 @@
+<PDM_IF 0>
+iss_accumulate.htmpl
+WHEN PRESENTED:
+    when the app needs to accumulate workflow costs and durations, and roll up to a
+    issue. User needs to decide whether to do just this Issue or
+    all child CO's.
+INTENT:
+    accumulate issue workflow costs and durations.
+VARIABLES:
+    object iss   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/issue.maj for the
+                            definition of attributes for 'OBJECT iss'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script>
+var obj_name = "Issue";
+var obj_id = "${args.ref_num:}";
+edit_form=1;
+setWindowTitle(obj_id + " - Accumulate Issue");
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+var cawf_procid = "$args.cawf_procid";
+</script>
+</head>
+<body onunload="unload_check()" class="editform">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<center>
+<H1>Accumulate Issue $args.ref_num</H1>
+<PDM_FORM NAME="frm001" ONSUBMIT="return check_submit()">
+<input type="hidden" name="HTMPL" value='show_main_detail.htmpl'>
+<input type="hidden" name="OP"  value="ACCUMULATE">
+<script language="JavaScript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+if (cawf_procid == "" ){
+<PDM_MACRO NAME=button caption="Accumulate this Issue and All Children" hotkey_name="Accumulate this Issue and All Children" id=btn001 func="pdm_submit('frm001','ACCUMULATE_ALL')" NewRow=yes EndRow=yes>
+<PDM_MACRO NAME=button caption="Accumulate Only this Issue" hotkey_name="Accumulate Only this Issue" id=btn002 func="pdm_submit('frm001','ACCUMULATE')" NewRow=yes EndRow=yes>
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" btnType="negative" id=btncncl Width=120 func="cancel_update('$prop.form_name_2', '$args.id', 'show_main_detail.htmpl')" NewRow=yes EndRow=yes>
+}
+else{
+	alertmsg("Accumulate_action_is_not_avail0");  
+}        
+</script>
+</PDM_FORM>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</center>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: iss_accumulate.htmpl ASPEN.4 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>

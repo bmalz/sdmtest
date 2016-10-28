@@ -1,0 +1,897 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display the Impact Explorer tree.   
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/menu_tree_menu.js"></SCRIPT>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript">
+var m_bTreeBusy = false;
+var m_NodeToloadChildTo = null;
+var m_MenuNode = null;
+var m_sObjectName = '$args.OBJECT_NAME';
+var m_lArrayNumber = '$args.lArrayNumber';
+
+var ticket_persid = "$args.ticket_persid";            // the change order's persistent_id (if for a chg).
+var ticket_ref_num = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.ticketRefNum"</PDM_FMT>;  // the change order's chg_ref_num (if for a chg).
+var ci_id = "$args.ci_id";                            // CI id (if for a CI).
+var ci_name = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.ciName"</PDM_FMT>;    // CI name (if for a CI).
+var rootID = "$args.rootID";                          // id of the change order node (the tree's root).
+var node_id = rootID;                                 // global var used for creating new new nodes.
+var more_str = "More...";
+var m_LinkedMoreNode = null;
+
+// bForTicket = true when the Impact Explorer is launched for a Change Order.
+// bForCI = true when the Impact Explorer is launched for a CI.
+var bForTicket = true;
+var bForCI = false;
+if (ci_id != "") {
+    bForTicket = false;
+    bForCI = true;
+}
+var imp_expl_form_title = "";
+
+// Determine CMDB Visualizer URL.
+var CMDBVisualizerURL = "";
+var CMDBViewer = "no";
+<PDM_IF $env.NX_CMDB_VISUALIZER != "">
+	CMDBViewer = "yes";
+	CMDBVisualizerURL = "$env.NX_CMDB_VISUALIZER";
+<PDM_ELSE>
+<PDM_LIST PREFIX="car" FACTORY=ca_application_registration WHERE="id=2018">
+if ($car.id) {
+	CMDBViewer = "yes";
+	CMDBVisualizerURL = "$car.product_data";
+}
+</PDM_LIST>
+</PDM_IF>
+
+var ctxNRMenu1 = new ContextMenu("ctxNRMenu1");
+ctxNRMenu1.addItem( "View", "ViewCIFromRightClick()" );
+ctxNRMenu1.addItem( "Add To Change Order", "doAttachToChg()" );
+ctxNRMenu1.addItem( "List Descendants", "viewDescendantsList()" );
+if (CMDBViewer == "yes") {
+ctxNRMenu1.addItem( "CMDB Visualizer", "openCmdbViz()" );
+}
+ctxNRMenu1.finish();
+
+var ctxNRMenu2 = new ContextMenu("ctxNRMenu2");
+ctxNRMenu2.addItem( "View", "ViewCIFromRightClick()" );
+ctxNRMenu2.addItem( "List Descendants", "viewDescendantsList()" );
+if (CMDBViewer == "yes") {
+ctxNRMenu2.addItem( "CMDB Visualizer", "openCmdbViz()" );
+}
+ctxNRMenu2.finish();
+
+var ctxNRMenu3 = new ContextMenu("ctxNRMenu3");
+ctxNRMenu3.addItem( "List Descendants", "viewDescendantsList()" );
+if (CMDBViewer == "yes") {
+ctxNRMenu3.addItem( "CMDB Visualizer", "openCmdbViz()" );
+}
+ctxNRMenu3.finish();
+
+</SCRIPT>
+	
+<SCRIPT>
+// Architect Tree Stuff
+var m_arrCatToCreate = new Array();
+var m_lCatToCreateCNT = 0;
+function loadTree()
+{
+    // Load the change order or CI as the root node
+    if ( bForTicket ) {
+        var oTop = LoadNode(null, rootID, "Change Order $args.ticketRefNum", true, "0", "", "", "", false);
+    }
+    else {
+        var oTop = LoadNode(null, rootID, ci_name, true, "0", "", "nr:"+ci_id, "", false);
+    }
+
+    // Load the change order's linked CIs or the CI's related CIs.
+    if ( bForTicket ) {
+        GetAttachedCIs(false);
+    }
+    else {
+        GetRelatedCIs(oTop);
+    }
+
+    oTop.kt_tree_child_Data_loaded = true;
+    m_NodeToloadChildTo = oTop;
+    GetDataEnd(true);
+
+    // select the Top node (change order) by default.
+    TreeOnFolderClick(oTop.TreeNodeID, false, true);
+    Tree_Lib_GoToNode(oTop, true);
+}
+
+function LoadNode(oParent, lID, sCaption, bHasChildren, lParentID, file_name, nr_persid, nr_name, bIsMoreNode, rel_type)
+{
+    var oNode = getTreeNodeByKCATID(lID);
+    //make sure the node is not already there, could happen when clickng on the back button and reloading the hidden frame sdt 32231 
+    if (oNode != null)
+    {
+	return oNode;
+    }
+    var oNewNode = new Tree_Node(sCaption, oParent)
+    oNewNode.kt_tree_id = lID;
+    oNewNode.kt_Tree_caption = sCaption;
+    oNewNode.kt_tree_child_Data_loaded = false;
+    oNewNode.kt_Tree_has_children = bHasChildren;	
+    oNewNode.kt_Tree_parent_id = lParentID;
+    oNewNode.kt_Tree_file_name = file_name;
+    oNewNode.kt_Tree_nr_persid = nr_persid;
+    oNewNode.kt_Tree_nr_name   = nr_name;
+    oNewNode.kt_Tree_more_node = bIsMoreNode;
+    oNewNode.kt_Tree_rel_type  = rel_type;
+    oNewNode.kt_Tree_child_persids = "";
+
+    if (bHasChildren)
+    {
+    	if (oParent!=null)
+	{
+	    Tree_Lib_showPlusMinusOnChild(oNewNode,true);
+    	}
+    	oNewNode.kt_Tree_Is_Father = true;
+    }
+    else
+    {
+	oNewNode.kt_Tree_Is_Father = false;
+    }
+
+    if (lParentID == rootID && bIsMoreNode)
+    {
+        m_LinkedMoreNode = oNewNode;
+    }
+
+    return oNewNode;
+}
+
+function TreeOnFolderClick(lNodeID, isImage, isLoadTreeClick)
+{
+    var oNode = Tree_GetNodeFromID(lNodeID);
+    if (oNode == null)
+    {
+	return;
+    }
+
+    //SDT 34771 - click on the current menu node refreshes the menu page
+    //if (oNode != Tree_Lib_GetCurrNode())
+    Tree_Lib_GoToNode(oNode,true);
+    if (m_oCallingDocObject!= null)
+    {
+        if ( oNode.kt_Tree_more_node )
+        {
+            // Set m_NodeToloadChildTo to parent node of the More... node.
+            m_NodeToloadChildTo = Tree_GetNodeFromID(oNode.kt_Tree_parent_id);
+
+            Tree_m_arrNodes[oNode.TreeNodeID] = null;
+
+            // If the parent node is the root node, we are getting more attached CIs.
+            // Otherwise, we are getting more related CIs.
+            if (m_NodeToloadChildTo.kt_tree_id == rootID && bForTicket) {
+                GetAttachedCIs(true, oNode);
+            }
+            else {
+                GetRelatedCIs(oNode);
+            }
+            return;
+        }
+
+	m_lCurrCatID = oNode.kt_tree_id;
+	//alert(m_lCurrCatID);
+	m_sfile_name = oNode.kt_Tree_file_name;
+
+	if (typeof m_oCallingDocObject.MenuTreeOnClick == "function")
+	{
+	    if (isImage == true ) {
+		m_oCallingDocObject.MenuTreeOnClick(m_lCurrCatID, m_sfile_name, 0, null, isImage);
+            }
+	    else {
+		m_oCallingDocObject.MenuTreeOnClick(m_lCurrCatID, m_sfile_name);
+            }
+	}
+    }
+
+    // If user clicks on the Change Order node, set focus to the Change Order detail.
+    if (lNodeID == rootID)
+    {
+        if (typeof isLoadTreeClick != "boolean" || isLoadTreeClick == false) 
+        {
+            if (typeof ahdframeset.opener == "object") {
+                ahdframeset.opener.focus();
+                return;
+            }
+        }
+    }}
+
+function update_filename(oNode,sfile_name)
+{
+    m_lCurrCatID = oNode.kt_tree_id;
+    m_sfile_name="";
+    m_snew_file_name = sfile_name;
+    if (typeof m_oCallingDocObject.MenuTreeOnClick == "function")
+    {
+	m_oCallingDocObject.MenuTreeOnClick(m_lCurrCatID, m_sfile_name, 1, m_snew_file_name);
+				
+    }
+}
+
+function TreeOnImageFolderClick(lNodeID)
+{
+    TreeOnPlusMinusClick(lNodeID);
+    TreeOnFolderClick(lNodeID, true);
+}
+
+
+function TreeOnRightClick(event,lNodeID)
+{
+    var oNode = Tree_GetNodeFromID(lNodeID);
+    if (oNode.kt_tree_id < 0 || oNode.kt_Tree_more_node)
+    {
+	return false;	// Return false so that the browser context menu does not display
+    }
+
+    if (oNode.kt_Tree_parent_id == 0) {
+        if ( bForCI ) {
+            var ctxMenu = ctxNRMenu3;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (oNode.kt_Tree_parent_id == rootID || bForCI) {
+        var ctxMenu = ctxNRMenu2;
+    }
+    else {
+        var ctxMenu = ctxNRMenu1;
+    }
+
+    m_oMenuNode = oNode;
+
+    var assoc = document.getElementById("s" + lNodeID + "ds");
+
+    if ("$prop.browser" != "IE" && ahdtop.cstUsingScreenReader) {
+       // use default delay time.
+       ctxMenu.show(event, assoc, "");
+    }
+    else {
+       ctxMenu.show(event, assoc, 0);
+    }
+
+	try {
+      if ( _browser.isIE ) {
+        event.cancelBubble = true;
+        event.returnValue = 0;	
+      }
+      else {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+    catch(e) {}
+	
+    return false;	// Return false so that the browser context menu does not display
+}
+
+function TreeOnPlusMinusClick(lNodeID)
+{
+    var oNode = Tree_GetNodeFromID(lNodeID);
+    if (oNode == null)
+    {
+	return;
+    }
+    if (oNode.kt_tree_id < 0)
+    {
+	return;
+    }	
+    if (oNode.kt_Tree_parent_id  == 0)
+    {
+	return;
+    }
+    if (m_bTreeBusy)
+    {
+	return;
+    }
+    if (!oNode.kt_Tree_Is_Father)
+    {
+	return;
+    }
+    if (oNode.kt_tree_child_Data_loaded)
+    {
+	Tree_Lib_ExpandOrCollapse(oNode);
+    }
+    else
+    {	
+	if (!action_in_progress())
+	{
+	    m_NodeToloadChildTo = oNode;
+            GetRelatedCIs(m_NodeToloadChildTo);
+	}
+    }
+}
+
+function GetDataStart()
+{
+    m_arrCatToCreate = new Array();
+    m_lCatToCreateCNT = 0;
+}
+
+function GetData(lID,sCaption,lHasChildren,lParentID, fname, nr_persid, nr_name, bIsMoreNode, rel_type)
+{
+    var arrNode = new Array();
+    arrNode [0] = lID;
+    arrNode [1] = sCaption;
+    arrNode [2] = lHasChildren;
+    arrNode [3] = lParentID;
+    //FILE_NAME field was renamed to RESOURCE to accomdate parameters 
+    //to be passed along with URL and not nly filenames 
+    //fname --> resource
+    arrNode [4] = fname;
+    arrNode [5] = nr_persid;
+    arrNode [6] = nr_name;
+    arrNode [7] = bIsMoreNode;
+    arrNode [8] = rel_type;
+    m_lCatToCreateCNT++;
+    m_arrCatToCreate[m_lCatToCreateCNT] = arrNode;
+}
+
+function GetDataEnd(bDrawAll)
+{
+    var bDrawAllIn = false;
+    if (GetDataEnd.arguments.length > 0)
+    {
+	bDrawAllIn = bDrawAll;
+    }
+    for (var i=1; i < m_lCatToCreateCNT + 1; i++)
+    {
+	var lID = m_arrCatToCreate[i][0];
+	var sCaption = m_arrCatToCreate[i][1];
+	bHasChildren = false;
+	if (m_arrCatToCreate[i][2] == 1)
+	{
+	    bHasChildren = true;
+	}
+	var lParentID   = m_arrCatToCreate[i][3];
+	var file_name   = m_arrCatToCreate[i][4];
+	var nr_persid   = m_arrCatToCreate[i][5];
+	var nr_name     = m_arrCatToCreate[i][6];
+	var bIsMoreNode = m_arrCatToCreate[i][7];
+	var rel_type    = m_arrCatToCreate[i][8];
+	LoadNode(m_NodeToloadChildTo, lID, sCaption, bHasChildren, lParentID, file_name, nr_persid, nr_name, bIsMoreNode, rel_type);
+    }
+    if (bDrawAllIn)
+    {
+	Tree_DrawAll("divTree");
+    }
+    else
+    {
+	m_NodeToloadChildTo.Tree_Expand();
+	m_NodeToloadChildTo.Tree_DrawChildren();
+	m_NodeToloadChildTo.kt_tree_child_Data_loaded = true;
+	set_action_in_progress(ACTN_COMPLETE);
+    }
+}
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/backfill.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fldrtree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/hier_set.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_tree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT>
+var m_sCurrPathText = "";
+var m_sfile_name= "";
+var m_sCurrFldrPathIDs = "";
+var m_oCallingDocObject = null;
+var m_lCurrCatID = 0;
+var m_objTree = null;
+
+function GetTreeFrame()
+{
+	if (m_objTree==null)
+	{
+		return window;
+	}
+	else
+	{
+		return m_objTree;
+	}
+}
+
+function Init(oCallingDocumentObj,objTree)
+{
+	m_oCallingDocObject = oCallingDocumentObj;
+	m_objTree = objTree;
+}
+
+function UpdateTree(lNodeID, bIsNew, sNodeCaption, lParentID, iHAS_CHILDREN, sfile_name, nr_persid, bMoreNode)
+{
+	if (!bIsNew)
+	{
+		// Updating existing node.
+		// Only done when CI is linked to the chamge order.
+		var oNode = getTreeNodeByKCATID(lNodeID);
+		if (oNode != null)
+		{
+			Tree_Lib_SetNodeText(oNode, sNodeCaption);	
+		}		
+	}
+	else
+	{
+		// Adding a new node.
+		// Done when linking a CI to the change order.
+		// This creates the new node for the CI, with the change order as its parent node.
+		var oNodeParent = getTreeNodeByKCATID(lParentID);
+		if (oNodeParent != null)
+		{
+			if(!oNodeParent.kt_tree_child_Data_loaded)
+			{
+				if (!oNodeParent.kt_Tree_Is_Father)
+				{
+					oNodeParent.kt_Tree_Is_Father = true;
+					Tree_Lib_showPlusMinusOnChild(oNodeParent,true);
+				}
+				TreeOnPlusMinusClick(oNodeParent.TreeNodeID);
+			}
+			else
+			{
+				bHasChildren = false;
+				if (iHAS_CHILDREN==1)
+				{
+					bHasChildren = true;
+				}
+				var oNewNode = LoadNode(oNodeParent, lNodeID, sNodeCaption, bHasChildren,
+						lParentID,sfile_name, nr_persid, sNodeCaption);
+				
+				//oNodeParent.Tree_Expand();
+				oNodeParent.Tree_DrawChildren();				
+			}
+		}
+	}	
+}
+
+function getTreeNodeByKCATID(lID)
+{
+	for (var i=1; i<Tree_m_lLastNodeID+1; i++)
+	{
+		if (Tree_m_arrNodes[i] == null)
+			continue;
+
+		if (Tree_m_arrNodes[i].kt_tree_id == lID)
+		{
+			return Tree_m_arrNodes[i];
+		}
+	}
+	return null;
+}
+
+// Call to get the CIs linked to the change order.
+// Called from loadTree() - when initially opening the form.
+function GetAttachedCIs(bIsMoreCall, moreNode)
+{
+    var query_string=cfgCgi+
+    "?SID="+cfgSID+
+    "+FID="+fid_generator()+
+    "+FACTORY=nr" +
+    "+OP=GET_ATTACHED_CIS" +
+    "+ticket_persid="+ticket_persid;
+
+    
+    if (bIsMoreCall) {
+        if (moreNode == null) return;
+        query_string += moreNode.kt_Tree_file_name;   // we stored what we needed.
+    }
+
+    query_string += "+callback_func=parent.ahdframeset.impexpl_hiersel.GetAttachedCIs_cb";
+    ahdframeset.workframe.location.href=query_string;
+}
+
+// Callback from OP GET_ATTACHED_CIS.
+// Use the ret_str to build the CI nodes attached to the change order.
+function GetAttachedCIs_cb(ret_str)
+{
+	if (ret_str == "") { return; }
+
+        var ret_arr = ret_str.split("@!@!@");
+        var nodes_info = ret_arr[0];
+        var more_nodes_tag = ret_arr[1];
+
+	GetDataStart();
+	BuildNextLevelNodes (rootID, nodes_info);
+
+	// Setup the More... node if necessary.
+	if (typeof more_nodes_tag == "string" && more_nodes_tag != "")
+	{
+		var more_nodes_info = more_nodes_tag.split(",");
+                var next_i      = more_nodes_info[0];
+                var next_persid = more_nodes_info[1];
+
+		var more_nodes_url  = "+next_i=" + next_i +
+		                      "+next_persid=" + next_persid;
+
+		GetData(++node_id, more_str, 0, rootID, more_nodes_url, "", "", true, "");
+	}
+
+	GetDataEnd(true);
+}
+
+// Call to get the CIs related to this CI.
+// Called from TreeOnPlusMinusClick().
+function GetRelatedCIs(moreNode)
+{
+    set_action_in_progress(ACTN_FILLFORM);
+
+    var query_string = cfgCgi+
+                       "?SID="+cfgSID+
+                       "+FID="+fid_generator()+
+                       "+FACTORY=nr" +
+                       "+OP=GET_RELATED_CIS" +
+                       "+ticket_persid=" + ticket_persid;
+
+    
+    if ( !moreNode.kt_Tree_more_node ) {
+        var parent_persid = "";
+        parent_persid = get_parent_node_nr_persid(moreNode.kt_Tree_parent_id);
+
+        query_string += "+start_ci_persid=" + moreNode.kt_Tree_nr_persid + 
+                        "+start_node_id=" + moreNode.kt_tree_id +
+                        "+parent_persid=" + parent_persid;
+    }
+    else {
+        query_string += moreNode.kt_Tree_file_name;   // we stored what we needed.
+    }
+
+    query_string += "+callback_func=parent.ahdframeset.impexpl_hiersel.GetRelatedCIs_cb";
+    ahdframeset.workframe.location.href=query_string;
+}
+
+// Callback from OP GET_RELATED_CIS.
+// Use the ret_str to build the child nodes to parent_node_id - this was the
+// start_node_id sent to GET_RELATED_CIS.
+function GetRelatedCIs_cb(ret_str)
+{
+	if (ret_str == "") { return; }
+
+        var ret_arr = ret_str.split("@!@!@");
+        var parent_node_id = ret_arr[0];
+        var new_nodes_str = ret_arr[1];
+        var more_nodes_tag = ret_arr[2];
+
+	GetDataStart();
+
+	BuildNextLevelNodes (parent_node_id, new_nodes_str);
+
+	if (typeof more_nodes_tag == "string" && more_nodes_tag != "")
+	{
+		var more_nodes_info = more_nodes_tag.split(",");
+                var start_ci_persid = more_nodes_info[0];
+                var start_node_id   = more_nodes_info[1];
+                var parent_persid   = more_nodes_info[2];
+                var next_list       = more_nodes_info[3];
+                var next_i          = more_nodes_info[4];
+                var next_persid     = more_nodes_info[5];
+                var next_rel_type   = more_nodes_info[6];
+
+		var more_nodes_url  = "+next_list=" + next_list +
+		                      "+next_i=" + next_i +
+		                      "+start_ci_persid=" + start_ci_persid +
+		                      "+start_node_id=" + start_node_id +
+		                      "+parent_persid=" + parent_persid +
+		                      "+next_persid="   + next_persid +
+		                      "+next_rel_type=" + next_rel_type;
+
+		GetData(++node_id, more_str, 0, start_node_id, more_nodes_url, "", "", true, "");
+	}
+
+	GetDataEnd();  // without the true parameter...
+}
+
+function BuildNextLevelNodes(parent_node_id, new_nodes)
+{
+	// new_nodes contains the data on all cis that will be added.
+	// split into the individual cis.
+        var new_node_arr = new_nodes.split("@!@");
+
+	var parent_node = Tree_GetNodeFromID(parent_node_id);
+
+	for (var i=0; i < new_node_arr.length; i++)
+	{
+		// A new_node_arr[] element contains the persid, name,
+		// has_child_nodes and the relationship description , like:
+		// "nr:1!@!ci1!@!1!@!administers" - split this
+		var new_node_arr_node = new_node_arr[i].split("!@!");
+
+		var ci_persid = new_node_arr_node[0];
+		if (parent_node != null) {
+			if ( is_already_child_persid(parent_node, ci_persid) ) {
+				// This child has already been added, so skip it.
+				continue;
+			}
+		}
+
+		var ci_name = new_node_arr_node[1];
+		var has_child_nodes = (new_node_arr_node[2] == "0") ? false : true;
+		var is_linked = (new_node_arr_node[4] == "0") ? false : true;
+
+		var sNodeCaption = <PDM_FMT ESC_STYLE=C KEEPTAGS=YES>ci_name</PDM_FMT>;
+		if (parent_node_id != rootID) 
+		{
+			// Determine if this CI is the descendent of itself (a loop in the relationships exists).
+        	        // If so, make it a leaf node.
+			if ( is_relation_loop(ci_persid, parent_node_id) ) {
+				has_child_nodes = false;
+			}
+
+			var rel_desc = new_node_arr_node[3];
+			if (rel_desc == "CHILD") {
+				rel_desc = "child";
+			}
+			else if (rel_desc == "DEPENDENT") {
+				rel_desc = "dependent";
+			}
+
+	                // Determine if this is ci is already linked to the chg.
+        	        // If so, mark it as linked.
+			if ( is_linked ) {
+				sNodeCaption = msgtext("Imp_expl_node_linked", rel_desc, sNodeCaption);
+			}
+			else {
+				sNodeCaption = msgtext("Imp_expl_node", rel_desc, sNodeCaption);
+			}
+		}
+		var sNodeResource = "OP=SHOW_DETAIL+PERSID=" + ci_persid + "+imp_expl_form_title=" + imp_expl_form_title;
+
+		GetData(++node_id, sNodeCaption, has_child_nodes, parent_node_id, sNodeResource, ci_persid, ci_name, false, rel_desc);
+	}
+}
+
+function is_already_child_persid(parent_node, ci_persid)
+{
+	// kt_Tree_child_persids contains a list of the persids all of the children
+	// that have been retrieved so far.
+	var child_persids = parent_node.kt_Tree_child_persids;
+	if (child_persids.indexOf(ci_persid) < 0) {
+		// ci_persid not found.
+		parent_node.kt_Tree_child_persids += ci_persid;
+		return false;
+	}
+	else {
+		// ci_persid was already in kt_Tree_child_persids.
+//alert("found existing ci_persid");
+		return true;
+	}
+}
+
+
+// Called when a new CI node is added.
+// Determine if the new node for this CI (ci_persid) exists as one of 
+// its ancestor nodes (parent, grandparent, etc).
+// If so, return true.  This is used to stop the node from showing
+// that it has children, preventing an infinite loop of CIs.
+function is_relation_loop(ci_persid, parent_node_id)
+{
+	var bIsLoop = false;
+	var ancestor_node_id = parent_node_id;
+
+	// Check ancestors until the root node is reached.
+	while ( ancestor_node_id != rootID )
+	{
+		var ancestor_node = Tree_GetNodeFromID(ancestor_node_id);
+		if (ancestor_node == null) {
+			return false;
+		}
+
+		var ancestor_persid = ancestor_node.kt_Tree_nr_persid;
+		if (ancestor_persid == ci_persid) {
+			bIsLoop = true;
+			break;
+		}
+
+		// Not found, move up the tree.
+		ancestor_node_id = ancestor_node.kt_Tree_parent_id;
+	}
+
+	return bIsLoop;
+}
+
+// Get the nr_persid from the calling node's parent node.
+// Passed into OP GET_RELATED_CIS for use with peer relationship processing.
+function get_parent_node_nr_persid( parent_node_id )
+{
+	var parent_node = Tree_GetNodeFromID(parent_node_id);
+	if (parent_node == null) {
+		return "";
+	}
+
+	return parent_node.kt_Tree_nr_persid;
+}
+
+function viewDescendantsList()
+{
+    set_action_in_progress(ACTN_FILLFORM);
+
+    if (m_oMenuNode == null)
+        return;
+    
+    var query_string=cfgCgi+
+        "?SID="+cfgSID+
+        "+FID="+fid_generator()+
+        "+FACTORY=nr" +
+        "+OP=SHOW_CI_DESCENDANTS_LIST" +
+        "+HTMPL=list_ci_descendants.htmpl" +
+        "+imp_expl_form_title=" + imp_expl_form_title +
+        "+START_CI_PERSID=" + m_oMenuNode.kt_Tree_nr_persid +
+        "+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME";
+
+    ahdframe.location=query_string;
+}
+
+// Link the current node's CI (m_oMenuNode) to the change order.
+function doAttachToChg( )
+{
+    if (m_oMenuNode == null)
+        return;
+    
+    var query_string=cfgCgi+
+        "?SID="+cfgSID+
+        "+FID="+fid_generator()+
+        "+FACTORY=nr" +
+        "+OP=ATTACH_NR_TO_CHANGE" +
+        "+chg_persid=" + ticket_persid + 
+        "+nr_persid=" + m_oMenuNode.kt_Tree_nr_persid;
+
+    query_string += "+callback_func=parent.ahdframeset.impexpl_hiersel.AttachNRToChg_cb";
+    ahdframeset.workframe.location.href=query_string;
+}
+
+// Callback function from OP=ATTACH_NR_TO_CHANGE.
+// Notify the user of the status.
+// If the link was successful, update the tree - show the CI as linked to the chg.
+function AttachNRToChg_cb (ret_str)
+{
+// SUCCESS_1 should get a nice success message
+// SUCCESS_2 means that they need to save the change order
+
+	ret_str = nx_unescape(ret_str);
+
+	if (ret_str == "GENERIC_FAIL") {
+		alert(msgtext("Imp_expl_add_to_chg_fail"));
+		return;
+	}
+
+	if (ret_str == "ALREADY_ATTACHED") {
+		alert(msgtext("Imp_expl_add_to_chg_already_att", m_oMenuNode.kt_Tree_nr_name, ticket_ref_num));
+		return;
+	}
+
+	if (ret_str.indexOf("SUCCESS") == 0) {
+
+		if ( m_oMenuNode == null) {
+			return;
+		}
+
+                // Show the new one as linked.  Rebuild the caption from the node info.
+		var updNodeCaption = msgtext("Imp_expl_node_linked", m_oMenuNode.kt_Tree_rel_type, m_oMenuNode.kt_Tree_nr_name);
+		UpdateTree(m_oMenuNode.kt_tree_id, false, updNodeCaption, "","", "", "", "", false);
+
+		m_NodeToloadChildTo = Tree_GetNodeFromID(rootID);
+
+		//  Add this persid to the list of child persids for the change order node.
+		m_NodeToloadChildTo.kt_Tree_child_persids += m_oMenuNode.kt_Tree_nr_persid;
+
+		GetDataStart();
+
+                // Add the new node as a child of the root node.
+		GetData(++node_id, m_oMenuNode.kt_Tree_nr_name, m_oMenuNode.kt_Tree_has_children, 
+			rootID,	m_oMenuNode.kt_Tree_file_name, m_oMenuNode.kt_Tree_nr_persid, 
+			m_oMenuNode.kt_Tree_nr_name, false, "");
+
+		// Get rid of the old More... node and make a new one - so it is the last node.
+		if (m_LinkedMoreNode != null && m_LinkedMoreNode.kt_Tree_parent_id == rootID)
+		{
+			var more_nodes_url  = m_LinkedMoreNode.kt_Tree_file_name;
+			Tree_m_arrNodes[m_LinkedMoreNode.TreeNodeID] = null;
+			//m_LinkedMoreNode = null;
+			GetData(++node_id, more_str, 0, rootID, more_nodes_url, "", "", true, "");
+		}
+
+		GetDataEnd();
+
+                // Refresh the change order detail
+		if (typeof ahdframeset.opener == "object") 
+		{
+			if (typeof ahdframeset.opener.propFormName3 == "string")
+			{
+				if (ahdframeset.opener.propFormName3 == "ro") {
+					ahdframeset.opener.refreshForm();
+				}
+				else if (ahdframeset.opener.propFormName3 == "edit") {
+					ahdframeset.opener.alertSecondaryUpd(ahdframeset.opener, "secondary");
+				}
+			}
+		}
+		if (ret_str == "SUCCESS_1") {
+			alert(msgtext("Imp_expl_add_to_chg_success1"));
+		}
+		if (ret_str == "SUCCESS_2") {
+			alert(msgtext("Imp_expl_add_to_chg_success2"));
+		}
+		ahdframeset.impexpl_hiersel.focus();
+		return;
+	}
+
+	alert(ret_str);
+}
+
+// Display the CI details in the right pane.
+function ViewCIFromRightClick()
+{
+	if ( m_oMenuNode == null) {
+		return;
+	}
+	TreeOnFolderClick(m_oMenuNode.kt_tree_id, true);
+}
+
+function openCmdbViz()
+{
+	var userId = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.userid</PDM_FMT>';
+	var e_userId = nx_escape( userId );
+
+        // For uuidCI, need to get the nr_persid from the node and strip off the "nr:".
+	var nr_persid = m_oMenuNode.kt_Tree_nr_persid;
+        if (nr_persid.indexOf("nr:") != 0) {
+		alert("Unable to load the CMDB Visualizer");
+		return;
+        }
+        var uuidCI = nr_persid.substr(nr_persid.indexOf(":")+1, nr_persid.length-1);
+
+	// URL to open CMDB Visualizer.  No filter specified.
+	var cmdbviz_url = CMDBVisualizerURL + "/externallaunch.do?sid=NULL&uuid=" + uuidCI 
+				+ "&loginusername=" + e_userId + "&bopsid=%bopsid";
+			
+	popup_window( '', 'LINK_WITH_BOPSID', 0, 0, 
+		      'ahdmenu=no,register=no,resizable=yes,menubar=no,toolbar=no,location=no,scrollbars=yes,status=yes','SHARE_SESSION=1',
+		      'URL='+ cmdbviz_url);
+}
+
+function Loaded()
+{
+	// This makes it easier to set up callback functions.
+	ahdframeset.impexpl_hiersel = window;
+
+	if (typeof parent.MenuTreeLoaded == "function")
+	{
+		parent.MenuTreeLoaded();
+	}
+
+	if (typeof parent.imp_expl_form_title == "string" && parent.imp_expl_form_title != null && parent.imp_expl_form_title != "")
+	{
+		imp_expl_form_title = nx_escape(parent.imp_expl_form_title);
+	}
+
+        // Load the Change Order or CI root node and its linked CIs
+	loadTree();
+}
+
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onLoad="fldrtreeTabOff();Loaded()" LEFTMARGIN=3 TOPMARGIN=3>
+<PDM_INCLUDE FILE=std_body.htmpl menubar=no logo=no header=no>
+
+<DIV id="divTree"></DIV>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: hiersel_impact_explorer.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>

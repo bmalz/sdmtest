@@ -1,0 +1,107 @@
+<PDM_IF 0>
+detail_resp.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Personalized Response
+INTENT:
+    Display the detail info for the Personalized Response
+VARIABLES:
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Personalized Response Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Personalized Response"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Personalized Response $args.name"</PDM_FMT>;
+</SCRIPT>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgMachineName = "$SESSION.MachineName";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var cfgDateFormat = "$date_format";
+var argRefNum = "$args.ref_num";
+var argID = "$args.id";
+var admin_acc = $ACCESS.admin;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+function copy_from_parent()
+{}
+function unloadActions() {
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=response>
+<PDM_MACRO name=dtlStart scroll=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+    
+if (admin_acc > 1) {
+	if (("$args.response_owner.type" == 2308)&&("$prop.form_name_3" == "edit")) {
+		detailLookup(	"Response Owner", 
+						"response_owner", 
+						"cst", 1, "",
+						"0", "", "",
+						"0", "", "",
+						"", "", "yes", 
+						"ADDITIONAL_WHERE=type<>2308"
+					); 
+	} else if ("$args.response_owner.type" == 2308) {
+		detailValidate();
+		showAlertMsg("A Group is not allowed as a Response Owner, defaulting to no Response Owner.");
+		           
+        detailLookup(	"Response Owner", 
+						"response_owner", 
+						"cst", 1, "",
+						"0", "", "",
+						"0", "", "",
+						"", "", "yes", 
+						"ADDITIONAL_WHERE=type<>2308"
+					);
+	} else {
+		
+<PDM_MACRO name=dtlLookup hdr="Właściciel odpowiedzi" attr=response_owner>
+	}
+} else {
+   docWriteln("<INPUT type=hidden NAME=SET.response_owner VALUE=$cst.id>");
+   detailTextboxReadonly( "Response Owner", "response_owner", 1, "$cst.combo_name", "" );
+}
+
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Odpowiedź" attr=response colspan=3 keeplinks=yes rows=6 size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+document.write("<th align=left valign=baseline scope=col colspan=5 class=labeltext>Display the Response for:</th><th>&nbsp;</th></tr><tr>");
+<PDM_MACRO name=dtlCheckbox hdr="Wnioski" attr=cr_flag>
+<PDM_MACRO name=dtlCheckbox hdr="Incydenty" attr=in_flag>
+<PDM_MACRO name=dtlCheckbox hdr="Problemy" attr=pr_flag>
+<PDM_MACRO name=dtlCheckbox hdr="Zmiany" attr=chg_flag>
+<PDM_MACRO name=dtlCheckbox hdr="Issues" attr=iss_flag>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_response.htmpl ASPEN.2 2011/09/20 18:17:11 vwwsr01 Exp $
+</PDM_IF>
+
+<PDM_WSP>

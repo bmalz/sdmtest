@@ -1,0 +1,291 @@
+<PDM_IF 0>
+detail_arcpur_rule.htmpl
+WHEN PRESENTED:
+    When the app needs input to create or update a archive and purge rule 
+INTENT:
+    Capture user input for a archive and purge rule, create/update a archive 
+    and purge rule when submitted.
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  arcpur_rule  args	The archive and purge rulle object we are 
+			displaying. See $NX_ROOT/bopcfg/majic/.maj for the
+                        definition of attributes for 'OBJECT arcpur_rule'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Archive and Purge Rule Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Archive and Purge Rule"</PDM_FMT>;
+if("$args.name")
+	var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Archive and Purge Rule $args.name"</PDM_FMT>;
+else
+	var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Archive and Purge Rule"</PDM_FMT>;
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function sel_oper_type(form_name, opt)
+{
+    var eles = document.forms[form_name].elements;
+    var opts = document.forms[form_name].elements["OPTS"];
+    var oper_type_fld = document.forms[form_name].elements["SET.oper_type"];
+    if ((typeof opts == "undefined") || (typeof oper_type_fld == "undefined"))
+    {
+	alertmsg("Unable_to_set_the_operation_ty");
+	return;
+    }
+    if (opt == 0)
+    {
+	oper_type_fld.value = "0";
+	opts[0].checked = true;
+    }
+    else 
+	opts[0].checked = false;
+    if (opt == 1)
+    {
+	oper_type_fld.value = "1";
+	opts[1].checked = true;
+    }
+    else 
+	opts[1].checked = false;
+    if (opt == 2)
+    {
+	oper_type_fld.value = "2";
+	opts[2].checked = true;
+    }
+    else 
+	opts[2].checked = false;
+}
+
+function run_now()
+{
+    var sel_fld = document.getElementById("hours");
+    var name = nx_escape("$args.name");
+    if (typeof sel_fld == "undefined" || name == "")
+    {
+	alertmsg("Unable_to_find_the_rule_name_o"); 
+	return;
+    }
+    var hours = sel_fld.options[sel_fld.selectedIndex].value;
+    var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+	      "+OP=RUN_ARCPUR_NOW+rule_name=" + name + 
+	      "+hours=" + hours + "+FACTORY=arcpur_rule+persid=" + 
+	      argPersistentID; 
+    if (ahdframeset.name != "AHDtop")
+	url += "+KEEP.POPUP_NAME=" + ahdframeset.name;
+    document.location.href = url; 
+}
+
+function copy_from_parent()
+{
+    if ("$args.KEEP.MAKE_COPY" == "1")
+    {
+	var exceptions = new Array();
+	exceptions[0] = "SET.name";
+	exceptions[1] = "SET.arc_file_name";
+	detailCopyEditForm(exceptions);
+    }
+}
+
+var days_inactive_saved = "$args.days_inactive" - 0;
+var msg_pop = 0;
+function check_days_inactive(fld_obj)
+{
+    if (!_dtl.edit) return true;
+    if (typeof fld_obj == "undefined")
+	fld_obj = document.forms["main_form"].elements["SET.days_inactive"];
+    if (typeof fld_obj == "undefined") 
+	return true;
+    var val = fld_obj.value; 
+    if (val <= 0)
+    {
+	detailReportValidation( fld_obj, 1, msgtext("Error:_the_Days_Inactive_value"));
+	fld_obj.value = days_inactive_saved;
+	return false;
+    }
+    else 
+    {
+	detailReportValidation( fld_obj, 0);
+	if ((val < 30) &&
+	    (val != days_inactive_saved) &&
+	    (days_inactive_saved >= 30))
+	{
+	    if (msg_pop) return false;
+	    msg_pop =1
+	    if (!confirm(msgtext("Set_the_Days_Inactive_value_to", 30)))
+	    {
+		fld_obj.value = days_inactive_saved;
+		msg_pop = 0;
+		return false;
+	    }
+	    msg_pop = 0;
+	}
+	days_inactive_saved = val;
+	return true;
+    }
+}
+
+function radioButton(hdrtext, opt, isChecked)
+{
+  var text = '<input type=RADIO name=OPTS ' + detailNextID() + " ";
+  if ( isChecked )
+    text += 'CHECKED ';
+  text += 'onClick="sel_oper_type(\'' + detailCurrForm() +
+          '\' , ' + opt + ')"><span class="labeltext"><label for="' +
+          _dtl.currID + '">' + hdrtext + '</label></span>';
+  detailSetRowData(text);
+}
+
+function get_disp_name(key, list)
+{
+    var arr = list.split("@,@");
+    var ret = "";
+    for (var i = 1; i < arr.length; i += 2) 
+    {
+	var sym = arr[i-1];
+	var code = arr[i];
+	if (code == key)
+	{
+	    ret = sym;
+	    break;
+	}
+    }
+    return ret;
+}
+
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()" onload="copy_from_parent();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Archive and Purge Rule" key="$args.name">
+<center>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=arcpur_rule>
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+if ((0 + cfgUserAuth) > 1 ) {
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button caption="Save[s]" func="detailSave()" hotkey_name="Save[s]" id="btn001" width=0>
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="pdm_reset()" hotkey_name="Reset[r]" id="btn004" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_ELSE>
+<PDM_MACRO name=button caption="Edit[d]" func="detailEdit()" hotkey_name="Edit[d]" id="btn001">
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" != "edit" && "$args.conf_obj_name" != "" && "$args.object_name" != "">
+
+  docWriteln('<td class="detailro">&nbsp;</td>');
+<PDM_MACRO name=button caption="Run Now" func="run_now()" hotkey_name="Run Now" id="" width=0>
+<PDM_MACRO name=btnEndRow>
+  docWriteln('<td class="detailro" NOWRAP>Stop after:</td>');
+  docWriteln('<td class="detailro"><select id=hours name=hours>');
+  docWriteln('<option selected="selected" value=1>1</option>');
+  for (var i = 2; i < 25; i++)
+  {
+      docWriteln('<option value=' + i +'>' + i + '</option>');
+  }
+  docWriteln('</select></td>');
+  docWriteln('<td class="detailro" NOWRAP>hour(s)</td>');
+</PDM_IF>
+}
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlTextbox hdr="Nazwa reguły" attr=name evt="onBlur=\\\"detailValidateFileName(this)\\\"">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa reguły" attr=name>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlDropdown hdr="Harmonogram" attr=sched default="$env.NX_DEFAULT_SCHEDULE">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Harmonogram" attr=sched default="$args.sched.sym">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Interwał powtarzania" attr=reoccur_interv>
+<PDM_MACRO name=dtlTextbox hdr="Archiwalna nazwa pliku" attr=arc_file_name evt="onBlur=\\\"detailValidateFileName(this)\\\"">
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_IF "$args.oper_type" == "0">
+detailTextboxReadonly( "Operation Type", "", 1, "Archive and Purge", "" );
+</PDM_IF>
+<PDM_IF "$args.oper_type" == "1">
+detailTextboxReadonly( "Operation Type", "", 1, "Purge Only", "" );
+</PDM_IF>
+<PDM_IF "$args.oper_type" == "2">
+detailTextboxReadonly( "Operation Type", "", 1, "Archive Only", "" );
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+document.write("<th align='left' valign='baseline' class='labeltext'>Operation Type</th><th>&nbsp;</th>");
+document.write('<input type="hidden" name="SET.oper_type" value="$args.oper_type">');
+radioButton("Archive and Purge", 0, "$args.oper_type" <= "0" );
+radioButton("Purge Only", 1, "$args.oper_type" == "1");
+radioButton("Archive Only (Test Run)", 2, "$args.oper_type" == "2");
+var e = document.getElementById(_dtl.currTblId);
+if ( e != null )
+  e.summary +=  " Operation Type";
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+document.write("<th align='left' valign='baseline' class='labeltext'>Criteria</th></tr><tr>");
+<PDM_IF "$prop.form_name_3" != "edit">
+detailTextboxReadonly("Config. Object Name","conf_obj_name",1,
+		      get_disp_name("$args.conf_obj_name", "$args.CONF_OBJ_NAME_LIST"), "");
+<PDM_ELSE>
+detailDropdown("Config. Object Name", "conf_obj_name", "", 1, 20, 
+	       "1", "", "$args.conf_obj_name", "no", "", "", "", "", "no", "", "", "$args.conf_obj_name", 
+	       "$args.CONF_OBJ_NAME_LIST");
+</PDM_IF>
+detailTextboxReadonly("Object Name", "", 1, "$args.object_name", "" );
+<PDM_MACRO name=dtlTextbox hdr="Dni braku aktywności" attr=days_inactive evt="onBlur=\\\"check_days_inactive(this)\\\"" maxlength=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Dodatkowe zapytanie" attr=add_query colspan=3 rows=3 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+<script>
+    var orig_onsubmit = null;
+    if (typeof document.forms["main_form"].onsubmit != "undefined")
+	orig_onsubmit = document.forms["main_form"].onsubmit;
+    function arcpur_onsubmit()
+    {
+	if (!check_days_inactive())
+	    return false;
+	var name_obj = window.document.forms["main_form"].elements["SET.name"];
+	if ((typeof name_obj != "undefined") && 
+	    !detailValidateFileName(name_obj))
+	    return false;
+	if (orig_onsubmit != null)
+	    return orig_onsubmit();
+    }
+    document.forms["main_form"].onsubmit = arcpur_onsubmit;
+</script>
+</body>
+</html>
+<PDM_WSP>

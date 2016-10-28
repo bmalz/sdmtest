@@ -1,0 +1,64 @@
+<PDM_IF 0>
+@(#)$Id: html_editor_toolbar.htmpl ASPEN.2 2011/01/14 10:58:00 jenji01 Exp $
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+_editor_url = '$CAisd/'; 
+_editor_lang = 'en';
+var clickedOnOK = false;
+</script>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/htmlarea.css">
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/editor_menu.css">
+
+
+<script type="text/javascript" src="$CAisd/scripts/dialog.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/popupwin.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/htmlarea.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/table-operations.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/html_editor_i18n.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/html_editor_toolbar.js"></script>
+
+<script>
+var editor;
+var toolbar;
+var toolbarMode = "$args.TB";
+var fid = "$args.FID";
+var fieldName = "$args.fieldName";
+var tenant= "$args.tenant";
+var tenantName= "$args.tenantName";
+var parent_persid= "$args.persid";
+
+// Add tenant parameters to provide hidden filtering by tenant for action content
+var sExtraActionContentURL = "";
+<PDM_IF "$prop.MultiTenancy" == "on" && "$args.tenant" != "">
+	var sTenantID = "args.tenant";
+	var sTenantName = "";
+	<PDM_LIST PREFIX=kdMT factory="tenant" WHERE="id=U'$args.tenant'">
+		sTenantName = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>${kdMT.name:}</PDM_FMT>';
+	</PDM_LIST>
+	sExtraActionContentURL = "+KEEP.backfill_field=KEY.ACT_CONT+KEEP.backfillFactory=KD+KEEP.objectTenant=$args.tenant+KEEP.objectTenantName=" + nx_escape(sTenantName);
+</PDM_IF>	
+
+</script>
+
+</head>
+<BODY onload="return window_onload()" onBeforeUnload="return beforeUnloadEditor();" border=no scroll=no>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no menubar=html_editor>
+
+<form style="height:99%;width:100%;" id=formData1 name=formData1>
+	<textarea name=inpText id=inpText style="overflow-y:no;height:99%;width:100%"
+              title="HTML Text"
+              ONFOCUS="storeCaret(this);" 
+              ONSELECT="storeCaret(this);"
+              ONCLICK="storeCaret(this);"
+              ONKEYUP="storeCaret(this);">
+    </textarea>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

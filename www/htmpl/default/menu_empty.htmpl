@@ -1,0 +1,26 @@
+<PDM_IF 0>
+menu_empty.htmpl
+WHEN PRESENTED:
+    A possible form to show empty Screen on the right side of the menu tree when a 
+    node has no resource attached to it.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="main_form">
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+
+</html>
+<PDM_IF 0>
+@(#)$Id: menu_empty.htmpl ASPEN.1 2010/11/16 22:18:05 saima01 Exp $;
+</PDM_IF>

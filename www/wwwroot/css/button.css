@@ -1,0 +1,112 @@
+
+/*these two button classes are used for the two images that create the buttons */
+a.button {
+    background:url("/CAisd/sitemods/img/button_blue_left.gif") no-repeat scroll left top transparent;
+	display:inline-block;
+	font:bold 12px/15px Arial;
+	height:19px;
+	margin:3px;
+	padding-left:9px;
+	text-decoration:none;
+	white-space:nowrap;
+}
+
+a.button span {
+    background:url("/CAisd/sitemods/img/button_blue_right.gif") no-repeat scroll right top transparent;
+	/*color:#FFFFFF;*/
+	display:inline-block;
+	padding:2px 14px 2px 6px;
+	text-decoration:none;
+}
+
+/*these grey classes are used for negative buttons */
+a.grey {
+	background: transparent url('/CAisd/img/button_grey_left.gif') no-repeat top left;
+}
+a.grey span{
+	background: transparent url('/CAisd/img/button_grey_right.gif') no-repeat top right;
+}
+
+/* The a.buttonEnabled:hover classes are used for enabled buttons for mouseover and mousedown events. 
+ * a.buttonEnabled:active is used by IE when the user tabs to the button. 
+ * a.button:focus is used by firefox when the user tabs to the button. */
+a.buttonEnabled:hover, a.buttonEnabled:active, a.button:focus {
+    background-position: 0px -19px;
+    text-decoration:none;
+}
+a.buttonEnabled:hover span, a.buttonEnabled:active span, a.button:focus span {
+    background-position: right -19px;
+    text-decoration:none;
+}
+
+/*these button:hover classes are used for mouseover of disabled buttons */
+a.button:hover span 
+{
+	text-decoration:none;
+}
+
+a.button:hover
+{
+	text-decoration:none;
+}
+
+/*this class is used to set the properties of the button for disabled buttons (only the text and cursor changes, not the image) */
+.disabledattr
+{
+	opacity: 0.5; filter:Alpha(Opacity=50);
+	cursor:default;
+	color:#C0C0C0;
+}
+
+.disabledattr_grey
+{
+	color:#606060;
+}
+
+
+/*this class is used to set the properties for enabled buttons */
+.enabledattr
+{
+	color:#FFFFFF;
+	cursor:pointer;
+}
+
+.tablecenter
+{
+	margin:auto;
+}
+
+/* Container you can use to surround a CSS button to clear float */
+.buttonwrapper {
+    overflow: hidden; /*See: http://www.quirksmode.org/css/clearing.html */
+    width: 100%;
+}
+.button-action {
+	float:right;
+}
+.attach-button {
+	display: inline;	
+}
+
+.request-open-close-btn {
+	float:right;
+	margin-top:15px;
+}
+.new-request-btn {
+	float: right;	
+}
+
+/* End: Buttons from Dynamic Drive CSS Library */
+
+/* Side by side DIVs */
+.leftdiv {
+	float: left
+}
+
+.rightdiv {
+	float: right
+}
+
+.spacerdiv {
+	clear: both;
+}

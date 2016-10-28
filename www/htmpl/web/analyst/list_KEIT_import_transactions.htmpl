@@ -1,0 +1,95 @@
+<PDM_IF 0>
+@(#)$Id: list_KEIT_import_transactions.htmpl ASPEN.1 2011/10/19 11:41:44 visan03 Exp $
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+
+<HEAD>
+	<PDM_PRAGMA RELEASE=110>
+	<PDM_INCLUDE FILE=styles.htmpl>
+	<SCRIPT LANGUAGE="JavaScript">
+		var hdrTitle = "Knowledge Import Transactions Search";
+		var hdrTitleList = "Knowledge Import Transactions List";
+		var cfgCanEdit = true;
+	</SCRIPT>
+	<PDM_INCLUDE FILE=std_head.htmpl >
+	<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_admin.js"></SCRIPT>
+	<PDM_INCLUDE FILE=std_list_include.htmpl>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_keit.js"></SCRIPT>
+</HEAD>
+
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+	
+<PDM_MACRO name=sfStart create=false factory="KEIT_TRANSACTIONS">
+</SCRIPT>
+
+<INPUT TYPE=hidden NAME=HTMPL VALUE='list_KEIT_import_transactions.htmpl'>
+
+<SCRIPT LANGUAGE="JavaScript">
+	
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Pakiet" attr="PACKAGE_NAME" size=47>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data modyfikacji" attr=last_mod_dt qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data modyfikacji" attr=last_mod_dt qbe_condition=LE>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT language="JavaScript">
+	var msgFoundNone = "No import transaction found";
+	var msgFound1 = "1 import transaction found";
+	var msgFound = "%1 import transaction found";
+	var msgFoundMore = "%1 import transaction found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired import transaction";
+	
+	var arrPackages = new Array();
+	var ID_counter = 0;
+	
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="arrPackages[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.PACKAGE_NAME}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="ID_counter++;">
+<PDM_MACRO name=lsCol hdr="Pakiet" attr="PACKAGE_NAME">
+<PDM_IF 0>
+<PDM_MACRO name=lsCol hdr="Szablon" attr="TEMPLATE_ID.TEMPLATE_NAME" width=20>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Uruchomiony przez" attr="last_mod_by" width=20>
+<PDM_MACRO name=lsCol hdr="Czas ropzoczęcia" attr="START_TIME" width=20>
+<PDM_MACRO name=lsCol hdr="Data zakończenia" attr="END_TIME" width=20>
+<PDM_MACRO name=lsCol hdr="Licznik dokumentów" attr="ACTIONS_COUNT" width=20>
+<PDM_MACRO name=lsCol hdr="Licznik porażek" attr="ERR_COUNT" width=20>
+<PDM_MACRO name=lsCol hdr="Postęp (%)" attr="ACTIONS_DONE_COUNT" width=20>
+<PDM_MACRO name=lsCol hdr="Status" attr="STATUS_ID" width=20>
+<PDM_MACRO name=lsEnd factory=KEIT_TRANSACTIONS>
+
+	var bImportAllowed = ahdtop.CanUserPerformAction("ROLE_KNOWLEDGE_IMPORT");
+	if (bImportAllowed)
+	{
+		var ctxMenu=new ContextMenu("id_KEIT_import_transactions");
+		ctxMenu.addItem(msgtext("Retry"), "RunKeitImport(self.activeRow);");
+		ctxMenu.addItem(msgtext("Print_Form%1...", " " + window.propFormName),"CAisdPrint();");  // Print this window
+		ctxMenu.addItem(msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')"); // Help on this window
+		ctxMenu.finish();
+	}
+</SCRIPT>
+</PDM_IF>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

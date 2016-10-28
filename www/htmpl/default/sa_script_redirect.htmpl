@@ -1,0 +1,49 @@
+<PDM_IF 0>
+sa_script_redirect.htmpl
+WHEN PRESENTED:
+   When CA Business Intelligence has not been installed and configured with CA Service Desk.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msg_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/std_head.js"></SCRIPT>
+<script LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></script>
+<script LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></script>
+<script LANGUAGE="JavaScript" SRC="$CAisd/scripts/fid_gen.js"></script>
+
+</HEAD>
+<BODY >
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+document.writeln(generate_logo_product_name_html());
+</SCRIPT>
+
+<H1>
+<SCRIPT>
+var canLaunch = ( ahdtop.isSupportAutomationEnabled() && _browser.isWindows );
+if ( canLaunch ) {
+	document.writeln( msgtext("Loading_SA_Script") );
+} else {
+	document.writeln( msgtext("Cannot_Launch_SA_Script") );
+}
+</SCRIPT>
+</H1>
+
+</CENTER>
+<SCRIPT>
+if ( canLaunch ) {
+	var scriptID= "$args.KEEP.sa_script"
+	var d= new Date();
+	var tz=d.getTimezoneOffset();
+	var sa_script_url=ahdtop.cfgNX_SUPPORTAUTOMATION_URL+"/jsp/selfserve/processScriptRequestOwnWindow.jsp?BOPSID=%bopsid&scriptID="+scriptID+"&lID=-1&timezoneOffset="+tz+"&roleID="+ahdtop.cfgCurrentRoleID;
+	var url= ahdtop.cfgCgi + "?SID=" + ahdtop.cfgSID + "+FID="+fid_generator() + "+OP=LINK_WITH_BOPSID" + "+URL="+nx_escape(sa_script_url);
+	ahdtop.ahdframeset.location.replace(url);
+}
+</SCRIPT>
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: sa_script_redirect.htmpl ANDERSON.2 2010/01/22 19:35:50 kylja01 Exp $"
+</PDM_IF>

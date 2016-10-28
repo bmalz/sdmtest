@@ -1,0 +1,64 @@
+<PDM_IF 0>
+sdsc_map_cnt_tab.htmpl
+WHEN PRESENTED:
+    The Contact tab of a Service Contract
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=sdsc_map_cnt_tab" factory=svc_contract>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+function dtl_ServType_url() {
+   var servType_url = "ADDITIONAL_WHERE=owning_contract=$args.id+KEEP.SVC_CONTRACT_ID=$args.id" +
+                      "+KEEP.SVC_CONTRACT_SYM=" + nx_escape(<PDM_FMT ESC_STYLE=C PAD=NO>"$args.sym"</PDM_FMT>);
+   return servType_url;
+}
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+   
+<PDM_IF $UserAuth \> 1>
+<PDM_IF "$prop.MultiTenancy" != "off">
+<PDM_MACRO name=button caption="Map Single Contact" func="create_new('sdsc_map', false, '', '', 'PRESET=map_contract:$args.id', 'KEEP.fac=cnt', 'KEEP.REFRESH_PARENT=1', 'KEEP.argTenantId='+argTenantId, 'KEEP.argTenant='+argTenant)" hotkey_name="Map Single Contact" id=ADD_SDSC_MAP_CNT newrow=yes>
+<PDM_ELSE>
+<PDM_MACRO name=button caption="Map Single Contact" func="create_new('sdsc_map', false, '', '', 'PRESET=map_contract:$args.id', 'KEEP.fac=cnt', 'KEEP.REFRESH_PARENT=1')" hotkey_name="Map Single Contact" id=ADD_SDSC_MAP_CNT newrow=yes>
+</PDM_IF>
+<PDM_MACRO name=button caption="Add/Remove Contact Maps" endrow=yes func="mass_map_insert('cnt', 'my_cnt_maps', '_mapped_cnt.combo_name', '_mapped_cnt', 'Available Contacts', 'Assigned Contacts')" hotkey_name="Add/Remove Contact Maps" id=UPDATE_LREL_CNT>
+</PDM_IF>
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=tabBanner title="Contacts" add_btns=true>
+<PDM_MACRO name=dtlStartRow class='tab'>
+// The ADDITIONAL_WHERE is for autofill; the KEEP variables are for list_sdsc.htmpl
+<PDM_MACRO name=dtlLookup hdr="Default Service Type" attr="dflt_cnt_st" extraurl="javascript:dtl_ServType_url();">
+
+function get_cnt_src_url()
+{
+    var url = "OP=SEARCH+FACTORY=sdsc_map+QBE.EQ.map_contract.id=$dob.id" + 
+              "+QBE.IN.map_persid=" + nx_escape("cnt%") + 
+              "+KEEP.MAP_FACTORY=cnt+KEEP.SVC_CONTRACT_ID=$args.id" + 
+              "+KEEP.SVC_CONTRACT_SYM=" + nx_escape(<PDM_FMT ESC_STYLE=C PAD=NO>"$args.sym"</PDM_FMT>) + 
+              "+KEEP.IS_EDIT=$prop.form_name_3";
+    return url;
+}
+
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList brbefore="yes" btntitle="Load Mapped Contacts List." src="javascript:get_cnt_src_url();">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: sdsc_map_cnt_tab.htmpl ASPEN.2 2010/11/09 11:52:25 ralje02 Exp $
+</PDM_IF>

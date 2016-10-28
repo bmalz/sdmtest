@@ -1,0 +1,67 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_dtview_list.js"></SCRIPT>
+</HEAD>
+<BODY onload="return window_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no>
+
+<TABLE class=generic_table>
+	<TR>
+		<TD style='width: 100%; height: 22px; padding: 0px;' class=portlet_header_center><h3 class=portlet_title style="margin:0px"><span id=spnNodeList></span></h3></TD>
+	</TR>
+</TABLE>
+									
+<table id="tblTree" style='border-spacing: 0px;'>
+<SCRIPT>
+	var strPicName;
+	var strAfterNBSP;
+	var strRowHTML;
+	for (var i=1;i<=parent.frmDTUserNode.ahdframeset.NodeCounter;i++)
+	{
+		strRowHTML = "<tr>";
+		switch (parent.frmDTUserNode.ahdframeset.arrDTHistory[i][NODE_TYPE])
+		{
+			case NODE_TYPE_ROOT :
+				strPicName ="EXUserRoot"; 
+				break;
+			case NODE_TYPE_QUERY :
+				strPicName ="EXUserQuery";
+				break;
+			case NODE_TYPE_CONCLUSION :
+				strPicName="EXUserConclusion";
+				break;
+			default:
+				strPicName ="EXUserQuery";
+		}
+		if (i==parent.frmDTUserNode.ahdframeset.NodePos) {strPicName = strPicName + "_Selected";}
+		strPicName += ".gif";
+		strPicName = "/CAisd/img/" + strPicName;
+		strRowHTML += "<td><img src=" + strPicName + " onclick='OnTreeClick(" + i + ")'></td>";
+		
+		strAfterNBSP = parent.frmDTUserNode.ahdframeset.arrDTHistory[i][NODE_NAME];
+		while (strAfterNBSP.search(" ")> 0)
+		{
+			strAfterNBSP = strAfterNBSP.replace(" ","&nbsp;");
+		}
+		if (i==parent.frmDTUserNode.ahdframeset.NodePos)
+		{
+			strRowHTML += "<td class='clsExpertNodeCurrent'>" + strAfterNBSP + "</td>";
+		}
+		else
+		{
+			strRowHTML += "<td><a id=aNode" + i + " class='clsExpertNode' ";
+			strRowHTML += "href='javascript:OnTreeClick(" + i + ")'>" + strAfterNBSP + "</a></td>";
+		}	
+		strRowHTML += "</tr>";
+		document.write(strRowHTML);
+	}
+</SCRIPT>
+</table>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

@@ -1,0 +1,67 @@
+<PDM_IF 0>
+@(#)$Id: detail_attmnt_ro.htmpl ASPEN.1 2010/12/21 09:43:06 ralje02 Exp $
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=60>
+<PDM_INCLUDE FILE=styles.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_lib.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Podgląd załącznika";
+var hdrTitleUpd = "Edycja załącznika";
+var hdrTitleNew = "Nowy załącznik";
+var argPersistentID = "$args.persistent_id";
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT>
+function window_onload()
+{
+	// No need if displaying as a Mouseover Preview.
+	if ( typeof cfgMOPreviewMode == "number" && cfgMOPreviewMode == 1) {
+		return;
+	}
+
+	if(typeof parent.SetGLtype == "function")
+		parent.SetGLtype( "${args.KEEP.GLType:}" );
+
+	if(typeof parent.SetAttmntId == "function")
+	{
+	     if( "${args.ErrorCode:}" == "1" )
+	        parent.SetAttmntId("0", AlertMsg, "2");
+	     else
+		parent.SetAttmntId("$args.id");
+	}
+		
+	if ( "${args.KEEP.PARENT_POPUP:}" != "" && 
+		"${args.KEEP.PARENT_DIV:}" != "") 
+	{ // called from context menu, refresh it
+		if ( typeof ahdtop == "object"  && ahdtop != null && ! ahdtop.closed ) 
+		{ 
+			var parentwin = ahdtop.AHD_Windows["$args.KEEP.PARENT_POPUP"];
+			
+			if ( parentwin != null ) 
+			{ 
+				var parent_div = parentwin.frames['cai_main'].self.frames['attmnt_iframe'];	
+				if ( "${args.KEEP.NEW_ATTMNT:0}" == "1" )
+					parent_div.refresh_frame("${args.KEEP.GLType:}", "$args.id");
+				else
+					parent_div.refresh_frame("${args.KEEP.GLType:}");
+				  
+			} 
+		}
+	}
+
+}
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="attmnt_ro" header=no>
+<PDM_INCLUDE FILE=attmnt_fields.htmpl>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+

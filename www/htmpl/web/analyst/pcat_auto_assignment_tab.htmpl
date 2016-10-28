@@ -1,0 +1,65 @@
+<PDM_IF 0>
+pcat_auto_assignment_tab.htmpl
+
+INTENT:
+    Display a Auto Assignment notebook page for Request Area page.
+
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=pcat_auto_assignment_tab" factory=pcat>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript">
+</script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_OBJECT>
+cfgUserAuth = "$UserAuth";
+function add_button_to_tab_banner(){
+if (cfgUserAuth < 2) {
+	
+<PDM_MACRO name=button caption="Update Groups" disabled=yes func="update_loc_grp('pcat', '$args.persistent_id', 'cnt', 'service_grps','Groups Available','Groups Assigned','')" hotkey_name="Update Groups" id=UPDATE_GRP newrow=yes>
+<PDM_MACRO name=button caption="Update Locations" disabled=yes func="update_lrel('pcat', '$args.persistent_id', 'loc', 'service_locs',  'Locations Available', 'Locations Assigned', '')" hotkey_name="Update Locations" id=UPDATE_LREL>
+<PDM_MACRO name=button caption="Update Workshifts" disabled=yes endrow=yes func="update_lrel('pcat', '$args.persistent_id', 'wrkshft', 'service_schedules',  'Workshifts Available', 'Workshifts Assigned', '')" hotkey_name="Update Workshifts" id=UPDATE_LREL>
+} else {
+	
+<PDM_MACRO name=button caption="Update Groups" func="update_loc_grp('pcat', '$args.persistent_id', 'cnt', 'service_grps','Groups Available','Groups Assigned','')" hotkey_name="Update Groups" id=UPDATE_GRP newrow=yes>
+<PDM_MACRO name=button caption="Update Locations" func="update_lrel('pcat', '$args.persistent_id', 'loc', 'service_locs',  'Locations Available', 'Locations Assigned', '')" hotkey_name="Update Locations" id=UPDATE_LREL>
+<PDM_MACRO name=button caption="Update Workshifts" endrow=yes func="update_lrel('pcat', '$args.persistent_id', 'wrkshft', 'service_schedules',  'Workshifts Available', 'Workshifts Assigned', '')" hotkey_name="Update Workshifts" id=UPDATE_LREL>
+}
+}
+</PDM_OBJECT>
+<PDM_MACRO name=tabBanner title="Auto Assignment List" add_btns=true>
+<PDM_MACRO name=dtlStartExpRow label="Auto Assignment Control" colspan='2' exp_rows="1" form_name="detail_pcat">
+<PDM_MACRO name=dtlDropdown hdr="Auto Assignment Mode" attr="auto_assign" codename="autoassignmode">
+<PDM_MACRO name=dtlStartExpRow label="Configuration Item Based Auto Assignment" colspan='2' exp_rows="1" form_name="detail_pcat">
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlLookup hdr="Assignable CI Attribute" attr="assignable_ci_attr" common_name_attr="COLUMN_NAME" extraurl="javascript:get_assignable_ci_attr_extra_url();" factory="OA_COLUMNS">
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Assignable CI Attribute" attr="assignable_ci_attr" link=no>
+</PDM_IF>
+<PDM_MACRO name=dtlStartExpRow label="Location Based Auto Assignment" colspan='1' exp_rows="1,2,3" form_name="detail_pcat">
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Group List." height=180 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.service_pcat.pcat.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.type.id=2308+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Location List." height=180 src="OP=SEARCH+FACTORY=loc+QBE.EQ.service_pcat.pcat.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Workshift List." height=180 src="OP=SEARCH+FACTORY=wrkshft+QBE.EQ.pcat_svc.pcat.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: pcat_auto_assignment_tab.htmpl ASPEN.5 2010/10/22 14:05:44 ralje02 Exp $;
+</PDM_IF>

@@ -1,0 +1,496 @@
+<PDM_IF 0>
+Purpose:
+   This tab file is launched from the detail form for every cmdb family.
+   
+   This tab is also used by other objects for generic object auditing support such as
+   ci_verification_policy and ci_planned_change. See cmdb_metadata_not_ci.htmpl for 
+   corresponding metadata for the generic objects.
+
+   This page is loaded as a deferred page, into a separate iframe.  It is
+   entirely self contained, however it does reference the parent detail page,
+   using the dom variables of the parent form.
+
+   This page is referenced in the notebook, using the TAB macro specifying SRC=
+   and a corresponding datafilename_suffix as follows:
+     - "ing" for CI versioning support (uses cmdb_versioning.htmpl for data)
+     - "obj" for generic audit support (uses cmdb_versionobj.htmpl for data)
+     
+   To override the tab banner, specify prop.tab_banner="your object name History" in the SRC= statement
+
+
+Author.
+    Peter McKay
+    John Tomaszewski
+
+History:
+   05/01/2008 mckpe04/tomjo02 Initial Version shipped with CMDB 11.2
+   09/08/2008 tomjo02 SCO 16454 - Localization support
+   09/19/2008 tomjo02 SCO 16581 - Multi Tenancy logo changes
+   10/01/2008 tomjo02 SCO 16582 - Disable milestone creation based on multi tenancy permissions
+   11/14/2008 tomjo02 SCO 18202 - Versioning content under Firefox 3 may not be viewable
+   01/21/2009 tomjo02 I18N - Incorporated R11.2 localization changes
+   05/14/2009 tomjo02 SCO 16454 - QC 2162 - Incorporated R11.2 localization changes - Prevent filter label from displaying vertical
+   07/22/2009 tomjo02 SCO 26226 - CMDBf Federation Viewer support, added include for cmdb.js
+   11/02/2010 tomjo02 SCO 35745 - Removed prompt when number of log entries exceed internal limit, now uses NX_CMDB_VERSIONING_MAXROWS to limit amount of data loaded.
+   01/20/2012 tomjo02 SCO 41350 - Changes to support display of both CI and generic object audit information
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cmdb.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cmdb_versioning.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+
+<script type="text/javascript">
+
+<PDM_INCLUDE FILE="cmdb_version${prop.datafilename_suffix}.htmpl">
+</script>
+</head>
+
+<body onload="cmdbVersioningOnload();" >
+
+<div id="versioningTab">
+<PDM_INCLUDE FILE="std_body.htmpl" filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+var _dtl;
+if ( window.parent != window &&
+    typeof window.parent._dtl == "object" &&   window.parent._dtl != null)
+{
+  _dtl = parent._dtl;
+}
+else
+{
+  _dtl = new DetailForm("$prop.factory","${args.id:0}","",false);
+}
+
+// Use "Versioning" by default (CI's) or override it (generic object support) if prop.tab_banner is defined
+var tabBanner = "Versioning";
+<PDM_IF "$prop.tab_banner" != "">
+    tabBanner = nx_unescape("$prop.tab_banner");
+</PDM_IF>
+<PDM_MACRO NAME=tabBanner title="\" + tabBanner + \"">
+
+var cmdb_milestone_anchor = "";
+if ( cmdbIsGenericVersioningView == false )
+{
+    // Setup the Create Milestone anchor used on the basic/advanced views.
+    // Milestones are only supported for CIs
+    cmdb_milestone_anchor = '<a title="Create Milestone" ';
+    if ( cfgUserAuth < 2 )
+    {
+      // Show a disabled anchor link in read-only mode.
+      cmdb_milestone_anchor += 'class="global_link versioning_anchor_disabled">';
+    }
+    else
+    {
+      // Enable for read/write mode.
+      cmdb_milestone_anchor += 'class="global_link" onmouseover="status=\'\';return true;" href=\'javascript:add_milestone(this.form, "$args.persistent_id", <PDM_FMT PAD=NO ESC_STYLE=JS2>"$cst.combo_name"</PDM_FMT>)\'>';
+    }
+    cmdb_milestone_anchor += 'Create Milestone</a>';
+}
+
+</script>
+
+<div id="VersioningContainer">
+
+<!-- BEGIN - 3 column table - holds basic/advanced view, resize bar and comparison/log view -->
+<!-- SCO 18202 - table-layout:fixed is required for Firefox 3 -->
+<table class="versioning_table_layout_fixed" width="100%"><tr>
+
+<td valign="top" align="left" id="leftVersioningCell" width="350">
+
+<div id="leftVersioningContainer" width="100%" height="300">
+
+
+<!-- BASIC VERSION SELECTION -->
+<div id="cmdbBasicSelection" class="versioning_selection_area" width="100%">
+<form >
+<div class="versioning_padding_top">
+<p id="cmdbversiontypelabel" class="label" title="Choose snapshot type">Snapshot type
+<select id="cmdbversiontype" class="gn_font_size_1em versioning_snapshot_select_height_width" onchange="cmdbSetSnapshotType(this);">
+<option value="date"     class="data gn_font_size_1em">Snapshot</option>
+<option value="milestone" class="data gn_font_size_1em">Milestone</option>
+</p>
+</select>
+</form>
+<p class="gn_content_right">
+  <script  type="text/javascript">
+  docWriteln( cmdb_milestone_anchor );
+  </script>
+  <a onmouseover="status='';return true;" title="Show Log" class="global_link" href="javascript:cmdbShowLog('');">Show Log</a>
+  <a id="cmdbVersioningAdvancedLink" onmouseover="status='';return true;" title="Advanced" class="global_link" href="javascript:flipDiv('cmdbBasicSelection','cmdbAdvancedSelection');" >Advanced</a>
+</p>
+</div>  <!-- end of border surrounding pulldown box and links -->
+
+<form name="cmdbVersionBasicForm" id="cmdbVersionBasicForm" action="javascript:cmdbCompareSelectedForm('cmdbVersionBasicForm');">
+
+<div class="versioning_selection_area_border gn_width_100pct">
+
+<div id="cmdbentrydiv" class="gn_width_100pct">
+
+</div> <!-- cmdbentrydiv-->
+</div> <!-- border -->
+</form> <!-- end of selection form -->
+</div> <!-- end div id=basic -->
+
+<!-- ADVANCED SELECTION -->
+<div id="cmdbAdvancedSelection" class="versioning_selection_area" width="100%" style="display:none;" >
+<div class="versioning_padding_top">
+<p class="label">Advanced Selection
+<p class="gn_content_right">
+    <script  type="text/javascript">
+    docWriteln( cmdb_milestone_anchor );
+    </script>
+    <a onmouseover="status='';return true;" title="Show Log" class="global_link" href="javascript:cmdbShowLog('');">Show Log</a>
+    <a id="cmdbVersioningBasicLink" onmouseover="status='';return true;" title="Basic" class="global_link" href="javascript:flipDiv('cmdbAdvancedSelection','cmdbBasicSelection');">Basic</a>
+</p>
+</div>  <!-- end of div with links -->
+<form name="cmdbVersionAdvancedForm" id="cmdbVersionAdvancedForm" action="javascript:cmdbCompareSelectedForm('cmdbVersionAdvancedForm');">
+
+<div class="versioning_selection_area_border" width="100%">
+
+<div id="advTreeDiv" width="100%"> put data here
+</div>
+
+<script  type="text/javascript">
+
+// ===============================================================================
+// BEGIN - Setup cmdbVerStrings array holds versioning strings to be localized
+// ===============================================================================
+cmdbVerStrings["Standard CI"]  = "Standard CI";
+cmdbVerStrings["Relationship"] = "Relationship";
+cmdbVerStrings["Snapshot created on:"]  = "Snapshot created on:";
+cmdbVerStrings["Created on:"] = "Created on:";
+cmdbVerStrings["Changed on:"] = "Changed on:";
+cmdbVerStrings["Relationship Type"] = "Relationship Type";
+cmdbVerStrings["New Relationship Type"] = "New Relationship Type";
+cmdbVerStrings["Relationship Partner"] = "Relationship Partner";
+cmdbVerStrings["Partner CI unassigned"] = "Partner CI unassigned";
+cmdbVerStrings["Relationship Terminated"] = "Relationship Terminated";
+cmdbVerStrings["Partner CI Assigned"] = "Partner CI Assigned";
+cmdbVerStrings["New Partner and Type"] = "New Partner and Type";
+cmdbVerStrings["Relationship Changed"] = "Relationship Changed";
+cmdbVerStrings["Relationship Deleted"] = "Relationship Deleted";
+cmdbVerStrings["CI Versions"] = "CI Versions";
+cmdbVerStrings["No results found"] = "No results found";
+cmdbVerStrings["Milestone"] = "Milestone";
+cmdbVerStrings["Milestone created"] = "Milestone created";
+cmdbVerStrings["Date"] = "Date";
+cmdbVerStrings["Log"] = "Log";
+cmdbVerStrings["General"] = "General";
+cmdbVerStrings["Attribute"] = "Attribute";
+cmdbVerStrings["New Value"] = "New Value";
+cmdbVerStrings["Old Value"] = "Old Value";
+cmdbVerStrings["Changed By"] = "Changed By";
+cmdbVerStrings["MDR"] = "MDR";
+cmdbVerStrings["Category"] = "Category";
+cmdbVerStrings["Value"] = "Value";
+cmdbVerStrings["(blank)"] = "(blank)";
+cmdbVerStrings["Launch"] = "Launch";
+cmdbVerStrings["Changed from previous snapshot"] = "Changed from previous snapshot";
+cmdbVerStrings["No"] = "No";
+cmdbVerStrings["items found"] = "items found";
+cmdbVerStrings["Attribute previously changed on"] = "Attribute previously changed on";
+cmdbVerStrings["At that time, value was"] = "At that time, value was";
+cmdbVerStrings["Loading advanced view"] = "Loading advanced view";
+cmdbVerStrings["Loading basic view"] = "Loading basic view";
+cmdbVerStrings["No milestones found"] = "No milestones found";
+cmdbVerStrings["No snapshots found"] = "No snapshots found";
+cmdbVerStrings["Versioning Report"] = "Versioning Report";
+cmdbVerStrings["Versioning Report for Standard CI:"] = "Versioning Report for Standard CI:";
+cmdbVerStrings["Versioning Report for CI:"] = "Versioning Report for CI:";
+cmdbVerStrings["Versioning Log Report for CI:"] = "Versioning Log Report for CI:";
+cmdbVerStrings["end of report"] = "---- end of report ----";
+cmdbVerStrings["Export to CSV"] = "Export to CSV";
+cmdbVerStrings["Export to CSV for Standard CI:"] = "Export to CSV for Standard CI:";
+cmdbVerStrings["Export to CSV for CI:"] = "Export to CSV for CI:";
+cmdbVerStrings["Export Log to CSV for CI:"] = "Export Log to CSV for CI:";
+cmdbVerStrings["Close Window"] = "Close Window";
+cmdbVerStrings["Select the area below and use copy/paste to create a new CSV file."] = "Select the area below and use copy/paste to create a new CSV file.";
+cmdbVerStrings["Standard CI Reminder Msg"] = "Reminder: this is the Standard CI for the focus CI, not the CI itself";
+cmdbVerStrings["No previous value Msg"] = "No history for this attribute";
+cmdbVerStrings["MDR Launch not supported Msg"] = "Launch in context to this MDR provider is not available for this CI.\n\nThis condition can occur when either \n- The CI is not currently mapped to an active MDR\n- The MDR definition has an blank hostname or URL";
+cmdbVerStrings["Please select a second version for comparison"] = "Please select a second version for comparison";
+cmdbVerStrings["All snapshots are identical"] = "All snapshots are identical";
+cmdbVerStrings["To compare Snapshots or Standard CIs, check 2 or more checkboxes"] = "To compare Snapshots or Standard CIs, check 2 or more checkboxes";
+cmdbVerStrings["To compare Milestones or Standard CIs, check 2 or more checkboxes"] = "To compare Milestones or Standard CIs, check 2 or more checkboxes";
+cmdbVerStrings["For details, click on a Snapshot or Standard CI from the list above"] = "For details, click on a Snapshot or Standard CI from the list above";
+cmdbVerStrings["For details, click on a Milestone or Standard CI from the list above"] = "For details, click on a Milestone or Standard CI from the list above";
+cmdbVerStrings["To compare Snapshots, Standard CIs or Milestones, check 2 or more checkboxes"] = "To compare Snapshots, Standard CIs or Milestones, check 2 or more checkboxes";
+cmdbVerStrings["For details, click on a Snapshot, Standard CI or Milestone from the tree above"] = "For details, click on a Snapshot, Standard CI or Milestone from the tree above";
+cmdbVerStrings["Relationship Created"] = "Relationship Created";
+cmdbVerStrings["Relationship Created Inactive"] = "Relationship Created Inactive";
+cmdbVerStrings["Relationship Active"] = "Relationship Active";
+cmdbVerStrings["Relationship Inactive"] = "Relationship Inactive";
+cmdbVerStrings["Relationship Changed Inactive"] = "Relationship Changed Inactive";
+cmdbVerStrings["Field Updated"] = "Field Updated";
+cmdbVerStrings["Change Closed"] = "Change Closed";
+cmdbVerStrings["Assigned Contact"] = "Assigned Contact";
+cmdbVerStrings["Assigned Organization"] = "Assigned Organization";
+cmdbVerStrings["Basic Selection"] = "Basic Selection";
+cmdbVerStrings["Change Specification"] = "Change Specification";
+cmdbVerStrings["Change Specification Scheduled Reminder Msg"] = "Reminder: This changed is scheduled for";
+cmdbVerStrings["Change Specification Unscheduled Reminder Msg"] = "Reminder: This change has not been scheduled";
+cmdbVerStrings["and is needed by"] = "and is needed by";
+cmdbVerStrings["Unscheduled Change"] = "Unscheduled Change";
+cmdbVerStrings["Change"] = "Change";
+
+if ( cmdbIsGenericVersioningView )
+{
+    // Setup strings for generic object support to be object neutral (not CI specific), 
+    // we only override strings that are exposed when displaying audit information for generic objects.
+    cmdbVerStrings["CI Versions"] = "Versions";
+    cmdbVerStrings["Versioning Report for CI:"] = "Versioning Report for:";
+    cmdbVerStrings["Export to CSV for CI:"] = "Export to CSV for:";
+    cmdbVerStrings["To compare Snapshots or Standard CIs, check 2 or more checkboxes"] = "To compare Snapshots, check 2 or more checkboxes";
+    cmdbVerStrings["For details, click on a Snapshot or Standard CI from the list above"] = "For details, click on a Snapshot from the list above";
+    cmdbVerStrings["To compare Snapshots, Standard CIs or Milestones, check 2 or more checkboxes"] = "To compare Snapshots, check 2 or more checkboxes";
+    cmdbVerStrings["For details, click on a Snapshot, Standard CI or Milestone from the tree above"] = "For details, click on a Snapshot from the tree above";
+}
+
+// ===============================================================================
+// END - cmdbVerStrings
+// ===============================================================================
+
+// -------------------------------------------------------------------
+// Execute the main versioning module.  This will load all data and populate
+// the display areas defined in this web page.
+cmdbVersioning();
+// -------------------------------------------------------------------
+
+// Convert special HTML chars in CI name.
+var cmdbCIName = '<PDM_FMT ESC_STYLE=HTML>${args.name}</PDM_FMT>';
+
+// Button and tooltip text for Print and Export buttons.
+var cmdbPrintBtnLabel  = "Print";
+var cmdbPrintBtnTitle  = "Popup print version details form";
+var cmdbExportBtnLabel = "Export";
+var cmdbExportBtnTitle = "Popup export version details form";
+
+</script>
+
+</div> <!-- end of advanced border -->
+</form>
+</div>   <!-- end div id=advancedSelection -->
+</div>  <!-- end div id=leftversioningcontainer -->
+</td>
+
+
+<!-- Horizontal Resize Bar -->
+<td  id="cmdbVersioningResizeBar" title="Click and drag to resize"
+    valign=center align=right
+    class="versioning_resize_bar"
+    onmousedown="cmdbVersionMouseDown(event)"
+    >
+    <img src="$CAisd/img/horizontal_resize_gripper.png">
+</td>
+
+
+<td valign=top align=left >
+<div id="rightVersioningContainer" class="versioning_detail_area_border" width="100%" >
+
+
+<!-- div cmdbLogControls BEGIN -->
+<div id="cmdbLogControls" style="display:none;" width="100%">
+
+<form action="">
+
+<!-- Table holding filter, Print and Export controls BEGIN -->
+<table class="gn_container_no_border" width="100%" >
+<tr>
+<!-- Blank area on left -->
+<td width="99%" align="left" >
+</td>
+
+<!-- Controls on the right BEGIN -->
+<td width="1%" align="right">
+
+<!-- Table for controls on the right BEGIN -->
+<table id="cmdbLogControlsTable" class="gn_container_no_border">
+<tr>
+
+<!-- Filter Criteria controls BEGIN -->
+<td>
+<span title="Enter filter criteria">
+<table class="gn_container_no_border">
+<tr>
+<td>
+<label class="label"><nobr>Filter</nobr></label>
+</td>
+<td>
+<input id="cmdbLogFilter" type="text" onkeyup="javascript:cmdbShowLog(this.value)">
+</td>
+</tr>
+</table >
+</span>
+</td>
+<!-- Filter Criteria controls END -->
+
+<!-- Print and Export buttons BEGIN -->
+<script type="text/javascript">
+
+// Spacer between edit control and first button.
+docWriteln("<td><\/td><td><\/td>");
+
+// Print button & tooltip setup.
+docWriteln("<td title='" + cmdbPrintBtnTitle + "' >");
+<PDM_MACRO NAME=button 
+	id="btn409"
+	caption="\" + cmdbPrintBtnLabel + \"" 
+	func="cmdbPrintDiv('detailTableDiv',  \'\" + cmdbCIName  + \"\')" 
+	hotkey_name="Print"  >
+docWriteln("<\/td>");
+
+// Export button & tooltip setup.
+docWriteln("<td title='" + cmdbExportBtnTitle + "' >");
+<PDM_MACRO NAME=button 
+	id="btn409" 
+	caption="\" + cmdbExportBtnLabel + \"" 
+	func="cmdbExportDiv('detailTableDiv',  \'\" + cmdbCIName  + \"\')" 
+	hotkey_name="Export" >
+docWriteln("<\/td>");
+
+</script>
+<!-- Print and Export buttons BEGIN -->
+
+</tr>
+</table>
+<!-- Table for controls on the right END -->
+
+</td>
+<!-- Controls on the right END -->
+</tr>
+</table>
+<!-- Table holding filter, Print and Export controls END -->
+
+</form>
+</div>
+<!-- div cmdbLogControls END -->
+
+
+<!-- div cmdbVersionDetailControls BEGIN -->
+<div id="cmdbVersionDetailControls" style="display:none;" width="100%">
+
+<!-- Table holding hide cells, Print and Export controls BEGIN -->
+<table class="gn_container_no_border" width="100%" >
+<tr>
+<!-- Blank area on left -->
+<td width="99%" align="left" >
+
+<!-- Controls on the right BEGIN -->
+<td width="1%" align="right">
+
+<!-- Table for controls on the right END -->
+<table id="cmdbDetailControlsTable" class="gn_container_no_border" width="100%" >
+<tr>
+
+<!-- Hide Empty Checkbox controls BEGIN -->
+<td id="cmdbvers_hideEmptyCell" title="Click to hide or show empty values">
+<table class="gn_container_no_border" >
+<tr>
+<td>
+<input id="cmdbvers_hideEmpty" type="checkbox" checked onclick="hideEmptyClicked();" >
+</input>
+</td>
+<td>
+<label class="label" ><nobr>Hide empty values</nobr></label>
+</td>
+</tr>
+</table >
+</td>
+<!-- Hide Empty Checkbox controls END -->
+
+<script  type="text/javascript">
+// Spacer between checkbox label and first button.
+docWriteln("<td><\/td><td><\/td>");
+
+// Print button & tooltip setup.
+docWriteln("<td title='" + cmdbPrintBtnTitle + "' >");
+<PDM_MACRO NAME=button 
+	id="btn409"
+	caption="\" + cmdbPrintBtnLabel + \"" 
+	func="cmdbPrintDiv('detailTableDiv',  \'\" + cmdbCIName  + \"\')" 
+	hotkey_name="Print"  >
+docWriteln("<\/td>");
+
+// Export button & tooltip setup.
+docWriteln("<td title='" + cmdbExportBtnTitle + "' >");
+<PDM_MACRO NAME=button 
+	id="btn409" 
+	caption="\" + cmdbExportBtnLabel + \"" 
+	func="cmdbExportDiv('detailTableDiv',  \'\" + cmdbCIName  + \"\')" 
+	hotkey_name="Export" >
+docWriteln("<\/td>");
+
+</script>
+
+</tr>
+</table>
+<!-- Table for controls on the right END -->
+
+</td>
+<!-- Controls on the right END -->
+</tr>
+</table>
+<!-- Table holding filter, Print and Export controls END -->
+
+</div>
+<!-- div cmdbVersionDetailControls END -->
+
+<div id="detailTableDiv" class="versioning_detail_area gn_width_100pct">
+<table id="cmdbVersionDetails" width="100%" class="table gn_container_no_border gn_container_white_background">
+<tr><td width="100%">&nbsp;</td></tr>
+<tr><td width="100%">&nbsp;</td></tr>
+<tr><td width="100%">&nbsp;</td></tr>
+<tr><td width="100%">&nbsp;</td></tr>
+<tr><td width="100%">&nbsp;</td></tr>
+<tr><td width="100%">&nbsp;</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td width="100%"><center>
+<script language="JavaScript">
+  docWriteln( generate_logo_product_name_html() );
+</script>
+</center></td></tr>
+
+</table>
+
+</div> <!-- detailtable div -->
+</div> <!-- rightVersioningContainer div -->
+</td></tr>
+
+<!-- Setup informational text area that is displayed at the bottom of versioning tab content -->
+</table>
+<!-- END - 3 column table - holds basic/advanced view, resize bar and comparison/log view -->
+<table id="cmdbversioninghelptextTable" class="page_section_instruction_area gn_container_no_margin" width="100%">
+<td valign="center">
+<img src="/CAisd/img/Information_16.png">
+<label id="cmdbversioninghelptext" class="page_section_instructions_text">&nbsp;</label>
+</td>
+</table>
+
+
+</div> <!-- VersioningContainer div -->
+
+
+</PDM_FORM>
+</div> <!-- versioningTab div -->
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: cmdb_versioning_tab.htmpl ASPEN.13 2012/03/24 17:02:58 tomjo02 Exp $;
+</PDM_IF>
+

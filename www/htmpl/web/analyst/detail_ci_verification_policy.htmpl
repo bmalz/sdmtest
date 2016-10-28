@@ -1,0 +1,108 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show the details of a CACF Change Verification Policy
+//
+// History:
+//   10/05/2011 MCKPE04 Initial Version
+//   11/29/2011 MCKPE04 show policy audit
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Verification Policy Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Update Verification Policy"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Verification Policy ${args.COMMON_NAME}"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</head>
+
+<body class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<center>
+
+<script language="JavaScript">
+
+var startDate   = "$args.start_date_INT_DATE";
+var endDate     = "$args.end_date_INT_DATE";
+var currentDate = "$args.current_date_INT_DATE";  
+
+if (startDate=="") startDate=0;
+if (endDate=="" || endDate==0) endDate=Number.MAX_VALUE;
+
+if (currentDate!="") {
+   var policyInactiveMsg = "";
+   if (currentDate < startDate) policyInactiveMsg = "WARNING: Policy start date has not been reached";
+   if (currentDate > endDate)   policyInactiveMsg = "WARNING: Policy has past its expiration date";
+   if (policyInactiveMsg.length>0) {
+       if (AlertMsg.length==0) AlertMsg = policyInactiveMsg;
+                          else AlertMsg =  AlertMsg + "  " + policyInactiveMsg;
+   }
+}
+
+<PDM_MACRO name=dtlForm factory="ci_verification_policy">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kolejność" attr="sequence">
+<PDM_MACRO name=dtlTextbox hdr="Nazwa polisy" attr="name">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" size=60>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" make_required="yes">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr=ci_verification_policy_nb>
+<PDM_MACRO name=TAB title="Policy Settings" file="detail_ci_verification_policy.settings.htmpl" height=400 id=verification_policy_settings>
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=TAB title="Verification Log" height=520 id=verification_log src="OP=SEARCH+FACTORY=ci_verification_log+QBE.EQ.ci_verification_policy=$args.id+KEEP.verification_policy_id=$args.id+KEEP.parentFac=$prop.factory">
+<PDM_ELSE>
+        <PDM_SET args.keep_tab_banner="KEEP.TAB_BANNER=Verification Log List">
+        <PDM_SET args.keep_tab_msg="KEEP.TAB_MSG=This tab is inactive until the Verification Policy is saved">
+        
+<PDM_MACRO name=TAB title="Verification Log" height=100 id=verification_log src="OP=SHOW_DETAIL+HTMPL=cmdb_empty_tab.htmpl+FACTORY=ci_verification_log+PERSID=$args.persistent_id+NO_DP=yes+$args.keep_tab_banner+$args.keep_tab_msg">
+</PDM_IF>
+<PDM_IF $args.id == 0>
+        <PDM_SET args.no_dp_option="+NO_DP=yes">
+    
+<PDM_ELSE>
+        <PDM_SET args.no_dp_option="">
+    
+</PDM_IF>
+    <PDM_SET args.prop_tab_banner="prop.tab_banner=Verification Policy History">
+    
+<PDM_MACRO name=TAB title="Verification Policy History" height=455 id=cmdb_versioning src="OP=SHOW_DETAIL+HTMPL=cmdb_versioning_tab.htmpl+FACTORY=ci_verification_policy+PERSID=$args.persistent_id+prop.datafilename_suffix=obj+$args.no_dp_option+$args.prop_tab_banner">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_ci_verification_policy.htmpl ASPEN.22 2012/03/24 16:50:21 tomjo02 Exp $;
+</PDM_IF>
+<PDM_WSP>

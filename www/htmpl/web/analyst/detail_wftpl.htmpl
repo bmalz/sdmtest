@@ -1,0 +1,125 @@
+<PDM_IF 0>
+detail_wftpl.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Workflow Template
+INTENT:
+    Display the detail info for Workflow Template
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.task.sym Workflow Template Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.task.sym Update Workflow Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Workflow Template"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+var argID = "$args.id";
+var argTaskNameHTML = <PDM_FMT PAD=NO ESC_STYLE=HTML>"$args.task.sym"</PDM_FMT>;
+var argTaskNameShowBhvtpl = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.task.sym</PDM_FMT>');
+
+<PDM_IF "$args.id" == "0">
+if ("$args.KEEP.fac_name" == "chgcat_wftpl")
+var the_parent_persid='chgcat'+ ':'+'$args.KEEP.chgcat_id';
+else if ("$args.KEEP.fac_name" == "isscat_wftpl")
+var the_parent_persid='isscat'+ ':'+'$args.KEEP.isscat_id';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+<PDM_ELSE>
+if("$args.object_type"=="chg")
+var the_parent_persid='chgcat'+':'+'$args.object_attrval';
+else if("$args.object_type"=="iss")
+var the_parent_persid='isscat'+':'+'$args.object_attrval';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+</PDM_IF>
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Workflow Template" key="$args.sym">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=wftpl>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.id" == 0  && "$args.KEEP.fac_name" == "chgcat_wftpl">
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrval VALUE='$args.KEEP.chgcat_id'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_type VALUE='chg'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrname VALUE='category'>");
+<PDM_ELIF "$args.id" == 0  && "$args.KEEP.fac_name" == "isscat_wftpl">
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrval VALUE='$args.KEEP.isscat_id'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_type VALUE='iss'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrname VALUE='isscat'>");
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro" && "$args.id" != 0>
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.CO_PARENT\" VALUE=\"1\">");
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.PARENT_PERSID\" VALUE="+the_parent_persid+">");
+</PDM_IF>
+
+// close this form and give focus on the main form
+if ( _dtl.edit ) 
+{
+docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+    
+} 
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Zadanie" attr=task>
+<PDM_MACRO name=dtlTextbox hdr="Kolejność" attr=sequence>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group>
+<PDM_MACRO name=dtlCheckbox attr=deleteable off=No on=Yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KEEP.SVC_CONTRACT_ID" != "" && "$args.KEEP.SVC_CONTRACT_ID" != "0">
+	<!-- Search only for Service Types belonging to the category's Svc Contract -->
+	
+<PDM_MACRO name=dtlLookup hdr="Typ serwisowy" attr=service_type extraurl="ADDITIONAL_WHERE=owning_contract=$args.KEEP.SVC_CONTRACT_ID+KEEP.SVC_CONTRACT_ID=$args.KEEP.SVC_CONTRACT_ID+KEEP.SVC_CONTRACT_SYM=$args.KEEP.SVC_CONTRACT_SYM">
+<PDM_ELSE>
+	<!-- Search only service types that are public, with no service contract -->
+	
+<PDM_MACRO name=dtlLookup hdr="Typ serwisowy" attr=service_type extraurl="ADDITIONAL_WHERE=owning_contract IS NULL+KEEP.SVC_CONTRACT_ID=0+KEEP.SVC_CONTRACT_SYM=(empty)">
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Przewidywany czas trwania" attr=est_duration>
+<PDM_MACRO name=dtlTextbox hdr="Przewidywany koszt" attr=est_cost>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=startNotebook hdr=wftpl_nb>
+<PDM_IF "$args.object_type" == "chg" || "$args.id" == "0">
+<PDM_MACRO name=TAB title="Behavior" height=300 id=wftpl_bhvtpl src="OP=SEARCH+FACTORY=bhvtpl+QBE.EQ.context_type=wf+QBE.EQ.object_id=$args.id+KEEP.WFTPL_ID=$args.id+KEEP.WFTPL_TYPE=$args.object_type+KEEP.IS_EDIT=$prop.form_name_3">
+<PDM_ELIF "$args.object_type" == "iss">
+<PDM_MACRO name=TAB title="Behavior" height=300 id=wftpl_bhvtpl src="OP=SEARCH+FACTORY=bhvtpl+QBE.EQ.context_type=iss_wf+QBE.EQ.object_id=$args.id+KEEP.WFTPL_ID=$args.id+KEEP.WFTPL_TYPE=$args.object_type+KEEP.IS_EDIT=$prop.form_name_3">
+</PDM_IF>
+<PDM_MACRO name=TAB title="Auto Assignment" file="wftpl_auto_assignment_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_wftpl.htmpl ASPEN.5 2011/02/22 13:31:54 ralje02 Exp $;
+</PDM_IF>
+<PDM_WSP>

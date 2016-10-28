@@ -1,0 +1,113 @@
+<PDM_IF 0>
+att_mgs_event.htmpl
+WHEN PRESENTED:
+    when the app needs to attach a Managed Survey Event
+INTENT:
+    attach Managed Survey events
+VARIABLES:
+    object mgs   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/mgs.maj for the
+                            definition of attributes for 'OBJECT mgs '
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var obj_name = "Managed Survey";
+var obj_id = "${args.sym:}";
+var form_title = "Attach Managed Survey Event to " + obj_name + " " + obj_id;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script>
+if ( "$args.PROCESS_STEP" == "2" )
+{
+    if (typeof parent.opener == "object" &&
+	!parent.opener.closed &&
+	(parent.opener.propFormRelease == "undefined" || 
+	parent.opener.propFormRelease < 60))
+    {
+	var factory = "$prop.factory";
+	var id = "$args.id";
+	if ((parent.name != "AHDtop") && 
+	    (typeof parent.opener.argID != "undefined") &&
+	    (parent.opener.argID == id))
+	{
+
+	    parent.opener.location.href = cfgCgi + "?SID=" + cfgSID +
+					  "+FID=" + cfgFID +
+					  "+OP=SHOW_DETAIL" +
+					  "+FACTORY=" + factory +
+					  "+PERSID=" + factory + "%3A" + id; 
+	}
+	window.parent.close();
+   }
+   else
+   {
+      switchToDetail("$prop.factory", "$args.id" );
+      window.parent.close();
+   }
+}
+edit_form = 1;
+</script>
+</head>
+<PDM_IF "$args.PROCESS_STEP" != "2"> 
+<body onunload="unload_check()" class="editform" >
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<center>
+<script type="text/javascript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+<PDM_MACRO NAME=dtlForm button=false>
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Ok[k]" hotkey_name="Ok[k]" id="btn001" width=120
+    func="pdm_submit('main_form','ATTACH_MGS_EVENT')">
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" id="btncncl" btnType="negative" width=120
+    func="cancel_update('$prop.factory','$args.id','show_main_detail.htmpl')">
+<PDM_MACRO NAME=btnEndRow>
+<PDM_MACRO NAME=dtlStart center=true>
+docWriteln("<input type='hidden' name=PROCESS_STEP value='$args.PROCESS_STEP'>");
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_IF "$args.PROCESS_STEP" == "0">
+detailRowHdr("");
+docWriteln("<th align='left' valign='baseline' class='editinfo'>");
+docWriteln("<a" + detailNextLinkID() + ' class="lookup1em" title="' + msgtext("%1_-_to_navigate_to_edit_field","Survey Event Lookup") + '"' +
+<PDM_IF "$SESSION.usingScreenReader" != "1">
+           " onMouseOver=\"self.status='Lookup Survey Event';return true\" onMouseOut=\"self.status='';return true\"" +
+</PDM_IF>
+           " href='javascript:void(0)' onClick=\"popup_search('evt','mgs_sym', 'main_form', 'KEEP.evt_obj_type=$prop.factory+KEEP.evt_obj_sym=', 0);return false\">");
+var nextID = detailNextID(true);
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+var caption = "Survey Event Lookup";
+<PDM_ELSE>
+var caption = "Survey Event";
+docWriteln('<img src="' + 
+           cfgCAISD + '/img/lookup.gif" class="dtl_img_attr" alt="Pop up lookup form">');
+</PDM_IF>
+docWriteln("<span>" + caption + "</span></a></th>");
+detailSetRowData("<INPUT" + nextID + ' type=TEXT name=mgs_sym size=30 title="' + msgtext("%1_-_autofill;_up_arrow_for_lo","Survey event name") + '">');
+<PDM_ELSE>
+var mgs_sym = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.mgs_sym</PDM_FMT>');
+input_fld = '<input type="hidden" name=mgs_sym value="' + gsub(mgs_sym, "\"", "&AHDQUOTE") + '" >';
+detailRowHdr("Survey Event");
+detailSetRowData(mgs_sym + input_fld);
+<PDM_MACRO NAME=dtlStartRow>
+detailRowHdr("Delay Time");
+detailSetRowData("<INPUT" + detailNextID(true) + " type=TEXT " +
+                 "NAME=mgs_duration size=15 value='$args.mgs_duration'>");
+</PDM_IF>
+</script>
+<PDM_MACRO NAME=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</center>
+</body>
+</PDM_IF>
+</html>
+<PDM_IF 0>
+@(#)$Id: att_mgs_event.htmpl ASPEN.5 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>

@@ -1,0 +1,44 @@
+<PDM_IF 0>
+$Id: kt_architect.htmpl,v 1.3 2006/11/09 22:23:35 tooda01 Exp $
+	WHEN PRESENTED:
+	    As the Knowledge Categories popup window from the Administration tab
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Knowledge Categories";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+<PDM_INCLUDE FILE=kt_architect_javascript.htmpl>
+</PDM_IF>
+
+<SCRIPT>
+// Used by inner frames to determine if they are inside a popup or not
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+var ahdframeset = window;
+</script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>	
+	<FRAMESET
+	<PDM_IF "$SESSION.usingScreenReader" == "1">
+		ROWS="28,28,*"
+	<PDM_ELSE>
+		ROWS="28,21,*"
+	</PDM_IF>
+	<PDM_IF "$prop.browser" != "IE">
+	    >     
+	<PDM_ELSE>
+		FRAMEBORDER="0" FRAMESPACING="0">
+	</PDM_IF>
+		<FRAME SRC="$CAisd/html/kt_architect_banner.html" NAME=banner SCROLLING=no NORESIZE FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0 title="C A logo - read only">
+		<FRAME SRC="$CAisd/html/menubar.html" id='menubar' NAME=menubar SCROLLING=no NORESIZE FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0 title="Menu bar">
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+<PDM_INCLUDE FILE=kt_architect_frameset.htmpl>
+<PDM_ELSE>
+	<frame src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=kt_architect2.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME+KEEP.IsPopUp=$args.KEEP.IsPopUp" NAME=ktarch_window style="border:0px" SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title="Hidden frame - do not navigate here">
+</PDM_IF>
+	</FRAMESET>	
+</HTML>

@@ -1,0 +1,157 @@
+<PDM_IF 0>
+@(#)$Id: attmnt_upload.htmpl ASPEN.1 2011/05/20 14:48:39 saima01 Exp $
+</PDM_IF>
+
+<SCRIPT>
+var sProhibitedExt="";
+var sHost="", nSessionId, sExt="";
+var sFileName ="",sServerFileName, retURL="", servletPath="";
+var nMaxFileSize=0, sDescription="", sAttmntName="";
+var sRelFilePath="";
+var nDobId = 0;
+var nFolderId;
+var nAttmntRet = 0;
+var bUploadClicked = 0;
+var isTomcatUp = 0;
+var servletTimer = 0;
+var lrelgl = "";
+var nChunkTimeout=0;
+var targetFolder = 0;
+var propTimeout = "$prop.Timeout";
+var nAttmntId = "$prop.AttmntId";
+var propSubmitKnowledge = "$prop.SubmitKnowledge";
+var propUI = "$prop.UI";
+var propRepId = "$prop.RepId";
+var propFolderId = "$prop.FolderId";
+var propSid = "$prop.SID";
+var propAttmntParent = "$prop.AttmntParent";
+var propView = "$prop.View";
+var propShowFields = "$prop.ShowFields";
+var propShowRepList = "$prop.ShowRepList";
+var propRepType = "$prop.RepType";
+var propShowImgStatus = "$prop.ShowImgStatus";
+var propTenant = "$prop.Tenant";
+var argPopupName = "$args.KEEP.POPUP_NAME";
+var propStatus = "$prop.Status";
+
+if (propStatus == "" || (propStatus == "KD_FILE" && propRepType != "2"))	// KD_FILE could be only if RepType=2
+{
+	propStatus = "INSTALLED";
+}
+
+<PDM_IF "$prop.AttmntId" != "0" && "$prop.AttmntId" != "">
+	<PDM_LIST FACTORY=attmnt PREFIX=list WHERE="id=$prop.AttmntId">
+		propRepId = "$list.repository";
+		propFolderId = "$list.folder_id";
+	</PDM_LIST>
+</PDM_IF>
+</SCRIPT>
+<script language="javascript" >
+function allow_all_keys(event)
+{
+   event.cancelBubble=true;    
+   return true;
+}
+</script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_upload.js"></SCRIPT>
+
+<div name=divAttmnt style="width:0px;height:0px;border:0;" id=divAttmnt></div>
+<div style='visibility:hidden;display:none;' name=divSession id=divSession></div>
+<FORM id=frmUpload NAME=frmUpload  onsubmit="return false;" ACTION="" METHOD="POST" ENCTYPE="multipart/form-data">
+
+<PDM_IF "$prop.View" == "Upload">
+<PDM_JSCRIPT FILE=detail_form.js>
+<TABLE class=alertmsg id=alertmsg style="DISPLAY: none" width="100%">
+<TBODY><TR><TD id=alertmsgText></TD></TR></TBODY></TABLE>
+</PDM_IF>
+
+<table  
+<PDM_IF "$prop.RepId" == "" && "$prop.user_type" != "analyst">
+	style="display:none" 
+</PDM_IF>
+	cellpadding=0 cellspacing=2 border=0>
+	
+<PDM_IF "$prop.ShowRepList" == "Yes">
+<tr>
+	<td >
+	<span class=label><label for="inpDocRepository">Nazwa repozytorium</label></span>
+	</td>
+</tr>
+<tr>
+	<td >
+        <SELECT ID=inpDocRepository NAME=inpDocRepository onChange='UpdateRepInfo(this.value);'> 
+        </SELECT>
+	</td>
+</tr>        
+</PDM_IF>	
+	
+<tr>
+	<td>
+	<PDM_IF "$prop.View" == "Attachment">
+		<PDM_IF "$prop.Required" == "Yes">
+			<PDM_IF "$prop.Caption" == "">
+				<span class=requiredlabeltext><B><label for="inpFileUpLoad">Dołącz dokument</label></B></span>
+			<PDM_ELSE>
+				<span class=requiredlabeltext><B><label for="inpFileUpLoad">$prop.Caption</label></B></span>
+			</PDM_IF>
+		<PDM_ELSE>
+			<span class=labeltext><B><label for="inpFileUpLoad">Dołącz dokumen</label></B></span>
+		</PDM_IF>
+	<PDM_ELSE>
+		<span class=requiredlabeltext>Plik&nbsp;*</span>
+	</PDM_IF>
+	</td>
+</tr>
+<tr>
+	<td >
+		<PDM_IF "$SESSION.usingScreenReader" == "1">
+			<INPUT TYPE="FILE" SIZE="$prop.Size" ID="inpFileUpload" NAME="inpFileUpload" title = "Wyszukaj plik" onkeydown="return allow_all_keys(event);" onkeypress="return allow_all_keys(event);"  >
+		<PDM_ELSE>
+			<INPUT TYPE="FILE" SIZE="$prop.Size" ID="inpFileUpload" NAME="inpFileUpload" title = "Wyszukaj plik" onkeydown="return allow_all_keys(event);" onkeypress="return allow_all_keys(event);"  >
+		</PDM_IF>
+		
+	</td>
+</tr>
+
+<PDM_IF "$prop.ShowFields" == "Yes">
+	<tr>
+		<td>
+			<span class=label><label for="inpAttName">Nazwa</label></span>
+		</td>
+	</tr>
+	<tr>
+		<td align=left width=100%>
+			<INPUT SIZE="$prop.Size" ID="inpAttName" NAME="inpAttName">
+		</td>
+	</tr>	
+	<tr>
+		<td>
+			<span class=label><label for="inpDesc">Opis</label></span>
+		</td>
+	</tr>
+	<tr>
+		<td align=left>
+			<TEXTAREA name=inpDesc id=inpDesc rows=3 cols="$prop.Size"></TEXTAREA>
+		</td>
+	</tr>
+</PDM_IF>
+<PDM_IF "$prop.ShowImgStatus" == "Yes">
+	<tr>
+		<td align=center height=40px width=100%>
+			<div id=imgUpload style="display:none"><img  height=30px src="$CAisd/img/uploading.gif"></div>
+		</td>
+	</tr>
+</PDM_IF>
+</table>
+<INPUT TYPE="hidden" NAME="inpRetURL">
+<INPUT TYPE="hidden" NAME="Test">
+<INPUT TYPE="hidden" NAME="inpServerName" value="">
+<INPUT TYPE="hidden" NAME="inpMaxFileSize" value="">
+<INPUT TYPE="hidden" NAME="inpBpsid">
+</FORM>
+
+<IFRAME src="$CAisd/html/empty.html" id=IFUpload style='visibility:hidden;width:0px;height:0px' title='Hidden frame - do not navigate here' name=IFUpload></IFRAME>
+
+

@@ -1,0 +1,72 @@
+<PDM_IF 0>
+list_sa_tenant_localization.htmpl
+WHEN PRESENTED:
+    When we need to display a list of SA Localizations for a tenant (sa_tenant_localization factory)
+INTENT:
+    Display the list of SA Fields
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Localization Search";
+			var hdrTitleList = "Localization Admin";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=sfStart button=false create=false factory="sa_localization">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa lokalizowana" attr="name" size=40>
+<PDM_MACRO name=sfDropdown hdr="Włączony" attr="enabled">
+<PDM_MACRO name=sfEnd>
+			var edit_field_count = 0;
+		</SCRIPT>
+		<PDM_FORM NAME="frmFID">
+		</PDM_FORM>
+		
+<PDM_IF "${current:n/a}" != "n/a">
+  			<SCRIPT LANGUAGE="JavaScript">
+        <PDM_JSCRIPT FILE=list_edit.js>
+
+				startListEdit(__search_filter);
+				listEditStartRow();
+				listEditReadonly("name");
+				listEditField("enabled");
+				listEditEndRow();
+				endListEdit();
+				
+  				var msgFoundNone = "No localizations found";
+ 	 			var msgFound1 = "1 localization found";
+  				var msgFound = "%1 localizations found";
+  				var msgFoundMore = "%1 localizations found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired localization";
+  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="name" link="no" sort=no>
+<PDM_MACRO name=lsCol hdr="Włączony" attr="enabled" link="no" sort=no>
+<PDM_MACRO name=lsEnd>
+
+				var ctxMenu = new ContextMenu("localizationAdminMenuLoc");
+				ctxMenu.addItem(msgtext("Print_Form%1..."," "+window.propFormName),"CAisdPrint();");
+				ctxMenu.addItem(msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')");
+				ctxMenu.finish();
+
+  			</SCRIPT>
+		
+</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,964 @@
+<PDM_IF 0>
+detail_cr.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Call Req
+INTENT:
+    Display the detail info for the Call Req
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  cr  args	The Call Req object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm
+/opt/CApdm/bopcfg/majic/writer.maj:OBJECT cr {.maj for the
+                        definition of attributes for 'OBJECT cr'
+</PDM_IF>
+<PDM_IF "$args.type" == "I">
+	<PDM_INCLUDE FILE=detail_in.htmpl>
+<PDM_ELIF "$args.type" == "P">
+	<PDM_INCLUDE FILE=detail_pr.htmpl>
+<PDM_ELSE>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = " Szczegóły Wniosku $args.ref_num";
+var hdrTitleUpd = "Aktualizacja Wniosku $args.ref_num ";
+var hdrTitleNew = "Tworzenie Wniosku $args.ref_num";
+var hdrTitleTempl = '$args.ref_num Szablon Wniosku <PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT> Detail';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+// 20130828 bmalz @ e-xim
+var CustomerLocSiteId = "";
+var CategoryOwningContractId = "";
+
+//20130903 bmalz @ e-xim
+function GenDoc() {
+	var url = "/SDMFav/GenDocs.ashx?";
+	url += "OP=obiegowka";
+	url += "&NrHD=" + encodeURIComponent(argRefNum);
+	url += "&NrKomp=" + encodeURIComponent('$args.customer.zNRE');
+	url += "&ImieNazwisko=" + encodeURIComponent('$args.customer.first_name $args.customer.middle_name $args.customer.last_name');
+	url += "&Spolka=$args.customer.organization.COMMON_NAME";
+	url += "&KomorkaOrg=" + encodeURIComponent('$args.customer.admin_org.COMMON_NAME');
+	url += "&DataRozwiazaniaUmowy=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop0]").html()));
+	url += "&PKZP_stan=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop1]").html()));
+	url += "&PKZP_stan_zadluzenia=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop2]").html()));
+	url += "&PKZP_data=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop3]").html()));
+	url += "&PKZP_komentarz=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop4]").html()));
+	url += "&ZFSS_stan=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop5]").html()));
+	url += "&ZFSS_stan_zadluzenia=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop6]").html()));
+	url += "&ZFSS_data=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop7]").html()));
+	url += "&ZFSS_komentarz=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop8]").html()));
+	url += "&BOM_stan=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop9]").html()));
+	url += "&BOM_stan2=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop10]").html()));
+	url += "&BOM_komentarz=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop11]").html()));
+	url += "&BOZ_stan=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop12]").html()));
+	url += "&BOZ_komentarz=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop13]").html()));
+	
+	display_new_page(url,ahdframeset.workframe2);
+}
+
+//20130924 bmalz @ e-xim
+function GenExpertise() {
+	var url = "/SDMFav/GenDocs.ashx?";
+	url += "OP=ekspertyza";
+	url += "&Miejscowosc=$args.customer.location";
+	url += "&Pracownik=$args.customer.first_name $args.customer.middle_name $args.customer.last_name";
+	url += "&MPK=$args.organization.zmpk.name";
+	url += "&NrHD=" + encodeURIComponent(argRefNum);
+	url += "&PC_Num=$args.affected_resource.name";
+	url += "&PC_SerialNum=$args.affected_resource.serial_number";
+	url += "&PC_Model=$args.affected_resource.zmodel";
+	url += "&PC_CPU=$args.affected_resource.assoc_zst_ro_kom.zegar_cpu";
+	url += "&PC_RAM=$args.affected_resource.assoc_zst_ro_kom.ilosc_ram";
+	url += "&PC_HDD=$args.affected_resource.assoc_zst_ro_kom.rozmiar_hdd";
+	url += "&WynikEkspertyzy=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop0]").html()));
+	url += "&PropozycjaSerw=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop1]").html()));
+	url += "&PropozycjaSerwInne=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop2]").html()));
+	url += "&SprzetZaplombowano=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop3]").html()));
+	url += "&BI_Uwagi=" + encodeURIComponent(jq.trim(jq("td[pdmqa=prop4]").html()));
+	
+	display_new_page(url,ahdframeset.workframe2);
+}
+
+var argHumantouchLog = "$args.KEEP.humantouch_log";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argRefNum = "$args.ref_num";
+var argID = "$args.id";
+var argChange = "$args.change";
+var argActive = "$args.active";
+var cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+var rptName = new Array("crsum.rpt", "crdtl.rpt");
+var argSearchSqlClause = "Call_Req.id = $args.id";
+var formAsset = new Array("main_form","KEY.affected_resource");
+var formEnduser = new Array("main_form","customer");
+var prop_ref = "${prop_ref:}"; 
+var propSearchConfig="$prop.SD_SEARCH_CONFIG_CR";
+var cfgCheckAgtInAreaDef = "$env.NX_CHECK_ASSIGNEE_IN_AREA_DEFAULTS";
+var requestType="$args.type";
+var requestTypeSym="$args.type.sym";
+var cawf_defid = "";
+var cawf_set;
+var argDescription = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.description</PDM_FMT>';
+var argSummary = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.summary</PDM_FMT>';
+var new_attmnts = new Array();
+
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=cr_trans transTrigger=1>
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/change_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/timer.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/webtab.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/wf_visible.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_reply.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/exim_mods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/json2.min.js"></script>
+<script type="text/javascript">
+var w_name = get_popup_window_name("ci_window");
+var loadFilterArr=new Array();
+function copy_from_parent()
+{}
+
+
+	// If it's readonly, we need to set values in loadFilterArr before calling 
+	// loadActions(), because the search page in the Knowledge tab that uses this 
+	// array to copy values could come up before loadActions() is called.    
+	if (typeof edit_form == "number" && edit_form == 0)
+   {
+	loadFilterArr["summary"]=<PDM_FMT ESC_STYLE=C>"$args.summary"</PDM_FMT>;
+	loadFilterArr["description"]=<PDM_FMT ESC_STYLE=C>"$args.description"</PDM_FMT>;
+	loadFilterArr["affected_resource"]=<PDM_FMT ESC_STYLE=C>"$args.affected_resource.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["affected_resource_id"]="$args.affected_resource";
+	loadFilterArr["severity"]="$args.severity";
+	loadFilterArr["impact"]="$args.impact";
+	loadFilterArr["urgency"]="$args.urgency";
+	loadFilterArr["priority"]="$args.priority";
+	loadFilterArr["category"]=<PDM_FMT ESC_STYLE=C>"$args.category.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["category_relAttr"]="$args.category.REL_ATTR";
+//	loadFilterArr["rootcause"]=<PDM_FMT ESC_STYLE=C>"$args.rootcause.COMMON_NAME"</PDM_FMT>;
+//	loadFilterArr["rootcause_id"]="$args.rootcause";
+	loadFilterArr["resolution_code"]=<PDM_FMT ESC_STYLE=C>"$args.resolution_code.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["resolution_code_id"]="$args.resolution_code";
+	loadFilterArr["resolution_method"]=<PDM_FMT ESC_STYLE=C>"$args.resolution_method.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["resolution_method_id"]="$args.resolution_method";
+   }
+
+function loadActions()
+{
+	// 20131014 szumm @ e-xim
+	exim_reservationDialogBoxBindEvents();
+
+	ChangeConditions('$args.category.zchg_flag'); // 20130909 bmalz @ e-xim
+   if ( _dtl.edit ) {
+	// 20130826 bmalz @ e-xim
+	<PDM_IF "$prop.form_name_3" == "edit">
+		// 20130829 bmalz @ e-xim
+		if('$args.KEEP.category_key' != '')
+			document.main_form.elements['KEY.category'].value='$args.KEEP.category_key';
+
+		if('$args.KEEP.category_set' != '')
+			document.main_form.elements['SET.category'].value='$args.KEEP.category_set';
+			
+		GetCntMore(); // 20130920 bmalz @ e-xim
+		var url = "";
+		var url2 = "";
+		if(document.main_form.elements["SET.category"].value && document.main_form.elements["SET.requested_by"].value) {
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	           	"+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_list_siteid_owningcontr.htmpl"+
+	            "+CustomerId=" + encodeURIComponent(document.main_form.elements["SET.customer"].value) +
+				"+CategoryId=" + encodeURIComponent(document.main_form.elements["KEY.category"].value.replace("pcat:",""));
+
+			jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		      if ( status == "error" ) {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+
+			url2 = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	            "+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=exim_pcat_getzsdsc.htmpl" +
+	            "+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements["SET.category"].value.replace("pcat:", ""));
+
+	        jq("#HiddenDiv").load(url2, function(response, status, xhr) {
+		      if (status == "error") {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+		} else if (document.main_form.elements["SET.requested_by"].value) {
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	           	"+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_cnt_userdetauls.htmpl"+
+	            "+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements["SET.customer"].value);
+
+			jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		      if (status == "error") {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+		} else if (document.main_form.elements["SET.category"].value) {
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	            "+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=exim_pcat_getdetails.htmpl"+
+	            "+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements["SET.category"].value.replace("pcat:", ""));
+
+	        jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		      if (status == "error") {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+		}
+	</PDM_IF>
+
+     //Form should retain the context for the status field in case change in status was done prior to save and save failed.	 
+     if(typeof "$args.old_status" != "undefined" && "$args.old_status" != "" )
+     {
+	window.document.main_form.elements["SET.status"].value =  "$args.old_status";
+	var setinp=window.document.main_form.elements["SET.status"];
+	setinp.value="$args.old_status";
+	set_default_toggle(setinp);
+      }
+      save_initial_vals();
+      <PDM_LIST PREFIX=list WHERE="delete_flag = 0" FACTORY=ctimer>
+         addctimer("$list.threshold", "$list.color", $list.beep, "$list.text");
+         <PDM_IF "$list.beep" == "1">
+            <PDM_SET args.needs_beep=1>
+         </PDM_IF>
+      </PDM_LIST>
+		if ('$args.KEEP.use_kd_values_fromahdtop' == '1' && "0" == "$args.id")
+		{
+			//This code used when creating a request from a link that was created by the HTML Editor. SDT 32942
+			ahdframe.detailExtUpdate (ahdtop.KDValuesToUse);
+			ahdtop.KDValuesToUse = null;
+		}            
+      StartTheTimer("main_form","timer");
+      loadFilterArray();
+   } 
+   
+  	// SDT 22046 get around IE 5.5 repaint problem by delaying call
+   window.setTimeout('default_scratchpad()', 250);
+    
+   // Need to fill in the 'customer' if 'reqested_by' is pre-loaded from the 
+   // sratched. This code was copied from the 'detail_chg.htmpl' form see 
+   // the comment SDT 22898 on that form
+   if (  _dtl.edit && "$args.id" == 0  ) {
+      backfill_cnt_event();
+   }
+
+   alert_banner("$args.customer");
+
+   // 20131013 bmalz @ e-xim
+	<PDM_IF "$prop.form_name_3" != "edit">
+		<PDM_IF "$args.KEEP.SaveAndClose" == "1">
+			if(typeof(ahdtop.frames[1].set_role(true)) != "") { };
+		</PDM_IF>
+		<PDM_IF "$args.KEEP.AutoClose" == "1">
+			if(typeof(ahdtop.frames[1].set_role(true)) != "") { };
+		</PDM_IF>
+	</PDM_IF>
+
+	// 20131014 bmalz @ e-xim : Close at end
+	<PDM_IF "$prop.form_name_3" == "edit">
+		<PDM_IF "$args.KEEP.SaveAndClose" == "1">
+			window.setTimeout(function(){ImgBtnExecute(0)},1000);
+		</PDM_IF>
+	</PDM_IF>
+}
+
+var alert_banner_last="";
+var alert_banner_obj="cr";
+var alert_banner_attr="customer";
+
+
+function default_scratchpad() {
+	if ( _dtl.edit ) {
+		load_from_scratchpad("$args.id", "$args.KEEP.FROM_PROF_BRWS");
+	}
+	detailFocus1st();
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+   cancel_any_lrel_update();
+}
+
+var cus_value = "";
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type, tenant, tenantName )
+{
+   var setOrgId = 0;
+   var cat_related_cnt = 0; 
+
+   if ( typeof base_name != "string" ) {
+      form_name = "main_form";
+      base_name = "requested_by";
+      caller_type = "";
+   }
+   if ( base_name == "requested_by" ) {
+      var f = document.main_form;
+      if ( typeof f == "object" &&
+           typeof f.customer_combo_name == "object" &&
+           typeof f.requested_by_combo_name == "object" &&
+           ( f.customer_combo_name.value == cus_value ||
+             f.customer_combo_name.value == "" ) ) {
+         cus_value = f.requested_by_combo_name.value; 
+         f.customer_combo_name.value = cus_value;
+         f.customer_fname.value = f.requested_by_fname.value;
+         f.customer_mname.value = f.requested_by_mname.value;
+         f.customer_lname.value = f.requested_by_lname.value;
+         f.elements["SET.customer"].value = f.elements["SET.requested_by"].value;
+         f.elements["KEY.customer"].value = f.elements["KEY.requested_by"].value;
+	 cat_related_cnt = 1;
+         if ( f.elements["SET.customer"].value != "" ) {
+           setOrgId = 1;
+           alert_banner(f.elements["SET.customer"].value);
+         }
+         if ( typeof tenant == "string" && tenant.length > 0 )
+           detailSetTenant( "customer", tenant, tenantName ); 
+         else if ( typeof _dtl.tenantImplyingFields == "object" ) {
+           detailSetTenant( "requested_by", "", "" );
+           detailSetTenant( "customer", "", "" );
+         }
+      }
+   } 
+   if(base_name == "customer") {
+	cat_related_cnt = 1;
+   	if(typeof cntID!="undefined" && cntID.length > 0) alert_banner(cntID);
+   }
+   if (_dtl.edit && !_dtl.skip_agt_check)
+   {
+	var f = void(0);
+	var r = form_name.match(/main_form([0-9]*)/);
+	if ( r != null ) {
+	    if ( r[1].length == 0 )
+		f = _dtl.form[0];
+	    else
+		f = _dtl.form[r[1]-0];
+	}
+	detailAgtCheck(f, base_name, cntID, prop_ref);
+   }
+   detailCntBackfill( form_name, base_name, lname, fname, mname,
+                      cntID, caller_type );
+                      
+    
+    if (cat_related_cnt && typeof cancel_cnt_lookup == "integer") 
+	cancel_cnt_lookup = 0;
+    // Contract enforcement:                  
+    if (ahdtop.cfgNX_CLASSIC_SLA_PROCESSING != 'Yes' &&
+	cat_related_cnt && typeof cntID != "undefined" && cntID.length > 1) 
+    {
+        
+        upd_workframe("GET_SVC_CONTRACT", "new_customer=cnt:" + cntID,
+			  "func=parent.ahdframe.get_svc_callback"); // 20130924 bmalz @ e-xim
+    }
+
+	//20130826 bmalz @ e-xim
+	if (base_name == "requested_by" && typeof cntID != "undefined" && cntID.length > 1) 
+    {
+        var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+            "+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_cnt_userdetails.htmpl"+
+            "+QBE.EQ.id=" + cntID ;
+     	// if (ahdframeset.name != "AHDtop") {
+     	//    display_new_page(url,ahdframeset.workframe2);
+      //   }
+
+		jq("#HiddenDiv").load(url, function(response, status, xhr) {
+			if (status == "error") {
+				var msg = "Sorry but there was an error: ";
+				alert( msg + xhr.status + " " + xhr.statusText );
+			}
+		});
+	}
+}
+
+// 20130920 bmalz @ e-xim
+function GetCntMore() {
+	if(document.main_form.elements["SET.customer"].value != "") {
+		url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	           	"+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_cnt_userdetails.htmpl"+
+	            "+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements["SET.customer"].value);
+
+		jq("#HiddenDiv").load(url, function(response, status, xhr) {
+	      if (status == "error") {
+	        var msg = "Sorry but there was an error: ";
+	        alert( msg + xhr.status + " " + xhr.statusText );
+	      }
+	    });
+	}
+}
+
+// 20130823 bmalz @ e-xim
+function GetCustomerLocSiteId(SiteId) {
+	CustomerLocSiteId = SiteId;
+	GetLrelzSLA();
+}
+
+// 20130823 bmalz @ e-xim
+function GetOwningContractId(OwningContractId) {
+	CategoryOwningContractId = OwningContractId;
+	document.main_form.elements["user_contract"].value = OwningContractId; // 20130924
+	GetLrelzSLA();
+}
+
+// 20130909 bmalz @ e-xim
+function GetChgFlag(Flag) {
+	ChangeConditions(Flag);
+}
+   
+// 20130909 bmalz @ e-xim
+function ChangeConditions(ShowCondition) {
+	if(ShowCondition == '1') {
+		jq('#dtltbl12').show();
+		//jq('#tabHyprlnk1_2').parent().parent().parent().parent().parent().parent().show();
+	} else {
+		jq('#dtltbl12').hide();
+		//jq('#tabHyprlnk1_2').parent().parent().parent().parent().parent().parent().hide();
+	}
+}
+
+// 20130826 bmalz @ e-xim
+function GetSiteIdOwningContractId(SiteId, OwningContractId) {
+	CategoryOwningContractId = OwningContractId;
+	CustomerLocSiteId = SiteId;
+	if(!document.main_form.elements["SET.zsla"].value)
+		GetLrelzSLA();
+}
+
+// 20130826 bmalz @ e-xim
+function GetLrelzSLA() {
+	if(CustomerLocSiteId && CategoryOwningContractId) {
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+			"+OP=SEARCH+FACTORY=zSLA+SKIPLIST=1+HTMPL=exim_zsla_getdetails.htmpl"+
+	        "+OwningContractId=" + CategoryOwningContractId + "+SiteId=" + CustomerLocSiteId;
+		// display_new_page(url,ahdframeset.workframe2);
+		jq("#HiddenDiv").load(url, function(response, status, xhr) {
+	      if (status == "error") {
+	        var msg = "Sorry but there was an error: ";
+	        alert( msg + xhr.status + " " + xhr.statusText );
+	      }
+	    });
+	}
+}
+
+// 20130826 bmalz @ e-xim
+function SetzSLA(zSLAId, zSLAName) {
+	document.main_form.elements["KEY.zsla"].value = zSLAName;
+	document.main_form.elements["SET.zsla"].value = zSLAId;
+}
+
+// 20131015 mch @ e-xim
+function GetZsdsc(zsdscName, zsdscCode) {
+	document.main_form.elements["KEY.zsdsc"].value = zsdscName;
+	document.main_form.elements["SET.zsdsc"].value = zsdscCode;
+}
+
+// 20131023 mch @ e-xim
+function GetZfzsdsc(zsdscName, zsdscCode) {
+	document.main_form.elements["KEY.zfzsdsc"].value = zsdscName;
+	document.main_form.elements["SET.zfzsdsc"].value = zsdscCode;
+}
+
+//e-xim
+function zcst_getmore(mpk_id, email, phone, nazwa)
+{
+	//document.main_form.elements["SET.zcustomer"].value = 'E-mail:' + email + ' Nr telefonu: ' + phone;
+}
+
+function copy_from_cr()
+{
+    if ("$args.KEEP.MAKE_COPY" == "1")
+    {
+	var exceptions = new Array();
+	exceptions[0] = "SET.customer";
+    exceptions[0] = "SET.requested_by";
+	detailCopyEditForm(exceptions);
+    }
+}
+
+function reset_field(target, newvalue ) { 
+	
+	// Reset a field on the main form to the newvalue passed in
+	if ( typeof document.main_form.elements[target]  == "object" ) {   
+		
+		if ( typeof newvalue == "undefined")  
+			document.main_form.elements[target].value = "";
+		else
+			document.main_form.elements[target].value = newvalue;
+			
+		detailClearSetField(document.main_form.elements[target]);
+			
+		
+	}
+		
+	
+ }
+
+
+// detailExtraSaveButtons()
+// Provide extra save buttons for edit form
+function detailExtraSaveButtons(generate)
+{
+  var count = 0;
+	<PDM_IF $ACCESS.FAC_chg == 2 && "$args.change" == "">
+  if ( cfgUserAuth \> 1 ) {
+    count++;
+    if ( generate ) {
+      <PDM_MACRO NAME=button caption="Utwórz Zmianę[!ea]" hotkey_name="Utwórz Zmianę[!ea]" id=btnchg 
+          func="detailSave('NEW_CHANGE')" Tooltip="Zapisz i utwórz Zmianę">
+    }
+  }
+</PDM_IF>
+<PDM_IF "$args.problem" == "">
+  if ( cfgUserAuth \> 1 ) {
+    count++;
+    if ( generate ) {
+      <PDM_MACRO NAME=button caption="Utwórz Incydent[!eaI]" hotkey_name="Utwórz Incydent[!eaI]" id=ITIL_INCIDENT 
+	  func="itil_incident()" Tooltip="Zapisz i utwórz Incydent">
+    }
+  }
+</PDM_IF>
+  return count;
+}
+   
+function itil_incident()
+{
+  parent.createIncident = true;
+  detailSave();
+}
+
+// e-xim
+function exim_CancelReservation() {
+	if("$args.zisRecurrenceReservation" == "1") {
+		toggleReservationDialogBox(true);
+	}
+	else {
+		//zwykle anulowanie
+		exim_CancelReservationAjaxCall(false);
+	}
+}
+
+// 20131014 szumm @ e-xim
+function toggleReservationDialogBox(val) {
+	var exim_eBO = jq('#eximBackgroundOverlay');
+	var exim_eRRRQ = jq('#eximRoomReservationRecurrenceQuestion');
+	
+	if(val) {
+		exim_eBO.show();
+		exim_eRRRQ.show();
+		var exim_dialogmargin = (jq(window).width() / 2) - 215;
+		exim_eRRRQ.css('left', exim_dialogmargin);
+	}
+	else {
+		exim_eBO.hide();
+		exim_eRRRQ.hide();
+	}
+}
+
+// 20131014 szumm @ e-xim
+function exim_reservationDialogBoxBindEvents() {
+	var exim_isRecurrenceReservation = jq('td[pdmqa="zisRecurrenceReservation"]').length;
+	if(exim_isRecurrenceReservation == 1) {
+		jq('td[pdmqa="zisRecurrenceReservation"]').parent().hide();
+		jq('td[pdmqa="zisRecurrenceReservation"]').parent().prev().hide();
+	}
+	else {
+		if(_dtl.edit) {
+			exim_isRecurrenceReservation = jq('input[pdmqa="zisRecurrenceReservation"]');
+			if(exim_isRecurrenceReservation.length == 1) {
+				exim_isRecurrenceReservation.parent().parent().hide();
+				exim_isRecurrenceReservation.parent().parent().prev().hide();
+			}
+		}
+	}
+	
+	jq('#eximRoomReservationRecurrenceQuestion_Close').click(function() { toggleReservationDialogBox(false); });
+	jq('#eximRoomReservationRecurrenceQuestion_CancelReservation').click(function() {
+		toggleReservationDialogBox(false);
+		var exim_questionResult = jq('#eximRoomReservationRecurrenceQuestion').find("input[name='exim_group1']:checked").val();
+		var exim_cancelAll = false;
+		if(exim_questionResult == "cancel_all") {
+			exim_cancelAll = true;
+		}
+		exim_CancelReservationAjaxCall(exim_cancelAll);
+	});
+}
+
+// 20131015 szumm @ e-xim
+function exim_CancelReservationAjaxCall (all) {
+	// jesli all ma ustawione na true, to anuluje wszystkie rezerwacje cykliczne, poczynajac od biezacej do konca
+	var prsid = "$args.persistent_id";
+	var exim_backgroundLoader = jq("#eximBackgroundAjaxLoader");
+	exim_backgroundLoader.show();
+	var wsurl = "/SDMFav/SDMFavService.asmx/CancelReservation";
+	jq.ajax({
+                type: "POST",
+                url: wsurl,
+                data: JSON.stringify({ persid: prsid, cancelAll: all }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                	exim_backgroundLoader.hide();
+					alert("Pomyślnie anulowano rezerwację sali.");
+					parent.window.close();
+
+                },
+                error: function (e) {
+                	exim_backgroundLoader.hide();
+					alert("Wystąpił problem z anulowaniem rezerwacji sali. Skontaktuj się ze wsparciem technicznym.");
+                }
+            });
+}
+
+</script>
+</head>
+<body class="detailro" onload="loadActions()" onunload="unloadActions()">
+<div id="eximBackgroundAjaxLoader" style="top: 0; left: 0;background-color: #000; opacity: 0.5; filter: alpha(opacity=50); zoom: 1; z-index: 12000; position: absolute; width: 100%; height: 100%; display: none;">
+	<img src="$CAisd/img/loading_icon.gif" style="position: absolute; left: 50%; top: 50%; margin-left: -32px; margin-top: -32px; display: block;" />
+</div>
+<div id="eximBackgroundOverlay" style="top: 0; left: 0;background-color: #000; opacity: 0.5; filter: alpha(opacity=50); zoom: 1; z-index: 12000; position: absolute; width: 100%; height: 100%; display: none;">
+</div>
+<div id="eximRoomReservationRecurrenceQuestion" style="background-color: #fff; opacity: 1.0; filter: alpha(opacity=100); zoom: 1; height: 160px; width: 380px; z-index: 12001; position: absolute; top: 200px; display: none; border: 1px solid #353535;">
+	<span style="margin-left: 8px; width: 400px; height: 70px; position: absolute; white-space: pre-wrap; font: 0.7em Verdana, Arial, Helvetica, sans-serif; ">
+		Ta rezerwacja jest rezerwacją cykliczną. Czy chcesz anulować wszystkie rezerwacje, czy tylko tą jedną?
+		<ul style="list-style-type: none;">
+			<li><input type="radio" value="cancel_one" name="exim_group1" checked="checked">Anuluj tylko tą jedną rezerwację</input></li>
+			<li><input type="radio" value="cancel_all" name="exim_group1">Anuluj wszystkie rezerwacje związane z tą rezerwacją</input></li>
+		</ul>
+	</span>
+	<div style="width:100%; height:35px; margin-top: 120px;">
+		<div style="float: right; margin-right: 5px; margin-top: 12px;">
+			<a href="#" id="eximRoomReservationRecurrenceQuestion_CancelReservation" class="button enabledattr buttonEnabled"><span>Anuluj rezerwację</span></a>
+			<a href="#" id="eximRoomReservationRecurrenceQuestion_Close" class="button enabledattr buttonEnabled"><span>Zamknij</span></a>
+		</div>
+	</div>
+</div>
+
+<PDM_IF "$args.needs_beep" == "1" && "$prop.form_name_3" == "edit">
+<embed src="/CAisd/img/beep.wav" autostart="false" style="display:none" width="0" height="0" id="beep" name='beep' enablejavascript="true">
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_body.htmpl >
+<center>
+
+<form name="frm002">
+<input type="hidden" name="SET.requested_by" value="$args.requested_by">
+<input type="hidden" name="requested_by_combo_name" value="$args.requested_by.combo_name">
+<input type="hidden" name="SET.customer" value="$args.customer">
+<input type="hidden" name="customer_combo_name" value="$args.customer.combo_name">
+<input type="hidden" name="SET.assignee" value="$args.assignee">
+<input type="hidden" name="assignee_combo_name" value="$args.assignee.combo_name">
+<input type="hidden" name="SET.group" value="$args.group">
+<input type="hidden" name="group_combo_name" value="$args.group.combo_name">
+<input type="hidden" name="SET.priority" value="$args.priority">
+<input type="hidden" name="SET.severity" value="$args.severity">
+<input type="hidden" name="SET.urgency" value="$args.urgency">
+<input type="hidden" name="SET.impact" value="$args.impact">
+<input type="hidden" name="SET.resolution_code" value="$args.resolution_code">
+<input type="hidden" name="SET.resolution_method" value="$args.resolution_method">
+<input type="hidden" name="SET.change" value="$args.change">
+<input type="hidden" name="KEY.change" value="$args.change.chg_ref_num">
+<input type="hidden" name="SET.affected_resource" value="$args.affected_resource">
+<input type="hidden" name="KEY.affected_resource" value=<PDM_FMT ESC_STYLE=C>"$args.affected_resource.COMMON_NAME"</PDM_FMT>>
+<input type="hidden" name="SET.parent" value="$args.persistent_id">
+<input type="hidden" name="KEY.parent" value="$args.ref_num">
+<input type="hidden" name="SET.summary" value=<PDM_FMT ESC_STYLE=JS2>"$args.summary"</PDM_FMT>>
+<input type="hidden" name="SET.description" value=<PDM_FMT ESC_STYLE=JS2>"$args.description (utworzone z Wniosku $args.ref_num)"</PDM_FMT>>
+</form>
+
+
+<script type="text/javascript">
+<PDM_IF "$prop.form_name_3" != "edit">
+if ( typeof parent.createIncident == "boolean" &&
+     parent.createIncident ) {
+  if (typeof ahdframeset.workframe == "object")
+    ahdframeset.workframe.SkipInitialFocus = "1";
+<PDM_IF "$prop.MultiTenancy" != "on">
+  create_new('cr',0,0,0,'PRESET=type:I','INITFROM=frm002');
+<PDM_ELSE>
+  create_new('cr',0,0,0,'PRESET=type:I@@tenant:'+argTenantId,'INITFROM=frm002');
+</PDM_IF>
+}
+</PDM_IF>
+parent.createIncident = void(0);
+
+<PDM_MACRO name=dtlForm factory=cr>
+
+// 20130924 @ e-xim
+<PDM_IF $args.zisRoomReservation == 1>
+<PDM_MACRO name=button Caption="Anuluj rezerwację" Func="exim_CancelReservation()" hotkey_name="Anuluj rezerwację" ID=CalcelReservation Tooltip="Anuluj rezerwację">
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit">
+if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SEARCH_ENGINE" ) {
+	//Add the find similar button
+      
+<PDM_MACRO name=button Caption="Znajdź podobny" Func="find_similar_tickets('cr')" hotkey_name="Find Similar" ID=FIND_SIMILAR Tooltip="Find Similar">
+}
+      
+<PDM_MACRO name=button Caption="Podgląd profilu" Disabled=yes Func="if ( document.main_form['SET.customer'].value != '' ) edit_profile_browser('id', document.main_form['SET.customer'].value); else edit_profile_browser('combo_name', document.main_form['customer_combo_name'].value)" hotkey_name="Quick Profile[Q]" ID=PROFILE_BROWSER>
+<PDM_IF $args.id == 0>
+<PDM_MACRO name=button Caption="Użyj szablonu[*Q]" Func="apply_template('frm001', 'SET.customer', 'cr')" hotkey_name="Use Template[*Q]" ID=btn010>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$args.category" != "" >
+<PDM_IF "$args.category.auto_assign" == "1" || "$args.category.auto_assign" == "2">
+<PDM_MACRO name=button Caption="Przypisz Wniosek" Func="re_auto_assign('$args.assignee','$args.group','$args.customer','$args.category','$args.auto_assign','$args.persistent_id','$args.affected_resource','$args.category.auto_assign')" hotkey_name="Przypisz Wniosek" ID=btn010>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF $ACCESS.FAC_chg == 2 && "$args.change" == "">
+   if ( cfgUserAuth > 1 ) {
+      
+
+   }
+<PDM_MACRO name=button Caption="Utwórz Zmianę[!ea]" Func="detailSave('NEW_CHANGE')" hotkey_name="Utwórz Zmianę[!ea]" ID=btnchg Tooltip="Zapisz i utwórz Zmianę">
+</PDM_IF>
+   if ( cfgUserAuth > 1 ) {
+<PDM_IF "$prop.MultiTenancy" != "on">
+<PDM_MACRO name=button Caption="Utwórz Incydent[!eaI]" Func="create_new('cr',0,0,0,'PRESET=type:I','INITFROM=frm002')" hotkey_name="Utwórz Incydent[!eaI]" ID=ITIL_INCIDENT>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Utwórz Incydent[!eaI]" Func="create_new('cr',0,0,0,'PRESET=type:I@@tenant:'+argTenantId,'INITFROM=frm002')" hotkey_name="Create Incident[!eaI]" ID=ITIL_INCIDENT>
+</PDM_IF>
+}
+if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SEARCH_ENGINE" ) {
+	//Add the find similar button
+      
+<PDM_MACRO name=button Caption="Znajdź podobny" Func="find_similar_tickets('cr')" hotkey_name="Find Similar" ID=FIND_SIMILAR Tooltip="Znajdź podobny">
+}           
+<PDM_MACRO name=button Caption="Podgląd profilu[Q]" Func="profile_browser('$args.customer.persistent_id',void(0),void(0),'$args.persistent_id')" hotkey_name="Quick Profile[Q]" ID=PROFILE_BROWSER>
+	// 20130903 bmalz @ e-xim
+<PDM_IF "$args.category.COMMON_NAME" == "HR.Obsługa kadrowa.Akta osobowe.Obiegówka">
+<PDM_MACRO name=button Caption="Generuj dokument" Func="GenDoc()" hotkey_name="Generuj dokument" ID=GENDOC Tooltip="Generuj dokument">
+</PDM_IF>
+	// 20130925 bmalz @ e-xim
+	
+<PDM_IF "$args.category.COMMON_NAME" == "Informatyka.Ekspertyza">
+<PDM_MACRO name=button Caption="Generuj dokument" Func="GenExpertise()" hotkey_name="Generuj dokument" ID=GENDOC Tooltip="Generuj dokument">
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "${args.extern_ref:}" != "">
+ var extern_token = "$args.extern_token";
+ var extern_ref = "$args.extern_ref";
+
+ if ( extern_token.indexOf("http://") != -1) { 
+ 	if ( extern_ref.indexOf("msgtext") == -1) {
+ 		
+<PDM_MACRO name=button Caption="$args.extern_ref" Func="popupWithURL('$args.extern_token',1)" hotkey_name="$args.extern_ref" ID=btnextlaunch>
+	}
+	else {
+		ImgBtnCreate("btnextlaunch","$args.extern_ref" , "popupWithURL('$args.extern_token',1)", true, 0);
+	}
+  }
+  
+</PDM_IF>
+<PDM_MACRO name=dtlStart scroll=true>
+<PDM_IF "$prop.form_name_3" == "edit">
+</script>
+<input type="hidden" name="change_category" value="0">
+<input type="hidden" name="SET.call_back_flag" value="$args.call_back_flag" id="SET.call_back_flag">
+<input type="hidden" name="NEW_ATTMNTS" id="NEW_ATTMNTS">
+<script type="text/javascript">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Wnioskujący" attr="requested_by" evt="onChange=\\\"backfill_cnt_event()\\\"">
+<PDM_MACRO name=dtlLookup hdr="Pracownik" attr=customer>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja" attr=category autofill=no evt="onChange=\\\"change_category_func('cr',null,'pcat_cr')\\\"" factory=pcat_cr>
+<PDM_IF $args.id == 0>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=status factory=crs_cr whereclause="(code='OP')">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=status factory=crs_cr>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Klasyfikacja - Kontrakt" attr="category.owning_contract">
+<PDM_MACRO name=dtlLookupReadonly hdr="Usługa" attr="category.owning_contract.zusluga">
+<PDM_MACRO name=dtlLookup hdr="Umowa SLA" attr="zsla">
+<PDM_MACRO name=dtlLookup hdr="Poziom usługi" attr="zsdsc" link="no">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Rezerwacja cykliczna" attr="zisRecurrenceReservation">
+<PDM_MACRO name=dtlStartExpRow label="Szczegóły wniosku" colspan=4 exp_rows="1,2,3,4" form_name="detail_cr">
+<PDM_MACRO name=dtlLookupReadonly hdr="Zarejestrowane przez" attr=log_agent>
+<PDM_IF "$env.NX_REQUIRE_REQUEST_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Właściciel" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Właściciel" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_IF "$env.NX_REQUIRE_REQUEST_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_MACRO name=dtlLookup hdr="Element konfiguracji" attr=affected_resource evt="onChange=\\\"assetChanged()\\\" onFocus=\\\"assetChanged()\\\"">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Krytyczność" attr=severity lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Pilność" attr=urgency lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Wpływ" attr=impact lookup=no>
+/*<PDM_MACRO name=dtlReadonly hdr="Aktywne" attr=active>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Charge Back ID" attr=charge_back_id>
+*/
+var cbDateCheck = 0;
+if ( _dtl.edit)
+    cbDateCheck = 1;
+
+if ( "$args.call_back_date_INT_DATE" != "" || ! _dtl.edit ) {
+<PDM_MACRO name=dtlDate hdr="Termin kontaktu" attr=call_back_date> // 20130923 bmalz @ e-xim : To tu zostawić i nie zmieniać pozycji tego wpisu! Inaczej wyrzuca błędy js
+}
+else {
+   detailDateDropdown("Termin oddzownienia", "call_back_date", 1, 20,
+                      "$args.REQUIRED_call_back_date",
+                      "SET.call_back_flag",
+                      86400, msgtext("In_one_day"),   // In one day
+                      172800, msgtext("In_two_days"),  // In two days
+                      604800, msgtext("In_one_week")); // In one week
+}
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlLookup hdr="Zmiana" attr=change>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Zmiana" attr=change>
+</PDM_IF>
+<PDM_MACRO name=dtlLookup hdr="Wynika ze zmiany" attr=caused_by_chg>
+<PDM_MACRO name=dtlTextbox hdr="Numer zgłoszenia zewnętrzengo" attr=external_system_ticket colspan=1 keeptags=yes>
+<PDM_MACRO name=dtlStartExpRow label="Opis wniosku" colspan=4 exp_rows="1,2,3" form_name="detail_cr"> 
+
+if(propSearchConfig.indexOf("summary*") > -1) 
+{
+	
+<PDM_MACRO name=dtlTextbox hdr="Temat" attr=summary colspan=3 keeplinks=yes size=120 spellchk=no srchknow=yes>
+} else {
+	
+<PDM_MACRO name=dtlTextbox hdr="Temat" attr=summary colspan=3 keeplinks=yes size=120 spellchk=no srchknow=no>
+}
+
+if ( _dtl.edit ) {
+   detailRowHdr("Czas aktywności");
+   detailSetRowData("<input type=text " + detailNextID() +
+                    " name='timer' value='' size=8 readonly>");
+}
+else {
+<PDM_MACRO name=dtlReadonly hdr="Całkowity czas aktywności" attr=time_spent_sum>
+}
+
+<PDM_MACRO name=dtlStartRow>
+if(propSearchConfig.indexOf("description*") > -1) 
+{
+
+	
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=4 size=120 spellchk=no srchknow=yes>
+} else {
+	
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=4 size=120 spellchk=no srchknow=no>
+}
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data otwarcia" attr=open_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data modyfikacji" attr=last_mod_dt>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rozwiązania" attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zamknięcia" attr=close_date>
+<PDM_MACRO name=dtlStartExpRow label="Opis rozwiązania" colspan=6 exp_rows="1,2,3" form_name="detail_cr">
+<PDM_MACRO name=dtlDropdown hdr="Kod rozwiązania" attr=resolution_code lookup=no size=60 whereclause="(zTyp!='HR')">
+<PDM_MACRO name=dtlDropdown hdr="Metoda rozwiązania" attr=resolution_method lookup=no size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis rozwiązania" attr=zrozwiazanie colspan=4 keeplinks=yes rows=4 size=120 srchknow=no>
+
+
+</script>
+
+<input type="hidden" name="catg_cawf_defid" value="" size="20">
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr="crro_nb">
+<PDM_MACRO name=startTabGroup title="Dodatkowe informacje">
+<PDM_MACRO name=tab title="Serwis" file="tab_in_serwis.htmpl">
+<PDM_MACRO name=tab title="Właściwości" file="xx_prop_tab.htmpl" id=tabProp>
+<PDM_MACRO name=tab title="Uzasadnienie Zmiany" file="xx_cr_chg_tab.htmpl" id=tabChange>
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=cr+PERSID=$args.persistent_id+NO_DP=yes">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=cr+PERSID=$args.persistent_id+SDBP_FLAG=1">
+</PDM_IF>
+<PDM_MACRO name=tab title="Service Type" file="xx_stype_tab.htmpl" id=stype>
+<PDM_IF "$prop.form_name_3" == "edit" || "$args.template_name" != "">
+<PDM_MACRO name=tab title="Szablon" file="xx_template_tab.htmpl" filename=request>
+</PDM_IF>
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=tab title="SAP" file="cr_sap_tab.htmpl">
+</PDM_IF>
+<PDM_MACRO name=tab title="Akceptacje" file="cr_akceptacje_tab.htmpl">
+<PDM_MACRO name=startTabGroup title="Logs">
+<PDM_IF "$prop.view_internal" == "0">
+<PDM_MACRO name=tab title="Aktywności" height=300 id=alg src="OP=SEARCH+FACTORY=alg+QBE.EQ.call_req_id=$args.persistent_id+QBE.EQ.internal=0" tooltip="Activity Log">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Aktywności" height=300 id=alg src="OP=SEARCH+FACTORY=alg+QBE.EQ.call_req_id=$args.persistent_id" tooltip="Activity Log">
+</PDM_IF>
+<PDM_MACRO name=tab title="Event Log" height=300 src="OP=SEARCH+FACTORY=event_log+QBE.EQ.sd_obj_type=cr+QBE.EQ.sd_obj_id=$dob.id">
+<PDM_MACRO name=tab title="Support Automation" height=300 src="OP=SEARCH+FACTORY=sa_event_history+QBE.EQ.sd_obj_id=$args.id+QBE.NE.sd_obj_type=iss+QBE.NE.sd_obj_type=chg">
+<PDM_MACRO name=startTabGroup title="Baza Wiedzy">
+<PDM_MACRO name=tab title="Artykuły Bazy Wiedzy" height=300 id=tabKnowledge src="OP=SEARCH+FACTORY=KD+KEEP.SD_LAUNCHED=$args.persistent_id+KEEP.DISPLAY_FROM=cr+KEEP.LAUNCHED_ITIL=R+KEEP.search_type=ticket+KEEP.tenantWc=buildWc+KEEP.backfill_field=None">
+<PDM_MACRO name=tab title="Rozwiązania" file="xx_solnalg_tab.htmpl" id=soln>
+<PDM_MACRO name=startTabGroup title="Relacje">
+<PDM_MACRO name=tab title="Hierarchiczne" file="cr_relreq_tab.htmpl" id=rel>
+<PDM_MACRO name=tab title="Zadania" height=300 id=ztask src="OP=SEARCH+FACTORY=ztask+QBE.EQ.parentPERSID=$args.persistent_id">
+<PDM_IF "$args.cawf_procid" != "">
+<PDM_MACRO name=TAB title="Workflow Tasks" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.CAWorkflow+ARG0=getWorkflowInstance+ARG1=+ARG2=$args.category.cawf_defid+ARG3=$args.cawf_procid+ARG4=1+ARG5=1+HTMPL=workitems.htmpl">
+<PDM_ELIF "$args.caextwf_instance_id" != "">
+<PDM_MACRO name=TAB title="Workflow Tasks" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.ItpamWorkflow+ARG0=getProcessInstanceLogs+ARG1=+ARG2=$args.caextwf_instance_id.instance_id+ARG3=1+OBJID=$args.caextwf_instance_id+END_DATE=$args.caextwf_instance_id.endtime+HTMPL=wfITPAMinstance.htmpl">
+<PDM_ELSE>
+<PDM_MACRO name=TAB title="Workflow Tasks" file="xx_wf_tab.htmpl">
+</PDM_IF>
+<PDM_IF 0>
+<PDM_MACRO name=tab title="Poczta przychodząca" src="OP=SEARCH+FACTORY=zCorrespondenceIncome+QBE.EQ.cr.id=$dob.id+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=tab title="Poczta wychodząca" src="OP=SEARCH+FACTORY=zCorrespondanceOucome+QBE.EQ.cr.id=$dob.id+QBE.EQ.delete_flag=0">
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+
+<!-- must be in the main form-->
+<input type="hidden" name="category_contract" value="$args.category.owning_contract">
+<input type="hidden" name="user_contract" value="$args.customer.organization.owning_contract">
+<input type="hidden" name="org_id" value="$args.customer.organization.id">
+
+<div style="display: none;" id="HiddenDiv"></div>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_IF "$args.itg_url_name" != "">
+function launchIntegrateUrl() {
+url="$args.itg_url_name";
+system_name="$args.affected_resource.system_name";
+alarm_id="$args.affected_resource.alarm_id";
+host=system_name?system_name:alarm_id;
+   if(typeof host == "string" && host.length) {
+      url+="?"+"HOST="+host;
+   }
+   var w = window.open(url,"","width=850,height=600,location,alwaysRaised");
+   check_popup_blocker(w);
+}
+
+// necessary for focus on itg popup window
+window.setTimeout('launchIntegrateUrl()',0);
+</PDM_IF>
+</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_cr.htmpl ASPEN.22 2012/04/18 16:14:21 pstso01 Exp $
+</PDM_IF>
+</PDM_IF>
+<PDM_WSP>

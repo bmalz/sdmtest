@@ -1,0 +1,65 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_federation_viewer.htmpl
+//
+// Purpose: CMDB federation detail viewer form showing the view of the current 
+//          CI attributes and corresponding MDR providers.
+//
+//
+// 22-Jul-2009 tomjo02 SCO 26226 - CMDBf Federation Viewer - Initial version 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<html>
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.name} Configuration Item Federation Viewer"</PDM_FMT>;
+var hdrTitleUpd = "";
+var hdrTitleNew = "";
+</script>
+
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cmdb_federation_viewer.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+// Load the metadata for CI attributes.
+<PDM_INCLUDE file=cmdb_metadata_federation_viewer.htmpl twa_setup="eval_extension_attrs" >
+
+</script>
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO NAME=dtlForm button=false factory="">
+<PDM_MACRO NAME=dtlStart>
+<PDM_MACRO NAME=dtlEndTable>
+
+// Show the CMDBf federation view with current CI and MDR provider snapshot data.
+cmdbShowFederationView();
+</script>
+
+<PDM_MACRO NAME=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+
+

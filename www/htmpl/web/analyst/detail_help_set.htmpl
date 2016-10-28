@@ -1,0 +1,162 @@
+<PDM_IF 0>
+detail_help_set.htmpl
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML lang="en">
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Help Set Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Update Help Set"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Help Set ${args.COMMON_NAME}"</PDM_FMT>;
+var argPersistentID = "$args.persistent_id";
+var argInterfaceType = "$args.interface_type";
+var argID = "$args.id";
+var argInternal = "$args.internal";
+var argPrefix = "$args.filename_prefix";
+var argPublishDate = "$args.last_publish_date";
+var rptName = new Array("help_setsum.rpt", "help_setdtl.rpt");
+var argSearchSqlClause = "id = $args.id";
+var argMakeCopy = "$args.KEEP.MAKE_COPY";
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+function copy_from_parent()
+{}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function defineContent()
+{
+    var addl_url = "+KEEP.ForHelpItem=1+ADDITIONAL_WHERE=(interface_type=" + argInterfaceType + " or interface_type is null)+HTMPL=update_lrel_help_content.htmpl";
+    update_with_lrel_style('help_set', 
+                           argPersistentID, 
+                           'help_content', 
+                           'items', 
+                           'Available Help', 
+                           'Selected Help', 
+                            addl_url );
+}
+ 
+ 
+function publishBuildHelp()
+{ 
+    upd_workframe("HELP_BUILD_PUBLISH", 
+                  "PERSID=" + argPersistentID,
+                  "PUBLISH_ID=" + argID,
+                  "FACTORY=help_set",
+                  "callback_func=parent.ahdframeset.ahdframe.help_item_cb");    
+}
+
+function viewHelp()
+{
+    launch_help_in_context(argPrefix, "");
+}
+
+function help_item_cb(answer)
+{
+    var message = "";
+    if (typeof answer == "string")
+    {
+        if (answer == "SUBMIT_OK")    { message = "Publish request submitted. Refresh form in a moment in order to view help."; }
+        else 
+        if (answer == "SUBMIT_NOTOK") { message = "Publish request failed. Check log."; }
+        else 
+        message = answer;
+    }
+    
+    if (message != "") {
+        showAlertMsg(message,false);
+    }
+}
+
+function nameChanged(nameObj)
+{
+	var f=document.main_form.elements["SET.filename_prefix"];
+	if(nameObj.value.length > 0 && f.value.length==0)
+	{
+		// default prefix to name replacing spaces with underscores
+		var pref = nameObj.value;
+		if (pref.length > 30)
+		{
+			pref = pref.substr(0,30);
+		} 
+		pref = pref.replace(/ /g, "_");
+		
+		// cleanup trailing underscores
+		while ( pref.length && pref.substr(pref.length - 1, 1) == "_")
+		{
+			pref = pref.substr(0, (pref.length - 1));
+		}
+		f.value = pref;
+	} 
+}
+
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory="help_set">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa zestawu pomocy" attr="name" evt="onChange='nameChanged(this)'" size=30>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa wewnętrzna" attr="internal_name" size=30>
+if (argMakeCopy == "1" || argInternal == "1") {
+<PDM_MACRO name=dtlReadonly hdr="Typ interfejsu" attr="interface_type">
+} else {
+<PDM_MACRO name=dtlDropdown hdr="Typ interfejsu" attr="interface_type" lookup=no size=20>
+}
+<PDM_MACRO name=dtlStartRow>
+if (argInternal == "1") {
+<PDM_MACRO name=dtlReadonly hdr="Prefix nazwy pliku" attr="filename_prefix">
+} else {
+<PDM_MACRO name=dtlTextbox hdr="Prefix nazwy pliku" attr="filename_prefix" size=30>
+}
+<PDM_MACRO name=dtlReadonly hdr="Wewnętrzny" attr="internal">
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opublikowano" attr="last_publish_date">
+<PDM_MACRO name=dtlReadonly hdr="Modyfikowano" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by.combo_name">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_MACRO name=startNotebook hdr=tabID>
+<PDM_MACRO name=TAB title="Contents" height=400 src="OP=SEARCH+FACTORY=help_item+QBE.EQ.help_set=$args.id">
+<PDM_MACRO name=endNotebook>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_WSP>

@@ -1,0 +1,60 @@
+<PDM_IF 0>
+multiframe_reports_sd_mgr.htmpl
+WHEN PRESENTED:
+    Used to display reports for the Service Desk Manager Role
+</PDM_IF>
+
+<HTML lang="en">
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+function frameset_loaded()
+{
+    // If cai_main is defined, save it in ahdframe, 
+    // otherwise, the HTMPL page needs to figure out 
+    // how to set ahdframe.
+    if (typeof window.cai_main != "undefined")
+    {
+	ahdframe = window.cai_main;
+	ahdframeset.ahdframe = ahdframe;
+	if (typeof parent.ahdframe == "object")
+	    parent.ahdframe = ahdframe;
+	if (typeof parent.ahdframeset == "object")
+	    parent.ahdframeset.ahdframe = ahdframe;
+    }
+}
+</script>
+</HEAD>
+<PDM_IF "$env.NX_BO_SERVER_LOCATION" == "" || "$env.NX_BO_SERVER_CMS" == "">
+    <PDM_INCLUDE file=reports_unavailable.htmpl>
+<PDM_ELSE>
+    <SCRIPT>
+        <PDM_MACRO NAME=startFrameset id="frameset01_sd_mgr" cols="50%,50%" border=2 onload="frameset_loaded();">
+	<PDM_IF "itil" == "$env.NX_OTB_MARKET">
+	        <PDM_MACRO NAME=frame id="Frame1_sd_mgr" frame_name="Frame1_sd_mgr" web_form_name="cr_failed_svctype_by_pcat" title="Frame1_sd_mgr" style="border: 1px #8B939A solid;" marginheight=0 marginwidth=0>
+	<PDM_ELSE>
+	        <PDM_MACRO NAME=frame id="Frame1_sd_mgr" frame_name="Frame1_sd_mgr" web_form_name="cr_viol_sla_group" title="Frame1_sd_mgr" style="border: 1px #8B939A solid;" marginheight=0 marginwidth=0>
+	</PDM_IF>
+        <PDM_MACRO NAME=frame id="Frame2_sd_mgr" frame_name="Frame2_sd_mgr" web_form_name="cr_non_closed_priority" title="Frame2_sd_mgr" style="border: 1px #8B939A solid;" marginheight=0 marginwidth=0>
+        <PDM_MACRO NAME=endFrameset>
+    </SCRIPT>
+</PDM_IF>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: multiframe_reports_sd_mgr.htmpl FWr1.1 2008/6/17 8:21:48 ralje02 Exp $
+</PDM_IF>

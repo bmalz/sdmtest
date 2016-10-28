@@ -1,0 +1,56 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a sa_security_group factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Privacy Levels Search";
+			var hdrTitleList = "Privacy Levels List";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"/>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/role.js"></SCRIPT>
+		<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+	</HEAD>
+	<BODY CLASS="list" OnUnload="cancel_any_lrel_update()">
+		<PDM_INCLUDE FILE=std_body.htmpl key="$args.name">
+		<script language="JavaScript">
+			<PDM_OBJECT>
+			function add_button_to_tab_banner() {
+				<PDM_IF $UserAuth \> 1>
+					<PDM_MACRO NAME=button caption="Update Privacy Levels" id=btnAddQ func="update_with_lrel_style('sa_role', 'sa_role:$args.QBE.EQ.roleID', 'sa_security_group', 'security_grps', 'Privacy Levels Available', 'Privacy Levels Assigned', '', 'KEEP.ForSAPrivacyLevel=1+QBE.GT.id=0+HTMPL=update_lrel_sa_security_group.htmpl')"  hotkey_name="Update Privacy Levels" NewRow=yes  EndRow=yes>
+				</PDM_IF>
+			}
+			</PDM_OBJECT>
+
+			<PDM_MACRO NAME=tabBanner title="Privacy Levels List" add_btns=true show_bar=false btns_in_two_rows=false btnfunc=add_button_to_tab_banner>
+		</script>
+		
+		<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+  				var msgFoundNone = "No Privacy Levels found";
+ 	 			var msgFound1 = "1 Privacy Level found";
+  				var msgFound = "%1 Privacy Levels found";
+  				var msgFoundMore = "%1 Privacy Levels found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired Privacy Level";
+  				<pdm_macro name=lsStart>
+					<pdm_macro name=lsWrite text="rs.currentRecord.persid=\"@{list.groupID.persistent_id}\";">
+					<pdm_macro name=lsCol hdr="Nazwa" attr="groupID.groupName" link=yes sort="no">
+  					<pdm_macro name=lsCol hdr="Poziom prywatności" attr="groupID.rank" link="no" sort="no">
+  				<pdm_macro name=lsEnd>
+  			</script>
+		</PDM_IF>
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

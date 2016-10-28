@@ -1,0 +1,102 @@
+<PDM_IF 0>
+list_prptpl.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Properties.
+	Used by both Change Categories and Issue Categories.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Wyszukiwanie właściwości";
+var hdrTitleList = "Listwa właściwości";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var cfgCanEdit = true;
+
+<PDM_IF "$args.KEEP.forCattoPrptpl" == "1">
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.CAT_ID" != "0" && $ACCESS.FAC_prptpl \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    <PDM_IF "$args.QBE.EQ.object_type" == "chg">
+        cfgExtraButton = new Array("Add_Property", "add_prptpl_chgcat('$args.KEEP.CAT_PERSID','chgcat_prptpl')", enableExtraBtn);
+    </PDM_IF>
+    <PDM_IF "$args.QBE.EQ.object_type" == "iss">
+        cfgExtraButton = new Array("Add_Property", "add_prptpl_isscat('$args.KEEP.CAT_PERSID','isscat_prptpl')", enableExtraBtn);
+    </PDM_IF>
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Property">
+<script language="JavaScript">
+
+<PDM_MACRO name=sfStart create=false factory=prptpl>
+<PDM_IF "$args.KEEP.forCattoPrptpl" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.object_type" value="$args.QBE.EQ.object_type">');
+    document.write('<input type="hidden" name="QBE.EQ.object_attrval" value="$args.QBE.EQ.object_attrval">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown attr="delete_flag">
+<PDM_MACRO name=sfTextbox hdr="Etykieta" attr="label">
+<PDM_MACRO name=sfTextbox hdr="Kolejność" attr="sequence">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="description" colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var msgFoundNone = "Brak";
+var msgFound1 = "Znaleziono 1 właściwość";
+var msgFound = "Znaleziono %1 właściwosci";
+var msgFoundMore = "Znaleziono %1 właściwosci. Wyświetlane %2 z %3";
+var msgSelect = "Kliknij aby wybrać daną właściwość";
+
+<PDM_IF "$args.KEEP.forCattoPrptpl" == "1" && "$args.KEEP.IS_EDIT" != "edit">
+function resultSetCustomContextAddMiddle(ctxMenu) {
+    
+<PDM_IF "$args.QBE.EQ.object_type" == "chg">
+        ctxMenu.addItem(msgtext("Delete"),"delete_prptpl_chgcat('$args.KEEP.CAT_PERSID',self.activePersid)");
+    
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.object_type" == "iss">
+        ctxMenu.addItem(msgtext("Delete"),"delete_prptpl_isscat('$args.KEEP.CAT_PERSID',self.activePersid)");
+    
+</PDM_IF>
+}
+</PDM_IF>
+
+function req_flag(value)
+{
+   if ( value == "1" )
+      value = "Yes";
+   else if ( value == "0" )
+      value = "No";
+   rs.data(value);     
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr=Kolejność attr=sequence exportFmt="ShowLink" link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr=Etykieta attr=label startrow="no">
+<PDM_MACRO name=lsCol hdr=Wymagane attr=required exportFmt=YesNo fmtfunc=req_flag sort=no startrow="no">
+<PDM_MACRO name=lsCol hdr=Reguła attr=validation_rule startrow="no">
+<PDM_MACRO name=lsCol hdr=Status attr=delete_flag startrow="no">
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_prptpl.htmpl ASPEN.2 2011/10/19 17:59:26 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

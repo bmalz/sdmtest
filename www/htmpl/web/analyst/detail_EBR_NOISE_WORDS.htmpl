@@ -1,0 +1,92 @@
+<PDM_IF 0>
+detail_EBR_NOISE_WORDS.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Noise Word
+INTENT:
+    Display the detail info for the Noise Word
+VARIABLES:
+    object EBR_NOISE_WORDS args	The EBR_NOISE_WORDS object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/kt.maj for the
+                        definition of attributes for 'OBJECT EBR_NOISE_WORDS'
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.NOISE_WORD Noise Word Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.NOISE_WORD Update Noise Word"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Noise Word $args.NOISE_WORD"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+var noise_word_orig_onsubmit = void(0);
+var doc;
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+function SaveNoiseWord()
+{
+	doc = document.forms[0].elements;
+	
+	//Important: Do not remove this line because it converts the text to lower case for EBR
+	doc["SET.NOISE_WORD"].value = trim(doc["SET.NOISE_WORD"].value.toLowerCase());
+	
+	// run original onsubmit handler if any	
+	if (typeof noise_word_orig_onsubmit != "undefined" && noise_word_orig_onsubmit != "")
+	{
+		return noise_word_orig_onsubmit();
+	}
+
+	return true;
+}
+//trim off the leading space
+function trim(argvalue)
+{
+	while (1)
+	{
+		if (argvalue.substring(0, 1) != " ")
+			break;
+		argvalue = argvalue.substring(1, argvalue.length);
+	}
+	return argvalue;
+}       
+</SCRIPT>
+</HEAD>
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="noiseword" header=no key="$args.NOISE_WORD">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=EBR_NOISE_WORDS>
+<PDM_MACRO name=dtlStart>
+
+if (typeof window.document.main_form.onsubmit != "undefined" && 
+	    window.document.main_form.onsubmit != "")
+{
+	//Try to catch the original submit if there is any
+    noise_word_orig_onsubmit = window.document.main_form.onsubmit;
+} 
+		
+window.document.main_form.onsubmit = SaveNoiseWord; 
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Noise Word" attr=NOISE_WORD size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

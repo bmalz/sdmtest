@@ -1,0 +1,292 @@
+<PDM_IF 0>
+pcat_wftpl_tab.htmpl
+
+INTENT:
+	Display a Workflow notebook page for Request/Incident/Problem Area.
+
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=pcat_wftpl_tab" factory=pcat>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro">
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+
+<PDM_FORM NAME="frmDTLRO" CLASS=searchFilterList>
+<script LANGUAGE="JavaScript">
+var restriction_keep = '<PDM_FMT ESC_STYLE=C PAD=NO>KEEP.SVC_CONTRACT_ID=$args.owning_contract+KEEP.SVC_CONTRACT_SYM=$args.owning_contract.sym</PDM_FMT>';
+var wf_htmpl = "wfdef.htmpl";
+var wfITPAM_htmpl = "wfITPAMdef.htmpl";
+var view_CAWF = "";		// contains HTML code for CA Workflow view
+var view_ITPAM = "";	// contains HTML code for ITPAM view
+var flag = "$args.flow_flag";	// current workflow in use (0=Classic, 1=CAWF, 2=ITPAM)
+// callback function for tab_banner()
+function add_button_to_tab_banner() {
+	ImgBtnRow();
+	// check for ITPAM integration
+	if ("$env.NX_CAEXTWF_ENDPOINT" != "") {
+		
+<PDM_MACRO name=button Caption="Użyj CA PAM" Func="launchITPAM()" hotkey_name="Use ITPAM" ID=btnITPAM>
+	}
+	
+<PDM_MACRO name=button Caption="Usuń" EndRow=yes Func="removeWF()" hotkey_name="Remove" ID=btnRemove>
+}
+
+function showITPAM() {
+	document.getElementById("divView").innerHTML = view_ITPAM;
+}
+
+function showCAWF() {
+	document.getElementById("divView").innerHTML = view_CAWF;
+}
+
+// Launch ITPAM
+function launchITPAM() {
+	showITPAM();
+	getITPAMDefinitions(wfITPAM_htmpl, "pcat");
+	document.getElementById("flowflag").value = "2";
+}
+
+// Launch CA Workflow
+function launchCAWF() {
+	showCAWF();
+	getDefinitions(wf_htmpl);
+	document.getElementById("flowflag").value = "1";
+}
+
+function removeWF() {
+	document.getElementById("divView").innerHTML = "";
+	document.getElementById("flowflag").value = "";
+}
+
+// Intermidiate method called after clicking Save
+// returns true to continue save operation
+//         false to stop save op
+function preSaveTrigger() {
+	var tempflag = document.getElementById("flowflag").value;
+
+	if (tempflag == "2" && pmURL != "" && pmLocal != "") {
+		// show error message when passing empty values in ITPAM view
+		// when CAWF is installed
+		if (document.getElementById("extdefName").value == "") {
+			var message = msgtext("Cannot_proceed_to_save_%1", "Nazwa procesu CA IT PAM");
+			alertmsg(message);
+			return false;
+		}
+	}
+	else if (tempflag == "2") {
+		// CAWF is not installed, i.e. ITPAM is the only option
+		// allow empty value but reset flag to original value
+		if (document.getElementById("extdefName").value == "") {
+			document.getElementById("flowflag").value = flag;
+		}
+	}
+	else if (tempflag == "1") {
+		// CAWF view
+		// allow empty value but reset flag to original value
+		if (document.getElementById("defname").value == "") {
+			document.getElementById("flowflag").value = flag;
+		}
+	}
+	return true;
+}
+
+
+
+// ITPAM view ...
+
+if (_dtl.edit) {
+	var fmtName = msgtext("CA_IT_PAM") + " Start Request Form";
+	view_ITPAM += "<table id='table00' class='tab'>";
+	var link = "<td><a href=\"javascript:launchITPAM()\" class='lookup'>";
+	if ( ahdtop.cstUsingScreenReader )
+	  fmtName = "C A I T PAM Start Request Form Lookup";
+	else {
+		link += "<img class='gn_container_no_border' align='bottom' width='12' height='12' src=";
+		link += cfgCAISD;
+		link += "/img/lookup.gif alt=\"Pop up lookup form\">";
+	}
+	link += fmtName;
+	link += "</a></td><tr>";
+	view_ITPAM += link;
+	view_ITPAM += "</table>";
+}
+
+view_ITPAM += "<table id='table01' class='tab' summary='C A I T PAM Process'>";
+view_ITPAM += "<tr>";
+view_ITPAM += "<th scope='col' align='left' class='detailro'>" + "Nazwa procesu CA PAM";
+view_ITPAM += "</th>";
+view_ITPAM += "<th scope='col' align='left' class='detailro'>" + "Ścieżka procesu CA PAM";
+view_ITPAM += "</th>";
+view_ITPAM += "</tr>";
+view_ITPAM += "<tr>";
+
+var fmtName = <PDM_FMT ESC_STYLE=C>"$args.caextwf_start_id.caextwf_form"</PDM_FMT>;
+if(_dtl.edit)
+	view_ITPAM += "<td valign='top' class='detailroTab'><input id='extdefName' type='text' readonly='readonly' name='SET.caextwf_start_id.caextwf_form' value='" + fmtName + "' size='30'>";
+else
+	view_ITPAM += "<td valign='top' class='detailro'>" + fmtName + "";
+
+view_ITPAM += "</td>";
+fmtName = <PDM_FMT ESC_STYLE=C>"$args.caextwf_start_id.caextwf_path"</pdm_fmt>;
+if(_dtl.edit)
+	view_ITPAM += "<td valign='top' class='detailroTab'><input id='extdefPath' type='text' readonly='readonly' name='SET.caextwf_start_id.caextwf_path' value='" + fmtName + "' size='50'>";
+else
+	view_ITPAM += "<td valign='top' class='detailro'>" + fmtName + "";
+
+view_ITPAM += "</td>";
+view_ITPAM += "</tr>";
+
+if (! _dtl.edit && "$args.caextwf_start_id" == "")
+{
+	view_ITPAM += "<tr>";
+	view_ITPAM += "<td align='middle' class='detailro' colspan='3'>";
+	view_ITPAM += "Brak przypiętego procesu";
+	view_ITPAM += "</td>";
+	view_ITPAM += "</tr>";
+}
+
+view_ITPAM += "</table>";
+
+
+
+// CA Workflow view ...
+
+if (_dtl.edit) {
+	var fmtName = "Procesy CA PAM";
+	view_CAWF += "<table id='table02' class='tab'>";
+	var link = "<td><a href=\"javascript:launchCAWF()\" class='lookup'>";
+	if ( ahdtop.cstUsingScreenReader )
+	  fmtName = "CA Workflow Definition Lookup";
+	else {
+		link += "<img class='gn_container_no_border' align='bottom' width='12' height='12' src=";
+		link += cfgCAISD;
+		link += "/img/lookup.gif alt=\"Pop up lookup form\">";
+	}
+	link += fmtName;
+	link += "</a></td><tr>";
+	view_CAWF += link;
+	view_CAWF += "</table>";
+}
+
+view_CAWF += "<table id='table03' class='tab' summary='CA PAM'>";
+view_CAWF += "<tr>";
+view_CAWF += "<th scope='col' align='left' class='detailro'>Nazwa Procesu";
+view_CAWF += "</th>";
+view_CAWF += "<th scope='col' align='left' class='detailro'>ID";
+view_CAWF += "</th>";
+view_CAWF += "<th scope='col' align='left' class='detailro'>Opis";
+view_CAWF += "</th>";
+view_CAWF += "<th scope='col' align='left' class='detailro'>Status";
+view_CAWF += "</th>";
+view_CAWF += "</tr>";
+view_CAWF += "<tr>";
+
+var fmtName = <PDM_FMT ESC_STYLE=C>"$args.cawf_defname"</pdm_fmt>;
+if(_dtl.edit)
+	view_CAWF += "<td valign='top' class='detailroTab'><input id='defname' type='text' readonly='readonly' name='SET.cawf_defname' value='" + fmtName + "' size='30'>";
+else
+	view_CAWF += "<td valign='top' class='detailro'>" + fmtName + "";
+
+view_CAWF += "</td>";
+fmtName = <PDM_FMT ESC_STYLE=C>"$args.cawf_defid"</pdm_fmt>;
+if(_dtl.edit)
+	view_CAWF += "<td valign='top' class='detailroTab'><input id='defID' type='text' readonly='readonly' name='SET.cawf_defid' value='" + fmtName + "' size='20'>";
+else
+	view_CAWF += "<td valign='top' class='detailro'>"+fmtName + "";
+
+view_CAWF += "</td>";
+fmtName = <PDM_FMT ESC_STYLE=C>"$args.cawf_desc"</pdm_fmt>;
+if(_dtl.edit)
+	view_CAWF += "<td valign='top' class='detailroTab'><input id='defDesc' type='text' readonly='readonly' name='SET.cawf_desc' value='" + fmtName + "' size='30'>";
+else
+	view_CAWF += "<td valign='top' class='detailro'>" + fmtName + "";
+
+view_CAWF += "</td>";
+<PDM_IF "$args.cawf_active" == "Y">
+	fmtName = msgtext("Yes");
+<PDM_ELIF "$args.cawf_active" == "">
+	fmtName = "";
+<PDM_ELSE>
+	fmtName = msgtext("No");
+</PDM_IF>
+
+if(_dtl.edit)
+	view_CAWF += "<td valign='top' class='detailroTab'><input id='defAct' type='text' readonly='readonly' name='SET.cawf_active' value='" + fmtName + "' size='4'>";
+else
+	view_CAWF += "<td valign='top' class='detailro'>" + fmtName + "";
+
+view_CAWF += "</td>";
+view_CAWF += "</tr>";
+
+if (! _dtl.edit && "$args.cawf_defid" == "")
+{
+	view_CAWF += "<tr>";
+	view_CAWF += "<td align='middle' class='detailro' colspan='4'>";
+	view_CAWF += "Brak przypiętego procesu";
+	view_CAWF += "</td>";
+	view_CAWF += "</tr>";
+}
+
+view_CAWF += "</table>";
+
+
+
+if ( _dtl.edit ) {
+	if (flag == "1")
+		tab_banner("CA PAM", true);
+	else if (flag == "2")
+		tab_banner(msgtext("CA_IT_PAM") + " Workflow", true);
+	else {
+		// default view depends on what is installed
+		if (pmURL != "" && pmLocal != "")
+			tab_banner("CA PAM", true);
+		else if ("$env.NX_CAEXTWF_ENDPOINT" != "")
+			tab_banner(msgtext("CA_IT_PAM") + " Workflow", true);
+	}
+}
+else {
+	if (flag == "1")
+		tab_banner("CA PAM");
+	else if (flag == "2")
+		tab_banner(msgtext("CA_IT_PAM") + " Workflow");
+	else {
+		// default view depends on what is installed
+		if (pmURL != "" && pmLocal != "")
+			tab_banner("CA PAM");
+		else if ("$env.NX_CAEXTWF_ENDPOINT" != "")
+			tab_banner(msgtext("CA_IT_PAM") + " Workflow");
+	}
+}
+
+docWrite("<div id='divView'></div>");
+docWrite("<input id='flowflag' type='hidden' name='SET.flow_flag' value='$args.flow_flag'>");
+
+// Show current view
+if (flag == "1")
+	showCAWF();
+else if (flag == "2")
+	showITPAM();
+else {
+	// default view depends on what is installed
+	if (pmURL != "" && pmLocal != "")
+		showCAWF();
+	else if ("$env.NX_CAEXTWF_ENDPOINT" != "")
+		showITPAM();
+}
+
+</script>
+</PDM_FORM>
+
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: pcat_wftpl_tab.htmpl ASPEN.3 2011/01/13 10:44:15 ralje02 Exp $;
+</PDM_IF>

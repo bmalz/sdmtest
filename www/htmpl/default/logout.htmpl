@@ -1,0 +1,18 @@
+<PDM_IF 0>
+$Id: logout.htmpl,v 1.2 2003/01/16 23:26:39 zimjo03 Exp $
+</PDM_IF>
+<PDM_IF 0>
+	This file is presented when a logout operation is desired.
+
+	All it does is call logout_all_windows().  If an operation must be sent
+	to the webengine before the logout operation completes, this is the HTMPL
+	form to use.
+</PDM_IF>
+<html>
+	<head>
+		<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+	</head>
+	<body onload="logout_all_windows(1);">
+	</body>
+</html>

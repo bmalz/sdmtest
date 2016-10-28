@@ -1,0 +1,132 @@
+<PDM_IF 0>
+detail_hier.htmpl
+WHEN PRESENTED:
+    When the app needs input to create or edit a new Asset Relation
+INTENT:
+    Capture user input for an Asset Relation, creates new one
+    when submitted, or modifies existing one.
+VARIABLES:
+    string    image        The location of the image directory as 
+                specified in the config file.
+    object hier   args        new hier obj.
+                            See $NX_ROOT/bopcfg/majic/nr.maj for the
+                            definition of attributes for 'OBJECT hier'
+    int       logged_in   A flag to say we have a user login object.
+    object cst    cst        A cst object (customer) that is the logged in user.
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Configuration Item Relationship";
+var hdrTitleUpd = "Update Configuration Item Relationship";
+var hdrTitleNew = "Create New Configuration Item Relationship";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+<PDM_IF "$args.id" == "0">
+var the_parent_persid='nr'+ ':'+'$args.KEEP.nr_id';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+<PDM_ELSE>
+var the_parent_persid = '$args.KEEP.ForHier';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+</PDM_IF>
+
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Configuration Item Relation">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=hier>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$prop.form_name_3" == "ro" && "$args.id" != 0>
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.CO_PARENT\" VALUE=\"1\">");
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.PARENT_PERSID\" VALUE="+the_parent_persid+">");
+</PDM_IF>
+
+// close this form and give focus on the main form
+if ( _dtl.edit ) 
+{
+docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+    
+} 
+    
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data" attr=log_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Identyfikator" attr=license_num>
+<PDM_IF "$args.id" == "0">
+				<!-- This is creating a new Asset/CI Relation -->
+				    
+<PDM_IF ${args.KEEP.child:} == "">
+									    <!-- We're adding a child -->
+							    
+<PDM_MACRO name=dtlStartRow>				    
+									detailTextboxReadonly("Parent Configuration Item","",1,<PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.nr_name"</PDM_FMT>); 
+									docWriteln("<INPUT TYPE=HIDDEN NAME=SET.parent VALUE='$args.KEEP.parent'>");										
+								
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Podrzędny element konfiguracji" attr=child>
+<PDM_ELSE>
+				    <!-- we're adding a parent -->	
+				    		
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Nadrzędny element konfiguracji" attr=parent>
+<PDM_MACRO name=dtlStartRow>   								   
+								detailTextboxReadonly("Child Configuration Item","",1,<PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.nr_name"</PDM_FMT>);	 		
+								docWriteln("<INPUT TYPE=HIDDEN NAME=SET.child VALUE='$args.KEEP.child'>");								
+					
+</PDM_IF>
+<PDM_ELSE>
+				    <!-- This is editing an existing Asset/CI Relation -->  
+				  	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nadrzędny element konfiguracji" attr=parent>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Podrzędny element konfiguracji" attr=child>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data" attr=log_date>
+<PDM_MACRO name=dtlReadonly hdr="Identyfikator" attr=license_num>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nadrzędny element konfiguracji" attr=parent>
+<PDM_MACRO name=dtlReadonly hdr="Podrzędny element konfiguracji" attr=child>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Ilość" attr=child.asset_count>
+<PDM_MACRO name=dtlReadonly hdr="Przydzielone" attr=child.parent_hier.length>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: detail_hier.htmpl RESILIENCE.1 2010/04/27 11:11:44 bohda01 Exp $";
+</PDM_IF>
+<PDM_WSP>

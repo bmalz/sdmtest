@@ -1,0 +1,170 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose:
+//    Show the details of an verification log entry managed by CACF
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.last_mod_dt} Verification Log Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.last_mod_dt} Update Verification Log"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+// Start with Configuration Item section collapsed by default
+if ( typeof ahdtop.detail_ci_verification_log_initialized == "undefined" )
+{
+    ahdtop.detail_ci_verification_log_initialized = true;
+    ahdtop.set_expand_sec_state( "detail_ci_verification_log", 0, "down" );
+}
+
+<PDM_IF "$args.ci_planned_change.status" == "FAIL" || "$args.ci_planned_change.status" == "MANVRFYACT" >
+   // Show the form title in "red" with trailing asterisks if
+   // the change specification is marked failed or requires manual verification
+   <PDM_SET args.sla_violation=1>
+
+    // Use the emergency indicator
+    ahdtop.cfgIndSLAViolPrev = ahdtop.cfgIndSLAViol;
+    ahdtop.cfgIndSLAViol = ahdtop.cfgIndEmergency;
+</PDM_IF>
+
+</script>
+
+</head>
+
+<body class=detailro onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<center>
+
+<script language="JavaScript">
+
+<PDM_IF "$args.sla_violation" == "1">
+    // Restore the previous indicator
+    ahdtop.cfgIndSLAViol = ahdtop.cfgIndSLAViolPrev;
+</PDM_IF>
+<PDM_MACRO name=dtlForm button=false factory="ci_verification_log">
+<PDM_IF 0>
+<!-- ------------------------------------------------------------------------------------------ -->
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Status weryfikacji" attr="status">
+<PDM_MACRO name=dtlLookupReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ci_planned_change" != "">
+        // Show the change order number for the change specification instead of the common name (internal ID)
+        detailLookupReadonly(
+            "Change Specification", // hdrtext
+            "ci_planned_change", 1,                      // attribute and colspan
+            "$args.ci_planned_change.persistent_id",     // srel persid
+            "$args.ci_planned_change.chg.chg_ref_num",   // common name - override with change order refnum
+            "yes" );                                     // show_link
+    
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Specyfikacja zmiany" attr="ci_planned_change">
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Status specyfikacji zmiany" attr="ci_planned_change.status.name">
+<PDM_IF "$args.error_message" != "">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Wiadomość polisy" attr="error_message">
+</PDM_IF>
+<PDM_IF 0>
+<!-- ------------------------------------------------------------------------------------------ -->
+</PDM_IF>
+<PDM_IF "$args.nr.name" != "">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartExpRow label="Configuration Item" colspan=2 exp_rows="2,3,4" form_name="detail_ci_verification_log">
+
+    // NOTE: Always show the first row with CI Name and class row (exp_rows does not have "1"), section is initially shown collapsed by default
+    
+<PDM_MACRO name=dtlLookupReadonly hdr="Nazwa CI" attr="nr">
+<PDM_MACRO name=dtlLookupReadonly hdr="Klasa" attr="nr.class">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa hosta" attr="nr.system_name">
+<PDM_MACRO name=dtlTextbox hdr="Numer seryjny" attr="nr.serial_number">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="MAC adres" attr="nr.mac_address">
+<PDM_MACRO name=dtlTextbox hdr="Nazwa DNS" attr="nr.dns_name">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Alternatywne ID CI" attr="nr.asset_num" colspan=2>
+</PDM_IF>
+<PDM_IF 0>
+<!-- ------------------------------------------------------------------------------------------ -->
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartExpRow label="Verification Details" colspan=2 exp_rows="1,2" form_name="detail_ci_verification_log">
+<PDM_MACRO name=dtlLookupReadonly hdr="Managed Attribute" attr="ci_managed_attribute">
+<PDM_MACRO name=dtlTextbox hdr="Znaleziona wartość" attr="discoveredvalue">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zaktualizowana wartość" attr="newvalue">
+<PDM_MACRO name=dtlTextbox hdr="Poprzednia wartość" attr="oldvalue">
+<PDM_IF 0>
+<!-- ------------------------------------------------------------------------------------------ -->
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ci_verification_policy" != "">
+<PDM_MACRO name=dtlStartExpRow label="Policy" colspan=2 exp_rows="1,2,3,4" form_name="detail_ci_verification_log">
+<PDM_MACRO name=dtlLookupReadonly hdr="Nazwa polisy" attr="ci_verification_policy">
+<PDM_MACRO name=dtlTextbox hdr="Akcja polisy" attr="ci_verification_policy_act.description">
+<PDM_MACRO name=dtlStartRow>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartExpRow label="Policy" colspan=2 exp_rows="1,2,3" form_name="detail_ci_verification_log">
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Wykryta rozbieżność" attr="is_variance">
+<PDM_MACRO name=dtlDropdown hdr="Nieweryfikowalna zmiana" attr="is_unverifiable">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Rogue Insert" attr="is_rogueinsert">
+<PDM_MACRO name=dtlDropdown hdr="Rogue Update" attr="is_rogueupdate">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="MDR" attr="ci_mdr_provider">
+<PDM_MACRO name=dtlLookupReadonly hdr="TWA" attr="ci_twa_ci">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartExpRow label="Related Tickets" colspan=2 exp_rows="1,2,3,4" form_name="detail_ci_verification_log">
+<PDM_MACRO name=dtlLookupReadonly hdr="Zmiana" attr="ci_planned_change.chg">
+<PDM_MACRO name=dtlTextbox hdr="Status zmiany" attr="ci_planned_change.chg.status.sym">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Streszcznie zmiany" attr="ci_planned_change.chg.summary" colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Incydent" attr="incident">
+<PDM_MACRO name=dtlTextbox hdr="Status incydentu" attr="incident.status.sym">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Podsumowanie incydentu" attr="incident.summary" colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_ci_verification_log.htmpl ASPEN.10 2012/04/11 11:40:31 mckpe04 Exp $;
+</PDM_IF>
+<PDM_WSP>
+

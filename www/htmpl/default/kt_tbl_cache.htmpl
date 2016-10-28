@@ -1,0 +1,105 @@
+
+<script>
+
+var arrHTMLImages;
+if(typeof arrHTMLImages == 'undefined')
+		arrHTMLImages = new Array;
+function AddItemToImageArray(attmntId, secId)
+{
+	for(var i=0; i<arrHTMLImages.length; i+=2)
+	{
+		if(arrHTMLImages[i] == attmntId)
+			if(arrHTMLImages[i+1] == secId)
+				return;		// already exist
+	}
+	arrHTMLImages[arrHTMLImages.length] = attmntId;
+	arrHTMLImages[arrHTMLImages.length] = secId;
+}
+
+<PDM_IF "$prop.CACHE" == "all" || "$prop.DOC_REP" == "1">
+	if(typeof ahdtop.arrActionContentRows == 'undefined')
+		ahdtop.arrRepositoriesRows = new Array;
+	var nRepRowCount = 0;
+	<PDM_LIST FACTORY=doc_rep PREFIX=list WHERE="id>0">
+		var bHasChildren = 0;
+		<PDM_LIST PREFIX=doc_rep_childs FACTORY=attmnt_folder WHERE="repository='$list.persistent_id' and parent_id=0">
+			bHasChildren = 1;
+			var x = $doc_rep_childs.id;  // does nothing
+		</PDM_LIST>	
+		ahdtop.arrRepositoriesRows[nRepRowCount+'persistent_id']='$list.persistent_id';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'server']='<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.server</PDM_FMT>';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'servlet_path']='<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.servlet_path</PDM_FMT>';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'sym']='<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.sym</PDM_FMT>';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'file_limit_size']='$list.file_limit_size';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'prohibited_file_ext']='<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.prohibited_file_ext</PDM_FMT>';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'default_rep']='$list.default_rep';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'repository_type']='$list.repository_type';
+		ahdtop.arrRepositoriesRows[nRepRowCount+'has_children']= bHasChildren;
+		ahdtop.arrRepositoriesRows[nRepRowCount+'tenant']='';  // init
+		<PDM_IF "$prop.MultiTenancy" != "off">
+			ahdtop.arrRepositoriesRows[nRepRowCount+'tenant']='${list.tenant:}';
+		</PDM_IF>
+		nRepRowCount++;
+	</PDM_LIST>
+		if(typeof ahdtop.arrRepositoriesRows == "object")
+		ahdtop.arrRepositoriesRows.length = nRepRowCount;
+</PDM_IF>
+
+<PDM_IF "$prop.CACHE" == "all" || "$prop.KT_ACT_CONTENT" == "1">
+	var nActionContentRowCount = 0;
+	if(typeof ahdtop.arrActionContentRows == 'undefined')
+		ahdtop.arrActionContentRows = new Array;
+	<PDM_LIST FACTORY=KT_ACT_CONTENT PREFIX=list WHERE="id>0">
+		ahdtop.arrActionContentRows[nActionContentRowCount+'CODE'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.CODE</PDM_FMT>';
+		ahdtop.arrActionContentRows[nActionContentRowCount+'SYM'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.SYM</PDM_FMT>';
+		ahdtop.arrActionContentRows[nActionContentRowCount+'URL'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.URL</PDM_FMT>';
+		ahdtop.arrActionContentRows[nActionContentRowCount+'INTERNAL'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.INTERNAL</PDM_FMT>';
+		ahdtop.arrActionContentRows[nActionContentRowCount+'HTMPL'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.HTMPL</PDM_FMT>';		
+		ahdtop.arrActionContentRows[nActionContentRowCount+'delete_flag'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.delete_flag</PDM_FMT>';		
+		nActionContentRowCount++;
+	</PDM_LIST>
+	if(typeof ahdtop.arrActionContentRows == "object")
+		ahdtop.arrActionContentRows.length = nActionContentRowCount;
+</PDM_IF>
+
+<PDM_IF "$prop.CACHE" == "all" || "$prop.KT_FILE_TYPE" == "1">
+	var nFileTypeRowCount = 0;
+	if(typeof ahdtop.arrFileTypeRows == 'undefined')
+		ahdtop.arrFileTypeRows = new Array;
+	<PDM_LIST FACTORY=KT_FILE_TYPE PREFIX=list WHERE="id>0">
+		ahdtop.arrFileTypeRows[nFileTypeRowCount+'EXTENSION'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.EXTENSION</PDM_FMT>';
+		ahdtop.arrFileTypeRows[nFileTypeRowCount+'ICON_NAME'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.ICON_NAME</PDM_FMT>';
+		nFileTypeRowCount++;
+	</PDM_LIST>
+	if(typeof ahdtop.arrFileTypeRows == "object")
+		ahdtop.arrFileTypeRows.length = nFileTypeRowCount;
+</PDM_IF>
+
+<PDM_IF "$prop.CACHE" == "all" || "$prop.CI_DOC_TEMPLATES" == "1">
+	var nDocTemplateRowCount = 0;
+	if(typeof ahdtop.arrDocTemplateRows == 'undefined')
+		ahdtop.arrDocTemplateRows = new Array;
+	<PDM_LIST PREFIX=list SOURCE=args.templ ESC_STYLE=C FACTORY=CI_DOC_TEMPLATES WHERE="id>0 AND DOC_ID>0">
+		ahdtop.arrDocTemplateRows['$list.id' + 'HIDE_T'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.HIDE_T</PDM_FMT>';
+		ahdtop.arrDocTemplateRows['$list.id' + 'HIDE_P'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.HIDE_P</PDM_FMT>';
+		ahdtop.arrDocTemplateRows['$list.id' + 'HIDE_S'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.HIDE_S</PDM_FMT>';
+		ahdtop.arrDocTemplateRows['$list.id' + 'HIDE_R'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.HIDE_R</PDM_FMT>';
+		if("$list.DOC_ID" != "")
+		{
+			ahdtop.arrDocTemplateRows['$list.id' + 'DOC_ID.TITLE'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.DOC_ID.TITLE</PDM_FMT>';
+			ahdtop.arrDocTemplateRows['$list.id' + 'DOC_ID.SUMMARY'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.DOC_ID.SUMMARY</PDM_FMT>';
+			ahdtop.arrDocTemplateRows['$list.id' + 'DOC_ID.PROBLEM'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$list.DOC_ID.PROBLEM</PDM_FMT>';
+			ahdtop.arrDocTemplateRows['$list.id' + 'DOC_ID.RESOLUTION'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=JS2 KEEPLINKS=NO KEEPTAGS=YES>$list.DOC_ID.RESOLUTION</PDM_FMT>';
+			ahdtop.arrDocTemplateRows['$list.id' + 'DOC_ID.NOTES'] = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=JS2 KEEPLINKS=NO KEEPTAGS=YES>$list.DOC_ID.NOTES</PDM_FMT>';
+		}
+	</PDM_LIST>
+	if(typeof ahdtop.arrDocTemplateRows == "object")
+		ahdtop.arrDocTemplateRows.length = nDocTemplateRowCount;
+</PDM_IF>
+
+
+
+if(typeof set_action_in_progress != "undefined")
+	set_action_in_progress(ACTN_COMPLETE);
+</script>
+

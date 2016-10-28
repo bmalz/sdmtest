@@ -1,0 +1,24 @@
+<PDM_IF 0>
+
+  cmdb_nofamily_tab_content.htmpl
+
+  Displays the CMDB Attributes tab for CI's with no extension
+  tables - tab displayed on detail_nr.htmpl
+
+  NOTE: A temporary file is provided with Service Desk due to the
+        PDM_TAB requirements for non-deferred notebook tabs.
+        The CMDB overrides the Service Desk temporary file to provided
+        MDR support and CMDB specific tab content.
+
+</PDM_IF>
+<script language="JavaScript">
+
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO NAME=tabBanner title="Attributes" add_btns=true> 
+
+var html = '<table><tr><td align="center" class="detailro">\n';
+html += "There are no additional attributes for this configuration item\n";
+html += "</td></tr></table>\n";
+docWrite(html);
+
+</script>

@@ -1,0 +1,317 @@
+<PDM_IF 0>
+request_status_change.htmpl
+WHEN PRESENTED:
+    when the app needs to update the status of a call request. When the user
+    clicks the 'Close Request' button from the 'Update call request' screen.
+INTENT:
+    change the status of a call request.
+VARIABLES:
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_IF "$args.type" == "I">
+	var form_title = "Zmiana statusu incydentu $args.ref_num";
+<PDM_ELIF "$args.type" == "P">
+	var form_title = "Zmiana statusu problemu $args.ref_num";
+<PDM_ELSE>
+	var form_title = "Zmiana statusu wniosku $args.ref_num";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+edit_form = 1;
+
+var alg_factory = "alg";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argRefNum = "$args.ref_num";
+var argID = "$args.id";
+var def_code=alert_banner_fix_text("$args.KEEP.DEF_CODE");
+var def_sym=alert_banner_fix_text("$args.KEEP.DEF_SYM");
+var requestType = "$args.type";     // used in popup.js to demultiplex ticket types when searching for status values
+<PDM_IF "<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>" != "">
+	var user_set_status = "${args.user_set_status:}";
+	var user_set_status_sym = "${args.user_set_status_sym:}";
+</PDM_IF>
+<PDM_IF $env.NX_KT == "Yes">
+	<PDM_IF 0>
+		When launching from a ticket, we want to know if the analyst has submitted a KD from ticket before, 
+		so in case he has more knowledge to submit he could use the same KD
+	</PDM_IF>
+	var m_iNumberOfDocsSubmitted = 0;//Number of documents subbmitted from this document.
+	var m_lSubbmitedDocumentID = "";
+	<PDM_LIST FACTORY=kdlinks PREFIX=kdlinks WHERE="cr='$args.persistent_id' and link_type=3">
+		m_iNumberOfDocsSubmitted ++;
+		m_lSubbmitedDocumentID = "$kdlinks.kd";
+	</PDM_LIST>
+</PDM_IF>
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_submit_kd.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+var resp_sym = new Array();
+var resp_ids = new Array();
+resp_sym[0] = "";
+resp_ids[0] = "";
+resp_field="SET.alg.description";
+resp_persid='$args.persistent_id';
+
+<PDM_IF "$args.type" == "R" || "$args.type" == ""> 
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND cr_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+<PDM_ELIF "$args.type" == "I">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND in_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+<PDM_ELIF "$args.type" == "P">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND pr_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+</PDM_IF>
+//To be called from the dtltextbox macro
+function create_submit_knowledge_btn()
+{
+       docWriteln("<th>");
+       <PDM_MACRO NAME=button caption="Submit Knowledge" hotkey_name="Submit Knowledge" id=btn004 func="submit_knowledge()">
+       docWriteln("</th>");
+}
+function submit_knowledge()
+{
+	// If no KD was created from this ticket before, we'll just create a new KD
+	// If 1 KD was created from this ticket before, we'll ask the user if he wants to review it or create a new one.
+	// If more than 1 KDs were submitted from this ticket we'll ask the user if to create a new one and adivise him to look at the solutions tab
+	var bCreateNewKD = true;//DEFAULT VALUE FOR m_iNumberOfDocsSubmitted = 0 case
+	if(ahdtop.cfgNX_KT == "Yes")
+	{
+		if (m_iNumberOfDocsSubmitted == 1)
+		{
+			var sMsgText = msgtext("A_Knowledge_Document_was_already_submitted_from_this_request");
+			<PDM_IF "$args.type" == "I">
+				sMsgText = msgtext("A_Knowledge_Document_was_already_submitted_from_this_incident");
+			<PDM_ELIF "$args.type" == "P">
+				sMsgText = msgtext("A_Knowledge_Document_was_already_submitted_from_this_problem");
+			</PDM_IF>
+			if (confirm(sMsgText))
+			{
+				bCreateNewKD = true;
+			}
+			else 
+			{
+				var features="directories=no"+
+					",location=no"+
+					",height=" + popupHeight(LARGE_POPUP) +
+					",width=" + popupWidth(LARGE_POPUP)+
+					",status=no";
+				//			
+				bCreateNewKD = false;
+				var lKDPersID = "KD:" + m_lSubbmitedDocumentID;
+				popup_window(lKDPersID,'SHOW_DETAIL', 0, 0, features, 'PERSID='+lKDPersID,'+RELOAD_WIN=0');
+				return;
+			}
+		}
+		else if (m_iNumberOfDocsSubmitted > 1)
+		{
+			var sMsgText = msgtext("Several_Knowledge_Documents_have_been_submitted_from_this_request");
+			<PDM_IF "$args.type" == "I">
+				sMsgText = msgtext("Several_Knowledge_Documents_have_been_submitted_from_this_incident");
+			<PDM_ELIF "$args.type" == "P">
+				sMsgText = msgtext("Several_Knowledge_Documents_have_been_submitted_from_this_problem");
+			</PDM_IF>
+			if (!confirm(sMsgText))
+			{
+				bCreateNewKD = false;
+			}	
+		}
+	}
+	//
+	if (!bCreateNewKD)
+	{
+		return;
+	}
+	var form_vars = new Array();
+	//If the ticket detail page is opened and in edit mode, use the latest values to create the knowledge
+	form_vars["SD_OBJECT_PERSID"] = "$args.persistent_id";
+	if (null != top.opener && !top.opener.closed && typeof top.opener._dtl != "undefined" && top.opener._dtl.edit)
+	{
+		var func = top.opener.detailValueOf;
+		form_vars["PROBLEM"] = func("SET.description"); 
+		form_vars["SUMMARY"] = func("SET.summary"); 	
+		form_vars["SD_ASSET_ID"] = func("SET.affected_resource"); 
+		form_vars["SD_SEVERITY_ID"]= func("SET.severity");
+		form_vars["SD_IMPACT_ID"] = func("SET.impact");
+		form_vars["SD_URGENCY_ID"] = func("SET.urgency");
+		form_vars["SD_PRIORITY_ID"] = func("SET.priority");
+		form_vars["SD_CATEGORY"] = func("KEY.category"); 
+		form_vars["SD_ROOTCAUSE_ID"] = func("SET.rootcause"); 
+		<PDM_IF "$args.type" == "I">
+			form_vars["SD_PROBLEM"] = func("SET.problem");
+		<PDM_ELIF "$args.type" == "P">	
+ 			form_vars["SD_PROBLEM"] = "$args.persistent_id";
+ 		<PDM_ELSE>
+ 			form_vars["SD_PROBLEM"] = "";
+ 		</PDM_IF>		
+	}
+	else
+	{
+		form_vars["SUMMARY"] = <PDM_FMT ESC_STYLE=C>"$args.summary"</PDM_FMT>;
+		form_vars["PROBLEM"] = <PDM_FMT ESC_STYLE=C>"$args.description"</PDM_FMT>;
+		form_vars["SD_ASSET_ID"]="$args.affected_resource";
+		form_vars["SD_SEVERITY_ID"]="$args.severity";
+		form_vars["SD_IMPACT_ID"]="$args.impact";
+		form_vars["SD_URGENCY_ID"]="$args.urgency";
+		form_vars["SD_PRIORITY_ID"]="$args.priority";
+		form_vars["SD_CATEGORY"]= <PDM_FMT ESC_STYLE=C>"$args.category.COMMON_NAME"</PDM_FMT>;
+		form_vars["SD_ROOTCAUSE_ID"]="$args.rootcause";
+		<PDM_IF "$args.type" == "I">
+			form_vars["SD_PROBLEM"] = "$args.problem";
+		<PDM_ELIF "$args.type" == "P">	
+ 			form_vars["SD_PROBLEM"] = "$args.persistent_id";
+ 		<PDM_ELSE>
+ 			form_vars["SD_PROBLEM"] = "";
+ 		</PDM_IF>
+ 	}
+ 	form_vars["RESOLUTION"] = detailValueOf("SET.alg.description");
+ 	ahdtop.SetSolutionText(form_vars["RESOLUTION"],form_vars["SD_OBJECT_PERSID"]);
+ 	ahdtop.SetProblemText(form_vars["PROBLEM"],form_vars["SD_OBJECT_PERSID"]);
+<PDM_IF "$prop.form_name_3" == "ro">
+	    popup_window(
+<PDM_ELSE>
+		var oWin = window;
+		if (!ahdtop.cstReducePopups && null != top.opener)
+		{
+			var oWin = top.opener;
+		}
+	    oWin.popup_window(
+</PDM_IF>  
+		"", "CREATE_NEW", popupWidth(LARGE_POPUP), popupHeight(MEDIUM_POPUP), 
+		"", "FACTORY=KD",
+		addSubmitKnowledgePreSet(form_vars, "SD_OBJECT_PERSID", true),
+		addSubmitKnowledgePreSet(form_vars, "SUMMARY", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_CATEGORY", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_ASSET_ID", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_ROOTCAUSE_ID", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_SEVERITY_ID", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_PRIORITY_ID", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_URGENCY_ID", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_IMPACT_ID", true),
+		addSubmitKnowledgePreSet(form_vars, "SD_PROBLEM", true)
+		);	
+}
+
+// The inc_valid_trans must be included AFTER detail_form.js in order to override that 
+// files definition of backfill_event()
+<PDM_IF "$args.type" == "R" || "$args.type" == ""> 
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=cr_trans>
+<PDM_ELIF "$args.type" == "I">
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=in_trans>
+<PDM_ELIF "$args.type" == "P">
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=pr_trans>
+</PDM_IF>
+
+var CheckCancel = 0;
+
+function LocalOnUnload()
+{
+  if(CheckCancel == 0)
+    detailResetSyncFields();
+}
+</script>
+
+</head>
+<body onload="load_from_scratchpad('0')" onunload="unload_check();LocalOnUnload();" class="editform">
+<PDM_INCLUDE FILE=std_body.htmpl filename="" editForm=1>
+<center>
+<script type="text/javascript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+<PDM_MACRO name=dtlForm factory=cr>
+<PDM_MACRO name=dtlStart>
+
+docWriteln("<input type='hidden' name='HTMPL' value='show_main_detail.htmpl'>");
+docWriteln("<input type='hidden' name='KEEP.IsModified' value='1'>");
+
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type" == "I">
+	<PDM_MACRO name=dtlReadonly hdr="Numer incydentu" attr=ref_num>
+	<PDM_MACRO name=dtlReadonly hdr="Temat incydentu" attr=summary colspan=2>
+<PDM_ELIF "$args.type" == "P">
+	<PDM_MACRO name=dtlReadonly hdr="Numer problemu" attr=ref_num>
+	<PDM_MACRO name=dtlReadonly hdr="Temat problemu" attr=summary colspan=2>
+<PDM_ELSE>
+	<PDM_MACRO name=dtlReadonly hdr="Numer wniosku" attr=ref_num>
+	<PDM_MACRO name=dtlReadonly hdr="Temat wniosku" attr=summary colspan=2>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr=status>
+<PDM_IF "$args.KEEP.DEF_CODE" == "">
+<PDM_IF "$args.type" == "I">
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!default_trans_sym!" evt="onBlur=\\\"detailSyncEditForms(this)\\\" onChange=\\\"make_desc_required(this)\\\"" factory=crs_in initial="!default_trans_code!">
+<PDM_ELIF "$args.type" == "P">
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!default_trans_sym!" evt="onBlur=\\\"detailSyncEditForms(this)\\\" onChange=\\\"make_desc_required(this)\\\"" factory=crs_pr initial="!default_trans_code!">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!default_trans_sym!" evt="onBlur=\\\"detailSyncEditForms(this);\\\" onChange=\\\"make_desc_required(this)\\\"" factory=crs_cr initial="!default_trans_code!">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$args.type" == "I">
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!def_sym!" evt="onBlur=\\\"detailSyncEditForms(this)\\\" onChange=\\\"make_desc_required(this)\\\"" factory=crs_in initial="!def_code!">
+<PDM_ELIF "$args.type" == "P">
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!def_sym!" evt="onBlur=\\\"detailSyncEditForms(this)\\\" onChange=\\\"make_desc_required(this)\\\"" factory=crs_pr initial="!def_code!">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!def_sym!" evt="onBlur=\\\"detailSyncEditForms(this);\\\" onChange=\\\"make_desc_required(this)\\\"" factory=crs_cr initial="!def_code!">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Czas spędzony" attr=alg.time_spent evt="onBlur='validate_duration_ts(this)'" maxlength=100>
+<PDM_MACRO name=dtlDate hdr="Data czynności" attr=alg.time_stamp>
+<PDM_IF 0>
+	<PDM_MACRO name=dtlDateReadonly hdr="Znacznik czasu" attr=alg.system_time>
+</PDM_IF>
+<PDM_IF "$prop.view_internal" == "1">
+<PDM_MACRO name=dtlCheckbox hdr="Wewnętrzne?" attr=alg.internal>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=alg.description colspan=4 rows=8 size=80 spellchk=no>
+
+make_desc_required();
+
+if (resp_ids.length > 1)
+{
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type" == "R" || "$args.type" == "">
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory=response list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND cr_flag=1">
+<PDM_ELIF "$args.type" == "I">
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory=response list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND in_flag=1">
+<PDM_ELIF "$args.type" == "P">
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory=response list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND pr_flag=1">
+</PDM_IF>
+}
+
+if (typeof document.main_form.elements["KEY.status"] != "undefined")
+    set_default_toggle(document.main_form.elements["KEY.status"]);
+else
+    set_default_toggle(document.main_form.elements["SET.status"]);
+
+</script>
+<PDM_MACRO name=dtlEnd>
+</PDM_FORM>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: request_status_change.htmpl ASPEN.8 2012/03/13 11:55:02 kumka02 Exp $
+</PDM_IF>
+<PDM_WSP>

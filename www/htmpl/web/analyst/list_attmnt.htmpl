@@ -1,0 +1,177 @@
+<PDM_IF 0>
+$Id: list_attmnt.htmpl,v 1.4 2007/01/04 23:12:25 tuach01 Exp $
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=60>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukaj Załącznik";
+var hdrTitleList = "Wyszukaj Załącznik";
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_lib.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/architect_filter.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></SCRIPT>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Document_filename" logo=no>
+<SCRIPT LANGUAGE="JavaScript">
+var argAdmin = "$args.KEEP.ADMIN";
+var argSearch = "$args.KEEP.SEARCH";
+
+var out = "";
+out = '<form action="' + cfgCgi + '" method=POST name=fltrFormSubmit>\n' +
+            '<input type=hidden name=OP value=STORE_URL>\n' +
+			'<input type=hidden name="URLID">\n' +
+			'<input type=hidden name="URL">\n' +
+			'<input TYPE=hidden name="SID">\n' +
+			'<input TYPE=hidden name="FID">\n' +
+			'</FORM>\n';
+document.writeln(out);
+
+<PDM_IF "$args.KEEP.SEARCH" == "1">
+<PDM_MACRO name=sfStart create=false factory=attmnt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=attmnt_name colspan=2 size=50>
+<PDM_MACRO name=sfStartRow>
+	//searchFilterSetEventHandler("onChange='repository_click(this)'");
+	//searchFilterDropdown("Repository Type","repository.repository_type","","Knowledge","2","Service Desk","0","Images","3");
+	searchFilterSetEventHandler("onChange='repository_click(this)'");
+	
+<PDM_MACRO name=sfDropdown hdr="Repozytorium" attr=repository>
+	searchFilterSetEventHandler("onChange='status_click(this)'");
+	searchFilterDropdown("Status","status","","Installed","INSTALLED","Link Only","LINK_ONLY","Not Installed","NOTINSTALLED","Archived","ARCHIVED","Not Available","NOTAVAILABLE","Knowledge File","KD_FILE");
+	
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Utworzono przez" attr=created_by>
+<PDM_MACRO name=sfLookup hdr="Ostatnio modyfikowany przez" attr=last_mod_by>
+	
+	searchFilterQBEDropdown("File Size ", "File Size Value (bytes)","file_size","",12,1);	
+	
+	
+<PDM_MACRO name=sfStartRow type=Set>
+	searchFilterDate("Earliest Creation Date","created_dt","QBE.GE");
+	searchFilterDate("Latest Creation Date","created_dt","QBE.LE");
+	searchFilterDate("Earliest Modification Date","last_mod_dt","QBE.GE");
+	searchFilterDate("Latest Modification Date","last_mod_dt","QBE.LE");	
+	
+<PDM_MACRO name=sfStartRow>
+	document.writeln('<INPUT TYPE=hidden NAME=QBE.NE.status VALUE="EMBD_LINK">');
+	document.writeln('<INPUT TYPE=hidden NAME=KEEP.SEARCH VALUE=1>');
+	
+<PDM_MACRO name=sfEnd>
+
+	var msgFoundNone = "Nie znaleziono załączników";
+	var msgFound1 = "Znaleziono 1 załącznik";
+	var msgFound = "Znaleziono %1 załączników";
+	var msgFoundMore = "Znaleziono %1 załączników. Wyświetlane %2 z %3";
+	var msgSelect = "Click to select desired Attachment";
+	var msgSelectAlg = "Click to select desired Attachment and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired Attachment template";
+	
+<PDM_ELSE>
+	var msgFoundNone = "Nie znaleziono plików";
+	var msgFound1 = "Znaleziono 1 plik";
+	var msgFound = "Znaleziono %1 plików";
+	var msgFoundMore = "Znaleziono %1 plików.  Wyświetlane %2 z %3";
+	var msgSelect = "Click to select desired File";
+	var msgSelectAlg = "Click to select desired File and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired File template";
+</PDM_IF>
+<PDM_IF "${current:n/a}" != "n/a">
+	ahdframeset.TreeAttmntListWin = window;
+	var arrFields = new Array;
+	var nCount = 0;
+	var ctxMenu = null;	
+	
+	
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-attmnt_id'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-persistent_id'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.persistent_id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-attmnt_name'] = '<PDM_FMT ESC_STYLE=C>@{list.attmnt_name}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-orig_file_name'] = '<PDM_FMT ESC_STYLE=C>@{list.orig_file_name}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-link_only'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.link_only}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.servlet_path'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.repository.servlet_path}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.server'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.repository.server}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.persistent_id'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.repository.persistent_id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-attached_persid'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.attached_persid}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.repository_type'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.repository.repository_type}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="if ('@{list.repository.repository_type}' == '3') {">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-sec_uuid'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.sec_uuid}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="}">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=attmnt_name exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsWrite both=yes text="if ('@args.KEEP.SEARCH' == '1') {">
+<PDM_MACRO name=lsWrite text="status = \"@{list.status:}\";">
+<PDM_MACRO name=lsCol hdr="Status" attr=status export=no fmtfunc=fmtStatus sort=no>
+<PDM_MACRO name=lsCol hdr="Repozytorium" attr=repository>
+<PDM_MACRO name=lsCol hdr="Modyfikowano" attr=last_mod_dt>
+<PDM_MACRO name=lsWrite text="linkOnly = \"@{list.link_only:}\";">
+<PDM_MACRO name=lsCol hdr="Rozmiar po spakowaniu" attr=file_size export=no fmtfunc=fmtSize sort=no>
+<PDM_MACRO name=lsCol hdr="Typ" attr=file_type>
+<PDM_MACRO name=lsWrite text="rep_type = \"@{list.repository.repository_type:}\";">
+<PDM_MACRO name=lsWrite text="attmnt_id = \"@{list.id:}\";">
+<PDM_MACRO name=lsWrite text="attached_persid = \"@{list.attached_persid:}\";">
+<PDM_MACRO name=lsCol hdr="Załączone do" attr=attached_name export=no fmtfunc=fmtAttachedTo sort=no>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd factory=attmnt>
+	
+
+	rs.fitSmallWin=true;
+	ctxMenu = new ContextMenu("idMenuFile");
+	ctxMenu.addItem(msgtext("View_Details"), "ViewAttmntDetail(self.activePersid);");
+	ctxMenu.addItem(msgtext("Edit_Details"), "EditAttmntDetail(self.activePersid);");
+	rs.setLinkOnclick(function(){ViewAttmntDetail(self.activePersid);});
+	ctxMenu.addItem(msgtext("View_Content"), "listDownloadFile(self.activePersid);");
+	m_itmAttachTo = ctxMenu.addItem(msgtext("Attached_To"), "ViewLinkedDocuments(self.activePersid);");
+
+	
+<PDM_IF "$args.KEEP.ADMIN" == "1">	
+		var arrRepInfo = GetRepositoryInfo(ahdframeset.RepIdClicked);
+		if(arrRepInfo && arrRepInfo[8] > 1)	
+		{		
+			ctxMenu.addItem(msgtext("Replace_File"), "listReplaceFile(self.activePersid);");
+			m_itmCut = ctxMenu.addItem(msgtext("Cut0"), "CutFile(self.activePersid);");
+			m_itmCopy = ctxMenu.addItem(msgtext("Copy0"), "CopyFile(self.activePersid);");
+			m_itmPaste = ctxMenu.addItem(msgtext("Paste0"), "PasteFile()");
+		}
+		m_itmDelete = ctxMenu.addItem(msgtext("Delete2"), "DeleteFile(self.activePersid,0);");
+			
+	
+<PDM_ELIF "$args.KEEP.IMAGES" == "1">
+		ctxMenu.addItem(msgtext("Replace_File"), "listReplaceFile(self.activePersid);");	
+		ctxMenu.addItem(msgtext("Insert_Image"), "listInsertImage(self.activePersid);");
+		rs.setLinkOnclick(function(){listInsertImage(self.activePersid);});
+	
+<PDM_ELIF "$args.KEEP.SEARCH" == "1">
+		m_itmDelete = ctxMenu.addItem(msgtext("Delete2"), "DeleteFile(self.activePersid,0);");
+	
+<PDM_ELIF "$args.KEEP.ATTMNT_TAB" == "1">
+		ctxMenu.addItem(msgtext("Replace_File"), "listReplaceFile(self.activePersid);");	
+		if(ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS"))
+			ctxMenu.addItem(msgtext("Attach_this_File"), "AddAttachmentLink(self.activePersid)");
+		rs.setLinkOnclick(function(){AddAttachmentLink(self.activePersid);});
+	
+</PDM_IF>
+	
+	ctxMenu.addItem( msgtext("Print_Form%1...", " " + window.propFormName),"CAisdPrint();");  // Print this window
+	ctxMenu.addItem( msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')"); // Help on this window
+	ctxMenu.finish();
+
+	// Called by resultSet.js
+	function updateCtxMenuItems(row)
+	{
+		listAttmntUpdateCtxMenu(self.activePersid);
+	}
+	
+</PDM_IF>	
+</script>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

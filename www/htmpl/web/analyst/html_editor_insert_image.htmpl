@@ -1,0 +1,304 @@
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+var hdrTitle = "Insert Image";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/editor_popup.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script type="text/javascript">
+var nRepId;
+function Init() 
+{
+	<PDM_IF "$args.QUICK_UPLOAD" == "1">
+		LoadUploadActions();
+	</PDM_IF>	
+  
+  var param = top.opener.Dialog._arguments;
+  if (param) 
+  {
+      document.getElementById("f_url").value = param["f_url"];
+      document.getElementById("f_alt").value = param["f_alt"];
+      document.getElementById("f_border").value = (param["f_border"]> 0)? param["f_border"] : 0;
+      document.getElementById("f_align").value = param["f_align"];
+      document.getElementById("f_vert").value = (param["f_vert"]> 0)? param["f_vert"] : 0;
+      document.getElementById("f_horiz").value = (param["f_horiz"]> 0)? param["f_horiz"] : 0;
+      
+      <PDM_IF "$args.QUICK_UPLOAD" != "1">
+  		var strURL="$cgi"+"?SID="+ "$args.SID" +
+		"+FID="+ "$args.FID" +
+		"+OP=DISPLAY_FORM" +
+		"+ImageURL=" + gpb_escape(param.f_url) +
+		"+HTMPL=ed_image_pane.htmpl";  
+           
+        window.ipreview.location.replace(strURL);
+      </PDM_IF>
+  }
+  document.getElementById("f_url").focus();
+};
+
+function Insert()
+{
+	<PDM_IF "$args.QUICK_UPLOAD" == "1">
+		var inp_url = document.getElementById("inpFileUpload");
+		if(inp_url.value != "")	// Upload case
+			Submit();
+		else					// Image URL case
+			Close();
+	<PDM_ELSE>
+		Close();
+	</PDM_IF>	
+}
+
+function RefreshFileList(nAttmntId)
+{
+	var arrRepInfo = GetRepositoryInfo(nRepId);
+	var server = arrRepInfo[1];
+	var servletPath = arrRepInfo[2];
+	var url = GetDownloadURL(0, nAttmntId, servletPath, server, 0);
+	document.getElementById("f_url").value = url;
+}
+
+
+function InsertImagePage()
+{
+
+	var strURL="$cgi"+"?SID="+ "$args.SID" +
+	"+FID="+ "$args.FID" +
+	"+OP=DISPLAY_FORM" +
+	"+Library=Images" +
+	"+ParentTenant=" + "$args.Tenant" +	
+	"+HTMPL=kt_admin_attachments.htmpl";
+	
+	var features="directories=no"+
+		",location=no"+
+		",screenY=100px"+
+		",screenX=100px"+
+		",menubar=no"+
+		",height=460"+
+		",width=740"+
+		",status=no";
+	preparePopup(strURL,"",features,undefined, undefined, 'GOBUTTON=no+MENUBAR=no');	
+}
+
+function InsertImage(sLink)
+{
+	document.getElementById("f_url").value=sLink;
+}
+
+function Close() 
+{
+ var required = {
+    "f_url": "You must enter the URL"
+  };
+  for (var i in required) {
+    var el = document.getElementById(i);
+    if (!el.value) {
+      alert(required[i]);
+      el.focus();
+      return false;
+    }
+  }
+  // pass data back to the calling window
+  var fields = ["f_url", "f_alt", "f_align", "f_border",
+                "f_horiz", "f_vert"];
+  var param = new Object();
+  for (var i in fields) {
+    var id = fields[i];
+    var el = document.getElementById(id);
+    param[id] = el.value;
+  }
+  __dlg_close(param);
+  return false;
+};
+
+function onPreview() 
+{
+  var f_url = document.getElementById("f_url");
+  var url = f_url.value;
+  if (!url || url == "") {
+    alert("You have to enter an URL first");
+    f_url.focus();
+    return false;
+  }
+  
+  var strURL="$cgi"+"?SID="+ "$args.SID" +
+  "+FID="+ "$args.FID" +
+  "+OP=DISPLAY_FORM" +
+  "+ImageURL=" + gpb_escape(url) +
+  "+HTMPL=ed_image_pane.htmpl";  
+  
+  ipreview.frameElement.src = strURL;
+  return false;
+};
+
+function getAttmntId(nAttmntId, nRepId, secId)
+{
+	ahdtop.AddItemToImageArray(nAttmntId, secId);
+
+	var arrRepInfo = GetRepositoryInfo(nRepId);
+	var sHost = arrRepInfo[1];
+	var servletPath = arrRepInfo[2];
+	nMaxFileSize = arrRepInfo[4];
+	sProhibitedExt = arrRepInfo[5];	
+	
+	var url = GetDownloadURL(0, nAttmntId, servletPath, sHost, nRepId, secId);		
+	InsertImage(url);
+	Close();
+}
+</script>
+</head>
+
+<body onload="Init()">
+<PDM_INCLUDE FILE="std_body.htmpl">
+<TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>
+<TR>
+<TD align=left width='99%'>Insert Image</TD>
+<TD align=right width='1%'>
+<SCRIPT>
+	ImgBtnRow();
+	<PDM_IF "$args.QUICK_UPLOAD" != "1">
+		ImgBtnCreate("bnPreview", "Preview", "onPreview()", "defer", 120);
+	</PDM_IF>
+	ImgBtnCreate("bnOk", "OK", "Insert()", "defer", 120);
+	ImgBtnCreate("bnCancel","Cancel[n]","top.close();",true,get_local_int(1));
+	ImgBtnEndRow();
+</SCRIPT>   
+</TD>
+</TR>
+</TABLE>
+
+<TABLE class='alertmsg gn_text_big' id=alertmsg style="DISPLAY: none;" width="100%">
+<TBODY><TR><TD id=alertmsgText></TD></TR></TBODY></TABLE>
+
+<table style="padding: 0px; margin: 0px">
+  <tbody>  
+  	<tr>
+		<td>
+			<PDM_IF "$args.QUICK_UPLOAD" == "1">
+					<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=60 Tenant="$args.Tenant" RepType="3" ShowFields="Yes" ShowRepList="No"  View="QuickUpload" FolderId="QuickUpload">
+			</PDM_IF>
+		</td>	
+	</tr>
+  </tbody>
+</table>
+<br>
+<form action="" method="get">
+<table style="padding: 0px; margin: 1px">
+  <tbody>  
+  	<tr>
+		<th align=left class=labeltext>Image URL:</th>
+		<td>
+			<input type="text" name="url" id="f_url" size=40 title="Image URL" />
+		</td>
+		<PDM_IF "$args.QUICK_UPLOAD" != "1">		
+			<td>
+			<SCRIPT>
+				ImgBtnRow();
+				ImgBtnCreate("bnLibrary", "From_Library...", "InsertImagePage()", "defer", 130);
+				ImgBtnEndRow();
+			</SCRIPT>	
+			</td>
+		</PDM_IF> 
+	</tr>
+	<tr>
+		<th align=left class=labeltext>Alternate&nbsp;Text:</th>
+		<td 
+		<PDM_IF "$args.QUICK_UPLOAD" != "1">
+		colspan=2
+		</PDM_IF> 
+		>
+			<input type="text" name="alt" id="f_alt" size=40 title="Alternate text for image"/>
+		</td>
+	</tr>
+  </tbody>
+</table>
+
+<table style="padding: 3px; margin: 1px">
+  <tbody>
+  <tr>
+  <td>
+  
+<fieldset>
+<legend class=labeltext>Layout</legend>
+
+<table style="padding: 0px; margin: 1px">
+  <tbody>
+	<tr>
+		<th align=left class=labeltext>Alignment:</th>
+		<td>
+			<select size="1" name="align" id="f_align"
+			title="Alignment">
+			<option value=""                             >Not set</option>
+			<option value="left"                         >Left</option>
+			<option value="right"                        >Right</option>
+			<option value="texttop"                      >Texttop</option>
+			<option value="absmiddle"                    >Absmiddle</option>
+			<option value="baseline" selected="1"        >Baseline</option>
+			<option value="absbottom"                    >Absbottom</option>
+			<option value="bottom"                       >Bottom</option>
+			<option value="middle"                       >Middle</option>
+			<option value="top"                          >Top</option>
+			</select>			
+		</td>
+	</tr>
+	<tr>
+		<th align=left class=labeltext>Border thickness:</th>
+		<td>
+			<input type="text" name="alt" id="f_border" size=10 style="width:100%" title="Border thickness"/>
+		</td>
+	</tr>
+  </tbody>
+</table>
+</fieldset>
+
+ </td>
+ <td>
+
+<fieldset>
+<legend class=labeltext>Padding</legend>
+
+<table style="padding: 0px; margin: 1px">
+  <tbody>
+	<tr>
+		<th align=left class=labeltext>Horizontal:</th>
+		<td>
+			<input type="text" name="horiz" id="f_horiz" size="5" title="Horizontal" />
+		</td>
+	</tr>
+	<tr>
+		<th align=left class=labeltext>Vertical:</th>
+		<td>
+			<input type="text" name="vert" id="f_vert" size="5" title="Vertical" />
+		</td>
+	</tr>
+  </tbody>
+</table>
+</fieldset>
+
+</td>
+</tr>
+<PDM_IF "$args.QUICK_UPLOAD" != "1">
+<tr>
+	<table style="padding: 0px; margin: 0px; margin:3px;">
+	<tr>
+	<th align=left class=labeltext>Image Preview:</th>
+	</tr>
+	<tr>
+	<td>
+		<iframe name="ipreview" id="ipreview" frameborder="0" class=gn_container_border_1 height="175" width="420" title="Preview" src=""></iframe>
+	</td>
+	</tr>
+	</table>
+</td>
+</tr>
+</PDM_IF>
+</tbody>
+</table>
+
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

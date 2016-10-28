@@ -1,0 +1,193 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Discovered Asset Search";
+var hdrTitleList = "Discovered Asset List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+//var rptName = new Array("ca_logical_assetsum.rpt", "ca_logical_assetdtl.rpt");
+var cfgCanEdit = false;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ca_logical_asset">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false export=no factory="ca_logical_asset">
+document.write('<INPUT TYPE=hidden NAME=QBE.EQ.asset_uuid.asset_type_id VALUE=1>');		// hardware only
+document.write('<INPUT TYPE=hidden NAME=QBE.EQ.delete_time VALUE="">');				// skip ones scheduled for deletion
+document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE="(not (source.subschema_id in 1) and source.delete_time is null)">');	// exclude Service Desk Assets
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Etykieta assetu" attr="asset_uuid.label">
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny" attr="asset_uuid.serial_number">
+<PDM_MACRO name=sfTextbox hdr="Asset Tag" attr="asset_uuid.asset_tag">
+<PDM_MACRO name=sfTextbox hdr="Nazwa hosta" attr="host_name">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa DNS" attr="property.dns_name">
+<PDM_MACRO name=sfTextbox hdr="MAC adres" attr="property.mac_address">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Discovered Assets found";
+var msgFound1 = "1 Discovered Asset found";
+var msgFound = "%1 Discovered Assets found";
+var msgFoundMore = "%1 Discovered Assets found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Discovered Asset";
+
+var dataSource = new Array();
+var indx = 0;
+
+var crs = new Object();
+var prs = new Object();
+var prop_count;
+var asset=new Object();
+
+<PDM_LIST DISTINCT=true SOURCE=list ESC_STYLE=C>
+	prop_count=0;
+
+	crs.asset=new Object();
+	var label='<PDM_FMT JUSTIFY=TRUNCATE PAD=NO ESC_STYLE=C>$list.asset_uuid.label</PDM_FMT>';
+	var serial_number='<PDM_FMT JUSTIFY=TRUNCATE PAD=NO ESC_STYLE=C>$list.asset_uuid.serial_number</PDM_FMT>';
+	var asset_tag='<PDM_FMT JUSTIFY=TRUNCATE PAD=NO ESC_STYLE=C>$list.asset_uuid.asset_tag</PDM_FMT>';
+	var host_name='<PDM_FMT JUSTIFY=TRUNCATE PAD=NO ESC_STYLE=C>$list.host_name</PDM_FMT>';
+
+	// handle special mdb null value
+	crs.asset.label=(label=="{null}" ? "" : label);
+	crs.asset.serial_number=(serial_number=="{null}" ? "" : serial_number);
+	crs.asset.asset_tag=(asset_tag=="{null}" ? "" : asset_tag);
+	crs.asset.host_name=(host_name=="{null}" ? "" : host_name);
+	crs.asset.dns_name='';
+	crs.asset.mac_address='';
+
+	// save for properties
+	asset.label=crs.asset.label;
+	asset.serial_number=crs.asset.serial_number;
+	asset.asset_tag=crs.asset.asset_tag;
+	asset.host_name=crs.asset.host_name;
+	
+	// make a row for each matching ca_logical_asset_property if there are any
+	<PDM_LIST PREFIX=prop_list FACTORY=ca_logical_asset_property WHERE="id=U'$list.id'" ESC_STYLE=C>
+		prs.asset=new Object();
+		
+		prs.asset.label=asset.label;
+		prs.asset.serial_number=asset.serial_number;
+		prs.asset.asset_tag=asset.asset_tag;
+		prs.asset.host_name=asset.host_name;
+		var dns='<PDM_FMT JUSTIFY=TRUNCATE PAD=NO ESC_STYLE=C>$prop_list.dns_name</PDM_FMT>';
+		var mac='<PDM_FMT JUSTIFY=TRUNCATE PAD=NO ESC_STYLE=C>$prop_list.mac_address</PDM_FMT>';
+
+		// handle special mdb null value
+		prs.asset.dns_name=(dns=="{null}" ? "" : dns);
+		prs.asset.mac_address=(mac=="{null}" ? "" : mac);
+
+		prop_count++;
+
+		prs.asset["key"] = "$prop_list.id";
+		prs.asset["factory"] = "ca_logical_asset_property";
+		prs.asset["persid"] = "$prop_list.persistent_id";
+		prs.asset["relAttr"] = "$prop_list.REL_ATTR";
+		dataSource[indx++] = prs.asset;
+	</PDM_LIST>
+
+	if(prop_count==0)
+	{
+		crs.asset["key"] = "$list.id";
+		crs.asset["factory"] = "ca_logical_asset";
+		crs.asset["persid"] = "$list.persistent_id";
+		crs.asset["relAttr"] = "$list.REL_ATTR";
+		dataSource[indx++] = crs.asset;
+	}
+</PDM_LIST>
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Etykieta assetu" attr=label sort="no">
+<PDM_MACRO name=lsCol hdr="Numer seryjny" attr=serial_number sort="no">
+<PDM_MACRO name=lsCol hdr="Asset Tag" attr=asset_tag sort="no">
+<PDM_MACRO name=lsCol hdr="Nazwa hosta" attr=host_name sort="no">
+<PDM_MACRO name=lsCol hdr="Nazwa DNS" attr=dns_name sort="no">
+<PDM_MACRO name=lsCol hdr="MAC adres" attr=mac_address sort="no">
+<PDM_MACRO name=lsEnd alt_data_src=dataSource>
+
+ctxMenu = new ContextMenu("apMenu");
+if(typeof ahdtop.asset_picker=="object")
+{
+	ctxMenu.addItem(msgtext("Select_New_Configuration_Item_"), "ap_select(self.rs.records[self.activeRow]);");			// Select
+	rs.setLinkOnclick(function(){ap_select(self.rs.records[self.activeRow])});			// mouse click
+} 
+else {
+	ctxMenu.addItem(msgtext("Create_New_Configuration_Item"), "ap_select(self.rs.records[self.activeRow]);");			// Select
+	rs.setLinkOnclick(function(){ap_select(self.rs.records[self.activeRow])});			// mouse click
+}
+ctxMenu.finish();
+
+function ap_select(asset)
+{
+	// try to find a good label
+	if(asset.label=="") asset.label=asset.host_name;
+	if(asset.label=="") asset.label=asset.dns_name;
+
+	// did we come from detail_asset.htmpl?
+	if(typeof ahdtop.asset_picker=="object")
+	{
+		var e=ahdtop.asset_picker.elements;
+
+		for (var i = 0; i < e.length; i++)
+		{
+			var field=e[i].name;
+			switch(field)
+			{
+				case "SET.name": 
+					e[i].value=asset.label;
+					break;
+				case "SET.system_name": 
+					e[i].value=asset.host_name;
+					break;
+				case "SET.dns_name": 
+					e[i].value=asset.dns_name;
+					break;
+				case "SET.serial_number": 
+					e[i].value=asset.serial_number;
+					break;
+				case "SET.mac_address": 
+					e[i].value=asset.mac_address;
+					break;
+				case "SET.asset_num": 
+					e[i].value=asset.asset_tag;
+					break;
+			}
+		}
+		parent.window.close();
+	} else {
+		
+		create_new("nr",0, 0, 0, 
+			"name="+asset.label,
+			"system_name="+asset.host_name,
+			"dns_name="+asset.dns_name,
+			"serial_number="+asset.serial_number,
+			"mac_address="+asset.mac_address,
+			"asset_num="+asset.asset_tag
+		)
+	}
+}
+
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

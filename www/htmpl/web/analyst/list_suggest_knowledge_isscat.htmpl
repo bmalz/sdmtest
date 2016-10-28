@@ -1,0 +1,92 @@
+<PDM_IF 0>
+list_suggest_knowledge_isscat.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Issue Categories
+INTENT:
+    Display the list of Issue Categories for Suggest Knowledge KT Feature
+VARIABLES:
+    
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Issue Category Search";
+var hdrTitleList = "Issue Category List";
+var cfgIsPopup = "$args.KEEP.IsPopUp";
+var cfgRecordCount = '$record_count';
+var cfgTotal = '$total';
+parent.m_cfgTotal = cfgTotal;
+var cfgStart = '$start';
+var cfgLength = '$length';
+var cfgCurrent = '$current';
+var selected_isscat_id;
+function rsGetActiveRow(row)
+{
+	selected_isscat_id = rs.records[row].persid;
+	selected_isscat_id = selected_isscat_id.split(":");
+	selected_isscat_id = selected_isscat_id[1];
+	parent.m_selected_isscat_id = selected_isscat_id;
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("isscatsum.rpt", "isscatdtl.rpt");
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/webtab.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin_suggest_knowledge.js"></script>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Issue Category">
+<PDM_FORM NAME="frmFID_isscat">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+function add_button_to_tab_banner() {
+				
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Add" func="AddIssCat()" hotkey_name="Add0" id="btnAdd">
+<PDM_MACRO name=button caption="Remove" func="RemoveIssCat()" hotkey_name="Remove" id="btnRemove">
+<PDM_MACRO name=button caption="Remove All" func="RemoveAllIssCats()" hotkey_name="Remove_All" id="btnRemoveAll">
+<PDM_MACRO name=btnEndRow>
+}
+<PDM_MACRO name=tabBanner title="<span class='gn_text_big'>For all Issue Categories except the following:</span>" add_btns=true show_bar=false>
+var msgFoundNone = "No issue categories found";
+var msgFound1 = "1 issue category found";
+var msgFound = "%1 issue categories found";
+var msgFoundMore = "%1 issue categories found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired issue category";
+var arrIDs = new Array;
+var ID_counter = 0;
+
+<PDM_MACRO name=sfStart button=false create=false export=no factory=isscat>
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=list_suggest_knowledge_isscat.htmpl>');
+<PDM_MACRO name=sfEnd>
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="ID_counter++;">
+<PDM_MACRO name=lsWrite text="arrIDs[ID_counter] = @{list.id:0}-0;">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym link=no>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=ss_include>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=ss_sym>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<form name=isscat_backfill_form>
+	<input type=hidden name=addIsscat id=addIsscat>
+</form>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_suggest_knowledge_isscat.htmpl ASPEN.3 2011/10/19 11:41:44 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

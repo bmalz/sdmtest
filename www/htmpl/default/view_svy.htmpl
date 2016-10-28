@@ -1,0 +1,149 @@
+<PDM_IF 0>
+view_svy.htmpl
+WHEN PRESENTED:
+    User is viewing a survey
+INTENT:
+    View survey responses being created
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  svy_tpl  args	The Survey Template (svy_tpl) object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT svy_tpl'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=svy_tpl preview="IS_ANALYST=1+OP=VIEW_SURVEY+CNT_ID={cnt}+SVY_ID={svy_tpl}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script language="javascript1.2">
+<!--
+	var ahdtop = window;
+	window.name = "AHDtop";
+	var cfgProductName = "$ProductName";
+	var usdImg = new Array();
+	usdImg["circleca"] = "$CAisd/img/circleca.png";
+	var i = 1;
+	function cntr() {
+		document.write(i++ + ".  ");
+	}
+// -->
+</script>
+<title>$ProductName - Survey</title>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="editform">
+<script type="text/javascript">
+maxSize=new Array("SVY_COMMENT","$args.comment_label", $args.LENGTH_comment_label);
+document.writeln(generate_basic_form_header_html());
+</script>
+
+<p>
+
+<table class="editform" cellspacing="3">
+<th>
+<td class="detailro">
+Hello, $cst.first_name $cst.last_name,
+<p>
+$args.description
+<p>
+<span class="requiredlabeltext gn_font_size_1em">
+Highlighted questions (if any) require a response before submitting the survey
+</span>
+</td></tr>
+</table>
+
+<p>
+<img src="$CAisd/img/bar.gif" width="90%" height="4" alt="Bar">
+<p>
+<PDM_FORM NAME="frm001">
+<input type="hidden" name="FACTORY" value="svy_tpl">
+<input type="hidden" name="SET.id"  value="$args.id">
+<PDM_LIST SOURCE=args.question_templates PREFIX=question>
+<table id="tbl001" class="survey_area">
+<!-- The question -->
+<tr>
+<PDM_IF "$question.resp_required" == "1" >
+<td valign="top" class="requiredlabeltext">
+<PDM_ELSE>
+<td valign="top" class="labeltext">
+</PDM_IF>
+<p>
+<script type="text/javascript">
+cntr();
+</script>
+$question.text
+</td>
+<!-- the answers-->
+<PDM_LIST FACTORY=svy_atpl where="owning_survey_question = $question.id" PREFIX=answer>
+<tr>
+<PDM_IF "$question.resp_required" == "1" >
+ <td valign="top" class="requiredlabeltext">
+<PDM_ELSE>
+<td valign="top" class="labeltext">
+</PDM_IF>
+<PDM_IF "$question.mult_resp_flag" == "1" >
+<input type="checkbox" name="$question.id" value="$answer.id" >
+<PDM_ELSE> 
+<input type="radio" name="$question.id" value="$answer.id" >
+</PDM_IF>
+$answer.text
+</td>
+</PDM_LIST>
+<PDM_IF "$question.include_qcomment" == "1" >
+<tr>
+<PDM_IF "$question.resp_required" == "1" >
+<td valign="top" class="requiredlabeltext">
+<PDM_ELSE>
+<td valign="top" class="labeltext">
+</PDM_IF>
+<label for="qcomment$question.id">$question.qcomment_label</label>
+</td>
+</tr>
+<tr>
+<td>
+<textarea id="qcomment$question.id" name="qcomment$question.id" value="" rows="3" cols="40">
+</textarea>
+</td>
+</tr>
+</PDM_IF>
+</PDM_LIST>
+</table>
+
+<!-- This spot is for extra user comments, if so 
+specified by the survey template.  The user comments
+MUST be in an input control named "SVY_COMMENT". -->
+<PDM_IF $args.include_comment>
+<table id="tbl001" class="survey_area">
+<tr>
+<td valign="top" class="labeltext gn_bold_text">
+<label for="SVY_COMMENT">$args.comment_label</label>
+</span>
+</td>
+</tr>
+<tr>
+<td>
+<textarea id="SVY_COMMENT" name="SVY_COMMENT" value="" rows="5" cols="40" maxlength="200">
+</textarea>
+</td>
+</tr>
+</table>
+</PDM_IF>
+<p>
+<img src="$CAisd/img/bar.gif" width="90%" height="4" alt="Bar">
+<p>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: view_svy.htmpl ASPEN.3 2010/11/17 20:10:46 saima01 Exp $
+</PDM_IF>

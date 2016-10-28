@@ -1,0 +1,33 @@
+<PDM_IF 0>
+This is for a temporary message while a server request is being
+processed.  
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT>
+function do_work() {
+	<PDM_IF "$args.KEEP.COPY_FROM" != "">
+	var copy_from = "$args.KEEP.COPY_FROM";
+	var query_string = "$cgi?SID=$SESSION.SID+FID=" + fid_generator() + 
+					"+OP=USQ_UPDATE+USQ_OP=COPY_USQ+COPY_FROM=" + copy_from + "+HTMPL=usq_update.htmpl";"+KEEP.IsPopUp=1";
+	if (typeof parent.argPopupName == "string")
+		query_string += "+KEEP.POPUP_NAME=" + parent.argPopupName;					
+	window.location.href = query_string;
+	</PDM_IF>
+}
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD >
+<BODY onLoad="do_work()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<CENTER>
+<H2>$args.KEEP.Message</H2>
+</CENTER>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: working.htmpl,v 1.2 2006/11/08 00:27:01 olsjo01 Exp $
+</PDM_IF>

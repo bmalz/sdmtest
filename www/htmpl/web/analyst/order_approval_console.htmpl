@@ -1,0 +1,250 @@
+<PDM_IF 0>
+order_approval_console.htmpl
+WHEN PRESENTED:
+    when the app needs to update the status of a change order. When the user
+    clicks the 'Cab console' button from the 'List Change Order' screen.
+INTENT:
+    change the status of a change order and save the comments
+VARIABLES:
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_WSP mode=general preview="order_approval_console.htmpl+OP=SHOW_DETAIL+PERSID={chg:}" factory=chg>
+<script type="text/javascript">
+var form_title = "Approval Console Change Order $args.chg_ref_num";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var edit_form = 1;
+var cur_persid = "$args.persistent_id";
+var cur_persid_pointer = parseInt('$args.KEEP.PERSID_POINTER');
+
+// get the status transistions cache
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=chg_trans>
+var transCache=new _TCM_proxy(cfgCgi, cfgSID, cfgFID, propFactory, "$args.status");
+
+// messages to display if comments are required
+var comments_msg=new Object();
+comments_msg[0]="Comments are required for an unrecognized status change";					// default message if we can't figure out the status
+comments_msg["APR"]="Comments are required for Approval";
+comments_msg["REJ"]="Comments are required for Rejection";
+
+// are comments required?
+function check_comments_required() {
+	// go extract the status code and tag id of the buttons in the button bar
+	var buttonArray = new Array();
+	buttonArray = get_button_array();
+	
+	var i;
+	var defaultAlreadyShown=false;		// so we don't show the default message more than once
+	
+	// check the buttons to see if comments are required
+	for(i=0; i<buttonArray.length;i++) {
+		// each buttonArray has entries like tag id:status-code
+		// get the status code potion
+		var btn = new Array();
+		btn = buttonArray[i].split(':');
+		// is there a matching message in comments_required[]?
+		if(comments_required(btn[1])) {
+			// show it in the alert banner
+			if(typeof comments_msg[btn[1]]!="undefined") {
+				showAlertMsg(comments_msg[btn[1]]);
+			} else {
+				// otherwise show the default unknown message, but only once if there is more than one unknown status
+				if(!defaultAlreadyShown) {
+					showAlertMsg(comments_msg[0]);
+					defaultAlreadyShown=true;
+				}
+			}
+		}
+	}
+}
+
+// see if the status code requires a comment
+function comments_required(new_status) {
+	// does the cache say that comments are required?
+	if(typeof transCache.comment[new_status]!="undefined" && transCache.comment[new_status]=="Y") {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function disableButtons() {
+	var i;
+	var buttonArray = new Array();
+	var status = "$args.status";
+	if(cur_persid_pointer == persid_arr_len-1) {
+		showAlertMsg("Reached last Change Order in the List.");
+		ImgBtnEnableButton("NEXT",false)
+	}
+	else ImgBtnEnableButton("NEXT",true)
+	
+	if(cur_persid_pointer == 0) 
+	ImgBtnEnableButton("PREVIOUS",false)
+	else ImgBtnEnableButton("PREVIOUS",true)
+	
+	buttonArray = get_button_array();
+	for(i=0;i<buttonArray.length;i++)
+	{
+		var splitArray = new Array();
+		splitArray = buttonArray[i].split(':');
+		if(splitArray.length>1 && splitArray[1]==status)
+		ImgBtnEnableButton(splitArray[0],false);
+	}
+	if(document.getElementsByName('SET.chgalg.description')[0]) 
+	{
+		window.setTimeout("document.getElementsByName('SET.chgalg.description')[0].focus()", 100);
+		document.getElementsByName('SET.chgalg.description')[0].value = "";
+	}
+	
+	// are comments required for any of the possible statuses?
+	check_comments_required();
+}
+
+//get the button ids and button functions of buttons located in the header section.
+function get_button_array() {
+	var i;
+	var j = parseInt(0);
+	var buttonInnerHTML;
+	var divInnerHTML="";
+	var btnArray = new Array();
+	var returnArray = new Array();
+	var buttonInfo = document.getElementById('button_div');
+	
+	if(buttonInfo!=null)
+	divInnerHTML = buttonInfo.innerHTML;
+	if(divInnerHTML.indexOf("ImgBtnRow()") != -1 && divInnerHTML.indexOf("ImgBtnEndRow()") != -1)
+	{
+		buttonInnerHTML = divInnerHTML.substring(divInnerHTML.indexOf("ImgBtnRow()"),divInnerHTML.indexOf("ImgBtnEndRow()"));
+		btnArray = buttonInnerHTML.split("ImgBtnCreate");
+		for(i=1;i<btnArray.length;i++)
+		{
+			var temp = new Array();
+			temp = btnArray[i].split(",");
+			if(temp.length > 2 && temp[2].indexOf("approve_reject") != -1) {
+				temp[0] = temp[0].substring(temp[0].indexOf("\"")+1,temp[0].length-1);
+				temp[2] = temp[2].substring(temp[2].indexOf("'")+1,temp[2].lastIndexOf("'"));
+				returnArray[j] = temp[0] + ":" + temp[2];
+				if(i<btnArray.length)
+				j++;
+			}
+		}
+	}
+	return returnArray;
+}
+</script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/track_asset.js"></script>
+<title>Approval Console Change Order $args.chg_ref_num</title>
+</head>
+<body class="detailro" onload="disableButtons()" >
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script type="text/javascript">
+var persid_arr_len  = ahdtop.cab_persid_array.length;
+var persid_array = ahdtop.cab_persid_array;
+
+function navigate_to(direction) {
+	var frm = document.forms["frmDTLRO"];
+	if(direction!='' && direction!=undefined) {
+		if(direction=='next' && cur_persid_pointer<persid_arr_len-1) {
+			cur_persid_pointer = cur_persid_pointer + 1;
+			cur_persid = persid_array[cur_persid_pointer];
+			frm.elements["KEEP.PERSID_POINTER"].value = cur_persid_pointer;
+			frm.elements["PERSID"].value = cur_persid;
+			pdm_submit('frmDTLRO','SHOW_DETAIL');
+		} else if(direction=='previous' && cur_persid_pointer>0) {
+			cur_persid_pointer = cur_persid_pointer - 1;
+			cur_persid = persid_array[cur_persid_pointer];
+			frm.elements["KEEP.PERSID_POINTER"].value = cur_persid_pointer;
+			frm.elements["PERSID"].value = cur_persid;
+			pdm_submit('frmDTLRO','SHOW_DETAIL');
+		}
+	}
+}
+
+function approve_reject(status) {
+	var temp_persid = "0";
+	var frm = document.forms["frmDTLRO"];
+	var prev_persid_pointer = cur_persid_pointer;
+	var comments = document.getElementsByName("SET.chgalg.description")[0].value;
+	
+	// see if status transitiions require a comment
+    if(comments_required(status) && comments.length==0) {
+		if(typeof comments_msg[status]!="undefined" && comments_msg[status].length>0) {
+			alert(comments_msg[status]);
+		} else {
+			alert(comments_msg[0]);
+		}
+		return;
+	}
+	
+	temp_persid = persid_array[cur_persid_pointer];
+	if(cur_persid_pointer<persid_arr_len-1) {
+		cur_persid_pointer = cur_persid_pointer + 1;
+	}
+	cur_persid = persid_array[cur_persid_pointer];
+	if(cur_persid!='' && temp_persid!='0') {
+		if(status!='' && status!=undefined){	
+			frm.elements["NEXT_PERSID"].value = cur_persid;
+			frm.elements["PERSID"].value = temp_persid;
+			frm.elements["NEW_STATUS"].value = status;
+			frm.elements["COMMENTS"].value = comments;
+			frm.elements["PREV_POINTER"].value = prev_persid_pointer;
+			frm.elements["KEEP.PERSID_POINTER"].value = cur_persid_pointer;
+			pdm_submit('frmDTLRO','CAB_APPROVE_DENY');
+		}
+	}
+}
+
+</script>
+<PDM_FORM NAME="frmDTLRO">
+<input type="hidden" name=OP>
+<input type="hidden" name=COMMENTS>
+<input type="hidden" name=NEW_STATUS>
+<input type="hidden" name=NEXT_PERSID>
+<input type="hidden" name=PREV_POINTER>
+<input type="hidden" name=FACTORY value=chg>
+<input type="hidden" name=KEEP.PERSID_POINTER>
+<input type="hidden" name=chg_ref_num value=$args.chg_ref_num>
+<input type="hidden" name=KEEP.POPUP_NAME value="approval_console">
+<input type="hidden" name=HTMPL value=order_approval_console.htmpl>
+<script type="text/javascript">
+document.write('<input type="hidden" name=PERSID value="' + cur_persid + '">');
+</script>
+</PDM_FORM>
+
+<div name=button_div id=button_div>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=chg> //using custom buttons
+<PDM_MACRO name=button caption="Previous" func="navigate_to('previous')" hotkey_name="Previous" id=PREVIOUS newrow=yes>
+<PDM_MACRO name=button caption="Approve Change" func="approve_reject('APR')" hotkey_name="Approve Change" id=APPROVE>
+<PDM_MACRO name=button caption="Reject Change" func="approve_reject('REJ')" hotkey_name="Reject Change" id=REJECT>
+<PDM_MACRO name=button caption="Next" endrow=yes func="navigate_to('next')" hotkey_name="Next" id=NEXT>
+</script>
+</div>
+<script type="text/javascript">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarze" attr="chgalg.description" rows=8 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr="chg_nb">
+<PDM_MACRO name=TAB title="Change Order details" file="xx_chgappr_tab.htmpl">
+<PDM_IF "$args.cawf_procid" != "">
+<PDM_MACRO name=TAB title="Workflow Tasks" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.CAWorkflow+ARG0=getWorkflowInstance+ARG1=+ARG2=$args.category.cawf_defid+ARG3=$args.cawf_procid+ARG4=1+ARG5=1+HTMPL=workitems.htmpl">
+<PDM_ELSE>
+<PDM_MACRO name=TAB title="Workflow Tasks" file="xx_wf_tab.htmpl">
+</PDM_IF>
+<PDM_MACRO name=TAB title="Config. Items" height=350 id=chgnr src="OP=SEARCH+FACTORY=nr+QBE.EQ.chgnr.chg.id=$dob.id+KEEP.chgnr_chg_id=$dob.id+KEEP.forCiTab=1+KEEP.TKT_PERSID=$args.persistent_id+KEEP.parentFac=$prop.factory+KEEP.assetCount=$args.asset.length+KEEP.chgRefNum=$args.chg_ref_num+KEEP.is_cab_approval=1">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<PDM_IF 0>
+detail_mgs.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Managed Survey
+INTENT:
+    Display the detail info for the Managed Survey 
+VARIABLES:
+    string	image	    The location of the image directory as specified in 	
+			    in the config file.
+    object  mgs  args   The Managed Survey  object we are displaying.
+                            See $NX_ROOT/bopcfg/majic/bop.maj for the
+                            definition of attributes for 'OBJECT mgs'
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Managed Survey Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Managed Survey"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Managed Survey $args.name"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+var argID = "$args.id";
+argPersistentID = "$args.persistent_id";
+function copy_from_parent()
+{}
+var features="directories=no"+
+		",ahdmenu=no"+
+		",location=no"+
+		",menubar=no"+
+		",height=650"+
+		",width=800"+
+		",status=no" +
+		",topsplash=no"+
+		",resizable=yes"+
+                ",scrollbars=yes";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+
+   cancel_any_lrel_update();
+}
+</script>
+
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Managed Survey" key="$args.name">
+<center>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=mgs>
+if ($args.id != 0)
+{ 
+<PDM_MACRO name=button caption="Event History" func="show_evt('mgs', 'atev', $args.id)" hotkey_name="Event History" id="SHOW_EVT_HISTORY" width=0>
+<PDM_MACRO name=button caption="Attach Event" func="do_popup_window()" hotkey_name="Attach Event" id="btn806" width=0>
+}
+function do_popup_window() {
+popup_window('', cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +"+FACTORY=$prop.factory" + "+FTYPE=xx" + "+SET.id=" + argID + "+PERSID=" + argPersistentID + "+ATTACH_MGS_EVENT=1", popupWidth(XSMALL_POPUP), popupHeight(XSMALL_POPUP));
+}
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_MACRO name=dtlDropdown hdr="Status ankiety zarządzanej" attr=status lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr=active lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group>
+<PDM_MACRO name=dtlLookup hdr="Ankieta" attr=tplid>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr="mgs_nb">
+<PDM_MACRO name=TAB title="Activities" height=300 src="OP=SEARCH+FACTORY=mgsalg+KEEP.id_from_mgsdetail=$args.id">
+<PDM_MACRO name=TAB title="Object Contacts" height=300 id=mgs_ntfl src="OP=SEARCH+FACTORY=ntfl+QBE.EQ.mgs_ntf.mgs.id=$dob.id+KEEP.forMgsToNtfl=1+KEEP.MGS_PERSID=$args.persistent_id+KEEP.MGS_ID=$args.id+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=TAB title="Contacts" height=300 id=mgs_cnt src="OP=SEARCH+FACTORY=cnt+QBE.EQ.mgs_ntf.mgs.id=$dob.id+KEEP.forMgsToCnt=1+KEEP.MGS_PERSID=$args.persistent_id+KEEP.MGS_ID=$args.id+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=TAB title="Contact Types" height=300 id=mgs_ctp src="OP=SEARCH+FACTORY=ctp+QBE.EQ.mgs_ntf.mgs.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forMgsToCtp=1+KEEP.MGS_PERSID=$args.persistent_id+KEEP.MGS_ID=$args.id">
+<PDM_MACRO name=TAB title="Initial Message" file="mgs_ini_tab.htmpl">
+<PDM_MACRO name=TAB title="Reminder Message" file="mgs_rem_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_mgs.htmpl ASPEN.4 2010/11/20 01:23:34 saima01 Exp $
+</PDM_IF>
+<PDM_WSP>

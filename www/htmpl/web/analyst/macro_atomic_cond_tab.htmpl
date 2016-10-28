@@ -1,0 +1,106 @@
+<PDM_IF 0>
+macro_atomic_cond_tab.htmpl
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=macro_atomic_cond_tab" factory=macro>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+function add_button_to_tab_banner(){
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Add Condition" func="add_macro_atomic_cond('$args.persistent_id','$args.ob_type')" hotkey_name="Add Condition" id="ADD_ATOMIC_COND" width=0>
+<PDM_MACRO name=btnEndRow>
+}
+<PDM_MACRO name=tabBanner title="Condition List" add_btns=true>
+<PDM_IF "$args.id" == 0>
+detailStartRow("Center");
+detailRowHdr("The Site-defined Condition Macro Needs to be saved before adding Conditions");
+<PDM_MACRO name=dtlEndTable>
+</PDM_IF>
+<PDM_IF "$args.id" == 0>
+ImgBtnDisableButton("ADD_ATOMIC_COND");
+</PDM_IF>
+var psid = new Array();
+var lnkid = 0;
+var relPersid = new Array();
+var childMenu = new ContextMenu("childMenu");
+childMenu.addItem("Remove Condition","delete_atomic_cond('$args.persistent_id',self.relPersid[self.lnkid])");
+childMenu.finish();
+
+
+html = "<table id=tbl502 class='tab' summary='Condition List'>\n";
+html +="<tr>\n";
+html += "<th scope='col' class='results' align='left'>Sequence</th>\n";
+html += "<th scope='col' class='results' align='left'>Attribute</th>\n";
+html += "<th scope='col' class='results' align='left'>Operator</th>\n";
+html += "<th scope='col' class='results' align='left'>Value</th>\n";
+html += "<th scope='col' class='results' align='left'>Connecter</th>\n";
+html += "</tr>\n";
+<PDM_IF $args.atomic_conds.length == 0>
+<PDM_MACRO name=dtlStartRow>    
+html += "<td>\n";
+html += "</td>\n";
+html += "<td align='middle' class='detailro'>\n";  
+html += "No Conditions Attached\n";
+html += "</td>\n";
+<PDM_MACRO name=dtlEndTable>
+<PDM_ELSE>
+var counter=0;
+<PDM_LIST SOURCE=args.atomic_conds ESC_STYLE=C>
+if ( lnkid%2 )
+  html += childMenu.tr("lnkid=" + lnkid, "class='results1'");
+else
+  html += childMenu.tr("lnkid=" + lnkid, "class='results0'");
+html += "<td class='detailroTab'>\n";    
+psid[lnkid] = "$args.atomic_conds.persistent_id";
+relPersid[lnkid] = "$args.atomic_conds.persistent_id"; 
+html += "<a" + detailNextID() +
+        " href=\"javascript:showDetailWithPersid(psid[" + lnkid +
+        "]);\"" + childMenu.mouseEvents("lnkid=" + lnkid) + ">" +
+        "$args.atomic_conds.sequence</a>\n";
+html += "</td>\n";
+
+html += "<td valign='top' class='detailroTab'>$args.atomic_conds.lval.sym</td>\n";
+if ($args.atomic_conds.operator == 0)
+html += "<td valign='top' class='detailroTab'>Equals</td>\n";
+else if ($args.atomic_conds.operator == 1)
+html += "<td valign='top' class='detailroTab'>Does Not Equal</td>\n";
+else if ($args.atomic_conds.operator == 2)
+html += "<td valign='top' class='detailroTab'>Greater Than</td>\n";
+else if ($args.atomic_conds.operator == 3)
+html += "<td valign='top' class='detailroTab'>Less Than</td>\n";
+else if ($args.atomic_conds.operator == 4)
+html += "<td valign='top' class='detailroTab'>Empty/NULL</td>\n";
+else if ($args.atomic_conds.operator == 5)
+html += "<td valign='top' class='detailroTab'>Not Empty/NULL</td>\n";
+
+html += "<td valign='top' class='detailroTab'>$args.atomic_conds.rval_display</td>\n";
+if ($args.atomic_conds.connecter == 0)
+html += "<td valign='top' class='detailroTab'>AND</td>\n";
+else
+html += "<td valign='top' class='detailroTab'>OR</td>\n";
+html += "</tr>\n";
+lnkid++;
+</PDM_LIST>
+</PDM_IF>
+html += "</table>\n";
+docWrite(html);
+</script>
+</PDM_FORM>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: macro_atomic_cond_tab.htmpl ASPEN.1 2010/11/20 01:23:34 saima01 Exp $;
+</PDM_IF>

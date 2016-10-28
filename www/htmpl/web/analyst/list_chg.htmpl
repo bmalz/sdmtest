@@ -1,0 +1,315 @@
+<PDM_IF 0>
+$Id: list_chg.htmpl,v 1.3 2006/11/09 18:54:55 taoyu02 Exp $
+list_chg.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Change Orders.
+	
+	Pass in KEEP.PARENT_SEARCH when searching for releated tickets.  It should be
+	set to the potential child's persistent_id.
+	
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgExtraButton; //Extra button to launch CAB Console
+//Added for right click context menu
+var cfgCanCopy=true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+//end of right click context menu code
+
+// When the user sets Status field to Closed, this function sets Active field to Inactive
+function setInactive() {	
+		var lookupObj = document.forms["fltrForm0"].elements["QBE.EQ.status"];
+	if(typeof lookupObj == "undefined") { 	// if status is a dropdown box, not a lookup
+		var statusObj = document.forms["fltrForm0"].elements["QBE.EQ.status"];
+		if(typeof statusObj == "undefined")
+			return;
+		var stat = statusObj.options[statusObj.selectedIndex].value;
+		if( stat == "CL" ) {
+			var activeDropdown = document.forms["fltrForm0"].elements["QBE.EQ.active"];
+			for(var i = 0; i < activeDropdown.length; ++i) {		
+				if(activeDropdown.options[i].value == "") {
+					activeDropdown.options[i].selected = true;
+					break;
+				}
+			}
+		}
+	}
+	else { 		// else, status is a lookup, not a dropdown box
+			var stat = lookupObj.value;
+			if( stat == "CL" ) {			
+			var activeDropdown = document.forms["fltrForm0"].elements["QBE.EQ.active"];
+			for(var i = 0; i < activeDropdown.length; ++i) {		
+				if(activeDropdown.options[i].value == "") {
+					activeDropdown.options[i].selected = true;
+					break;
+				}
+			}
+		}			
+	}
+	
+}
+
+<PDM_IF "$args.KEEP.ForChild" == "1" || "$args.KEEP.forChgChildList" == "1">
+var hdrTitle = "Change Order Children Search";
+var hdrTitleList = "Change Order Children List";
+var hdrTitleTempl = "Change Order Children Template Search";
+<PDM_ELSE>
+var hdrTitle = "Wyszukiwanie Zmian";
+var hdrTitleList = "Lista Zmian";
+var hdrTitleTempl = "Wyszukiwanie Szablonów Zmian";
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("chgsum.rpt", "chg_itildtl.rpt");
+var cfgCanEdit = true;
+var cfgContextActivities = true;
+var from_detail = "$args.KEEP.from_detail";
+//display CAB console button
+<PDM_IF 0>
+< PDM_IF $ACCESS.FAC_chg \> 1 && $UserAuth \> 1 && "${current:n/a}" != "n/a" >
+< PDM_IF $record_count == 0 >
+cfgExtraButton=new Array("CAB_Console", "approval_console('$args.FACTORY')",false);
+< PDM_ELSE>
+cfgExtraButton=new Array("CAB_Console", "approval_console('$args.FACTORY')");
+< /PDM_IF>
+< /PDM_IF>
+</PDM_IF>
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Change Order">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=chg>
+<PDM_IF "$args.KEEP.forNrtoChg" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.asset.nr.id" value="$args.QBE.EQ.asset.nr.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForChild" == "1">
+document.writeln('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_chg.htmpl>');
+</PDM_IF>
+<PDM_IF "" != "$args.KEEP.exclude_chg_ref_num">
+document.write('<INPUT TYPE=hidden NAME=QBE.NE.chg_ref_num VALUE="$args.KEEP.exclude_chg_ref_num">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forChgChildList" == "1">
+document.write('<INPUT TYPE=hidden NAME=QBE.EQ.parent.id VALUE="$args.QBE.EQ.parent.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forcmdbadmin_tree" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.has_ci_planned_change" VALUE="1">');
+</PDM_IF>
+
+var argCreateAlg = "${args.CREATE_ALG:}";
+if ( argCreateAlg.length > 0 ) {
+   var argAlgPreset = "${args.ALG_PRESET:}";
+   var argAlgPresetRel = "${args.ALG_PRESET_REL:}";
+   document.write('<INPUT TYPE=hidden NAME=CREATE_ALG VALUE="' + argCreateAlg + '">');
+   if ( argAlgPreset.length > 0 )
+      document.write('<INPUT TYPE=hidden NAME=ALG_PRESET VALUE="$args.ALG_PRESET">');
+   if ( argAlgPresetRel.length > 0 )
+      document.write('<INPUT TYPE=hidden NAME=ALG_PRESET_REL VALUE="$args.ALG_PRESET_REL">');
+
+}
+	
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status przypisania" attr="n/a" codename="assignStatus" colspan=2>
+<PDM_MACRO name=sfLookup hdr="Właściciel" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfLookup hdr="Kod zamknięcia" attr=closure_code factory=closure_code>
+<PDM_IF "$args.KEEP.PARENT_SEARCH" != "">
+<PDM_MACRO name=sfTextbox hdr=" " attr="category.children_ok" disabled="yes" display_value=" " qbe_condition="EQ" value="1">
+<PDM_MACRO name=sfTextbox hdr=" " attr="persistent_id" disabled="yes" display_value=" " qbe_condition="NE" value="$args.KEEP.PARENT_SEARCH">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Dotknięty użytkownikr" attr=affected_contact factory=cnt>
+<PDM_MACRO name=sfLookup hdr="Zgłaszający" attr=requestor factory=cnt>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+<PDM_MACRO name=sfDropdown hdr="Ryzyko" attr=risk factory=risk_level>
+<PDM_IF "$args.use_template" == "1">
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="active" codename="actTmpt" default="empty" Noempty=yes>
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="active" codename="act">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+searchFilterSetEventHandler("onChange='setInactive()'") 
+<PDM_MACRO name=sfLookup hdr="Status" attr=status factory=chgstat>
+<PDM_MACRO name=sfHier hdr="Kategoria" attr="category.sym" factory=chgcat>
+<PDM_MACRO name=sfDropdown hdr="Typ" attr=chgtype factory=chgtype>
+<PDM_MACRO name=sfDropdown hdr="Status konfliktu" attr=conflicts.conflict.conflict_status factory=chgcnf_status lookup=no>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Special Handling" attr="affected_contact.cnthandling_list.special_handling.sym" factory=special_handling>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_IF "$args.use_template" == "1">
+<PDM_MACRO name=sfDropdown hdr="Szablon" attr="template_name.template_name" codename="useTmpt" Noempty=yes>
+<PDM_MACRO name=sfDropdown hdr="Szablon aktywny" attr="template_name.delete_flag" codename="tmptAct" Noempty=yes>
+<PDM_MACRO name=sfTextbox hdr="Nazwa szablonu" attr="template_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Klasa szablonu" attr="template_name.template_class" size=12>
+<PDM_ELSE>
+<PDM_MACRO name=sfLookup hdr="CAB" attr="cab" factory=grp>
+<PDM_MACRO name=sfDropdown hdr="Akceptajca CAB" attr="cab_approval" factory=bool>
+<PDM_MACRO name=sfDropdown hdr="Szablon" attr="template_name" codename="tmpt">
+<PDM_MACRO name=sfDropdown hdr="Szablon aktynwy" attr="template_name.delete_flag">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Utworzone przez" attr="log_agent" factory=cnt>
+<PDM_MACRO name=sfDropdown hdr="Child Type" attr="child_type" codename="chdType">
+<PDM_MACRO name=sfDropdown hdr="Naruszenie SLA " attr="sla_violation" codename="slaViolation">
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr="impact" factory=imp>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=sfDate hdr="Najwcześniejszy czas do naruszenia" attr="attached_slas.time_to_violation" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas do naruszenia" attr="attached_slas.time_to_violation" qbe_condition=LE>
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Studium biznesowe" attr="business_case" size=20>
+<PDM_MACRO name=sfTextbox hdr="Uzasadnienie biznesowe" attr="justification" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Streszcznie zmiany" attr="summary" colspan=1 size=35>
+<PDM_MACRO name=sfTextbox hdr="Opis zmiany" attr="description" colspan=2 size=42>
+<PDM_MACRO name=sfTextbox hdr="Zgłoszenie w systemie zewnętrznym" attr="external_system_ticket" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Plan wdrożenia" attr="effort" colspan=1 size=35>
+<PDM_MACRO name=sfTextbox hdr="Plan wycofania" attr="backout_plan" colspan=2 size=42>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfLookup hdr="Nadrzędna Zmiana" attr="parent.chg_ref_num" factory=chg>
+<PDM_MACRO name=sfHier hdr="Przyczyna źródłowa" attr="rootcause.sym" factory=rc>
+<PDM_IF "$env.NX_CLASSIC_SLA_PROCESSING" == "Yes">
+<PDM_MACRO name=sfDropdown hdr="Service Type" attr="support_lev" factory=sdsc>
+<PDM_ELSE>
+<PDM_MACRO name=sfLookup hdr="Service Type" attr="attached_slas.map_sdsc.sym" factory=sdsc>
+<PDM_MACRO name=sfDropdown hdr="Legacy Service Type" attr="support_lev" factory=sdsc>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas startu harmonogramu" attr="sched_start_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas startu harmonogramu" attr="sched_start_date" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas końca harmonogramu" attr="sched_end_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas końca harmonogramu" attr="sched_end_date" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas wymagalności" attr="need_by" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas wymagalności" attr="need_by" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas otwarcia" attr="open_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas otwarcia" attr="open_date" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rozwiązania" attr="resolve_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rozwiązania" attr="resolve_date" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas zamknięcia" attr="close_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas zamknięcia" attr="close_date" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas szacunkowego skompletowaniae" attr="est_comp_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas szacunkowego skompletowania" attr="est_comp_date" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rzeczywistego skompletowania" attr="actual_comp_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rzeczywistego skompletowania" attr="actual_comp_date" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Najniższy szacowany koszt" attr="QBE.GE.est_cost" size=20>
+<PDM_MACRO name=sfTextbox hdr="Najwyższy szacowany koszt" attr="QBE.LE.est_cost" size=20>
+<PDM_MACRO name=sfTextbox hdr="Najkrótszy szacowany czas trwania" attr="QBE.GE.est_total_time" size=20>
+<PDM_MACRO name=sfTextbox hdr="Greatest Est Duration" attr="QBE.LE.est_total_time" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Least Actual Cost" attr="QBE.GE.cost" size=20>
+<PDM_MACRO name=sfTextbox hdr="Greatest Actual Cost" attr="QBE.LE.cost" size=20>
+<PDM_MACRO name=sfTextbox hdr="Least Actual Duration" attr="QBE.GE.actual_total_time" size=20>
+<PDM_MACRO name=sfTextbox hdr="Greatest Actual Duration" attr="QBE.LE.actual_total_time" size=20>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+<pdm_jscript file=list_edit.js>
+startListEdit(__search_filter);
+listEditStartRow();
+listEditReadonly("chg_ref_num","Zmiana #");
+listEditField("status");
+listEditField("priority");
+listEditField("parent.chg_ref_num");
+listEditField("assignee");
+listEditEndRow();
+listEditReadonly("summary",4);
+listEditField("affected_contact", "End User");
+endListEdit();
+var msgFoundNone = "No change orders found";
+var msgFound1 = "Znaleziono 1 Zmianę";
+var msgFound = "Znaleziono %1 Zmian.";
+var msgFoundMore = "Znaleziono %1 Zmian. Wyświetlane %2 z %3";
+var msgSelect = "Click to select desired change order";
+var msgSelectAlg = "Click to select desired change order and add a %1 activity log";
+var msgSelectTempl = "Click to select desired change order template";
+
+var show_template_name = ("$args.use_template" == "1");
+if ( searchFilterValueOf("template_name").indexOf("NOT NULL") != -1 )
+   show_template_name = true;
+
+var empty_colspan = 4;
+var ref_num_style;
+var add_icon_to_cust;
+
+// Writes a special handling icon next to the 'customer/end user' if they have special handling
+// needs. It defaults to the 'SpecialHandlingIcon' in web.cfg, else it uses the 'announcements_16.png'.  
+function writeIcon(name)
+{
+    var htmlStr = name;
+    if (add_icon_to_cust)
+    {
+        var specialHandlingAlertIcon = "$SpecialHandlingIcon";
+        if(specialHandlingAlertIcon == "") // did they provide a icon in the config file?
+        {
+            specialHandlingAlertIcon = "$CAisd/img/announcements_16.png";
+        }
+        htmlStr = htmlStr + "&nbsp <img src='" + specialHandlingAlertIcon 
+                  +"' border=0 height=14 width=14 alt='Special Handling Alert' title='Special Handling Alert'/>";
+    }
+    rs.data(htmlStr);
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0' ||  \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_elif @{list.ttv_att_slas.length:0} != 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.affected_contact.active_special_handling.length:0}' != '0'">
+<PDM_MACRO name=lsWrite text="add_icon_to_cust = 1;">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="add_icon_to_cust = 0;">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+
+<PDM_MACRO name=lsWrite both=yes text="if (show_template_name) {">
+							empty_colspan++;
+	<PDM_MACRO name=lsWrite both=yes text="}">	
+<PDM_MACRO name=lsCol hdr="Zmiana #" attr=chg_ref_num exportFmt="ShowLink" fmtfunc=writeIcon link=yes startrow="no" style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Szablon" attr=template_name exportFmt="ShowLink" link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Opis" attr=summary max_char=60 startrow="no">
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort="DESC" startrow="no">
+<PDM_MACRO name=lsCol hdr="Kategoria" attr=category startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=status startrow="no">
+<PDM_MACRO name=lsCol hdr="Przypisana do" attr=assignee startrow="no">
+<PDM_MACRO name=lsCol hdr="Typ Zmiany" attr=chgtype startrow="no">
+<PDM_MACRO name=lsCol attr=open_date label="Data otwarcia" sort="DESC" startrow=yes>
+<PDM_MACRO name=lsCol attr=mintgt label="Service Target">
+<PDM_MACRO name=lsCol attr=group label="Grupa">
+<PDM_MACRO name=lsCol attr=affected_contact export=no fmtfunc=writeIcon label="Zgłaszający" sort="no">
+<PDM_MACRO name=lsCol attr=risk label="Ryzyko" sort="DESC">
+<PDM_MACRO name=lsCol attr=parent.chg_ref_num label="Rodzic">
+<PDM_MACRO name=lsCol attr=children display_attr=length export=no label="#Child">
+<PDM_MACRO name=lsCol attr=sched_start_date label="Start wg harmonogramu" sort="sched_start_date DESC, sched_end_date DESC">
+<PDM_MACRO name=lsCol attr=sched_end_date label="Koniec wg harmonogramu">
+<PDM_MACRO name=lsEnd isTicketFactory=1>
+</PDM_IF>
+</SCRIPT>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,210 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show a list of CACF Change Specifications
+//
+// History:
+//    10/05/2011 Initial Version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Change Specifications Search";
+var hdrTitleList = "Change Specification List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<script language="JavaScript">
+
+<PDM_IF "$UserAuth" != "" &&  $UserAuth \> 1 >
+<PDM_IF "$args.KEEP.ALLOW_CREATE_CHG_SPEC" != "false" >
+         <PDM_SET args.show_create="true">
+    </PDM_ELSE>
+         <PDM_SET args.show_create="false">
+    
+</PDM_IF>
+    <PDM_SET args.preset_url_args="">
+    
+<PDM_IF "$args.KEEP.CHG_ID" != "">
+        <PDM_SET args.preset_url_args="+PRESET=chg:$args.KEEP.CHG_ID+KEEP.CHG_WAS_PRESET=1">
+        
+<PDM_IF "$args.KEEP.TENANT_ID" != "">
+            <PDM_SET args.preset_url_args+="+PRESET=tenant:$args.KEEP.TENANT_ID">
+        
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$args.KEEP.nr_id" != "">
+        <PDM_SET args.preset_url_args+="+PRESET=ci:$args.KEEP.nr_id">
+    
+</PDM_IF>
+<PDM_MACRO name=sfStart create="$args.show_create" extracreateurl="$args.preset_url_args" factory="ci_planned_change">
+    
+</PDM_ELSE>
+
+    
+<PDM_MACRO name=sfStart create=false factory="ci_planned_change">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.parentFac" == "nr">
+    document.write('<input type="hidden" name="QBE.EQ.ci.id" value="$args.KEEP.nr_id">');
+<PDM_ELIF "$args.KEEP.parentFac" == "chg">
+    document.write('<input type="hidden" name="QBE.EQ.chg.id" value="$args.KEEP.CHG_ID">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.parentFac" != "chg">
+<PDM_MACRO name=sfLookup hdr="Zmiana" attr="chg">
+<PDM_MACRO name=sfDropdown hdr="Status zmiany" attr="chg.status.sym" factory="chgstat">
+</PDM_IF>
+<PDM_IF "$args.KEEP.parentFac" != "nr">
+<PDM_MACRO name=sfLookup hdr="Nazwa CI" attr="ci">
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Managed Attribute" attr="attribute_name" lookup="no">
+<PDM_MACRO name=sfDropdown hdr="Aktywne?" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status weryfikacji" attr="status" lookup="no">
+<PDM_MACRO name=sfDropdown hdr="Końcowy" attr="status.isfinal" factory="bool" lookup="no">
+<PDM_MACRO name=sfTextbox hdr="Planowana wartość" attr="attribute_value_planned">
+<PDM_MACRO name=sfLookup hdr="Incydent" attr="incident">
+<PDM_MACRO name=sfLookup hdr="Status incydentu" attr="incident.status.sym" factory="crs">
+<PDM_IF "$args.KEEP.parentFac" != "nr">
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfLookup hdr="Ostatnie polityka weryfikacja" attr="last_verification_policy">
+<PDM_MACRO name=sfLookup hdr="Klasa CI" attr="ci.class.type" factory="grc">
+<PDM_MACRO name=sfLookup hdr="Lokalizacja CI" attr="ci.location.name" factory="loc">
+<PDM_MACRO name=sfDropdown hdr="Typ serwisowy CI" attr="ci.service_type.sym" factory="no_contract_sdsc" lookup="no">
+<PDM_MACRO name=sfDropdown hdr="Priorytet CI" attr="ci.priority.sym" factory="pri" lookup="no">
+<PDM_ELSE>
+<PDM_MACRO name=sfLookup hdr="Ostatnie polityka weryfikacja" attr="last_verification_policy">
+</PDM_IF>
+<PDM_IF "ci_planned_change" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Change Specifications found";
+  var msgFound1 = "1 Change Specifications found";
+  var msgFound = "%1 Change Specifications found";
+  var msgFoundMore = "%1 Change Specifications found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Change Specification";
+
+// variables used by the format functions
+var list_attribute_type;
+var list_attribute_value_internal;
+var list_attribute_value_disc_internal;
+var list_attribute_value_orig_internal;
+var link_style;
+
+// Routine that performs any special formatting of the planned change values
+function format_attr_value( attribute_type, attribute_value, internal_value )
+{
+    if( attribute_type == "4" ) // Date
+    {
+        // Convert the int date to a string if possible
+        if ( typeof internal_value != "undefined" &&
+             internal_value.length > 0            && 
+             !isNaN( internal_value ) )
+        {
+           attribute_value = date_to_string( internal_value );
+        }
+    }
+    return attribute_value;  
+}
+
+function format_planned_value( value )
+{
+    // Perform special formating as needed for the planned value
+    rs.data( format_attr_value( list_attribute_type, value, list_attribute_value_internal ) );
+}
+
+function format_discovered_value( value )
+{
+    // Perform special formating as needed for the discovered value
+    rs.data( format_attr_value( list_attribute_type, value, list_attribute_value_disc_internal ) );
+}
+
+function format_original_value( value )
+{
+    // Perform special formating as needed for the original value
+    rs.data( format_attr_value( list_attribute_type, value, list_attribute_value_orig_internal ) );
+}
+
+// Format for date link, needed for custom style for dates
+function format_last_mod_dt( value )
+{
+    value = date_to_string( value );
+    rs.data( value );
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="list_attribute_type                = '@{list.attribute_name.attribute_type:0}';">
+<PDM_MACRO name=lsWrite text="list_attribute_value_internal      = '<PDM_FMT PAD=NO ESC_STYLE=C>@{list.attribute_value_internal:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="list_attribute_value_disc_internal = '<PDM_FMT PAD=NO ESC_STYLE=C>@{list.attribute_value_disc_internal:}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="list_attribute_value_orig_internal = '<PDM_FMT PAD=NO ESC_STYLE=C>@{list.attribute_value_orig_internal:}</PDM_FMT>';">
+<PDM_IF 0>*** Show red color and asterisks on the link if the change specification is failed verification or requires manual verification ***</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.status:}\" == 'FAIL' || \"@{list.status:}\" == 'MANVRFYACT'">
+<PDM_MACRO name=lsWrite text="link_style = 'listEmergency';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="link_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite both=yes text="pdm_if '@{args.KEEP.parentFac}' != 'chg' ">
+     // DO NOT REMOVE: The following columns are needed for custom date format handling
+    
+<PDM_MACRO name=lsCol hdr="Zmiana" attr="chg.chg_ref_num" exportfmt="ShowLink" link="yes" sort="chg.chg_ref_num DESC, last_mod_dt DESC" style=link_style>
+<PDM_MACRO name=lsCol hdr="Data modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=lsWrite both=yes text="pdm_else">
+<PDM_MACRO name=lsCol hdr="Data modyfikacji" attr="last_mod_dt" exportfmt="ShowLink" fmtfunc=format_last_mod_dt link="yes" style=link_style>
+<PDM_MACRO name=lsWrite both=yes text="/pdm_if">
+<PDM_IF "$args.KEEP.parentFac" != "nr">
+<PDM_MACRO name=lsCol hdr="CI" attr="ci">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Managed Attribute" attr="attribute_name">
+<PDM_MACRO name=lsCol hdr="Planowana wartość" attr="attribute_value_planned" fmtfunc=format_planned_value sort=no>
+<PDM_MACRO name=lsCol hdr="Status weryfikacji" attr="status">
+<PDM_MACRO name=lsCol hdr="Końcowy" attr="status.isfinal">
+<PDM_IF "$args.KEEP.parentFac" != "chg">
+<PDM_MACRO name=lsCol hdr="Status zmiany" attr="chg.status">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Incydent" attr="incident.ref_num">
+<PDM_MACRO name=lsCol hdr="Aktywne?" attr="delete_flag">
+<PDM_MACRO name=lsCol hdr="Znaleziona wartość" attr="attribute_value_discovered" fmtfunc=format_discovered_value startrow="yes">
+<PDM_MACRO name=lsCol hdr="Wartość oryginalna" attr="attribute_value_original" fmtfunc=format_original_value>
+<PDM_MACRO name=lsCol hdr="Ostatnie polityka weryfikacja" attr="last_verification_policy">
+<PDM_MACRO name=lsCol hdr="Wiadomość weryfikacji" attr="verification_msg">
+<PDM_MACRO name=lsCol hdr="Status incydentu" attr="incident.status">
+<PDM_MACRO name=lsCol hdr="Podsumowanie incydentu" attr="incident.summary">
+<PDM_MACRO name=lsCol hdr="TWA" attr="ci_twa_ci">
+<PDM_IF "$args.KEEP.parentFac" != "chg">
+<PDM_MACRO name=lsCol hdr="Streszcznie zmiany" attr="chg.summary">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Opis" attr="description">
+<PDM_MACRO name=lsEnd>
+</script>	
+
+</PDM_IF>
+
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: list_ci_planned_change.htmpl ASPEN.19 2012/05/08 14:52:58 mckpe04 Exp $;
+</PDM_IF>
+<PDM_WSP>

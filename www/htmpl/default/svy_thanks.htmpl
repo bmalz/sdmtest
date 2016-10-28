@@ -1,0 +1,49 @@
+<PDM_IF 0>
+svy_thanks.htmpl
+WHEN PRESENTED:
+    When user completes a survey.
+INTENT:
+    Any concluding remarks for the user after a survey is submitted.
+	Please note the user is NOT logged in at this point.  You may still
+	use the 'cst' object (to mention the user's name, for example).
+VARIABLES:
+    string	image	    The location of the image directory as 
+			    specified in the config file.
+    object survey   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/bop.maj for the
+                            definition of attributes for 'OBJECT survey'
+   object	cst			User
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<title>$ProductName - Survey Completed</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+<!--
+	var ahdtop = window;
+	window.name = "AHDtop";
+	var cfgProductName = "$ProductName";
+	var usdImg = new Array();
+	usdImg["circleca"] = "$CAisd/img/circleca.png";
+// -->
+</script>
+</head>
+<body class="detailro">
+<PDM_INCLUDE FILE=splash.htmpl>
+<h1>$args.conclude_text</h1>
+<br>
+<p>
+<img src="$CAisd/img/bar.gif" width="90%" HEIGHT="4" ALT="Bar">
+</center>
+
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: svy_thanks.htmpl ASPEN.2 2011/10/24 11:35:50 visan03 Exp $
+</PDM_IF>

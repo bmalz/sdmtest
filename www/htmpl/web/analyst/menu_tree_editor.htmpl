@@ -1,0 +1,70 @@
+<PDM_IF 0>
+	menu_tree_editor.htmpl
+WHEN PRESENTED:
+	From the detail_menu_tree_name.htmpl when using Customize Menu.
+	Loads the menu_tree.htmpl in the left pane and uses the right pane 
+	for the node functionality.
+</PDM_IF>
+<html lang="en">
+
+<PDM_PRAGMA RELEASE=110>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+
+var ahdframeset = window;
+
+function frameset_loaded()
+{
+	if ("$prop.browser" == "IE") {
+		window.menu_tree_editor.location.href = "$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID" + 
+			    "+HTMPL=menu_tree_editor2.htmpl+menu_name=" + nx_escape("$args.menu_name") +
+			    "+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" + 
+			    "+KEEP.ALLOW_MENU_TREE_EDIT=$args.KEEP.ALLOW_MENU_TREE_EDIT";
+	}
+}
+
+</script>
+</HEAD>
+
+<SCRIPT>
+<PDM_IF "$prop.browser" != "IE">
+	<PDM_IF "$SESSION.usingScreenReader" == "1">
+		docWriteln('<FRAMESET ROWS="28,*" onLoad="frameset_loaded()">');
+	<PDM_ELSE>
+		docWriteln('<FRAMESET ROWS="23,*" onLoad="frameset_loaded()">');
+	</PDM_IF>
+<PDM_ELSE>
+	<PDM_IF "$SESSION.usingScreenReader" == "1">
+		docWriteln('<FRAMESET ROWS="28,*" FRAMESPACING="0" onLoad="frameset_loaded()">');
+	<PDM_ELSE>
+		docWriteln('<FRAMESET ROWS="23,*" FRAMESPACING="0" onLoad="frameset_loaded()">');
+	</PDM_IF>
+</PDM_IF>
+
+docWriteln('<FRAME SRC="$CAisd/html/menubar.html" NAME=menubar NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title="Menu bar">');
+
+
+<PDM_IF "$prop.browser" != "IE">
+	docWrite('<FRAME id=menu_tree_editor name=menu_tree_editor style="border: 1px #8B939A solid;" ');
+	docWrite('src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID');
+	docWrite('+menu_name=' + nx_escape("$args.menu_name"));
+	docWrite('+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME');
+	docWrite('+KEEP.ALLOW_MENU_TREE_EDIT=$args.KEEP.ALLOW_MENU_TREE_EDIT');
+	docWrite('+HTMPL=menu_tree_editor2.htmpl" ');
+	docWrite('SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 BORDER=0 ');
+	docWriteln('title="Menu Tree Editor frame">');
+<PDM_ELSE>
+	docWrite('<FRAME id=menu_tree_editor name=menu_tree_editor style="border: 1px #8B939A solid;" ');
+	docWrite('SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 BORDER=0 ');
+	docWriteln('title="Menu Tree Editor frame">');
+</PDM_IF>		
+docWriteln('</FRAMESET>');
+</SCRIPT>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: menu_tree_editor.htmpl ASPEN.1 2010/11/24 19:26:38 pstso01 Exp $;
+</PDM_IF>

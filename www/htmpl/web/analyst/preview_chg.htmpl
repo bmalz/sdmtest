@@ -1,0 +1,67 @@
+<PDM_IF 0>
+preview_chg.htmpl
+WHEN PRESENTED:
+   Mouseover Preview form for change orders.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Zmiana $args.chg_ref_num ";
+var hdrTitleTempl = 'Szablon Zmiany $args.chg_ref_num  <PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT> Detail';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</script>
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=chg>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Wnioskujący" attr=requestor>
+<PDM_MACRO name=dtlReadonly hdr="Osoba dotknięta" attr=requestor>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr=category>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=status>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=dtlReadonly hdr="Grupa" attr=group>
+<PDM_MACRO name=dtlReadonly hdr="Typ" attr=chgtype>
+<PDM_MACRO name=dtlReadonly hdr="Priorytet" attr=priority>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Rodzic" attr=parent>
+<PDM_MACRO name=dtlReadonly hdr="Przyczyna źródłowa" attr=rootcause>
+<PDM_MACRO name=dtlReadonly hdr="Projekt" attr=project>
+<PDM_MACRO name=dtlReadonly hdr="Ryzyko" attr=risk>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="CAB" attr=cab>
+<PDM_MACRO name=dtlDateReadonly hdr="Start wg harmonogramu" attr=sched_start_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Koniec wg harmonogramu" attr=sched_end_date>
+<PDM_MACRO name=dtlReadonly hdr="Akceptacja CAB" attr="cab_approval">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=summary colspan=4 keeplinks=yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data otwarcia" attr=open_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rozwiązania" attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zamknięcia" attr=close_date colspan=4>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: preview_chg.htmpl ASPEN.0 2010/10/04 11:31:08 ralje02 Exp $
+</PDM_IF>
+
+<PDM_WSP>

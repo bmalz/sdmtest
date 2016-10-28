@@ -1,0 +1,44 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/01/30
+// Title  : cmdb_metadata_projex.htmpl (family specific attributes)
+//
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_projex_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="clarity_id" 	 heading="CA Clarity PPM ID" help="CA Clarity PPM ID">
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="clarity_name"     heading="CA Clarity PPM Project Name" help="CA Clarity PPM Project Name">
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="harvest_name"     heading="CA SCM Project" help="CA SCM Project">
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="harvest_server"   heading="CA SCM Server" help="CA SCM Server">
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="endevor_name"     heading="Endevor SYS-SBS-ENV-STG" help="Endevor SYS-SBS-ENV-STG">
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="endevor_server"   heading="Endevor Host" help="Endevor Host">
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="entwb_server"     heading="Enterprise Workbench Server" help="Enterprise Workbench Server">
+<PDM_MACRO name=cmdbMetadata category="Project" extension="projex" attr="organization"     heading="Organization" help="Organization">
+
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

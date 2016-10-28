@@ -1,0 +1,57 @@
+<PDM_IF 0>
+list_ztasktype.htmpl
+WHEN PRESENTED:
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie typów zadań";
+var hdrTitleList = "Lista typów zadań";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("ztasktypesum.rpt", "ztasktypeedtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Typ zadania">
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=true factory=ztasktype>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Typ zadania" attr=sym>
+<PDM_MACRO name=sfLookup hdr="Klasa zadania" attr="task.sym">
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono HelpDesków";
+  var msgFound1 = "Znaleziono 1 HelpDesk";
+  var msgFound = "Znaleziono %1 HelpDesk";
+  var msgFoundMore = "Znaleziono %1 HelpDesk. Wyświetlane %2 z %3";
+  var msgSelect = "Kliknij aby wybrać rekord";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Typ zadania" attr=sym exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag startrow="no">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_ztasktype.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

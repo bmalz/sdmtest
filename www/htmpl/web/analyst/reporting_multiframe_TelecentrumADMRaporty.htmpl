@@ -1,0 +1,46 @@
+<html lang="en"><PDM_IF 0>
+$Id: multiframe.template,v 1.0 2006/04/25 16:53:28 poibr01 Exp $
+	WHEN PRESENTED:
+	    As the ticketing tab of the main page
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+function frameset_loaded()
+{
+    // If cai_main is defined, save it in ahdframe, 
+    // otherwise, the HTMPL page needs to figure out 
+    // how to set ahdframe.
+    if (typeof window.cai_main != "undefined")
+    {
+	ahdframe = window.cai_main;
+	ahdframeset.ahdframe = ahdframe;
+	if (typeof parent.ahdframe == "object")
+	    parent.ahdframe = ahdframe;
+	if (typeof parent.ahdframeset == "object")
+	    parent.ahdframeset.ahdframe = ahdframe;
+    }
+}
+</script>
+</HEAD>
+<SCRIPT>
+    <PDM_MACRO name=startFrameset border="2" id="frameset01_cv3" onload="frameset_loaded();">
+    <PDM_MACRO name=frame title="Raporty" frame_name="Frame1_cv3" id="Frame1_cv3" marginheight="0" marginwidth="0" style="border: 1px #8B939A solid;" web_form_name="reporting_report_RezerwacjeSal">
+    <PDM_MACRO NAME=endFrameset>
+</SCRIPT>
+</HTML>
+<PDM_WSP>

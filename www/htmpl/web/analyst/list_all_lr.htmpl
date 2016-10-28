@@ -1,0 +1,148 @@
+<PDM_IF 0>
+$Id: list_all_lr.htmpl,v 1.1.1.3 2006/11/10 19:47:18 belpe05 Exp tuach01 $
+list_all_lr.htmpl
+WHEN PRESENTED:
+	When we need to display a list of all Notifications.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Wyszukiwanie historii notyfikacji";
+var hdrTitleList = "Lista historii notyfikacji";
+form_title = "Historia notyfikacji";
+var propLrRefresh = "$prop.Lr_Refresh";  // Given in seconds.  
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+argBackfillField = '$args.KEEP.backfill_field';
+argBackfillForm = '$args.KEEP.backfill_form';
+argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+cfgUserid = '$cst.userid';
+cfgDateFormat = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format</PDM_FMT>';
+var cfgSavedSearchWhere = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.SavedSearchWhere</PDM_FMT>';
+<PDM_IF "${current:n/a}" == "n/a">
+searchFilterInitialState = "show";
+cfgTotal = 0;
+<PDM_ELSE>
+cfgCurrent = '$current';
+cfgTotal = parseInt('$total',10);
+cfgRecordCount = '$record_count';
+cfgStart = '$start';
+cfgLength = '$length';
+</PDM_IF>
+cfgUseTemplate = '$args.use_template';
+cfgIsPopup = '$args.KEEP.IsPopUp';
+var rptName = new Array("no", "no");
+var cfgCanEdit = false;
+var cfgNotifyAll = 0;
+</script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/log_reader.js"></script>
+<script type="text/javascript">
+</script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no>
+<center>
+<script type="text/javascript">
+cfgNotifyAll = 1;
+if (!isNaN(cfgTotal) && cfgTotal > 0) {
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Wybierz wszystkie" func="SelectAll(true)" hotkey_name="Select All" id="btn100" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="SelectAll(false)" hotkey_name="Reset[r]" id="btn101" width=120>
+<PDM_MACRO name=button caption="Wyczyść wybrane" func="OpAll(1)" hotkey_name="Clear Selected" id="btn102" width=0>
+<PDM_IF $ACCESS.FAC_all_lr \> 1>
+<PDM_MACRO name=button caption="Usuń wybrane" btntype="negative" func="OpAll(2)" hotkey_name="Delete Selected" id="btn103" width=0>
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+}
+</script>
+<p>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<script type="text/javascript">
+<PDM_MACRO name=sfStart create=false factory=all_lr>
+//			Force 'list_all_lr.htmpl' as return form for search. 
+document.writeln('<input type="hidden" name=HTMPL value=list_all_lr.htmpl>');
+document.writeln('<input type="hidden" name="SUBOP" value="LR_SUBOP">');
+document.writeln('<input type="hidden" name="QBE.IN.cntxt_obj" value="">');
+//	Force a value in the search filter so an initial Search 
+//	does not prompt for a filter argument.
+document.writeln('<input type="hidden" name="QBE.NE.id" value="0">');
+// These are set in log_reader.js.
+document.writeln('<input type="hidden" name="OP_REPLACE2" value="">');
+document.writeln('<input type="hidden" name="OP_REPLACE3" value="">');
+document.writeln('<input type="hidden" name="OLD_LENGTH" value="">');
+//	Used in log_reader.js
+//document.writeln('<input type="hidden" name="KEEP.SkipInitialFocus" value="">');
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Status wiadomości","status","",
+"Unsent","(status = 0)",
+"Sending Error","(status = 1)",
+"Incoming FYI","(status = 2)",
+"Cleared","(status = 7 OR status = 8 OR status = 9)", 1);
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nagłówek wiadomości" attr="msg_hdr">
+<PDM_MACRO name=sfTextbox hdr="Tekst wiadomości" attr="msg_text">
+<PDM_MACRO name=sfLookup hdr="Odbiorca" attr="contact" factory=cnt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data wysłania" attr="start_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data wysłania" attr="start_date" qbe_condition=LE>
+<PDM_MACRO name=sfDropdown hdr="Metoda notyfikacji" attr="cmth_used" factory=cmth>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Dla wniosku" attr="cntxt_obj.cr.ref_num" extraurl="ADDITIONAL_WHERE=(type = 'R' OR type = '' OR type IS NULL )" factory=cr>
+<PDM_MACRO name=sfLookup hdr="Dla incydentu" attr="cntxt_obj.in.ref_num" factory=in>
+<PDM_MACRO name=sfLookup hdr="Dla problemu" attr="cntxt_obj.pr.ref_num" factory=pr>
+<PDM_MACRO name=sfLookup hdr="Dla Zmiany" attr="cntxt_obj.chg.chg_ref_num" factory=chg>
+<PDM_MACRO name=sfLookup hdr="For Issue" attr="cntxt_obj.iss.ref_num" factory=iss>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Dla Elementu Konfiguracji" attr="cntxt_obj.nr.name" factory=nr>
+<PDM_MACRO name=sfLookup hdr="Dla kontaktu" attr="cntxt_obj.cnt.combo_name" factory=cnt>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No notifications found";
+var msgFound1 = "1 notification found";
+var msgFound = "%1 notifications found";
+var msgFoundMore = "%1 notifications found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired notification";
+function fmtType(value)
+{
+var persid = 'lr:'+ value;
+rs.data('<input type=checkbox name="mass_sel" onClick="reset_refresh()" value=' + persid + '>');
+}
+
+function getblankcol(value)
+{
+rs.data('');
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="<pusty>" attr=id export=no fmtfunc=fmtType justify=center sort=no>
+<PDM_MACRO name=lsCol hdr="Nagłówek" attr=msg_hdr exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Data wysłania" attr=start_date sort=DESC>
+<PDM_MACRO name=lsCol hdr="Odbiorca" attr=contact.combo_name>
+<PDM_MACRO name=lsCol hdr="Pilność" attr=notify_method>
+<PDM_MACRO name=lsCol hdr="Metoda" attr=cmth_used>
+<PDM_MACRO name=lsCol hdr="Status" attr=status_shadow export=no sort=no>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.msg_text}\" != ''">
+<PDM_MACRO name=lsCol attr=msg_text colspan=6 startrow=yes width=165>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsCol attr=msg_html colspan=6 startrow=yes width=165>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsEnd>
+</script>
+<br>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_WSP>

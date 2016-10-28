@@ -1,0 +1,62 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<pdm_set PRE.Is3FieldContact=1>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Contact Search";
+var hdrTitleList = "Contact List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("cntsum.rpt", "cntdtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=sfStart factory="cnt">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa uzytkownika" attr="userid" size=20>
+<PDM_MACRO name=sfTextbox hdr="Imie" attr="first_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Drugie imie" attr="middle_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwisko" attr="last_name" size=20>
+<PDM_IF "cnt" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO NAME=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono osob spelniajacych kryteria wyszukiwania";
+  var msgFound1 = "Znaleziono 1 rekord.";
+  var msgFound = "Znaleziono %1 rekordow";
+  var msgFoundMore = "Znaleziono %1 rekordow. Wsywietlanie od %2 do %3";
+  var msgSelect = "Kliknij aby wybrac osobe";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Imie" attr="first_name" exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Drugie imie" attr="middle_name">
+<PDM_MACRO name=lsCol hdr="Nazwisko" attr="last_name">
+<PDM_MACRO name=lsCol hdr="Nazwa uzytkownika" attr="userid">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

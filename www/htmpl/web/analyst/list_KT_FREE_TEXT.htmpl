@@ -1,0 +1,118 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "External Repositories Search";
+var hdrTitleList = "External Repositories Search List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+
+<SCRIPT LANGUAGE="JavaScript">
+var m_sArgsSD_LAUNCHED = "$args.KEEP.SD_LAUNCHED";
+var m_sArgsLAUNCHED_ITIL = "$args.KEEP.LAUNCHED_ITIL";
+var m_sArgsFAQ_WINDOW_NAME = "$args.FAQ_WINDOW_NAME";
+var m_sArgsPROF_BRWS_USER = "$args.KEEP.PROF_BRWS_USER";
+var m_sArgsevent_log_on = "$args.event_log_on";
+var m_sFactory = "$args.FACTORY";
+var argSearchType = "$args.KEEP.search_type";
+var highlightWords = "$args.KEEP.ebr_parsed_search_text"; 
+var fuzziness = "$args.QBE.EQ.ebr_fuzziness";
+
+function window_onload()
+{
+	<PDM_IF "$args.DO_SEARCH" == 1 || "$args.DO_SEARCH" == 2>
+		//Get the search text:
+		var sSearchText = "";
+		if (typeof ahdtop.StartWithSearchText != "undefined")
+		{
+			sSearchText = ahdtop.StartWithSearchText;
+			ahdtop.StartWithSearchText = "";// Clear it for next usage.
+		}
+		if (sSearchText == "")
+		{
+			sSearchText = "$args.set_search_text";
+		}
+		//
+		var oTextBox = null;
+		oTextBox = document.getElementById("ebr_search_text");
+		if (oTextBox != null)
+		{
+			oTextBox.value = sSearchText;
+			<PDM_IF "$args.DO_SEARCH" == 1>
+				setTimeout("doClick('search');", 1);
+			<PDM_ELSE>
+				// Get focus to the search text input
+				window.setTimeout('SetFocusOnSearchInput()', 1);
+			</PDM_IF>
+		}
+	</PDM_IF>
+}
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/list_KD_common.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+
+<BODY CLASS="list" onload="window_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="aaa}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false export=no factory="KT_FREE_TEXT" forcesearchwithkeywords=true knowledgesearchtext=true>
+<PDM_MACRO name=ebr_search_filter factory="KT_FREE_TEXT" order_by="false" view="Knowledge">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No documents found";
+  var msgFound1 = "1 document found";
+  var msgFound = "%1 documents found";
+  var msgFoundMore = "%1 documents found. Displaying %2 through %3";
+  var msgSelect = "Click to select desired document";
+  
+   var arrFields = new Array;
+  
+<PDM_MACRO name=lsStart search_type=DISPLAY>
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-ebr_URL'] = '<PDM_FMT ESC_STYLE=C>@{list.ebr_URL}</PDM_FMT>'">
+<PDM_MACRO name=lsCol attr="ebr_title" export=no fmtfunc=highlightSearchTerms link=yes sort=no>
+<PDM_MACRO name=lsCol attr="ebr_ks_teaser" export=no fmtfunc=highlightSearchTerms sort=no startrow=yes>
+<PDM_MACRO name=lsCol attr="ebr_URL" export=no sort=no startrow=yes>
+<PDM_MACRO name=lsEnd factory=KT_FREE_TEXT>
+
+  var ctxMenu = null;	
+    
+  ctxMenu = new ContextMenu("idMenuFile");
+  ctxMenu.addItem(msgtext("View"), "ViewURL(self.activePersid);");
+  rs.setLinkOnclick(function(){ViewURL(self.activePersid);});
+  function ViewURL(persid)
+  {
+	var features="directories=yes"+
+	",location=yes"+
+	",menubar=yes"+
+	",scrollbars=yes"+
+	",resizable=yes"+
+	",height=400"+
+	",width=600"+
+	",top=50"+
+	",left=50"+
+	",status=yes";  
+
+	var w = window.open(arrFields[persid+"-ebr_URL"],"_blank",features);
+	check_popup_blocker(w);
+  }
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

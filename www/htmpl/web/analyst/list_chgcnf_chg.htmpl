@@ -1,0 +1,144 @@
+<PDM_IF 0>
+list_chgcnf_chg.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Change Conflict Types.
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie konfliktów";
+var hdrTitleList = "List konfliktów";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("chgcnf_chgsum.rpt", "chgcnf_chgdtl.rpt");
+var cfgCanEdit = true;
+var cfgExtraButton;
+var argChgPersid;
+var argChgId="$args.KEEP.argID";
+<PDM_IF "$args.KEEP.FORM_NAME" == "ro">
+if(argChgId!="") {
+	if( (typeof $ACCESS.FAC_chg!="undefined" && $ACCESS.FAC_chg > 1) &&
+		(typeof $ACCESS.FAC_chgcnf!="undefined" && $ACCESS.FAC_chgcnf > 1) )
+		cfgExtraButton=new Array("Conflict_Analysis", "conflict_analysis()");
+	argChgPersid="chg:$args.KEEP.argID";
+}
+</PDM_IF>
+
+function showChange(value)
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + source_chg + "')\">" + source_chg_num + "</A>" ;
+	rs.data(reshtml);
+}
+
+function showConflictChange(value)
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + conflict_chg + "')\">" + conflict_chg_num + "</A>" ;
+	rs.data(reshtml);
+}
+
+function showConflictCi(value)
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + conflict_ci + "')\">" + conflict_ci_name + "</A>" ;
+	rs.data(reshtml);
+}
+
+function showConflict(value)
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + conflict + "')\">" + conflict_name + "</A>" ;
+	rs.data(reshtml);
+}
+
+function getParentDetailPage_prv()
+{
+	return null;
+}
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Conflict List">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=chgcnf_chg>
+document.write('<INPUT TYPE=hidden NAME="KEEP.argID" VALUE="$args.KEEP.argID">');
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.change" VALUE="$args.KEEP.argID">');
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status konfliktu" attr="conflict.conflict_status">
+<PDM_MACRO name=sfDropdown hdr="Status" attr="conflict.delete_flag" default="Active">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Dotknięty CI" attr="conflict.conflict_ci.name" factory=nr>
+<PDM_MACRO name=sfLookup hdr="Dotknięta rodzina CI" attr="conflict.conflict_ci.family.sym" factory=nrf>
+<PDM_MACRO name=sfLookup hdr="Dotknięta klasa CI" attr="conflict.conflict_ci.class.type" factory=grc>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejsze rozpoczęcie kolizji" attr="conflict.conflict_begin" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsze rozpoczęcie kolizji" attr="conflict.conflict_begin" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejsze zakończenie kolizji" attr="conflict.conflict_end" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsze zakończenie kolizji" attr="conflict.conflict_end" qbe_condition=LE>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono konflików";
+var msgFound1 = "Znaleziono 1 konflikt";
+var msgFound = "Znaleziono %1 konfliktów";
+var msgFoundMore = "Znaleziono %1 konfliktów. Wyświetlane %2 z%3";
+var msgSelect = "Kliknij, aby wybrać żądany konflikt";
+
+<PDM_MACRO name=lsStart search_type=GET_DOB>
+<PDM_IF "$args.KEEP.FORM_NAME" == "ro">
+var startDate = "$args.KEEP.schedStartDate";
+var endDate = "$args.KEEP.schedEndDate";
+var isactive = "$args.KEEP.active";
+if ( (typeof startDate != "undefined") && (typeof endDate != "undefined") && (endDate - startDate > 0) && (isactive == 1) ) {
+    ImgBtnEnableButton("btnExtra");
+} else {
+    ImgBtnDisableButton("btnExtra");
+}
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="var source_chg = \"@{list.change.persistent_id}\"">
+<PDM_MACRO name=lsWrite text="var source_chg_num = \"@{list.change.chg_ref_num}\"">
+<PDM_MACRO name=lsWrite text="var conflict_chg = \"@{list.conflict_change.persistent_id}\"">
+<PDM_MACRO name=lsWrite text="var conflict_chg_num = \"@{list.conflict_change.chg_ref_num}\"">
+<PDM_MACRO name=lsWrite text="var conflict_ci = \"nr:\" + \"@{list.conflict.conflict_ci.id}\"">
+<PDM_MACRO name=lsWrite text="var conflict_ci_name = \"@{list.conflict.conflict_ci.name}\"">
+<PDM_MACRO name=lsWrite text="var conflict = \"@{list.conflict.persistent_id}\"">
+<PDM_MACRO name=lsWrite text="var conflict_name = \"@{list.conflict.conflict_type.sym}\"">
+<PDM_MACRO name=lsWrite text="rs.currentRecord.conflict=conflict;">
+<PDM_MACRO name=lsCol hdr="Typ" attr=conflict.conflict_type fmtfunc=showConflict sort=no>
+<PDM_MACRO name=lsCol hdr="Dotknięty CI" attr=conflict.conflict_ci fmtfunc=showConflictCi sort=no>
+<PDM_MACRO name=lsCol hdr="Komentarze" attr=conflict.comments>
+<PDM_MACRO name=lsCol hdr="Ostatnio aktualizowany przez" attr=conflict.last_mod_by>
+<PDM_MACRO name=lsCol hdr="Status konfliktu" attr=conflict.conflict_status>
+<PDM_MACRO name=lsCol attr=conflict_change fmtfunc=showConflictChange label="Kolidująca zmiana" startrow=yes>
+<PDM_MACRO name=lsCol attr=conflict_change.summary label="Podsumowanie kolidującej zmiany">
+<PDM_MACRO name=lsEnd>
+
+
+ctxMenu = new ContextMenu("chgcnfMenu");
+ctxMenu.addItem( "View", "rsShowDetailPopup(self.rs.records[self.activeRow].conflict)" );
+ctxMenu.addItem( "Edit", "showEdit(self.rs.records[self.activeRow].conflict)" );
+ctxMenu.addItem( msgtext("Print_Form%1...", " " + window.propFormName), "CAisdPrint();"); 
+ctxMenu.addItem( msgtext("Help_on_This_Window..."), "help_on_form('"+window.propFormName+"')");
+ctxMenu.finish();
+
+</PDM_IF>
+
+</SCRIPT>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_chgcnf_chg.htmpl ASPEN.3 2011/02/18 15:17:51 ralje02 Exp $;
+</PDM_IF>
+<PDM_WSP>

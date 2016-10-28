@@ -1,0 +1,38 @@
+<PDM_IF 0>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<title>$ProductName - New Message!</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Notify Log Header" menubar=no logo=no>
+<center>
+You have a new Message!
+<br>
+<br>
+
+<script type="text/javascript">
+<PDM_MACRO NAME=button caption="Close" hotkey_name="Close" id="CLOSE" width=120
+    func="window.close()">
+function show_main() {
+
+   focus_main_window();
+	window.close();
+}
+
+function show_reader() {
+	log_reader();
+	window.close();
+}
+</script>
+<br><br>
+<span class=hinttext><a id='lnk001' name='lnk001' href=\"javascript:void(0);\" onClick=show_reader();>Log Reader</a></span>
+<br>
+<span class=hinttext><a id='lnk003' name='lnk003' href=\"javascript:void(0);\" onClick=show_main();>Main Page</a></span>
+
+</center>
+</body>
+</html>

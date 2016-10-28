@@ -1,0 +1,27 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview=kt_dtbuilder.htmpl>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT>
+function SetXMLAndSubmitForm(sXML)
+{
+	document.getElementById("XML").value = sXML;
+	if ( ahdtop.cstUsingScreenReader )
+	  document.getElementById("TreeID").value = parent.GetTreeID();
+    else  
+	  document.getElementById("TreeID").value = parent.parent.parent.GetTreeID();
+	document.forms[0].submit();
+}
+</SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no menubar=no target="frmDTBuilderSaveTreeReply">
+<PDM_FORM OP=KT_ES_SAVE_TREE id=form1>
+	<TEXTAREA ID=XML NAME="XML"></TEXTAREA>
+	<INPUT TYPE="TEXT" ID=TreeID NAME="TreeID">
+</PDM_FORM>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

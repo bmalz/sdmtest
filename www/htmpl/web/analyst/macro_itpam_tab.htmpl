@@ -1,0 +1,37 @@
+<PDM_IF 0>
+macro_itpam_tab.htmpl
+
+INTENT:
+	Display a IT PAM notebook page for CA workflow macro.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+
+// IT PAM view.....
+<PDM_MACRO NAME=tabBanner title="CA IT PAM" add_btns=true>
+docWriteln(link);
+
+</script>
+</PDM_FORM>
+
+</body>
+</html>

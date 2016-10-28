@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN"
+        "http://www.w3.org/TR/html4/frameset.dtd">
+<!--  static const char* const POPUP_FRAMES_RCSID = "@(#)$Id: cst_popup_frames.html ANDERSON.1 2009/11/05 16:21:37 ralje02 Exp $";-->
+
+
+<html lang="en">
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+<SCRIPT LANGUAGE="JavaScript">
+function get_ahdtop()
+{
+    var ahdtop = window.ahdtop;
+    if ( typeof ahdtop != "object" || !ahdtop ) {
+       for ( ahdtop = window;
+             typeof ahdtop == "object";
+             ahdtop = ahdtop.opener ) {
+           if ( ahdtop == null || typeof ahdtop.name != "string" ) {
+              ahdtop = void(0);
+              break;
+           }
+           while ( ahdtop != ahdtop.parent &&
+                   ahdtop.name != "AHDtop" &&
+                   typeof ahdtop.parent.name == "string" )
+              ahdtop = ahdtop.parent;
+           if ( ahdtop.name == "AHDtop" ) {
+              for ( var currtop = window;
+                    currtop.parent != currtop &&
+                    currtop.name != "AHDtop";
+                    currtop = currtop.parent );
+              if ( currtop.name != "AHDtop" )
+                  currtop.ahdtop = ahdtop;
+              break;
+           }
+       }
+    }
+    if ( typeof ahdtop == "object" && ahdtop != null && ! ahdtop.closed )
+       return ahdtop;
+    return void(0);
+}
+var ahdtop = get_ahdtop();
+if ( typeof ahdtop != "object" )
+   alert("Can't find ahdtop in cst_popup_frames.html");
+else {
+   var cfgCAISD = ahdtop.cfgCAISD;
+   var styleTag = "<"+"LINK REL='stylesheet' TYPE='text/css' HREF='";
+   var endStyle = "'>\n";
+   var scriptTag = "<"+"SCRIPT LANGUAGE='JavaScript' SRC='";
+   var endScript = "'><"+"/SCRIPT>\n";
+   document.write(styleTag + ahdtop.usdStyles["styles_ahd"] + endStyle);
+   document.write(scriptTag + ahdtop.usdScripts["browser"] + endScript);
+   document.write(scriptTag + ahdtop.usdScripts["window_manager"] + endScript);
+   document.write(scriptTag + ahdtop.usdScripts["sitemods"] + endScript);
+}
+var cfgInitialURL = void(0);
+var done_loading = 0;
+
+function load_initial_url()
+{
+	window.ahdframeset = window;
+	
+    done_loading = 1;
+    if ( typeof ahdtop == "object" &&
+         typeof ahdtop.popup_frames_info == "object" &&
+	 window.location.search.match(/POPUP_URLIX=(\d+)/) ) {	
+	 var ix = RegExp.$1 - 0;
+         var info = ahdtop.popup_frames_info[ix];
+	 cfgInitialURL = info.url;
+         if ( info.name != "" )
+            window.name = get_popup_window_name(info.name);
+         else 
+            window.name = get_next_window_name();
+	 ahdtop.popup_frames_info[ix] = void(0);
+      }
+      if ( typeof cfgInitialURL == "string" &&
+         cfgInitialURL.length > 0 ) {
+         replace_page(cfgInitialURL,window.cai_main);
+
+         var gobtn_url = ahdtop.usdHTML["gobtn"];
+         if ((typeof ahdtop.use_role != "undefined") && ahdtop.use_role)
+            gobtn_url = ahdtop.cfgCgi + "?OP=DISPLAY_FORM+SID=" + 
+                        ahdtop.cfgSID + 
+                        "+FID=456+HTMPL=gobtn_role.htmpl+KEEP.POPUP_NAME=" + 
+                        window.name;
+          
+	 window.gobtn.document.location.replace(gobtn_url);
+      }
+      else {
+	  alert("Internal error determining which page to load - please retry");
+         window.close();
+      }
+}
+
+function doClose()
+{
+   self.close();
+}
+
+function do_unload()
+{
+    if (_browser.isMAC && !done_loading)
+	return;
+    cancel_window();    	
+}
+
+</SCRIPT>
+</HEAD>
+
+<SCRIPT LANGUAGE="JavaScript">
+document.writeln("<FRAMESET ROWS='80,*,1,1' FRAMEBORDER='0' FRAMESPACING='0' BORDER='0' onLoad='load_initial_url()' onUnload='do_unload()'>");
+document.writeln("<FRAME SRC='" + cfgCAISD +
+"/html/empty.html' NAME='gobtn' NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title=\"C A logo - read only\">");
+document.writeln("<FRAME SRC='" + cfgCAISD +
+   "/html/empty.html' NAME='cai_main' SCROLLING=auto MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\"Main\">");
+document.writeln("<FRAME SRC='" + ahdtop.usdHTML["top_splash"] +
+    "' NAME=top_splash NORESIZE SCROLLING=NO MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\" \">");
+document.writeln("<FRAME SRC='" + cfgCAISD +
+    "/html/empty.html' NAME=workframe NORESIZE='NORESIZE' MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\" \">");
+document.writeln("</FRAMESET>");
+
+</SCRIPT>
+</HTML>

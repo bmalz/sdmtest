@@ -1,0 +1,76 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of role UI tab objects 
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Tab Search";
+var hdrTitleList = "Tab List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("tabsum.rpt", "tabdtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl filename="Tab">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Tab">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF $ACCESS.FAC_tab \> 1>
+<PDM_MACRO name=sfStart factory="tab">
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory="tab">
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_tab.htmpl>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa zakładki" attr="name" addpercent=yes size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa wyświetlana" attr="display_name" addpercent=yes size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr="code" size=20>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+<PDM_MACRO name=sfTextbox hdr="Status rekordu" attr="delete_flag" disabled="yes" display_value="Active" qbe_condition="EQ" value="0">
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Status rekordu" attr="delete_flag">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Pasek menu" attr="menu_bar_obj" addpercent=yes factory=menu_bar>
+<PDM_MACRO name=sfLookup hdr="Strona startowa" attr="web_form_obj" addpercent=yes extraurl="QBE.NE.wf_type=1@@2" factory=web_form>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="description" addpercent=yes colspan=4 size=80>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Tabs found";
+  var msgFound1 = "1 Tab found";
+  var msgFound = "%1 Tabs found";
+  var msgFoundMore = "%1 Tabs found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Tab";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa zakładki" attr=name exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa wyświetlana" attr=display_name justify=left>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code justify=left>
+<PDM_MACRO name=lsCol hdr="Strona startowa" attr=web_form_obj.name justify=left>
+<PDM_MACRO name=lsCol hdr="Pasek menu" attr=menu_bar_obj.name justify=left>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_tab.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

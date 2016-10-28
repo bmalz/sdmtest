@@ -1,0 +1,146 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	When we need to display a list of document links.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Document Links Search";
+var hdrTitleList = "Document Links List";
+var hdrTitleTempl = "Document Links Template Search";
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kd_tabs.js"></script>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list">
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<script type="text/javascript">
+var argKeepDocId = "$args.KEEP.DOC_ID";
+var nCount = 0;
+var msgFoundNone = "No Document Links found";
+var msgFound1 = "1 Document Link found";
+var msgFound = "%1 Document Links found";
+var msgFoundMore = "%1 Document Links found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Document";
+var msgSelectAlg = "Click to select desired Document Link and add a %1 activity log";
+var msgSelectTempl = "Click to select desired Document Link template";	
+
+var tenantColumn = "no"; // used to remove generic tenant column
+
+//Note: This function is used for list macro
+function IncludeLink(value)
+{
+	// Switch to the title of DOC_ID2 if DOC_ID1 is the current doc.
+	if (argKeepDocId == doc1_id) {
+		value = doc2_id;
+	}
+	if (typeof parent.parent.getEdit != "undefined" &&
+	    parent.parent.getEdit() != 0)
+	{
+    		var val_str = "<a class='record' href=\"javascript:showDetailWithPersid('KD:" + 
+		              value + "')\">" + value + "&nbsp</a>";
+		rs.data(val_str);
+	}
+	else
+	{
+		rs.data(value);
+	}
+}
+//Added to display Child link type in the list
+function FindTypeChild(value)
+{
+	if (value == 0 || value == null)
+		rs.data("See Also");
+	else 
+		rs.data("Child");
+}
+
+//Added to display Parent link type in the list
+function FindTypeParent(value)
+{
+	if (value == 0 || value == null)
+		rs.data("See Also");
+	else 
+		rs.data("Parent");
+}
+
+function FindType(value)
+{
+   if (argKeepDocId == doc1_id) {
+      FindTypeChild(value);
+   }
+   else {
+      FindTypeParent(value);
+   }
+}
+
+function setPublicTenancy(value)
+{
+	// Switch to the tenant of DOC_ID2 if DOC_ID1 is the current doc.
+	if (argKeepDocId == doc1_id) {
+		value = doc2_tenant;
+	}
+
+	if (value == "" || value == null)
+		rs.data("public");
+	else 
+		rs.data(value);
+}
+
+function IncludeTitle(value)
+{
+   // Switch to the title of DOC_ID2 if 
+   // DOC_ID1 is the current doc.
+   if (argKeepDocId == doc1_id) {
+      rs.data(doc2_title);
+   }
+   else {
+      rs.data(value);
+   }
+}
+
+var doc1_id, doc2_id;
+var doc2_title, doc2_tenant;
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="doc1_id = '@{list.DOC_ID1.id}'">
+<PDM_MACRO name=lsWrite text="doc2_id = '@{list.DOC_ID2.id}'">
+<PDM_MACRO name=lsWrite text="doc2_title = '<PDM_FMT ESC_STYLE=C>@{list.DOC_ID2.TITLE}</PDM_FMT>'">
+<PDM_MACRO name=lsCol hdr="Tytuł dokumentu" attr=DOC_ID1.TITLE fmtfunc=IncludeTitle sort=no>
+<PDM_IF "$prop.MultiTenancy" == "on" >
+<PDM_MACRO name=lsWrite text="doc2_tenant = '<PDM_FMT ESC_STYLE=C PAD=NO>@{list.DOC_ID2.tenant.name}</PDM_FMT>'">
+<PDM_MACRO name=lsCol hdr="Tenant" attr=DOC_ID1.tenant.name fmtfunc=setPublicTenancy sort="no">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="ID" attr=DOC_ID1.id fmtfunc=IncludeLink sort=no>
+<PDM_MACRO name=lsCol hdr="Typ połączenia" attr=parent_child fmtfunc=FindType sort=no>
+<PDM_MACRO name=lsEnd factory=CI_DOC_LINKS>
+//rs.setLinkOnclick(function(){ViewLink(self.activeRow)});		
+//rs.fitSmallWin=true;
+//rs.overrideMenu=true;
+
+var ctxMenu=new ContextMenu("idMenuTabDocLinks");
+	if (typeof parent.parent.getEdit != "undefined" &&
+	    parent.parent.getEdit() != 0)
+	{
+		ctxMenu.addItem("Remove this Link", "RemoveLink(self.activePersid);");
+	}
+	ctxMenu.finish();
+</script>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_kd_CI_DOC_LINKS.htmpl ASPEN.1 2011/01/06 14:36:54 ralje02 Exp $
+</PDM_IF>
+<PDM_WSP>

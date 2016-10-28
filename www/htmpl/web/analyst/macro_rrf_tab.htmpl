@@ -1,0 +1,76 @@
+<PDM_IF 0>
+macro_rrf_tab.htmpl
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=macro_rrf_tab" factory=macro>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javaScript">
+<PDM_MACRO name=tabBanner title="Remote Reference">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "ro">
+detailRowHdr("Remote Reference", 2);
+<PDM_LIST PREFIX=list FACTORY=rrf WHERE="code='$args.usr_string4'" ESC_STYLE=C> 
+var m_persid = "rrf:$list.id";
+orgLink = "<a" + detailNextID() +
+	" href=\"javascript:showDetailWithPersid(m_persid)\"" + getMOPreviewEventHtml( m_persid ) + ">$list.sym</a>";     
+detailSetRowData(orgLink);
+detailWriteRow();
+</PDM_LIST>
+
+<PDM_ELSE>  
+
+// Need to use the JS call cos this Remote Reference Lookup field is stored in the DB as a 
+// STRING and not a usual SREL. The Macro will display only the code field which is not we want.
+// We need the sym.
+
+detailLookup("Remote Reference","usr_string4","rrf",1,40,
+1,"","$args.code","yes","sym",
+<PDM_IF '$args.usr_string4'== ''> 
+""
+<PDM_ELSE>
+<PDM_LIST PREFIX=list FACTORY=rrf WHERE="code='$args.usr_string4'" ESC_STYLE=C>
+<PDM_FMT PAD=NO ESC_STYLE=C>'$list.sym'</PDM_FMT></PDM_LIST></PDM_IF>,"","","yes","");
+
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Parametry komendy" attr=usr_string1 colspan=2 size=80>
+<PDM_MACRO name=dtlEndTable>
+docWriteln("<center>");
+<PDM_LIST PREFIX=list FACTORY=rrf WHERE="code='$args.usr_string4'" ESC_STYLE=C> 
+var pass_persid = "rrf:$list.id";
+var temp1 = "$list.exec_str";
+</PDM_LIST>
+<PDM_IF "$args.id" != 0 && "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button caption="Edit Command Parameters" func="update_rrf(pass_persid)" hotkey_name="Edit Command Parameters" id="btnecp" newrow=yes>
+</PDM_IF>
+<PDM_IF "$args.id" == 0>
+ImgBtnDisableButton("btnecp");
+</PDM_IF>
+docWriteln("</center>");
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("NT Server, Unix Server, or Unix Client Exec Command", 2);
+if ("$args.id" != 0)
+detailSetReadonlyRowData("command",temp1);
+else
+detailSetReadonlyRowData("command","");
+detailWriteRow();
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: macro_rrf_tab.htmpl ASPEN.1 2010/11/22 16:39:48 youra01 Exp $;
+</PDM_IF>

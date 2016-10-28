@@ -1,0 +1,390 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display the menu tree.   
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/menu_tree_menu.js"></SCRIPT>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript">
+var m_sCurrRelID = "$args.CurrRelID";
+var m_bTreeBusy = false;
+var m_NodeToloadChildTo = null;
+var m_MenuNode = null;
+var m_sObjectName = '$args.OBJECT_NAME';
+//var m_lRepID = '$args.RepID';
+var m_lArrayNumber = '$args.lArrayNumber';
+//
+var rootID = "$args.rootID";
+var rootCaption = "$args.rootCaption";
+var treeNameID = "$args.treeNameID";
+var menu_name = "$args.menu_name";
+
+</SCRIPT>
+	
+<SCRIPT>
+// Architect Tree Stuff
+var m_arrCatToCreate = new Array();
+var m_lCatToCreateCNT = 0;
+function loadTree()
+{
+    var oTop = LoadNode(null, rootID, rootCaption, true, "0","");
+    oTop.kt_tree_child_Data_loaded = true;
+    m_NodeToloadChildTo = oTop;
+    GetDataEnd(true);
+    // select the Administration node by default.
+    TreeOnFolderClick(oTop.TreeNodeID);
+    Tree_Lib_GoToNode(oTop, true);
+}
+function LoadNode(oParent, lID, sCaption, bHasChildren, lParentID, file_name)
+{
+    var oNode = getTreeNodeByKCATID(lID);
+    //making sure the not is not allready there, could happen when clickng on the back button and reloading the hidden frame sdt 32231 
+    if (oNode != null)
+    {
+	return oNode;
+    }
+    var oNewNode = new Tree_Node(sCaption, oParent)	
+    oNewNode.kt_tree_id = lID;
+    oNewNode.kt_Tree_caption = sCaption;
+    oNewNode.kt_tree_child_Data_loaded = false;
+    oNewNode.kt_Tree_has_children = bHasChildren;	
+    oNewNode.kt_Tree_parent_id = lParentID;
+    oNewNode.kt_Tree_file_name = file_name;
+    if (bHasChildren)
+    {
+    	if (oParent!=null)
+	{
+	    Tree_Lib_showPlusMinusOnChild(oNewNode,true);
+    	}
+    	oNewNode.kt_Tree_Is_Father = true;
+    }
+    else
+    {
+	oNewNode.kt_Tree_Is_Father = false;
+    }
+    return oNewNode;
+}
+
+function TreeOnFolderClick(lNodeID,isImage) {
+    var oNode = Tree_GetNodeFromID(lNodeID);
+    if (oNode != null)
+    {
+        //SDT 34771 - click on the current menu node refreshes the menu page
+        //if (oNode != Tree_Lib_GetCurrNode())
+        Tree_Lib_GoToNode(oNode,true);
+        if (m_oCallingDocObject!= null) {
+            m_lCurrCatID = oNode.kt_tree_id;
+            //alert(m_lCurrCatID);
+            m_sfile_name = oNode.kt_Tree_file_name;
+            if (typeof m_oCallingDocObject.MenuTreeOnClick == "function") {
+                if (isImage == true )
+	                m_oCallingDocObject.MenuTreeOnClick(m_lCurrCatID, m_sfile_name, 0, null, isImage);
+                else
+	                m_oCallingDocObject.MenuTreeOnClick(m_lCurrCatID, m_sfile_name);			
+            }
+        }
+    }
+}
+
+function update_filename(oNode,sfile_name)
+{
+    m_lCurrCatID = oNode.kt_tree_id;
+    m_sfile_name="";
+    m_snew_file_name = sfile_name;
+    if (typeof m_oCallingDocObject.MenuTreeOnClick == "function")
+    {
+	m_oCallingDocObject.MenuTreeOnClick(m_lCurrCatID, m_sfile_name, 1, m_snew_file_name);
+				
+    }
+}
+
+function TreeOnImageFolderClick(lNodeID)
+{
+    TreeOnPlusMinusClick(lNodeID);
+    TreeOnFolderClick(lNodeID, true);
+}
+
+function TreeOnRightClick(event,lNodeID)
+{
+    if (! allowMenuTreeEdit)
+        return false;
+
+    var oNode = Tree_GetNodeFromID(lNodeID);
+    if (oNode.kt_tree_id < 0)
+    {
+	return false;	// Return false so that the browser context menu does not display
+    }
+    m_oMenuNode = oNode;
+    var ctxMenu = m_MenuNodeMenu;	
+    if(oNode.kt_tree_id == rootID)
+    {   
+	ctxMenu = m_MenuTopMenu;		
+    }		
+    var assoc = document.getElementById("s" + lNodeID + "ds");
+
+    if ("$prop.browser" != "IE" && ahdtop.cstUsingScreenReader) {
+       // use default delay time.
+       ctxMenu.show(event, assoc, "");
+    }
+    else {
+       ctxMenu.show(event, assoc, 0);
+    }
+
+	try {
+      if ( _browser.isIE ) {
+        event.cancelBubble = true;
+        event.returnValue = 0;	
+      }
+      else {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+    catch(e) {}
+	
+    return false;	// Return false so that the browser context menu does not display
+}
+
+function TreeOnPlusMinusClick(lNodeID)
+{
+    var oNode = Tree_GetNodeFromID(lNodeID);
+    if (oNode == null)
+    {
+	return;
+    }
+    if (oNode.kt_tree_id < 0)
+    {
+	return;
+    }	
+    if (oNode.kt_Tree_parent_id  == 0)
+    {
+	return;
+    }
+    if (m_bTreeBusy)
+    {
+	return;
+    }
+    if (!oNode.kt_Tree_Is_Father)
+    {
+	return;
+    }
+    if (oNode.kt_tree_child_Data_loaded)
+    {
+	Tree_Lib_ExpandOrCollapse(oNode);
+    }
+    else
+    {	
+	if (!action_in_progress())
+	{
+	    m_NodeToloadChildTo = oNode;
+	    var url=cfgCgi+"?SID="+cfgSID+
+		    "+FID="+cfgFID+
+		    "+OP=DISPLAY_FORM" + 
+		    "+HTMPL=hierload_menu_tree.htmpl" +
+		    "+OBJECT_NAME=" + m_sObjectName + 
+		    "+PRN_ID=" + m_NodeToloadChildTo.kt_tree_id + "+lArrayNumber=" + m_lArrayNumber;
+
+	    set_action_in_progress(ACTN_FILLFORM);
+	    ahdframeset.workframe.location.href = url;
+	}
+    }
+}
+
+function GetDataStart()
+{
+    m_arrCatToCreate = new Array();
+    m_lCatToCreateCNT = 0;
+}
+
+function GetData(lID,sCaption,lHasChildren,lParentID, fname)
+{
+    var arrNode = new Array();
+    arrNode [0] = lID;
+    arrNode [1] = sCaption;
+    arrNode [2] = lHasChildren;
+    arrNode [3] = lParentID;
+    //FILE_NAME field was renamed to RESOURCE to accomdate parameters 
+    //to be passed along with URL and not nly filenames 
+    //fname --> resource
+    arrNode [4] = fname;
+    m_lCatToCreateCNT++;
+    m_arrCatToCreate[m_lCatToCreateCNT] = arrNode
+}
+
+function GetDataEnd(bDrawAll)
+{
+    var bDrawAllIn = false;
+    if (GetDataEnd.arguments.length > 0)
+    {
+	bDrawAllIn = bDrawAll;
+    }
+    for (var i=1; i < m_lCatToCreateCNT + 1; i++)
+    {
+	var lID = m_arrCatToCreate[i][0];
+	var sCaption = m_arrCatToCreate[i][1];
+	bHasChildren = false;
+	if (m_arrCatToCreate[i][2] == 1)
+	{
+	    bHasChildren = true;
+	}
+	var lParentID = m_arrCatToCreate[i][3];
+	var file_name = m_arrCatToCreate[i][4];
+	LoadNode(m_NodeToloadChildTo, lID, sCaption, bHasChildren,lParentID,file_name);
+    }
+    if (bDrawAllIn)
+    {
+	Tree_DrawAll("divTree");
+    }
+    else
+    {
+	m_NodeToloadChildTo.Tree_Expand();
+	m_NodeToloadChildTo.Tree_DrawChildren();
+	m_NodeToloadChildTo.kt_tree_child_Data_loaded = true;
+	set_action_in_progress(ACTN_COMPLETE);
+    }
+}
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/backfill.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fldrtree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/hier_set.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_tree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT>
+var m_sCurrPathText = "";
+var m_sfile_name= "";
+var m_sCurrFldrPathIDs = "";
+var m_oCallingDocObject = null;
+var m_lCurrCatID = 0;
+var m_objTree = null;
+
+function GetTreeFrame()
+{
+	if (m_objTree==null)
+	{
+		return window;
+	}
+	else
+	{
+		return m_objTree;
+	}
+}
+
+function Init(oCallingDocumentObj,objTree)
+{
+	m_oCallingDocObject = oCallingDocumentObj;
+	m_objTree = objTree;
+}
+
+function UpdateTree(lNodeID,bIsNew,sNodeCaption,lParentID,iHAS_CHILDREN,sfile_name)
+{
+	if (!bIsNew)
+	{
+		var oNode = getTreeNodeByKCATID(lNodeID);
+		if (oNode != null)
+		{
+			
+		 Tree_Lib_SetNodeText(oNode, sNodeCaption);	
+		 update_filename(oNode,sfile_name);						
+		}		
+	}
+	else
+	{
+		var oNodeParent = getTreeNodeByKCATID(lParentID);
+				
+		if (oNodeParent != null)
+		{
+			if(!oNodeParent.kt_tree_child_Data_loaded)
+			{
+				if (!oNodeParent.kt_Tree_Is_Father)
+				{
+					oNodeParent.kt_Tree_Is_Father = true;
+					Tree_Lib_showPlusMinusOnChild(oNodeParent,true);
+				}
+				TreeOnPlusMinusClick(oNodeParent.TreeNodeID);
+			}
+			else
+			{
+				bHasChildren = false;
+				if (iHAS_CHILDREN==1)
+				{
+					bHasChildren = true;
+				}
+				var oNewNode = LoadNode(oNodeParent, lNodeID, sNodeCaption, bHasChildren,lParentID,sfile_name)
+				
+				oNodeParent.Tree_Expand();
+				oNodeParent.Tree_DrawChildren();				
+			}
+		}
+	}	
+}
+function getTreeNodeByKCATID(lID)
+{
+	for (var i=1; i<Tree_m_lLastNodeID+1; i++)
+	{
+		if (Tree_m_arrNodes[i].kt_tree_id == lID)
+		{
+			return Tree_m_arrNodes[i];
+		}
+	}
+	return null;
+}
+
+
+function Loaded()
+{
+	if (typeof parent.MenuTreeLoaded == "function")
+	{
+		parent.MenuTreeLoaded();
+	}
+		loadTree();
+}
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onLoad="fldrtreeTabOff();Loaded()" LEFTMARGIN=3 TOPMARGIN=3>
+<PDM_INCLUDE FILE=std_body.htmpl menubar=no logo=no header=no>
+
+<SCRIPT LANGUAGE="JavaScript">
+    var nx_kt = "$env.NX_KT";
+    GetDataStart();
+    var sNodeCaption;
+    <PDM_LIST PREFIX=list FACTORY="menu_tree" WHERE="parent_id = $args.rootID AND tree_name = $args.treeNameID" ORDER_BY = "caption">
+    var type = "$list.resource.type" - 0;
+    if ( type == 0 ||
+         "$list.resource" == "" ||
+         ( type == 1 && nx_kt == "Yes" ) ||
+         ( type == 2 && ahdtop.cfgMultiTenancy != "off" ) || 
+         ( type == 3 && ahdtop.cfgCIA == true )) {
+            sNodeCaption = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.caption</PDM_FMT>';
+            sNodeResource = '<PDM_FMT PAD=NO ESC_STYLE=C>$list.resource.resource</PDM_FMT>';
+            GetData($list.id, sNodeCaption, $list.has_children, $list.parent_id, sNodeResource);
+    }
+    </PDM_LIST>
+
+<PDM_IF "$args.KEEP.ALLOW_MENU_TREE_EDIT" == "1">
+   var m_MenuNodeMenu = createMenuTreeMenu("menu_node");	
+   var m_MenuTopMenu = createMenuTreeMenu("menu_top");
+   var allowMenuTreeEdit = 1;	
+<PDM_ELSE>
+   var allowMenuTreeEdit = 0;	
+</PDM_IF>
+
+</SCRIPT>
+
+
+<DIV id="divTree"></DIV>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: hiersel_menu_tree.htmpl ASPEN.2 2011/10/24 11:35:50 visan03 Exp $;
+</PDM_IF>

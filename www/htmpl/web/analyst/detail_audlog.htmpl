@@ -1,0 +1,109 @@
+<PDM_IF 0>
+detail_audlog.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Audit Log
+INTENT:
+    Display the detail info for Audit Log
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Audit Log Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Audit Log"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Audit Log $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+var object_type  = "$args.audobj_name";
+var call_req_id  = "$args.call_req_id";
+var issue_id     = "$args.issue_id";
+var change_id    = "$args.change_id";
+var audobj_trkid = "$args.audobj_trkid";
+var contact_id= "$args.audobj_persid";
+var config_item_id= "$args.audobj_persid";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function showObject(value)
+{
+    var alghtml;
+    
+    if (object_type == "cr")
+    {
+        alghtml = "<A " + audobj_trkid + " CLASS='lookup1em' HREF=\"";
+        alghtml = alghtml + "javascript:showDetailWithPersid('" + call_req_id + "')\">" + value + "</A>" ;
+    }
+    else if (object_type == "iss")
+    {
+        alghtml = "<A " + audobj_trkid + " CLASS='lookup1em' HREF=\"";
+        alghtml = alghtml + "javascript:showDetailWithPersid('" + issue_id + "')\">" + value + "</A>" ;
+    }
+    else if(object_type == "chg")
+    {
+        alghtml = "<A " + audobj_trkid + " CLASS='lookup1em' HREF=\"";
+        alghtml = alghtml + "javascript:showDetailWithPersid('chg:' + '" + change_id + "')\">" + value + "</A>" ;
+    }
+	else if(object_type == "cnt")
+    {
+        alghtml = "<A " + audobj_trkid + " CLASS='lookup' STYLE='font-size:1.0em;' HREF=\"";
+        alghtml = alghtml + "javascript:showDetailWithPersid('" + contact_id + "')\">" + value + "</A>" ;
+    }
+    else if(object_type == "nr")
+    {
+        alghtml = "<A " + audobj_trkid + " CLASS='lookup' STYLE='font-size:1.0em;' HREF=\"";
+        alghtml = alghtml + "javascript:showDetailWithPersid('" + config_item_id + "')\">" + value + "</A>" ;        
+    }
+    
+    return(alghtml);
+}
+</SCRIPT>
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Audit Log" key="$args.sym">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=audlog>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa obiektu audytowanego" attr=audobj_name>
+<PDM_MACRO name=dtlReadonly hdr="ID obiketu audytowanego" attr=audobj_trkid fmtfunc=showObject>
+<PDM_MACRO name=dtlReadonly hdr="Działanie" attr=operation>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Modyfikujący" attr=analyst.combo_name>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa atrybutu" attr=attr_name>
+<PDM_MACRO name=dtlReadonly hdr="Data zmiany" attr=change_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Wartość przed" attr=attr_before_val colspan=4>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Wartość po" attr=attr_after_val colspan=4>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_audlog.htmpl ASPEN.2 2011/08/11 17:46:48 datsi03 Exp $;
+</PDM_IF>
+<PDM_WSP>

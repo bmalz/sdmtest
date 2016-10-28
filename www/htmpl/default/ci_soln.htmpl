@@ -1,0 +1,71 @@
+<PDM_IF 0>
+ci_soln.htmpl
+WHEN PRESENTED:
+    To show solution link on activity log when using 5.5 form in 6.0 
+INTENT:
+    Display solution link
+Note:
+    This htmpl is for replacing the 5.5 function, redo_ci(). Remove 
+    the redo_ci() code and use PDM_INCLUDE to include this htmpl file. 
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+
+<td valign="top" class="detailro">
+<script>
+var session; 
+var do_it = 0;
+<PDM_IF $cst.type.view_internal == 0> 
+<PDM_IF "$args.act_log.type" == "SOLN">
+<PDM_IF "NLS_FAQ" == "$args.act_log.k_tool" || "EXPERT" == "$args.act_log.k_tool">
+do_it = 1;
+</PDM_IF>
+</PDM_IF>
+session = "$args.act_log.session";
+<PDM_ELSE>
+<PDM_IF "$args.act_log_all.type" == "SOLN">
+<PDM_IF "NLS_FAQ" == "$args.act_log_all.k_tool" || "EXPERT" == "$args.act_log_all.k_tool">
+do_it = 1;
+</PDM_IF>
+</PDM_IF>
+session = "$args.act_log_all.session";
+</PDM_IF>
+if ("$prop.URL_CI" != "" && session != "" && do_it) 
+{
+    // Form the anchor tag for the knowledge link -
+    var refnum = nx_escape("$args.ref_num");
+    var extData = nx_escape("PERSID=$args.persistent_id DOMSRVR=$prop.domsrvr");
+
+<PDM_IF $cst.type.view_internal == 0> 
+<PDM_IF "$args.act_log.type" == "SOLN">
+<PDM_IF "NLS_FAQ" == "$args.act_log.k_tool" || "EXPERT" == "$args.act_log.k_tool">
+        // A non-DT log has a newline for action_desc.  Strip it.
+        var treePath = '<pdm_fmt esc_style=html>$args.act_log.action_desc</pdm_fmt>';
+	var title = '${args.act_log.session:}';
+</PDM_IF>
+</PDM_IF>
+<PDM_ELSE> 
+<PDM_IF "$args.act_log_all.type" == "SOLN">
+<PDM_IF "NLS_FAQ" == "$args.act_log_all.k_tool" || "EXPERT" == "$args.act_log_all.k_tool">
+        // A non-DT log has a newline for action_desc.  Strip it.
+        var treePath = '<pdm_fmt esc_style=html>$args.act_log_all.action_desc</pdm_fmt>';
+	var title = '${args.act_log_all.session:}';
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+
+        // SDT 21231 double-nx_escape needed to handle how often this gets passed around in
+        //      the location field
+        if (treePath.length == 1)
+                treePath = "";
+        else
+                treePath = nx_escape(nx_escape(treePath));
+        var theText = "<a" +
+               " title='Click to display Knowledge document " + title + "' href=\"javascript:popup_window('','LINK_WITH_BOPSID', 0, 0, 'ahdmenu=no,register=no','URL=%CI?BOPSID=%bopsid&ACTION=AHD_CI_DOCUMENT&ID=" + title + "&SESSIONID=" + treePath + "&REFNUM=" + refnum + "&EXTERNAL_DATA=" + extData + "')\" >";
+    theText += "<img src=$CAisd/img/knowledge_doc.gif border=0 alt=''></a>";
+    document.write(theText);
+}
+</script>
+</td>
+<PDM_IF 0>
+@(#)$Id: ci_soln.htmpl ASPEN.1 2010/11/16 13:07:57 saima01 Exp $
+</PDM_IF>

@@ -1,0 +1,131 @@
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+var hdrTitle = "Insert/Modify Link";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" SRC="$CAisd/scripts/editor_popup.js"></script>
+<script type="text/javascript" SRC="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript">
+
+I18N = top.opener.HTMLArea.I18N.dialogs;
+
+function i18n(str) {
+  return (I18N[str] || str);
+};
+
+function onTargetChanged() {
+  var f = document.getElementById("f_other_target");
+  if (this.value == "_other") {
+    f.style.visibility = "visible";
+    f.select();
+    f.focus();
+  } else f.style.visibility = "hidden";
+};
+
+function Init() {
+
+  var param = top.opener.Dialog._arguments
+  var target_select = document.getElementById("f_target");
+  if (param) {
+      document.getElementById("f_href").value = param["f_href"];
+      document.getElementById("f_title").value = param["f_title"];
+      comboSelectValue(target_select, param["f_target"]);
+      if (target_select.value != param.f_target) {
+        var opt = document.createElement("option");
+        opt.value = param.f_target;
+        opt.innerHTML = opt.value;
+        target_select.appendChild(opt);
+        opt.selected = true;
+      }
+  }
+  var opt = document.createElement("option");
+  opt.value = "_other";
+  opt.innerHTML = i18n("Other");
+  target_select.appendChild(opt);
+  target_select.onchange = onTargetChanged;
+  document.getElementById("f_href").focus();
+  //document.getElementById("f_href").select();
+};
+
+function onOK() {
+  var required = {
+    "f_href": i18n("You must enter the URL where this link points to")
+  };
+  for (var i in required) {
+    var el = document.getElementById(i);
+    if (!el.value) {
+      alert(required[i]);
+      el.focus();
+      return false;
+    }
+  }
+  // pass data back to the calling window
+  var fields = ["f_href", "f_title", "f_target" ];
+  var param = new Object();
+  for (var i in fields) {
+    var id = fields[i];
+    var el = document.getElementById(id);
+    param[id] = el.value;
+  }
+  if (param.f_target == "_other")
+  {
+    var other_target = document.getElementById("f_other_target").value;
+    other_target = system_Trim(other_target);
+    if(other_target == "" || other_target.toLowerCase() == "_self")
+    {
+		alert(i18n("Target cannot be empty or _self."));
+		return;
+	}
+    param.f_target = other_target.toString();
+  }
+  __dlg_close(param);
+  return false;
+};
+
+function onCancel() {
+  __dlg_close(null);
+  return false;
+};
+
+</script>
+</head>
+
+<body onload="Init()">
+<PDM_INCLUDE FILE="std_body.htmpl">
+<TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>
+<TR>
+<TD align=left width='99%'>Insert/Modify Link</TD>
+<TD align=right width='1%'>
+<SCRIPT>
+	ImgBtnRow();
+	ImgBtnCreate("bnOk", "OK", "onOK()", "defer", 120);
+	ImgBtnCreate("bnCancel","Cancel[n]","onCancel();",true,get_local_int(1));
+	ImgBtnEndRow();
+</SCRIPT>   
+</TD>
+</TR>
+</TABLE>
+<table style="width: 100%;">
+  <tr>
+    <th align=left class=labeltext>URL:</th>
+    <td><input type="text" id="f_href" style="width: 100%" value="http://" title="Enter the link URL here"/></td>
+  </tr>
+  <tr>
+	<th align=left class=labeltext>Title (tooltip):</th>
+    <td><input type="text" id="f_title" style="width: 100%"/></td>
+  </tr>
+  <tr>
+    <th align=left class=labeltext>Target:</th>
+    <td><select id="f_target">
+      <option value="_blank">New window (_blank)</option>
+      <option value="_top">Top frame (_top)</option>
+    </select>
+    <input type="text" name="f_other_target" id="f_other_target" size="10" style="visibility: hidden" />
+    </td>
+  </tr>
+</table>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

@@ -1,0 +1,160 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_metadata_twa.htmpl
+//
+// Purpose: File containing transaction work area (twa) routine used to create
+//          the metadata required for building the detail_ci_twa_ci.htmpl form.
+//
+//
+// 11-Jun-2009 tomjo02 SCO 23497 CMDB r12.1 Reconciliation PES 05629 - Initial version 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Include the function getCMDBMetaData() header and array definitions
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl twa_setup="process_metadata_header" >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Metadata arrays for saving TWA specific attribute information.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var cmdbAttrLength = new Array();
+    var cmdbAttrDataType = new Array();
+    var cmdbAttrExtension = new Array();
+    
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Save class to family mappings (active or inactive)
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var cmdbClassFamilyMap = new Array();
+    <PDM_LIST FACTORY="grc" PREFIX="list" WHERE="delete_flag = 0 OR delete_flag = 1">
+       cmdbClassFamilyMap['<PDM_FMT ESC_STYLE=C>$list.type</PDM_FMT>'] = '<PDM_FMT ESC_STYLE=C>$list.family.sym</PDM_FMT>'
+    </PDM_LIST>
+    
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Save the family to extension mappings (active or inactive)
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var cmdbFamilyExtensionMap = new Array();
+    <PDM_LIST FACTORY="nrf" PREFIX="list" WHERE="delete_flag = 0 OR delete_flag = 1">
+       cmdbFamilyExtensionMap['<PDM_FMT ESC_STYLE=C>$list.sym</PDM_FMT>'] = '<PDM_FMT ESC_STYLE=C>$list.extension_name</PDM_FMT>'
+    </PDM_LIST>
+    
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Add the common metadata attributes (nr object). Set twa_setup
+    // to "process_metadata_common" to only load the common attributes once.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE=cmdb_metadata_common.htmpl twa_setup="process_metadata_common">
+    
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Include all metadata for the out-of-the-box CMDB families.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE=cmdb_metadata_har_serx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_app_extx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_app_inhx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_cntx.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_common.htmpl    >
+    <PDM_INCLUDE FILE=cmdb_metadata_conx.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_dat_basx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_docx.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_entservx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_enttx.htmpl     >
+    <PDM_INCLUDE FILE=cmdb_metadata_fac_acx.htmpl   >
+    <PDM_INCLUDE FILE=cmdb_metadata_fac_firex.htmpl >
+    <PDM_INCLUDE FILE=cmdb_metadata_fac_furnx.htmpl >
+    <PDM_INCLUDE FILE=cmdb_metadata_fac_othx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_fac_upsx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_lparx.htmpl >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_maix.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_monx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_othx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_prix.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_serx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_stox.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_virx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_har_worx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_invidex.htmpl   >
+    <PDM_INCLUDE FILE=cmdb_metadata_invothx.htmpl   >
+    <PDM_INCLUDE FILE=cmdb_metadata_invprjx.htmpl   >
+    <PDM_INCLUDE FILE=cmdb_metadata_locx.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_brix.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_clux.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_conx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_frox.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_gatx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_hubx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_nicx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_othx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_perx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_porx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_rgrpx.htmpl >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_roux.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_net_rsrcx.htmpl >
+    <PDM_INCLUDE FILE=cmdb_metadata_opsysx.htmpl    >
+    <PDM_INCLUDE FILE=cmdb_metadata_orgx.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_secx.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_serx.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_slax.htmpl      >
+    <PDM_INCLUDE FILE=cmdb_metadata_tel_cirx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_tel_othx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_tel_radx.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_tel_voix.htmpl  >
+    <PDM_INCLUDE FILE=cmdb_metadata_tel_wirx.htmpl  >
+    
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Include the internal use only attributes and user-defined attributes.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE=cmdb_metadata_twa_attrs.htmpl >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Include the user-defined family metadata files.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE=cmdb_metadata_site_families.htmpl >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Return arrays needed for building the twa detail form.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var result;
+    result = [cmdbCategory, cmdbHeading, cmdbCurrentValue,
+             cmdbAttrHelp, cmdbAttrLength, cmdbAttrDataType, cmdbAttrExtension,
+             cmdbClassFamilyMap, cmdbFamilyExtensionMap ]; 
+    return result;
+}
+<PDM_IF 0>
+//////////////////////////////////////////////////////////////////////////////////
+// End of function getCMDBMetaData() 
+//////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Strings used in cmdb_twa.js
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+cmdbTWAStrings["Hide empty values"] = "Hide empty values";
+cmdbTWAStrings["Hide Empty Values Checked Title"] = "Click to show attributes with or without values";
+cmdbTWAStrings["Hide Empty Values Unchecked Title"] = "Click to hide attributes with empty values";
+cmdbTWAStrings["Category"] = "Category";
+cmdbTWAStrings["Attribute Name"] = "Attribute Name";
+cmdbTWAStrings["Attributes"] = "Attributes";
+cmdbTWAStrings["Value"] = "Value";
+cmdbTWAStrings["row"] = "row";
+cmdbTWAStrings["All attributes contain empty values"] = "All attributes contain empty values, click 'Hide empty values' to see all attributes";
+cmdbTWAStrings["Not in family"] = "Not in family";
+

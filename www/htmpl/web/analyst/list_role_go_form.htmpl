@@ -1,0 +1,146 @@
+<PDM_IF 0>
+list_role_go_form.htmpl
+WHEN PRESENTED:
+	When we need to display a list of a role's go forms.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Go Resource Search";
+var hdrTitleList = "Go Resource List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/role.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript">
+// Get the go resource default data from its parent frame.
+var grdefs = parent.grdefs;
+
+// Save the default go resource id in grdefs as the initial and current default.
+<PDM_LIST PREFIX=list WHERE="role_obj.id=$args.KEEP.ROLE_ID AND is_default=1" FACTORY=role_go_form>
+    grdefs.set_init_def_flags("$list.id");
+</PDM_LIST>
+
+// Reset grdefs if the user does a Search.
+function OnBeforeSearchFilterValidate ()
+{
+   grdefs.reset("role:$args.KEEP.ROLE_ID");
+   return true;
+}
+</script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Attached Go Resource">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=role_go_form>
+<PDM_IF "$args.QBE.EQ.role_obj.id" != "">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.role_obj.id" value="$args.QBE.EQ.role_obj.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=web_form_obj.name>
+<PDM_MACRO name=sfDropdown hdr="Domyślnie" attr="is_default" codename="dft">
+<PDM_MACRO name=sfDropdown hdr="Status" attr="web_form_obj.delete_flag" default="Active">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="web_form_obj.description" colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var msgFoundNone = "No go resources found";
+var msgFound1 = "1 go resource found";
+var msgFound = "%1 go resources found";
+var msgFoundMore = "%1 go resources found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired go resource";
+
+function create_name_link(value)
+{
+    var val_str = "<a class='record' href=\"javascript:showDetailWithPersid('" + 
+		  gores_persid + "')\">" + value + "&nbsp</a>";
+    rs.data(val_str);
+}
+// Creates a link to the role_go_form object (LREL)
+// so that the user can edit the Menubar value.
+function create_menubar_link(value)
+{
+<PDM_IF "$args.KEEP.IS_EDIT" == "ro">
+    var val_str = "<a class='record' href=\"javascript:showDetailWithPersid('" + 
+		  role_go_form_persid + "')\">" + value + "&nbsp</a>";
+    rs.data(val_str);
+<PDM_ELSE>
+    rs.data(value);
+</PDM_IF>
+}
+
+// Display the default as radio buttons in readonly mode
+// or as Yes / No in edit mode (or if the role is inactive).
+function disp_def(value)
+{
+   var role_updatable = false;
+<PDM_IF $ACCESS.FAC_role \> 1>
+   role_updatable = true;
+</PDM_IF>
+<PDM_IF $args.KEEP.roleUserAuth \< 2>
+   role_updatable = false;
+</PDM_IF>
+   if (gores_del_flag == "1") {
+      role_updatable = false;
+   }
+   var val_str;
+   if ( typeof parent._dtl != "undefined" && 
+        ! parent._dtl.edit &&
+        role_updatable )
+   {
+      val_str = "<input type='RADIO' ";
+      if (grdefs.is_default(role_go_form_id)) {
+         val_str += "checked ";
+      }
+      val_str += "name='DEF_FLAGS' value=" + role_go_form_id + 
+                 " onclick='grdefs.change_curr_flag(this.value)'" + 
+                 " title='Default flag - click Set Default button to save changes'>";
+   }
+   else 
+   {
+      if ( value == "1" ) {
+         val_str = "Yes";
+      }
+      else {
+         val_str = "No";
+      }
+   }
+   rs.data(val_str);
+}
+var role_go_form_id, gores_persid, gores_del_flag, role_go_form_persid;
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="role_go_form_id = '@{list.id}';">
+<PDM_MACRO name=lsWrite text="role_go_form_persid = '@{list.persistent_id}';">
+<PDM_MACRO name=lsWrite text="gores_persid = '@{list.web_form_obj.persistent_id}';">
+<PDM_MACRO name=lsWrite text="gores_del_flag = '@{list.web_form_obj.delete_flag}';">
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr=is_default exportfmt=YesNo fmtfunc=disp_def sort=no>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=web_form_obj.name fmtfunc="create_name_link">
+<PDM_MACRO name=lsCol hdr="Pasek menu" attr=menu_bar_obj.name fmtfunc="create_menubar_link">
+<PDM_MACRO name=lsCol hdr="Opis" attr=web_form_obj.description sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=web_form_obj.delete_flag>
+<PDM_MACRO name=lsEnd>
+
+// If it's in a tab, disable ctxMenu
+if (parent.name == "cai_main")
+{
+    // Create a new ctxMenu with no menu item. 
+    ctxMenu = new ContextMenu("no_menu");
+}
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_role_go_form.htmpl ASPEN.3 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

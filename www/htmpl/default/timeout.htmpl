@@ -1,0 +1,105 @@
+<PDM_IF 0>
+@(#)\$Id: timeout.htmpl,v 1.3 2007/01/04 23:00:03 tuach01 Exp $
+WHEN PRESENTED:
+    When a session using HTTPD validation times out
+INTENT:
+    Close all popups and refresh the main form
+</PDM_IF>
+<html lang="en">	<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msg_cat.js"></script>
+<script type="text/javascript">
+<!--
+var cfgCAISD = "$CAisd"
+var cfgCgi = "$cgi"
+var cfgProductName = "$ProductName";
+var cfgFormTitle = "$prop.FormTitle";
+var propFormName = "$prop.form_name";
+var force_pda = 0;
+var msg = "";
+var msg2 = "";
+
+function NS4_OnKeyDown(e)
+{
+   if (e.which == 13) 
+   {
+      var obj = e.target;
+      if (typeof obj == "object")
+      {
+         if ((obj.name == "USERNAME") ||
+             (obj.name == "PIN"))
+         {
+            obj.blur();
+            document.forms["login"].submit();
+            return false;
+         }
+      }
+   } 
+   else 
+      document.routeEvent(e); 
+   return true;
+}
+
+if ( "$prop.DebugSource" != "1" )
+   disable_right_click();
+
+var ahdtop = get_ahdtop();
+var win_url = window.location.href;
+if ( win_url.indexOf("help_about.htmpl") != -1 &&
+     _browser.isIE55) 
+{
+   window.returnValue = "session_timeout";
+   window.close();
+}
+else
+{
+   window.returnValue = "";
+   if ( "${SESSION.SESSION_TIMEOUT:}" != "" &&
+         "${SESSION.SESSION_TIMEOUT:}" != "restart")
+   {
+      if ( typeof ahdtop != "object" || ahdtop == null )
+         document.location.href = cfgCgi;
+      else
+      if (window.name != "welcomebanner" &&
+          window.name != "welcome_banner" )
+      {
+	 // Set the ahdtop.name to empty string, so the message
+	 // doesn't show again
+	 ahdtop.name = "";
+         alertmsg("Sorry,_your_session_has_timed_", msgtext("Press_OK_to_close_all_%1_windo", cfgProductName) );
+         // Sorry, your session has timed out.  
+         ahdtop.session_timeout("$prop.SID", window);
+      }
+   }
+   else if ( typeof ahdtop == "object" &&
+             ahdtop != null  &&
+             window.name != "welcomebanner")
+   {
+	if ( window.name != "AHDtop" && window.name != "" )
+	{
+	    // Set the ahdtop.name to empty string, so the message
+	    // doesn't show again
+	    ahdtop.name = "";
+	    alertmsg("Sorry,_the_server_has_been_res", msgtext("Press_OK_to_close_all_%1_windo", cfgProductName) );
+	}
+        // Sorry, the server has been restarted.
+	if ( typeof ahdtop.session_timeout != "undefined" )
+	    ahdtop.session_timeout("$prop.SID", window);
+   }
+   else
+   {
+	// ahdtop is not there. Re-issue URL to bring up 
+	// the main page for using External Auth. 
+	document.location.href = "$cgi";
+   } 
+}
+		// -->
+		</script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+</body>
+</html>

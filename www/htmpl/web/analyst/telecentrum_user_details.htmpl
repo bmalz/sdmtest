@@ -1,0 +1,114 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script>
+jq(document).ready(function () {
+	jq("#application tr").click(function () {
+		jq('#application tr').each(function() {
+			jq(this).removeClass('TelecentrumDataSelected');
+		});
+
+		if(parent.Selected_Application != jq(this).attr('value')) {
+			jq(this).toggleClass('TelecentrumDataSelected');
+			parent.Selected_Application = jq(this).attr('value');
+			SetCategory(jq(this).attr('catsym'),
+				jq(this).attr('cattype'),
+				jq(this).attr('catid'),
+				jq(this).attr('catgroup'),
+				jq(this).attr('ref'));
+		} else {
+			parent.Selected_Application = "";
+			SetCategory("",	"",	"",	"",	"");
+		}
+	});
+});
+
+function SetCategory(ss_sym, type, id, group, ref) {
+	if (type == "R") {
+		parent.CategoryType = "cr";
+	}
+	else if(type == "I") {
+		parent.CategoryType = "in";
+	} else {
+		parent.CategoryType = "";
+	}
+
+	parent.CategoryID = id;
+	parent.CategoryGroup = group;
+	parent.CategorySym = ss_sym;
+
+	parent.categories.SetCategoryLabel();
+
+	var TitleText = "Dotyczny zgłoszenia nr " + ref;
+	var SymSplitted = ss_sym.split('.');
+	if (SymSplitted.length > 1)
+		TitleText += " w kategorii " + SymSplitted[SymSplitted.length-2] + " " + SymSplitted[SymSplitted.length-1];
+	parent.details.document.getElementById("title").value = TitleText;
+}
+
+var numberOf = 0;
+
+function ShowDetail(cr_id) {
+	popup_window('RequestDetail',
+		'SHOW_DETAIL',
+		0, 
+		0, 
+		'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+		'FACTORY=cr', 
+		'HTMPL=detail_cr.htmpl', 
+		'PERSID=cr:' + cr_id + '');
+}
+</script>
+</HEAD>
+
+<BODY>
+<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>
+	<tr>
+		<td align='left' width='99%'><h2 style='margin: 0px; font-size: 11px;'>Zgłoszenia użytkownika</h2></td>
+		<td align='right' width='1%'></td>
+	</tr>
+</table>
+<table id="application" class="ResultTable" style="width: 100%">
+<SCRIPT>
+var type;
+<PDM_LIST PREFIX=list FACTORY=cr WHERE="customer.id = U'$args.USERID' AND category.sym like '$args.KEEP.area%'" ESC=HTML>
+	if('$list.type' == 'R') {
+		type = "Wniosek";
+	} else if ('$list.type' == 'I') {
+		type = "Incydent";
+	}
+
+	var cr_id = '$list.id';
+	var cr_category = '$list.category.ss_sym';
+	document.write('<tr class="TelecentrumData" value=' + cr_id + ' catsym="$list.category.sym" cattype="$list.type" catid="$list.category.id" catgroup="$list.category.group" ref="$list.ref_num">' +
+		'<td style="padding-left:5px;">' +
+		'<a href="javascript:ShowDetail(' + cr_id + ')">$list.ref_num</a>' +
+		'</td>' +
+		'<td>$list.summary</td><td>' + cr_category + '</td>' +
+		<PDM_IF '$args.KEEP.area' != 'HR'>'<td>' + type + '</td>' + </PDM_IF>
+		'<td>$list.status.sym</td></tr>');
+	
+	numberOf++;
+</PDM_LIST>
+</SCRIPT>
+</table>
+<SCRIPT>
+	if(numberOf == 0)
+		document.write('<div class="labeltext" style="width:100%; text-align:center; margin-top: 10px;">Brak zgłoszeń</div>');
+</SCRIPT>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

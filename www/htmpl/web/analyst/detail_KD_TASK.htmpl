@@ -1,0 +1,239 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When starting a new rework version using the KD_TASK local object
+INTENT:
+    Starting a new rework version 
+    Note that the KD Task is a local object. 
+    Means no records are created in the database and the object used to create standard detail pages
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Create Rework Version";
+var hdrTitleUpd = "Create Rework Version";
+var hdrTitleNew = "Create Rework Version";
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msg_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_KD_TASK.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+_bHideTenantSelection = true;//Inherit the tenant from the containing KD - SCO 6350
+ahdframeset.top_splash.next_persid = "KD:$args.KD";
+var m_bAdminMode = ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS");
+var m_bDidAdminChooseTask = false;//Boolean indicates if admin has choose a task from the list
+
+if (!m_bAdminMode)
+{
+	m_bDidAdminChooseTask = true;//As we are not in admin mode
+}
+
+<PDM_IF 0>
+Check if the document is linked as a parent
+</PDM_IF>
+var is_parent=0;
+<PDM_LIST FACTORY=CI_DOC_LINKS PREFIX=list WHERE="DOC_ID1=$args.KD AND parent_child=1">
+		is_parent="$list.parent_child";
+		
+</PDM_LIST>
+// Do not send the message more than once
+if (is_parent ==1 && ( typeof parent.linkedParentMsg == "undefined" || parent.linkedParentMsg!=1 ))
+{
+  // if document is a parent send and alert message about changes.
+  show_response(msgtext("This_Document_is_linked_as_a_parent"));
+  parent.linkedParentMsg = 1;
+}
+
+var m_ofrom;
+
+function PageLoad()
+{
+	m_ofrom = document.forms["main_form"];//Ref the detail form
+	<PDM_IF "$args.id" == "0">
+		//Load admin mode with infiormation of previous tasks 
+		var iTaskCount = 0$args.KD.WF_TEMPLATE.TASKS.length;
+		if (iTaskCount < 2){
+			m_bDidAdminChooseTask = true;//As there is no need to choose tasks
+		}
+		else if (m_bAdminMode)
+		{
+			ImgBtnHideButton("btn001");
+			ImgBtnHideButton("btn003");
+            document.getElementById("divTasks").style.display = "";
+			set_action_in_progress(ACTN_SAVE);
+			var url=cfgCgi+
+				"?SID="+cfgSID+
+				"+FID="+fid_generator()+
+				"+KEEP.DOC_ID=$args.KD.id" +
+				"+OP=KT_ACTION_UNPUBLISH";
+			ahdframeset.workframe.location.href = url;
+		}
+	</PDM_IF>
+}
+
+//This function calls 'pageHeader', 'tableHeader', and tasksValues to show all previous tasks, so an admin 
+//could choose what task to start with. This data is provided by a KD Daemon method: wf_reject_to_list.
+function FillAdminMode(msg)
+{
+  var divTasksPageHdr = document.createElement("div");
+  divTasksPageHdr.innerHTML = pageHeader("Previous Tasks"); 
+  document.getElementById("divTasks").appendChild(divTasksPageHdr);
+
+  var divTasksTableHdr = document.createElement("div");
+  divTasksTableHdr.innerHTML = tableHeader("Task Name", "Default Assignee", "Date");
+  document.getElementById("divTasks").appendChild(divTasksTableHdr);
+
+  var divTasksValues = document.createElement("div");
+  divTasksValues.innerHTML = tasksValues(msg);
+  document.getElementById("divTasks").appendChild(divTasksValues);
+}
+
+m_ActionOrder = 1;
+
+function ShowUnpublishTask(actionID, actionName, userID, userName, ActionOrder)
+{
+	document.forms["main_form"].style.display = "";
+	m_ofrom.elements["SET.WF_REJECT_TO_ID"].value = actionID;
+	document.getElementById("TDTask").innerHTML = actionName;
+	m_ofrom.elements["WF_CONTACT_ID_combo_name"].value = userName;
+	m_ofrom.elements["SET.WF_CONTACT_ID"].value = userID;	
+	ImgBtnShowButton("btn001");
+	ImgBtnEnableButton("btn001", true);
+	ImgBtnShowButton("btn003");
+	ImgBtnEnableButton("btn003", true);
+	m_ActionOrder = ActionOrder;
+	UpdateCntWhereClause();
+	m_bDidAdminChooseTask = true;
+	//Hiding the admin div and focusing the on first field in the detail form
+	try
+	{	
+		_dtl.firstField.focus();
+        document.getElementById("divTasks").style.display = "none";
+	}
+	catch(e)
+	{}
+}
+
+//Private handler for the fill_name_fields to support the changing where clause
+function prvfill_name_fields()
+{
+	var lTAskId = m_ofrom.elements["SET.WF_REJECT_TO_ID"].value ;
+	var sExtWC = "";
+	
+	if ( m_ActionOrder != 1 )
+	{
+		sExtWC = "ADDITIONAL_WHERE=(KD_APPROVAL.ACTION_ID=" + lTAskId + ")";
+	}
+	return fill_name_fields(_dtl.form[0],'agtgrp','WF_CONTACT_ID',true, sExtWC);
+}
+
+//Private handler for the detailAutofill to support the changing where clause
+function prvdetailAutofill()
+{
+	var lTAskId = m_ofrom.elements["SET.WF_REJECT_TO_ID"].value ;
+	var sExtWC = "";
+	
+	if ( m_ActionOrder != 1 )
+	{
+		sExtWC = "ADDITIONAL_WHERE=(KD_APPROVAL.ACTION_ID=" + lTAskId + ")";
+	}
+	var CurrObj = document.getElementById("df_2_0");
+	return detailAutofill(CurrObj,'agtgrp',true,'combo_name',false,sExtWC);
+}
+
+function UpdateCntWhereClause()
+{
+	//If admin choosed a task diffrent than the default task, we should update the contact selection where clause
+	if (m_ofrom.elements["SET.WF_REJECT_TO_ID"].value != "$args.WF_REJECT_TO_ID")
+	{
+		//Changing the evnt handlers to a local functions to overide the wehere clause.
+		document.getElementById("dflnk_2_0").onclick = prvfill_name_fields;
+		document.getElementById("df_2_0").onchange = prvdetailAutofill;
+	}
+}
+
+function KT_REPLY(sOP,msg)
+{
+	set_action_in_progress(ACTN_COMPLETE);
+	if (sOP == "KT_ACTION_UNPUBLISH")
+	{
+		document.forms["main_form"].style.display = "none";
+		FillAdminMode(msg);
+		return;
+	}
+}
+
+function preSaveTrigger()
+{
+	if (!m_bDidAdminChooseTask)
+	{
+		return false;
+	}
+	return true;
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</head>
+
+<body class=detailro onunload="unloadActions()" onload="PageLoad()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="KD_TASK">
+<PDM_MACRO name=dtlStart>
+</script>
+<input type=hidden value="$args.WF_REJECT_TO_ID" name="SET.WF_REJECT_TO_ID">
+<script language="JavaScript">
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł dokumentu" attr="KD.TITLE" inline="yes">
+<PDM_MACRO name=dtlReadonly hdr="Status dokumentu" attr="KD.STATUS_ID.STATUS" inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zachowaj opublikowaną wersję jako dostępną" attr="SWITCH1">
+<PDM_MACRO name=dtlReadonly hdr="Zadanie akceptacji dokumentu bazy wiedzy" attr="WF_REJECT_TO_ID.ACTION_TITLE" id="TDTask">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.WF_REJECT_TO_ID.ACTION_ORDER" == "1">
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr="WF_CONTACT_ID" autofill=yes factory=agtgrp>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr="WF_CONTACT_ID" autofill=yes extraurl="ADDITIONAL_WHERE=(KD_APPROVAL.ACTION_ID=$args.WF_REJECT_TO_ID)" factory=agtgrp>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="WF_COMMENT" rows=3 size=105>
+	docWriteln("<input type=hidden name=HTMPL value='show_main_detail.htmpl'>");
+	docWriteln("<input type=hidden name=KEEP.FORCE_EDIT value='1'>");//We would like to open the new rework version in edit mode
+<PDM_MACRO name=dtlEndTable>
+if (m_bAdminMode)
+{
+	
+<PDM_IF "$args.id" == "0">
+		document.forms["main_form"].style.display = "none";
+	
+</PDM_IF>
+}
+</script>
+<PDM_MACRO name=dtlEnd>
+<div name="divTasks" id="divTasks">
+</div>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

@@ -1,0 +1,12 @@
+c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\bin\SDMFavService.dll
+c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\bin\SDMFavService.pdb
+c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\obj\Debug\SDMFavService.dll
+c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\obj\Debug\SDMFavService.pdb
+C:\Users\Bartosz\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\bin\DocX.dll
+C:\Users\Bartosz\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\obj\Debug\SDMFavService.csprojResolveAssemblyReference.cache
+C:\Users\szumi_000\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\SDMFavService\bin\SDMFavService.dll
+C:\Users\szumi_000\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\SDMFavService\bin\SDMFavService.pdb
+C:\Users\szumi_000\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\SDMFavService\bin\DocX.dll
+C:\Users\szumi_000\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\SDMFavService\obj\Debug\SDMFavService.csprojResolveAssemblyReference.cache
+C:\Users\szumi_000\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\SDMFavService\obj\Debug\SDMFavService.dll
+C:\Users\szumi_000\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\SDMFavService\obj\Debug\SDMFavService.pdb

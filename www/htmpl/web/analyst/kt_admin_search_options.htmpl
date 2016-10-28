@@ -1,0 +1,243 @@
+<PDM_IF 0>
+kt_admin_search_options.htmpl
+WHEN PRESENTED:
+    When we need to display the search options admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES 
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+	var iDefaultSearchType = 0;
+	var iTotalSearchFields;
+	var iBooleanSearchMethod;
+	var iNLSSearchMethod;
+	var iNLSSearchMethod2;
+	var iShowBooleanSearch = 0;
+	var iBLCMaxCount = 0;
+	var strDBID = new Array("","","","","","","","");
+	var iDefValue = new Array(0,0,0,0,0,0,0);
+
+	<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "EBR_SEARCH_DEF_MODE">
+			strDBID[0] = "$ciProps.id";
+			iDefValue[0] = "$ciProps.PROPERTY_DEFAULT";
+			if ("$ciProps.PROPERTY_VALUE" == "0")
+			{
+				iDefaultSearchType = 0;
+			}
+			else
+			{
+				iDefaultSearchType = 1;
+			}
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "EBR_SEARCH_FIELDS" >
+			strDBID[2] = "$ciProps.id";
+			iDefValue[2] = "$ciProps.PROPERTY_DEFAULT";
+			iTotalSearchFields = "$ciProps.PROPERTY_VALUE";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "EBR_BOOLEAN_SEARCH_OR_AND_EXACT" >
+			strDBID[3] = "$ciProps.id";
+			iDefValue[3] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "EBR_SEARCH_OR_AND_EXACT" >
+			strDBID[4] = "$ciProps.id";
+			iDefValue[4] = "$ciProps.PROPERTY_DEFAULT";
+			if ("$ciProps.PROPERTY_VALUE" == "1")
+			{
+				iNLSSearchMethod = 1;
+			}
+			else
+			{
+				iNLSSearchMethod = 2;
+			}
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BLC_MAX_COUNT" >
+			strDBID[5] = "$ciProps.id";
+			iDefValue[5] = "$ciProps.PROPERTY_DEFAULT";
+			iBLCMaxCount = "$ciProps.PROPERTY_VALUE";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "FROM_TICKET_SEARCH_OR_AND_EXACT" >
+			strDBID[6] = "$ciProps.id";
+			iDefValue[6] = "$ciProps.PROPERTY_DEFAULT";
+			if ("$ciProps.PROPERTY_VALUE" == "1")
+			{
+				iNLSSearchMethod2 = 1;
+			}
+			else
+			{
+				iNLSSearchMethod2 = 2;
+			}
+		</PDM_IF>
+	</PDM_LIST>
+</script>
+</head>
+<body class=detailro onload="frmSearchOptionsOnLoad();" onbeforunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<form id="frmMain" name="frmMain">
+<table cellSpacing=0 cellPadding=0 width='100%' class="page_header gn_container_no_border">
+	<tr>
+		<td align=left width='99%'>Search</script>
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmSearchOptions')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmSearchOptions')",true, "", msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table width="100%" cellspacing="0" cellpadding="0" class="gn_container_no_border">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center"><span  class="page_section_header_text" >Search Options</span></td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class=page_section>
+	<div id=divKT1 name=divKT1>
+		<table cellspacing=0 cellpadding=0 class="gn_container_no_border" width="99%">
+			<PDM_IF "$env.NX_EBR_VERSION" != "SEARCH_ENGINE">
+				<tr>
+					<td>
+						<span class=label>&bull;&nbsp;Default Search Type</span>
+					</td>
+				</tr>
+				
+				<tr>
+					<td nowrap>
+						&nbsp;&nbsp;
+						<input tabindex=100 type="radio" id="optSearchType" name="optSearchType" title="Default Search Type: Keyword" class="data" onclick="optSearchType_click()" DBID=>
+						<span class="data" onclick="optSearchType[0].click()">Keyword</span>
+						<input tabindex=100 type="radio" id="optSearchType" name="optSearchType" title="Default Search Type: NLS" class="data" onclick="optSearchType_click()" DBID=>
+						<span class="data" onclick="optSearchType[1].click()">NLS</span>					
+					</td>
+				</tr>
+			</PDM_IF>
+		</table>
+	</div>
+	<div id=divKT3 name=divKT3>
+		<table cellspacing=0 cellpadding=0 class="gn_container_no_border" width="99%">
+			<tr>
+				<td nowrap>
+					<span class=label>&bull;&nbsp;Recommended Documents</span>
+				</td>
+			</tr>
+			<tr>
+				<td nowrap>&nbsp;&nbsp;
+					<span class="data"><label for="ddBLCMaxCount1">Display</label></span>
+					<select tabindex=100 id="ddBLCMaxCount" class="data" title="Display __ recommended documents in the search result document list" DBID=>
+						<option value="0">0</option>
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+						<option value="6">6</option>
+						<option value="7">7</option>
+						<option value="8">8</option>
+						<option value="9">9</option>
+						<option value="10">10</option>
+					</select>
+					<span class="data"><label for="ddBLCMaxCount2">recommended documents in the search result document list</label></span>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id=divKTLite name=divKTLite>
+		<table cellspacing=0 cellpadding=0 class="gn_container_no_border" width="99%">
+			<tr>
+				<td nowrap>
+					<span class=label>&bull;&nbsp;Default Keyword Search Settings</span>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id=divKT2 name=divKT2>
+		<table cellspacing=0 cellpadding=0 class="gn_container_no_border" width="99%">
+			<tr>
+				<td nowrap>
+					<span class="label">&bull;&nbsp;Default search fields</span>
+				</td>
+			</tr>
+			<tr>
+				<td nowrap>&nbsp;&nbsp;
+					<input tabindex=100 type="checkbox" title="Default search fields: Title" id="cbTitle" name="cbTitle" class="data" onclick="bDirty=true;">
+					<span class="data">Title</span>
+					<input tabindex=100 type="checkbox" title="Default search fields: Summary" id="cbSummary" name="cbSummary" class="data" onclick="bDirty=true;">
+					<span class="data">Summary</span>
+					<input tabindex=100 type="checkbox" title="Default search fields: Problem" id="cbProblem" name="cbProblem" class="data" onclick="bDirty=true;">
+					<span class="data">Problem</span>
+					<input tabindex=100 type="checkbox" title="Default search fields: Resolution" id="cbResolution" name="cbResolution" class="data" onclick="bDirty=true;">
+					<span class="data">Resolution</span>
+					<PDM_IF "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+						<input tabindex=100 type="checkbox" title="Default search fields: Attachments" id="cbAttachments" name="cbAttachments" class="data" onclick="bDirty=true;">
+						<span class="data">Attachments</span>					
+					</PDM_IF>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<table id="divNLSSettings" class="gn_container_no_border" cellspacing=0 cellpadding=0 width="99%">
+		<tr>
+			<td nowrap>
+				<span class='label'>&bull;&nbsp;Search Settings for All Sources</span>
+			</td>
+		</tr>
+		<tr>
+			<td nowrap>&nbsp;&nbsp;
+				<input tabindex=100 type="radio" id="optNLSMatchUsing" name="optNLSMatchUsing" title="Search Settings for All Sources: Any of the words (OR)" class="data" onclick="bDirty=true;" DBID=>
+				<span class="data" onclick="optNLSMatchUsing[0].click()">Any of the words (OR)</span>		
+				<input tabindex=100 type="radio" id="optNLSMatchUsing" name="optNLSMatchUsing" title="Search Settings for All Sources: All of the words (AND)" class="data" onclick="bDirty=true;" DBID=>
+				<span class="data" onclick="optNLSMatchUsing[1].click()">All of the words (AND)</span>
+			</td>
+		</tr>
+	</table>
+	<table id="divNLSSettings2" class="gn_container_no_border" cellspacing=0 cellpadding=0 width="99%">
+		<tr>
+			<td nowrap>
+				<span class='label'>&bull;&nbsp;Search Settings in a Ticket Context</span>
+			</td>
+		</tr>
+		<tr>
+			<td nowrap>&nbsp;&nbsp;
+				<input tabindex=100 type="radio" id="optNLSMatchUsing2" name="optNLSMatchUsing2" title="Search Settings in a Ticket Context: Any of the words (OR)" class="data" onclick="bDirty=true;" DBID=>
+				<span class="data" onclick="optNLSMatchUsing2[0].click()">Any of the words (OR)</span>		
+				<input tabindex=100 type="radio" id="optNLSMatchUsing2" name="optNLSMatchUsing2" title="Search Settings in a Ticket Context: All of the words (AND)" class="data" onclick="bDirty=true;" DBID=>
+				<span class="data" onclick="optNLSMatchUsing2[1].click()">All of the words (AND)</span>
+			</td>
+		</tr>
+	</table>
+		
+		
+</div>
+<script>
+	endScrollbar();
+</script>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

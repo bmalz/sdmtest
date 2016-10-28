@@ -1,0 +1,474 @@
+<PDM_IF 0>
+detail_bmhier.htmpl
+WHEN PRESENTED:
+    When we need to display details of a single relationship
+INTENT:
+    Display and edit the detail information for a relationship
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+<PDM_IF "$env.NX_CMDB" == "">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Change Impact Analyzer Relationship Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Change Impact Analyzer Relationship"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Change Impact Analyzer Relationship $args.sym"</PDM_FMT>;
+<PDM_ELSE>
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Configuration Item  Relationship Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Configuration Item Relationship"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Configuration Item Relationship $args.sym"</PDM_FMT>;
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cmdb.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/spellcheck.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script language="JavaScript">
+
+// Variable that identifies if the page is launched from Visualizer. the value 1 identifies YES, while 0 identifies NO.
+var m_ExtLaunch = 0;
+
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+<PDM_IF 0>
+////////////////////////////////////////////////////////
+//Java script for CMDB - Begin
+////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$env.NX_CMDB" != "">
+var parentUUID = "";
+var parentFamily = "";
+var childUUID = "";
+var childFamily = "";
+var openOptional = 0;
+var useExpTbl = true;
+// Expandable table becomes regular table when
+// preference is use screen reader
+useExpTbl =  ! ahdtop.cstUsingScreenReader ;
+<PDM_IF "$args.KEEP.parent_uuid" != "">
+parentUUID = "$args.KEEP.parent_uuid";
+</PDM_IF>
+<PDM_IF "$args.KEEP.PARENT_FAMILY" != "">
+parentFamily = $args.KEEP.PARENT_FAMILY;
+</PDM_IF>
+<PDM_IF "$args.KEEP.child_uuid" != "">
+childUUID = "$args.KEEP.child_uuid";
+</PDM_IF>
+<PDM_IF "$args.KEEP.CHILD_FAMILY" != "">
+childFamily = $args.KEEP.CHILD_FAMILY;
+</PDM_IF>
+<PDM_IF $args.KEEP.OPEN_OPTIONAL == 1>
+openOptional = 1;
+</PDM_IF>
+if ( useExpTbl )
+{
+    ahdtop.set_expand_sec_state( "detail_bmhier", 0, "down");
+    var all_tbls;
+    var first_rep_tbl_idx = 0;
+    var first_rep_tbl_id = "imgBtn";
+    var rep_btn_id = 3;
+    function cmdbToggleHiddenElements()
+    {
+        exp_sec_clicked( 0);
+        if ( first_rep_tbl_idx > 0)
+        {
+            var rep_tbl_elt;
+            var display_setting;
+            rep_tbl_elt = document.getElementById(first_rep_tbl_id);
+            if ( rep_tbl_elt.style.display == "none")
+                display_setting = "block";
+            else
+                display_setting = "none";
+            for (  var tbl_idx = first_rep_tbl_idx ; tbl_idx < all_tbls.length;                 tbl_idx++)
+            {
+                all_tbls[tbl_idx].style.display = display_setting;
+            }
+        }
+        if(openOptional == 0)
+        {
+            openOptional = 1;
+        }
+        else
+        {
+            openOptional = 0;
+        }
+    }
+}
+function loadActions()
+{
+    if ( useExpTbl)
+    {
+        document.getElementById( "exp_sec_down_id0").onclick=cmdbToggleHiddenElements;
+        document.getElementById( "exp_sec_up_id0").onclick=cmdbToggleHiddenElements;
+        first_rep_tbl_id += rep_btn_id;
+        all_tbls = document.getElementsByTagName("table");
+        for (  var tbl_idx = 0 ; tbl_idx < all_tbls.length; tbl_idx++)
+        {
+            if ( all_tbls[tbl_idx].id == first_rep_tbl_id)
+                first_rep_tbl_idx = tbl_idx;
+            if ( first_rep_tbl_idx != 0)
+                all_tbls[tbl_idx].style.display = "none";
+        }
+        if(openOptional == 1)
+        {
+            cmdbToggleHiddenElements();
+            openOptional = 1;
+        }
+    }
+    
+    <PDM_IF "$args.KEEP.SWAP_ENABLED" == "1" && "$prop.MultiTenancy" != "off">     
+    // Reset tenant control to value previously specified by the user. This is done so the
+    // tenant control remains editable after the swap occurs.
+    if ( argTenantId == "" )
+    {
+        // Only reset if the tenant ID is not already set (argTenantId=="") and tenant field is editable.
+        
+        // When tenancy is enabled (editable), tenant input control (dropdown or lookup) is shown on row 0
+        var tenantDisplayElt = document.getElementById( "df_0_0" );
+        if ( tenantDisplayElt != null )
+        {
+            // Tenant input control exists, preserve the user values.
+            <PDM_IF "$args.KEEP.TENANT_ID" != "">
+                var f = document.main_form;
+                f.elements['SET.tenant'].value =  "$args.KEEP.TENANT_ID";
+            </PDM_IF>
+            <PDM_IF "$args.KEEP.TENANT_VALUE" != "">
+                tenantDisplayElt.value =  '<PDM_FMT PAD=NO ESC_STYLE=C>$args.KEEP.TENANT_VALUE</PDM_FMT>';
+            </PDM_IF>
+        }
+    }
+    </PDM_IF>
+}
+function swapCI()
+{
+    if (!action_in_progress())
+    {
+        set_action_in_progress(ACTN_LOADFORM);
+        var url=cfgCgi;
+        var dlm="?";
+        var f = document.main_form;
+        var element_count = f.elements.length;
+        for (var i = 0; i < element_count; i++){
+            var e = f.elements[i];
+            if (e.name == "SID")
+            {
+                dlm = "?";
+                url += dlm + e.name+ "=" + nx_escape(e.value);
+                dlm = "+";
+            }
+            if (e.name == "FID")
+            {
+                url += dlm + e.name+ "=" + nx_escape(e.value);
+            }
+            if (e.name == "FACTORY")
+            {
+                url += dlm + e.name+ "=" + nx_escape(e.value);
+                url += dlm + "KEEP.IsPopUp=1";
+            }
+            if (e.name == "OP")
+            {
+                url += dlm + e.name+ "=" + "CREATE_NEW";
+            }
+        }
+        var temp_parent;
+        var temp_child;
+        var temp_relationship;
+        var temp_symbol;
+        var temp_active_flag;
+        var temp_description;
+        var temp_cost;
+        var temp_url_substring;
+        
+        // Preserve current valuse specified by user.
+        if ( parentFamily.length == 0 )           
+        {
+            // Preserve parent specified by user.
+            temp_parent = f.elements['SET.parent'].value;
+        }
+        if ( childFamily.length == 0 )           
+        {
+            // Preserve the current child specified by user.
+            temp_child = f.elements['SET.child'].value;
+        }
+        temp_relationship = f.elements['SET.ci_rel_type'].value;
+        temp_active_flag = f.elements['SET.delete_flag'].value;
+        temp_symbol = f.elements['SET.sym'].value;
+        temp_description = f.elements['SET.description'].value;
+        temp_cost = f.elements['SET.cost'].value;
+        
+        var temp_tenant_id = "";
+        var temp_tenant_value = "";
+        <PDM_IF "$prop.MultiTenancy" != "off">
+           // Get the tenant id specified by user.
+           temp_tenant_id = f.elements['SET.tenant'].value;
+           
+           // When tenancy is enabled, tenant input control (dropdown or lookup) is shown on row 0
+           var tenantDisplayElt = document.getElementById( "df_0_0" );
+           if ( tenantDisplayElt != null )
+           {
+                // Tenant control is editable, get it's value if specified.
+                if ( typeof tenantDisplayElt.value != "undefined" )
+                {
+                    temp_tenant_value = tenantDisplayElt.value;
+                }
+           }
+        </PDM_IF>
+         
+
+        var preset_temp_relationship = "";
+        var preset_temp_symbol = "sym:" +  temp_symbol;
+        var preset_temp_description = "description:" +  temp_description;
+        var preset_temp_cost = "cost:" +  temp_cost;
+        var preset_temp_active_flag = "delete_flag:" +  temp_active_flag;
+        if ( temp_relationship != "")
+        {
+            preset_temp_relationship = "+PRESET=ci_rel_type:" + nx_escape(temp_relationship);
+        }
+        preset_temp_symbol = nx_escape(preset_temp_symbol);
+        preset_temp_description = nx_escape(preset_temp_description);
+        preset_temp_cost = nx_escape(preset_temp_cost);
+        preset_temp_active_flag = nx_escape(preset_temp_active_flag);
+        temp_url_substring = preset_temp_relationship +
+                      "+PRESET=" + preset_temp_symbol + "+PRESET=" + preset_temp_description +
+                      "+PRESET=" + preset_temp_active_flag;
+        if(temp_cost != 0) {
+            temp_url_substring += "+PRESET=" + preset_temp_cost;
+        }
+        
+        // Preserve the tenant specified by user, pass using keep arguments so tenant
+        // remains editable (if its already editable) after user clicks reverse. We do 
+        // not use PRESET=tenant:id since this will set the objects tenant and make the 
+        // tenant control read-only (need to keep editable if it was previously editiable).
+        if( temp_tenant_id != "") 
+        {
+            temp_url_substring += "+KEEP.TENANT_ID="+ temp_tenant_id;
+        }
+        if ( temp_tenant_value != "" )
+        {
+            temp_url_substring += "+KEEP.TENANT_VALUE="+ nx_escape( temp_tenant_value );
+        }
+        
+        if(openOptional == 1) {
+            temp_url_substring += "+KEEP.OPEN_OPTIONAL=1";
+        } else {
+            temp_url_substring += "+KEEP.OPEN_OPTIONAL=0";
+        }
+        if (parentFamily != "") {
+            var preset_child = "child:" + parentUUID;
+            var preset_temp_parent = "";
+            if ( temp_child != "" )
+            {
+               preset_temp_parent =  "+PRESET=parent:" + nx_escape(temp_child);
+            }
+            preset_child = nx_escape(preset_child);
+            url += "+PRESET=" + preset_child;
+            url += "+KEEP.CHILD_FAMILY=" + parentFamily;
+            url += "+KEEP.PARENT_FAMILY=" + "";
+            url += "+KEEP.child_uuid=" + parentUUID;
+            url += "+KEEP.SWAP_ENABLED=1";
+            url += preset_temp_parent;
+            url += temp_url_substring;
+        } else  {
+            var preset_parent = "parent:" + childUUID;
+            var preset_temp_child = "";
+            if ( temp_parent != "" )
+            {
+                preset_temp_child = "+PRESET=child:" + nx_escape(temp_parent);
+            }
+            preset_parent = nx_escape(preset_parent);
+            url += "+PRESET=" + preset_parent;
+            url += "+KEEP.PARENT_FAMILY=" + childFamily;
+            url += "+KEEP.CHILD_FAMILY=" + "";
+            url += "+KEEP.parent_uuid=" + childUUID;
+            url += "+KEEP.SWAP_ENABLED=1";
+            url += preset_temp_child;
+            url += temp_url_substring;
+        }
+        replace_page(url);
+    }
+}
+</PDM_IF>
+<PDM_IF 0>
+////////////////////////////////////////////////////////
+//Java script for CMDB - End
+////////////////////////////////////////////////////////
+</PDM_IF>
+</script>
+
+</head>
+
+<PDM_IF "$env.NX_CMDB" == "">
+<body class="detailro" onunload="unloadActions()">
+<PDM_ELSE>
+<body class="detailro" onunload="unloadActions()" onload="loadActions()">
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="bmhier" key="$args.sym">
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="bmhier">
+<PDM_MACRO name=dtlStart>
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Close this form and give focus on the parent form (if one supplied) after edit
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+// Visualizer passes the variable KEEP.FROM_EXT_APP=1 in the query string.
+m_ExtLaunch = "$args.KEEP.FROM_EXT_APP"; 
+
+if ( typeof _dtl != "undefined" && _dtl.edit && m_ExtLaunch == 0) 
+{
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Setup the next_persid using the KEEP value supplied to this form (if present)
+// otherwise use the  persistent_id of this object so read-only form is shown.
+// next_persid is required for show_main_detail.htmpl processing.
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$args.id" == "0" && $args.KEEP.nr_id != "">
+    ahdframeset.top_splash.next_persid = 'nr'+ ':'+'$args.KEEP.nr_id';
+<PDM_ELIF "$args.KEEP.ForHier" != "">
+    ahdframeset.top_splash.next_persid = '$args.KEEP.ForHier';
+<PDM_ELSE>
+    // Refresh read-only form for the current object being edited
+    // if the parent persid is not specified.
+    ahdframeset.top_splash.next_persid = '$args.persistent_id';
+</PDM_IF>
+
+    docWriteln('<input type="hidden" name="HTMPL" value="show_main_detail.htmpl">');
+    if (_dtl && _dtl.next_persid == "")
+    {
+        _dtl.next_persid = 'show_main_detail.htmpl';
+    }
+}else if(m_ExtLaunch == 1 && ! _dtl.edit) {
+	// if condition ensures that user is not on the edit page of relationship detail page and 
+	// the request is coming from the visualizer component.
+	ahdframeset.close();
+}
+
+
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_IF "$args.KEEP.SWAP_ENABLED" == 1 && "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=button caption="Reverse" disabled=no func="swapCI()" hotkey_name="Reverse" id=buttonSwap tooltip="Use this button to swap the provider and dependent CIs" width=120>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$env.NX_CMDB" == "">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=dtlTextbox hdr="Znak" attr="sym" size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Znak" attr="sym">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Koszt" attr="cost" size=20>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr="warning_msg">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KEEP.PARENT_FAMILY" != "">
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlLookupReadonly hdr="CI Dostawca / CI Równorzędny" attr="parent">
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Nadrzędny CI" attr="parent">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$args.KEEP.CHILD_FAMILY" == "">
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlLookup hdr="CI Dostawca / CI Równorzędny" attr="parent" size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Nadrzędny CI" attr="parent" size=20>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlLookup hdr="CI Dostawca / CI Równorzędny" attr="parent" make_required="yes" size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Nadrzędny CI" attr="parent" make_required="yes" size=20>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlLookup hdr="Typ relacji" attr="ci_rel_type">
+</PDM_IF>
+<PDM_IF "$args.KEEP.CHILD_FAMILY" != "">
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlLookupReadonly hdr="CI Nabywca / CI Równorzędny" attr="child">
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Podrzędny CI" attr="child">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlLookup hdr="CI Nabywca / CI Równorzędny" attr="child" make_required="yes">
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Podrzędny CI" attr="child" make_required="yes">
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" lookup=no>
+</PDM_IF>
+<PDM_IF 0>
+//////////////////////////////////////////////
+//Start of Optional Parameter Section for CMDB
+//////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=dtlStartExpRow label="Optional" colspan=3 exp_rows="1,2" form_name="detail_bmhier">
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=dtlTextbox hdr="Znak" attr="sym" size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Znak" attr="sym">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Koszt" attr="cost" size=20>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_IF "$env.NX_CMDB" != "">
+rep_btn_id = imgBtnID;
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+<PDM_IF 0>
+//////////////////////////////////////////////
+//End of Optional Parameter Section for CMDB
+/////////////////////////////////////////////
+</PDM_IF>
+
+docWriteln("</table>");
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP mode=edit>
+<PDM_IF 0>
+@(#)$Id: detail_bmhier.htmpl ASPEN.6 2011/10/05 14:09:01 mckpe04 Exp $;
+</PDM_IF>
+
+

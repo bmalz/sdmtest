@@ -1,0 +1,63 @@
+<PDM_IF 0>
+detail_sa_security_group.htmpl
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+	<PDM_PRAGMA RELEASE=110>
+	<PDM_INCLUDE FILE=styles.htmpl>
+	<SCRIPT LANGUAGE="JavaScript">
+		var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Automated Task Classification Detail"</PDM_FMT>;
+		var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Automated Task Classification ${args.COMMON_NAME}"</PDM_FMT>;
+		var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Automated Task Classification ${args.COMMON_NAME}"</PDM_FMT>;
+	</SCRIPT>
+	<PDM_INCLUDE FILE=std_head.htmpl>
+
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+	<SCRIPT LANGUAGE="JavaScript">
+		argPersistentID = "$args.persistent_id";
+
+		function preSaveTrigger()
+		{
+			return true;
+		}
+		
+		function unloadActions()
+		{
+   			if ( _dtl.edit )
+      			unload_check();
+		}
+	</SCRIPT>
+</HEAD>
+
+<BODY class="list" onUnload="unloadActions()">
+	<PDM_INCLUDE FILE=std_body.htmpl>
+	<CENTER>
+
+	<SCRIPT LANGUAGE="JavaScript">
+		
+<PDM_MACRO name=dtlForm factory="sa_script_group">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Automated Task Classification Name" attr="groupName" colspan="3" size="50">
+<PDM_MACRO name=dtlStartRow>
+	</SCRIPT>
+
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

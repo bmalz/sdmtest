@@ -1,0 +1,32 @@
+<html lang="en"><PDM_IF 0>
+$Id: profile_browser2.htmpl,v 1.3 2006/11/14 21:16:02 jenji01 Exp $
+WHEN PRESENTED:
+    When the Profile Browser is requested in order to set up a window
+    that can be used to display a menu.
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_telecentrum.htmpl+PERSID={cnt:}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var ahdtop = parent.ahdtop;
+var ahdframeset = parent.ahdframeset;
+var cfgCAISD = "$CAisd";
+var cfgCgi = "$cgi";
+var cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+var in_content_frame = ( ahdframeset == ahdtop );
+var ahdframeset = ( in_content_frame ? window.ahdframeset : window );
+if (!in_content_frame)
+{
+    argPopupName = parent.argPopupName;
+    parent.ahdframeset = ahdframeset;
+}
+</SCRIPT>
+</HEAD>
+<body>
+<iframe style="width:100%;height:100%;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=profile_telecentrum3.htmpl+FACTORY=$args.FACTORY+PERSID=$args.PERSID+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME+SD_LAUNCHED=${args.SD_LAUNCHED:}+prop.role_menubar=$prop.role_menubar" NAME=pbwindow_menuOK SCROLLING=no MARGINHEIGHT=2 MARGINWIDTH=0 FRAMEBORDER=1 title="Hidden frame - do not navigate here">This window requires iframe support</iframe>
+</body>
+</HTML>

@@ -1,0 +1,431 @@
+<PDM_IF 0>
+detail_cnt.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Call Req
+INTENT:
+    Display the detail info for the Call Req
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  cnt  args	The Call Req object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm
+/opt/CApdm/bopcfg/majic/writer.maj:OBJECT cnt {.maj for the
+                        definition of attributes for 'OBJECT cnt'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_IF "$args.type" == "2305">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Szczegóły użytkownika $args.combo_name</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C>Aktualizacja użytkownika $args.combo_name</PDM_FMT>';
+var hdrTitleNew = '<PDM_FMT ESC_STYLE=C>Utwórz nowego użytkownika</PDM_FMT>';
+<PDM_ELIF "$args.type" == "2307">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Szczegóły analityka $args.combo_name</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C>Aktualizacja analityka $args.combo_name</PDM_FMT>';
+var hdrTitleNew = '<PDM_FMT ESC_STYLE=C>Utwórz nowego analityka</PDM_FMT>';
+<PDM_ELIF "$args.type" == "2308">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Szczegóły grupy $args.combo_name</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C>Aktualizacja grupy $args.combo_name</PDM_FMT>';
+var hdrTitleNew = '<PDM_FMT ESC_STYLE=C>Utwórz nową grupę</PDM_FMT>';
+<PDM_ELIF "$args.type" == "2310">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>$args.combo_name Customer Detail</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C>$args.combo_name Update Customer</PDM_FMT>';
+var hdrTitleNew = '<PDM_FMT ESC_STYLE=C>Create New Customer</PDM_FMT>';
+<PDM_ELSE>
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Szczegóły kontaktu $args.combo_name</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C>Aktualizacja kontaktu $args.combo_name</PDM_FMT>';
+var hdrTitleNew = '<PDM_FMT ESC_STYLE=C>Utwórz nowy kontakt</PDM_FMT>';
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var argPersistentID = "$args.persistent_id";
+var argID = "$args.id";
+<PDM_IF "$args.type" == "2308">
+var rptName = new Array("grpsum.rpt", "grpdtl.rpt");
+<PDM_ELSE>
+var rptName = new Array("cntsum.rpt", "cntdtl.rpt");
+</PDM_IF>
+var argSearchSqlClause = "id = U'$args.id'";
+var enableBtns = true;
+var prop_ref = "${prop_ref:}";
+if (cfgUserAuth < 2 || ("$args.type.id" == "2308" && "$ACCESS.FAC_grp" != "2")) enableBtns = false;
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/role.js"></script>
+<PDM_IF "$prop.form_name_3" == "ro">
+<script type="text/javascript">
+profile_reset_if_necessary('$args.persistent_id')
+</script>
+</PDM_IF>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+<PDM_IF "$args.type.id" == "2308">
+// For member list
+var mbs = new members('$args.persistent_id');
+<PDM_ELIF "$prop.MultiTenancy" != "off">
+// Store newly selected contact type value
+var newContactType = "$args.type.id";
+var oldContactType = "$args.type.id";
+var tenant_groupFldObjs;
+
+</PDM_IF>
+function copy_from_parent()
+{}
+function loadActions()
+{
+    detailFocus1st();
+    alert_banner("$args.persistent_id");
+}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+   cancel_any_lrel_update();
+}
+
+<PDM_IF "$prop.MultiTenancy" != "off" && "$args.type.id" != "2308">
+function onChangeContactType(value)
+{
+   newContactType = value;
+
+   if ( typeof tenant_groupFldObjs == "undefined" )
+      tenant_groupFldObjs = findFieldAndLabelFromTable("tenant_group");
+
+   if ( tenant_groupFldObjs != null )
+   {
+      if ( value == "2307" )
+      {
+         tenant_groupFldObjs[0].style.display = "block";
+         tenant_groupFldObjs[1].style.display = "block";
+      }
+      else
+      {
+         tenant_groupFldObjs[0].style.display = "none";
+         tenant_groupFldObjs[1].style.display = "none";
+      }
+   }
+}
+
+function onResetForm()
+{
+   if ( oldContactType != newContactType )
+      onChangeContactType(oldContactType);
+}
+</PDM_IF>
+
+function check_for_member_flags_and_save() { 
+    <PDM_IF "$args.type.id" == "2308">
+    mbs.update_flags();
+    //detailSave is called in update_flags_cb() which is the callback function
+    // for update_flags()
+    <PDM_ELSE>
+    <PDM_IF "$prop.MultiTenancy" != "off">
+    // clear tenant_group field
+    if ( newContactType != "2307" && typeof tenant_groupFldObjs != "undefined" && tenant_groupFldObjs != null )
+        tenant_groupFldObjs[0].value = "";
+    </PDM_IF>
+    detailSave();
+    </PDM_IF>
+}
+
+function pop_ldap()
+{
+	var e=document.main_form.elements;
+	var fn="";
+	var mn="";
+	var ln="";
+	var ui="";
+
+	if(typeof e["SET.first_name"]=="object" && e["SET.first_name"].value.length)
+	{
+		fn="QBE.IN.first_name="+e["SET.first_name"].value;
+	}
+
+	if(typeof e["SET.middle_name"]=="object" && e["SET.middle_name"].value.length>0)
+	{
+		mn="QBE.IN.middle_name="+e["SET.middle_name"].value;
+	}
+
+	if(typeof e["SET.last_name"]=="object" && e["SET.last_name"].value.length>0)
+	{
+		ln="QBE.IN.last_name="+e["SET.last_name"].value;
+	}
+
+	if(typeof e["SET.userid"]=="object" && e["SET.userid"].value.length>0)
+	{
+		ui="QBE.IN.userid="+e["SET.userid"].value;
+	}
+
+	ahdtop.merge_ldap=new Object();
+	ahdtop.merge_ldap=window;
+
+	popup_window('', 'SEARCH', 0, 0, '', '', 'FACTORY=ldap', ln, fn, mn, ui, 'KEEP.merge_ldap='+argPersistentID, 'KEEP.prop_ref='+prop_ref);
+	
+}
+
+function pop_ldap_callback(l,errmsg)
+{
+    showAlertMsg(errmsg);
+
+	// merge_ldap() returns attr/value pairs in the form:
+	//	attr1:value,attr2:value, ... attrx:value
+	// split them apart and stuff them in the form
+
+    var pairs_length = 0;
+    var pairs = "";
+    if ( typeof l=="string" && l.length > 0 ) {
+	    pairs=l.split(",");
+        pairs_length = pairs.length;
+    }
+
+	for(var i=0; i<pairs_length; i++)
+	{
+		var vals=pairs[i].split(":");
+		var attr=vals[0];
+		var val=nx_unescape(vals[1]);
+
+		if(attr.indexOf("#")<0) {
+			if(typeof document.main_form.elements["SET."+attr]=="object")
+			{
+				document.main_form.elements["SET."+attr].value=val;
+			}
+		} else {
+			var attrvals=attr.split("#");
+			var attr1=attrvals[0];
+			var tag=attrvals[1];
+			
+			if(typeof document.main_form.elements[tag+"."+attr1]=="object")
+			{
+				document.main_form.elements[tag+"."+attr1].value=val;
+				if(tag=="KEY") {
+					document.main_form.elements["KEY."+attr1].onchange();
+					document.main_form.elements["KEY."+attr1].onblur();
+				}
+			}
+		}
+	}
+
+	ahdtop.merge_ldap=void(0);
+}
+    if ( enableBtns ) {
+        //define the parameters for the lrel "Group/Memebers" edit button
+        var updateMemOrGroup            = "updateMemOrGroup"; //this variable could probably be omitted and removed from the check in list_in.htmpl also.  It doesn't carry any information that cannot be obtained from the following variable definition (that is, that the button display code should be executed)
+	    var updateMemOrGroupShowBool    = ("$ACCESS.FAC_grp" == "2");
+        
+<PDM_IF "$args.type.id" == "2308">
+        var updateMemOrGroupButtonLabel = "Update_Members";
+	var comboNameHtml = nx_escape('<pdm_fmt esc_style=C>$args.combo_name</pdm_fmt>');
+       var updateMemOrGroupMethod      = "update_mem('cnt', '$args.persistent_id', 'cnt', 'member_list',  'Members', msgtext(\"%1_Members\", nx_unescape('" + comboNameHtml + "')))";
+<PDM_ELSE>
+        var updateMemOrGroupButtonLabel = "Update_Groups";
+       	var comboNameHtml = nx_escape('<pdm_fmt esc_style=C>$args.combo_name</pdm_fmt>');
+	var updateMemOrGroupMethod      = "update_grp('cnt', '$args.persistent_id', 'cnt', 'group_list',  'Groups', msgtext(\"%1_Groups\", nx_unescape('" + comboNameHtml + "')))";
+</PDM_IF>
+        //define the parameters for the lrel "Special Handling" edit button
+	    var updateLrelButton=               "updateLrelButton";
+	    var updateLrelButtonShowBool=       true;
+	    var updateLrelButtonLabel=          "Update_Contact_s_Special_Handlings";
+	    var updateLrelButtonParentFactory=  "cnt";
+	    var updateLrelButtonParentPersId=   "cnt:$dob.id";
+	    var updateLrelButtonFactory=        "special_handling";
+	    var updateLrelButtonInLrelName=     "cnthandling_list";
+	    var updateLrelButtonLabel1=         "Special Handlings";
+	    var updateLrelButtonLabel2=         <PDM_FMT ESC_STYLE=JS2>"$args.combo_name Special Handlings"</PDM_FMT>;
+	    var updateLrelButtonParentHtmpl=    "";
+	    var updateLrelButtonExtra=          "KEEP.forCntToSh=1";
+	}
+</script>
+</head>
+<body class="detailro" onload="loadActions()" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script type="text/javascript">
+<PDM_IF "$args.type.id" == "2308">
+    var factoryDisplayName = "Group";
+</PDM_IF>
+<PDM_MACRO name=dtlForm button=false factory=cnt>
+if (_dtl.edit)
+{
+  try 
+  {
+    var pb_window_name = popup_window_name("profile_browser");
+    if ( typeof pb_window_name == "string" &&
+         pb_window_name.length > 0 ) 
+    {
+	var pb_window = ahdtop.AHD_Windows[pb_window_name];
+	var _p = window.parent;
+	if (typeof _p.opener == "object" &&
+	    _p.opener != null && 
+	    !_p.opener.closed) 
+	{
+	    var opPar = _p.opener;
+	    while (opPar != opPar.parent &&
+		   opPar != ahdtop) 
+	    {
+		opPar = opPar.parent;
+		if (opPar == pb_window) 
+		{
+		    opPar.closePopup = 1;
+		    break;
+		}
+	    }
+	}
+    }
+  }
+  catch(e) {}
+}
+var combo_name = '<PDM_FMT ESC_STYLE=C>$args.combo_name</PDM_FMT><br>';
+
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+<PDM_MACRO name=btnStartRow>
+if (_dtl.edit)
+{
+<PDM_MACRO name=button Caption="Save[s]" Func="check_for_member_flags_and_save()" hotkey_name="Save[s]" ID="btn001" Width=0>
+<PDM_MACRO name=button Caption="Cancel[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" ID="btncncl" Width=120>
+<PDM_MACRO name=button Caption="Reset[r]" Func="pdm_reset()" hotkey_name="Reset[r]" ID="btn004" Width=120>
+}
+else if ( enableBtns )
+{
+<PDM_MACRO name=button Caption="Edytuj[d]" Func="detailEdit()" hotkey_name="Edytuj[d]" ID="btn001">
+}
+if (_dtl.edit)
+{
+	if ( typeof cfgLdapEnabled == "string" && cfgLdapEnabled == "yes" ) 
+	{
+<PDM_MACRO name=button Caption="Merge Ldap" Func="pop_ldap()" hotkey_name="Merge Ldap" ID="btn005">
+	}
+}
+if (argID != 0)
+<PDM_MACRO name=button Caption="Historia zdarzeń" Func="show_evt('cnt', 'atev', argID)" hotkey_name="Historia zdarzeń" ID="SHOW_EVT_HISTORY" Width=0>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+<PDM_MACRO name=dtlStart scroll=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type.id" == "2308">
+<PDM_MACRO name=dtlTextbox hdr="Nazwa grupy" attr=last_name colspan=2 size=30>
+<PDM_MACRO name=dtlDropdown hdr="Typ HelpDesk" attr=zHelpDeskType size=30>
+<PDM_MACRO name=dtlDropdown hdr="Obszar" attr=zArea size=30>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Nawisko" attr=last_name>
+<PDM_MACRO name=dtlTextbox hdr="Imię" attr=first_name>
+<PDM_MACRO name=dtlTextbox hdr="Drugie imię" attr=zmiddle_name_alt>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type.id" == "2308">
+<PDM_MACRO name=dtlTextbox hdr="Kod grupy" attr=contact_num>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="ID kontaktu" attr=contact_num>
+<PDM_MACRO name=dtlTextbox hdr="ID użytkownika" attr=userid>
+</PDM_IF>
+<PDM_IF $args.type.id == 2308 || "$args.KEEP.disable_contact_type" == "1">
+<PDM_MACRO name=dtlReadonly hdr="Typ kontaktu" attr=type>
+<PDM_ELSE>
+<PDM_IF "$prop.MultiTenancy" != "off">
+<PDM_MACRO name=dtlDropdown hdr="Typ kontaktu" attr=type evt="onChange='onChangeContactType(this.value)'" lookup=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Typ kontaktu" attr=type lookup=no>
+</PDM_IF>
+</PDM_IF>
+
+<!-- Search only service types that are public, with no service contract -->
+<PDM_MACRO name=dtlLookup hdr="Typ serwisowy" attr=service_type extraURL="ADDITIONAL_WHERE=owning_contract IS NULL+KEEP.SVC_CONTRACT_ID=0+KEEP.SVC_CONTRACT_SYM=(empty)">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Strefa czasowa" attr=timezone lookup=no>
+<PDM_IF $args.type.id != 2308 >
+<PDM_MACRO name=dtlDropdown hdr="Stanowisko" attr=position>
+<PDM_IF 0>
+<PDM_MACRO name=dtlDropdown hdr="Partycja danych" attr=domain>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Typ dostępu" attr=access_type lookup=no>
+<PDM_MACRO name=dtlCheckbox hdr="Akceptujący Wnioski i Zmiany" attr="zakceptujacy">
+<PDM_MACRO name=dtlStartRow>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Harmonogram pracy" attr=schedule>
+<PDM_MACRO name=dtlCheckbox hdr="Dostępny" attr=available off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Potwierdź zapis w SelfService" attr=confirm_save off=No on=Yes>
+<PDM_IF "$args.type.id" != "2308">
+<PDM_MACRO name=dtlTextbox hdr="Alias" attr=alias>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_IF "$args.type.id" != "2308">
+<PDM_MACRO name=dtlTextbox hdr="NRE" attr=zNRE>
+</PDM_IF>
+<PDM_MACRO name=dtlLookup hdr="Przełożony" attr="zmanager2">
+<PDM_IF "$prop.MultiTenancy" != "off" && "$args.type.id" != "2308">
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlDropdown hdr="Analyst&#39;s Tenant Group" attr=tenant_group lookup=no>
+<PDM_ELIF "$args.type.id" == "2307">
+<PDM_MACRO name=dtlReadonly hdr="Analyst&#39;s Tenant Group" attr=tenant_group>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+<PDM_IF "$prop.MultiTenancy" != "off" && "$args.type.id" != "2308" && "$prop.form_name_3" == "edit">
+   // For updates, need to set function for onReset event, and call onChangeContactType
+   // to update the tenant_group field according to the Contact Type value.
+   document.main_form.onreset = onResetForm;
+   onChangeContactType("$args.type.id");
+</PDM_IF>
+
+</script>
+
+<PDM_MACRO name=startNotebook hdr="cnt_nb">
+<PDM_MACRO name=startTabGroup title="Szczegóły kontaktu">
+<PDM_MACRO name=tab title="Powiadomienia" file="cnt_notif_tab.htmpl">
+<PDM_MACRO name=tab title="Adresy" file="cnt_addr_tab.htmpl">
+<PDM_MACRO name=tab title="Informacje organizacyjne" file="cnt_org_tab.htmpl">
+<PDM_MACRO name=tab title="Środowisko" height=300 id=cnt_env src="OP=SEARCH+FACTORY=nr+QBE.EQ.cntref.cnt.id=$dob.id+KEEP.forCntToNr=1">
+<PDM_IF 0>
+<PDM_MACRO name=startTabGroup title="Remarks and Special Handling">
+<PDM_MACRO name=tab title="Remarks" file="cnt_rem_tab.htmpl">
+<PDM_MACRO name=tab title="Special Handling" height=300 id=special_handling src="OP=SEARCH+FACTORY=special_handling+QBE.EQ.cnthandling_list.contact.id=$dob.id+KEEP.cnthandling_list_contact_id=$dob.id">
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=tab title="SAP" file="cnt_sap_tab.htmpl">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=startTabGroup title="Historia">
+<PDM_MACRO name=tab title="Dziennik zdarzeń" height=300 src="OP=SEARCH+FACTORY=event_log+QBE.EQ.session.contact.id=$dob.id+KEEP.session_contact_id=$dob.id">
+<PDM_IF "$prop.view_internal" == "0">
+<PDM_MACRO name=tab title="Czynności" height=300 id=cntalg src="OP=SEARCH+FACTORY=cntalg+QBE.EQ.cnt_id=$dob.id+QBE.EQ.internal=0">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Czynności" height=300 id=cntalg src="OP=SEARCH+FACTORY=cntalg+QBE.EQ.cnt_id=$dob.id">
+</PDM_IF>
+<PDM_MACRO name=startTabGroup>
+<PDM_IF "$args.type.id" == "2308">
+<PDM_MACRO name=tab title="Członkowie" height=300 id=members src="OP=SEARCH+FACTORY=grpmem+QBE.EQ.group=$dob.id+QBE.EQ.member.delete_flag=0+KEEP.forGrpMem=1">
+<PDM_ELIF "$args.id" != 0>
+<PDM_MACRO name=tab title="Grupy" height=300 id=cnt_grp src="OP=SEARCH+FACTORY=cnt+QBE.EQ.member_list.member.id=$dob.id+KEEP.type.id=2308+KEEP.forCntToGrp=1+KEEP.CNT_PERSID=$args.persistent_id+KEEP.CNT_ID=$args.id">
+<PDM_MACRO name=tab title="Role" file="cnt_role_tab.htmpl">
+</PDM_IF>
+<PDM_IF $ACCESS.FAC_svc_contract \> 0>
+<PDM_IF "$args.type.id" == "2308">
+<PDM_MACRO name=tab title="Kontrakty" height=300 id=grp_svc_contract src="OP=SEARCH+FACTORY=svc_contract+QBE.EQ.my_grp_maps.map_persid=grp:$dob.id+KEEP.forGrpToSvcContract=1">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Kontrakty" height=300 id=cnt_svc_contract src="OP=SEARCH+FACTORY=svc_contract+QBE.EQ.my_cnt_maps.map_persid=cnt:$dob.id+KEEP.forCntToSvcContract=1">
+</PDM_IF>
+<PDM_IF 0>
+<PDM_IF "$args.type.id" == "2308">
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+<PDM_MACRO name=tab title="Auto Assignment" file="cnt_auto_assignment_tab.htmpl">
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_cnt.htmpl ASPEN.18 2012/06/12 14:51:45 debbi01 Exp $
+</PDM_IF>
+<PDM_WSP>

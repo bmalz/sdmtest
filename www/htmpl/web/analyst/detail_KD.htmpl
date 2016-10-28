@@ -1,0 +1,787 @@
+<PDM_IF 0>
+//@(#)$Id: detail_KD.htmpl ASPEN.8 2012/03/26 08:10:26 siwst01 Exp $;
+WHEN PRESENTED:
+    When we need to display Knowledge Document Editor
+INTENT:
+    Display the Knowledge Document Editor
+VARIABLES:
+    
+    object  KD  args	The Skeleton object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT KD
+						for the definition of attributes for 'OBJECT KD'
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_IF "$args.ACTIVE_STATE" == "200">
+	<!-- Forum -->
+	<PDM_INCLUDE FILE=detail_KD_QA.htmpl>
+<PDM_ELIF "$args.ACTIVE_STATE" == "100">
+	<!-- File -->
+	<PDM_INCLUDE FILE=detail_KD_FILE.htmpl>
+<PDM_ELSE>
+<html lang="pl">
+<head>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var docTitle = '<PDM_FMT ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+if(docTitle.length > 50)
+	var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>...';
+else	
+	var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>';
+<PDM_IF "$args.DOC_TYPE_ID" == "2">
+	var hdrTitleNew = "Create New Tree Document";
+	if (docTitle.length > 50)
+		var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>... Update Tree Document';
+	else
+		var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT> Update Tree Document';
+<PDM_ELSE>
+	var hdrTitleNew = "Create New Document";
+	if (docTitle.length > 50)	
+		var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>... Update Document';
+	else
+		var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT> Update Document';	
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/change_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/timer.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_KD.js"></script>
+<script type="text/javascript">
+var cfgFocusOnTabDisabled = true;
+<PDM_IF "$env.NX_KT" != "Yes">
+	_bHideTenantSelection = true;//Inactivate tenant selection for KWS
+</PDM_IF>
+
+var sERr = <PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>"$args.ERROR_MSG"</PDM_FMT>;
+if (sERr != "" && sERr !="updateOK")
+	ahdtop.saveKTAckMsgNum = void(0);
+
+var ackMsgNum = ahdtop.saveAckMsgNum;
+var _bKDApprovalMessage = false;//Flag setting that a KD Approval message exists, so need to overide regular message in buildKTAlertMsg of detail_KD.js 
+if ( typeof ahdtop.saveKTAckMsgNum == "number" ){
+  _bKDApprovalMessage = true;
+  ackMsgNum = ahdtop.saveKTAckMsgNum;
+ }
+ahdtop.saveAckMsgNum = void(0);
+ahdtop.saveKTAckMsgNum = void(0);
+var argPersistentID = "$args.persistent_id";
+var propMaxResolution = "$prop.RESOLUTION_MAX_SIZE";
+var propEditPublished = "$prop.WORKFLOW_EDIT_AFTER_PUBLISH";
+var propForceFindSimilar = "$prop.AVOID_DUPLICATE_DOC";
+var m_nSkeletonId = "$args.id";
+var m_nVerCrossRefID = "$args.VER_CROSS_REF_ID";
+var statusId="$args.STATUS_ID";
+var sIndexPath = '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C>$args.PRIMARY_INDEX.INDEX_PATH</PDM_FMT>';
+var iBuResult = "$args.BU_RESULT";
+var iAvgRating = "$args.AVG_RATING";
+var iVoteCount = "$args.VOTE_COUNT";
+var argsExtDocID = "$args.EXT_DOC_ID";
+var argsKeepIsTree = "$args.KEEP.IS_TREE";
+var argsDocTemplateId = "$args.DOC_TEMPLATE_ID";
+var argsDocTypeID =  "$args.DOC_TYPE_ID";
+var argsKeepPopUpName = "$args.KEEP.POPUP_NAME";
+var isEdit = 0;
+var sTreeID = -999;
+var bTreeSaved = 0;
+var sTreeWinName;
+var sForwardWinName;
+var sRejectWinName;
+var sUnpublishWinName;
+var sUnretireWinName;
+var sPublishWinName;
+var bLoadPermission_tab = 0;
+var bContentChanged = 0;//Flag that indicates if the KD content changed since last template was chosen 
+						//It get updated by content_onChange trigger and used in template_onChange
+var childWinName;
+var sTopCategory;
+var doc;
+var sTitle = '<PDM_FMT ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+var sProblem = '<PDM_FMT ESC_STYLE=C>$args.PROBLEM</PDM_FMT>';
+var sSummary = '<PDM_FMT ESC_STYLE=C>$args.SUMMARY</PDM_FMT>';
+ahdframeset.similarTabLoaded = false;
+var m_opener = "$args.KEEP.opener";
+if (m_opener == null || m_opener == "")
+	m_opener = "$args.opener";
+ahdframeset.nSkeletonId='$args.id';
+
+var Tenant = "";
+<PDM_IF "${args.tenant:n/a}" != "n/a">
+	Tenant = "$args.tenant";
+</PDM_IF>
+
+<PDM_IF "$args.PRIMARY_INDEX" == "">
+	<PDM_IF "$args.SD_CATEGORY" == "">
+		<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="id=1" ESC_STYLE=C>
+			sTopCategory = '<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$list.CAPTION</PDM_FMT>';
+		</PDM_LIST>
+	</PDM_IF>
+</PDM_IF>
+function setTenants()
+{
+	<PDM_IF "$prop.MultiTenancy" != "off">
+		detailSetTenantFromPresetField( "PRIMARY_INDEX", '${args.PRIMARY_INDEX.tenant:}', '<PDM_FMT ESC_STYLE=C>${args.PRIMARY_INDEX.tenant.name:}</PDM_FMT>' );
+	</PDM_IF>
+}
+</script>
+</head>
+<body class="detailro" onload="LoadActions();SubmitKD();setTenants();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Skeleton" header=no>
+<PDM_INCLUDE FILE=hourglass.htmpl>
+<script>
+buildKTAlertMsg("$args.id");
+
+var is_parent=0;
+<PDM_LIST FACTORY=CI_DOC_LINKS PREFIX=list WHERE="DOC_ID1=$args.id AND parent_child=1">
+		is_parent="$list.parent_child";		
+</PDM_LIST>
+
+//code for parent change send message that may affect child docs
+
+		if (is_parent ==1 && ( typeof parent.linkedParentMsg == "undefined" || parent.linkedParentMsg!=1 ))
+
+		{
+				// if document is a parent send and alert message about changes.
+				show_response(msgtext("This_Document_is_linked_as_a_parent"));
+				parent.linkedParentMsg =1;
+			
+		}
+
+
+
+function SubmitKD()
+{
+	window.setTimeout("SubmitKD_real()", 100);
+}
+function SubmitKD_real()
+{
+	
+<PDM_IF 0>This function is to set the resolution after submit knowldge done from a ticket, see detail_alg.htmpl and detail_issalg.htmpl</PDM_IF>
+<PDM_IF "$args.id" == "0">
+<PDM_IF "$args.SD_OBJECT_PERSID" != "">
+		if ( docTitle != "" ){
+			bContentChanged = 1;
+		}
+		if (typeof ahdtop.GetSolutionText != "undefined" && ahdtop.GetSolutionText != "")
+		{
+			document.forms["main_form"].elements["SET.RESOLUTION"].value  = ahdtop.GetSolutionText("$args.SD_OBJECT_PERSID");
+			delete ahdtop.arrSolution["$args.SD_OBJECT_PERSID"];
+			bContentChanged = 1;
+		}
+		if (typeof ahdtop.GetProblemText != "undefined" && ahdtop.GetProblemText != "")
+		{
+			document.forms["main_form"].elements["SET.PROBLEM"].value  = ahdtop.GetProblemText("$args.SD_OBJECT_PERSID");
+			delete ahdtop.arrProblem["$args.SD_OBJECT_PERSID"];
+			bContentChanged = 1;
+		}
+		
+</PDM_IF>
+</PDM_IF>
+}
+function OpenDoc()
+{	
+	if ("$prop.form_name_3" == "edit")
+	{
+		var open_mode = "$args.open_mode";
+        if ("$args.DOC_TYPE_ID" == "2")
+        {
+			//1.For tree document, we have to make sure that we send in a number for 'open_mode'
+			//(cannot depend on $args.open_mode because it might be blank which is fine for regular document)
+			//2.When it gets to the freeaccess.spl, it needs this number (either 0 or 2) to redirect to kt_dtview.htmpl
+			//3.In kt_dtviewe.htmpl, it calls the kt_document_view.htmpl again (without sending the 'open_mode' otherwise it creates
+			//the infinite loop) to open the document properly
+			//4.Actually, we dont need this if statement because the replace_page() with take care of it automatically
+			if( "$args.KEEP.POPUP_NAME" != "")
+			{
+				open_mode = 2;
+			}
+			else
+			{
+				open_mode = 0;
+			}
+        }
+		
+		if(confirm(msgtext("Changes_made_to_this_document_need_to_be_saved_first")))
+		{
+			var f = window.document.forms["main_form"];
+			f.elements["STAY_EDIT"].value=0;
+			f.elements["HTMPL"].value = "kt_document_view_init.htmpl";
+			f.elements["opener"].value = m_opener;
+			f.elements["open_mode"].value = open_mode;
+			detailSave();
+		}
+	}
+	else
+	{
+		OpenDocumentViewer("$args.id", 2, m_opener, undefined, undefined, "false", "false", "true", "false", "RELOAD_WIN=1", "+KEEP.OPENER=" + argPopupName, "+BUID=$args.KEEP.BUID");
+	}
+}	
+function OpenSaveVersionWindow()
+{
+	/*if ('$args.KEEP.ALLOW_SAVE_VERSION' == '1')
+	{
+		alert ('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.KEEP.ALLOW_SAVE_VERSION_MSG</PDM_FMT>');
+		return;
+	}
+	*/
+	if ("$prop.form_name_3" == "edit")
+	{
+		//if (confirm ("Changes made to this document need to be saved before saving the version. If you'd like to continue saving changes click OK."))
+		{
+			parent.do_save_version = 1;
+			checkBeforeSave(false);
+			return;
+		}
+		return;
+	}
+	else
+	{
+		if ( ahdtop.cfgMultiTenancy == "off" )
+			create_new('DOC_VERSIONS',0,'','','',"PRESET=DOC_ID:" + "$args.id");
+		else
+			create_new('DOC_VERSIONS',0,'','','',"PRESET=DOC_ID:" + "$args.id","PRESET=tenant:" + "$args.tenant");
+		
+	}
+}
+function OpenForwardWindow()
+{
+	if ( ("$args.KEEP.IS_TREE" == "1") || ("$args.DOC_TYPE_ID" == "2"))
+	{
+		if (!checkTree(2))
+		{
+			return;
+		}
+	}
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+					"+OP=DISPLAY_FORM+HTMPL=kd_action_forward.htmpl" + "+KEEP.DOC_ID=" + "$args.id" + "+KEEP.NEXT_ACTION_ID=" + "$args.CURRENT_ACTION_ID.NEXT_ACTION_ID" + "+KEEP.TEMPLATE_ID=" + "$args.WF_TEMPLATE" + "+KEEP.ACTION_ORDER=" + "$args.CURRENT_ACTION_ID.ACTION_ORDER"  + "+Tenant=" + Tenant + "+RELOAD_WIN=0" + "+KEEP.OPENER=" + argPopupName;
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",status=no";
+	preparePopup(url, "FORWARD_WIN"+"$args.id", features, width=-(popupWidth(SMALL_POPUP)), height=popupHeight(MEDIUM_POPUP), 'GOBUTTON=no');	
+}
+function OpenPublishWindow(byPass)
+{
+	if ( "$args.PRIMARY_INDEX" == "1" ){
+		AlertMsg = "";  // Remove previous error message
+		showAlertMsg("This document is attached to the top category and cannot be published.");
+		return;
+	}
+	//
+	if ( ("$args.KEEP.IS_TREE" == "1") || ("$args.DOC_TYPE_ID" == "2"))
+	{
+		if (!checkTree(2))
+		{
+			return;
+		}
+	}
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+	              "+OP=DISPLAY_FORM+HTMPL=kd_action_publish.htmpl" + 
+	              "+KEEP.DOC_ID=" + "$args.id" + 
+				  "+KEEP.BYPASS=" + byPass + 
+	              "+RELOAD_WIN=0" + 
+	              "+Tenant=" + Tenant +
+	              "+KEEP.OPENER=" + argPopupName;
+	              
+
+	//Default the owner ID only if the current owner is active SCO 29624 
+	if ( "$args.OWNER_ID.delete_flag" == "0" )
+	{
+		url = url + "+KEEP.OWNER_ID=" + "$args.OWNER_ID" + "+KEEP.OWNER_COMBO_NAME=" + 
+	            nx_escape("$args.OWNER_ID.combo_name");
+	}
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",status=no";
+	preparePopup(url, "PUBLISH_WIN"+"$args.id", features, width=-(popupWidth(SMALL_POPUP)), height=popupHeight(SMALL_POPUP), 'GOBUTTON=no');	
+}
+function OpenRejectWindow()
+{
+	if ( ("$args.KEEP.IS_TREE" == "1") || ("$args.DOC_TYPE_ID" == "2"))
+	{
+		if (!checkTree(3))
+		{
+			return;
+		}
+	}
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+	              "+OP=DISPLAY_FORM+HTMPL=kd_action_reject.htmpl" + 
+	              "+KEEP.DOC_ID=" + "$args.id" + 
+	              "+KEEP.CURRENT_ACTION=" + gpb_escape("$args.CURRENT_ACTION_ID.ACTION_TITLE") + 
+	              "+KEEP.CURRENT_STATUS=" + gpb_escape("$args.STATUS_ID.STATUS") + 
+	              "+RELOAD_WIN=0" + 
+				  "+Tenant=" + Tenant +	              
+	              "+KEEP.OPENER=" + argPopupName;
+	              
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",status=no";
+	preparePopup(url, "REJECT_WIN"+"$args.id", features, width=-(popupWidth(SMALL_POPUP)), height=popupHeight(SMALL_POPUP), 'GOBUTTON=no');	
+}
+
+function CancelReworkVersion()
+{
+	if ("$prop.form_name_3" == "edit")
+	{
+		if (confirm ("All changes made to this document need to be saved before canceling the rework version. If you'd like to continue saving changes click OK."))
+		{
+			detailSave();
+			return;
+		}
+		return;
+	}
+	//
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+		"+OP=CREATE_NEW+FACTORY=KD_TASK" + 
+		"+HTMPL=detail_KD_TASK_cancel_rework.htmpl" + 
+		"+PRESET=KD:" + "$args.id" + 
+		"+PRESET=WF_ACTION:cancel_rework_version" + 
+		"+RELOAD_WIN=0" +
+		"+KEEP.OPENER=" + argPopupName;
+		
+		if ( ahdtop.cfgMultiTenancy != "off" )
+			url+= "+PRESET=tenant:" + "$args.tenant";
+	//
+	var features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no";
+	preparePopup(url, 'UNPUBLISH_WIN'+'$args.id', "", undefined, undefined, 'GOBUTTON=no');
+}
+
+function ViewAvailVersion()
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			"+OP=SHOW_DETAIL+PERSID=KD:$args.VER_CROSS_REF_ID";
+		document.location.href = url;
+}
+
+function ViewReworkVersion()
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			"+OP=UPDATE+PERSID=KD:$args.VER_CROSS_REF_ID";
+		document.location.href = url;
+}
+
+function RetireKD()
+{
+	if ("$prop.form_name_3" == "edit")
+	{
+		var bConfirm = confirm("All changes made to this document need to be saved before the document is retired. If you'd like to continue saving changes click OK.");
+		if (bConfirm)
+		{
+			detailSave();
+			return;
+		}
+		return;
+	}
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+		"+OP=CREATE_NEW+FACTORY=KD_TASK" + 
+		"+HTMPL=detail_KD_TASK_retire.htmpl" +  
+		"+PRESET=KD:" + "$args.id" + 
+		"+PRESET=WF_ACTION:retire_kd" + 
+		"+RELOAD_WIN=0" +
+		"+KEEP.OPENER=" + argPopupName;
+		
+		if ( ahdtop.cfgMultiTenancy != "off" )
+			url+= "+PRESET=tenant:" + "$args.tenant";
+	
+	var features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no";
+	preparePopup(url, 'RETIRE_WIN'+'$args.id', features, undefined, undefined, 'GOBUTTON=no');
+}
+function CreateReworkVersion()
+{
+	if ("$prop.form_name_3" == "edit")
+	{
+		var bConfirm = confirm("All changes made to this document need to be saved before the rework version is created. If you'd like to continue saving changes click OK.");
+		if (bConfirm == true)
+		{
+			parent.do_start_rework = 1;
+			detailSave();
+			return;
+		}
+		return;
+	}
+	var KDApprovalTak = 100;//Default task if not defined otherwise;
+	var DefAssignee = "";
+	<PDM_LIST PREFIX=KDWF FACTORY=CI_ACTIONS WHERE="WF_TEMPLATE_ID=$args.WF_TEMPLATE and UNPUBLISH=1" ESC_STYLE=C>
+		KDApprovalTak = $KDWF.id;
+		DefAssignee = '$KDWF.ANALYST_ID';
+	</PDM_LIST>
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+		"+OP=CREATE_NEW+FACTORY=KD_TASK" + 
+		"+PRESET=KD:" + "$args.id" + 
+		"+PRESET=WF_REJECT_TO_ID:" +  KDApprovalTak +
+		"+PRESET=WF_ACTION:start_rework_version" + 
+		"+PRESET=SWITCH1:1" + 
+		"+PRESET=WF_CONTACT_ID:" + DefAssignee + 
+		"+RELOAD_WIN=0" +
+		"+KEEP.OPENER=" + argPopupName;
+		
+		if ( ahdtop.cfgMultiTenancy != "off" )
+			url+= "+PRESET=tenant:" + "$args.tenant";
+	
+	var features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no";
+	sWinName  = "UNPUBLISH_WIN$args.id";
+	preparePopup(url, sWinName, "", undefined, undefined, 'GOBUTTON=no');
+}
+
+function OpenUnpublishWindow()
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+		"+OP=DISPLAY_FORM+HTMPL=kd_action_unpublish.htmpl" + 
+		"+KEEP.DOC_ID=" + "$args.id" + 
+		"+KEEP.TEMPLATE_ID=" + "$args.WF_TEMPLATE" + 
+		"+KEEP.CURRENT_STATUS=" + gpb_escape("$args.STATUS_ID.STATUS") + 
+		"+RELOAD_WIN=0" + 
+		"+KEEP.OPENER=" + argPopupName;
+		
+	var features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no";
+	preparePopup(url, 'UNPUBLISH_WIN'+'$args.id', features, width=-(popupWidth(SMALL_POPUP)), height=popupHeight(SMALL_POPUP), 'GOBUTTON=no');
+}
+function OpenUnRetireWindow()
+{
+	if ("$prop.form_name_3" != "edit")
+	{
+		detailEdit();
+	}
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+	             "+OP=DISPLAY_FORM+HTMPL=kd_action_unretire.htmpl" + 
+	             "+KEEP.DOC_ID=" + "$args.id" + 
+	             "+KEEP.TEMPLATE_ID=" + "$args.WF_TEMPLATE" + 
+	             "+KEEP.CURRENT_STATUS=" + gpb_escape("$args.STATUS_ID.STATUS") + 
+	             "+RELOAD_WIN=0" + 
+	             "+KEEP.OPENER=" + argPopupName;
+	             
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",status=no";
+	preparePopup(url, "UNRETIRE_WIN"+"$args.id", features, width=-(popupWidth(SMALL_POPUP)), height=popupHeight(SMALL_POPUP), 'GOBUTTON=no');	
+}
+function OpenDesignTree()
+{
+	var tempTreeID;
+	
+	if (sTreeID == -999)
+	{
+		tempTreeID = argsExtDocID;
+	}
+	else
+	{
+		tempTreeID = sTreeID;
+	}
+	var url=cfgCgi+
+        "?SID="+cfgSID+
+        "+FID="+fid_generator()+
+        "+OP=DISPLAY_FORM"+
+        "+HTMPL=kt_dtbuilder.htmpl"+
+        "+RELOAD_WIN=0" +
+        "+KEEP.OPENER=" + argPopupName + 
+        "+KEEP.CURRENT_STATUS=" + "$args.STATUS_ID" + 
+        "+DTRootID=" + tempTreeID +
+        "+Tenant=" + Tenant +
+        "+DTDocID=" + m_nSkeletonId;
+        
+    var strFeatures = "scrollbars=yes,toolbars=no,menubar=no,fullscreen=no,resizable=yes";
+   
+    preparePopup(url, "TREE_WIN"+"$args.id", strFeatures, undefined, undefined, 'GOBUTTON=no+MENUBAR=no');
+}
+function OpenEmail()
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+	              "+OP=DISPLAY_FORM+HTMPL=kt_email_document.htmpl+RELOAD_WIN=0+KEEP.OPENER=" + argPopupName;
+	var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",status=no";
+	preparePopup(url, "EMAIL_WIN"+"$args.id", features, width=550, height=320, 'GOBUTTON=no+MENUBAR=no');	
+}
+
+function DocumentUserView()
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			"+OP=SHOW_DETAIL+PERSID=KD:$args.id+HTMPL=kt_document_view.htmpl" +
+			"+open_mode=$args.open_mode";
+	document.location.href = url;
+}
+
+</script>
+<script>
+	
+<PDM_MACRO name=dtlForm button=false factory=KD>
+    if ( ahdtop.cstUsingScreenReader )
+      _dtl.firstField = "kdidAtTop";
+<PDM_MACRO name=btnStartRow>
+<PDM_IF 0>
+	We decided to remove this button out of the box as we have too many buttons ...
+	
+<PDM_IF "$args.REWORK_VER" != "0">
+<PDM_MACRO name=button Caption="View Available Version[V]" Disabled="defer" Func="ViewAvailVersion()" hotkey_name="View Available Version[V]" ID="btnUnViewRework">
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit">
+		if ("$args.KEEP.ALLOW_EDIT" == "1" || "$args.KEEP.ALLOW_EDIT" == "")
+		{
+			var bSave = true;
+			if (typeof parent.wf_action != "undefined"  && parent.wf_action == "wf_unpublish")
+				bSave = false;
+			if (bSave)
+			{
+<PDM_MACRO name=button Caption="Save[s]" Disabled="defer" Func="checkBeforeSave()" hotkey_name="Save[s]" ID="btnSave">
+				if (ahdframeset != ahdtop)
+<PDM_MACRO name=button Caption="Save and close[a]" Disabled="defer" Func="checkBeforeSave(false, true)" hotkey_name="Save and close[a]" ID="btnSaveAndClose">
+				else
+<PDM_MACRO name=button Caption="Save and close[a]" Disabled="yes" Func="checkBeforeSave(false, true)" hotkey_name="Save and close[a]" ID="btnSaveAndClose">
+<PDM_MACRO name=button Caption="Cancel[n]" btnType="negative" Func="checkBeforeCancel();" hotkey_name="Cancel[n]" ID="btncncl">
+<PDM_MACRO name=button Caption="Reset[r]" Func="contentTabReset();check_reset();detailReset();permissionTabReset()" hotkey_name="Reset[r]" ID="btnReset">
+			}
+			if ( ("$args.STATUS_ID" == "70") && cfgUserAuth > 1 )
+			{
+				
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_IF "$args.VER_CROSS_REF_ID" == "0">
+<PDM_MACRO name=button Caption="Rework[R]" Disabled="defer" Func="CreateReworkVersion()" hotkey_name="Rework[R]" ID="btnUnPublish">
+<PDM_MACRO name=button Caption="Retire[e]" Disabled="defer" Func="RetireKD()" hotkey_name="Retire[e]" ID="btnRetire">
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Cancel Rework[n]" btnType="negative" Disabled="defer" Func="CancelReworkVersion()" hotkey_name="Cancel Rework[n]" ID="btncanrwk">
+<PDM_MACRO name=button Caption="View Rework[V]" Disabled="defer" Func="ViewReworkVersion()" hotkey_name="View Rework[V]" ID="btnUnViewRework">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Unpublish[U]" Disabled="defer" Func="OpenUnpublishWindow()" hotkey_name="Unpublish[U]" ID="btnUnPublish">
+</PDM_IF>
+			}
+		}
+	
+<PDM_ELSE>
+		if( "$args.KEEP.ALLOW_EDIT" == "1" )
+		{
+			if ( "$args.STATUS_ID" != "70" && cfgUserAuth > 1 )
+			{
+<PDM_MACRO name=button Caption="Edit[E]" Func="detailEdit()" hotkey_name="Edit[E]" ID="btnEdit">
+			}
+			else if ( ("$args.STATUS_ID" == "70") && ("$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "0") && cfgUserAuth > 1 )
+			{
+				
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_IF "$args.VER_CROSS_REF_ID" == "0">
+<PDM_MACRO name=button Caption="Rework[R]" Disabled="defer" Func="CreateReworkVersion()" hotkey_name="Rework[R]" ID="btnUnPublish">
+<PDM_MACRO name=button Caption="Retire[e]" Disabled="defer" Func="RetireKD()" hotkey_name="Retire[e]" ID="btnRetire">
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Cancel Rework[n]" btnType="negative" Disabled="defer" Func="CancelReworkVersion()" hotkey_name="Cancel Rework[n]" ID="btncanrwk">
+<PDM_MACRO name=button Caption="View Rework[V]" Disabled="defer" Func="ViewReworkVersion()" hotkey_name="View Rework[V]" ID="btnUnViewRework">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Unpublish[U]" Disabled="defer" Func="OpenUnpublishWindow()" hotkey_name="Unpublish[U]" ID="btnUnPublish">
+</PDM_IF>
+			}
+			else if ( ("$args.STATUS_ID" == "70") && cfgUserAuth > 1 )
+			{
+<PDM_MACRO name=button Caption="Edit[E]" Func="detailEdit()" hotkey_name="Edit[E]" ID="btnEdit">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_IF "$args.VER_CROSS_REF_ID" == "0">
+<PDM_MACRO name=button Caption="Rework[R]" Disabled="defer" Func="CreateReworkVersion()" hotkey_name="Rework[R]" ID="btnUnPublish">
+<PDM_MACRO name=button Caption="Retire[e]" Disabled="defer" Func="RetireKD()" hotkey_name="Retire[e]" ID="btnRetire">
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Cancel Rework[n]" btnType="negative" Disabled="defer" Func="CancelReworkVersion()" hotkey_name="Cancel Rework[n]" ID="btncanrwk">
+<PDM_MACRO name=button Caption="View Rework[V]" Disabled="defer" Func="ViewReworkVersion()" hotkey_name="View Rework[V]" ID="btnUnViewRework">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Unpublish[U]" Disabled="defer" Func="OpenUnpublishWindow()" hotkey_name="Unpublish[U]" ID="btnUnPublish">
+</PDM_IF>
+			}
+		}
+	
+</PDM_IF>
+<PDM_IF $args.id>
+<PDM_IF "$env.NX_KT" == "Yes">
+			if (('$args.VER_CROSS_REF_ID'== '0' || '$args.VER_CROSS_REF_ID'== '') &&
+				'$args.STATUS_ID'!= '70' && '$args.STATUS_ID'!= '80' && cfgUserAuth > 1)
+				//Cannot save version for rework, published and expired KDs 
+				//Button removed if not the tenant or service provider
+			{
+<PDM_MACRO name=button Caption="Zapisz wersje[a]" Disabled="defer" Func="OpenSaveVersionWindow()" hotkey_name="Save Version[a]" ID="btnSaveVersion">
+			}
+		
+</PDM_IF>
+		if ('$args.CURRENT_ACTION_ID.NEXT_ACTION_ID' != 0)
+		{
+			if ("$prop.form_name_3" == "edit")
+			{
+				if	('$args.STATUS_ID'!= 70)
+				{ 
+					if ("$args.KEEP.CAN_FORWARD" == "1")
+					{
+<PDM_MACRO name=button Caption="Przekaż[o]" Disabled="defer" Func="OpenForwardWindow()" hotkey_name="Forward[o]" ID="btnForward">
+					}
+					if ("$args.CURRENT_ACTION_ID.ACTION_ORDER" > "1")
+					{
+						if ("$args.KEEP.CAN_REJECT" == "1")
+						{
+<PDM_MACRO name=button Caption="Odrzuć[R]" Disabled="defer" Func="OpenRejectWindow()" hotkey_name="Reject[R]" ID="btnReject">
+						}
+					}
+					if (ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS"))
+					{
+<PDM_MACRO name=button Caption="Publikuj[P]" Disabled="defer" Func="OpenPublishWindow(1)" hotkey_name="Publish[P]" ID="btnPublish">
+					}
+				}
+			}
+		}
+		else
+		{	
+			if ("$prop.form_name_3" == "edit")
+			{
+				if ("$args.CURRENT_ACTION_ID.ACTION_ORDER" > "1")
+				{
+					if ("$args.KEEP.CAN_REJECT" == "1")
+					{
+<PDM_MACRO name=button Caption="Odrzuć[R]" Disabled="defer" Func="OpenRejectWindow()" hotkey_name="Reject[R]" ID="btnReject">
+					}
+				}
+				if ("$args.CURRENT_ACTION_ID.ACTION_ORDER" >= "1")
+				{
+					if ("$args.KEEP.CAN_FORWARD" == "1")
+					{
+<PDM_MACRO name=button Caption="Publikuj[P]" Disabled="defer" Func="OpenPublishWindow()" hotkey_name="Publish[P]" ID="btnPublish">
+					}
+				}
+				else if	('$args.STATUS_ID'== 80)
+				{
+<PDM_MACRO name=button Caption="Poprzednia wersja[U]" Disabled="defer" Func="OpenUnRetireWindow()" hotkey_name="Unretire[U]" ID="btnUnretire">
+				}
+			}
+		}
+		
+<PDM_MACRO name=button Caption="Widok Użytkownika[U]" Disabled="defer" Func="OpenDoc()" hotkey_name="User View[U]" ID="btnView">
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>	
+    detailCloseForm();  // Nothings on the form before the notebook
+</script>
+<center>
+<br />
+<table width="90%"  class='gn_container_no_border' cellspacing="2" cellpadding="0" summary="Document $args.id Status">
+    <tr>
+		<td width="40%" class="data" align="left" nowrap tabindex=100 id=kdidAtTop><span class='label gn_text_normal'>ID:</span> <PDM_IF $args.id>$args.id</PDM_IF></td>
+		<td width="35%" class="data" align="left" nowrap tabindex=100
+			
+<PDM_IF "$args.INDEXED" == "-1"> title='Document is indexed'>
+			
+<PDM_ELIF "$args.INDEXED" == "0"> title='Document index is pending'>
+			
+<PDM_ELIF "$args.INDEXED" == "1"> title='Document index is pending'>
+			
+<PDM_ELIF "$args.INDEXED" == "2"> title='Document is not indexed because it contains no keywords'>
+			
+<PDM_ELIF "$args.INDEXED" == "3"> title='Document is not indexed due to errors'>
+			
+<PDM_ELSE>>
+			
+</PDM_IF>
+			<span class='label gn_text_normal'>Stan indeksowania:</span> 
+			
+<PDM_IF "$args.INDEXED" == "-1">Indeksowany
+			
+<PDM_ELIF "$args.INDEXED" == "0">Oczekujący
+			
+<PDM_ELIF "$args.INDEXED" == "1">Oczekujący
+			
+<PDM_ELIF "$args.INDEXED" == "2">Nie indeksowany
+			
+<PDM_ELIF "$args.INDEXED" == "3">Nie indeksowany
+			
+</PDM_IF>
+		</td>
+    </tr>
+    <tr>
+      <td width="40%" class="data" align="left" nowrap tabindex=100><span class='label gn_text_normal'>Obecne zadanie:</span> $args.CURRENT_ACTION_ID.ACTION_TITLE</td>
+      <td width="35%" class="data" align="right" nowrap tabindex=100><span class='label gn_text_normal'>Obecny status:</span><PDM_IF "$args.REWORK_VER" != "0"><I> Rework </I>-</PDM_IF> $args.STATUS_ID.STATUS</td>
+    </tr>
+    <tr>
+      
+<PDM_IF "$env.NX_KT" == "Yes" && "$args.id" != "0">
+			<td width="40%" class="data" align="left" nowrap tabindex=100>
+				<span class='label gn_text_normal'>Comments for Follow-Up:</span>
+				&nbsp;$args.FLG_COUNT.length
+			</td>
+	  
+</PDM_IF>
+      <td width="35%" class="data" align="right" nowrap tabindex=100><span class='label gn_text_normal'>Numer wersji:</span> $args.VER_COUNT</td>
+    </tr>
+</table>
+</center>
+<p>
+
+<script>
+	startScrollbar(true, true);
+	
+	//Focus on a particular tab if the tab number is specified via the KEEP.show_tab variable
+	//KEEP.show_tab variable as of now comes part of some URL's from the Dashboard.
+	var hold_tab_num = "$args.KEEP.show_tab";
+   	if (hold_tab_num.length != 0)
+	{
+		if (!isNaN(hold_tab_num - 1))	
+			selected_page_id(1, hold_tab_num - 1); //This function is in the webtab.js
+	}
+</script>
+<center>
+<input type="hidden" name=SET.VER_COUNT value="$args.VER_COUNT">
+<PDM_MACRO name=startNotebook hdr=skeletons_nb>
+<PDM_MACRO name=startTabGroup title="Szczegóły dokumentu">
+<PDM_MACRO name=tab title="Content" file="kd_content_tab.htmpl" id=tabContent>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=tab title="Find Similar" height=500 id=tabSimilarDoc src="OP=SEARCH+FACTORY=KD+KEEP.search_type=SimilarDocs+KEEP.SkeletonId=$args.id+KEEP.IS_EDIT=$prop.form_name_3">
+</PDM_IF>
+<PDM_IF $args.id>
+<PDM_MACRO name=tab title="Related Knowledge" height=650 id=tabCategories src="OP=DISPLAY_FORM+HTMPL=kd_categories_tab.htmpl+SkeletonId=$args.id+ParentTenant=$args.tenant+KEEP.IS_EDIT=$prop.form_name_3">
+<PDM_MACRO name=tab title="Attachments" height=500 id=tabAttachments new_row=Yes src="OP=DISPLAY_FORM+HTMPL=kd_attachments_tab.htmpl+SkeletonId=$args.id+ParentTenant=$args.tenant+KEEP.IS_EDIT=$prop.form_name_3">
+<PDM_MACRO name=startTabGroup title="Uprawnienia">
+<PDM_MACRO name=tab title="Atrybuty" file="kd_attributes_tab.htmpl" id=tabAttributes>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=tab title="Uprawnienia" height=600 id=tabPermissions src="OP=DISPLAY_FORM+HTMPL=kd_permissions_tab.htmpl+SkeletonId=$args.id+KEEP.INHERIT_PERMISSION=$args.INHERIT_PERMISSION+READ_PGROUP=$args.READ_PGROUP+WRITE_PGROUP=$args.WRITE_PGROUP+PARENT_READ_PGROUP=$args.PRIMARY_INDEX.READ_PGROUP+PARENT_WRITE_PGROUP=$args.PRIMARY_INDEX.WRITE_PGROUP+KEEP.IS_EDIT=$prop.form_name_3">
+</PDM_IF>
+<PDM_MACRO name=startTabGroup title="Historia i wersje">
+<PDM_MACRO name=tab title="Historia" height=500 id=tabHistory src="OP=SEARCH+FACTORY=O_EVENTS+QBE.EQ.ENTITY_ID=$args.id">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=tab title="Wersje" height=500 id=tabVersions src="OP=SEARCH+FACTORY=DOC_VERSIONS+QBE.EQ.DOC_ID=$args.id">
+</PDM_IF>
+<PDM_MACRO name=startTabGroup title="Komentarze i powiadomienia">
+<PDM_MACRO name=tab title="Komentarze" height=500 id=tabComments src="OP=SEARCH+FACTORY=O_COMMENTS+QBE.EQ.DOC_ID=$args.id+SkeletonId=$args.id">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=tab title="Powiadomienia" height=500 id=tabNotifications src="OP=SEARCH+FACTORY=NOTIFICATION+QBE.EQ.DOC_ID=$args.id+SkeletonId=$args.id">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+</center>
+<script>
+	endScrollbar();
+</script>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+</PDM_IF>
+<PDM_WSP>

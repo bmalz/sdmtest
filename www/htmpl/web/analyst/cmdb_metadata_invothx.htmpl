@@ -1,0 +1,56 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/01/30
+// Title  : cmdb_metadata_invothx.htmpl (family specific attributes)
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_invothx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="type"                heading="Investment Type" help="Investment Type">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="risk"                heading="Risk" help="Risk">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="active"              heading="Investment Active?" help="Investment Active?">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="investment_priority" heading="Investment Priority" help="Investment Priority">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="alignment"           heading="Alignment" help="Alignment">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="manager"             heading="Manager" help="Manager">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="stage"               heading="Stage" help="Stage">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="goal"                heading="Goal" help="Goal">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="progress"            heading="Progress" help="Progress">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="investment_status"   heading="Investment Status" help="Investment Status">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="status_indicator"    heading="Investment Status Indicator" help="Investment Status Indicator">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="start_date"          heading="Start Date" help="Start Date">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="status_comment"      heading="Investment Status Comment" help="Investment Status Comment">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="finish_date"         heading="Finish Date" help="Finish Date">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="charge_code"         heading="Charge Code" help="Charge Code">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="currency"            heading="Currency" help="Currency">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="total_cost"          heading="Total Cost" help="Total Cost">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invothx" attr="total_effort"        heading="Total Effort" help="Total Effort">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>
+

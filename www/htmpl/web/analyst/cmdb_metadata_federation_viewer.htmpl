@@ -1,0 +1,175 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_metadata_federation_viewer.htmpl
+//
+// Purpose: File containing routine used to create the metadata required for 
+//          building the cmdb_federation_viewer.htmpl form.
+//
+//
+// 22-Jul-2009 tomjo02 SCO 26226 CMDBf Federation Viewer - Initial version 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Include the function getCMDBMetaData() header and array definitions
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl twa_setup="process_metadata_header" >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Metadata arrays for saving specific attribute information
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var cmdbAttrDataType = new Array();
+    var cmdbAttrExtension = new Array();
+    var cmdbMdrAttrMap = new Array();
+    var cmdbMdrRegExpAttrMap = new Array();
+    var cmdbMdrHideAttrMap = new Array();
+    var cmdbMdrRegExpHideAttrMap = new Array();
+    var cmdbAttrLength = new Array(); // Required for metadata macro
+    
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Save class to family mappings (active or inactive)
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var cmdbClassFamilyMap = new Array();
+    <PDM_LIST FACTORY="grc" PREFIX="list" WHERE="delete_flag = 0 OR delete_flag = 1">
+       cmdbClassFamilyMap['<PDM_FMT ESC_STYLE=C>$list.type</PDM_FMT>'] = '<PDM_FMT ESC_STYLE=C>$list.family.sym</PDM_FMT>'
+    </PDM_LIST>
+    
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Save the family to extension mappings (active or inactive)
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var cmdbFamilyExtensionMap = new Array();
+    <PDM_LIST FACTORY="nrf" PREFIX="list" WHERE="delete_flag = 0 OR delete_flag = 1">
+       cmdbFamilyExtensionMap['<PDM_FMT ESC_STYLE=C>$list.sym</PDM_FMT>'] = '<PDM_FMT ESC_STYLE=C>$list.extension_name</PDM_FMT>'
+    </PDM_LIST>
+ 
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Add the common metadata attributes (nr object). Set twa_setup
+    // to "process_metadata_common" to only load the common attributes once.
+    // Set provider_option_setup to setup mdr/attribute mappings if specified.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE=cmdb_metadata_common.htmpl twa_setup="process_metadata_common" provider_option_setup="process_options" >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Add the family specific metadata, $prop.extension contains the extension name.
+    // Set provider_option_setup to setup mdr/attribute mappings if specified.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE="cmdb_metadata_$prop.extension.htmpl" provider_option_setup="process_options" >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Include user defined metadata
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE="cmdb_metadata_federation_viewer_site_attrs.htmpl" provider_option_setup="process_options" >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Include the internal use only attributes used by the viewer.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    <PDM_INCLUDE FILE="cmdb_metadata_federation_viewer_attrs.htmpl" provider_option_setup="process_options" >
+
+    <PDM_IF 0>
+    /////////////////////////////////////////////////////////////////////////////////
+    // Return arrays needed for building the detail form.
+    /////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF>
+    var result;
+    result = [cmdbCategory, cmdbHeading, cmdbCurrentValue,
+             cmdbAttrHelp, cmdbAttrDataType, cmdbAttrExtension,
+             cmdbClassFamilyMap, cmdbFamilyExtensionMap, 
+             cmdbMdrAttrMap, cmdbMdrRegExpAttrMap, 
+             cmdbMdrHideAttrMap, cmdbMdrRegExpHideAttrMap ]; 
+    return result;
+}
+<PDM_IF 0>
+//////////////////////////////////////////////////////////////////////////////////
+// End of function getCMDBMetaData() 
+//////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+            
+
+<PDM_IF 0>
+///////////////////////////////////////////////////////////////////////////////////////
+// Routine that loads the MDR providers and corresponding snapshots associate with a CI. 
+///////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+function cmdbGetMdrSnapshotData()
+{
+    <PDM_IF 0 > 
+    //////////////////////////////////////////////////////////////////////////////////
+    // Save all MDR providers that are CMDBf "enabled" for retrieve processing.
+    //////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF> 
+     <PDM_LIST FACTORY="ci_mdr_idmap" PREFIX="list" WHERE="cmdb_asset_id = U'$args.id' AND delete_flag = 0" >
+     
+         <PDM_IF "$list.mdr_provider_id.mdr_class" == "cmdbf" >
+             cmdbAddMdrProvider( '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.id</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.name</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.mdr_name</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.namespace</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.endpoint</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.timeout_sec</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.userid</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.mdr_provider_id.password</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.federated_asset_id</PDM_FMT>', 
+                                 '<PDM_FMT ESC_STYLE=C>$list.cmdb_asset_id</PDM_FMT>' );
+         </PDM_IF> 
+         
+     </PDM_LIST>
+        
+    
+    <PDM_IF 0 > 
+    //////////////////////////////////////////////////////////////////////////////////
+    // Save the MDR snapshots associated with this CI.
+    //////////////////////////////////////////////////////////////////////////////////
+    </PDM_IF> 
+    <PDM_LIST FACTORY="ci_mdr_snapshot" PREFIX="list" WHERE="cmdb_asset_id = U'$args.id' AND delete_flag = 0">
+        cmdbAddCIAttribute( <PDM_FMT PAD=NO ESC_STYLE=C>'$list.mdr_provider_id.id'</PDM_FMT>, 
+                            <PDM_FMT PAD=NO ESC_STYLE=C>'$list.mdr_attribute_name'</PDM_FMT>, 
+                            <PDM_FMT PAD=NO ESC_STYLE=C>'$list.mdr_attribute_value'</PDM_FMT>, 
+                            <PDM_FMT PAD=NO ESC_STYLE=C>'$list.last_mod_dt'</PDM_FMT>, 
+                            <PDM_FMT PAD=NO ESC_STYLE=C>'$list.last_mod_by'</PDM_FMT> );
+    </PDM_LIST>
+}
+
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Strings used in cmdb_federation_viewer.js
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+cmdbCITableViewerStrings["Hide empty values"] = "Hide empty values";
+cmdbCITableViewerStrings["Hide Empty Values Checked Title"] = "Click to show attributes with or without values";
+cmdbCITableViewerStrings["Hide Empty Values Unchecked Title"] = "Click to hide attributes with empty values";
+cmdbCITableViewerStrings["Category"] = "Category";
+cmdbCITableViewerStrings["Attribute Name"] = "Attribute Name";
+cmdbCITableViewerStrings["Attributes"] = "Attributes";
+cmdbCITableViewerStrings["Value"] = "Value";
+cmdbCITableViewerStrings["row"] = "row";
+cmdbCITableViewerStrings["All attributes contain empty values"] = "All attributes contain empty values, click 'Hide empty values' to see all attributes";
+cmdbCITableViewerStrings["Not in family"] = "Not in family";
+cmdbCITableViewerStrings["As of"] = "As of";
+cmdbCITableViewerStrings["Not Retrieved"] = "Not Retrieved";
+cmdbCITableViewerStrings["Not In CMDB"] = "Not In CMDB";
+cmdbCITableViewerStrings["Retrieve_Button_Tip"] = "Click to retrieve data for this MDR provider";
+cmdbCITableViewerStrings["Error: Could not retrieve from MDR"] = "Error: Could not retrieve from MDR"; 
+cmdbCITableViewerStrings["CA CMDB"] = "CMDB";
+cmdbCITableViewerStrings["Missing_MDR_Provider_Info"] = "The retrieve operation could not be performed for this MDR provider.\n\nThis condition can occur when MDR provider definition has a blank CMDBf endpoint, userid or shared secret.";
+cmdbCITableViewerStrings["Unknown_error"] = "Unknown error occurred, see stdlog for errors.";
+cmdbCITableViewerStrings["No_CMDBf_MDR_Providers_Defined"] = "There are no CMDBf Federated Mappings defined for this CI, only current CI values are displayed.";
+cmdbCITableViewerStrings["Retrieving data, please wait..."] = "Retrieving data, please wait...";
+

@@ -1,0 +1,79 @@
+<html lang="en">
+<PDM_IF 0>
+$Id: role_main.htmpl,v 1.1 2007/01/04 01:45:26 jenji01 Exp $
+	WHEN PRESENTED:
+	   When displaying a tab page for a role 
+</PDM_IF>
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/product_toolbar.js"></SCRIPT>
+</PDM_IF>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/report.js"></script>
+<title>$prop.FormTitle</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+function frameset_loaded()
+{
+<PDM_IF "$prop.initial_popup" == "">
+    var toolbarTab = ahdtop.toolbarTab;
+    var currID = ahdtop.toolbarCurrentTab;
+    if (typeof toolbarTab != "undefined" &&
+	typeof currID != "undefined")
+	window.role_main.location.href = toolbarTab[currID].src; 
+<PDM_ELSE>
+    window.role_main.location.href = 
+	    "$cgi?SID=$SESSION.SID+FID=123+$prop.initial_load_last_use"; 
+</PDM_IF>
+    ahdframe = window.role_main;
+    ahdframeset.ahdframe = ahdframe;
+}
+var propRoleMenubar = "$prop.role_menubar";
+<pdm_include file="$prop.role_menubar">
+</script>
+</head>
+<script>
+<PDM_IF "$prop.role_menubar" != "menubar_.htmpl">
+	<PDM_IF "$SESSION.usingScreenReader" == "1">
+		<PDM_IF "$prop.browser" != "IE">
+			if (_browser.isSafari)
+				<PDM_MACRO NAME=startFrameset id="frameset1" rows="30,*" onload="frameset_loaded()">
+			else
+				<PDM_MACRO NAME=startFrameset id="frameset1" rows="25,*" onload="frameset_loaded()">
+		<PDM_ELSE>
+			<PDM_MACRO NAME=startFrameset id="frameset1" rows="28,*" onload="frameset_loaded()" FRAMEBORDER='0' border='0'>
+		</PDM_IF>
+	<PDM_ELSE>
+			<PDM_IF "$prop.browser" != "IE">
+				<PDM_MACRO NAME=startFrameset id="frameset1" rows="23,*" onload="frameset_loaded()">
+			<PDM_ELSE>
+				<PDM_MACRO NAME=startFrameset id="frameset1" rows="23,*" onload="frameset_loaded()" FRAMEBORDER='0' border='0'>
+			</PDM_IF>
+	</PDM_IF>
+	<PDM_MACRO NAME=frame id=menubar frame_name=menubar web_form_url="$CAisd/html/menubar.html" SCROLLING=no NORESIZE 
+	    frameborder=0 marginheight=0 marginwidth=0 title="Menu bar"> 
+<PDM_ELSE>
+	<PDM_MACRO NAME=startFrameset id="frameset1" rows="*" onload="frameset_loaded()">
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.scrolling" == "yes">
+	    <PDM_MACRO NAME=frame id=role_main frame_name=role_main web_form_url="$CAisd/html/empty.html" style="border: 1px #8B939A solid;" 
+	     marginheight=0 marginwidth=0 title="Role main">
+<PDM_ELSE>
+	    <PDM_MACRO NAME=frame id=role_main frame_name=role_main web_form_url="$CAisd/html/empty.html" style="border: 1px #8B939A solid;" 
+	     scrolling=$SESSION.scrolling marginheight=0 marginwidth=0 title="Role main">
+</PDM_IF>
+	<PDM_MACRO NAME=endFrameset>
+</script>
+</html>

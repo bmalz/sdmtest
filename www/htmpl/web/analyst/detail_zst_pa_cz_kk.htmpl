@@ -1,0 +1,24 @@
+<PDM_IF 0>
+DESCRIPTION:
+   Display a standard CA CMDB CI detail page including the family specific attributes tab.
+
+PROCEDURE:
+Step 1:
+   Change the keyword strings ***EXTENSION*** below to the name of the extension table. 
+
+Step 2:
+   Save this file as detail_***EXTENSION***.htmpl, where ***EXTENSION*** is the extension table name.
+
+Step 3:
+   Use Web Screen Painter to create nr_cmdb_***EXTENSION***_tab.htmpl, using the template file 
+   nr_cmdb_extension_tab.template as a basis.
+
+</PDM_IF>
+
+<!-- ------------------------------------------------------------------- -->
+<!-- Replace ***EXTENSION*** with the name of the extension table below  -->
+<!-- ------------------------------------------------------------------- -->
+<PDM_INCLUDE FILE="cmdb_detail.htmpl" extension="zst_pa_cz_kk">
+
+<PDM_WSP where="family.extension_name='zst_pa_cz_kk'" factory=nr design=no>
+ 

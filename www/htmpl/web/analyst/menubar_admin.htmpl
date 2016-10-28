@@ -1,0 +1,207 @@
+<PDM_IF 0>
+@(#)$Id: menubar_admin.htmpl ASPEN.1 2010/12/22 13:47:23 taoyu02 Exp $
+WHEN PRESENTED:
+    Build the Administration tab menubar.
+    This file is included in sd_kt_admin.htmpl, and the function it
+    generates is used by any form in the Administration tab with no
+    explicit menubar specified in the invocation of std_body.htmpl.
+
+////////////////////////////////////////////////////////////////////////
+// Administration Menubar
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_WSP preview="OP=menu+NBTAB=adm">
+
+<PDM_MACRO name=startMenubar>
+<PDM_MACRO name=menubarItem label="File" id=mFile variable=__mFile>
+<PDM_MACRO name=menubarItem label="View" id=mView>
+
+<PDM_OBJECT>
+if ( ( w.propFormName1 == "list" ||
+       ( w.propFormName1 == "detail" &&
+         w.propFormName3 == "ro" ) ) &&
+     typeof w.rptName != "undefined" && w.rptName[0] != "no" &&
+     w.rptName[0] != "" ) {
+  if ( typeof w.argSaveSqlClause == "string" && 
+      ! w.argSearchSqlClause.length &&
+      w.argSaveSqlClause.length )
+    w.argSearchSqlClause = w.argSaveSqlClause;
+
+  if ( typeof w.argSearchSqlClause == "string" &&
+      w.argSearchSqlClause.length > 0 ) {
+<PDM_MACRO name=menubarItem label="Reports" hotkey=o id=mReports>
+  }
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menubarItem label="Window" id=mWindow>
+<PDM_MACRO name=menubarItem label="Help" id=mHelp>
+<PDM_MACRO name=endMenubar>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "File" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mFile>
+
+<PDM_OBJECT>
+
+if ( parseInt(w.cfgUserAuth) > 1 &&
+     typeof w.ahdframeset.ahdframe._dtl == "object" &&
+     typeof w.ahdframeset.ahdframe.copy_from_parent != "undefined"  &&
+	   w.ahdframeset.ahdframe._dtl.edit==false) {
+	if ( ( w.propFactory != "ntfr" && w.propFactory != "ntfm" && w.propFactory != "attmnt" ) ||
+         ( typeof w.pass_val_to_menubar == "string" &&
+           ( (w.pass_val_to_menubar =="cr" && $ACCESS.FAC_cr >= 2) ||
+             (w.pass_val_to_menubar =="chg" && $ACCESS.FAC_chg >= 2) ||
+             (w.pass_val_to_menubar =="iss" && $ACCESS.FAC_iss >= 2) ||
+             (w.pass_val_to_menubar =="doc_rep" && $ACCESS.FAC_doc_rep >= 2) ||
+             ( w.propFactory == "ntfm" && 
+               (( w.pass_val_to_menubar == "wf" && $ACCESS.FAC_wf >= 2) ||
+                 (w.pass_val_to_menubar == "iss_wf" && $ACCESS.FAC_iss_wf >= 2) ) ) ) ) ) {
+		
+<PDM_MACRO name=menuItem label=Copy function="make_copy()">
+    }
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItemLocal label="Print_Form..." function="CAisdPrint();" hotkey=n>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Create_New_Repository" function="CreateRepository();" id=itmNewRep>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Add_Folder" function="CreateFolder(ahdframeset.RepIdClicked, ahdframeset.FolderIdClicked);" id=itmNewFolder>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Add_File" function="AddFile(ahdframeset.RepIdClicked, ahdframeset.FolderIdClicked);" id=itmNewFile>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Edit" function="ModifyFolder(ahdframeset.FolderIdClicked?ahdframeset.FolderIdClicked:ahdframeset.RepIdClicked);" id=itmModify>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Cut" function="CutCopyFolder(1, ahdframeset.RepIdClicked, ahdframeset.FolderIdClicked);" id=itmCut>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Copy" function="CutCopyFolder(0, ahdframeset.RepIdClicked, ahdframeset.FolderIdClicked);" id=itmCopy>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Paste" function="PasteFolder(ahdframeset.RepIdClicked, ahdframeset.FolderIdClicked);" id=itmPaste>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.ahdframeset.ahdframe.attmnt_lib_menu != "undefined" ) {
+<PDM_MACRO name=menuItem label="Delete" function="DeleteFolder(ahdframeset.FolderIdClicked?ahdframeset.FolderIdClicked:ahdframeset.RepIdClicked, 0);" id=itmDelete>
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "View" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mView>
+
+<PDM_OBJECT>
+if ( $ACCESS.FAC_USP_PREFERENCES >= 2 ) {
+<PDM_MACRO name=menuItem label="Preferences..." function="showPreferences()">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if (!(typeof w.ahdframeset.ahdframe._dtl == "object" &&
+	   w.ahdframeset.ahdframe._dtl.edit==true)) {           
+<PDM_MACRO name=menuItemLocal label="Refresh" function="refreshForm()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Reports" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mReports>
+<PDM_MACRO name=menuItem label="Summary..." function="ahdtop.popup_report('\" + w.rptName[0] + \"','\" + nx_escape(w.argSearchSqlClause) + \"')">
+<PDM_MACRO name=menuItem label="Detail..." function="ahdtop.popup_report('\" + w.rptName[1] + \"','\" + nx_escape(w.argSearchSqlClause) + \"')">
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+    ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Log_Reader..." function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+     ! ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Main_Page" function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Help" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+<PDM_MACRO name=menuItem label="Documentation..." function="popupWithURL('$env.NX_SERVLET_SERVER_URL' + '$CAisd' + '/doc/' + '$env.NX_CA_BOOKSHELF_LANG' + '/Bookshelf.html', 1, 1)">
+
+<PDM_OBJECT>
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+<PDM_MACRO name=menuItem label="Support..." function="popupWithURL('http://www.ca.com', 1, 1)">
+<PDM_MACRO name=menuItem label="Operations_Info..." function="upd_specific_frame('sd','about.htmpl')">
+
+<PDM_OBJECT>
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>

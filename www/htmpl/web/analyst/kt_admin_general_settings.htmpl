@@ -1,0 +1,192 @@
+<PDM_IF 0>
+kt_admin_general_settings.htmpl
+WHEN PRESENTED:
+    When we need to display the General Settings admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES table
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+
+var iDefValue = new Array(0,0,0,0,0,0,0,0);	//Default Value from the database
+var iRealValue = new Array(0,0,0,0,0,0,0,0);	//Value Display on the page
+var strDBID = new Array("","","","","","","","");	//Databse ID for each record
+var sEBRAdminName;
+var sEBRAdminID;
+
+	
+	<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SEARCH_TOOLS_OPENER">
+			strDBID[0] = "$ciProps.id";
+			iRealValue[0] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[0] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "SEARCH_TOOLS_OPEN_TREE_ID">
+			strDBID[1] = "$ciProps.id";
+			iRealValue[1] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[1] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "ARC_TREE_UI">
+			strDBID[2] = "$ciProps.id";
+			iRealValue[2] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[2] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "TOP_SOLUTION_COUNT">
+			strDBID[3] = "$ciProps.id";
+			iRealValue[3] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[3] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "EBR_ADMIN_ID">
+			strDBID[4] = "$ciProps.id";
+			iRealValue[4] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[4] = "$ciProps.PROPERTY_DEFAULT";
+			<PDM_IF "$ciProps.PROPERTY_VALUE" != "">
+				sEBRAdminID = "$ciProps.PROPERTY_VALUE";
+				<PDM_LIST PREFIX=cntProp FACTORY=cnt WHERE="id=U'$ciProps.PROPERTY_VALUE'" ESC_STYLE=C>
+						sEBRAdminName = "$cntProp.last_name";
+						<PDM_IF "$cntProp.first_name" != " ">
+							sEBRAdminName = sEBRAdminName + ", " + "$cntProp.first_name";
+						</PDM_IF>
+						<PDM_IF "$cntProp.middle_name" != " ">
+							sEBRAdminName = sEBRAdminName + " " + "$cntProp.middle_name";
+						</PDM_IF>
+				</PDM_LIST>
+			</PDM_IF>						
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "TOP_SOLUTION_GLOBAL_DATA">
+			strDBID[5] = "$ciProps.id";
+			iRealValue[5] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[5] = "$ciProps.PROPERTY_DEFAULT";	
+		</PDM_IF>			
+	</PDM_LIST>
+</script>
+
+</head>
+<body class=detailro onload="frmGeneralSettingsOnLoad();" onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<table cellSpacing=0 cellPadding=0 width='100%' class="page_header gn_container_no_border">
+	<tr>
+		<td align=left width='99%'>System</script>
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmGeneralSettings')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmGeneralSettings')",true, "", msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+_dtl = new DetailForm("USP_PROPERTIES","" , "", false,"skip");
+_dtl.edit = true;
+startDetail();
+</script>
+<table width="100%" cellspacing="0" cellpadding="0" class="gn_container_no_border">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center"><span  class="page_section_header_text" >General Settings</span></td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class=page_section>
+<table cellspacing=0 cellpadding=0 class="gn_container_no_border" width="99%">
+
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Search Tool Opening Screen:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>&nbsp;
+			<input tabindex=100 type="radio" id="optSearchToolsOpener" name="optSearchToolsOpener" class="data" title="Open with FAQ / Search" onclick="optChecked('optSearchToolsOpener')" DBID= DefValue= RealValue=>
+			<span class="data" onclick="optSearchToolsOpener[0].click()">Open with FAQ / Search</span><JH>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>&nbsp;
+			<input tabindex=100 type="radio" id="optSearchToolsOpener" name="optSearchToolsOpener" class="data" title="Open with Knowledge Tree Document" onclick="optChecked('optSearchToolsOpener')" DBID= DefValue= RealValue=>
+			<span class="data" onclick="optSearchToolsOpener[1].click()">Open with Knowledge Tree Document ID:</span>
+			<input tabindex=100 type='text' id='txtTreeID' name='txtTreeID' size='12' title="Open with Knowledge Tree Document ID" align='absmiddle' DBID='' RealValue='' onfocus="this.className='focusField';" onblur="this.className='';">
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Category Viewing:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>&nbsp;
+			<input tabindex=100 type="radio" id="optCategoryViewing" name="optCategoryViewing" title="Display categories in tree view" class="data" onclick="bDirty=true;" DBID= DefValue= RealValue= >
+			<span class="data" onclick="optCategoryViewing[0].click()">Display categories in tree view</span><JH>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>&nbsp;
+			<input tabindex=100 type="radio" id="optCategoryViewing" name="optCategoryViewing" title="Display categories in list view" class="data" onclick="bDirty=true;" DBID= DefValue= RealValue= >
+			<span class="data" onclick="optCategoryViewing[1].click()">Display categories in list view</span><JH>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Top Solutions:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>&nbsp;&nbsp;
+			<span class="data"><label for="slctSolutionCount">Number of Documents to Display:</label></span><JH>
+				<select tabindex=100 id='slctSolutionCount' name='slctSolutionCount' onchange='bDirty=true;'>
+				<option value='1'>1</option>
+				<option value='3'>3</option>
+				<option value='5'>5</option>
+				<option value='7'>7</option>
+				<option value='10'>10</option>
+				<option value='20'>20</option>
+				</select>
+		</td>
+	</tr>
+	<PDM_IF "$prop.MultiTenancy" == "on"> 
+	<tr>
+		<td nowrap>&nbsp;&nbsp;
+					<input tabindex=100 type="checkbox" id="cbIncGlobalData" name="cbIncGlobalData" class="clsTextBlackWithHand">
+					<span class=data><label for="cbIncGlobalData">Include public data</label></span><JH>
+		</td>
+	</tr>		
+	</PDM_IF>
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Document Indexing Notifications:</span>
+		</td>
+	</tr>
+	</table>
+	<script>
+		<PDM_MACRO NAME=dtlStartRow>
+			detailLookupEdit("Assignee", "CONTACT", "agtgrp", 1, 20, false, "","", "yes","combo_name","","","","yes","",1);
+		<PDM_MACRO NAME=dtlEndTable>
+	</script>
+</div>
+<script>
+	endDetail();
+</script>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

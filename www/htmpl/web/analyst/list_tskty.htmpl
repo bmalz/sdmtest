@@ -1,0 +1,56 @@
+<PDM_IF 0>
+list_tskty.htmpl
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie klas zadań";
+var hdrTitleList = "Lista klas zadań";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("tsktysum.rpt", "tsktydtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = false;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Task Type">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=tskty>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code size=20>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono klas zadań";
+var msgFound1 = "Znaleziono 1 klasę zadania";
+var msgFound = "Znaleziono %1 klas zadań";
+var msgFoundMore = "Znaleziono %1 klas zadań. Wyświetlane %2 z %3";
+var msgSelect = "Wybierz aby wybrać rekord";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportFmt=ShowLink link=yes sort="sym ASC, tenant ASC">
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_tskty.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

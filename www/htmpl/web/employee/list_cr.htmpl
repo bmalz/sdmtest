@@ -1,0 +1,95 @@
+<PDM_IF 0>
+$Id: list_cr.htmpl,v 1.4 2006/11/20 22:44:20 taoyu02 Exp $
+list_cr.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Call Requests.
+</PDM_IF>
+<PDM_IF "$args.search_sql_clause" : "type =.*'[Ii]'" && "itil" == "$env.NX_OTB_MARKET">		
+	<!-- Added for ITIL Incidents -->		
+	<PDM_INCLUDE FILE=list_in.htmpl>
+<PDM_ELIF "$args.FACTORY" == "in" && "itil" == "$env.NX_OTB_MARKET">
+	<PDM_INCLUDE FILE=list_in.htmpl>
+<PDM_ELSE>			
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<script>
+var hdrTitleList = "Lista wniosków";
+
+function loadActions()
+{
+	var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + 
+		"+OP=TICKET_SEARCH+TICKET_TYPE=" + nx_escape("Requests") + "+SEARCH_COUNT=$record_count";
+	
+	SyncAjaxCall(sURL);
+}
+</script>	
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS=emp onload="loadActions();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono wniosków";
+var msgFound1 = "Znaleziono 1 wniosek";
+var msgFound = "Znaleziono %1 wniosków";
+var msgFoundMore = "Znaleziono %1 wniosków.  Wyświetlam %2 do %3";
+var msgSelect = "Click to select desired request";
+var msgSelectAlg = "Click to select desired request and add a %1 activity log";
+var ref_num_style;
+var out = "";
+out = '<form action="' + cfgCgi + '" method=POST name=fltrFormSubmit>\n' +
+                        '<input type=hidden name=OP value=STORE_URL>\n' +
+			'<input type=hidden name="URLID">\n' +
+			'<input type=hidden name="URL">\n' +
+			'<input TYPE=hidden name="SID">\n' +
+			'<input TYPE=hidden name="FID">\n' +
+			'</FORM>\n';
+document.writeln(out);
+<PDM_MACRO name=lsStart>
+rs.overrideMenu=true
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_if @{list.ttv_act_slas.length:0} == 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_ELSE>
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Wniosek #" attr=ref_num exportFmt=ShowLink link=yes style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Opis" attr=summary startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=DESC>
+<PDM_IF 0>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort="DESC">
+</PDM_IF>
+<PDM_IF "$env.NX_URGENCY_ON_EMPLOYEE" == "Yes">
+<PDM_MACRO name=lsCol hdr="Pilność" attr=urgency>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort=DESC>
+</PDM_IF>
+<PDM_MACRO name=lsCol attr=description colspan=6 label="Opis długi" startrow=yes width=50>
+<PDM_MACRO name=lsEnd factory=cr>
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+</PDM_IF>
+<PDM_WSP>

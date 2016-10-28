@@ -1,0 +1,125 @@
+<PDM_IF 0>
+view_risk_svy.htmpl
+WHEN PRESENTED:
+    User is presented with a Risk survey with previously selected answers.
+INTENT:
+    Capture survey responses from the user
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  risk_svy  args	The Risk Survey (risk_svy) object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/change.maj for the
+                        definition of attributes for 'OBJECT risk_svy'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+	string	ext_args.CNTXT_PERSID - the object that initiated the survey request
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="no">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Risk Survey"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var i = Number(0);
+if (!_browser.isIE)
+{
+	if ( window.frameElement )
+	window.frameElement.scrolling="yes";
+}
+function cntr() {
+	i++;
+}
+function formatmessage(in_str)
+{
+	var m=in_str;
+	if(m.indexOf("%")!=-1)	
+		m=m.replace(new RegExp("%"+1,"g"),"<b>"+i+"</b>");
+	
+	return m;
+}
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msg_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onunload="unload_check();" class="editform">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=risk_svy_answer skiphdr=yes>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext dataclass="alertmsg" value="This survey was submitted by $args.last_mod_by.first_name $args.last_mod_by.last_name at $args.last_mod_dt .">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext value="Hello, $cst.first_name $cst.last_name,">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext value="$args.description">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext dataclass=required showbarimg="yes" value="All questions require a response before submitting the survey">
+
+docWriteln("<input type='hidden' name='FACTORY' value='risk_svy_answer'>");
+docWriteln("<input type='hidden' name='SET.id'  value='$args.id'>");
+docWriteln("<input type='hidden' name='CNTXT_PERSID' value='$ext_args.CNTXT_PERSID'>");
+docWriteln("<input type='hidden' name='CNT_ID' value='$cst.id' >");
+docWriteln("<input type='hidden' name='CRID' value='$args.CRID' >");
+docWriteln("<input type='hidden' name='SVY_ID' value='$args.SVY_ID' >");
+
+<PDM_IF "$args.LOOKUP_RC" != "0" >
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext value="The following condition was encountered while processing your request to take this survey:">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext dataclass=required value="$args.LOOKUP_EMSG">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext value="You will not be allowed to complete the survey at this time. Please report this to the $ProductName Administrator.">
+<PDM_ELSE>
+//The rest of the form goes here, remember to close the PDM_IF	
+
+<PDM_LIST SOURCE=args.questions PREFIX=question>
+cntr();
+//The question -->
+<PDM_IF "$question.answers.length" != "0">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext dataclass=required fmtmsg=formatmessage value="%1. $question.text">
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext fmtmsg=formatmessage value="%1. $question.text">
+</PDM_IF>
+
+// the answers-->
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlSurvey factory="risk_svy_answer" parentid="$question.id" parentmultiflag="$question.mult_resp_flag" view="viewsubmitted">
+<PDM_IF "$question.include_qcomment" == "1" >
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="$question.qcomment_label" attr="qcomment" rows=4 size=60 value="$question.qcomment">
+</PDM_IF>
+</PDM_LIST>
+
+<PDM_IF 0>
+This spot is for extra user comments, if so 
+specified by the survey template.  The user comments
+MUST be in an input control named "SVY_COMMENT". 
+</PDM_IF>
+<PDM_IF $args.include_comment>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="$args.comment_label" attr="comment" rows=4 size=60>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext showbarimg="yes" value="">
+</script>
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<PDM_IF 0>list_KD_QA.htmpl - added as a fragment included to list_KD.htmpl
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+
+var msgFoundNone = "No Results found";
+  var msgFound1 = "1 Result found";
+  var msgFound = "%1 Results found";
+  var msgFoundMore = "%1 Results found. Displaying %2 through %3";
+  var msgSelect = "Click to select desired Result";
+  var arrIDs = new Array();
+  var arrFILE_IDs = new Array();
+  var arrGatewayPaths = new Array();
+  var arrServers = new Array();
+  var arrTitles = new Array();
+  var arrKSTypes = new Array;
+  var arrDoc_blc = new Array;
+  var arrActiveStates = new Array();
+  var ID_counter = 0;
+  var imgPath='$CAisd' + '/img/';
+  var img = "";
+  var doctype = "";
+  var active_state = "";
+
+	function writeRecommendedResults()
+	{
+		for ( i = 0; i < arrDoc_blc.length ; i++)
+		{
+			if(arrDoc_blc[i] > 0)
+			{
+				var currTD_Id = "rs_" + i + "_TITLE";
+				var e = document.getElementById(currTD_Id);
+				if(e)
+				{
+					var html = e.innerHTML;
+					if(html.indexOf("id=spnRec" + i) == -1)
+					{
+						html = html.split("<img").join("<img");
+						html = html.split("><img").join("> <span id=spnRec" + i + " class='navy_bold'>" + msgtext("Recommended") + "</span> <img");
+						e.innerHTML = html;
+					}
+				}
+			}	 
+		}
+	}
+
+  <pdm_macro name=lsStart>
+  <pdm_macro name=lsWrite text="doctype = \"@{list.DOC_TYPE_ID:0}\";" both=no>
+  <pdm_macro name=lsWrite text="active_state = (\"@{list.ACTIVE_STATE:0}\");" both=no>
+  <pdm_macro name=lsWrite text="arrIDs[ID_counter]='@{list.id}';">
+  <pdm_macro name=lsWrite text="arrFILE_IDs[ID_counter]='@{list.FILE_ID}';">
+  <pdm_macro name=lsWrite text="arrGatewayPaths[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.FILE_ID.repository.servlet_path}</PDM_FMT>'">
+  <pdm_macro name=lsWrite text="arrServers[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.FILE_ID.repository.server}</PDM_FMT>'">
+  <pdm_macro name=lsWrite text="arrTitles[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.TITLE}</PDM_FMT>'">
+  <pdm_macro name=lsWrite text="arrKSTypes[ID_counter]=@{list.KS_TYPE}-0;">
+  <pdm_macro name=lsWrite text="arrDoc_blc[ID_counter] = '@{list.ebr_doc_blc}';">
+  <pdm_macro name=lsWrite text="arrActiveStates[ID_counter] = '@{list.ACTIVE_STATE}';">
+  <pdm_macro name=lsWrite text="ID_counter++;">
+  <pdm_macro name=lsWrite text="if (doctype == '2') img = imgPath + 'tree.gif'; else img = imgPath + 'doc.gif';" both=yes>
+  <pdm_macro name=lsWrite text="if (active_state == '100') img = ahdtop.GetFileTypeImage(\"@{list.FILE_ID.file_type:0}\")" both=no>
+  <pdm_macro name=lsWrite text="if (active_state == '200') img = imgPath + 'qa_FileType_16.png';" both=no>
+  <pdm_macro name=lsCol hdr="Tytuł" attr=TITLE link=yes  img=img fmtfunc=highlightSearchTerms sort=no >
+  <pdm_macro name=lsCol hdr="Modyfikowano" attr=MODIFY_DATE sort=no >
+  <pdm_macro name=lsWrite both=yes text="if (active_state == '200') {">
+  <pdm_macro name=lsCol attr=PROBLEM_SHORT disp_entities=no startrow=yes width=255 colspan=4 fmtfunc=highlightSearchTerms sort=no export=no>
+  <pdm_macro name=lsWrite both=yes text="}">
+  <pdm_macro name=lsWrite both=yes text="else if (active_state == '100'){">
+  <pdm_macro name=lsWrite text="pdm_if '@{args.QBE.IN.ebr_search_text}' == '' || '$env.NX_EBR_VERSION' != 'SEARCH_ENGINE' ">
+  <pdm_macro name=lsCol attr=SUMMARY disp_entities=no startrow=yes width=255 colspan=4 fmtfunc=highlightSearchTerms sort=no export=no>
+  <pdm_macro name=lsWrite text="pdm_else">
+  <pdm_macro name=lsCol attr=ebr_ks_teaser keeptags=yes startrow=yes width=255 colspan=4 fmtfunc=highlightSearchTerms sort=no export=no>  
+  <pdm_macro name=lsWrite text="/pdm_if">
+  <pdm_macro name=lsWrite both=yes text="}">
+  <pdm_macro name=lsWrite both=yes text="else {">
+  <pdm_macro name=lsCol attr=SUMMARY disp_entities=no startrow=yes width=255 colspan=4 fmtfunc=highlightSearchTerms sort=no export=no>
+  <pdm_macro name=lsWrite both=yes text="}">
+  <pdm_macro name=lsEnd>
+  //
+  rs.setLinkOnclick(function(){ViewKDAll(self.activeRow, self.activePersid);});
+  var ctxMenu=new ContextMenu("idKD_ALL");
+  ctxMenu.addItem(msgtext("View"), "ViewKDAll(self.activeRow, self.activePersid);");
+  var m_nCtxEdit=ctxMenu.addItem(msgtext("Edit"), "EditKDAll(self.activeRow, self.activePersid);");
+  <PDM_IF "$env.NX_KT" == "Yes">
+    if (argSearchType == "ticket" && m_sArgsSD_LAUNCHEDTopassOn != "")
+	{
+	  ctxMenu.addItem("Accept as Solution", "AcceptFromList(self.activePersid);");
+	}
+  </PDM_IF>	  
+  if (ahdtop.CanUserPerformAction("ROLE_DOCUMENT_DELETE"))
+  {
+	ctxMenu.addItem(msgtext("Delete"), "DeleteSelectedObject(self.activeRow);");
+  }
+  ctxMenu.addItem(msgtext("Print_Form%1...", " " + window.propFormName),"CAisdPrint();");  // Print this window
+  ctxMenu.addItem(msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')"); // Help on this window
+  ctxMenu.finish();

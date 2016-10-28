@@ -1,0 +1,111 @@
+<PDM_IF 0>
+detail_prptpl.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Property Template
+INTENT:
+    Display the detail info for Property Template
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły szablonu właściwości $args.sym"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizacja szablonu właściwości $args.sym "</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie nowego szablonu właściwosci $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+<PDM_IF "$args.id" == "0">
+if ("$args.KEEP.fac_name" == "chgcat_prptpl")
+var the_parent_persid='chgcat'+ ':'+'$args.KEEP.chgcat_id';
+else if ("$args.KEEP.fac_name" == "isscat_prptpl")
+var the_parent_persid='isscat'+ ':'+'$args.KEEP.isscat_id';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+<PDM_ELSE>
+if("$args.object_type"=="chg")
+var the_parent_persid='chgcat'+':'+'$args.object_attrval';
+else if("$args.object_type"=="iss")
+var the_parent_persid='isscat'+':'+'$args.object_attrval';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+</PDM_IF>
+
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Property Template" key="$args.sym">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=prptpl>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.id" == 0  && "$args.KEEP.fac_name" == "chgcat_prptpl">
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrval VALUE='$args.KEEP.chgcat_id'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_type VALUE='chg'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrname VALUE='category'>");
+<PDM_ELIF "$args.id" == 0  && "$args.KEEP.fac_name" == "isscat_prptpl">
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrval VALUE='$args.KEEP.isscat_id'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_type VALUE='iss'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_attrname VALUE='isscat'>");
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro" && "$args.id" != 0>
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.CO_PARENT\" VALUE=\"1\">");
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.PARENT_PERSID\" VALUE="+the_parent_persid+">");
+</PDM_IF>
+
+// close this form and give focus on the main form
+if ( _dtl.edit ) 
+{
+docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+    
+} 
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kolejność" attr=sequence>
+<PDM_MACRO name=dtlCheckbox hdr="Wartość Wymagana" attr=required off=No on=Yes>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Reguła walidacyjna" attr="validation_rule" colspan=1>
+<PDM_MACRO name=dtlTextbox hdr="Etykieta" attr=label colspan=2 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Przykład" attr=sample colspan=3 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zmodyfikowane dnia" attr=modified_date colspan=1>
+<PDM_MACRO name=dtlReadonly hdr="Zmodyfikowane przez" attr=last_mod_by colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: detail_prptpl.htmpl ANDERSON.1 2009/11/12 14:06:29 sahra04 Exp $;
+</PDM_IF>
+<PDM_WSP>

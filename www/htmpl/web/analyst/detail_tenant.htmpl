@@ -1,0 +1,144 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a Tenant
+</PDM_IF>
+
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Tenant Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Tenant"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Tenant $args.name"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function displayLogo ()
+{
+    var name = <PDM_FMT ESC_STYLE=JS2>"$args.name"</PDM_FMT>,
+        logo = <PDM_FMT ESC_STYLE=JS2>"$args.logo"</PDM_FMT>;
+   document.write("<TR><TD><IMG ALT='");
+   document.write(name);
+   document.write("' TITLE='");
+   document.write(name);
+   document.write("' SRC='");
+   document.write(logo);
+   document.write("' height=38></TD></TR>");
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function setServiceProvider(value)
+{
+   var fval = "No";
+   if ( "$prop.form_name_3" == "edit" && "$args.id" == "0" ) {
+       if ( "$prop.SERVICE_PROVIDER_UUID" == "00" ) {
+           fval = "Yes";
+           show_response(msgtext("AHD05360"));
+           document.main_form.elements["SET.service_provider"].value = "1";
+       }
+   }
+   else if ( value == "1" )
+        fval = "Yes";
+   return(fval);     
+}
+
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory="tenant">
+<PDM_MACRO name=dtlStart>
+</SCRIPT>
+<INPUT TYPE=HIDDEN NAME=SET.service_provider VALUE="$args.service_provider">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr="name" size=20>
+<PDM_MACRO name=dtlReadonly hdr="Dostawca usługi" attr="service_provider" fmtfunc=setServiceProvider>
+<PDM_MACRO name=dtlTextbox hdr="Tenant Number" attr="tenant_number" size=20>
+<PDM_IF "$prop.form_name_3" == "edit" && "$prop.SERVICE_PROVIDER_UUID" != "00" && "$args.service_provider" != "1">
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Status rekordu" attr="delete_flag">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KEEP.RestrictParent" != "1">
+<PDM_MACRO name=dtlDropdown hdr="Parent Tenant" attr=parent extraurl="QBE.EQ.subtenants_ok=1" link=yes whereclause="subtenants_ok=1">
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Parent Tenant" attr="parent">
+</PDM_IF>
+<PDM_MACRO name=dtlCheckbox hdr="Subtenants Allowed" attr=subtenants_ok off="No" on="Yes">
+<PDM_MACRO name=dtlReadonly hdr="Tenant Depth" attr=tenant_depth colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Supertenant Group" attr=supertenant_group>
+<PDM_MACRO name=dtlLookupReadonly hdr="Subtenant Group" attr=subtenant_group>
+<PDM_MACRO name=dtlLookupReadonly hdr="Related Tenant Group" attr=relatedtenant_group>
+<PDM_MACRO name=dtlLookupReadonly hdr="Grupa kluczy obcych" attr=fkey_group>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Numer telefonu" attr="phone_number" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Dodatkowy numer telefonu" attr="alt_phone" size=20>
+<PDM_IF "$env.NX_LDAP_ENABLE" == "Yes" && "$env.NX_LDAP_ENABLE_GROUPS" == "Yes">
+<PDM_MACRO name=dtlTextbox hdr="Faks" attr="fax_number" size=20>
+<PDM_MACRO name=dtlLookup hdr="LDAP Tenant Group" attr=ldap_tenant_group size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Faks" attr="fax_number" colspan=2 size=20>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlLookup hdr="Kontakt" attr="contact" extraurl=QBE.EQ.tenant=$prop.SERVICE_PROVIDER_UUID size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Kontakt" attr="contact" size=20>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="e-mail" attr="contact.email_address">
+<PDM_MACRO name=dtlReadonly hdr="Adres e-mail pagera" attr="contact.pemail_address">
+<PDM_MACRO name=dtlDropdown hdr="Warunki użytkowania" attr="terms_of_usage" link=yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Logo" attr="logo" colspan=4 size=80>
+<PDM_IF "$args.logo" != "">
+<PDM_MACRO name=dtlStartRow>
+   displayLogo();
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 rows=4 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=startNotebook hdr=tenant_tabs>
+<PDM_MACRO name=TAB title="Address" file="tenant_address_tab.htmpl">
+<PDM_MACRO name=TAB title="Tenant Groups" height=300 id=ten_tengrp src="OP=SEARCH+FACTORY=tenant_group+QBE.EQ.members.tenant_id.id=$dob.id+KEEP.forTenToTenGrp=1+KEEP.TEN_PERSID=$args.persistent_id+KEEP.TEN_ID=$args.id+QBE.EQ.delete_flag=0">
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=TAB title="Subtenants" height=300 src="OP=SEARCH+FACTORY=tenant+QBE.EQ.parent=$args.id+KEEP.subtenants_ok=$args.subtenants_ok">
+<PDM_MACRO name=TAB title="CIs In Contact Environments" height=300 src="OP=SEARCH+FACTORY=nr+QBE.EQ.cntref.cnt.tenant=$args.id+KEEP.cis_in_cnt_envs=$args.id">
+<PDM_MACRO name=TAB title="CIs In Organization Environments" height=300 src="OP=SEARCH+FACTORY=nr+QBE.EQ.orgref.org.tenant=$args.id+KEEP.cis_in_org_envs=$args.id">
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_tenant.htmpl ASPEN.6 2010/10/14 18:34:21 manmu01 Exp $
+</PDM_IF>
+<PDM_WSP>

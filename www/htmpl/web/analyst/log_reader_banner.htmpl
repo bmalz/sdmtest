@@ -1,0 +1,31 @@
+<PDM_IF 0>
+$Id: log_reader_banner.htmpl,v 1.2 2006/11/08 00:19:39 olsjo01 Exp $
+list_lr.htmpl
+WHEN PRESENTED:
+	When we need to display Log Reader.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview=log_reader_fs.htmpl+SINGLE_FRAME=1>
+<PDM_INCLUDE FILE=styles.htmpl>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/imgbutton.css">
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript">
+if (_browser.isUnix == true)
+   document.writeln("<link rel='stylesheet' type='text/css' href='$CAisd/css/unix.css'>");
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/imgbutton.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+
+<body>
+<script language="JavaScript">
+disable_right_click();
+html = generate_basic_form_header_html();
+document.writeln(html);
+</script>
+
+</body>
+</html>

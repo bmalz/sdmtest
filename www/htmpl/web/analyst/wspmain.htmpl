@@ -1,0 +1,43 @@
+<PDM_IF 0>
+wspmain.htmpl
+WHEN PRESENTED:
+    After initial WSP login
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=ahdtop.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<title>Web Screen Painter</TITLE>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class=messages>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_INCLUDE FILE=welcome_banner.htmpl>
+<center>
+<h1>Web Screen Painter</h1>
+<script type="text/javascript">
+var text;
+var access = "$ACCESS.wsp" - 0;
+if ( access & 0x04 )
+  text = "<h2>Preview Session</h2>";
+else
+  text = "<h2>Readonly Preview Session</h2>";
+text += "<br><br>Forms you preview in WSP appear in this browser window.";
+if ( access & 0x04 )
+  text += "<h3>Caution: This preview session is authorized to update the database</h3>";
+else
+  text += "<br><br>Since this is a readonly session, all update operations are ignored." +
+          "<br>As a reminder of this, the caption of all \"Save\" buttons is changed to \"noSave\".";
+text += "<br><br>Please use WSP itself to logout from this session.";
+document.writeln(text);
+</script>
+</center>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+<IFRAME style="width:0 px;height:0 px;" border="0" frameborder="NO" marginwidth="0" marginheight="0" NAME=workframe></IFRAME>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: wspmain.htmpl ASPEN.2 2012/04/30 11:47:37 aliab01 Exp $
+</PDM_IF>

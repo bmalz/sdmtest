@@ -1,0 +1,42 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/02/02
+// Title  : cmdb_metadata_net_rsrcx.htmpl (family specific attributes)
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_net_rsrcx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="net_rsrcx" attr="resource_group_type"  heading="Resource Group Type" help="The type of recovery domain for a cluster (for example, data resiliency, application resiliency, or device resiliency)">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="net_rsrcx" attr="resource_type"        heading="Resource Type" help="The categorization of a cluster resource (for example, physical disk, print spooler, file share, network name, local quorum, and so on)">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="net_rsrcx" attr="resource_file"        heading="Resource File" help="The identifier for a file folder whose subfolders can be shared among cluster resources">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="net_rsrcx" attr="resource_mount_point" heading="Resource Mount Point" help="The name of the directory where the device must be mounted">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="net_rsrcx" attr="resource_disk"        heading="Resource Disk" help="The identifier for a shared disk to which access can be requested by a server or cluster node">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

@@ -1,0 +1,88 @@
+void alg::log_rozwiazanie(...)
+{
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+    string method;
+    method = "alg::log_rozwiazanie";
+    logf(TRACE,"%s: Started for %s and %s", method, (string)argv[3], argv[6]);
+	
+	send_wait( 0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, argv[3], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+		return;
+	}
+	object cr;
+	cr = msg[0] ;
+	logf(TRACE, "cr ref_num: %s", cr.ref_num);
+	
+	send_wait( 0, top_object(), "call_attr", "resocode", "dob_by_id", NULL, argv[12], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_id: '%s'", method, msg[0] );
+		return;
+	}
+	object resocode;
+	resocode = msg[0] ;
+	logf(TRACE, "resocode status: %s", resocode.zcrs);
+	
+	string rozwiazanie;
+	rozwiazanie = cr.zrozwiazanie;
+	if ( is_null(rozwiazanie) || rozwiazanie == ""  )
+	{
+		rozwiazanie = (string)argv[9] + " " + argv[6];
+	}
+	else
+	{
+		rozwiazanie = rozwiazanie + "\n" + (string)argv[9] + " " + argv[6];
+	}
+	object gl;
+	send_wait(0, top_object(), "get_co_group");
+	gl = msg[0];
+
+	send_wait(1, gl, "checkout", cr);
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on checkout cr: %s", method, (string)msg[0]);
+		return;
+	}
+	send_wait(1, cr, "call_attr", "zrozwiazanie", "set_val", rozwiazanie, "SURE_SET");
+	
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on change Rozwiązanie value: %s", method, msg[0]);
+		return;
+	}
+	logf(TRACE, "%s: Rozwiązanie value changed - no error", method);
+	
+	send_wait(1, cr, "call_attr", "resolution_code", "set_val", argv[12], "SURE_SET");
+	
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on change Resolution code value: %s", method, msg[0]);
+		return;
+	}
+	logf(TRACE, "%s: Resolution code value changed - no error", method);
+	
+	send_wait(1, cr, "call_attr", "status", "set_val", resocode.zcrs, "SURE_SET");
+	
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error on change status value: %s", method, msg[0]);
+		return;
+	}
+	logf(TRACE, "%s: Status value changed - no error", method);
+
+	// Save change.
+	send_wait(0, gl, "checkin");
+	if( msg_error() ) {
+		logf(ERROR, "%s: Error on save: %s", method, (string)msg[0]);
+
+		send_wait(0, gl, "uncheck");
+		return;
+	}
+
+	logf(TRACE, "%s: Saved, Finished", method);
+}
+
+test( ... )
+{
+    string method;
+    method = "alg::log_rozwiazanie";
+    logf(TRACE,"%s: Started for %s", method, (string)localtime);
+}

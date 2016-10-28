@@ -1,0 +1,120 @@
+<PDM_IF 0>
+@(#)$Id: list_org.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+list_org.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Organizations.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie organizacji";
+var hdrTitleList = "Lista organizacji";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("intorgsum.rpt", "intorg.rpt");
+var cfgCanEdit = true;
+if(typeof ahdtop != "undefined" && typeof ahdtop.toolbarTab != "undefined" && ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].code=='sd')
+	var cfgCanCopy = false;
+else
+	var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+
+<PDM_IF "$args.KEEP.forNrToOrg" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.NR_ID" != "0" && $ACCESS.FAC_nr \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Organizations", "UpdateOrganizations()", enableExtraBtn);
+
+    function UpdateOrganizations() {
+        update_with_lrel_style("nr", "$args.KEEP.NR_PERSID", "org", "orgref", "Organizacje", 
+                               "Assigned to CI", "", "KEEP.forNrToOrg=0");
+    }
+<PDM_ELIF "$args.KEEP.forOrgToKontr" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.KONTR_ID" != "0" && $ACCESS.FAC_svc_contract \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Organizations", "UpdateOrganizations()", enableExtraBtn);
+
+    function UpdateOrganizations() {
+        update_with_lrel_style("svc_contract", "$args.KEEP.KONTR_ID", "org", "zorgs", "Organizacje", "Przypisane do kontraktu", "", "KEEP.forOrgToKontr=0");
+		//update_lrel("svc_contract", "$args.KEEP.KONTR_ID", "org", "zorgs",  "Organizacje", "Przypisane do kontraktu", "");
+    }
+</PDM_IF>
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Organization">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF $args.KEEP.noCreateBtn == "1">
+<PDM_MACRO name=sfStart create=false factory=org>
+<PDM_ELIF $ACCESS.FAC_org \> 1>
+<PDM_MACRO name=sfStart factory=org>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=org>
+</PDM_IF>
+<PDM_IF "$args.KEEP.forNrToOrg" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.oenv.nr.id" value="$args.QBE.EQ.oenv.nr.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forOrgToKontr" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.zsvc_contracts.kontr.id" value="$args.QBE.EQ.zsvc_contracts.kontr.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_org.htmpl>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=name size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Kod organizacji" attr=org_num size=20>
+<PDM_MACRO name=sfLookup hdr="Preferowany kontakt" attr=contact factory=cnt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=42>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No organizations found";
+var msgFound1 = "1 organization found";
+var msgFound = "%1 organizations found";
+var msgFoundMore = "%1 organizations found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired organization";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kod organizacji" attr=org_num>
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=contact>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+<PDM_IF "$args.KEEP.forNrToOrg" == "1" && "$args.KEEP.NR_ID" == "0">
+    ImgBtnDisableButton("btnShowHide");
+    ImgBtnDisableButton("btndflt");
+    ImgBtnDisableButton("btnClear");
+<PDM_ELIF "$args.KEEP.forOrgToKontr" == "1" && "$args.KEEP.KONTR_ID" == "0">
+    ImgBtnDisableButton("btnShowHide");
+    ImgBtnDisableButton("btndflt");
+    ImgBtnDisableButton("btnClear");
+</PDM_IF>
+
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

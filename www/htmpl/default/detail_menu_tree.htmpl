@@ -1,0 +1,205 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When adding, modifying or viewing a node on the menu tree
+INTENT:
+    Adding, editing or viewing a node on the menu tree
+VARIABLES:
+    object menu_tree args	The menu_tree object we are displaying.
+
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Menu Tree Node Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Update Menu Tree Node"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Menu Tree Node ${args.COMMON_NAME}"</PDM_FMT>;
+
+</script>
+<script type="text/javascript">
+var argPersistentID = "$args.persistent_id";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/change_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/timer.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/tree_edit.js"></script>
+<script>
+var menu_tree_orig_onsubmit = void(0);
+var lArrayNumber = 0;
+var close_with_opener = 1;
+function loadActions()
+{
+    var strHref = location.href;
+    var j = strHref.search("lArrayNumber");
+    if (j>0)
+    {
+        j = j + "lArrayNumber".length + 1;
+        var lNumber = strHref.substr(j,1);
+        lArrayNumber = lNumber;
+    }
+	
+    if ("$prop.form_name_3" == "edit")
+    {
+        ahdtop.menuTreeObject = void(0);
+        ahdtop.menuTreeExecStr = void(0);
+        if ('<PDM_FMT PAD=NO ESC_STYLE=C>$args.caption</PDM_FMT>' == "")
+        {
+            parent.bEditing_New = true;
+        }
+        else
+        {
+            parent.bEditing_New = false;
+        }
+				
+    }
+    else
+    {
+        if (typeof parent.bEditing_New != 'undefined')
+        {
+            //Getting a reference to the tree macro and sending it a message to update the tree with the changes          
+            if (typeof ahdframeset.opener == "object" && 
+		ahdframeset.opener != null && 
+		typeof ahdframeset.opener.ahdframeset == 'object' && 
+		ahdframeset.opener.ahdframeset != null) 
+            {
+                ahdframeset.opener.ahdframeset.menuTreeWindows[lArrayNumber].MenuTree.UpdateTree($args.id,parent.bEditing_New,'<PDM_FMT PAD=NO ESC_STYLE=C KEEPTAGS=YES>$args.caption</PDM_FMT>',$args.parent_id,$args.has_children,'<PDM_FMT PAD=NO ESC_STYLE=C>$args.resource.resource</PDM_FMT>');
+            }
+            else
+            {
+                if (typeof ahdframeset.menuTreeWindows == 'object' &&
+		    ahdframeset.menuTreeWindows != null) 
+                {
+                    ahdframeset.menuTreeWindows[lArrayNumber].MenuTree.UpdateTree($args.id,parent.bEditing_New,'<PDM_FMT PAD=NO ESC_STYLE=C KEEPTAGS=YES>$args.caption</PDM_FMT>',$args.parent_id,$args.has_children,'<PDM_FMT PAD=NO ESC_STYLE=C>$args.resource.resource</PDM_FMT>');
+                }
+            }            
+        }
+        else 
+        {
+            ahdtop.menuTreeExecStr = "UpdateTree($args.id, false,'" + 
+                                        '<PDM_FMT PAD=NO ESC_STYLE=C KEEPTAGS=YES>$args.caption</PDM_FMT>' + 
+                                        "',$args.parent_id,$args.has_children,'" + 
+                                        '<PDM_FMT PAD=NO ESC_STYLE=C>$args.resource.resource</PDM_FMT>' + "');";
+
+            if (typeof ahdframeset.opener == 'object' &&
+		ahdframeset.opener != null && 
+		typeof ahdframeset.opener.ahdframeset == 'object' &&
+		ahdframeset.opener.ahdframeset != null) 
+            {
+                ahdtop.menuTreeObject = ahdframeset.opener.ahdframeset.menuTreeWindows[lArrayNumber].MenuTree; 
+            }
+            else
+            {		
+                if (typeof ahdframeset.menuTreeWindows == 'object' &&
+		    ahdframeset.menuTreeWindows != null) 
+                {
+                    ahdtop.menuTreeObject = ahdframeset.menuTreeWindows[lArrayNumber].MenuTree;       
+                }                	
+            }		
+        }
+    }
+}
+
+function checkBeforeSave()
+{
+	var sNodeName;
+	cap_obj = document.forms[0].elements["SET.caption"];
+	sNodeName = trim(cap_obj.value);
+	if (sNodeName.length == 0)
+	{
+		alert("Please enter a node name.");
+		cap_obj.focus();
+		return;
+	}
+	if (!check_caption(cap_obj))
+	    return false;
+	
+	// run original onsubmit handler if any
+    if (typeof menu_tree_orig_onsubmit != "undefined" && 
+	menu_tree_orig_onsubmit != "")
+	  return menu_tree_orig_onsubmit();
+	return true;
+	
+}
+function close()
+{
+	ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+function trim(argvalue)
+{
+	while (1)
+	{
+		if (argvalue.substring(0, 1) != " ")
+			break;
+		argvalue = argvalue.substring(1, argvalue.length);
+	}
+	return argvalue;
+}
+function check_caption(fld_obj)
+{
+    if (typeof fld_obj == "undefined")
+	return true;
+    var caption = fld_obj.value;
+    if (!check_label(caption)) 
+    {
+	detailReportValidation( fld_obj, 1, msgtext("Bad_character_in_node_name.__P"));
+	return false;
+    }
+    else 
+    {
+	detailReportValidation(fld_obj,0);
+	return true;
+    }
+}       
+</script>
+</head>
+<body class="detailro" onload="loadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="" header=no>
+<script>
+<PDM_MACRO name=dtlForm factory=menu_tree>
+<PDM_MACRO name=dtlStart>
+
+	if (typeof window.document.main_form.onsubmit != "undefined" && 
+	    window.document.main_form.onsubmit != "")
+	{
+	    menu_tree_orig_onsubmit = window.document.main_form.onsubmit;
+	} 
+		
+	window.document.main_form.onsubmit = checkBeforeSave; 
+	
+</script>
+<center>
+<script>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa węzła" attr=caption colspan=2 evt="onChange='check_caption(this)'" rows=1 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=2 rows=6 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Zasób" attr=resource colspan=2 extraurl="KEEP.RESTRICT_INACTIVE_RESOURCE=1" size=80>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Zasób" attr=resource colspan=2 extraurl="QBE.EQ.type=0+KEEP.RESTRICT_INACTIVE_RESOURCE=1" size=80>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_menu_tree.htmpl ASPEN.1 2010/11/16 16:04:37 saima01 Exp $;
+</PDM_IF>
+<PDM_WSP>

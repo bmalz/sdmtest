@@ -1,0 +1,58 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie umów SLA";
+var hdrTitleList = "Lista umów SLA";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zSLAsum.rpt", "zSLAdtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=sfStart factory="zSLA">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="sym" size=20>
+<PDM_MACRO name=sfLookup hdr="Usługa" attr="usluga">
+<PDM_MACRO name=sfDropdown hdr="Status" attr="delete_flag">
+<PDM_IF "zSLA" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO NAME=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No SLAs found";
+  var msgFound1 = "1 SLA found";
+  var msgFound = "%1 SLAs found";
+  var msgFoundMore = "%1 SLAs found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired SLA";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="sym" link="yes" startrow="no">
+<PDM_MACRO name=lsCol hdr="Usługa" attr="usluga" startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr="delete_flag" startrow="no">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

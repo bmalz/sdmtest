@@ -1,0 +1,93 @@
+<PDM_IF 0>
+list_sa_disclaimer.htmpl
+WHEN PRESENTED:
+    When we need to display a list of SA Disclaimers (Factory sa_disclaimer)
+INTENT:
+   	Display list of SA Disclaimers
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Support Automation Log List";
+			var hdrTitleList = "Support Automation Log List";
+			var cfgCanEdit = true;
+			var cfgExtraButton; //Extra button to Invite End User
+			
+			function InviteEndUser()
+			{
+				var sd_obj_type = "cr";
+				if ("$args.QBE.EQ.sd_obj_type" != "") {
+					sd_obj_type = "$args.QBE.EQ.sd_obj_type"; 
+				} 
+				ahdtop.inviteEndUser(sd_obj_type+":$args.QBE.EQ.sd_obj_id");
+			}
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"/>
+	</HEAD>
+	<BODY CLASS="list">
+			<PDM_INCLUDE FILE=std_body.htmpl>
+		
+<PDM_IF "$env.NX_SUPPORTAUTOMATION_URL" != "">
+			<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+			<SCRIPT LANGUAGE="JavaScript">
+				//show the button only for users set as SA analysts		
+				if (ahdtop.canDisplayLiveAssistanceLink() && "$args.QBE.EQ.sd_obj_id" != "0" ) {
+					cfgExtraButton=new Array("Invite_End_User", "InviteEndUser()",true);
+				}
+				
+<PDM_MACRO name=sfStart create="false" factory="sa_event_history">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data wpisu" attr="eventEpoch" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data wpisu" attr="eventEpoch" qbe_condition=LE>
+<PDM_MACRO name=sfTextbox hdr="Element logu" attr="eventDisplayText" size="40">
+					document.write('<INPUT TYPE=hidden NAME="QBE.EQ.sd_obj_id" VALUE="$args.QBE.EQ.sd_obj_id">');
+					document.write('<INPUT TYPE=hidden NAME="QBE.EQ.sd_obj_type" VALUE="$args.QBE.EQ.sd_obj_type">');
+					document.write('<INPUT TYPE=hidden NAME="QBE.NE.sd_obj_type" VALUE="$args.QBE.NE.sd_obj_type">');
+				
+<PDM_MACRO name=sfEnd>
+			</SCRIPT>
+		
+</PDM_IF>
+		
+			<PDM_FORM NAME="frmFID">
+			</PDM_FORM>
+		
+<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+				if ( ahdtop.isSupportAutomationEnabled() ) {
+	  				var msgFoundNone = "No Support Automation Log Items found";
+	 	 			var msgFound1 = "1 Support Automation Log Item found";
+	  				var msgFound = "%1 Support Automation Log Items found";
+	  				var msgFoundMore = "%1 Support Automation Log Items found.  Displaying %2 through %3";
+	  				var msgSelect = "Click to select desired Support Automation Log Item";
+	  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Data" attr="eventEpoch" link="no">
+<PDM_MACRO name=lsCol hdr="Element logu" attr="eventDisplayText" link="no" sort=no>
+<PDM_MACRO name=lsEnd>
+				}
+				ctxMenu = void(0);
+  			</script>
+		
+</PDM_IF>
+<PDM_IF "$env.NX_SUPPORTAUTOMATION_URL" != "">
+			
+			<PDM_INCLUDE FILE="std_footer.htmpl">
+		
+<PDM_ELSE>
+			<PDM_INCLUDE file=sa_unavailable.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+	set_action_in_progress(ACTN_COMPLETE);
+</SCRIPT>
+			
+			<PDM_INCLUDE FILE="std_footer.htmpl">
+		
+</PDM_IF>
+	</BODY>
+</HTML>
+<PDM_WSP>

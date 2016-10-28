@@ -1,0 +1,11 @@
+<PDM_IF 0>
+splash.htmpl
+WHEN PRESENTED:
+    Used as a PDM_INCLUDE file to get a splash
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript">
+document.writeln(generate_logo_product_name_html());
+</script>
+

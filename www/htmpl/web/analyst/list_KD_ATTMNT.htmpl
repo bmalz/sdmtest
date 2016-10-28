@@ -1,0 +1,132 @@
+<PDM_IF 0>
+$Id: list_KD_ATTMNT.htmpl,v 1.4 2007/01/04 23:12:34 tuach01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of Attachments.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.View" == "">
+	var hdrTitle = "Document Attachment";
+	var hdrTitleList = "Attachment List";
+	var hdrTitleTempl = "Document Template Attachment";
+<PDM_ELSE>
+	var hdrTitle = "Document";
+	var hdrTitleList = "Linked Documents List";
+	var hdrTitleTempl = "Document Template";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_reply.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript">
+	var linkOnly, repName, folderPath, attmntNmae;
+</script>
+</head>
+
+<body leftmargin=0 topmargin=0 class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="attachments" header=yes>
+
+<PDM_IF "$args.KEEP.View" == "DOC_LIST">
+<table cellspacing=0 cellpadding=0 width='100%' border=0  class="page_header">
+<tr>
+<td align="left" width='99%'>Linked Documents List</td>
+<td align="right" width='1%'>
+<script type="text/javascript">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Detach From All Documents[A]" disabled="defer" func="DetachFile('$args.KEEP.ATTMNT_ID')" hotkey_name="Detach From All Documents" id="bnRemoveAllLinks[A]" width=230>
+<PDM_MACRO name=btnEndRow>
+</script>   
+</td>
+</tr>
+</table>
+</PDM_IF>
+
+<script type="text/javascript">
+var arrFields = new Array;
+
+<PDM_IF "$args.KEEP.View" == "">
+	var msgFoundNone = "No attachments found";
+	var msgFound1 = "1 Attachment found";
+	var msgFound = "%1 Attachments found";
+	var msgFoundMore = "%1 Attachments found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Attachments";
+	var msgSelectAlg = "Click to select desired Attachments and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired Attachments template";
+<PDM_ELSE>
+	var msgFoundNone = "No Document found";
+	var msgFound1 = "1 Document found";
+	var msgFound = "%1 Documents found";
+	var msgFoundMore = "%1 Document found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Documents";
+	var msgSelectAlg = "Click to select desired Documents and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired Documents template";
+</PDM_IF>
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite both=yes text="pdm_if '@{args.KEEP.View}' == ''">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-id'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.ATTMNT_ID.id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-persistent_id'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.ATTMNT_ID.persistent_id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-attmnt_name'] = '<PDM_FMT ESC_STYLE=C>@{list.ATTMNT_ID.attmnt_name}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-orig_file_name'] = '<PDM_FMT ESC_STYLE=C>@{list.ATTMNT_ID.orig_file_name}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-link_only'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.ATTMNT_ID.link_only}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.servlet_path'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.ATTMNT_ID.repository.servlet_path}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.server'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.ATTMNT_ID.repository.server}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="linkOnly = \"@{list.ATTMNT_ID.link_only:}\";">
+<PDM_MACRO name=lsWrite text="repName = \"@{list.ATTMNT_ID.repository.sym:}\";">
+<PDM_MACRO name=lsWrite text="folderPath = \"@{list.ATTMNT_ID.folder_id.folder_path}\";">
+<PDM_MACRO name=lsWrite text="attmntNmae = \"@{list.ATTMNT_ID.attmnt_name}\";">
+<PDM_MACRO name=lsWrite both=yes text="if (typeof parent.parent.getEdit != 'undefined' && parent.parent.getEdit() != 0) {">
+<PDM_MACRO name=lsCol hdr="" attr=ATTMNT_ID.attmnt_name fmtfunc=fmtPath link=yes>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="else {">
+<PDM_MACRO name=lsCol hdr="" attr=ATTMNT_ID.attmnt_name fmtfunc=fmtPath>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="pdm_else">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-doc_id'] = '@{list.DOC_ID}'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-attmnt_id'] = '@{list.ATTMNT_ID.id}'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-link_type'] = '@{list.ATTMNT_ID.link_type}'">
+<PDM_MACRO name=lsCol hdr="Tytuł" attr=DOC_ID.TITLE link=yes>
+<PDM_MACRO name=lsCol hdr="Źródło wiedzy" attr=DOC_ID.KS_TYPE fmtfunc=fmtKSType>
+<PDM_MACRO name=lsCol hdr="Typ połączenia" attr=ATTMNT_ID.link_type fmtfunc=fmtLinkType>
+<PDM_MACRO name=lsWrite both=yes text="/pdm_if">
+<PDM_MACRO name=lsEnd factory=KD_ATTMNT>
+
+var ctxMenu=new ContextMenu("idMenuTabAttachments");
+
+<PDM_IF "$args.KEEP.View" == "">
+	if ( typeof parent.parent.getEdit != "undefined" &&
+         parent.parent.getEdit() != 0)
+	{
+		rs.setLinkOnclick(function(){ViewAttmntDetail(self.activePersid);});
+		ctxMenu.addItem(msgtext("View_Details"), "ViewAttmntDetail(self.activePersid);");
+		ctxMenu.addItem(msgtext("View_Content"), "listDownloadFile(self.activePersid);");
+		ctxMenu.addItem(msgtext("Detach0"), "DeleteAttachmentLink(self.activePersid);");
+	}	
+<PDM_ELSE>
+	rs.setLinkOnclick(function(){OpenDocumentEditor(self.activePersid);});
+	ctxMenu.addItem(msgtext("View_Document0"), "OpenDocumentEditor(self.activePersid);");
+	itmDetach = ctxMenu.addItem(msgtext("Detach_from_Document"), "DeleteAttachmentLink(self.activePersid);");
+	
+	// Called by resultSet.js
+	function updateCtxMenuItems(row)
+	{
+		listKdAttmntUpdateCtxMenu(self.activePersid);
+	}
+		
+</PDM_IF>
+	ctxMenu.finish();
+	
+	
+</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+
+<PDM_WSP>

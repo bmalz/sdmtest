@@ -1,0 +1,126 @@
+<script>
+var sError = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.ERROR_MSG</PDM_FMT>';
+if(sError.length > 0 && 
+			sError != "updateOK"  && (typeof parent.SetAttmntId == "function"))
+		parent.SetAttmntId(0, sError, 2);
+		
+// No need if displaying as a Mouseover Preview.	
+if ( typeof cfgMOPreviewMode != "number" || cfgMOPreviewMode != 1) 
+{
+	if(typeof parent.SetDobId == "function")
+	{
+		if("$args.id" == "0")
+			parent.SetDobId("$dob.id", "$args.sec_uuid");
+		else 
+		{
+			parent.SetDobId("$args.id", "$args.sec_uuid");
+			parent.SetFields(<PDM_FMT ESC_STYLE=C>"$args.attmnt_name"</PDM_FMT>,<PDM_FMT ESC_STYLE=C>"$args.description"</PDM_FMT>);
+		}
+	}
+}
+
+</script>	
+	
+	<script>
+		
+<PDM_MACRO name=dtlForm factory=attmnt onsubmit="return check_submit()">
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.status" == "LINK_ONLY">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="URL" attr="orig_file_name" colspan=3 size=60>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=attmnt_name colspan=3 rows=1 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 rows=3 size=75>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.link_only" != "1" && "${args.KEEP.FILE_UPLOAD:0}" != "1">
+<PDM_MACRO name=dtlReadonly hdr="Oryginala nazwa pliku" attr=orig_file_name colspan=2>
+<PDM_MACRO name=dtlReadonly hdr="Typ pliku" attr=file_type>
+<PDM_MACRO name=dtlStartRow>
+		
+		var file_path = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.repository.upload_path</PDM_FMT>'; 
+		file_path = file_path.replace(/\\/ig,"/");
+		if(file_path.charAt(file_path.length-1) != "/")
+					file_path += "/" ;
+		file_path += "$args.rel_file_path";
+		if(file_path.charAt(file_path.length-1) != "/")
+				file_path += "/"; 
+		file_path += "$args.file_name";
+		
+		detailTextboxReadonly("Physical Path","file_path",3,file_path);	
+		
+		
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa repozytorium" attr=repository>
+		
+		var isZipped = "No";
+		if("$args.zip_flag" == "1")
+			isZipped = "Yes"
+		detailTextboxReadonly("Zipped","zip_flag",1,isZipped);
+					
+		var size_txt = GetSizeText("$args.file_size",1);
+		size_txt = size_txt.replace(/ /g,"&nbsp;"); 
+		detailTextboxReadonly("Zipped Size","file_size",1,size_txt);
+		
+		
+<PDM_MACRO name=dtlStartRow>
+		var folder_path;
+		folder_path = "$args.repository.sym" 
+		if(folder_path != "")
+			folder_path += ">" + "$args.folder_id.folder_path";
+		detailTextboxReadonly("Folder Path","full_file_path",3,folder_path);	
+	
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Utworzony przez" attr=created_by>
+<PDM_MACRO name=dtlDateReadonly hdr="Utworzony dnia" attr=created_dt>
+	var status = GetStatusText('${args.status}');
+	detailTextboxReadonly("Status","",1,status);
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zmodyfikowany przez" attr=last_mod_by>
+<PDM_MACRO name=dtlDateReadonly hdr="Zmodyfikowany dnia" attr=last_mod_dt>
+	
+	var link = "";
+	docWriteln('<' + 'INPUT TYPE=hidden NAME=KEEP.PARENT_DIV VALUE="' + '${args.KEEP.PARENT_DIV:}' + '">' );
+	docWriteln('<' + 'INPUT TYPE=hidden NAME=KEEP.PARENT_POPUP VALUE="' + '${args.KEEP.PARENT_POPUP:}' + '">' );
+
+	
+<PDM_IF "$args.id" == "0" >
+		docWriteln('<' + 'INPUT TYPE=hidden NAME=KEEP.NEW_ATTMNT value="1">' );
+	
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro">
+		link = GetAttachedToText('$args.id', '$args.attached_persid', '$args.attached_name', '$args.repository.repository_type');
+		detailTextboxReadonly("Attached To","",1,link);
+	
+<PDM_ELSE>
+<PDM_IF "${args.KEEP.PARENT_PERSID:}" != "" >
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=KEEP.parent_persid value="$args.KEEP.PARENT_PERSID">' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=KEEP.lrel_name value="attachments">' );	
+		
+</PDM_IF>
+<PDM_IF "${args.KEEP.FILE_UPLOAD:0}" != "0" >
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.rel_file_path value="${args.rel_file_path:}">' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.file_size>' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.file_type>' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.zip_flag>' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.status>' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.repository value="${args.repository:}">' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.orig_file_name value="${args.orig_file_name:}">' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.file_name value="${args.file_name:}">' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.sec_uuid value="${args.sec_uuid:0}">' );
+		
+</PDM_IF>	
+			docWriteln('<INPUT TYPE="hidden" NAME="SET.ON_FILE_UPDATE" value="0">');	
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.submit_knowledge value=0>' );
+			docWriteln('<' + 'INPUT TYPE=hidden NAME=SET.link_only value="${args.link_only:0}">' );
+						
+	
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+	</script>
+	
+<PDM_MACRO name=dtlEnd>
+<PDM_WSP>

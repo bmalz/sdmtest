@@ -1,0 +1,18 @@
+<PDM_IF 0>
+list_status_trans_include2.htmpl
+WHEN PRESENTED:
+	Contain reusable js and htmpl codes for Status Transition, section 2
+	Input properties:
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="NBTAB=list_status_trans_include2" factory=cr_trans>
+<!-- BEGIN -->
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Dozwolony" attr=id export=no fmtfunc=selectCbx1 justify=left sort="no" uid=allowed>
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr=id export=no fmtfunc=selectCbx2 justify=center sort="no" uid=default>
+<PDM_MACRO name=lsCol hdr="Wymaga komentarza" attr=id export=no fmtfunc=selectCbx3 justify=center sort="no" uid=comment>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt="ShowLink" link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+<!-- END -->

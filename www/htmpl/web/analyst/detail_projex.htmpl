@@ -1,0 +1,17 @@
+<PDM_IF 0>
+detail_projex.htmpl
+Purpose:
+    This is a sample family; not for production use.
+    Display the detail of a Projects CI.
+    See cmdb_detail.htmpl for  more details.
+
+History:
+       17-Sep-2009 aliab01 - SCO # 27241 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+Note:
+     Please use Investment.Project for defining a Project Family CI
+
+</PDM_IF>
+
+<PDM_INCLUDE FILE="cmdb_detail.htmpl"   extension="projex">
+
+<PDM_WSP where="family.extension_name='projex'" factory=nr design=no>

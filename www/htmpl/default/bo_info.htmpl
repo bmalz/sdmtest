@@ -1,0 +1,45 @@
+<PDM_IF 0>
+bo_info.htmpl
+WHEN PRESENTED:
+	For displaying BOXI report 
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<script>
+function submitForm()
+{
+    if (typeof parent.name != "string" || 
+	parent.name != "AHDtop" || 
+	window.name != "boframe")
+    {
+	window.location.replace("about:blank");
+	return;
+    }  
+    var frm = document.forms["boform"];
+    var ele = frm.elements["BO_PATH"];
+    if (typeof ele != "undefined")
+    {
+	var action = "$BOServerURL";
+	frm.action = action.replace(/openDocument\.jsp/, "sd.jsp"); 
+	var bo_path = window.location.href;
+	var idx = bo_path.lastIndexOf("/");
+	bo_path = bo_path.slice(0, idx) + "/html/bo_work.html";
+	ele.value = bo_path;
+	frm.submit(); 
+    } 
+}
+</script>
+</head>
+<body onload="submitForm()">
+<form name="boform" action=""  method="POST">
+<input type="hidden" name="CMS" value="$BOServerCMS">
+<input type="hidden" name="BO_INFO" value="$BO_INFO">
+<input type="hidden" name="Auth" value="$BOServerAuth">
+<input type="hidden" name="BO_PATH" value="">
+<input type="hidden" name="INFOVIEW" value="$INFOVIEW">
+</form>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: bo_info.htmpl ASPEN.1 2010/11/16 13:07:57 saima01 Exp $;
+</PDM_IF>

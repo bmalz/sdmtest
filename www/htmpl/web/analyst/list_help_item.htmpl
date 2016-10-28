@@ -1,0 +1,126 @@
+<PDM_IF 0>
+list_help_item.htmpl
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "";
+var hdrTitleList = "";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("no", "no");
+var cfgCanView = false;
+var cfgCanEdit = false;
+var argID = parent.argID;
+var argPersistentID = parent.argPersistentID;
+var argInterfaceType  = parent.argInterfaceType;
+var argInternal = parent.argInternal;
+var argPublishDate = parent.argPublishDate;
+show_header=0;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/webtab.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF "$prop.MultiTenancy" != "setup">
+<PDM_IF "$UserAuth" \> "1">
+<PDM_IF "${args.tenant:}" != "$cst.tenant" &&
+            "$cst.tenant" != "$prop.SERVICE_PROVIDER_UUID" &&
+            "$prop.SERVICE_PROVIDER_UUID" != "00">
+      cfgAccessUpdateModify = "0";
+      cfgUserAuth = 1;
+      <PDM_SET UserAuth="1">
+    
+<PDM_ELIF "${args.tenant:}" == "" || "${args.tenant:}" == "00">
+<PDM_IF "$ACCESS.Update_Global" == "0" && "${args.id:}" != "0">
+        cfgUserAuth = 1;
+        <PDM_SET UserAuth="1">
+      
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF 0>
+// Suppress Search bar completely
+<PDM_MACRO name=sfStart button=false factory="help_item">
+<PDM_MACRO name=sfStartRow>
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='help_set = " + argID + "'>");
+<PDM_MACRO name=sfEnd>
+</PDM_IF>
+
+if (isNaN(argID) == false && argID != 0)
+{
+	function add_button_to_tab_banner()
+	{
+	    
+<PDM_IF $UserAuth \> 1>
+	    ImgBtnRow();
+	    // All button functions are in context of parent 
+	    if (typeof argInternal == "string" && argInternal == "0")
+	    { 
+	        
+<PDM_MACRO name=button caption="Define Content" func="parent.ahdframeset.ahdframe.defineContent()" hotkey_name="Define Content" id="DEFINE_HELP">
+
+	        if (cfgRecordCount != 0) {
+				
+<PDM_MACRO name=button caption="Publish" disabled=no func="parent.ahdframeset.ahdframe.publishBuildHelp()" hotkey_name="Publish" id="PUBLISH_HELP">
+	        } else {
+				
+<PDM_MACRO name=button caption="Publish" disabled=yes func="parent.ahdframeset.ahdframe.publishBuildHelp()" hotkey_name="Publish" id="PUBLISH_HELP">
+	        }
+	    }
+	    if (argInternal ==  "1" || typeof argPublishDate == "string" && argPublishDate != "" )
+	    {
+			
+<PDM_MACRO name=button caption="View Help" disabled=no func="parent.ahdframeset.ahdframe.viewHelp()" hotkey_name="View Help" id="VIEW_HELP">
+		} else {
+			
+<PDM_MACRO name=button caption="View Help" disabled=yes func="parent.ahdframeset.ahdframe.viewHelp()" hotkey_name="View Help" id="VIEW_HELP">
+		}
+	    ImgBtnEndRow();
+	    
+</PDM_IF>
+	}
+}
+
+if (isNaN(argID) == false && argID != 0) 
+{
+    tab_banner("Help Contents Items",true, false);
+} else {
+    tab_banner("Help Contents Items");
+}
+
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No content items found";
+  var msgFound1 = "1 content item found";
+  var msgFound = "%1 content items found";
+  var msgFoundMore = "%1 content items found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired content item";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Zawartość" attr=help_content justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

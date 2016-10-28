@@ -1,0 +1,116 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show a list of the CACF Change Verification Policies
+//
+// History:
+//    10/05/2011 Initial Version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Verification Policy Search";
+var hdrTitleList = "Verification Policy List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var rptName = new Array("ci_verification_policysum.rpt", "ci_verification_policydtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart factory="ci_verification_policy">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Kolejność" attr="sequence">
+<PDM_MACRO name=sfTextbox hdr="Nazwa polisy" attr="name">
+<PDM_MACRO name=sfDropdown hdr="Managed Attribute" attr="attribute_name">
+<PDM_MACRO name=sfDropdown hdr="Aktualizuj zachowanie" attr="action">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Wzór nazwy CI" attr="ci_name_pattern">
+<PDM_MACRO name=sfTextbox hdr="Wzór klasy" attr="class_pattern">
+<PDM_MACRO name=sfTextbox hdr="Wzór roli" attr="rolename_pattern">
+<PDM_MACRO name=sfDropdown hdr="Typ serwisowy" attr="service_type">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Wzór nazwy MDR" attr="mdr_name_pattern">
+<PDM_MACRO name=sfTextbox hdr="Wzór klasy MDR" attr="mdr_class_pattern">
+<PDM_MACRO name=sfTextbox hdr="Wzór lokalizacji" attr="location_pattern">
+<PDM_MACRO name=sfDropdown hdr="Aktywne?" attr="delete_flag">
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfDropdown hdr="Rogue Insert" attr="isrogue_insert">
+<PDM_MACRO name=sfDropdown hdr="Rogue Update" attr="isrogue_update">
+<PDM_MACRO name=sfDropdown hdr="Zmiana ze specyfikacją" attr="isvariance">
+<PDM_MACRO name=sfDropdown hdr="Zmiana bez specyfikacji" attr="isnotverifiable">
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr="priority">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Zapisz dane do TWA" attr="write_twa">
+<PDM_MACRO name=sfDropdown hdr="Utwórz incydent" attr="write_incident">
+<PDM_MACRO name=sfDropdown hdr="Zamknij incydent po weryfikacji" attr="autoclose_incident">
+<PDM_MACRO name=sfDropdown hdr="Szablon incydentu" attr="incident_template">
+<PDM_MACRO name=sfDropdown hdr="Tryb tylko logowania" attr="log_only_mode">
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejsza data aktywacji" attr="start_date">
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data aktywacji" attr="start_date" qbe_condition="LT">
+<PDM_MACRO name=sfDate hdr="Najwczęśniejsza data dezaktywacji" attr="end_date">
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data dezaktywacji" attr="end_date" qbe_condition="LT">
+<PDM_IF "ci_verification_policy" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE name=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Verification Policy found";
+  var msgFound1 = "1 Verification Policy found";
+  var msgFound = "%1 Verification Policies found";
+  var msgFoundMore = "%1 Verification Policies found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Verification Policy";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr="sequence" link="yes">
+<PDM_MACRO name=lsCol hdr="Nazwa polisy" attr="name">
+<PDM_MACRO name=lsCol hdr="Aktualizuj zachowanie" attr="action">
+<PDM_MACRO name=lsCol hdr="Managed Attribute" attr="attribute_name">
+<PDM_MACRO name=lsCol hdr="Wzór nazwy CI" attr="ci_name_pattern">
+<PDM_MACRO name=lsCol hdr="Wzór klasy" attr="class_pattern">
+<PDM_MACRO name=lsCol hdr="Typ serwisowy" attr="service_type">
+<PDM_MACRO name=lsCol hdr="Aktywne?" attr="delete_flag">
+<PDM_MACRO name=lsCol hdr="Zmiana ze specyfikacją" attr="isvariance" startrow="yes">
+<PDM_MACRO name=lsCol hdr="Zmiana bez specyfikacji" attr="isnotverifiable">
+<PDM_MACRO name=lsCol hdr="Rogue Insert" attr="isrogue_insert">
+<PDM_MACRO name=lsCol hdr="Rogue Update" attr="isrogue_update">
+<PDM_MACRO name=lsCol hdr="Wzór nazwy MDR" attr="mdr_name_pattern">
+<PDM_MACRO name=lsCol hdr="Wzór klasy MDR" attr="mdr_class_pattern">
+<PDM_MACRO name=lsCol hdr="Wzór roli" attr="rolename_pattern">
+<PDM_MACRO name=lsCol hdr="Priorytet" attr="priority">
+<PDM_MACRO name=lsCol hdr="Wzór lokalizacji" attr="location_pattern">
+<PDM_MACRO name=lsCol hdr="Zapisz dane do TWA" attr="write_twa">
+<PDM_MACRO name=lsCol hdr="Utwórz incydent" attr="write_incident">
+<PDM_MACRO name=lsCol hdr="Szablon incydentu" attr="incident_template">
+<PDM_MACRO name=lsCol hdr="Zamknij incydent po weryfikacji" attr="autoclose_incident">
+<PDM_MACRO name=lsCol hdr="Tryb tylko logowania" attr="log_only_mode">
+<PDM_MACRO name=lsCol hdr="Data aktywacji" attr="start_date">
+<PDM_MACRO name=lsCol hdr="Data dezaktywacji" attr="end_date">
+<PDM_MACRO name=lsCol hdr="Opis" attr="description">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: list_ci_verification_policy.htmpl ASPEN.7 2012/04/04 17:02:11 tomjo02 Exp $;
+</PDM_IF>
+<PDM_WSP>

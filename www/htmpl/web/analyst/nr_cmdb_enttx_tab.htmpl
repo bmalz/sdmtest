@@ -1,0 +1,81 @@
+<PDM_IF 0>
+nr_cmdb_enttx_tab.htmpl
+WHEN PRESENTED:
+    Display Enterprise Transaction family attributes of the selected CI
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+
+History:
+       24-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_enttx.htmpl" where="family.extension_name='enttx'" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr=bm_status factory=bms lookup=no>
+<PDM_MACRO name=dtlStartRow>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Transaction Category" attr=assoc_enttx.category>
+<PDM_MACRO name=dtlTextbox hdr="Transaction Version" attr=assoc_enttx.version>
+<PDM_MACRO name=dtlTextbox hdr="Transaction Manager" attr=assoc_enttx.transaction_manager>
+<PDM_MACRO name=dtlTextbox hdr="Obszar" attr=assoc_enttx.site>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Właściciel biznesowy" attr=assoc_enttx.business_owner>
+<PDM_MACRO name=dtlTextbox hdr="Jednostka biznesowa" attr=assoc_enttx.business_unit>
+<PDM_MACRO name=dtlTextbox hdr="Kontakty biznesowe" attr=assoc_enttx.business_contacts>
+<PDM_MACRO name=dtlTextbox hdr="Escalation Contacts" attr=assoc_enttx.escalation_contacts>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Transaction Lifecycle State" attr=assoc_enttx.lifecycle_state>
+<PDM_MACRO name=dtlTextbox hdr="Transaction Lifecycle Status" attr=assoc_enttx.lifecycle_status>
+<PDM_MACRO name=dtlTextbox hdr="Wpływ biznesowy" attr=assoc_enttx.business_impact>
+<PDM_MACRO name=dtlTextbox hdr="Priorytet biznesowy" attr=assoc_enttx.business_priority>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Transaction Goal" attr=assoc_enttx.transaction_goal>
+<PDM_MACRO name=dtlTextbox hdr="Transaction Alignment" attr=assoc_enttx.transaction_alignment>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Design Start Date" attr=assoc_enttx.design_start_date>
+<PDM_MACRO name=dtlDate hdr="Design End Date" attr=assoc_enttx.design_end_date>
+<PDM_MACRO name=dtlDate hdr="Transition Start Date" attr=assoc_enttx.transition_start_date>
+<PDM_MACRO name=dtlDate hdr="Transition End Date" attr=assoc_enttx.transition_end_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Operation Start Date" attr=assoc_enttx.operation_start_date>
+<PDM_MACRO name=dtlDate hdr="Operation End Date" attr=assoc_enttx.operation_end_date>
+<PDM_MACRO name=dtlDate hdr="Availability Start" attr=assoc_enttx.availability_start>
+<PDM_MACRO name=dtlDate hdr="Availability End" attr=assoc_enttx.availability_end>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Unavailability Start" attr=assoc_enttx.unavailability_start>
+<PDM_MACRO name=dtlDate hdr="Unavailability End" attr=assoc_enttx.unavailability_end>
+<PDM_MACRO name=dtlDate hdr="Cancel Date" attr=assoc_enttx.cancel_date>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>

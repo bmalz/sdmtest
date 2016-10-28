@@ -1,0 +1,59 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of property validation rule
+INTENT:
+    Display the property of validation rule
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Property Validation Rule Search";
+var hdrTitleList = "Property Validation Rule List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("prpval_rulesum.rpt", "prpval_ruledtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Property Validation Rule">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="prpval_rule">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr=Name attr="sym" size=20>
+<PDM_MACRO name=sfDropdown hdr="Status rekordu" attr="delete_flag">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Typ reguły walidacji" attr="validation_type">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Property Validation Rule Values found";
+  var msgFound1 = "1 Property Validation Rule Value found";
+  var msgFound = "%1 Property Validation Rule Values found";
+  var msgFoundMore = "%1 Property Validation Rule Values found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Property Validation Rule Value";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Typ reguły walidacji" attr=validation_type justify=left>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description justify=left>
+<PDM_MACRO name=lsCol hdr="Status rekordu" attr=delete_flag justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

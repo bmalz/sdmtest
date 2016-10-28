@@ -1,0 +1,157 @@
+<PDM_IF 0>
+detail_cr_prptpl.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Property Template
+INTENT:
+    Display the detail info for Property Template
+</PDM_IF>
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły właściwości $args.sym "</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowanie właściwości $args.sym Update Property Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie właściwości $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/spellcheck.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+<PDM_IF "$args.id" == "0">
+var the_parent_persid='$args.KEEP.pcat_persid';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+var cr_prptpl_edit = "";
+<PDM_ELSE>
+var the_parent_persid='$args.owning_area';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+var cr_prptpl_edit = '$args.sequence';
+</PDM_IF>
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function preSaveTrigger()
+{
+   var sequence = document.main_form.elements["SET.sequence"]; 
+   if ((_dtl.edit) && (cr_prptpl_edit != sequence.value ))
+   {
+       
+      var url = cfgCgi +
+      "?SID=" + cfgSID +
+      "+FID=" + cfgFID +
+      "+OP=CHECK_CR_PRPTPL" +
+      "+FACTORY=" + "cr_prptpl" +
+      "+owning_area=" + the_parent_persid + 
+      "+sequence=" + sequence.value;
+      
+      var reply=SyncAjaxCall(url); 
+      if ( typeof reply == "string" && 
+          reply.length > 0 )
+      {
+          reply = rtrim_nonchar(reply);
+      }
+      
+      if ( reply == "TRUE" )
+      {
+          showAlertMsg("Sequence number already exists, please use different sequence number.");
+          return false;
+      }
+      else if ( reply == "ERROR" )
+      {
+          showAlertMsg("Property template search for duplicates failed.");
+          return false;
+      }
+      else 
+      {
+          if (typeof ahdframeset.opener == "object" && ahdframeset.opener != null && typeof ahdframeset.opener.cr_prptpl_list != "undefined")
+          {
+              if ((ahdframeset.opener.cr_prptpl_list[sequence.value] != null) )
+              {
+                  showAlertMsg("Sequence number already exists, please use different sequence number.");
+                  return false;
+              }
+              else {
+                  ahdframeset.opener.cr_prptpl_list[sequence.value] = sequence.value; 
+                  return true;
+              }
+          }
+          else {
+              return true;
+              }
+      }
+   }
+   else {
+       return true;
+   }
+}
+
+
+</script>
+
+</head>
+
+
+<body class=detailro onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Property Template" key="$args.sym">
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory=cr_prptpl>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.id" == 0>
+docWriteln("<input type=hidden name=SET.owning_area value='$args.KEEP.pcat_persid'>");
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro" && "$args.id" != 0>
+docWriteln("<input type=hidden name=\"KEEP.CO_PARENT\" value=\"1\">");
+docWriteln("<input type=hidden name=\"KEEP.PARENT_PERSID\" value="+the_parent_persid+">");
+</PDM_IF>
+
+// close this form and give focus on the main form
+if ( _dtl.edit ) 
+{
+docWriteln("<input type=hidden name=HTMPL value='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+    
+} 
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kolejność" attr=sequence>
+<PDM_MACRO name=dtlCheckbox hdr="Wartość wymagana" attr=required off=No on=Yes>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Reguła walidacji" attr="validation_rule">
+<PDM_MACRO name=dtlTextbox hdr="Etykieta" attr=label size=60>
+<PDM_MACRO name=dtlStartExpRow label="Typy parametru" colspan=4 exp_rows="1" form_name="detail_cr_prptpl">
+<PDM_MACRO name=dtlCheckbox hdr="Kalendarz" attr="zkalendarz">
+<PDM_MACRO name=dtlCheckbox hdr="Zegar" attr="zegar">
+<PDM_MACRO name=dtlCheckbox hdr="Sekcja" attr="zsekcja">
+<PDM_MACRO name=dtlCheckbox hdr="Duże pole tekstowe" attr="zpoletekstowe">
+<PDM_MACRO name=dtlStartExpRow label="Właściwości parametru" colspan=4 exp_rows="1" form_name="detail_cr_prptpl">
+<PDM_MACRO name=dtlTextbox hdr="Długość pola tekstowego" attr="zdlugoscpola">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=2 keeplinks=yes rows=4 size=60 maxlength=4000>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Przykład" attr=sample colspan=2 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr=last_mod_dt>
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr=last_mod_by>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_cr_prptpl.htmpl ASPEN.1 2010/08/24 15:41:05 saima01 Exp $;
+</PDM_IF>
+<PDM_WSP>

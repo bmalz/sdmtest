@@ -1,0 +1,79 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    Build the Support Automation tab menubar.
+
+////////////////////////////////////////////////////////////////////////
+// Support Automation Menubar
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_WSP preview="OP=menu+NBTAB=sa">
+
+<PDM_MACRO name=startMenubar>
+<PDM_MACRO name=menubarItem label="File" id=mFile variable=__mFile>
+<PDM_MACRO name=menubarItem label="View" id=mView>
+<PDM_MACRO name=menubarItem label="Window" id=mWindow>
+<PDM_MACRO name=menubarItem label="Help" id=mHelp>
+<PDM_MACRO name=endMenubar>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Support Automation "File" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mFile>
+<PDM_MACRO name=menuItemLocal label="Print_Form..." function="CAisdPrint();" hotkey=n>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Support Automation "View" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mView>
+<PDM_OBJECT>
+if ( $ACCESS.FAC_USP_PREFERENCES >= 2 ) {
+<PDM_MACRO name=menuItem label="Preferences..." function="showPreferences()">
+}
+</PDM_OBJECT>
+<PDM_OBJECT>
+if (!(typeof w.ahdframeset.ahdframe._dtl == "object" &&
+	   w.ahdframeset.ahdframe._dtl.edit==true)) {           
+<PDM_MACRO name=menuItemLocal label="Refresh" function="refreshForm()">
+}
+</PDM_OBJECT>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Support Automation "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Support Automation "Help" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+<PDM_OBJECT>
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+</PDM_OBJECT>
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+<PDM_MACRO name=menuItem label="Support..." function="popupWithURL('http://www.ca.com', 1, 1)">
+<PDM_MACRO name=menuItem label="Operations_Info..." function="JavaScript: popup_window('sd','about.htmpl', 800, 455, 'ahdmenu=no')">
+<PDM_OBJECT>
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+</PDM_OBJECT>
+<PDM_MACRO name=endMenu>

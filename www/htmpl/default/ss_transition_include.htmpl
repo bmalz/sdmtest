@@ -1,0 +1,119 @@
+<PDM_IF 0>
+@(#)$Id: ss_transition_include.htmpl ASPEN.1 2010/11/17 00:22:41 saima01 Exp $
+
+Common HTMPL code to include Status Transition buttons in the self-service interface.
+</PDM_IF>
+<script type="text/javascript">
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+
+var trans_array = new Array();
+var bUseTransitionButtons = 0;
+
+<PDM_IF 0>
+    bUseTransitionButtons indicates whether or not to use the buttons provided by
+    Status Transitions.
+    When bUseTransitionButtons=0, the self-service ticket detail form will have continue
+    to use the "Close" and "Reopen" buttons.
+    When bUseTransitionButtons=0, the self-service ticket detail form will use
+    buttons based on the ticket's current status, using Status Transitions.
+</PDM_IF>
+
+<PDM_LIST PREFIX=list LENGTH=1 WHERE="t_type IS NOT NULL AND t_type.ss_flag=1 AND t_type.delete_flag=0" FACTORY=$prop.trans_factory>
+   var dummyvar = "$list.id";
+   bUseTransitionButtons = 1;
+</PDM_LIST>
+
+create_transArray();
+
+// do_transition() is called by the status transition buttons that have been
+// added to the ticket's detail form.
+// Calls the UPDATE method.
+// Parameters are the factory and the index into the trans_array for this button.
+function do_transition(factory, iIndex)
+{
+   if (factory == "cr") {
+      var edit_htmpl = "request_status_transition.htmpl";
+   }
+   var new_status = trans_array[iIndex][0];
+   var button_text = trans_array[iIndex][1];
+   var header_text = trans_array[iIndex][2];
+   var must_comment = trans_array[iIndex][3];
+
+   var query_str = cfgCgi +
+                   "?SID=" + cfgSID +
+                   "+FID=" + fid_generator() +
+                   "+FACTORY=" + factory +
+                   "+PERSID=$args.persistent_id" +
+                   "+OP=UPDATE" +
+                   "+AUTO_OVERRIDE_LOCK=true" +
+                   "+EDIT_HTMPL=" + edit_htmpl +
+                   "+ACTIVITY_LOG_TYPE=ST" +
+                   "+KEEP.SS_NEW_STATUS=" + nx_escape(new_status) +
+                   "+KEEP.SS_BUTTON_TEXT=" + nx_escape(button_text) +
+                   "+KEEP.SS_HEADER_TEXT=" + nx_escape(header_text) +
+                   "+KEEP.tick_fac=$prop.tick_fac" +
+                   "+KEEP.SS_MUST_COMMENT=" + must_comment;
+
+   document.location.href=query_str;
+}
+
+
+// Used by create_transArray() to make an array of
+// the self-service status transitons from the ticket's
+// current status.
+// Each element in the array has the new_status (from the status transition), 
+// button_text and header_text (from the transition_type).
+// "@,@" is used as row separator; ",#," is used as column separator
+function fetch_transString()
+{
+return '<PDM_LIST PREFIX=list1 FACTORY=$prop.trans_factory ORDER_BY=t_type WHERE="status='$args.status' AND t_type.ss_flag=1 AND t_type.delete_flag=0"><PDM_FMT PAD=NO ESC_STYLE=HTML>@,@$list1.new_status,#,$list1.t_type.ss_button_text,#,$list1.t_type.ss_header_text,#,$list1.must_comment</PDM_FMT></PDM_LIST>';
+}
+
+
+// Call fetch_transString() to get the Status Transitions for the ticket's current status
+// Then build the trans_array.  Each element in the trans_array contains:
+//    new_status
+//    button_text
+//    header_text
+//    must_comment (attribute of the status transition).
+function create_transArray()
+{
+    var transString = "";
+    transString = fetch_transString();
+
+    // Look for "@,@" at the beginning of the string and strip it off.
+    if (transString.length > 2 && transString.match(/^@,@/)) { 
+        transString = transString.substring(3, transString.length);
+
+        var tmparr = new Array();
+        // Rows are divided by "@,@"
+        if (transString.indexOf("@,@") > 0) {
+            tmparr = transString.split("@,@");
+        }
+        else {
+            tmparr[0] = transString;
+        }
+
+        for(var i=0; i < tmparr.length; i++) 
+        {
+            // The elements in each row are divided by ",#,"
+            var tmparr2 = tmparr[i].split(",#,");
+            var new_status = tmparr2[0];
+            // Escape '[' characters so ImgBtnCreate does not try to process them.
+            var button_text = gsub(tmparr2[1], "[", "&#91;");
+            var header_text = tmparr2[2];
+            var must_comment = tmparr2[3];
+            if (must_comment == "") {
+                must_comment = "0";
+            }
+
+            trans_array[i] = new Array(3);
+            trans_array[i][0] = new_status;
+            trans_array[i][1] = button_text;
+            trans_array[i][2] = header_text;
+            trans_array[i][3] = must_comment;
+        }
+    }
+}
+</script>

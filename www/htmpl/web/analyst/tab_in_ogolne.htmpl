@@ -1,0 +1,59 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a tab page with details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for tab detail screens
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+In order to have WSP Preview work, the PDM_WSP tag must be edited.
+Add the new tab page to the notetbook tab of a detail page (detail_xx.htmpl). 
+Then assign the name of the detail page (detail_xx.htmpl) to the preview attribute
+of the PDM_WSP tag. 
+</SCRIPT>
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_xx.htmpl" factory=in>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Pilność" attr=urgency evt="onBlur='manual_modify();detailSyncEditForms(this)'" lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Wpływ" attr=impact evt="onBlur='manual_modify();detailSyncEditForms(this)'" lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO name=dtlDateReadonly hdr="Termin realizacji" attr="ztermin_realizacji">
+<PDM_MACRO name=dtlStartExpRow label="Przekazanie" colspan=4 exp_rows="1" form_name="detail_in">
+<PDM_IF "$env.NX_REQUIRE_INCIDENT_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Do grupy" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Do grupy" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_IF "$env.NX_REQUIRE_INCIDENT_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Do osoby" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Do osoby" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO NAME=dtlEndTable>
+
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+

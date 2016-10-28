@@ -1,0 +1,249 @@
+<PDM_IF 0>
+detail_ztask.htmpl
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var taskType = "";
+var hdrTitle = "";
+var hdrTitleUpd = "";
+var hdrTitleNew = "";
+
+if("$prop.form_name_3" != "edit") {
+	taskType = "$args.task";
+} else {
+	taskType = "$args.KEEP.ETaskType";
+}
+
+if(taskType == "CRAPPTSK") {
+	hdrTitle = "Szczegóły zadania akceptacyjnego";
+	hdrTitleUpd = "Aktualizowanie zadania akceptacyjnego";
+	hdrTitleNew = "Tworzenie zadania akceptacyjnego";
+}
+else if (taskType == "CREXTTSK") {
+	hdrTitle = "Szczegóły zadania dla firmy zewnętrznej";
+	hdrTitleUpd = "Aktualizowanie zadania dla firmy zewnętrznej";
+	hdrTitleNew = "Tworzenie zadania dla firmy zewnętrznej";
+}
+else if (taskType == "CRINTTSK") {
+	hdrTitle = "Szczegóły zadania wewnętrznego";
+	hdrTitleUpd = "Aktualizowanie zadania wewnętrznego";
+	hdrTitleNew = "Tworzenie zadania wewnętrznego";
+}
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script>
+	cfgDateFormat = "$date_format"
+</script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function approveTask() {
+	var query_str = cfgCgi +
+	                "?SID=" + cfgSID +
+	                "+FID=" + fid_generator() +
+	                "+FACTORY=ztask" +
+	                "+PERSID=$args.persistent_id" +
+	                "+OP=UPDATE" +
+	                "+KEEP.StatusCode=APP" +
+	                "+KEEP.POPUP_NAME=1" +
+	                "+KEEP.autoApproved=1";
+	parent.frames["workframe3"].window.document.location.href = query_str;
+}
+
+function rejectTask() {
+	var query_str = cfgCgi +
+	                "?SID=" + cfgSID +
+	                "+FID=" + fid_generator() +
+	                "+FACTORY=ztask" +
+	                "+PERSID=$args.persistent_id" +
+	                "+OP=UPDATE" +
+	                "+KEEP.StatusCode=REJ" +
+	                "+KEEP.POPUP_NAME=1" +
+	                "+KEEP.autoApproved=1";
+
+	parent.frames["workframe3"].window.document.location.href = query_str;
+}
+
+jq(document).ready(function() {
+});
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+</script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Zadania">
+<center>
+
+
+<input type="hidden" name=FACTORY value=ztask>
+<PDM_IF "$prop.form_name_3" == "edit">
+<input type="hidden" name=OP value="UPDATE">
+<PDM_IF 0 == $args.id>
+<PDM_ELSE>
+<PDM_IF $args.id>
+<input type="hidden" name=SET.id  value="$args.id">
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=ztask>
+
+
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Zapisz[s]" Func="detailSave()" hotkey_name="Zapisz[s]" ID="btn001" Width=120>
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Anuluj[n]" ID="btncncl" Width=120>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+</script>
+<PDM_IF "$prop.form_name_3" == "ro">
+	<script type="text/javascript">
+	<PDM_MACRO name=btnStartRow>
+	</script>
+	<PDM_IF $UserAuth \> 1>
+		<PDM_FORM NAME="frmDTLRO">
+			<input type="hidden" name=FACTORY value=ztask>
+			<input type="hidden" name=SET.id  value="$args.id">
+			<input type="hidden" name=OP>
+			<script type="text/javascript">
+			<PDM_IF "$args.task" == "CREXTTSK" || "$args.KEEP.ETaskType" == "CREXTTSK">
+				<PDM_IF "$args.status.allow_accumulate" == 1>
+					<PDM_MACRO name=button Caption="Edytuj[d]" Func="pdm_submit('frmDTLRO','UPDATE')" hotkey_name="Edytuj[d]" ID="btn001" Width=120>
+				</PDM_IF>
+			</PDM_IF>
+			</script>
+		</PDM_FORM>
+	</PDM_IF>
+	<script type="text/javascript">
+	<PDM_MACRO name=btnEndRow>
+	</script>
+</PDM_IF>
+
+<PDM_IF "$args.task" == "CREXTTSK" || "$args.KEEP.ETaskType" == "CREXTTSK" > 
+	<script>
+		<PDM_IF "$prop.form_name_3" == "edit">
+			<PDM_MACRO name=dtlStart>
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_IF "$args.KEEP.ParentType" == "cr">
+				<PDM_MACRO name=dtlLookupReadonly hdr="Powiązany wniosek" attr=cr>
+			<PDM_ELIF "$args.KEEP.ParentType" == "chg">
+				<PDM_MACRO name=dtlLookupReadonly hdr="Powiązana zmiana" attr=chg>
+			</PDM_IF>
+			detailDropdown("Status","status","status",1,20, 
+				true,"","$args.status","yes","sym","Przekazane","","",
+				"no","0","","",
+				"W realizacji","PEND",
+				"Gotowe","FZREADY",
+				"Zrealizowane", "COMP");
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_MACRO name=dtlLookupReadonly hdr="Firma zew." attr=sdgroup>
+			
+			detailLookup("Serwisant","assignee_agt","agt",1,30,"0","",'',"yes","combo_name",'',"","","yes",
+						"ADDITIONAL_WHERE=group_list.group=U'" + "$args.assignee_agt.group_list.group.id" + "'", "0","0", "0");
+
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_MACRO name=dtlStartExpRow label="Oprogramowanie" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlTextbox hdr="Zainstalowane oprogramowanie" attr=installedSoftware colspan=4 rows=4 size=70>
+
+			<PDM_MACRO name=dtlStartExpRow label="Części serwisowe" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlTextbox hdr="Nazwy części" attr=usedParts colspan=3 rows=4 size=70>
+			<PDM_MACRO name=dtlTextbox hdr="Wartość części" attr=partsCost>
+
+			<PDM_MACRO name=dtlStartExpRow label="Wykonane usługi" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlTextbox hdr="Nazwy usług" attr=deliveredServices colspan=3 rows=4 size=70>
+			<PDM_MACRO name=dtlTextbox hdr="Wartość usług" attr=laborCost>
+			
+			<PDM_MACRO name=dtlStartExpRow label="Pracochłonność" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlTextbox hdr="Zużyty czas" attr=spenttime>
+			<PDM_MACRO name=dtlTextbox hdr="Stawka" attr=rate>
+			
+			<PDM_MACRO name=dtlStartExpRow label="Ekspertyza" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlCheckbox hdr="Ekspertyza" attr=expertise>
+			<PDM_MACRO name=dtlStartExpRow label="Dodatkowe uwagi" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlTextbox hdr="Dodatkowe uwagi" attr=description colspan=3 keeplinks=yes rows=4 size=70>
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_MACRO name=dtlReadonly hdr="Utworzone przez" attr=creator>
+			<PDM_MACRO name=dtlDateReadonly hdr="Data utworzenia" attr=date_created>
+			<PDM_MACRO name=dtlEndTable>
+		<PDM_ELSE>
+			<PDM_MACRO name=dtlStart>
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_IF "$args.task.zparent_type" == "cr">
+				<PDM_MACRO name=dtlLookupReadonly hdr="Powiązany wniosek" attr=cr>
+			<PDM_ELIF "$args.task.zparent_type" == "chg">
+				<PDM_MACRO name=dtlLookupReadonly hdr="Powiązana zmiana" attr=chg>
+			</PDM_IF>
+			<PDM_IF "$args.status" == "FZREADY">
+				detailDropdown("Status","status","status",1,20, 
+				true,"","$args.status","yes","sym","Przekazane","","",
+				"no","0","","",
+				"Gotowe","FZREADY",
+				"Zrealizowane", "COMP");
+			<PDM_ELSE>
+				<PDM_MACRO name=dtlReadonly hdr="Status" attr=status>
+			</PDM_IF>
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_MACRO name=dtlLookupReadonly hdr="Firma zew." attr=sdgroup>
+			<PDM_MACRO name=dtlLookupReadonly hdr="Serwisant" attr=assignee_agt>
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_MACRO name=dtlStartExpRow label="Oprogramowanie" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlReadonly hdr="Zainstalowane oprogramowanie" attr=installedSoftware>
+
+			<PDM_MACRO name=dtlStartExpRow label="Części serwisowe" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlReadonly hdr="Nazwy części" attr=usedParts>
+			<PDM_MACRO name=dtlReadonly hdr="Wartość części" attr=partsCost>
+
+			<PDM_MACRO name=dtlStartExpRow label="Wykonane usługi" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlReadonly hdr="Nazwy usług" attr=deliveredServices>
+			<PDM_MACRO name=dtlReadonly hdr="Wartość usług" attr=laborCost>
+			
+			<PDM_MACRO name=dtlStartExpRow label="Pracochłonność" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlReadonly hdr="Zużyty czas" attr=spenttime>
+			<PDM_MACRO name=dtlReadonly hdr="Stawka" attr=rate>
+			
+			<PDM_MACRO name=dtlStartExpRow label="Ekspertyza" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlReadonly hdr="Ekspertyza" attr=expertise>
+			<PDM_MACRO name=dtlStartExpRow label="Dodatkowe uwagi" colspan=4 exp_rows="1" form_name="detail_ztask">
+			<PDM_MACRO name=dtlReadonly hdr="Dodatkowe uwagi" attr=description>
+			<PDM_MACRO name=dtlStartRow>
+			<PDM_MACRO name=dtlReadonly hdr="Utworzone przez" attr=creator>
+			<PDM_MACRO name=dtlDateReadonly hdr="Data utworzenia" attr=date_created>
+			<PDM_MACRO name=dtlEndTable>
+		</PDM_IF>
+	</script>
+<PDM_ELIF "$args.task" == "CRAPPTSK" || "$args.KEEP.ETaskType" == "CRAPPTSK" >
+	<script>
+		
+
+		
+	</script>
+<PDM_ELIF "$args.task" == "CRINTTSK" ||"$args.KEEP.ETaskType" == "CRINTTSK" >
+	<script>
+
+	</script>
+</PDM_IF>
+
+<input type="hidden" name="SET.task" value="$args.task.code">
+<input type="hidden" name="KEY.task" value="$args.task.COMMON_NAME">
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

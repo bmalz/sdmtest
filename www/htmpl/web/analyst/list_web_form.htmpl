@@ -1,0 +1,173 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of Web Forms
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.forRoleReports" == "1">
+var hdrTitle = "Report Web Form Search";
+var hdrTitleList = "Report Web Form List";
+<PDM_ELSE>
+var hdrTitle = "Web Form Search";
+var hdrTitleList = "Web Form List";
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("web_formsum.rpt", "web_formdtl.rpt");
+var cfgCanEdit = true;
+var from_tab = false;
+var from_tab_detail = false;
+var extra_backfill_vals = void(0);
+if (ahdframeset != ahdtop) {
+    if (typeof ahdframeset.opener == "object" &&
+        typeof ahdframeset.opener != null &&
+        (ahdframeset.opener.propFormName == "detail_tab.htmpl" || 
+         ahdframeset.opener.propFormName == "list_tab.htmpl"))
+    {
+        from_tab = true;
+        if (ahdframeset.opener.propFormName == "detail_tab.htmpl") {
+            from_tab_detail = true;
+        }
+        if (ahdframeset.opener.propFormName == "detail_tab.htmpl" && 
+	    typeof ahdframeset.opener.extra_backfill_vals == "object")
+        {
+            extra_backfill_vals = ahdframeset.opener.extra_backfill_vals;
+        }
+    }
+}
+<PDM_IF "$args.KEEP.forRoleReports" == "1">
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.ROLE_ID" != "0" && $ACCESS.FAC_role \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Report_Web_Forms", "UpdateRoleReports()", enableExtraBtn);
+
+    function UpdateRoleReports() {
+        update_lrel_webform("role", "role:$args.KEEP.ROLE_ID", "web_form", "web_forms",  
+             "Report Web Forms Available", "Report Web Forms Assigned", "");
+    }
+</PDM_IF>
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<PDM_IF "$args.KEEP.forRoleReports" == "1">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+</PDM_IF>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Web Form">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF $ACCESS.FAC_web_form \> 1 && "$args.KEEP.noCreateBtn" != "1">
+if (from_tab_detail)
+<PDM_MACRO name=sfStart extracreateurl=PRESET=delete_flag:0+KEEP.RestrictForTab=2 factory="web_form">
+else if (from_tab)
+<PDM_MACRO name=sfStart extracreateurl=KEEP.RestrictForTab=1 factory="web_form">
+else
+<PDM_MACRO name=sfStart factory="web_form">
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory="web_form">
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForWebform" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_webform.htmpl>');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForGoform" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_goform.htmpl>');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forRoleReports" == "1">
+document.write('<input type="hidden" name="QBE.EQ.report_roles.role_obj.id" value="$args.QBE.EQ.report_roles.role_obj.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa formularza webowego" attr="name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr="code" size=20>
+
+if ( from_tab_detail )
+	
+<PDM_MACRO name=sfTextbox hdr="Status rekordu" attr="delete_flag" disabled=yes display_value="Active" qbe_condition="EQ" value="0">
+else
+	
+<PDM_MACRO name=sfDropdown hdr="Status rekordu" attr="delete_flag">
+<PDM_IF "$args.KEEP.forRoleReports" != "1">
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.ForWebform" == "1">
+<PDM_MACRO name=sfTextbox hdr="Typ" attr="wf_type" disabled="yes" display_value="Report" qbe_condition="EQ" value="1">
+<PDM_ELIF "$args.KEEP.ForGoform" == "1">
+<PDM_MACRO name=sfTextbox hdr="Typ" attr="wf_type" disabled="yes" display_value="Go Resource" qbe_condition="EQ" value="2">
+<PDM_ELSE>
+if (!from_tab)
+{
+      searchFilterDropdown("Type","wf_type","","HTMPL","0","Report","1","Go Resource","2","Other","3");
+}
+else 
+{
+      searchFilterDropdown("Type","wf_type","","HTMPL","0","Other","3");
+}
+</PDM_IF>
+</PDM_IF>
+
+if (from_tab)
+{
+    document.writeln("<input type=hidden NAME=QBE.NE.wf_type VALUE='1'>");
+    document.writeln("<input type=hidden NAME=QBE.NE.wf_type VALUE='2'>");
+}
+
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Web Forms found";
+  var msgFound1 = "1 Web Form found";
+  var msgFound = "%1 Web Forms found";
+  var msgFoundMore = "%1 Web Forms found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Web Form";
+
+function web_form_type(value)
+
+{
+  if ( value == "0" )
+     value = "HTMPL";
+
+  else if ( value == "1" )
+     value = "Report";
+
+  else if ( value == "2" )
+     value = "Go Resource";
+
+  else if ( value == "3" )
+     value = "Other";
+  rs.data(value);     
+}
+
+function web_form_typeExp(){
+	return "LIST_LOOKUP: 0," + msgtext("HTMPL") + ",1," + msgtext("Report") + ",2," + msgtext("Go Resource") + ",3," + msgtext("Other");	
+}
+
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="if (typeof extra_backfill_vals != 'undefined') ">
+<PDM_MACRO name=lsWrite text="{ extra_backfill_vals[@{list.id}] = '@{list.wf_type}'; }">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code justify=left>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description justify=left>
+<PDM_IF "$args.KEEP.forRoleReports" != "1">
+<PDM_MACRO name=lsCol hdr="Typ" attr=wf_type exportfmt=web_form_typeExp fmtfunc=web_form_type sort=no>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_web_form.htmpl ASPEN.3 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

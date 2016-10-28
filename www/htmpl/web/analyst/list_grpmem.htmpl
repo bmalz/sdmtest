@@ -1,0 +1,209 @@
+<PDM_IF 0>
+$Id: list_grpmem.htmpl,v 1.0 2006/11/08 00:18:16 olsjo01 Exp $
+list_grpmem.htmpl
+WHEN PRESENTED:
+	When we need to display a list of group members.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Member Search";
+var hdrTitleList = "Member List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("", "");
+var cfgCanEdit = true;
+	var autoRefreshWindows;
+    if( window.parent != null &&
+        typeof window.parent.updateMemOrGroup == "string" && 
+        typeof window.parent.updateMemOrGroupShowBool == "boolean" && window.parent.updateMemOrGroupShowBool &&
+        typeof window.parent.updateMemOrGroupButtonLabel == "string" &&
+        typeof window.parent.updateMemOrGroupMethod == "string" )
+    {
+        
+        autoRefreshWindows = new Object();
+	    cfgExtraButton = new Array(window.parent.updateMemOrGroupButtonLabel, window.parent.updateMemOrGroupMethod);
+    }
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Member">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false export=no factory=grpmem>
+<PDM_IF "$args.KEEP.forGrpMem" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.group" value="$args.QBE.EQ.group">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nazwa" attr=member factory=cnt>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja" attr=member.location.name factory=loc>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="member.delete_flag" default=Active>
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Available","member.available","",
+		     "Yes","1",
+		     "No","(member.available = 0 OR member.available IS NULL)");
+searchFilterDropdown("Manager","manager_flag","",
+		     "Yes","1",
+		     "No","0");
+searchFilterDropdown("Notify","notify_flag","",
+		     "Yes","1",
+		     "No","0");
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No member found";
+var msgFound1 = "1 member found";
+var msgFound = "%1 members found";
+var msgFoundMore = "%1 members found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired member";
+
+// Get the members array from its parent frame.
+// This list form only shows, by default, 25 
+// entries at a time, so we need to save all 
+// updates with the parent window. 
+var mbs = parent.mbs;
+
+<PDM_IF "$prop.MultiTenancy" == "on" && "$cst.tenant" != "$prop.SERVICE_PROVIDER_UUID">
+  var mem_updatable = (( mem_tenant == "$cst.tenant" ) && ("$ACCESS.FAC_grp" == "2"));
+<PDM_ELSE>
+  var mem_updatable = "$ACCESS.FAC_grp" == "2";
+</PDM_IF>
+
+
+function disp_avail(value)
+{
+
+  var val_str;
+  if ( typeof parent._dtl != "undefined" && 
+       parent._dtl.edit &&
+       mem_updatable )
+  {
+  val_str = "<INPUT TYPE=CHECKBOX ";
+  if (mbs.avail(grpmem_id, value))
+      val_str += "CHECKED ";
+  val_str += "NAME=A_FLAGS VALUE=" + grpmem_id + 
+          " onClick='mbs.change_a_flag(this.value, this.checked)'" +
+          " title=\"Set Available flag for " + mem_combo_name + "\">";
+  }
+  else 
+  {
+  if (mbs.avail(grpmem_id, value))
+      val_str = "Yes";
+  else 
+      val_str = "No";
+  }
+  if (mbs.avail(grpmem_id, value))
+  mbs.add_a_flag(grpmem_id, true, true);
+  else 
+  mbs.add_a_flag(grpmem_id, false, false);
+  rs.data(val_str);
+}
+
+function disp_mgr(value)
+{
+
+  var val_str;
+  if ( typeof parent._dtl != "undefined" && 
+       parent._dtl.edit &&
+       mem_updatable )
+  {
+  val_str = "<INPUT TYPE=CHECKBOX ";
+  if (mbs.mgr(grpmem_id, value))
+      val_str += "CHECKED ";
+  val_str += "NAME=A_FLAGS VALUE=" + grpmem_id + 
+          " onClick='mbs.change_m_flag(this.value, this.checked)'" + 
+          " title=\"Set Manager flag for " + mem_combo_name + "\">";
+  }
+  else 
+  {
+  if (mbs.mgr(grpmem_id, value))
+      val_str = "Yes";
+  else 
+      val_str = "No";
+  }
+  if (mbs.mgr(grpmem_id, value))
+  mbs.add_m_flag(grpmem_id, true, true);
+  else 
+  mbs.add_m_flag(grpmem_id, false, false);
+  rs.data(val_str);
+}
+
+function disp_ntf(value)
+{
+
+  var val_str;
+  if ( typeof parent._dtl != "undefined" && 
+       parent._dtl.edit &&
+       mem_updatable )
+  {
+  val_str = "<INPUT TYPE=CHECKBOX ";
+  if (mbs.ntf(grpmem_id, value))
+      val_str += "CHECKED ";
+  val_str += "NAME=A_FLAGS VALUE=" + grpmem_id + 
+          " onClick='mbs.change_n_flag(this.value, this.checked)'" + 
+          " title=\"Set Notify flag for " + mem_combo_name + "\">";
+  }
+  else 
+  {
+  if (mbs.ntf(grpmem_id, value))
+      val_str = "Yes";
+  else 
+      val_str = "No";
+  }
+  if (mbs.ntf(grpmem_id, value))
+  mbs.add_n_flag(grpmem_id, true, true);
+  else 
+  mbs.add_n_flag(grpmem_id, false, false);
+  rs.data(val_str);
+}
+
+function create_name_link(value)
+{
+    var val_str = "<A HREF=\"javascript:showDetailWithPersid('" + 
+		  mem_persid + "')\">" + value + "&nbsp</A>";
+    rs.data(val_str);
+}
+
+function create_loc_link(value)
+{
+    var val_str = "<A HREF=\"javascript:showDetailWithPersid('" + 
+		  mem_loc_persid + "')\">" + value + "&nbsp</A>";
+    rs.data(val_str);
+}
+
+var grpmem_id, mem_persid, mem_loc_persid, mem_combo_name, mem_tenant = "";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="grpmem_id = '@{list.id}';">
+<PDM_MACRO name=lsWrite text="mem_persid = '@{list.member.persistent_id}';">
+<PDM_MACRO name=lsWrite text="mem_loc_persid = '@{list.member.location.persistent_id}';">
+<PDM_MACRO name=lsWrite text="mem_combo_name = '<PDM_FMT pad=no esc_style=C>@{list.member.combo_name}</PDM_FMT>';">
+<PDM_IF "$prop.MultiTenancy" == "on">
+<PDM_MACRO name=lsWrite text="mem_tenant = '@{list.member.tenant}'">;
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=member.combo_name fmtfunc="create_name_link" sort=no>
+<PDM_MACRO name=lsCol hdr="Lokalizacja" attr=member.location fmtfunc="create_loc_link" sort=no>
+<PDM_MACRO name=lsCol hdr="Dostępny" attr=member.available fmtfunc="disp_avail" sort=no>
+<PDM_MACRO name=lsCol hdr="Menadżer" attr=manager_flag fmtfunc="disp_mgr" sort=no>
+<PDM_MACRO name=lsCol hdr="Powiadom" attr=notify_flag fmtfunc="disp_ntf" sort=no>
+<PDM_MACRO name=lsEnd list=list.member>
+
+// If it's in a tab, disable ctxMenu
+if (parent.name == "cai_main")
+{
+    // Create a new ctxMenu with no menu item. 
+    ctxMenu = new ContextMenu("no_menu");
+}
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

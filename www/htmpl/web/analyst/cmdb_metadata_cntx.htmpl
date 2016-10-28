@@ -1,0 +1,73 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/01/29
+// Title  : cmdb_metadata_cntx.htmpl (family specific attributes)
+// author : sahpr01
+//
+//  Attribute heading depends on contact type. Use the
+//  heading associated with the current contact type.
+//  Some attributes are not displayed for all contact
+//  types, but this file needs to provide a heading
+//  for every attribute in case contact type
+//  has changed.
+//  Common CI attribute, status, appears on Attributes tab
+//  under heading, Configured Status.
+//
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_cntx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+NOTE: You must provide standardcivalue and currentcivalue values if the attribute displayed requires special dotted notation for SREL value.
+
+// ************************************************************************
+</PDM_IF>
+
+// Show the base_contact.combo_name for the base_contact attribute, override standardcivalue and currentcivalue.
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact"                 heading="Base Contact" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.combo_name} currentcivalue=${args.assoc_cntx.base_contact.combo_name} help="Specifies the person or group that the CI represents">
+
+<PDM_IF "$args.assoc_cntx.0.base_contact.type.id" == "2308">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.last_name"       heading="Group Name" help="Group Name">
+<PDM_ELSE>
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.last_name"       heading="Last Name" help="Indicates the last name of the contact">
+</PDM_IF>
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.first_name"      heading="First Name" help="Specifies the first name of the contact">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.middle_name"     heading="Middle Name" help="Specifies the middle name of the contact">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.contact_num"     heading="Contact ID" help="Specifies a unique ID of the contact. contactId is UUID in string format">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.userid"          heading="System Login" help="Indicates the user name of the contact">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.type"            heading="Contact Type" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.type.sym} currentcivalue=${args.assoc_cntx.base_contact.type.sym} help="Contact Type">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.service_type"    heading="Service Type" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.service_type.sym} currentcivalue=${args.assoc_cntx.base_contact.service_type.sym} help="Service Type">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.timezone"        heading="Time Zone" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.timezone.sym} currentcivalue=${args.assoc_cntx.base_contact.timezone.sym} help="Time Zone">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.position"        heading="Job Title" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.position.sym} currentcivalue=${args.assoc_cntx.base_contact.position.sym} help="Job Title">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.domain"          heading="Data Partition" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.domain.sym} currentcivalue=${args.assoc_cntx.base_contact.domain.sym} help="Data Partition">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.access_type"     heading="Access Type" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.access_type.sym} currentcivalue=${args.assoc_cntx.base_contact.access_type.sym} help="Access Type">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.schedule"        heading="Work Schedule" standardcivalue=${args.standard_ci.0.assoc_cntx.0.base_contact.schedule.sym} currentcivalue=${args.assoc_cntx.base_contact.schedule.sym} help="Work Schedule">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="cntx" attr="base_contact.available"       heading="Available" help="Indicate that the analyst is available">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

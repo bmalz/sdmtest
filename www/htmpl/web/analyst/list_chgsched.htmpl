@@ -1,0 +1,168 @@
+<PDM_IF 0>
+$Id: list_chgsched.htmpl,v 1.3 2006/11/09 18:54:55 taoyu02 Exp $
+WHEN PRESENTED:
+	When we need to display the Change Calendar
+</PDM_IF>
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="OP=DISPLAY_FORM&HTMPL=list_chgsched.htmpl" factory=chg>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Filtr Kalendarza Zmian";
+var hdrTitleList = "Kalendarz Zmian";
+var msgMore = "...%1 więcej Zmian";
+var msgMore1 = "...1 więcej Zmian";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<PDM_IF 0>Change Calendar Configuration</PDM_IF>
+<PDM_INCLUDE FILE=list_chgsched_config.htmpl>
+
+<script type="text/javascript">
+var rptName = new Array("chgsum.rpt", "chg_itildtl.rpt");
+var cfgCanEdit = true;
+var cfgContextActivities = true;
+var cfgUserAuth = parseInt("$UserAuth",10);
+var from_detail = "$args.KEEP.from_detail";
+var error_msg = '<PDM_FMT ESC_STYLE=JS2>$args.ERROR_MSG</PDM_FMT>';
+var tenant;
+if ("$args.QBE.EQ.tenant" != "")
+{
+	tenant = "$args.QBE.EQ.tenant";
+}
+var init = "$args.init";
+var tenantSort = "no"; //By default all tenant columns are sortable. This variable is needed to make the
+						//tenant column not sortable
+</script>
+<script type="text/javascript" SRC="$CAisd/scripts/val_type.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" SRC="$CAisd/scripts/comboname.js"></script>
+<script type="text/javascript" SRC="$CAisd/scripts/sitemods.js"></script>
+
+
+
+<script type="text/javascript" >
+
+// get conflict analysis counts
+<PDM_IF "$args.search_where_conflicts" != "">
+	// build a hash of conflict types
+	var conflict_types=new Object();
+	<PDM_LIST PREFIX=cnftype FACTORY=chgcnf_type WHERE="delete_flag=0" ESC_STYLE=C>
+		conflict_types["$cnftype.code"]=new Object();
+		conflict_types["$cnftype.code"]["icon"]="$cnftype.icon";
+		conflict_types["$cnftype.code"]["sym"]="$cnftype.sym";
+	</PDM_LIST>
+
+	var change_orders=new Object();
+	<PDM_LIST PREFIX=chgcnf FACTORY=chgcnf_chg WHERE="$args.search_where_conflicts" ESC_STYLE=C>
+		if ('$chgcnf.conflict.conflict_status' != "RSLVD") {	
+			if(typeof change_orders["$chgcnf.change"]=="undefined") {
+				change_orders["$chgcnf.change"]=new Object();
+			}
+			if(typeof change_orders["$chgcnf.change"]["$chgcnf.conflict.conflict_type"]=="undefined") {
+				  change_orders["$chgcnf.change"]["$chgcnf.conflict.conflict_type"]=1;
+			} else {
+				  change_orders["$chgcnf.change"]["$chgcnf.conflict.conflict_type"]+=1;
+			}
+		}
+	</PDM_LIST>
+</PDM_IF>
+
+function conflict_counts(value)
+{
+	if(typeof value=="undefined" || value=="" || typeof value.id=="undefined" || value.id=="") return;
+	var counts=new String();
+	for(var conflict in change_orders[value.id]) {
+		if(counts.length > 0) counts+=" ";
+		counts+=conflict_types[conflict].sym + "(" + change_orders[value.id][conflict] + ")";
+	}
+	return counts;
+}
+
+function conflict_counts_ls(value)
+{
+	if(typeof value=="undefined" || value=="") return;
+	var counts=new String();
+	for(var conflict in change_orders[value]) {
+		counts+=" " + conflict_types[conflict].sym + "(" + change_orders[value][conflict] + ")";
+	}
+	rs.data(counts);
+	return;
+}
+
+</script>
+
+
+
+</head>
+<body CLASS="list" onload="setupSchedule('change')">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Change Order">
+<script type="text/javascript">
+<PDM_MACRO name=sfStart create=true export=no factory=chg>
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=list_chgsched.htmpl>');
+
+<PDM_MACRO name=sfStartRow>
+
+searchFilterDropdown("Active","active","","Active","1","Inactive","0");
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status colspan=2 factory=chgstat>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfHier hdr="Klasyfikacja" attr="category.sym" factory=chgcat>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfLookup hdr="Rodzic" attr=parent factory=chg>
+<PDM_MACRO name=sfDropdown hdr="Typ zmiany" attr=chgtype factory=chgtype>
+<PDM_IF "$PRE.schedAttrs" : "CI[0-9]">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nazwa CI" attr=schedCI.name factory=nr>
+<PDM_MACRO name=sfLookup hdr="Klasa CI" attr=schedCIClass.type factory=grc>
+<PDM_MACRO name=sfDropdown hdr="Rodzina CI" attr=schedCIFamily factory=nrf lookup=no>
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Status konfliktu" attr=conflicts.conflict.conflict_status factory=chgcnf_status lookup=no>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Kod zamknięcia" attr="closure_code" factory=closure_code>
+<PDM_MACRO name=sfDropdown hdr="Akceptacja CAB" attr="cab_approval" factory=bool>
+<PDM_MACRO name=sfDropdown hdr="CAB" attr="cab" factory=grp>
+<PDM_MACRO name=sfDropdown hdr="Ryzyko" attr="risk" factory=risk_level>
+<PDM_MACRO name=sfLookup hdr="Organizacja" attr="organization" factory=org>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<div id=schedButtonDiv class=page_header></div>
+<script type="text/javascript">
+var msgFoundNone = "Brak Zmian";
+var msgFound1 = "Znaleziono 1 Zmianę";
+var msgFound = "Znaleziono %1 Zmian";
+var msgFoundMore = "Znaleziono %1 Zmian. Wyświetlane %2 z %3";
+
+var ref_num_style;
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var conflictIcons = new Array();">
+<PDM_MACRO name=lsWrite text="<PDM_LIST PREFIX=icon FACTORY=chgcnf_chg WHERE=\"change = @{list.id} AND conflict.conflict_status != 'RSLVD'\" ESC_STYLE=JS>">
+<PDM_MACRO name=lsWrite text="conflictIcons[\"@{icon.conflict.conflict_type}\"] = \"@{icon.conflict.conflict_type.icon}\";">
+<PDM_MACRO name=lsWrite text="setConflictIcons(conflictIcons, \"@{icon.change}\" );">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsCol hdr="Planowe rozpoczęcie" attr=sched_start_date sort="no">
+<PDM_MACRO name=lsCol hdr="Czas trwania" attr=sched_duration sort="no">
+<PDM_MACRO name=lsCol hdr="Planowe zakończenie" attr=sched_end_date sort="no">
+<PDM_MACRO name=lsCol hdr="Zmiana #" attr=chg_ref_num link=yes sort="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=status sort="no">
+<PDM_MACRO name=lsCol hdr="Typ zmiany" attr=chgtype sort="no">
+<PDM_MACRO name=lsCol hdr="Klasyfikacja" attr=category colspan=2 sort="no">
+<PDM_MACRO name=lsCol hdr="Licznik kolizji" attr=id fmtfunc=conflict_counts_ls sort="no">
+<PDM_MACRO name=lsCol attr=summary colspan=9 label="Podsumowanie" startrow=yes>
+<PDM_MACRO name=lsEnd isTicketFactory=1 sort="sched_start_date,sched_end_date">
+</script>
+<!-- Creating div to display calendar views -->
+<div id=schedDiv style="display:block"></div>
+<script type="text/javascript">
+// Hiding list view by default
+rs.hide();
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

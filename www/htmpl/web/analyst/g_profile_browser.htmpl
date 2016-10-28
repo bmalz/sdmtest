@@ -1,0 +1,67 @@
+<html lang="en"><PDM_IF 0>
+g_profile_browser.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+var ahdtop = get_ahdtop();
+var cfgCAISD = "$CAisd";
+var cfgCgi = "$cgi";
+var cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+var closePopup = 0;
+if (typeof ahdframeset == "undefined")
+    ahdframeset = parent.ahdframeset;
+var in_content_frame = ( ahdframeset == ahdtop );
+var ahdframeset = ( in_content_frame ? window.ahdframeset : window );
+
+if (in_content_frame)
+{
+   document.writeln('<FRAMESET ROWS="*" FRAMEBORDER="0" FRAMESPACING="2" BORDER="0" onUnload="cancel_window()">');
+}
+else 
+{
+var r_size = 50 + 26 + 22; 
+document.writeln('<FRAMESET MARGINHEIGHT=0 MARGINWIDTH=0 ROWS="' + r_size + ',*"  onUnload="cancel_window()">');
+document.writeln('<FRAMESET ROWS="*,26,22" FRAMEBORDER=NO MARGINHEIGHT=0 MARGINWIDTH=0>');
+document.writeln('<FRAMESET COLS="*,1" FRAMEBORDER=NO MARGINHEIGHT=0 MARGINWIDTH=0 >');
+if (typeof ahdtop.use_role != "undefined" && ahdtop.use_role)
+{
+    document.writeln('<FRAME FRAMEBORDER=NO MARGINHEIGHT=0 MARGINWIDTH=0 SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=456+HTMPL=gobtn_role.htmpl" NAME=gobtn NORESIZE SCROLLING=NO title="Go button navigation">');
+}
+else 
+{
+    document.writeln('<FRAME FRAMEBORDER=NO MARGINHEIGHT=0 MARGINWIDTH=0 SRC="$CAisd/html/gobtn.html" NAME=gobtn NORESIZE SCROLLING=NO title="Go button navigation">');
+}
+document.writeln('<FRAME FRAMEBORDER=NO MARGINHEIGHT=0 MARGINWIDTH=0 SRC="$CAisd/html/empty.html" NAME=workframe NORESIZE SCROLLING=NO title="Hidden frame - do not navigate here">');
+document.writeln('</FRAMESET>');
+document.writeln("<FRAME FRAMEBORDER=NO MARGINHEIGHT=0 MARGINWIDTH=0 SRC='" + ahdtop.cfgCgi + "?OP=DISPLAY_FORM+SID=" + ahdtop.cfgSID + "+FID=123+HTMPL=welcome_banner.htmpl+KEEP.POPUP_NAME='" + window.name + "' NAME=welcomebanner NORESIZE='NORESIZE' title='User name and logoff link'>");
+document.writeln('<FRAME FRAMEBORDER=NO MARGINHEIGHT=0 MARGINWIDTH=0 SRC="$CAisd/html/menubar.html" NAME=menubar SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title="Menu bar">');
+document.writeln('</FRAMESET>');
+}
+
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+<PDM_INCLUDE FILE=g_profile_browser_frameset.htmpl>
+<PDM_ELSE>
+document.writeln('<FRAME style="border:0px;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=g_profile_browser2.htmpl+KEEP.POPUP_NAME=$args.KEEP.popup_name" NAME=gpbwindow SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO title="Hidden frame - do not navigate here">');
+</PDM_IF>
+
+document.writeln("</FRAMESET>");
+</SCRIPT>
+</HTML>
+<PDM_IF 0>
+$Id: g_profile_browser.htmpl,v 1.2 2006/11/08 00:11:44 olsjo01 Exp $
+</PDM_IF>

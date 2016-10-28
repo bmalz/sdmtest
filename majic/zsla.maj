@@ -1,0 +1,11 @@
+OBJECT zSLA {
+  ATTRIBUTES zSLA {
+    sites	 BREL zlrel_zsla_site zsla		  { LREL site; } ;
+  };
+};
+
+OBJECT site {
+    ATTRIBUTES ca_site {
+		zslas	 BREL zlrel_zsla_site site		  { LREL zSLA; } ;
+	};
+};

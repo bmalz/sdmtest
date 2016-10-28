@@ -1,0 +1,298 @@
+<PDM_IF 0>
+xx_solnalg_tab.htmpl
+WHEN PRESENTED:
+    On the request, issue, or change order detail form
+INTENT:
+    Display a notebook page for SOLN activity logs only
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=xx_solnalg_tab.htmpl
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=xx_solnalg_tab" factory=cr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript">
+argActLogKTool = "$args.act_log.k_tool";
+argActLogSession = "$args.act_log.session";
+cfgDateFormat = "$date_format";
+</script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Solution Log">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_IF 0>
+	Need to select all active solutions using the kdlinks table.
+	So we'll show each solution once and avoid from showing the solution unlinked event
+	
+</PDM_IF>
+	var m_arrSolKDs = new Array();
+	var m_iarrSolKDsCounter = 0; 
+	<PDM_LIST FACTORY=kdlinks PREFIX=KDs1 WHERE="cr='$args.persistent_id' and (link_type=1 or link_type=2)">
+		m_arrSolKDs[m_iarrSolKDsCounter] = "$KDs1.kd.id";
+		m_iarrSolKDsCounter ++;
+	</PDM_LIST>
+	<PDM_LIST FACTORY=kdlinks PREFIX=KDs2 WHERE="iss='$args.persistent_id' and (link_type=1 or link_type=2)">
+		m_arrSolKDs[m_iarrSolKDsCounter] = "$KDs2.kd.id";
+		m_iarrSolKDsCounter ++;
+	</PDM_LIST>
+</PDM_IF>
+tab_banner("Solutions");
+docWriteln("<table id='tbl101' class='tab' summary='Solution List'>");
+docWriteln("<tr>");
+docWriteln("<th scope='col' align='left' class='results'>Analyst</th>");
+docWriteln("<th scope='col' align='left' class='results'>Date</th>");
+docWriteln("<th scope='col' align='left' class='results'>Type</th>");
+docWriteln("<th scope='col' align='left' class='results'>Summary</th>");
+docWriteln("</tr>");
+<PDM_IF $prop.view_internal == 0>
+<PDM_IF $args.soln_log.length == 0>
+detailStartRow("Center");  
+docWriteln("<td align='middle' class='detailro'>");  
+docWriteln("No Solutions Attached");
+docWriteln("</td>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_ELSE>
+var counter=0;
+<PDM_LIST SOURCE=args.soln_log>
+	var bInclude = true;//boolean to decide if to include the next item in the list
+	
+<PDM_IF "$env.NX_KT" == "Yes">		
+		if ("$args.soln_log.type.code" == "KTREJECT")
+		{
+			bInclude = false;
+		}
+		if ("$args.soln_log.type.code" == "KTSOLN")
+		{
+			var bDidFindSol = false;
+			for (var i = 0; i < m_arrSolKDs.length; i++)
+			{
+				if (m_arrSolKDs[i] ==  "$args.soln_log.session")
+				{
+					bDidFindSol = true;
+					m_arrSolKDs[i] = "";//So we'll display it just once
+					break;
+				}
+			}
+			if (!bDidFindSol)
+			{
+				bInclude = false;	
+			}
+		}
+	
+</PDM_IF>
+	if (bInclude)
+	{
+		var sClass;
+		if(counter%2)
+			sClass = "results1";
+		else
+			sClass = "results0";
+		counter++;
+		var strHTML="<tr class='" + sClass +  "'>";
+					
+		docWriteln(strHTML); 
+		docWriteln("<td valign='top' class='detailroTab'>");
+		docWriteln("<a" + detailNextID() +
+				" href=\"javascript:showDetailWithPersid('$args.soln_log.analyst.persistent_id')\"" + getMOPreviewEventHtml( '$args.soln_log.analyst.persistent_id' ) + ">$args.soln_log.analyst.combo_name</a>");
+		docWriteln("</td>");
+		docWriteln("<td nowrap valign='top' class='detailroTab'>");
+		docWriteln(date_to_string('$args.soln_log.time_stamp_INT_DATE', 0));
+		docWriteln("</td>");
+
+		if (("$args.soln_log.type.code" == "KTSOLN" || "$args.soln_log.type.code" == "KTREJECT") && 
+			"$args.soln_log.session" != "")
+		{
+			var sPathIDs = <PDM_FMT STYLE=C WIDTH=255>'$args.soln_log.action_desc'</PDM_FMT>;
+			sPathIDs = system_Trim(sPathIDs);
+			var algTitle = "";
+			var moEventHtml = getMOPreviewEventHtml( "KD:" + "$args.soln_log.session" );
+			if ( moEventHtml == "" )
+			{
+				// Only show tooltip when mouseover preview is disabled. 
+				algTitle = "Click to display Knowledge Document  $args.soln_log.session"; 
+			}
+			var alghtml = "<td nowrap valign='top' class='detailroTab'>";
+			alghtml += "<a" + detailNextID() + " title='" + algTitle + "' " +
+			"href=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, " +
+			"'directories=no,location=no,menubar=no,status=no,topsplash=no,menubar=no','PERSID=KD:$args.soln_log.session', " +
+			"'HTMPL=kt_document_view.htmpl', 'opener=search_tools', 'open_mode=2', 'reload=1', " + 
+			"'SOLUTION_OF=" + nx_escape(argPersistentID) + "','disable_solution_survey=true','TICKET_FACTORY=" + propFactory + "'," +
+			"'SOLUTION_OF_ID=" + argID + "','PATH_IDS=" + sPathIDs + "')\"" + moEventHtml + ">\n";
+			alghtml += "$args.soln_log.type.sym</a></td>\n";
+			docWriteln(alghtml);
+		}
+		else if ("$args.soln_log.type.code" == "KTSUBMIT" && "$args.soln_log.session" != "")
+		{
+			var algTitle = "";
+			var moEventHtml = getMOPreviewEventHtml( "KD:" + "$args.soln_log.session" );
+			if ( moEventHtml == "" )
+			{
+				// Only show tooltip when mouseover preview is disabled. 
+				algTitle = "Click to display Knowledge Document  $args.soln_log.session"; 
+			}
+			var alghtml = "<td nowrap valign='top' class='detailroTab'>";
+			alghtml += "<a" + detailNextID() + " title='" + algTitle + "' " +
+			"href=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, " +
+			"'', 'PERSID=KD:$args.soln_log.session','RELOAD_WIN=0') \"" + moEventHtml + ">\n";
+			alghtml += "$args.soln_log.type.sym</a></td>\n";
+			docWriteln(alghtml);
+		}
+		else 
+		{
+			docWriteln('<td valign="top" class="detailroTab">$args.soln_log.type.sym</td>');
+		}
+		docWriteln("<td valign='top' class='detailroTab'>");
+		docWriteln("<a" + detailNextID(true) +
+				" href=\"javascript:showLog('$args.soln_log.persistent_id', '$args.soln_log.analyst.combo_name')\"" + getMOPreviewEventHtml( '$args.soln_log.persistent_id' ) + ">");   
+		docWriteln('<PDM_FMT ESC_STYLE=C WIDTH=80>$args.soln_log.description</PDM_FMT>');
+		docWriteln("</a>");
+		docWriteln("</td>");
+		docWriteln("</tr>");
+	}
+</PDM_LIST>
+</PDM_IF>
+<PDM_ELSE>
+<!-- Show all actlogs -->
+
+<PDM_IF $args.soln_log_all.length == 0>
+detailStartRow("Center");  
+docWriteln("<td align='middle' class='detailro'>");  
+docWriteln("No Solutions Attached");
+docWriteln("</td>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_ELSE>
+var counter=0;
+<PDM_LIST SOURCE=args.soln_log_all>
+		var bInclude = true;//boolean to decide if to include the next item in the list
+		
+<PDM_IF "$env.NX_KT" == "Yes">		
+			if ("$args.soln_log_all.type.code" == "KTREJECT")
+			{
+				bInclude = false;
+			}
+			if ("$args.soln_log_all.type.code" == "KTSOLN")
+			{
+				var bDidFindSol = false;
+				for (var i = 0; i < m_arrSolKDs.length; i++)
+				{
+					if (m_arrSolKDs[i] ==  "$args.soln_log_all.session")
+					{
+						bDidFindSol = true;
+						m_arrSolKDs[i] = "";//So we'll display it just once
+						break;
+					}
+				}
+				if (!bDidFindSol)
+				{
+					bInclude = false;	
+				}
+			}
+		
+</PDM_IF>
+		if (bInclude)
+		{
+			var sClass;
+			if(counter%2)
+				sClass = "results1";
+			else
+				sClass = "results0";
+			counter++;
+			var strHTML="<tr class='" + sClass +  "'>";
+			
+			docWriteln(strHTML); 
+			docWriteln("<td valign='top' class='detailroTab'>");
+			docWriteln("<a" + detailNextID() +
+					" href=\"javascript:showDetailWithPersid('$args.soln_log_all.analyst.persistent_id')\"" + getMOPreviewEventHtml( '$args.soln_log_all.analyst.persistent_id' ) + ">$args.soln_log_all.analyst.combo_name</a>");
+			docWriteln("</td>");
+			docWriteln("<td nowrap valign='top' class='detailroTab'>");
+			docWriteln(date_to_string('$args.soln_log_all.time_stamp_INT_DATE', 0));
+			docWriteln("</td>");
+
+			var showInternalIcon = "$args.soln_log_all.internal";
+			if (0 == showInternalIcon.length) showInternalIcon = "0";
+
+			docWriteln("<td nowrap valign='top' class='detailroTab'>");
+			if (("$args.soln_log_all.type.code" == "KTSOLN" || "$args.soln_log_all.type.code" == "KTREJECT") && 
+				"$args.soln_log_all.session" != "")
+			{
+				var alghtml = "";
+				var sPathIDs = <PDM_FMT STYLE=C WIDTH=255>'$args.soln_log_all.action_desc'</PDM_FMT>;
+				sPathIDs = system_Trim(sPathIDs);				
+				var algTitle = "";                                                                                
+				var moEventHtml = getMOPreviewEventHtml( "KD:" + "$args.soln_log_all.session" );                      
+				if ( moEventHtml == "" )                                                                          
+				{                                                                                                 
+				    // Only show tooltip when mouseover preview is disabled.                                      
+				    algTitle = "Click to display Knowledge Document  $args.soln_log_all.session";
+				}                                                                                                 
+				alghtml += "<a" + detailNextID() + " title='" + algTitle + "' " + 
+				"href=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, " + 
+				"'directories=no,location=no,menubar=no,status=no,topsplash=no,menubar=no','PERSID=KD:$args.soln_log_all.session'," + 
+				"'HTMPL=kt_document_view.htmpl', 'opener=search_tools', 'open_mode=2', 'reload=1', " + 
+				"'SOLUTION_OF=" + nx_escape(argPersistentID) + "','disable_solution_survey=true', 'TICKET_FACTORY=" + propFactory + "'," + 
+				"'SOLUTION_OF_ID=" + argID + "','PATH_IDS=" + sPathIDs + "')\"" + moEventHtml + ">\n";
+				alghtml += "$args.soln_log_all.type.sym</a>\n";
+				docWriteln(alghtml);
+			}
+			else if ("$args.soln_log_all.type.code" == "KTSUBMIT" && "$args.soln_log_all.session" != "")
+			{
+				var algTitle = "";                                                                                
+				var moEventHtml = getMOPreviewEventHtml( "KD:" + "$args.soln_log_all.session" );                      
+				if ( moEventHtml == "" )                                                                          
+				{                                                                                                 
+				    // Only show tooltip when mouseover preview is disabled.                                      
+				    algTitle = "Click to display Knowledge Document  $args.soln_log_all.session";
+				}                                                                                                 
+				var alghtml = "";
+				alghtml += "<a" + detailNextID() + " title='" + algTitle + "' " +
+				"href=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, " +
+				"'', 'PERSID=KD:$args.soln_log_all.session', 'RELOAD_WIN=0') \"" + moEventHtml + ">\n";
+				alghtml += "$args.soln_log_all.type.sym</a>\n";
+				docWriteln(alghtml);
+			}			
+			else 
+			{
+				docWriteln("$args.soln_log_all.type.sym");
+			}
+			docWriteln("</td>");
+
+			docWriteln("<td valign='top' class='detailroTab'>");
+			docWriteln("<a" + detailNextID(true) +
+					" href=\"javascript:showLog('$args.soln_log_all.persistent_id', '$args.soln_log_all.analyst.combo_name')\"" + getMOPreviewEventHtml( '$args.soln_log_all.persistent_id' ) + ">");   
+			docWriteln('<PDM_FMT ESC_STYLE=C WIDTH=80>$args.soln_log_all.description</PDM_FMT>');
+			docWriteln("</a>");
+			if ("1" == showInternalIcon) {
+					docWriteln("&nbsp;&nbsp;<img src='$CAisd/img/glasses.gif' title='This is an internal log' class='gn_container_no_border' alt='This is an internal log'>");
+				}
+			docWriteln("</td>");
+
+			docWriteln("</tr>");
+		}
+</PDM_LIST>
+</PDM_IF>
+</PDM_IF>
+docWriteln("</table>");
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: xx_solnalg_tab.htmpl ASPEN.1 2010/11/22 14:26:17 tomjo02 Exp $
+</PDM_IF>

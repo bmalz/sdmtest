@@ -1,0 +1,169 @@
+<PDM_IF 0>
+detail_mailbox.htmpl
+WHEN PRESENTED:
+    When we need to display a details of a single mailbox
+INTENT:
+    Display the detail and edit info for the mailbox
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  mailbox  args	The Mailbox object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm.maj for the
+                        definition of attributes for 'OBJECT mailbox'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Mailbox Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Mailbox"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Mailbox $args.name"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+argName = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name"</PDM_FMT>;
+argID = "$args.id";
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+function check_repos_before_save()
+{	
+  // clear the previous message
+    clearAlertMsg(window.parent);    
+    AlertMsg=""; // reset the AlertMsg
+	if ((window.document.main_form.elements["SET.attach_email"].value != "0")
+			|| (window.document.main_form.elements["SET.split_out_attachment"].value != "0")){				
+				if (window.document.main_form.elements["SET.attmnt_repository"].value == ""){
+				    showAlertMsg("Attachment Repository is required when 'Attach Entire Email' and/or 'Force Attachment Splitout' option is selected");
+				    return;
+				  }
+		}	
+	if (window.document.main_form.elements["SET.check_interval"].value < 20){
+            showAlertMsg("Minimum value for Check Interval is 20 seconds"); 
+            return;
+    }
+				 
+	detailSave();
+}
+
+function validate_interval(field)
+{
+ // clear the previous message
+    clearAlertMsg(window.parent);    
+    AlertMsg=""; // reset the AlertMsg
+
+ var interval;
+ if ( typeof field == "object" )
+  {
+    interval = field.value;
+    if (interval < 20){
+    showAlertMsg("Minimum value for Check Interval is 20 seconds"); 
+    //field.value = 20;
+  }
+ }
+}
+</script>
+
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="mailbox" key="$args.name">
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=mailbox>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Save[s]" func="check_repos_before_save()" hotkey_name="Save[s]" id="btn001" width=120>
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="pdm_reset()" hotkey_name="Reset[r]" id="btn003" width=120>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Edit[d]" func="pdm_submit('main_form','UPDATE')" hotkey_name="Edit[d]" id="btn001" width=120>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=name>
+<PDM_MACRO name=dtlTextbox hdr="Interwał sprawdzania (w sek.)" attr=check_interval evt="onBlur=\\\"validate_interval(this)\\\"">
+<PDM_MACRO name=dtlDropdown hdr="Aktywne" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ e-mail" attr=email_type lookup=no whereclause="incoming=1">
+<PDM_MACRO name=dtlTextbox hdr="Nazwa hosta" attr=host_name>
+<PDM_MACRO name=dtlTextbox hdr="Port Override" attr=host_port>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa użytkownika" attr=userid>
+<PDM_MACRO name=dtlTextbox hdr="Hasło" attr=password password=yes>
+var csecurity_lvl;
+switch("$args.security_lvl") {
+	case "0" : 
+	      csecurity_lvl = msgtext("Clear_Text");
+	      break;
+	case "1":
+				csecurity_lvl = "APOP";
+				break;
+	case "2":
+				csecurity_lvl = "NTLM";
+				break;
+	case "3":
+				csecurity_lvl = "MD5";
+				break;
+	default :
+		    csecurity_lvl = msgtext("Clear_Text");
+	      break;	
+			}
+detailDropdown("Security Level","security_lvl","mailbox",1,20,
+true,"","$args.security_lvl",
+"no","$args.security_lvl",csecurity_lvl,
+"","","no","","","0",
+msgtext("Clear_Text"),"0","APOP","1","NTLM","2","MD5","3");
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Repozytorium załączników" attr=attmnt_repository lookup=no whereclause="server LIKE '$env.NX_LOCAL_HOST' AND repository_type=0">
+<PDM_MACRO name=dtlCheckbox hdr="Załącz cały e-mail" attr="attach_email" colspan=1 off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Wymuś podział załącznika" attr="split_out_attachment" colspan=1 off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zezwalaj na anonimowe" attr="allow_anonymous" colspan=1 off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Zapisz nierozpoznane e-maile" attr="save_unknown_emails" colspan=1 off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Użyj adresu Odpowiedz do" attr="use_reply_to_address" colspan=1 off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Szczegóły" attr=description colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by" colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=startNotebook hdr=mailbox_rules_policy>
+<PDM_MACRO name=TAB title="Rules" height=300 src="OP=SEARCH+FACTORY=mailbox_rule+QBE.EQ.mailbox=$args.id">
+<PDM_MACRO name=TAB title="Policy" file="mailbox_policy_tab.htmpl" id=policy>
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_mailbox.htmpl ASPEN.4 2010/11/17 23:42:16 saima01 Exp $
+</PDM_IF>
+<PDM_WSP>

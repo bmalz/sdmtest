@@ -1,0 +1,28 @@
+<PDM_IF 0>
+@(#)$Id: hourglass.htmpl ASPEN.1 2010/08/26 18:29:18 bansu06 Exp $
+</PDM_IF>
+<script type="text/javascript">
+    var sTop = "35px";
+    var sRight = "15px";
+    
+    if ("$prop.top_pos" != "")
+    {
+        sTop = "$prop.top_pos";
+    }
+    if ("$prop.right_pos" != "")
+    {
+        sRight = "$prop.right_pos";
+    }
+    
+    var txt = "<DIV ID=hourglassLayer STYLE='display: none; " +
+                "position: absolute;" + "top:" + sTop + ";right:" +
+                sRight + ";'>";
+<PDM_IF "$SESSION.usingScreenReader" != "1">
+    txt += "<A HREF=\"javascript:show_action_in_progress();\">" +
+           "<IMG class=gn_container_no_border SRC=\"" + cfgCAISD +
+           "/img/busy.gif\" alt='Form busy - please wait.  Click for more information.'></A>";
+</PDM_IF>
+    txt += "</DIV>";
+    document.writeln(txt);
+</script>
+            

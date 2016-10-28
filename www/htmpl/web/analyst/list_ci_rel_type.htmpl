@@ -1,0 +1,86 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Relationship Type Search";
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+var hdrTitleList = "Relationship Type List";
+<PDM_ELSE>
+var hdrTitleList = "CI Relationship Type List";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var rptName = new Array("ci_rel_typesum.rpt", "ci_rel_typedtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ci_rel_type">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart factory="ci_rel_type">
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$env.NX_CMDB" == "">
+<PDM_MACRO name=sfTextbox hdr="Etykieta nadrzędnego do podrzędnego" attr="parenttochild" addpercent=yes size=20>
+<PDM_MACRO name=sfTextbox hdr="Etykieta podrzędnego do nadrzędnego" attr="childtoparent" addpercent=yes size=20>
+<PDM_ELSE>
+<PDM_MACRO name=sfTextbox hdr="Etykieta nabywcy do odbiorcy" attr="parenttochild" addpercent=yes size=20>
+<PDM_MACRO name=sfTextbox hdr="Etykieta odbiorcy do nabywcy" attr="childtoparent" addpercent=yes size=20>
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Jest równorzędna?" attr="is_peer">
+<PDM_MACRO name=sfDropdown hdr="Aktywne?" attr="delete_flag">
+<PDM_IF "ci_rel_type" : "^z.*$">
+document.writeln('<input type="hidden" id="ADDL_WHERE_HARDCODE" name="ADDL_WHERE_HARDCODE" value="id IS NOT NULL">');
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Relationship Types found";
+  var msgFound1 = "1 Relationship Type found";
+  var msgFound = "%1 Relationship Types found";
+  var msgFoundMore = "%1 Relationship Type found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Relationship Type";
+
+  function display_peer_value(value)
+{
+  if ( value == "Active" )
+     value = "Yes";
+  else if ( value == "Inactive" )
+     value = "No";
+  rs.data(value);     
+} 
+
+function display_peer_valueExp(){
+	return "LIST_LOOKUP: " + msgtext("Active") + "," + msgtext("Yes") + "," + msgtext("Inactive") + "," + msgtext("No");
+}
+<PDM_MACRO name=lsStart>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=lsCol hdr="Dostawca do odbiorcy" attr=parenttochild exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Odbiorca do dostawcy" attr=childtoparent justify=left>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Nadrzędny do podrzędnego" attr=parenttochild justify=left>
+<PDM_MACRO name=lsCol hdr="Podrzędny do nadrzędnego" attr=childtoparent justify=left>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Jest równorzędna?" attr=is_peer exportfmt=display_peer_valueExp fmtfunc=display_peer_value justify=left sort=no>
+<PDM_MACRO name=lsCol hdr="Aktywne?" attr=delete_flag justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

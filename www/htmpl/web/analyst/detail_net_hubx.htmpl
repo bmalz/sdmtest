@@ -1,0 +1,13 @@
+<PDM_IF 0>
+detail_net_hubx.htmpl
+Purpose:
+    Display the detail of a Network.Hub/SAN.Switch CI.
+    See cmdb_detail.htmpl for  more details.
+
+History:
+       22-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<PDM_INCLUDE FILE="cmdb_detail.htmpl"   extension="net_hubx">
+
+<PDM_WSP where="family.extension_name='net_hubx'" factory=nr design=no>

@@ -1,0 +1,98 @@
+<PDM_IF 0>
+"@(#)$Id: list_in.htmpl ASPEN.1 2011/08/11 15:51:55 vwwsr01 Exp $";
+list_in.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Call Incidents.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>	
+<script>
+var hdrTitleList = "Lista incydentów";
+
+function loadActions()
+{
+	var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + 
+		"+OP=TICKET_SEARCH+TICKET_TYPE=Incidents+SEARCH_COUNT=$record_count";
+	
+	SyncAjaxCall(sURL);
+}
+</script>	
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS=emp onload="loadActions();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono incydentów";
+var msgFound1 = "Znaleziono 1 incydent";
+var msgFound = "Znaleziono %1 incydentów";
+var msgFoundMore = "Znaleziono %1 incydentów.  Wyświetlanie %2 do %3";
+var msgSelect = "Click to select desired incident";
+var msgSelectAlg = "Click to select desired incident and add a %1 activity log";
+var col_count = 5;
+
+
+var pri_cal_enabled = false;
+pri_cal_enabled = ("$args.KEEP.auto_pri_cal" == "true");
+var ref_num_style;
+var out = "";
+out = '<form action="' + cfgCgi + '" method=POST name=fltrFormSubmit>\n' +
+            '<input type=hidden name=OP value=STORE_URL>\n' +
+			'<input type=hidden name="URLID">\n' +
+			'<input type=hidden name="URL">\n' +
+			'<input TYPE=hidden name="SID">\n' +
+			'<input TYPE=hidden name="FID">\n' +
+			'</FORM>\n';
+document.writeln(out);
+<PDM_MACRO name=lsStart>
+rs.overrideMenu=true
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_if @{list.ttv_act_slas.length:0} == 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_ELSE>
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Incydent #" attr=ref_num exportFmt=ShowLink link=yes startrow="no"> // 20131108 bmalz @ e-xim : SLA Warning off - style=ref_num_style
+<PDM_MACRO name=lsCol hdr="Opis" attr=summary startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=status startrow="no">
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=DESC startrow="no">
+<PDM_IF 0>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort=DESC startrow="no">
+</PDM_IF>
+<PDM_IF "$env.NX_URGENCY_ON_EMPLOYEE" == "Yes">	
+	col_count++;
+<PDM_MACRO name=lsCol hdr="Pilność" attr=urgency sort="DESC" startrow="no">
+<PDM_ELSE>
+<PDM_MACRO name=lsWrite both=yes text="if (!pri_cal_enabled) {">
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort="DESC" startrow="no">
+		col_count++;
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+</PDM_IF>
+<PDM_MACRO name=lsCol attr=description colspan=col_count label="Opis długi" startrow=yes width=50>
+<PDM_MACRO name=lsEnd factory=in>
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

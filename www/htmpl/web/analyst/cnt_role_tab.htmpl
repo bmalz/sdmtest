@@ -1,0 +1,59 @@
+<PDM_IF 0>
+cnt_role_tab.htmpl
+INTENT:
+    Display a Role notebook page for the Contact page.
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=cnt_role_tab" factory=cnt>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/role.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class=detailro onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class=detailro onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// Default role data used by list form.
+var rdefs = new attached_defaults("$args.persistent_id");
+<PDM_OBJECT>
+function add_button_to_tab_banner() {
+   if( ($ACCESS.FAC_cnt > 1) && ($ACCESS.FAC_cnt_role > 1)) {
+      
+<PDM_MACRO name=button caption="Aktualizuj role" func="update_lrel_role('cnt', '$args.persistent_id', 'role', 'roles',  'Roles Available', 'Roles Assigned', '')" hotkey_name="Update Roles" id=UPDATE_LREL newrow=yes>
+
+      if (_dtl.edit) {
+         
+<PDM_MACRO name=button caption="Ustaw domyślną rolę" disabled=yes endrow=yes func="set_def_role('cnt_role', rdefs)" hotkey_name="Set Default Role" id=SET_DEFAULT_ROLE>
+      }
+      else {
+         
+<PDM_MACRO name=button caption="Ustaw domyślną rolę" endrow=yes func="set_def_role('cnt_role', rdefs)" hotkey_name="Set Default Role" id=SET_DEFAULT_ROLE>
+      }
+   }
+}
+</PDM_OBJECT>
+if (cfgUserAuth > 1) {
+<PDM_MACRO name=tabBanner add_btns=true show_bar=false>
+}
+
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=tabList btntitle="Load Attached Roles List." height=300 src="OP=SEARCH+FACTORY=cnt_role+QBE.EQ.contact.id=$dob.id+QBE.EQ.role_obj.delete_flag=0+KEEP.CNT_ID=$args.id+KEEP.cntUserAuth=$UserAuth">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+</PDM_FORM>
+</body>
+</html>

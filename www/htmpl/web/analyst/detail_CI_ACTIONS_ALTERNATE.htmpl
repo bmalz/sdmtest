@@ -1,0 +1,55 @@
+<PDM_IF 0>
+detail_CI_ACTIONS_ALTERNATE.htmpl
+WHEN PRESENTED:
+    When we need to edit assignee
+INTENT:
+    Edit a task
+VARIABLES:
+    
+    object  CI_ACTIONS_ALTERNATE  args	The CI_ACTION_ALTERNATE object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT CI_ACTIONS_ALTERNATE
+						for the definition of attributes for 'OBJECT CI_ACTIONS_ALTERNATE'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.CONTACT_ID.userid Assignee Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.CONTACT_ID.userid Update Assignee"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Assignee"</PDM_FMT>;
+</script>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var sOpener = "$args.KEEP.OPENER";
+var argID = "$args.id";
+var isEdit = "$args.KEEP.IS_EDIT";
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+_bHideTenantSelection = true;//Inherit the tenant from the Approval Template - SCO 6350
+</script>
+</head>
+<body class="detailro" onload="frmCiActionsAlternateOnLoad()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ciactions" header=no key="$args.CONTACT_ID">
+<center>
+	<script>
+		
+<PDM_MACRO name=dtlForm factory=CI_ACTIONS_ALTERNATE>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=CONTACT_ID autofill=yes factory=agtgrp>
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

@@ -1,0 +1,292 @@
+<PDM_IF 0>
+do_svy.htmpl
+WHEN PRESENTED:
+    User is presented with a survey
+INTENT:
+    Capture survey responses from the user
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  svy_tpl  args	The Survey Template (svy_tpl) object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT svy_tpl'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+	string	ext_args.CNTXT_PERSID - the object that initiated the survey request
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview=no>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msg_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript">
+<!--
+	var ahdtop = window;
+	window.name = "AHDtop";
+	var cfgProductName = "$ProductName";
+	var usdImg = new Array();
+	usdImg["circleca"] = "$CAisd/img/circleca.png";
+	var i = 1;
+	var linkpfx = "link";
+	var reqarray = new Array(); // tracks responses to compulsory questions
+	
+	////////////////////////////////////////////////////////////
+	// Generate the question # 
+	////////////////////////////////////////////////////////////	  
+	function cntr(dolink) {
+		
+		if ( dolink ) {
+		   var linkname = linkpfx + i.toString();
+		   var hyplink = "<" + "a id='" + linkname + "' name='" + linkname + "'> <" + "/a" + ">" ; 
+		   document.write( hyplink );
+		  }
+		document.write(i++ + ".  ");
+		   
+	}
+	
+	
+	////////////////////////////////////////////////////////////
+	// Check if this pertains to a compulsory question and 
+	// update the response flag with the current state
+	////////////////////////////////////////////////////////////
+	function ck_req(index, elenm) { 
+	
+		var formname = "frm001";
+		
+				
+			
+		if ( typeof reqarray[index] != "undefined") {
+		   // this is a compulsory question
+		   var tgtvar = reqarray[index];
+		   var tgtele = document.forms[formname].elements[elenm];
+		   var i;
+		   
+		   // assume it is not checked then traverse the array to inspect
+		   tgtvar[1] = 0;		   
+		   for ( i=0; i < tgtele.length; i++ ) { 
+		      if ( tgtele[i].checked ) { 
+		          tgtvar[1] = 1;
+		          break;
+		          }
+		      }
+		   }
+		  
+		   
+		}
+	
+	//modified for all text areas by kumjo01 SDT 15924947
+    function check_max_size()
+    {
+		var returnValue = true;
+		var objs = document.getElementsByTagName("textarea");
+  		var oi = 0; //oi is object index
+  		var thisObj;
+  		for (oi=0;oi<objs.length;oi++) {
+   			thisObj = objs[oi];
+   			// note that maxlength is case sensitve
+   			if (thisObj.getAttribute('maxlength')){
+			    var maxLength = parseInt(thisObj.getAttribute('maxlength'));			 
+			    var text_area_name = thisObj.getAttribute('id');
+			    var entered_length = thisObj.value.length;
+			    if(entered_length > maxLength){	            
+				alert(msgtext("%1_contains_%2_characters,_but", 
+					      text_area_name , entered_length,
+					      maxLength, entered_length-maxLength));
+				thisObj.focus();
+				returnValue = false;
+				break;
+			    }
+			    else
+				continue;
+			}
+		}
+		return returnValue;
+	}
+
+	//////////////////////////////////////////////////////////////
+	// Verify that user has responded to all compulsory questions
+	// If not, prevent survey submission
+	//////////////////////////////////////////////////////////////	
+	function validate_svy() {
+		if (!check_max_size()) return false;
+		var rc = true;
+		var sep = ": ";
+		var i;
+		var errmsg = "You must respond to the following questions before submitting";
+		var hyplink;
+		// Traverse the array and see if they responded to all req questions
+		for ( i = 0; i < reqarray.length; i++ ) { 
+		    if ( reqarray[i][1] == 0 ) { 
+		      	// They did not respond to this one, update errmsg and setup link
+		    	errmsg += sep + reqarray[i][0];
+		    	sep = ", ";
+		    	if ( rc ) {
+		    	    // Set the link to the first missed question
+		    	    rc = false;
+		    	    hyplink = linkpfx + reqarray[i][0];
+		    	    }
+		    	}
+		    }
+		if ( ! rc ) { 
+		    alert( errmsg);
+		    document.location.hash = hyplink;
+		    }
+		return rc;
+		
+		}
+		    
+		         
+// -->
+</script>
+<title>$ProductName - Survey</title>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="detailro">
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=splash.htmpl>
+
+<p>
+
+<table class="detailro" cellspacing="3">
+<th>
+<td class="detailro">
+Hello, $cst.first_name $cst.last_name,
+<p>
+$args.description
+<p>
+<span class="requiredlabeltext" style="font-size:1.0em;">
+Highlighted questions (if any) require a response before submitting the survey
+</span>
+</td></tr>
+</table>
+
+<p>
+<img src="$CAisd/img/bar.gif" width="90%" HEIGHT="4" alt="Bar">
+<p>
+
+<PDM_FORM NAME="frm001" onSubmit="return validate_svy();">
+<input type="hidden" name="FACTORY" value="svy_tpl">
+<input type="hidden" name="SET.id"  value="$args.id">
+<input type="hidden" name="CNTXT_PERSID" value="$ext_args.CNTXT_PERSID">
+<input type="hidden" name="CNT_ID" value="$cst.id" >
+<input type="hidden" name="OP" value="SUB_SURVEY">
+<PDM_IF "$args.LOOKUP_RC" != "0" >
+<p>
+The following condition was encountered while processing your request to take this survey: </p>
+		<span class="requiredlabeltext">		
+			$args.LOOKUP_EMSG
+		</span>
+<p>
+	You will not be allowed to complete the survey at this time. Please report this to the $ProductName Administrator.
+</p>
+
+<PDM_ELSE>
+<!-- The rest of the form goes here, remember to close the PDM_IF -->	
+
+<PDM_LIST SOURCE=args.question_templates PREFIX=question>
+<script>
+<!--
+var idx$question.sequence;
+ -->
+</script>
+<table id="tbl001" cellspacing="7" width="70%">
+<!-- The question -->
+<tr>
+<PDM_IF "$question.resp_required" == "1" >
+<script>
+<!--
+// Note: this variable is also used as a parm in the onclick handler below
+var reqseq$question.sequence = [i, 0];
+idx$question.sequence = reqarray.length;
+reqarray[reqarray.length] = reqseq$question.sequence;
+ -->
+</script>
+<td valign="top" class="requiredlabeltext">
+<PDM_ELSE>
+<td valign="top" class="labeltext">
+</PDM_IF>
+<p>
+<script type="text/javascript">
+cntr($question.resp_required);
+</script>
+$question.text
+</td>
+<!-- the answers-->
+<PDM_LIST FACTORY=svy_atpl where="owning_survey_question = $question.id" PREFIX=answer>
+<tr>
+<PDM_IF "$question.resp_required" == "1" >
+ <td valign="top" class="requiredlabeltext">
+<PDM_ELSE>
+<td valign="top" class="labeltext">
+</PDM_IF>
+<PDM_IF "$question.mult_resp_flag" == "1" >
+<input type="checkbox" name="q$question.id" value=$answer.id onclick="ck_req(idx$question.sequence,this.name);">
+<PDM_ELSE> 
+<input type="radio" name="q$question.id" value=$answer.id onclick="ck_req(idx$question.sequence,this.name);">
+</PDM_IF>
+$answer.text
+</td>
+</PDM_LIST>
+<PDM_IF "$question.include_qcomment" == "1" >
+<tr>
+<PDM_IF "$question.resp_required" == "1" >
+<td valign="top" class="requiredlabeltext" style="font-size:0.7em;">
+<PDM_ELSE>
+<td valign="top" class="labeltext" style="font-weight:bold;font-size:0.7em;">
+</PDM_IF>
+$question.qcomment_label
+</td>
+</tr>
+<tr>
+<td>
+<textarea id="$question.qcomment_label" name="qcomment$question.id" value="" rows="3" cols="40" maxlength="2000">
+</textarea>
+</td>
+</tr>
+</PDM_IF>
+</PDM_LIST>
+</table>
+<!-- This spot is for extra user comments, if so 
+specified by the survey template.  The user comments
+MUST be in an input control named "SVY_COMMENT". -->
+<PDM_IF $args.include_comment>
+<table id="tbl001" cellspacing="7" width="70%">
+<tr>
+<td valign="top" class="labeltext" style="font-weight:bold;font-size:0.7em;">
+<label for=SVY_COMMENT>$args.comment_label</label>
+</span>
+</td>
+</tr>
+<tr>
+<td>		
+<textarea id="$args.comment_label" name=SVY_COMMENT value="" rows="5" cols="40" maxlength="1000">
+</textarea>
+</td>
+</tr>
+</table>
+</PDM_IF>
+<br>
+<input type="submit" name="SUBMIT"  value="  Submit  " style="font-size:1.0em;">
+<!-- The object that initiated the survey. Must be passed back to webengine-->
+
+</PDM_IF>
+<p>
+<img src="$CAisd/img/bar.gif" width="90%" HEIGHT="4" ALT="Bar">
+<p>
+</center>
+</PDM_FORM>
+
+
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: do_svy.htmpl ASPEN.1 2010/11/16 16:04:37 saima01 Exp $
+</PDM_IF>

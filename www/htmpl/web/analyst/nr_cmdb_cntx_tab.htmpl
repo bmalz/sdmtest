@@ -1,0 +1,80 @@
+<PDM_IF 0>
+nr_cmdb_cntx_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Asset
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl
+file, but only one PDM_FORM tag is allowed. Anything
+outside the PDM_FORM tag won't be included in the
+notebook page. All the javascript files defined in the
+notebook page HTMPL file need to be also defined in the
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=nr_cmdb_cntx_tab" where="family.extension_name='cntx'" factory=nr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script>
+cfgDateFormat = "$date_format"
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+    <PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Skonfigurowany status" attr=status lookup=no>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr="bm_status" factory=bms lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.assoc_cntx.base_contact.type.id" == "2308">
+<PDM_MACRO name=dtlReadonly hdr="Nazwa grupy" attr="assoc_cntx.base_contact.last_name" colspan=3>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Nawisko" attr="assoc_cntx.base_contact.last_name">
+<PDM_MACRO name=dtlReadonly hdr="Imię" attr="assoc_cntx.base_contact.first_name">
+<PDM_MACRO name=dtlReadonly hdr="Drugie imię" attr="assoc_cntx.base_contact.middle_name">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.assoc_cntx.base_contact.type.id" == "2308">
+<PDM_MACRO name=dtlReadonly hdr="ID kontaktu" attr="assoc_cntx.base_contact.contact_num" colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="ID kontaktu" attr="assoc_cntx.base_contact.contact_num">
+<PDM_MACRO name=dtlReadonly hdr="login" attr="assoc_cntx.base_contact.userid">
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ kontaktu" attr="assoc_cntx.base_contact.type">
+<PDM_MACRO name=dtlReadonly hdr="Typ serwisowy" attr="assoc_cntx.base_contact.service_type">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Strefa czasowa" attr="assoc_cntx.base_contact.timezone">
+<PDM_MACRO name=dtlReadonly hdr="Stanowisko" attr="assoc_cntx.base_contact.position">
+<PDM_MACRO name=dtlReadonly hdr="Partycja danych" attr="assoc_cntx.base_contact.domain">
+<PDM_MACRO name=dtlReadonly hdr="Typ dostępu" attr="assoc_cntx.base_contact.access_type">
+<PDM_IF $args.assoc_cntx.base_contact.type == 2307 ||
+                       $args.assoc_cntx.base_contact.type == 2308>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Harmonogram pracy" attr="assoc_cntx.base_contact.schedule">
+<PDM_IF $args.assoc_cntx.base_contact.type == 2307>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Dostępny" attr="assoc_cntx.base_contact.available" colspan=1 off="No" on="Yes">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+    01-oct-2007   bersa02   Created this file.
+    30-Jul-2010   youra01   SCO 34811 Replaced detailCheckboxReadonly with dtlReadonly
+</PDM_IF>

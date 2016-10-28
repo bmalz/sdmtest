@@ -1,0 +1,45 @@
+<PDM_IF 0>
+	20130826 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	alert('load');
+	var frm = "";
+	if ( !parent.cai_main )
+	{
+		frm = parent.ahdframe;
+	}
+	else { frm = parent.cai_main; }
+
+	if (typeof frm.GetSiteIdOwningContractId == "function")
+    {
+		alert('in');
+		var SiteId = "";
+		var CategoryId = "";
+		<PDM_LIST PREFIX=list1 FACTORY=cnt WHERE="id=$args.CustomerId">
+        	SiteId = '$list1.location.site.id';
+		</PDM_LIST>
+
+		<PDM_LIST PREFIX=list2 FACTORY=pcat WHERE="ss_sym='$args.CategoryId'">
+        	CategoryId = '$list2.owning_contract.id';
+		</PDM_LIST>
+
+		alert(SiteId + ' : ' + CategoryId);
+		frm.GetSiteIdOwningContractId(SiteId, CategoryId);
+    }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+</BODY>
+</HTML>
+

@@ -1,0 +1,87 @@
+<PDM_IF 0>
+list_crsq.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Stored Querys.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Stored Query Search";
+var hdrTitleList = "Stored Query List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("crsqsum.rpt", "crsqdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+var argCrsqType = "${args.KEEP.CrsqType:}";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Stored Query">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF "$args.KEEP.CrsqType" == "KPI">
+<PDM_MACRO name=sfStart extracreateurl="PRESET=uf_scoreboard:0+PRESET=uf_kpi:1+KEEP.CrsqType=$args.KEEP.CrsqType" factory=crsq>
+<PDM_ELIF "$args.KEEP.CrsqType" == "Scoreboard">
+<PDM_MACRO name=sfStart extracreateurl="PRESET=uf_scoreboard:1+PRESET=uf_kpi:0+KEEP.CrsqType=$args.KEEP.CrsqType" factory=crsq>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=crsq>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.HIDE_obj_type" == "1">
+//obj_type selection removed from GUI when opening from document visibility tab of the role detail page
+document.write ("<INPUT type=hidden name='QBE.EQ.obj_type' id='QBE.EQ.obj_type' value='$args.QBE.EQ.obj_type'>");
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Typ" attr=obj_type factory=stored_query_prod_list>
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Etykieta" attr=label size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.CrsqType" == "KPI">
+<PDM_MACRO name=sfTextbox hdr="Użycie KPI" attr="usage_flag" disabled="yes" display_value="Yes" qbe_condition="NE" value="0">
+<PDM_ELIF "$args.KEEP.CrsqType" == "Scoreboard">
+<PDM_MACRO name=sfTextbox hdr="Użycie Scoreboardu" attr="usage_flag" disabled="yes" display_value="Yes" qbe_condition="NE" value="1">
+   document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE="(usage_flag != 1 OR usage_flag IS NULL)">');
+<PDM_ELSE>
+   searchFilterDropdown("Scoreboard Usage","usage_flag","",
+   "Yes","(usage_flag = 0 OR usage_flag = 2)","No","(usage_flag != 0 AND usage_flag != 2)");
+   searchFilterDropdown("KPI Usage","","",
+   "Yes","(usage_flag = 1 OR usage_flag = 2)","No","(usage_flag != 1 AND usage_flag != 2)");
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfTextbox hdr="Klauzula WHERE" attr=where_clause size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No stored queries found";
+var msgFound1 = "1 stored query found";
+var msgFound = "%1 stored queries found";
+var msgFoundMore = "%1 stored queries found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired stored query";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Etykieta / Opis" attr=label exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Typ" attr=obj_type>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsCol attr=description colspan=4 startrow=yes width=100>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_crsq.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

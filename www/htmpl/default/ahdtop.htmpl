@@ -1,0 +1,1309 @@
+<PDM_IF 0>
+@(#)\$Id: ahdtop.htmpl,v 1.4 2007/01/15 13:48:10 gurig01 Exp $
+This file specifies variables required for a page to function as AHDtop.
+Access to these variables is available from the ahdtop object in all forms.
+
+***************************************************************************
+* DO NOT MODIFY THIS FILE!  This file is not migrated for new releases or
+* Service Packs, and your modifications can be lost.  You can use the file
+* ahdtop_site.htmpl for site modifications to variables required in ahdtop.
+***************************************************************************
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<!-- Start of ahdtop.htmpl -->
+<script type="text/javascript" src="$CAisd/scripts/ticket_avoid.js"></script>
+<script type="text/javascript">
+function activate_AHDtop()
+{
+   if ( typeof window.opener == "object" &&
+        window.opener != null )
+      window.opener = null;
+   window.ahdtop = window
+   window.name = "AHDtop"
+}
+<PDM_IF "$prop.ahdtop" != "no">
+activate_AHDtop();
+</script>
+<script type="text/javascript" src="$CAisd/scripts/imgbutton.js"></script>
+<script type="text/javascript">
+</PDM_IF>
+var CMDBViewer = "no";
+<PDM_LIST PREFIX="car" FACTORY=ca_application_registration WHERE="id=2018">
+if ($car.id) {
+var CMDBViewer = "yes";
+}
+</PDM_LIST>
+
+var ahd_window_count = 0;
+var AHD_Windows = new Object();
+var detailForms = new Object();
+var close_edit_window = void(0);
+var nextStoredUrlId = 0;
+var AHD_logout_requested = false
+var popup_frames_info = new Array();
+var closing_all_windows = false;
+var refresh_in_progress = false;
+var isLogReader = false;
+var checked_knowledge = false;
+var cfgCAISD = "$prop.CAisd"
+var cfgNX_ROOT= "$env.NX_ROOT";
+var cfgServletURL="$env.NX_SERVLET_SERVER_URL";
+var cfgLocalServletURL="$env.NX_LOCAL_SERVLET_SERVER_URL";
+var cfgNX_COPYRIGHT_YEAR = "$env.NX_COPYRIGHT_YEAR";
+var cfgCgi = "$cgi";
+var cfgSID = "$SESSION.SID";
+var cfgProductName = "$ProductName";
+var cfgDefStatusFlag = '<PDM_FMT PAD=NO ESC_STYLE=HTML>$DefaultStatusFlag</PDM_FMT>';
+var cfgFormTitle = "$prop.FormTitle";
+var cfgProductID = "$ProductID";
+var cfgCurrentRoleID = "$SESSION.ROLE_ID";
+var cfgPdmQA = "$PdmQA";
+var cstID = "${cst.id:0}";
+var cstLastName = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.last_name</PDM_FMT>';
+var cstFirstName = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.first_name</PDM_FMT>';
+var cstPERSID = "$cst.persistent_id";
+var cstConfirmSave = "$cst.confirm_save";
+<PDM_IF "$prop.MultiTenancy" != "off">
+var cstTenantId = "${cst.tenant:}";
+var cstTenantLogo = <PDM_FMT PAD=NO ESC_STYLE=C>'${cst.tenant.logo:}'</PDM_FMT>;
+var cstTenantLogoAlt = <PDM_FMT PAD=NO ESC_STYLE=C>'${cst.tenant.name:}'</PDM_FMT>;
+var cstTenantRestriction = "${ACCESS.Tenant_Restriction:0}";
+<PDM_IF "${ACCESS.Tenant_Restriction:}" == "1" && "${cst.tenant:}" != "${ACCESS.Single_Tenant:}">
+<PDM_LIST PREFIX=list WHERE="id = U'$ACCESS.Single_Tenant'" FACTORY=tenant>
+cstTenantLogo = "$list.logo";
+cstTenantLogoAlt = "$list.name";
+</PDM_LIST>
+</PDM_IF>
+var serviceProviderUuid = "$prop.SERVICE_PROVIDER_UUID";
+var cfgAccessTenantWriteRestriction = $ACCESS.Tenant_Write_Restriction;
+var cfgAccessTenantWriteUUID = "$ACCESS.Tenant_Write_UUID";
+var cfgAccessTenantWriteName = "$ACCESS.Tenant_Write_Name";
+var cfgAccessUpdatableTenantUuids = <PDM_FMT ESC_STYLE=NONE>$ACCESS.UpdatableTenantUuids</PDM_FMT>;
+var cfgAccessUpdatableTenantNames = <PDM_FMT ESC_STYLE=NONE>$ACCESS.UpdatableTenantNames</PDM_FMT>;
+</PDM_IF>
+var cfgUserType = "$prop.user_type";
+var cfgGuestUser = "$prop.guest_user";
+var propSupportR50 = "$prop.SupportR50";
+var cfgARGISurl = "$prop.URL_ARGIS";
+var cfgLdapEnabled = "$prop.LDAP_ENABLED";
+var cfgCIurl = "$prop.URL_CI";
+var cfgHTurl = "$prop.URL_HT";
+var cfgETRUSTurl = "$env.NX_URL_ETRUST_PASSWORD_RESET";
+var propTimeout = "$prop.Timeout" - 0;
+var propTimeoutWarning = "$prop.TimeoutWarning";
+propTimeoutWarning = ( propTimeoutWarning.length > 0 ? propTimeoutWarning - 0 : 5 );
+var cfgAnyContact = "${ANY_CONTACT:0}";
+var cfgSearchStr = "${env.NX_KNOW_SEARCH_STRING}";
+var cfgAccessReqMgr = $ACCESS.call_mgr;
+var cfgAccessChgMgr = $ACCESS.change_mgr;
+var cfgAccessIssMgr = $ACCESS.issue_mgr;
+var cfgAccessAdmin = $ACCESS.admin;
+var cfgAccessInventory = $ACCESS.inventory;
+var cfgAccessRef = $ACCESS.reference;
+var cfgAccessNotify = $ACCESS.notify;
+var cfgAccessSecurity = $ACCESS.security;
+var cfgAccessAnmt = $ACCESS.announcement;
+var cfgAccessCallMgrRef = $ACCESS.call_mgr_reference;
+var cfgAccessCallMgrTpl = $ACCESS.call_mgr_template;
+var cfgAccessChgMgrTpl = $ACCESS.change_mgr_template;
+var cfgAccessChgRef = $ACCESS.change_reference;
+var cfgAccessCi = $ACCESS.ci;
+var cfgAccessCiComn = $ACCESS.ci_common_ro;
+var cfgAccessCiRef = $ACCESS.ci_reference;
+var cfgAccessContact = $ACCESS.contact;
+var cfgAccessGroup = $ACCESS.group;
+var cfgAccessIssMgrTpl = $ACCESS.issue_mgr_template;
+var cfgAccessIssRef = $ACCESS.issue_reference;
+var cfgAccessLoc = $ACCESS.location;
+var cfgAccessNotRef = $ACCESS.notification_reference;
+var cfgAccessOrg = $ACCESS.organization;
+var cfgAccessPri = $ACCESS.prioritization;
+var cfgAccessSvcLvl = $ACCESS.service_level;
+var cfgAccessSite = $ACCESS.site;
+var cfgAccessStoredQuery = $ACCESS.stored_queries;
+var cfgAccessSurvey = $ACCESS.survey;
+var cfgAccessTentAdmin = $ACCESS.tenant_admin;
+var cfgAccessTimeZone = $ACCESS.timezone;
+var cfgAccessWfRef = $ACCESS.workflow_reference;
+var cfgAccessWorkshift = $ACCESS.workshifts;
+var cfgAccessFac_lr = $ACCESS.FAC_lr;
+var cfgAccessFac_in = $ACCESS.FAC_in;
+var cfgAccessFac_pr = $ACCESS.FAC_pr;
+var cfgAccessFac_cr = $ACCESS.FAC_cr;
+var cfgAccessFac_chg = $ACCESS.FAC_chg;
+var cfgAccessFac_iss = $ACCESS.FAC_iss;
+var cfgAccessFac_all_lr = $ACCESS.FAC_all_lr;
+var cfgAccessFac_cnt = $ACCESS.FAC_cnt;
+var cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+// dpc 02/17/04 13062144 var cfgUserid = '$cst.userid';
+var cfgUserid = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.userid</PDM_FMT>';
+var cfgDateFormat = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format</PDM_FMT>';
+var cfgDateFormatNoTime = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format_no_time</PDM_FMT>';
+var cfgCIEbrUrl = '$SESSION.CIEBRURL';
+var cfgFaqInstalled = "$SESSION.FAQInstalled";
+var cfgCIEbrInstalled = "$SESSION.CIEBRInstalled";
+var cfgNX_KT = "$env.NX_KT";
+var cfgNX_KT_DISALLOW_FORUMS = "$env.NX_KT_DISALLOW_FORUMS";
+var cfgNXCMDB = "$env.NX_CMDB";
+var cfgCI_FILTER = "$env.NX_CI_FILTER";
+var popup_frames_url = "$CAisd/html/popup_frames.html";
+var cst_popup_frames_url = "$CAisd/html/cst_popup_frames.html";
+var cfgLexicalSortOrder="$env.NX_NX_DSSORT";
+var cfgInitListSearch="$env.NX_INIT_LIST_SEARCH";
+var cfgClearScratchPad="$env.NX_CLEAR_SCRATCH_PAD";
+var cfgHighlightKeywords = "$env.KNOWLEDGE_HIGHLIGHT_KEYWORDS";
+var cfgShowNegativeButtons = "$env.NX_SHOW_NEGATIVE_BUTTONS";
+<PDM_IF "$prop.MultiTenancy" != "setup">
+var cfgMultiTenancy = "$prop.MultiTenancy";
+<PDM_ELIF "${cst.tenant:}" == "$prop.SERVICE_PROVIDER_UUID" && "$ACCESS.admin" != "0">
+var cfgMultiTenancy = "setup";
+<PDM_ELSE>
+var cfgMultiTenancy = "off"; // setup applies only to service provider administrators
+</PDM_IF>
+var cfgUfamAttributes="";
+var cfgEBRVersion="$env.NX_EBR_VERSION";
+<pdm_if "$env.NX_ALLOW_UNRESTRICTED_ASSET_UPD" != "Yes">
+<!-- please keep space chars on either side -->
+	cfgUfamAttributes=" $env.NX_UFAM_ATTRIBUTES ";
+</pdm_if>
+var cfgBOServerLocation="$env.NX_BO_SERVER_LOCATION";
+var cfgBOServerURL="$env.NX_BO_SERVER_URL";
+var cfgBOServerCMS="$env.NX_BO_SERVER_CMS";
+var cfgBOServerAuth="$env.NX_BO_SERVER_AUTH";
+var bo_auth = "0";
+<PDM_LIST PREFIX=opt FACTORY=options WHERE="sym='Netres_pty' AND delete_flag=0">
+var cfgNetresPty = <PDM_IF "$opt.action_status" == "Installed">true<PDM_ELSE>false</PDM_IF>;
+</PDM_LIST>
+<PDM_IF 0>
+default user interface=analyst if it is employee or customer it is changed in the relevant home.htmpl 
+options are "analyst_Interface","employee_Interface", or "customer_Interface"
+</PDM_IF>
+var cfgInterfaceType ="$SESSION.InterfaceType";
+
+var usdImg = new Object();
+usdImg["arrow_asc_bk"] = "$CAisd/img/arrow_asc_bk.png";
+usdImg["sort_asc"] = "$CAisd/img/sort_ascending.png";
+usdImg["sort_desc"] = "$CAisd/img/sort_descending.png";
+usdImg["nosort"] = "$CAisd/img/nosort.png";
+usdImg["circleca"] = "$CAisd/img/circleca.png";
+var usdStyles = new Object();
+usdStyles["styles_ahd"] = "$CAisd/css/styles_ahd.css";
+usdStyles["imgbutton"] = "$CAisd/css/imgbutton.css";
+usdStyles["menubar"] = "$CAisd/css/menubar.css";
+usdStyles["castyles"] = "$CAisd/css/castyles.css";
+usdStyles["button"] = "$CAisd/css/button.css";
+var usdScripts = new Object();
+usdScripts["browser"] = "$CAisd/scripts/browser.js";
+usdScripts["dynlayer"] = "$CAisd/scripts/dynlayer.js";
+usdScripts["menus"] = "$CAisd/scripts/menus.js";
+usdScripts["msgtext"] = "$CAisd/scripts/msgtext.js";
+usdScripts["imgbutton"] = "$CAisd/scripts/imgbutton.js";
+usdScripts["window_manager"] = "$CAisd/scripts/window_manager.js";
+usdScripts["ahdmenus"] = "$CAisd/scripts/ahdmenus.js";
+usdScripts["sitemods"] = "$CAisd/scripts/sitemods.js";
+usdScripts["popup"] = "$CAisd/scripts/popup.js";
+usdScripts["fid_gen"] = "$CAisd/scripts/fid_gen.js";
+var usdHTML = new Object();
+usdHTML["cst_menubar"] = "$CAisd/html/cst_menubar.html";
+usdHTML["menubar"] = "$CAisd/html/menubar.html";
+usdHTML["top_splash"] = "$CAisd/html/top_splash.html";
+usdHTML["gobtn"] = "$CAisd/html/gobtn.html";
+usdHTML["wlist"] = "$CAisd/html/window_list.html";
+usdHTML["ctxmenu"] = "$CAisd/html/context_menu.html";
+var cfgIsCS = ( cfgProductID == "cs" || cfgProductID == "htcs" );
+var cfgAllowPopupResize = true;
+var cstComboName = '<PDM_FMT ESC_STYLE=C>$cst.combo_name</PDM_FMT>';
+var cfgSuppressHier = ' $env.NX_SUPPRESS_WEB_HIER_SEARCH ';
+var propPortalSession = "$prop.portal_session";
+var propInitialPopup = "$prop.initial_popup";
+var propDebugScript = "$prop.DebugScript";
+var propMinCharsAutoSuggest = "$prop.MinCharsAutoSuggest" - 0;
+if ( typeof propMinCharsAutoSuggest != "number" || propMinCharsAutoSuggest < 1 || propMinCharsAutoSuggest > 10 || isNaN(propMinCharsAutoSuggest))
+	propMinCharsAutoSuggest = 3;
+var propMaxRecordsAutoSuggest = "$prop.MaxRecordsAutoSuggest" - 0;
+if ( typeof propMaxRecordsAutoSuggest != "number" || propMaxRecordsAutoSuggest < 25 || propMaxRecordsAutoSuggest > 250 || isNaN(propMaxRecordsAutoSuggest))
+	propMaxRecordsAutoSuggest = 25;
+var propAutoSuggestStatus = "$prop.AutoSuggestStatus";
+
+var propDebugOptions = "$prop.DebugOptions";
+
+var UseNestedTabs = "$prop.UseNestedTabs";
+UseNestedTabs = UseNestedTabs.toUpperCase();
+if ( UseNestedTabs !='NO') 
+	var  propUseNestedTabs= 1; 
+else  
+	var  propUseNestedTabs= 0; 
+	
+var notebookPageID = new Array();
+var folderGraphVarsArray = new Array();
+var cfgListAllWarn = "$prop.ListAllWarn" - 0;
+var cfgListAllMaximum = "$prop.ListAllMaximum" - 0;
+var cfgSchedExpMaximum = "$prop.SchedExpMaximum" - 0;
+var cfgListBottomWarn = "$prop.ListBottomWarn" - 0;
+var cfgListBottomMaximum = "$prop.ListBottomMaximum" - 0;
+if ( typeof cfgListAllWarn != "number" || cfgListAllWarn < 0 )
+   cfgListAllWarn = 0;
+if ( typeof cfgListAllMaximum != "number" || cfgListAllMaximum < 0 )
+   cfgListAllMaximum = 0;
+if ( typeof cfgListBottomWarn != "number" || cfgListBottomWarn < 0 )
+   cfgListBottomWarn = 0;
+if ( typeof cfgListBottomMaximum != "number" || cfgListBottomMaximum < 0 )
+   cfgListBottomMaximum = 0;
+var cfgNX_SDURL= "$env.NX_URL_SOFTWARE_DELIVERY";
+var cfgNX_UAMURL= "$env.NX_URL_UAM";
+var cfgNX_RCOURL= "$env.NX_URL_RCO";
+var cfgNX_CLASSIC_SLA_PROCESSING = "$env.NX_CLASSIC_SLA_PROCESSING";
+var cfgNX_FILTER_TEMPLATE_SEARCH = "$env.NX_FILTER_TEMPLATE_SEARCH"; 
+var cfgNX_EDIT_INACTIVE = "$env.NX_EDIT_INACTIVE"; 
+var cfgNX_SUPPORTAUTOMATION_URL="$env.NX_SUPPORTAUTOMATION_URL";
+var cfgNX_ACTIVITY_LOG_SECURITY="$env.NX_ACTIVITY_LOG_SECURITY";
+var cfgNX_EMPLOYEE_INTF_INCIDENT_SUPPORT="$env.NX_EMPLOYEE_INTF_INCIDENT_SUPPORT";
+var cfgNX_GUEST_INTF_INCIDENT_SUPPORT="$env.NX_GUEST_INTF_INCIDENT_SUPPORT";
+var edit_profile_browser_opener = void(0);
+var propHierDlm = "$env.NX_WEB_HIER_DLM";
+var role_menubar_win;
+var role_menubar_flag = 0;
+if ( propHierDlm.length == 0 )
+   propHierDlm = ".";
+var propHierCaseSensitive = "$env.NX_WEB_HIER_CASE_SENSITVE" - 0;
+var cfg_restore_rootcause = "$env.NX_RESTORE_ROOTCAUSE";
+
+var menuStyles = new Array();
+var ctxmenuStyles = new Array();
+var manage_popup_windows = new Object();
+var BOFuncArray = new Array();
+var BOFuncInProgress = false;
+var cfgListUrl;
+var cfgCIA=false
+var cfgQueueSearched=false;
+var docParentMsg = new Array();
+
+function initMenuStyles(win)
+{
+   for ( var i = 0; i < win.document.styleSheets.length; i++ ) {
+      var rules = win.document.styleSheets[i].rules;
+      for ( var j = 0; j < rules.length; j++ ) {
+         var rtext = rules[j].style.cssText;
+         if ( rtext.length ) {
+            var rname = rules[j].selectorText;
+            if ( rname.match(/A\.menu/) ||
+                 rname.match(/DIV\.menu/) ||
+                 rname == ".clsMenuSelect" ||
+                 rname == ".menubar_background" ||
+                 rname == ".menubar_selected_background" ||
+                 rname == ".menu_unselected_text" ||
+                 rname == ".menu_selected_text" ||
+                 rname == ".menubar_unselected_background" ||
+                 rname == ".submenu" ||
+                 rname == "A" )              
+               menuStyles[menuStyles.length] = 
+                                new Array ( rname, rtext );
+                                
+           if ( rname.match(/\.ctxMenu/) ||
+						rname == ".menubar_background" ||
+						rname == ".menubar_selected_background" ||
+						rname == ".menu_unselected_text" ||
+						rname == ".menu_selected_text" ||
+						rname == ".menubar_unselected_background" ||
+						rname == ".submenu" ||
+						rname == "A" )
+               ctxmenuStyles[ctxmenuStyles.length] = 
+                                new Array ( rname, rtext );
+         }
+      }
+   }
+}
+var workframe_queue = new Array();
+var wf_delay_list = new Array();
+
+var cfgSuppressImgButtonWidth = "$prop.SuppressImgButtonWidth";
+var expandSecStateArr = new Array();
+function get_expand_sec_state(form_name, exp_sec_num)
+{
+    if (typeof expandSecStateArr[form_name] == "undefined" || 
+	typeof expandSecStateArr[form_name][exp_sec_num] == "undefined")
+    {
+	set_expand_sec_state(form_name, exp_sec_num, "up");
+	return "up";	
+    }
+    return expandSecStateArr[form_name][exp_sec_num];
+}
+
+function set_expand_sec_state(form_name, exp_sec_num, state)
+{
+    var f_arr;
+    if (typeof expandSecStateArr[form_name] == "undefined")
+    {
+	f_arr = new Array();
+	f_arr[exp_sec_num] = state; 
+	expandSecStateArr[form_name] = f_arr;
+    }
+    else 
+    {
+	f_arr = expandSecStateArr[form_name]; 
+	f_arr[exp_sec_num] = state; 
+    }
+}
+
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION CanUserPerformAction
+// Date: 19 April 2004
+// This function is to check if the user's Access Type is listed for a 
+// specific Operation in the USP_PROPERTIES TABLE.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var arrRoleActions = new Array();
+arrRoleActions["ROLE_BOOKMARKS"] = '$prop.ROLE_BOOKMARKS';
+arrRoleActions["ROLE_CATEGORIES_ADD_EDIT_COPY_PASTE"] = '$prop.ROLE_CATEGORIES_ADD_EDIT_COPY_PASTE';
+arrRoleActions["ROLE_CATEGORIES_CUT_DELETE"] = '$prop.ROLE_CATEGORIES_CUT_DELETE';
+arrRoleActions["ROLE_MASS_DELETE"] = '$prop.ROLE_MASS_DELETE';
+arrRoleActions["ROLE_OPEN_TICKET"] = '$prop.ROLE_OPEN_TICKET';
+arrRoleActions["ROLE_PREFERENCES"] = '$prop.ROLE_PREFERENCES';
+arrRoleActions["ROLE_SUBMIT_KNOWLEDGE"] = '$prop.ROLE_SUBMIT_KNOWLEDGE';
+arrRoleActions["ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS"] = '$prop.ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS';
+arrRoleActions["ROLE_DOCUMENT_DELETE"] = '$prop.ROLE_DOCUMENT_DELETE';
+arrRoleActions["ROLE_TICKET_BASED_ON_DOC"] = '$prop.ROLE_TICKET_BASED_ON_DOC';
+arrRoleActions["ROLE_WORKFLOW_BYPASS"] = '$prop.ROLE_WORKFLOW_BYPASS';
+arrRoleActions["ROLE_WORKFLOW_CHANGE_TEMPLATE"] = '$prop.ROLE_WORKFLOW_CHANGE_TEMPLATE';
+arrRoleActions["ROLE_FORUM_BROWSE_SEARCH"] = '$prop.ROLE_FORUM_BROWSE_SEARCH';
+arrRoleActions["ROLE_FORUM_SUBMIT"] = '$prop.ROLE_FORUM_SUBMIT';
+arrRoleActions["ROLE_FORUM_ANSWER"] = '$prop.ROLE_FORUM_ANSWER';
+arrRoleActions["ROLE_FORUM_CLOSE"] = '$prop.ROLE_FORUM_CLOSE';
+arrRoleActions["ROLE_FILE_BROWSE_SEARCH"] = '$prop.ROLE_FILE_BROWSE_SEARCH';
+arrRoleActions["ROLE_FILE_EDIT"] = '$prop.ROLE_FILE_EDIT';
+arrRoleActions["ROLE_KNOWLEDGE_EXPORT"] = '$prop.ROLE_KNOWLEDGE_EXPORT';
+arrRoleActions["ROLE_KNOWLEDGE_IMPORT"] = '$prop.ROLE_KNOWLEDGE_IMPORT';
+arrRoleActions["ROLE_SEARCH_FREE_TEXT"] = '$prop.ROLE_SEARCH_FREE_TEXT';
+arrRoleActions["ROLE_RELATED_TICKET"] = '$prop.ROLE_RELATED_TICKET';
+//
+function CanUserPerformAction(sActionName)
+{
+	var sAcessTypeList = arrRoleActions[sActionName];
+	if (sAcessTypeList == '0')
+	{
+		return true;
+	}
+	arrAcessTypeList = sAcessTypeList.split(",");
+	for (var i = 0; i < arrAcessTypeList.length; i++)
+	{
+		if (cfgCurrentRoleID == arrAcessTypeList[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION GetUSPPreferences (sPreference)
+// Date: 28 April 2004
+// This function will return the value of the preference specified by the input parameter.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var arrUSPPreferences = new Array();
+var prefsRecID;
+var useDefaultPrefs = 1;
+var default_size_arr = new Array();
+default_size_arr[1] = new Array(window.screen.availHeight * 0.9, window.screen.availWidth * 0.96);
+default_size_arr[2] = new Array(window.screen.availHeight * 0.75, window.screen.availWidth * 0.6);
+default_size_arr[3] = new Array(window.screen.availHeight * 0.6, window.screen.availWidth * 0.6);
+default_size_arr[4] = new Array(window.screen.availHeight * 0.45, window.screen.availWidth * 0.6);
+ 
+function LoadDefaultUSPPreferences() {
+	<PDM_IF 0>
+		Populate the Javascript array with the values of the preferences where the analyst_id is 0
+		There are the default preferences. If the user does not have his/her own preferences,
+		these preferences will be used.
+	</PDM_IF>
+
+	<PDM_LIST PREFIX=list WHERE="ANALYST_ID IS NULL" FACTORY="USP_PREFERENCES">
+		prefsRecID = $list.id;
+		arrUSPPreferences["ARC_DOCS_TO_DISPLAY"] = '$list.ARC_DOCS_TO_DISPLAY';
+		arrUSPPreferences["USER_DEF_ID"] = '$list.USER_DEF_ID';
+		arrUSPPreferences["AUTHOR"] = '$list.AUTHOR';
+		arrUSPPreferences["STATUS"] = '$list.STATUS';
+		arrUSPPreferences["OWNER"] = '$list.OWNER';
+		arrUSPPreferences["SUBJECT_EXPERT"] = '$list.SUBJECT_EXPERT';
+		arrUSPPreferences["INITIATOR"] = '$list.INITIATOR';
+		arrUSPPreferences["ASSIGNEE"] = '$list.ASSIGNEE';
+		arrUSPPreferences["PRIORITY"] = '$list.PRIORITY';
+		arrUSPPreferences["DOC_TYPE"] = '$list.DOC_TYPE';
+		arrUSPPreferences["CREATION_DATE"] = '$list.CREATION_DATE';
+		arrUSPPreferences["MODIFY_DATE"] = '$list.MODIFY_DATE';
+		arrUSPPreferences["START_DATE"] = '$list.START_DATE';
+		arrUSPPreferences["EXPIRATION_DATE"] = '$list.EXPIRATION_DATE';
+		arrUSPPreferences["REVIEW_DATE"] = '$list.REVIEW_DATE';
+		arrUSPPreferences["LAST_ACCEPTED_DATE"] = '$list.LAST_ACCEPTED_DATE';
+		arrUSPPreferences["PUBLISHED_DATE"] = '$list.PUBLISHED_DATE';
+		arrUSPPreferences["BU_RESULT"] = '$list.BU_RESULT';
+		arrUSPPreferences["PRODUCT"] = '$list.PRODUCT';
+		arrUSPPreferences["ITEM"] = '$list.ITEM';
+		arrUSPPreferences["SD_ROOTCAUSE"] = '$list.SD_ROOTCAUSE';
+		arrUSPPreferences["SD_PRIORITY"] = '$list.SD_PRIORITY';
+		arrUSPPreferences["SD_SEVERITY"] = '$list.SD_SEVERITY';
+		arrUSPPreferences["SD_IMPACT"] = '$list.SD_IMPACT';
+		arrUSPPreferences["SD_URGENCY"] = '$list.SD_URGENCY';
+		arrUSPPreferences["SD_ACCEPTED_HITS"] = '$list.SD_ACCEPTED_HITS';
+		arrUSPPreferences["CREATED_VIA"] = '$list.CREATED_VIA';
+		arrUSPPreferences["PRIMARY_INDEX"] = '$list.PRIMARY_INDEX';
+		arrUSPPreferences["CURRENT_ACTION"] = '$list.CURRENT_ACTION';
+		arrUSPPreferences["DOC_TEMPLATE"] = '$list.DOC_TEMPLATE';
+		arrUSPPreferences["WF_TEMPLATE"] = '$list.WF_TEMPLATE';
+		arrUSPPreferences["DOC_VERSION"] = '$list.DOC_VERSION';
+		arrUSPPreferences["CUSTOM1"] = '$list.CUSTOM1';
+		arrUSPPreferences["CUSTOM2"] = '$list.CUSTOM2';
+		arrUSPPreferences["CUSTOM3"] = '$list.CUSTOM3';
+		arrUSPPreferences["CUSTOM4"] = '$list.CUSTOM4';
+		arrUSPPreferences["CUSTOM5"] = '$list.CUSTOM5';
+		arrUSPPreferences["CUSTOM_NUM1"] = '$list.CUSTOM_NUM1';
+		arrUSPPreferences["CUSTOM_NUM2"] = '$list.CUSTOM_NUM2';
+		arrUSPPreferences["ONE_B_DOCS_TO_DISPLAY"] = '$list.ONE_B_DOCS_TO_DISPLAY';
+		arrUSPPreferences["ONE_B_SEARCH_TYPE"] = '$list.ONE_B_SEARCH_TYPE';
+		arrUSPPreferences["ONE_B_DOC_VIEW_MODE"] = '$list.ONE_B_DOC_VIEW_MODE';
+		arrUSPPreferences["ONE_B_HIDE_DETAILS"] = '$list.ONE_B_HIDE_DETAILS';
+		arrUSPPreferences["DOC_ID"] = '$list.DOC_ID';
+		arrUSPPreferences["HITS"] = '$list.HITS';
+		arrUSPPreferences["INBOX_COUNTER"] = '$list.INBOX_COUNTER';
+		arrUSPPreferences["ONE_B_WORD_PARTS"] = '$list.ONE_B_WORD_PARTS';
+		arrUSPPreferences["ONE_B_MATCH_TYPE"] = '$list.ONE_B_MATCH_TYPE';
+		arrUSPPreferences["ONE_B_SEARCH_FIELDS"] = '$list.ONE_B_SEARCH_FIELDS';
+		arrUSPPreferences["ONE_B_SEARCH_ORDER"] = '$list.ONE_B_SEARCH_ORDER';
+		arrUSPPreferences["WEB_POPUP1_HEIGHT"] = '$list.WEB_POPUP1_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP1_WIDTH"] = '$list.WEB_POPUP1_WIDTH'-0;
+		arrUSPPreferences["WEB_POPUP2_HEIGHT"] = '$list.WEB_POPUP2_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP2_WIDTH"] = '$list.WEB_POPUP2_WIDTH'-0;
+		arrUSPPreferences["WEB_POPUP3_HEIGHT"] = '$list.WEB_POPUP3_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP3_WIDTH"] = '$list.WEB_POPUP3_WIDTH'-0;
+		arrUSPPreferences["WEB_POPUP4_HEIGHT"] = '$list.WEB_POPUP4_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP4_WIDTH"] = '$list.WEB_POPUP4_WIDTH'-0;
+		arrUSPPreferences["SA_ANALYST_LOCALIZATION"] = '$list.SA_ANALYST_LOCALIZATION';
+		for (var i = 1; i <= 4; i++)
+		{
+		    var hg_name = "WEB_POPUP" + i + "_HEIGHT"; 
+		    var wd_name = "WEB_POPUP" + i + "_WIDTH";
+		    // Use default values if the default values are not set 
+		    // in the default preferences record.
+		    if (arrUSPPreferences[hg_name] == 0)
+			arrUSPPreferences[hg_name] = default_size_arr[i][0];
+		    else 
+			default_size_arr[i][0] = arrUSPPreferences[hg_name]; 
+		    if (arrUSPPreferences[wd_name] == 0)
+			arrUSPPreferences[wd_name] = default_size_arr[i][1];
+		    else 
+			default_size_arr[i][1] = arrUSPPreferences[wd_name]; 
+		}
+		arrUSPPreferences["WEB_ROLE_ID"] = '$list.WEB_ROLE_ID';
+		arrUSPPreferences["WEB_TOOLBAR_TAB"] = '$list.WEB_TOOLBAR_TAB'-0;
+		arrUSPPreferences["WEB_PREFERENCES"] = '$list.WEB_PREFERENCES' - 0;
+		arrUSPPreferences["WEB_SUPPRESS_TOUR"] = '$list.WEB_SUPPRESS_TOUR'-0;
+		arrUSPPreferences["USE_DEFAULT_ROLE"] = '$list.USE_DEFAULT_ROLE'-0;
+		arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"] = '$list.CLASSIC_RESULTSET_CONTEXT'-0;
+		arrUSPPreferences["KT_REPORT_CARD_PAST_DAYS"] = '$list.KT_REPORT_CARD_PAST_DAYS'-0;
+		arrUSPPreferences["KT_REPORT_CARD_SCREEN_DEFAULT"] = '$list.KT_REPORT_CARD_SCREEN_DEFAULT'-0;
+	</PDM_LIST>
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION SetUSPPreferences
+// Date: 30 Novemeber 2005
+// in :
+//		sPreferenceName - the preferences name
+//		PreferenceValue - the preference new value
+//  This function is to update the preferences array when changing a value. 
+//  Note that it should only update the ahdtop cache and not the database, as it also updates the setting for the 
+//  session only when the user has no preferences record.
+/////////////////////////////////////////////////////////////////////////////////////////////
+function SetUSPPreferences(sPreferenceName,PreferenceValue)
+{
+	try
+	{
+		if (typeof arrUSPPreferences[sPreferenceName] == "string" || 
+			typeof arrUSPPreferences[sPreferenceName] == "number")			
+			arrUSPPreferences[sPreferenceName] = PreferenceValue;
+	}
+	catch(e)
+	{
+	}
+}
+function LoadAnalystUSPPreferences() {
+	<PDM_IF 0>
+		If the analyst has his/her own preferences, re-populate the Javascript array with the values
+		of the preferences where the analyst_id is $cst.id (the ID of the logged in contact).
+	</PDM_IF>
+	<PDM_LIST PREFIX=list WHERE="ANALYST_ID=U'$cst.id'" FACTORY="USP_PREFERENCES">
+		prefsRecID = $list.id;
+		useDefaultPrefs = 0;
+		if(CanUserPerformAction("ROLE_PREFERENCES"))
+		{
+			arrUSPPreferences["ARC_DOCS_TO_DISPLAY"] = '$list.ARC_DOCS_TO_DISPLAY';
+			arrUSPPreferences["USER_DEF_ID"] = '$list.USER_DEF_ID';
+			arrUSPPreferences["AUTHOR"] = '$list.AUTHOR';
+			arrUSPPreferences["STATUS"] = '$list.STATUS';
+			arrUSPPreferences["OWNER"] = '$list.OWNER';
+			arrUSPPreferences["SUBJECT_EXPERT"] = '$list.SUBJECT_EXPERT';
+			arrUSPPreferences["INITIATOR"] = '$list.INITIATOR';
+			arrUSPPreferences["ASSIGNEE"] = '$list.ASSIGNEE';
+			arrUSPPreferences["PRIORITY"] = '$list.PRIORITY';
+			arrUSPPreferences["DOC_TYPE"] = '$list.DOC_TYPE';
+			arrUSPPreferences["CREATION_DATE"] = '$list.CREATION_DATE';
+			arrUSPPreferences["MODIFY_DATE"] = '$list.MODIFY_DATE';
+			arrUSPPreferences["START_DATE"] = '$list.START_DATE';
+			arrUSPPreferences["EXPIRATION_DATE"] = '$list.EXPIRATION_DATE';
+			arrUSPPreferences["REVIEW_DATE"] = '$list.REVIEW_DATE';
+			arrUSPPreferences["LAST_ACCEPTED_DATE"] = '$list.LAST_ACCEPTED_DATE';
+			arrUSPPreferences["PUBLISHED_DATE"] = '$list.PUBLISHED_DATE';
+			arrUSPPreferences["BU_RESULT"] = '$list.BU_RESULT';
+			arrUSPPreferences["PRODUCT"] = '$list.PRODUCT';
+			arrUSPPreferences["ITEM"] = '$list.ITEM';
+			arrUSPPreferences["SD_ROOTCAUSE"] = '$list.SD_ROOTCAUSE';
+			arrUSPPreferences["SD_PRIORITY"] = '$list.SD_PRIORITY';
+			arrUSPPreferences["SD_SEVERITY"] = '$list.SD_SEVERITY';
+			arrUSPPreferences["SD_IMPACT"] = '$list.SD_IMPACT';
+			arrUSPPreferences["SD_URGENCY"] = '$list.SD_URGENCY';
+			arrUSPPreferences["SD_ACCEPTED_HITS"] = '$list.SD_ACCEPTED_HITS';
+			arrUSPPreferences["CREATED_VIA"] = '$list.CREATED_VIA';
+			arrUSPPreferences["PRIMARY_INDEX"] = '$list.PRIMARY_INDEX';
+			arrUSPPreferences["CURRENT_ACTION"] = '$list.CURRENT_ACTION';
+			arrUSPPreferences["DOC_TEMPLATE"] = '$list.DOC_TEMPLATE';
+			arrUSPPreferences["WF_TEMPLATE"] = '$list.WF_TEMPLATE';
+			arrUSPPreferences["CUSTOM1"] = '$list.CUSTOM1';
+			arrUSPPreferences["CUSTOM2"] = '$list.CUSTOM2';
+			arrUSPPreferences["CUSTOM3"] = '$list.CUSTOM3';
+			arrUSPPreferences["CUSTOM4"] = '$list.CUSTOM4';
+			arrUSPPreferences["CUSTOM5"] = '$list.CUSTOM5';
+			arrUSPPreferences["CUSTOM_NUM1"] = '$list.CUSTOM_NUM1';
+			arrUSPPreferences["CUSTOM_NUM2"] = '$list.CUSTOM_NUM2';
+			arrUSPPreferences["ONE_B_DOCS_TO_DISPLAY"] = '$list.ONE_B_DOCS_TO_DISPLAY';
+			arrUSPPreferences["ONE_B_SEARCH_TYPE"] = '$list.ONE_B_SEARCH_TYPE';
+			arrUSPPreferences["ONE_B_DOC_VIEW_MODE"] = '$list.ONE_B_DOC_VIEW_MODE';
+			arrUSPPreferences["ONE_B_HIDE_DETAILS"] = '$list.ONE_B_HIDE_DETAILS';
+			arrUSPPreferences["DOC_ID"] = '$list.DOC_ID';
+			arrUSPPreferences["HITS"] = '$list.HITS';
+			arrUSPPreferences["INBOX_COUNTER"] = '$list.INBOX_COUNTER';
+			arrUSPPreferences["ONE_B_WORD_PARTS"] = '$list.ONE_B_WORD_PARTS';
+			arrUSPPreferences["ONE_B_MATCH_TYPE"] = '$list.ONE_B_MATCH_TYPE';
+			arrUSPPreferences["ONE_B_SEARCH_FIELDS"] = '$list.ONE_B_SEARCH_FIELDS';
+			arrUSPPreferences["ONE_B_SEARCH_ORDER"] = '$list.ONE_B_SEARCH_ORDER';
+		}
+		arrUSPPreferences["WEB_POPUP1_HEIGHT"] = '$list.WEB_POPUP1_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP1_WIDTH"] = '$list.WEB_POPUP1_WIDTH'-0;
+		arrUSPPreferences["WEB_POPUP2_HEIGHT"] = '$list.WEB_POPUP2_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP2_WIDTH"] = '$list.WEB_POPUP2_WIDTH'-0;
+		arrUSPPreferences["WEB_POPUP3_HEIGHT"] = '$list.WEB_POPUP3_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP3_WIDTH"] = '$list.WEB_POPUP3_WIDTH'-0;
+		arrUSPPreferences["WEB_POPUP4_HEIGHT"] = '$list.WEB_POPUP4_HEIGHT'-0;
+		arrUSPPreferences["WEB_POPUP4_WIDTH"] = '$list.WEB_POPUP4_WIDTH'-0;
+		arrUSPPreferences["WEB_ROLE_ID"] = '$list.WEB_ROLE_ID';
+		arrUSPPreferences["WEB_TOOLBAR_TAB"] = '$list.WEB_TOOLBAR_TAB'-0;
+		arrUSPPreferences["WEB_PREFERENCES"] = '$list.WEB_PREFERENCES' - 0;
+		arrUSPPreferences["WEB_SUPPRESS_TOUR"] = '$list.WEB_SUPPRESS_TOUR'-0;
+		arrUSPPreferences["USE_DEFAULT_ROLE"] = '$list.USE_DEFAULT_ROLE'-0;
+		arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"] = '$list.CLASSIC_RESULTSET_CONTEXT'-0;
+		arrUSPPreferences["KT_REPORT_CARD_PAST_DAYS"] = '$list.KT_REPORT_CARD_PAST_DAYS'-0;
+		arrUSPPreferences["KT_REPORT_CARD_SCREEN_DEFAULT"] = '$list.KT_REPORT_CARD_SCREEN_DEFAULT'-0;
+		arrUSPPreferences["SA_ANALYST_LOCALIZATION"] = '$list.SA_ANALYST_LOCALIZATION';
+	</PDM_LIST>
+}
+
+LoadDefaultUSPPreferences();
+LoadAnalystUSPPreferences();
+
+var cstPopup1 = new Array(arrUSPPreferences["WEB_POPUP1_HEIGHT"], arrUSPPreferences["WEB_POPUP1_WIDTH"]);
+var cstPopup2 = new Array(arrUSPPreferences["WEB_POPUP2_HEIGHT"], arrUSPPreferences["WEB_POPUP2_WIDTH"]);
+var cstPopup3 = new Array(arrUSPPreferences["WEB_POPUP3_HEIGHT"], arrUSPPreferences["WEB_POPUP3_WIDTH"]);
+var cstPopup4 = new Array(arrUSPPreferences["WEB_POPUP4_HEIGHT"], arrUSPPreferences["WEB_POPUP4_WIDTH"]);
+var popupResized = false;
+var preservePopup = true;
+var mouseoverMenus = ( arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"] == "1" );
+var matchInitialRole = ( arrUSPPreferences["WEB_ROLE_ID"] == cfgCurrentRoleID);
+// Default to the first tab if the role id doesn't match 
+// the login role id.
+if (!matchInitialRole)
+{
+    arrUSPPreferences["WEB_TOOLBAR_TAB"] = 0; 
+}
+if (!useDefaultPrefs)
+{
+    var tot = cstPopup1[0] + cstPopup1[1] +        
+	      cstPopup2[0] + cstPopup2[1] +        
+	      cstPopup3[0] + cstPopup3[1] +        
+	      cstPopup4[0] + cstPopup4[1];
+    if (tot == 0)
+	preservePopup = false;
+}
+
+// Figure out if it's inside browser window of 
+// other application (ex: Portal).
+var insidePortal = false;
+try 
+{
+    if (window.parent != window)
+	insidePortal = true;
+}
+
+catch(e) 
+{
+    insidePortal = true;
+}
+	 
+var saAnalystUILocalization = arrUSPPreferences["SA_ANALYST_LOCALIZATION"];
+var cstPrefs = arrUSPPreferences["WEB_PREFERENCES"];
+var cstReducePopups = ( insidePortal ? false : ( 0 != (cstPrefs & 0x0001) ) );
+var cstCloseLogRdr = (0 != (cstPrefs & 0x0002) );
+var cstScoreCountLeft = (0 != (cstPrefs & 0x0004) );
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+var cstUsingScreenReader = true;
+<PDM_ELSE>
+var cstUsingScreenReader =  (0 != (cstPrefs & 0x0008) );
+</PDM_IF>
+var cstRetainTenant = (0 != (cstPrefs & 0x0010) );
+
+// cstDisablePreviews is on whenever it's preference is on, or when
+// the Using Screen Reader or Mouseover Menus preferences are on.
+// Check all 3 to support migrated users.
+var cstDisablePreviews = ( (0 != (cstPrefs & 0x0020)) || (0 != (cstPrefs & 0x0008)) || (0 != (arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"])));
+
+var cstSuppressTour = (arrUSPPreferences["WEB_SUPPRESS_TOUR"] == 2);
+var cstScrolling = "${SESSION.scrolling:}";
+if ( cstScrolling != "auto" && cstScrolling != "no" )
+  cstScrolling = ( cstUsingScreenReader ? "auto" : "no" );
+
+var cfgIndRequired = "$prop.IndRequired";
+var cfgIndAdvisory = "$prop.IndAdvisory";
+var cfgIndEmergency = "$prop.IndEmergency";
+var cfgIndSLAWarn = "$prop.IndSLAWarn";
+var cfgIndSLAViol = "$prop.IndSLAViol";
+var cfgIndTenant = "$prop.IndTenantImplying";
+var cfgIndTenantOpt = "$prop.IndTenantOptImplying";
+if ( cstUsingScreenReader || cfgUserType != "analyst" ) {
+  cfgIndRequired = "$prop.IndRdrRequired";
+  cfgIndAdvisory = "$prop.IndRdrAdvisory";
+  cfgIndEmergency = "$prop.IndRdrEmergency";
+  cfgIndSLAWarn = "$prop.IndRdrSLAWarn";
+  cfgIndSLAViol = "$prop.IndRdrSLAViol";
+  if ( cstUsingScreenReader ) {
+    cfgIndTenant = "$prop.IndRdrTenantImplying";
+    cfgIndTenantOpt = "$prop.IndRdrTenantOptImplying";
+  }
+  else {
+    cfgIndTenant = "";
+    cfgIndTenantOpt = "";
+  }
+}
+
+function GetUSPPreferences(sPreference)
+{
+	var sPrefValue = "";
+	
+	if (typeof arrUSPPreferences[sPreference] == "string" || 
+	    typeof arrUSPPreferences[sPreference] == "number")			
+		sPrefValue = arrUSPPreferences[sPreference];
+	
+	return sPrefValue;
+}
+
+// The window size of the date helper popup can be modified 
+// with the following variables. 
+var helperWidth_mod = 325;	    // the width
+var helperHeight_noTime_mod = 275;  // the height if exclude time in popup 
+var helperHeight_mod = 400;	    // the height if include time in popup 
+
+// image files
+var IMG_lookup_hier       = "$CAisd/img/lookup_hier.gif";
+var IMG_lookup            = "$CAisd/img/lookup.gif";
+var IMG_lookup_cal        = "$CAisd/img/lookup_cal.gif";
+var IMG_lookup_scheduler  = "$CAisd/img/lookup_sched.gif";
+var IMG_spacer		  = "$CAisd/img/spacer.png";
+var IMG_arrow_down	  = "$CAisd/img/arrow_down.png";
+var IMG_arrow_up	  = "$CAisd/img/arrow_up.png";
+var IMG_tree_minus	  = "$CAisd/img/tree_minus.gif";
+var IMG_treenode_open     = "$CAisd/img/treenode_open.gif";
+var IMG_treetop           = "$CAisd/img/treetop.gif";
+var IMG_tree_plus         = "$CAisd/img/tree_plus.gif";
+var IMG_treenode_normal   = "$CAisd/img/treenode_normal.gif";
+var IMG_tree_indent	  = "$CAisd/img/tree_indent.gif";
+var IMG_arrow_asc_bk	  = "$CAisd/img/arrow_asc_bk.png";
+var IMG_pb_node           = "$CAisd/img/pb_node.gif";
+var IMG_pb_lastnode       = "$CAisd/img/pb_lastnode.gif";
+var IMG_barback           = "$CAisd/img/barback.jpg";
+var IMG_corner            = "$CAisd/img/corner.gif";
+var IMG_button_up_e       = "$CAisd/img/button_up_e.gif";
+var IMG_button_up_p       = "$CAisd/img/button_up_p.gif";
+var IMG_button_up_d       = "$CAisd/img/button_up_d.gif";
+var IMG_button_down_e     = "$CAisd/img/button_down_e.gif";
+var IMG_button_down_p     = "$CAisd/img/button_down_p.gif";
+var IMG_button_down_d     = "$CAisd/img/button_down_d.gif";
+var IMG_ud_top            = "$CAisd/img/ud-top.gif";
+var IMG_ud_middle         = "$CAisd/img/ud-middle.gif";
+var IMG_ud_bottom         = "$CAisd/img/ud-bottom.gif";
+var IMG_button_left_e     = "$CAisd/img/button_left_e.gif";
+var IMG_button_left_p     = "$CAisd/img/button_left_p.gif";
+var IMG_button_left_d     = "$CAisd/img/button_left_d.gif";
+var IMG_button_right_e    = "$CAisd/img/button_right_e.gif";
+var IMG_button_right_p    = "$CAisd/img/button_right_p.gif";
+var IMG_button_right_d    = "$CAisd/img/button_right_d.gif";
+var IMG_lr_left           = "$CAisd/img/lr-left.gif";
+var IMG_lr_middle         = "$CAisd/img/lr-middle.gif";
+var IMG_lr_right          = "$CAisd/img/lr-right.gif";
+var IMG_filtershow        = "$CAisd/img/filtershow.gif";
+var IMG_filterhide        = "$CAisd/img/filterhide.gif";
+var IMG_background        = "$CAisd/img/background.gif";
+var IMG_logo              = "$CAisd/img/logo.gif";
+var IMG_bar               = "$CAisd/img/bar.gif";
+var IMG_space1x1          = "$CAisd/img/space1x1.gif";
+var IMG_default           = "$CAisd/img/default_16.png";
+
+var pb_refresh_urls = void(0);
+
+
+// This is the latest announcement user has seen
+var latest_cnote_date = -1;
+
+// The last time we popped the announcement notification window
+var last_popup_date = -1;
+
+function set_cnote_date(in_date)
+{
+	if (typeof in_date == "number" && in_date > latest_cnote_date) {
+		latest_cnote_date = in_date;
+	}
+}
+
+// Returns -1 if we're not initialized yet.
+function get_last_cnote_date() {
+	return latest_cnote_date;
+}
+
+var go_role_menubar = void(0);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION ISFullKT
+// Date: 26 April 2004
+// This function is to return if KT Lite is on. The function is based on the environment variable NX_KT.
+// It is important to use this function since the $env.NX_KT is not accessible in JS files.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function ISFullKT()
+{
+<pdm_if "$env.NX_KT" : "^[Yy]">
+  return true;
+<pdm_else>
+  return false;
+</pdm_if>
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION GetSearchInChildKCAT & SetSearchInChildKCAT
+// Date: 17 Novemeber 2005
+// These 2 functions are to set and get last status of the search in child categories check box in the 
+// Knowledge Categories page's filter.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var m_bSearchInChildCategories = true;//The setting is default to true
+if ("$env.KNOWLEDGE_KCAT_SEARCH_IN_CHILD_KCAT" == "0")
+	m_bSearchInChildCategories = false;
+else 
+	m_bSearchInChildCategories = true;
+
+function GetSearchInChildKCAT()
+{
+	return m_bSearchInChildCategories;
+}
+function SetSearchInChildKCAT(bStatus)
+{
+	if (bStatus)
+		m_bSearchInChildCategories = true;
+	else
+		m_bSearchInChildCategories = false;
+	
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION SetSolutionText & GetSolutionText
+// Date: 14 September 2005
+// These 2 functions are to pass the solution text between the solution form and the KD form,
+// when user selects to submit knowledge.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var arrSolution = new Array();
+function SetSolutionText(sText,TicketID)
+{
+	arrSolution[TicketID] = sText;
+}
+function GetSolutionText(TicketID)
+{
+	if (typeof arrSolution[TicketID] == "undefined")
+	{
+		return "";
+	}
+	var retVal = arrSolution[TicketID];
+	arrSolution[TicketID] = "";
+	return retVal;
+}
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION SetProblemText & GetProblemText
+// Date: 28 March 2007
+// These 2 functions are to pass the problem text between the solution form and the KD form,
+// when user selects to submit knowledge.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var arrProblem = new Array();
+function SetProblemText(sText,TicketID)
+{
+	arrProblem[TicketID] = sText;
+}
+function GetProblemText(TicketID)
+{
+	if (typeof arrProblem[TicketID] == "undefined")
+	{
+		return "";
+	}
+	var retVal = arrProblem[TicketID];
+	arrProblem[TicketID] = "";
+	return retVal;
+}
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION GetArchitectTreeWindow & SetArchitectTreeWindow
+// Date: 19 September 2005
+// This function is to get a windows handle to the architect tree.
+// It is needed when changing preferences, to update the architect window with the new KDs list page to use.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var _winArchitectKCAT = null;
+function SetArchitectTreeWindow(oWin)
+{
+	_winArchitectKCAT = oWin;
+}
+function GetArchitectTreeWindow()
+{
+	return _winArchitectKCAT;
+}
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION GetMyRecentDocs,UpdateMyRecentDocs & GetMyRecentSearches,UpdateMyRecentSearches
+// Date: 27 December 2006
+// These function retrieves the logged in user's recently 
+// viewed documents and recently executed searches.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var arrMyRecentDocs = new Array();
+var arrMyRecentSearches = new Array();
+var bIsOpenMyRecentDocs = "";
+var bIsOpenMyRecentSearches = "";
+var envRecentDocs = "$env.KNOWLEDGE_SHOW_RECENT_DOCS";
+var envRecentSearches = "$env.KNOWLEDGE_SHOW_RECENT_SEARCHES";
+//
+function GetMyRecentDocs()
+{
+	<PDM_IF "$env.NX_KT" == "No" || "$env.KNOWLEDGE_SHOW_RECENT_DOCS" == 0>
+		return;
+	</PDM_IF>	
+	if (arrMyRecentDocs.length == 0)
+	{
+		//load the array
+		var i = 0;
+		<PDM_LIST PREFIX=list FACTORY=BU_TRANS WHERE="USER_ID=U'$cst.id'" LENGTH=$env.KNOWLEDGE_SHOW_RECENT_DOCS ESC_STYLE=C>
+			arrMyRecentDocs[i] = "$list.DOC_ID";
+			arrMyRecentDocs[i+1] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID.TITLE</PDM_FMT>';
+			i = i+2;
+		</PDM_LIST>
+	}
+	return arrMyRecentDocs;
+}
+function UpdateMyRecentDocs(doc_id, doc_title)
+{
+	<PDM_IF "$env.NX_KT" == "No" || "$env.KNOWLEDGE_SHOW_RECENT_DOCS" == 0>
+		return;
+	</PDM_IF>	
+	//every time a document is opened this array needs to be updated
+	
+	if (arrMyRecentDocs.length == 0)
+	{
+		GetMyRecentDocs();
+		
+	}
+	
+	if(arrMyRecentDocs.length >= envRecentDocs)
+	{
+		//remove oldest two items in the array
+		arrMyRecentDocs.pop();
+		arrMyRecentDocs.pop();
+	}
+	//add the new doc to the array
+	arrMyRecentDocs.unshift(doc_title);
+	arrMyRecentDocs.unshift(doc_id);
+		
+	return arrMyRecentDocs;
+}
+function GetMyRecentSearches()
+{
+	<PDM_IF "$env.NX_KT" != "No" && "$prop.user_type" != "analyst" && "$env.KNOWLEDGE_SHOW_RECENT_SEARCHES" != "0">
+		if (arrMyRecentSearches.length == 0)
+		{
+			//load the array
+			var i = 0;
+			<PDM_LIST PREFIX=list FACTORY=EBR_LOG WHERE="USER_ID='$cst.userid'" LENGTH=$env.KNOWLEDGE_SHOW_RECENT_SEARCHES ESC_STYLE=C>
+				<PDM_LIST prefix=ebr_log2 FACTORY=EBR_LOG WHERE="id=$list.id">
+					arrMyRecentSearches[i] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$ebr_log2.SEARCH_TEXT</PDM_FMT>';
+					i++;
+				</PDM_LIST>
+			</PDM_LIST>
+		}
+		return arrMyRecentSearches;
+	</PDM_IF>
+}
+var m_sLastSearchText = "";//Last Search text, used when opening a new ticket as a default to the ticket description
+function UpdateMyRecentSearches(search_text)
+{
+	<PDM_IF "$env.NX_KT" == "No" || "$env.KNOWLEDGE_SHOW_RECENT_SEARCHES" == 0>
+		return;
+	</PDM_IF>	
+	m_sLastSearchText = search_text;
+
+	//every time a search is executed this array needs to be updated	
+	if (arrMyRecentSearches.length == 0)
+	{
+		GetMyRecentSearches();
+		
+	}
+	
+	if(arrMyRecentSearches.length >= envRecentSearches)
+	{
+		//remove the oldest search in the array
+		arrMyRecentSearches.pop();
+	}
+	//add the new search to the array
+	arrMyRecentSearches.unshift(search_text);
+	
+	return arrMyRecentSearches;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// View non-published KDs calculations
+// Date: 15 January 2007
+//
+// The member variables defined below provide the details of statuses allowed to be viewed.
+/////////////////////////////////////////////////////////////////////////////////////////////
+var m_bAllowViewNonPublished = false;	// If the user is allowed to view non-published KDs
+var m_sDefStatusWhereClause = "";		// The default where clause to view the allowed KDs
+var m_sDefStatusSelection = "";			// The default where clause to view the allowed KDs
+var m_arrAllowedStatusIDs = new Array();	// Allowed status ids
+var m_arrAllowedStatusNames = new Array();	// Allowed status names
+var m_arrAllowedStatusIsDef = new Array();	// if the allowed statuses should be viewed by default
+var m_arrStatusCnt = 0;						// A number of allowed statuses
+var m_arrDefaultSearchStatuses = new Array();
+var m_sDefNotStarted = 0;
+var m_sAllowNotStarted = 0;
+//
+m_arrDefaultSearchStatuses[0] = 70;
+m_sDefStatusSelection = "70";
+//
+var default_crsq_persid='';
+var default_crsq_desc='';
+var default_crsq_wc='';
+
+//Filter checkbox values for change order schedule form
+var showBlackoutWindows = true;       // Flag for Blackout window  display filter
+var showMaintenanceWindows = true;    // Flag for Maintenance window  display filter
+var isSummaryOnly = false;            // Summary only display for n-day view
+
+<PDM_LIST PREFIX=usp_prop FACTORY=USP_PROPERTIES WHERE="PROPERTY_NAME='$SESSION.ROLE_ID WC_PERSID'">
+	default_crsq_persid = "$usp_prop.PROPERTY_VALUE";
+	<PDM_LIST FACTORY=crsq PREFIX=list WHERE="persistent_id='$usp_prop.PROPERTY_VALUE'">
+		default_crsq_wc = "$list.where_clause";	
+	</PDM_LIST>
+</PDM_LIST>
+<PDM_LIST PREFIX=usp_prop FACTORY=USP_PROPERTIES WHERE="PROPERTY_NAME='$SESSION.ROLE_ID WC_DESCR'">
+	default_crsq_desc = "$usp_prop.PROPERTY_VALUE";
+</PDM_LIST>
+//
+<PDM_LIST PREFIX=list FACTORY=KT_STATUS_ROLE WHERE="ROLE_ID=$SESSION.ROLE_ID" ESC_STYLE=C>
+	m_bAllowViewNonPublished = true;
+	m_arrAllowedStatusIDs[m_arrStatusCnt] = $list.STATUS_ID;
+	<PDM_IF "$list.STATUS_ID" == 0>
+		m_sAllowNotStarted = 1;
+		m_arrAllowedStatusNames[m_arrStatusCnt] = 'Not Started';
+	<PDM_ELSE>
+		m_arrAllowedStatusNames[m_arrStatusCnt] = '$list.STATUS_ID.STATUS';
+	</PDM_IF>
+	m_arrAllowedStatusIsDef[m_arrStatusCnt] = $list.IS_DEF;
+	m_arrStatusCnt++;
+	<PDM_IF "$list.IS_DEF" != 0>
+		<PDM_IF "$list.STATUS_ID" == 0>
+			m_sDefNotStarted = 1;
+		<PDM_ELSE>	
+			m_sDefStatusSelection += ",$list.STATUS_ID";
+		</PDM_IF>	
+	</PDM_IF>
+</PDM_LIST>
+if(m_sAllowNotStarted == 1 && m_sDefNotStarted == 0)
+	m_sDefStatusWhereClause = "STATUS_ID in (" + m_sDefStatusSelection + ") AND NOT ACTIVE_STATE = 3"; 
+else
+	m_sDefStatusWhereClause = "STATUS_ID in (" + m_sDefStatusSelection + ")";
+//
+//get default where clause for loading documents per user role if defined 
+var m_defaultWC = "";
+if(default_crsq_persid != "" && default_crsq_desc != "")
+{
+	m_defaultWC += "( " + default_crsq_wc + " )";	
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Knowledge Sources drop-down list in list_KD.htmpl
+/////////////////////////////////////////////////////////////////////////////////////////////
+//	
+var m_KSType = "KD"
+//	
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// GetFileTypeImage
+// Date: 14 Jun 2007
+// Return the image path for a given file type. Used when displaying list of Knowledge files.
+/////////////////////////////////////////////////////////////////////////////////////////////
+function GetFileTypeImage(sFileExtension)
+{
+	value = sFileExtension.toLowerCase();
+	var sIconName = "";
+	var sExtension = "";
+	var lFileTypeCount = ahdtop.arrFileTypeRows.length;
+	for (var lFileType = 0; lFileType < lFileTypeCount; lFileType++)
+	{
+		sExtension = ahdtop.arrFileTypeRows[lFileType + "EXTENSION"];
+		sExtension = sExtension.toLowerCase();
+		if (sExtension == value)
+		{
+			sIconName = ahdtop.arrFileTypeRows[lFileType + "ICON_NAME"];
+		}
+	}
+	if (sIconName == "")
+	{
+		sIconName = "filemisc.png";
+	}
+	var imgPath= cfgCAISD + '/img/' + sIconName;
+	return imgPath;
+}
+
+//function checks if tenant has permission to set global settings in MT
+function canEditAdminKT_MT()//
+{
+	if ( "$prop.MultiTenancy" != "on" )
+		return true;
+	if(typeof cstTenantId !="undefined" && cstTenantId == serviceProviderUuid && "$ACCESS.Update_Global" == "1")
+		return true;
+	else 
+		return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Support Automation variables computation 
+// These variables define if Live chat link/ Join Analyst Now should be displayed on home.htmpl
+// and if web chat should be used instead of End User Client EXE
+//
+// Date: 15 July 2009
+//
+/////////////////////////////////////////////////////////////////////////////////////////////
+var m_sa_display_join_analyst_now = false;
+var m_sa_display_live_chat_link = false;
+var m_sa_use_web_chat = false;
+var sa_tenant_option_found = false;
+var m_sa_display_mrs_menu_node = false;
+
+<PDM_LIST FACTORY=sa_system_property PREFIX=list WHERE="propertyKey LIKE 'system.SDM.HomePage.JoinSession.Link'">
+	if ("$prop.MultiTenancy" != "on" || ("$prop.MultiTenancy" == "on" && "$list.tenant" == ahdtop.cstTenantId)) {
+		if ("$list.propertyValue" == "on") {
+			m_sa_display_join_analyst_now = true;
+		}	
+		else {
+			m_sa_display_join_analyst_now = false;
+		}
+			
+		sa_tenant_option_found = true;
+	}
+	else if ("$prop.MultiTenancy" == "on" && sa_tenant_option_found == false && "$list.tenant" == "") {
+		if ("$list.propertyValue" == "on") {
+			m_sa_display_join_analyst_now = true;
+		}	
+		else {
+			m_sa_display_join_analyst_now = false;
+		}
+	}
+</PDM_LIST>
+	
+sa_tenant_option_found = false;
+<PDM_LIST FACTORY=sa_system_property PREFIX=list WHERE="propertyKey LIKE 'system.SDM.HomePage.LiveChat.Link'">
+	if ("$prop.MultiTenancy" != "on" || ("$prop.MultiTenancy" == "on" && "$list.tenant" == ahdtop.cstTenantId)) {
+		if ("$list.propertyValue" == "on") {
+			m_sa_display_live_chat_link = true;
+		}
+		else {
+			m_sa_display_live_chat_link = false;
+		}
+		sa_tenant_option_found = true;
+	}
+	else if ("$prop.MultiTenancy" == "on" && sa_tenant_option_found == false && "$list.tenant" == "") {
+		if ("$list.propertyValue" == "on") {
+			m_sa_display_live_chat_link = true;
+		}
+		else {
+			m_sa_display_live_chat_link = false;
+		}
+	}
+</PDM_LIST>
+
+//check system.use.WebChat SA system option
+sa_tenant_option_found = false;
+<PDM_LIST FACTORY=sa_system_property PREFIX=list WHERE="propertyKey LIKE 'system.use.WebChat'">
+	if ("$prop.MultiTenancy" != "on" || ("$prop.MultiTenancy" == "on" && "$list.tenant" == ahdtop.cstTenantId)) {
+		if ("$list.propertyValue" == "true") {
+			m_sa_use_web_chat = true;
+		}
+		else {
+			m_sa_use_web_chat = false;
+		}
+		sa_tenant_option_found = true;
+	}
+	else if (sa_tenant_option_found == false && "$prop.MultiTenancy" == "on" && "$list.tenant" == "") {
+		if ("$list.propertyValue" == "true") {
+			m_sa_use_web_chat = true;
+		}
+		else {
+			m_sa_use_web_chat = false;
+		}
+	}
+</PDM_LIST>
+
+
+//check system.dataRoutingServers SA system option to see if the Message Routing Server feature is enabled
+sa_tenant_option_found = false;
+<PDM_LIST FACTORY=sa_system_property PREFIX=list WHERE="propertyKey LIKE 'system.dataRoutingServers'">
+	if ("$prop.MultiTenancy" == "off" || ("$prop.MultiTenancy" == "on" && "$list.tenant" == ahdtop.cstTenantId)) {
+		if ("$list.propertyValue" == "true") {
+			m_sa_display_mrs_menu_node = true;
+		}
+		else {
+			m_sa_display_mrs_menu_node = false;
+		}
+		sa_tenant_option_found = true;
+	}
+	else if (sa_tenant_option_found == false && "$prop.MultiTenancy" == "on" && "$list.tenant" == "") {
+		if ("$list.propertyValue" == "true") {
+			m_sa_display_mrs_menu_node = true;
+		}
+		else {
+			m_sa_display_mrs_menu_node = false;
+		}
+	}
+</PDM_LIST>
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// View non-published KDs calculations
+// Date: 15 January 2007
+//
+// The member variable defined below provide the Valid Character Range
+/////////////////////////////////////////////////////////////////////////////////////////////
+var m_sValidCharRange = "";
+<PDM_LIST PREFIX=ebr_prop FACTORY=EBR_PROPERTIES WHERE="PROPERTY_NAME='VALID_CHAR_RANGE'">
+	m_sValidCharRange = "$ebr_prop.PROPERTY_VALUE";
+</PDM_LIST>
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Get current sa_access from usp_role
+// 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+var m_s_sa_role_id ="";
+var m_s_sa_is_analyst = false;
+<PDM_LIST PREFIX=list FACTORY=role WHERE="id=$SESSION.ROLE_ID">
+	var m_s_sa_role_id = "$list.sa_access";
+	m_s_sa_is_analyst = ("$list.sa_access.isAgent" == 1);
+</PDM_LIST>
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Indicates if the logged in contact can access owning tenant data
+// Gives true for Multi-Tenancy off
+// 
+/////////////////////////////////////////////////////////////////////////////////////////////
+function canReadOwnTenantData() {
+	var result = false;
+	if ( cfgMultiTenancy == "off" ) {
+		result = true
+	} else {
+		<PDM_LIST PREFIX=list WHERE="id=U'$cst.id'" FACTORY="cnt">
+		// Include $list.id to avoid a SQL error.  
+			result = true;
+		</PDM_LIST>
+	}
+	return result;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Forum creating
+// Date: 23 July 2008
+//
+// The member variable defined below to provide if forums are enabled in a category
+/////////////////////////////////////////////////////////////////////////////////////////////
+var m_arrIsForumEnabled = new Array();
+m_arrIsForumEnabled[1] = 1;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Forum creating
+// Date: 2 August 2009
+//
+// The member variable defined below to provide viewed tickets
+/////////////////////////////////////////////////////////////////////////////////////////////
+var m_arrViewedTickets = new Array();
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Support Automation - enabled
+// Date: 5 November 2009
+//
+// If Support Automation is enabled
+/////////////////////////////////////////////////////////////////////////////////////////////
+function isSupportAutomationEnabled() {
+	return (typeof ahdtop.cfgNX_SUPPORTAUTOMATION_URL!="undefined" && ahdtop.cfgNX_SUPPORTAUTOMATION_URL!="");
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Support Automation - Live Assistance link visibility
+// Date: 5 November 2009
+//
+// If Live Assistance/Invit End User links can be shown
+/////////////////////////////////////////////////////////////////////////////////////////////
+function canDisplayLiveAssistanceLink() {
+	return (isSupportAutomationEnabled() && canReadOwnTenantData() && _browser.isWindows && ahdtop.m_s_sa_is_analyst && "$cst.access_type.licensed"=="1");
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Support Automation - Invite End User to a session (ticket based)
+// Date: 13 November 2009
+//
+// Calls freeaccess method SA_INVITE_END_USER which opens detail_sa_user_route_invite_end_user.html
+// with the needed parameters
+/////////////////////////////////////////////////////////////////////////////////////////////
+function inviteEndUser(ticket_persid) {
+
+	var strFeatures="directories=no"+
+			",location=no"+
+			",menubar=no"+
+			",status=no";
+	
+	var url = ahdtop.cfgCgi+
+			"?SID="+ahdtop.cfgSID+
+			"+FID="+ahdframe.cfgFID+
+			"+OP=SA_INVITE_END_USER" +
+			"+KEEP.presetToPublic=1" +
+			"+ticket_persid=" + ticket_persid;
+
+	preparePopup(url, '', strFeatures, '', '', '', 1);	
+}
+
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/msg_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/factory_size.js"></script>
+<PDM_INCLUDE FILE=ahdtop_site.htmpl>
+
+<!-- Suggest Knowledge include file -->
+<PDM_INCLUDE FILE=self_service_include.htmpl status=0 page=AHDTOP>
+
+<!-- Cache repositories and action content list -->
+<PDM_IF "$prop.KT_CACHE" == "yes">
+<PDM_INCLUDE FILE=kt_tbl_cache.htmpl CACHE=all> 
+</PDM_IF>
+<!-- End of ahdtop.htmpl -->

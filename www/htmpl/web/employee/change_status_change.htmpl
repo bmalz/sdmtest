@@ -1,0 +1,102 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  change_status_change.htmpl  
+// Created: 09/05/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: change_status_change.htmpl,v 1.4 2007/01/04 23:01:30 tuach01 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="change_status_change.htmpl+OP=UPDATE+ACTIVITY_LOG_TYPE=ST+PERSID={chg:}" factory=chg>
+<html lang="en">	<HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.status" != "CL" && "$args.active" != 0 >
+form_title = "Close Change Order $args.chg_ref_num";		  
+<PDM_ELSE>
+form_title = "Reopen Change Order $args.chg_ref_num";
+</PDM_IF>	
+</SCRIPT>
+<PDM_INCLUDE FILE="std_head.htmpl">
+		<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+		<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+
+		<title>$ProductName - Change Order Status Change</title>
+		<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+edit_form = 1;
+argPersistentID = "$args.persistent_id";
+if ( ! _browser.supportsLayers )
+   document.writeln('<scr' + 'ipt language="JavaScript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+</SCRIPT>
+</head>
+<body onUnload="unload_check()">
+<PDM_INCLUDE FILE="std_body.htmpl">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=chg>
+ImgBtnRow();
+	
+<PDM_IF "$args.status" != "CL" && "$args.active" != 0 >
+		ImgBtnCreate("btn001", "Close_Change", "detailSave()", "defer", 0);
+		ImgBtnCreate("btn002", "Leave_Change_Open", "detailCancel()", "defer", 0);
+        
+<PDM_ELSE>
+		ImgBtnCreate("btn001", "Reopen_Change", "detailSave()", "defer", 0);
+		ImgBtnCreate("btn002", "Leave_Change_Closed", "detailCancel()", "defer", 0);                                
+        
+</PDM_IF>
+ImgBtnCreate("btn003", "Clear_Remarks", "document.main_form.reset()", "defer", 0);
+ImgBtnEndRow();
+
+<PDM_MACRO name=dtlStart>
+</SCRIPT>		
+<PDM_IF "$args.status" != "CL" && "$args.active" != 0 >
+<PDM_IF "$args.KEEP.useClose" == "1">
+		    <input type=hidden name=SET.status value="CL">
+	
+</PDM_IF>
+<PDM_ELSE>
+	<input type=hidden name=SET.status value="OP">
+</PDM_IF>				
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr=status>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.status" != "CL" && "$args.active" != 0 >
+<PDM_MACRO name=dtlTextbox hdr="Closing Remarks" attr=chgalg.description colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Opening Remarks" attr=chgalg.description colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<!-- If Cancel Link brings up the form other than main menu, we do not want to
+     set the TARGET to _top because it will cause the next form to show without
+     main menu on the side.
+-->
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

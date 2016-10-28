@@ -1,0 +1,58 @@
+<PDM_IF 0>
+//@(#)$Id: list_KT_FILE_TYPE.htmpl ASPEN.1 2011/10/19 11:41:44 visan03 Exp $
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Typy plików";
+var hdrTitleList = "Lista typów plików";
+var cfgCanEdit = true;
+function fmtImage(value)
+{
+	var imgPath='$CAisd' + '/img/' + value;
+	var sHTML = "<img src='" + imgPath + "' alt=''></img>";
+	rs.data(sHTML);
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="KT_FILE_TYPE">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Rozszerzenie" attr="EXTENSION" size=40>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono plików";
+  var msgFound1 = "Znaleziono 1 plik";
+  var msgFound = "Znaleziono %1 plików";
+  var msgFoundMore = "Znaleziono %1 plików. Wyświetlanie %2 z %3";
+  var msgSelect = "Kliknij aby wybrać dany typ pliku";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Typ" attr="SYM" exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Rozszerzenie" attr="EXTENSION">
+<PDM_MACRO name=lsCol hdr="Ikona" attr="ICON_NAME" disp_entities=yes export=no fmtfunc=fmtImage sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

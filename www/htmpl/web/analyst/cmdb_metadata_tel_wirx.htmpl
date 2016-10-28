@@ -1,0 +1,87 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/02/03
+// Title  : cmdb_metadata_tel_wirx.htmpl (family specific attributes)
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_tel_wirx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="network_name"            heading="Network Name" help="The unique name or identifier for a communications system that connects two or more computers and their peripheral devices">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="network_address"         heading="Network Address" help="The IP address at which this CI resides, for example, 192.168.0.4">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="phone_number"            heading="Phone Number" help="The number issued by the phone company that uniquely identifies a land line or cellular telephone connection">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="carrier"                 heading="Carrier" help="A company that provides telecommunication services, such as AT&T, Cingular, Sprint, Verizon, and so on">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="gateway_id"              heading="Gateway ID" help="The unique identifier for a network point that acts as an entrance (gateway) to another network">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="subnet_mask"             heading="Subnet Mask" help="The identifier of the subnet into which a CI falls. Expressed in the same format as an IP address for example, 255.128.0.0">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="domain"                  heading="Domain" help="The identifier of the logical grouping (domain) to which a network or telecom device is assigned">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="bios_ver"                heading="BIOS Version" help="The version number of the BIOS - the code that's run when a personal computer starts up">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="cpu_type"                heading="CPU Type" help="The type (and speed) of the central processor in a telecom device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="memory_available"        heading="Memory Available" help="The amount of memory that is still available for use">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="memory_used"             heading="Memory Used" help="The amount of the available memory that is in use">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="harddrive_capacity"      heading="Hard Drive Capacity" help="The amount of hard drive capacity that is available for use on a Telecom CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="harddrive_used"          heading="Hard Drive Space Used" help="The amount of hard drive capacity that is being used">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="monitor"                 heading="Monitor" help="The type of display unit connected to a hardware, network, or telecom device">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="nic_card"                heading="NIC Card" help="Each device (Node) on a network has a Network Interface Card (NIC). The NIC can be Ethernet, Token Ring, RF, or other. The NIC is installed inside the device and provides a real-time dedicated connection to the network">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="bandwidth"               heading="Bandwidth" help="The amount of data that can be carried in a given time period over a wired or wireless communications link. Usually specified as bits per second, KB per second, MB per second, and so on">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="frequency"               heading="Frequency" help="The wavelength at which a telecom signal is transmitted to a wireless or radio device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="ci_license_number"       heading="CI License Number" help="The valid license number for a hardware or software CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="license_expiration_date" heading="License Expiration Date" help="The date on which a hardware or software license will expire">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="last_mtce_date"          heading="Last Maintenance Date" help="The latest date on which maintenance was performed on a CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="mtce_level"              heading="Maintenance Level" help="An indication of the current patch version for this CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="active_date"             heading="Activation Date" help="The date on which the CI was put into active status">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="retire_date"             heading="Retired Date" help="The date on which a CI is no longer active">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="ci_priority"             heading="CI Priority" help="The service level designation that is assigned to indicate the priority for restoration of this CI">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="SLA"                     heading="Service Level Agreement" help="The name or identifier of the contract between IT and the customer that governs the level of service and support options that are expected and acceptable for this IT component">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="leased_or_owned_status"  heading="Leased or Owned?" help="An indication of whether a particular CI has been leased for a specific time frame or was purchased">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="proj_code"               heading="Project Code" help="The ID or other unique identifier for the project to which a CI is assigned">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="contract_number"         heading="Contract Number" help="The unique identifier for a legal contract covering the purchase, lease, warranty, maintenance, and so on, of a CI or group of CIs">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="lease_effective_date"    heading="Lease Start Date" help="The date on which a lease becomes effective (also known as the lease start date)">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="lease_termination_date"  heading="Lease End Date" help="The date on which a lease ends and the affected CIs must be returned to the vendor">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="lease_renewal_date"      heading="Lease Renewal Date" help="The date on which a lease must be renewed for the next time period, or the affected CIs must be returned to the vendor">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="lease_cost_per_month"    heading="Lease Cost per Month" help="The dollar amount owed to the vendor each month for a lease">
+
+<PDM_IF "$env.NX_CMDB_PURCHASEAMT" == "INT">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="purchase_amount"         heading="Purchase Amount" help="The cost incurred to buy a CI (This field is deprecated and purchase_amountc should be used instead)">
+<PDM_ELSE>
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="purchase_amountc"        heading="Purchase Amount" help="The cost incurred to buy a CI">
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="mtce_type"               heading="Maintenance Type" help="The kind of maintenance that will be provided for this CI, for example, vendor or in-house">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="maintenance_period"      heading="Maintenance Period" help="The time frame for which a maintenance contract will be active">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="mtce_contract_number"    heading="MTCE Contract Number" help="The number that uniquely identifies a maintenance contract">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="tel_wirx" attr="maintenance_fee"         heading="Maintenance Fee" help="The amount of money paid to cover the cost of maintenance services over a specified time period">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

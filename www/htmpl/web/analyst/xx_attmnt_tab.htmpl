@@ -1,0 +1,304 @@
+<PDM_IF 0>
+xx_attmnt_tab.htmpl
+WHEN PRESENTED:
+    On the request, issue, or change order detail form
+INTENT:
+    Display a notebook page for attachments
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=xx_alg_tab.htmpl
+</script>
+History:
+       2011-Feb-08 aliab01 SCO:37387 - Attachment Tab is not refreshed while attaching document to the new incident creation window in non pop-up mode.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=xx_attmnt_tab" factory=chg>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/change_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/timer.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attevts.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/mouseover_preview.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script language="JavaScript">
+// attListData is populated in list_attmnt_sd.htmpl
+// and the functions are called by its context menu.
+
+//The following flag is set to avoid executing cancel_window() function from onunload event do_this_onunload().
+//Though this flag name is used for different purpose, the risk is lesser compared to changing code in do_this_onunload().
+noCancelAtomicCond = 1;
+
+
+var attListData = new Array();
+function do_download_attmnt(attmnt_persid) {
+   download_exec(attListData[attmnt_persid]);
+}
+function do_edit_attmnt(attmnt_persid) {
+   edit_attmnt("$args.persistent_id", attListData[attmnt_persid].id);
+}
+function do_delete_attmnt(attmnt_persid) {
+   delete_attmnt("$args.persistent_id", attListData[attmnt_persid].id);
+}
+</script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Attachment">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+var cfgAccessTenantGroup='$ACCESS.Tenant_Group';
+
+var display = false;
+
+if("$prop.MultiTenancy" == "on" && ahdtop.cstTenantId !="undefined")
+{
+
+	 if((ahdtop.cstTenantId == ahdtop.serviceProviderUuid) || ahdtop.cstTenantRestriction == "0")
+	{
+		display = true;
+	}
+	else	if (ahdtop.cstTenantRestriction == "1" && ahdtop.cstTenantId == "$args.tenant")
+	{
+		display = true ;
+	}
+	else
+	{
+		
+<PDM_IF "$ACCESS.Tenant_Restriction" == "2" && "$ACCESS.Tenant_Group" != "" && "$ACCESS.Tenant_Group" != "0">
+			<PDM_LIST ESC_STYLE=js PREFIX=list1 FACTORY=tenant_group_member WHERE="tenant_id=U'${cst.tenant:}' AND tenant_group=U'$ACCESS.Tenant_Group'">
+			if ( "$list1.id" != "" && "$list1.id" != "0")
+			{
+			<PDM_LIST ESC_STYLE=js PREFIX=list2 FACTORY=tenant_group_member WHERE="tenant_id=U'$args.tenant' AND tenant_group=U'$ACCESS.Tenant_Group'">
+				if ( "$list2.id" != "" && "$list2.id" != "0")
+				{
+					display = true;
+				}
+				else
+				{
+					display = false ;
+				}
+			</PDM_LIST>
+			}
+			</PDM_LIST>
+		
+</PDM_IF>
+	}
+}
+else
+	display = true ;
+
+if ( display == false )
+{
+	docWrite("<html>");
+	docWrite("<body>");
+	docWrite("<br><br><center><b>")
+	docWrite("Security settings prevents this operation");
+	docWrite("</b></center>");
+	docWrite("</body>");
+	docWrite("</html>");
+}
+else if ( display == true )
+{
+rClickMenu = new ContextMenu("rClickMenu");
+rClickMenu.finish();
+if ( window.parent != window && 
+	typeof window.parent._dtl == "object" &&   window.parent._dtl != null)
+{   
+  _dtl = parent._dtl;
+} 
+else
+{ 
+  _dtl = new DetailForm("$prop.factory","${args.id:0}","",false);
+} 
+
+if ( typeof window.parent.cfgUserAuth != "undefined" )
+{
+	if(typeof window.parent.propFactory != "undefined" && 
+	   ( window.parent.propFactory == "cr" || window.parent.propFactory == "chg" || window.parent.propFactory == "iss" || window.parent.propFactory == "nr"))
+               cfgUserAuth=window.parent.cfgUserAuth;
+}
+
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+<PDM_IF "$env.NX_EDIT_INACTIVE" != "No" || "$args.active" == "1"> 
+if(cfgUserAuth > 1)
+{
+
+      
+<PDM_MACRO name=button Caption="Dołącz dokument[!D]" Func="do_attach_doc()" hotkey_name="Attach Document[!D]" ID=btn201 NewRow=yes>
+<PDM_MACRO name=button Caption="Dołącz URL" EndRow=yes Func="do_attach_url()" hotkey_name="Attach URL" ID=btn202>
+}
+</PDM_IF>
+}
+function do_attach_doc() {
+   var add_file_src = "View=Upload+ShowFields=Yes+ShowImgStatus=Yes+ShowRepList=Yes+RepType=0+KEEP.POPUP_NAME=" + top.name + 
+                      "+KEEP.PARENT_DIV=" + window.frameElement.parentNode.id + "+KEEP.attmnt_parent=$args.persistent_id";
+   AddFile(0, 0, 0, add_file_src, 50 );
+}
+function do_attach_url() {
+   var att_url_src = cfgCgi + "?SID=$prop.SID+FID=" + fid_generator() +  
+                     "+OP=CREATE_NEW+FACTORY=attmnt" +
+                     "+attmnt_parent=$prop.form_name_2" +
+                     "+KEEP.PARENT_POPUP=" + top.name + "+PRESET=status:LINK_ONLY" +
+                     "+PRESET=link_only:1+KEEP.PARENT_DIV=" + window.frameElement.parentNode.id + 
+                     "+KEEP.PARENT_PERSID=$args.persistent_id+attmnt_parent=$prop.factory";
+   popupWithURL(att_url_src, undefined, undefined, undefined, true);
+}
+</PDM_OBJECT>
+
+var attmntAccess = 0;
+switch ("$prop.factory") {
+   case "cr":  attmntAccess = "${ACCESS.FAC_cr:0}" - 0; break;
+   case "iss": attmntAccess = "${ACCESS.FAC_iss:0}" - 0; break;
+   case "chg": attmntAccess = "${ACCESS.FAC_chg:0}" - 0; break;
+   case "nr": attmntAccess = "${ACCESS.FAC_nr:0}" - 0; break; // szum@e-xim 20130927
+}
+
+var html;		
+var attlnkid = -1;
+var attdata = new Array();
+
+var childMenu2 = new ContextMenu("childMenu2");
+childMenu2.addItem(msgtext("View_Document0"), "download_exec(self.attdata[self.attlnkid])");
+if ( attmntAccess > 1 ) {
+   childMenu2.addItem(msgtext("Edit_Details"),"edit_attmnt('$args.persistent_id',self.attdata[self.attlnkid].id)");
+}
+childMenu2.finish();
+
+<PDM_MACRO name=tabBanner add_btns=true show_bar=false>
+
+startScrollbar(false, false) ;
+var new_attmnt_flag = 0; 
+if (_dtl.edit && "$args.new_attmnt_wc" != "")
+{
+new_attmnt_flag = 1;
+html = "<table id='tbl201' class='tab' summary='New Attachment LIst'>\n";
+html +=  "<tr><th align='LEFT' class='results' colspan='5'>New Attachments</th></tr>\n";
+html += "<tr>\n";
+html +=  "<th scope=col ALIGN=LEFT class=results>Repository</th>\n";
+html +=  "<th scope=col ALIGN=LEFT class=results>Document</th>\n";
+html +=  "<th scope=col ALIGN=LEFT class=results>Description</th>\n";
+html +=  "<th scope=col ALIGN=LEFT class=results>Attached On</th>\n";
+html +=  "<th scope=col ALIGN=LEFT class=results>Status</th>\n";
+html +=  "</tr>\n";
+<PDM_IF "$args.new_attmnt_wc" == "">
+<PDM_SET args.list_attmnt_wc="id = 0">
+<PDM_ELSE>
+<PDM_SET args.list_attmnt_wc="$args.new_attmnt_wc">
+</PDM_IF>
+<PDM_LIST FACTORY=attmnt PREFIX=list WHERE="$args.list_attmnt_wc">
+
+if ( ++attlnkid % 2 )
+  html +=  childMenu2.tr("attlnkid=" + attlnkid, "class=results1");
+else
+  html +=  childMenu2.tr("attlnkid=" + attlnkid, "class=results0");
+attdata[attlnkid] = new Object();
+attdata[attlnkid].id = "$list.id";
+attdata[attlnkid].persid = "$list.persistent_id";
+attdata[attlnkid].attmnt_name = '<PDM_FMT ESC_STYLE=C>$list.attmnt_name</PDM_FMT>';
+attdata[attlnkid].orig_file_name = '<PDM_FMT ESC_STYLE=C>$list.orig_file_name</PDM_FMT>';
+attdata[attlnkid].status = "$list.status";
+<PDM_IF "$list.link_only" != "1">
+attdata[attlnkid].protocol = "servlet";
+attdata[attlnkid].server = "$list.repository.server";
+attdata[attlnkid].retrieve_path = "$list.repository.retrieve_path";
+attdata[attlnkid].file_name = "$list.file_name";
+attdata[attlnkid].rep_id = "$list.repository";
+attdata[attlnkid].cgi_path = "$list.repository.servlet_path";
+</PDM_IF>
+
+  html += "<td valign='top' class='detailroTab'>$list.repository.sym</td>\n";
+  html += "<td align='left' class='detailroTab'";
+  html += ">\n";
+  html += "<a class='lookup1em'" + detailNextID(true) +
+           " href=\"javascript:download_exec(attdata[" + attlnkid +
+           "]);\"" + childMenu2.mouseEvents("attlnkid=" + attlnkid) + getMOPreviewEventHtml( attdata[attlnkid].persid ) + ">\n";
+  html += nx_unescape('<PDM_FMT WIDTH=40 PAD=NO KEEPNL=YES KEEPTAGS=YES ESC_STYLE=JS2>$list.attmnt_name</PDM_FMT></a>\n');
+
+ html += "</td>\n"
+ html += "<td valign='top' class='detailroTab'"; 
+ html += ">\n";
+  html += nx_unescape('<PDM_FMT WIDTH=40 PAD=NO KEEPNL=YES KEEPTAGS=YES ESC_STYLE=JS2>$list.description</PDM_FMT>\n');
+html +=  "</td>\n";
+html +=  "<td valign='top' class='detailroTab'>\n";
+html +=  date_to_string('$list.created_dt_INT_DATE', 0);
+html +=  "</td>\n";
+html +=  "<td valign='top' class='detailroTab'>\n";
+if ( "$list.status" == "INSTALLED" )
+   html +=  "Wgrany";
+else if ( "$list.status" == "LINK_ONLY" )
+   html +=  "Podlinkowany";
+else if ( "$list.status" == "NOTINSTALLED" )
+   html +=  "Nie wgrany";
+else if ( "$list.status" == "ARCHIVED" )
+   html +=  "Zarchiwizowany";
+else // if ( "$list.status" == "NOTAVAILABLE" )
+   html +=  "Niedostępny";
+html +=  "</td>\n";
+html +=  "</tr>\n";
+</PDM_LIST>
+html +=  "</table>\n";
+docWrite(html);
+}
+
+function att_tab_src() {
+   var att_tab_url = "OP=SEARCH+FACTORY=attmnt+HTMPL=list_attmnt_sd.htmpl+KEEP.ticketFac=$prop.factory";
+   
+<PDM_IF "$prop.factory" == "cr">
+      att_tab_url += "+QBE.EQ.requests.cr.persistent_id=$args.persistent_id";
+   
+<PDM_ELIF "$prop.factory" == "chg">
+      att_tab_url += "+QBE.EQ.changes.chg.persistent_id=$args.persistent_id";
+   
+<PDM_ELIF "$prop.factory" == "iss">
+      att_tab_url += "+QBE.EQ.issues.iss.persistent_id=$args.persistent_id";
+<PDM_ELIF "$prop.factory" == "nr">
+      att_tab_url += "+QBE.EQ.nrs.nr.id=$args.id";
+   
+</PDM_IF>
+   if (new_attmnt_flag == 1) {
+      att_tab_url += "+KEEP.forSavedAttmnts=1";
+   }
+   return att_tab_url;
+}
+
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList height=250 src="javascript:att_tab_src();">
+<PDM_MACRO name=dtlEndTable>
+
+} // End - display = true
+</script>
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: xx_attmnt_tab.htmpl ASPEN.7 2011/08/26 19:17:44 tomjo02 Exp $
+</PDM_IF>

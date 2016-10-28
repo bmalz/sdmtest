@@ -1,0 +1,84 @@
+<PDM_IF 0>
+@(#)$Id: hierload_KCAT.htmpl ANDERSON.2 2009/11/05 20:19:39 kesav02 Exp $;
+WHEN PRESENTED:
+    Load a new level into a hierarchical search tree.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="OP=MENU+NBTAB=kt">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+ ("0");
+var argFactory = "KCAT";
+var argIndex = "$args.KEEP.Index" - 0;
+var KTTreeCaller;
+var m_lArrayNumber = '$args.lArrayNumber';
+
+KTTreeCaller  = parent.ahdframeset.kt_catTreeWindow[m_lArrayNumber];
+if ( typeof KTTreeCaller == "object" && KTTreeCaller != null ) {
+	var objTree = KTTreeCaller.GetTreeFrame();
+	if ( typeof objTree.HierSetCurrFolder == "function")
+	{
+		objTree.GetDataStart();
+		<PDM_IF "$args.OBJECT_NAME" == "KCAT">
+			<PDM_IF "$args.ParentTenant" == "None">
+				<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = $args.PRN_ID" ORDER_BY = "CAPTION">
+					objTree.GetData($list.id,'<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>',$list.HAS_CHILDREN, '$list.RELATIONAL_ID', $list.PARENT_ID, void(0), '${list.tenant:}'
+					<PDM_IF "$prop.MultiTenancy" != "off">					
+					, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>${list.tenant.name:}</PDM_FMT>'
+					</PDM_IF> 
+					);
+					ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+				</PDM_LIST>  	
+			<PDM_ELIF "$args.ParentTenant" == "Global">
+				<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = $args.PRN_ID and (tenant IS NULL)" ORDER_BY = "CAPTION">
+					objTree.GetData($list.id, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>', $list.HAS_CHILDREN, '$list.RELATIONAL_ID', $list.PARENT_ID, void(0), '${list.tenant:}'
+					<PDM_IF "$prop.MultiTenancy" != "off">					
+					, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>${list.tenant.name:}</PDM_FMT>'
+					</PDM_IF> 
+					);					
+					ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+				</PDM_LIST>					
+			<PDM_ELSE>
+				<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = $args.PRN_ID and (PdmTenantFkey(tenant,U'$args.ParentTenant','KD.PRIMARY_INDEX') = 1)" ORDER_BY = "CAPTION">
+					objTree.GetData($list.id, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>', $list.HAS_CHILDREN, '$list.RELATIONAL_ID', $list.PARENT_ID, void(0), '${list.tenant:}'
+					<PDM_IF "$prop.MultiTenancy" != "off">					
+					, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>${list.tenant.name:}</PDM_FMT>'
+					</PDM_IF> 
+					);					
+					ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+				</PDM_LIST>	
+			</PDM_IF>			
+		<PDM_ELSE>
+			<PDM_IF "$args.REP" == "NO">
+				<PDM_LIST PREFIX=list FACTORY=$args.OBJECT_NAME WHERE="parent_id = $args.PRN_ID" ORDER_BY = "folder_name">
+					objTree.GetData($list.id, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.folder_name</PDM_FMT>', $list.has_children, '$list.folder_path_ids', $list.parent_id, '$list.repository', '${list.tenant:}');
+				</PDM_LIST>	
+			<PDM_ELSE>
+				<PDM_LIST PREFIX=list FACTORY=$args.OBJECT_NAME WHERE="parent_id = 0 and folder_type<=$args.FOLDER_TYPE and repository='$args.REP'" ORDER_BY = "folder_name">
+					objTree.GetData($list.id, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.folder_name</PDM_FMT>', $list.has_children, '$list.folder_path_ids', $list.parent_id, '$list.repository', '${list.tenant:}');
+				</PDM_LIST>	
+			</PDM_IF>			
+		</PDM_IF>
+		objTree.GetDataEnd();
+	}
+	else
+	{
+		alert ("Can't Locate the tree frame");
+	}
+}
+if (!_browser.isMAC)
+    document.location.href="$CAisd/html/empty.html";
+</SCRIPT>
+</HEAD>
+<BODY>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: hierload_KCAT.htmpl,v 1.3 2006/11/09 20:22:05 tuach01 Exp $
+</PDM_IF>

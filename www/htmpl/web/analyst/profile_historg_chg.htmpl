@@ -1,0 +1,132 @@
+<html lang="en"><PDM_IF 0>
+profile_historg_chg.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="profile_browser.htmpl+PERSID={cnt:}+NBTAB=historg_chg" factory=cnt>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = formatmsg("Organization Change Order History for %1", parent.menu.organization);
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl listForm=1>
+<SCRIPT>
+
+var cfgCanEdit = true;
+var cfgContextActivities = true;
+var cfgUseTemplate = "";
+var show_header = 0;
+
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$prop.MultiTenancy" == "on">
+if ( typeof parent.menu.tenantUserAuth == "number" &&
+     parent.menu.tenantUserAuth < 2 )
+  
+<PDM_MACRO name=sfStart create=false factory=chg>
+else
+  
+<PDM_MACRO name=sfStart extracreateurl="PRESET=tenant:$args.pbTenant" factory=chg>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=chg>
+</PDM_IF>
+document.writeln('<INPUT TYPE=hidden NAME=HTMPL VALUE=profile_historg_chg.htmpl>');
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status przypisania" attr="n/a" codename="assignStatus" colspan=2>
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status factory=chgstat>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=impact factory=imp>
+<PDM_MACRO name=sfHier hdr="Klasyfikacja" attr="category.sym" factory=chgcat>
+<PDM_MACRO name=sfLookup hdr="Dotknięty użytkownik" attr=affected_contact factory=cnt>
+<PDM_MACRO name=sfLookup hdr="Nazwa żądającego" attr=requestor factory=cnt>
+docWriteln('<INPUT TYPE=HIDDEN NAME="QBE.EQ.affected_contact.organization" VALUE="$args.QBE.EQ.affected_contact.organization">');
+
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=active codename="act">
+<PDM_MACRO name=sfDropdown hdr="Szablon" attr="template_name" codename="tmpt">
+<PDM_MACRO name=sfLookup hdr="Utworzono przez" attr=log_agent factory=cnt>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=42>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Naruszenie SLA" attr="sla_violation" codename="slaViolation">
+<PDM_MACRO name=sfTextbox hdr="Justification" attr=justification size=20>
+<PDM_MACRO name=sfTextbox hdr="Nakład pracy" attr=effort size=20>
+<PDM_MACRO name=sfTextbox hdr="Plan wycofania" attr=backout_plan colspan=2 size=42>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Parent Change" attr=parent.chg_ref_num factory=chg>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas wymagalności" attr=need_by qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas wymagalności" attr=need_by qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas otwarcia" attr=open_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas otwarcia" attr=open_date qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas zamknięcia" attr=close_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas zamknięcia" attr=close_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas szacunkowego skompletowania" attr=est_comp_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas szacunkowego skompletowania" attr=est_comp_date qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rzeczywistego skompletowania" attr=actual_comp_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rzeczywistego skompletowania" attr=actual_comp_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Least Est Cos" attr=QBE.GE.est_cost size=20>
+<PDM_MACRO name=sfTextbox hdr="Najwyższy szacowany koszt" attr=QBE.LE.est_cost size=20>
+<PDM_MACRO name=sfTextbox hdr="Najkrótszy szacowany czas trwania" attr=QBE.GE.est_total_time size=20>
+<PDM_MACRO name=sfTextbox hdr="Najdłuższy szacowany czas trwania" attr=QBE.LE.est_total_time size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Najniższy rzeczywisty koszt" attr=QBE.GE.cost size=20>
+<PDM_MACRO name=sfTextbox hdr="Najwyższy rzeczywisty koszt" attr=QBE.LE.cost size=20>
+<PDM_MACRO name=sfTextbox hdr="Najkrótszy rzeczywisty czas trwania" attr=QBE.GE.actual_total_time size=20>
+<PDM_MACRO name=sfTextbox hdr="Najdłuższy rzeczywisty czas trwania" attr=QBE.LE.actual_total_time size=20>
+<PDM_MACRO name=sfEnd>
+
+var msgFoundNone = "No change orders found";
+var msgFound1 = "1 change order found";
+var msgFound = "%1 change orders found";
+var msgFoundMore = "%1 change orders found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired change order";
+var ref_num_style;
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0' ||  \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_elif @{list.ttv_att_slas.length:0} != 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Zmiana #" attr=chg_ref_num exportfmt=ShowLink link=yes style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=DESC>
+<PDM_MACRO name=lsCol hdr="Prio" attr=priority sort=DESC>
+<PDM_MACRO name=lsCol hdr="Category / Affected End User" attr=category>
+<PDM_MACRO name=lsCol label="Summary" attr=summary colspan=4 startrow=yes width=50>
+<PDM_MACRO name=lsCol attr=affected_contact>
+<PDM_MACRO name=lsEnd isticketfactory=1>
+</SCRIPT>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</CENTER>
+</BODY>
+</HTML>

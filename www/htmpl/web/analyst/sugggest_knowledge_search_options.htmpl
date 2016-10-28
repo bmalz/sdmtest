@@ -1,0 +1,176 @@
+<PDM_IF 0>
+kt_admin_search_options.htmpl
+WHEN PRESENTED:
+    When we need to display the search options admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES 
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin_suggest_knowledge.js"></script>
+<script language="JavaScript">
+	
+	// set Save Avoided Ticket when a suggested KD is not opened
+	var m_NoOpen_TA_dbId;
+	var m_NoOpen_TA_default;
+	var m_NoOpen_TA_value;
+	// set Save Avoided Ticket when a suggested KD is opened
+	var m_Open_TA_dbId;
+	var m_Open_TA_default;
+	var m_Open_TA_value;
+	// credit the doc(s) when a suggested KD is opened
+	var m_Open_CD_dbId;
+	var m_Open_CD_default;
+	var m_Open_CD_value;
+	// set Save Avoided Ticket when a suggested KD is accepted
+	var m_Accept_TA_dbId;
+	var m_Accept_TA_default;
+	var m_Accept_TA_value;
+	// credit the doc(s) when a suggested KD is accepted
+	var m_Accept_CD_dbId;
+	var m_Accept_CD_default;
+	var m_Accept_CD_value;
+	//Credit the doc(s) when searching (not from a ticket), opening a KD and exiting from the application(SUGGEST_KNOWLEDGE_SEARCH_CREDIT_KD)
+	var m_SearchC_D_dbId;
+	var m_SearchC_D_default;
+	var m_SearchC_D_value;	
+	<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+			
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SUGGEST_KNOWLEDGE_NO_OPEN_TCKT_AVOID">
+			m_NoOpen_TA_dbId = "$ciProps.id";
+			m_NoOpen_TA_default = "$ciProps.PROPERTY_DEFAULT";
+			m_NoOpen_TA_value = "$ciProps.PROPERTY_VALUE";
+		</PDM_IF>	
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SUGGEST_KNOWLEDGE_OPEN_TCKT_AVOID">
+			m_Open_TA_dbId = "$ciProps.id";
+			m_Open_TA_default = "$ciProps.PROPERTY_DEFAULT";
+			m_Open_TA_value = "$ciProps.PROPERTY_VALUE";
+		</PDM_IF>	
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SUGGEST_KNOWLEDGE_OPEN_CREDIT_KD">
+			m_Open_CD_dbId = "$ciProps.id";
+			m_Open_CD_default = "$ciProps.PROPERTY_DEFAULT";
+			m_Open_CD_value = "$ciProps.PROPERTY_VALUE";
+		</PDM_IF>	
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SUGGEST_KNOWLEDGE_ACCEPT_TCKT_AVOID">
+			m_Accept_TA_dbId = "$ciProps.id";
+			m_Accept_TA_default = "$ciProps.PROPERTY_DEFAULT";
+			m_Accept_TA_value = "$ciProps.PROPERTY_VALUE";
+		</PDM_IF>	
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SUGGEST_KNOWLEDGE_ACCEPT_CREDIT_KD">
+			m_Accept_CD_dbId = "$ciProps.id";
+			m_Accept_CD_default = "$ciProps.PROPERTY_DEFAULT";
+			m_Accept_CD_value = "$ciProps.PROPERTY_VALUE";
+		</PDM_IF>	
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SUGGEST_KNOWLEDGE_SEARCH_CREDIT_KD">
+			m_SearchC_D_dbId = "$ciProps.id";
+			m_SearchC_D_default = "$ciProps.PROPERTY_DEFAULT";
+			m_SearchC_D_value = "$ciProps.PROPERTY_VALUE";
+		</PDM_IF>			
+	</PDM_LIST>	
+</script>
+</head>
+<body onload="javacript:window_onload('suggest_knowledge_settings');">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<form id="frmMain" name="frmMain">
+<table cellSpacing=0 cellPadding=0 width='100%' class='page_header gn_container_no_border'>
+	<tr>
+		<td align=left width='99%'>Service Desk Integration
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "Save('suggest_knowledge_settings')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "ResetDefaults('suggest_knowledge_settings')",true, "", msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<table width="100%" cellspacing="0" cellpadding="0" class='gn_container_no_border'>
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center"><span  class="page_section_header_text" >Self-Service Configuration Settings</span></td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class=page_section>
+	<div id=divKT2 name=divKT2>
+		
+		<table width="98%" align=center cellspacing="0" cellpadding="0" class='gn_container_no_border'>	
+			
+			<PDM_IF 0>
+			<tr>
+				<table width="98%" class="page_instruction_area2">	
+				<tr>
+				<td nowrap>
+					<span class="page_instructions_text2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<img alt='' align='absmiddle' src='/CAisd/img/Information_16.png' >
+					Use the checkboxes below to create policies that determine ticket avoidance<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					by an end user. You may also determine if a document should be credited as<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					a solution, meaning the document's Solution Count field will be incremented.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					The scenarios below describe the steps taken by an end user who has opened a ticket,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					had knowledge suggested and subsequently did not save the ticket.  
+					</span>
+				</td>
+				<td>&nbsp;</td>
+				</tr>
+				</table>	
+			</tr>
+			</PDM_IF>
+		<tr>
+			<td>
+				<table width="98%" cellspacing="1" cellpadding="0" class="table gn_container_white_background">
+					<tr>
+						<td width="60%" class="table_column_header_background"><span class="table_column_header_text_small">Scenario</span></td>
+						<td width="20%" class="table_column_header_background"><span class="table_column_header_text_small">Credit KD(s) as ticket avoided</span></td>
+						<td width="20%" class="table_column_header_background"><span class="table_column_header_text_small">Save Avoided Ticket</span></td>
+					</tr>
+				</table>
+				<!-- the suffixes used fot the checkboxes here are T_A = 'Save Avoided Ticket' and C_D = 'credit document'
+				-->
+				<table width='98%' cellspacing='1' cellpadding='0' class='table'>
+					<tr class="table_row">
+						<td width="60%" class="data"><div align="left"><label>User did not open any suggested document</label></div></td>
+						<td width="20%" class="data">&nbsp;</td>
+						<td width="20%" class="data"><div align="center"><input tabindex=100 type="checkbox" id="cbNoOpenT_A" name="cbNoOpenT_A" class="data" title="User did not open any suggested document-Save Avoided Ticket"></div></td>
+					</tr>
+					<tr class="table_banded_row">
+						<td width="60%" class="data"><div align="left"><label>User opened a suggested document</label></div></td>
+						<td width="20%" class="data"><div align="center"><input tabindex=100 type="checkbox" id="cbOpenDocC_D" checked name="cbOpenDocC_D" class="data" title="User opened a suggested document-Credit KD(s) as ticket avoided"></div></td>
+						<td width="20%" class="data"><div align="center"><input tabindex=100 type="checkbox" id="cbOpenDocT_A" checked name="cbOpenDocT_A" class="data" title="User opened a suggested document-Save Avoided Ticket"></div></td>
+					</tr>
+					<tr class="table_row">
+						<td width="60%" class="data"><div align="left"><label>User accepted a suggested document as a solution to their problem</label></div></td>
+						<td width="20%" class="data"><div align="center"><input tabindex=100 type="checkbox" checked id="cbAcceptDocC_D" name="cbAcceptDocC_D" class="data" title="User accepted a suggested document as a solution to their problem-Credit KD(s) as ticket avoided"></div></td>
+						<td width="20%" class="data"><div align="center"><input tabindex=100 type="checkbox"  checked id="cbAcceptDocT_A" name="cbAcceptDocT_A" class="data" title="User accepted a suggested document as a solution to their problem-Save Avoided Ticket"></div></td>
+					</tr>
+					<tr class="table_banded_row">
+						<td width="60%" class="data"><div align="left"><label>User searched for knowledge, opened document and exit</label></div></td>
+						<td width="20%" class="data"><div align="center"><input tabindex=100 type="checkbox" id="cbSearcC_D" checked name="cbSearcC_D" class="data" title="User searched for knowledge, opened document and exit-Credit KD(s) as ticket avoided"></div></td>
+						<td width="20%" class="data"><div align="center">&nbsp;</div></td>
+					</tr>
+				</table>		
+			</td>
+		</tr>
+	</table>
+	</div>
+</div>
+
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

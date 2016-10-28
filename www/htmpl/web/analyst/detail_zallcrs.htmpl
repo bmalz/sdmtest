@@ -1,0 +1,5 @@
+<PDM_IF "$args.type" == "I">
+	<PDM_INCLUDE FILE=detail_in.htmpl>
+<PDM_ELSE>
+	<PDM_INCLUDE FILE=detail_cr.htmpl>
+</PDM_IF>

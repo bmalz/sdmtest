@@ -1,0 +1,51 @@
+<PDM_IF 0>
+@(#)$Id: category_content_tab.htmpl ASPEN.6 2011/04/18 11:07:45 erier01 Exp $
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_WSP mode=edit preview="PRESET=PARENT_ID:1+KTMacrolArrayNumber=0+NBTAB=category_content_tab" factory=KCAT>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Content Tab">
+<PDM_FORM NAME="frmDTLRO">
+
+<SCRIPT>
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+<PDM_MACRO name=tabBanner title="Content">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł" attr=CAPTION colspan=3 rows=1 size=120>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=DESCRIPTION colspan=3 rows=8 size=120>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Właściciel klasyfikacji" attr=OWNER_ID factory=agt>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=dtlDropdown hdr="Szablon dokumentów" attr=DOC_TEMPLATE lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Szablon procesu akceptacji" attr=WF_TEMPLATE lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_KT" == "Yes" && "$env.NX_KT_DISALLOW_FORUMS" == "No">
+<PDM_MACRO name=dtlCheckbox hdr="Zezwalaj na tworzenie forów w tej klasyfikacji" attr=ALLOW_QA colspan=3>
+</PDM_IF>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja zgłoszeń" attr=CR_CAT colspan=2>
+<PDM_MACRO name=dtlHier hdr="Issue Category" attr=ISS_CAT>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: category_content_tab.htmpl,v 1.2 2006/11/08 00:49:01 olsjo01 Exp $
+</PDM_IF>

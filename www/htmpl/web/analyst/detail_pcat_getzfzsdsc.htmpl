@@ -1,0 +1,32 @@
+<PDM_IF 0>
+20131016 mch @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	var frm = "";
+	if ( !parent.cai_main )
+	{
+		frm = parent.ahdframe;
+	}
+	else { frm = parent.cai_main; }
+	
+	if (typeof frm.GetZfzsdsc == "function")
+	{
+		frm.GetZfzsdsc("$args.zfzsdsc.sym", "$args.zfzsdsc.code");
+	}
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

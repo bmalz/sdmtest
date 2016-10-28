@@ -1,0 +1,316 @@
+<PDM_IF 0>
+Purpose:
+   This tab file defines all cmdb data to be used by versioning into
+   javascript variables.
+
+   This page is referenced in the head section, along with the metadata, in each
+   detail_xxxxx.htmpl file.
+
+Usage:
+   use PDM_INCLUDE file="cmdb_versioning.htmpl" Extension=xxxx
+   where xxxx is the name of the extension table object
+
+History:
+   05/12/2008 mckpe04/tomjo02 Initial Version shipped with CMDB 11.2
+   07/22/2008 tomjo02 PES P05544 - CMDB-UAPM integration phase 1 - added UAPM launch-in-context support
+   01/21/2009 tomjo02 I18N - Incorporated R11.2 localization changes
+   01/27/2009 tomjo02 SCO 19284 - PDM_IF did not handle MDRs with special characters in the mdr_name, added quotes around argument condition.
+   02/24/2009 tomjo02 SCO 17187 - Add support for APM - CA Asset Portfolio Managment product name change
+   07/22/2009 tomjo02 SCO 26226 CMDBf Federation Viewer support - Added cmdbAttrDataType metadata array for attribute name validation/removal
+   12/17/2009 tomjo02 SCO 31405 - Add ITAM 12.5 MDR launch in context support
+   10/29/2010 tomjo02 SCO 35745 - Use NX_CMDB_VERSIONING_MAXROWS to limit data used by versioning, changed PDM_LIST from SOURCE= to FACTORY=.
+   11/02/2010 tomjo02 SCO 35745 - Add support for empty or truncated audit logs
+   02/23/2012 tomjo02 SCO 42464 - Added change specification type and need by date to MDR definition and desc sort order based on change order number for versioning improvements
+</PDM_IF>
+
+<PDM_JSCRIPT file=cmdb_versioning.js>
+
+<PDM_INCLUDE FILE="cmdb_metadata_${prop.Extension}.htmpl">
+
+function getCMDBData()
+{	
+
+var longDate      = new Array();
+var who           = new Array();
+var mdr           = new Array();
+var attribute     = new Array();
+var newvalue      = new Array();
+var oldvalue      = new Array();
+var intDate       = new Array();
+var what          = new Array();
+
+var cmdbCommon    = new Array();
+var cmdbHeading  = new Array();
+var cmdbCurrentValue = new Array();
+var cmdbCategory = new Array();
+var cmdbAttrHelp = new Array();
+var cmdbDBColumn = new Array();
+var cmdbAttrDataType = new Array();
+
+var versionNumber;
+var n;
+var i;
+
+i=-1;
+
+
+// Get cmdb meta data for versioning
+var result;
+result = getCMDBMetaData();
+//result=parent.cmdbMetaData;
+i=result[0];
+who=result[1];
+longDate=result[2];
+what=result[3];
+intDate=result[4];
+mdr=result[5];
+attribute=result[6];
+newvalue=result[7];
+oldvalue=result[8];
+cmdbCategory=result[9];
+cmdbHeading=result[10];
+cmdbCommon=result[11];
+cmdbCurrentValue=result[12];
+cmdbAttrHelp=result[13];
+cmdbDBColumn=result[14];
+cmdbAttrDataType=result[15];
+result=null;
+
+<PDM_IF "$env.NX_CMDB_VERSIONING_MAXROWS" == "" || "$env.NX_CMDB_VERSIONING_MAXROWS" == "0">
+  <PDM_SET args.versioning_maxrows="400">
+<PDM_ELSE>
+  <PDM_SET args.versioning_maxrows="$env.NX_CMDB_VERSIONING_MAXROWS">
+</PDM_IF>
+
+var num_nr_com_records = i;
+
+// append the asset log (CMDB Audit log)....
+// searching audit log for updates to ci named: $args.name LENGTH=$args.versioning_maxrows
+
+////////////////////////////////////////////////////
+<PDM_LIST FACTORY="nr_com" ESC_STYLE="C" PREFIX="asset_log" 
+          WHERE="asset_id = U'$args.id'" 
+          ORDER_BY="log_date DESC" 
+          LENGTH="$args.versioning_maxrows">
+	i++;
+	who[i]       = "$asset_log.writer_name";
+	// dont use longDate[i]  = 'asset_log.log_date' ;
+	what[i]      = "$asset_log.log";
+	attribute[i] = "$asset_log.attr_name";
+	newvalue[i]  = "$asset_log.new_value";
+	oldvalue[i]  = "$asset_log.old_value";
+	intDate[i]   = "$asset_log.log_date_INT_DATE";
+
+<PDM_IF "$asset_log.mdr_name" != "">
+<PDM_LIST prefix=mdr factory=ci_mdr_provider where="mdr_name='$asset_log.mdr_name' and mdr_class='$asset_log.mdr_class'" length=1>
+	mdr[i] = <PDM_FMT PAD=NO ESC_STYLE=C>"$mdr.name"</PDM_FMT>;
+</PDM_LIST>
+	if ( mdr[i] == undefined )
+	{
+		mdr[i] = "";
+	}
+<PDM_ELSE>
+	mdr[i] = "";
+</PDM_IF>
+	
+</PDM_LIST>
+
+
+////////////////////////////////////////////////////
+// CACF Change Specifications
+// Add pending (non-final) change specifications for this CI
+////////////////////////////////////////////////////
+
+// Routine that performs any special formatting of the Change Specification values
+function format_attr_value( attribute_type, attribute_value, internal_value )
+{
+    if( attribute_type == "4" ) // Date
+    {
+        // Convert the int date to a string if possible
+        if ( typeof internal_value != "undefined" &&
+             internal_value.length > 0            && 
+             !isNaN( internal_value ) )
+        {
+           attribute_value = date_to_string( internal_value );
+        }
+    }
+    return attribute_value;  
+}
+var cmdb_change_specification_type = "";
+var cmdb_change_need_by_int_date = "";
+<PDM_LIST FACTORY="ci_planned_change" ESC_STYLE="C" PREFIX="ci_planned_change" 
+          WHERE="ci.id = U'$args.id'  AND status.isfinal=0 AND delete_flag=0" 
+          ORDER_BY="chg.chg_ref_num DESC, last_mod_dt DESC" 
+          LENGTH="$args.versioning_maxrows">
+	i++;
+	who[i]       = "$ci_planned_change.chg.requested_by.userid";
+	what[i]      = "Change Specification";
+	attribute[i] = "$ci_planned_change.attribute_name.attribute_name";
+	newvalue[i]  = format_attr_value( "$ci_planned_change.attribute_name.attribute_type",
+                                      <PDM_FMT PAD=NO ESC_STYLE=C>"$ci_planned_change.attribute_value_planned"</PDM_FMT>, 
+                                      <PDM_FMT PAD=NO ESC_STYLE=C>"$ci_planned_change.attribute_value_internal"</PDM_FMT>);
+	oldvalue[i]  = "";
+	if ("$ci_planned_change.chg.sched_end_date_INT_DATE" != "")  
+    {
+        intDate[i] = "$ci_planned_change.chg.sched_end_date_INT_DATE";
+        cmdb_change_specification_type = "scheduled_change";
+    }
+	else
+    {
+        cmdb_change_specification_type = "unscheduled_change";
+        intDate[i] = 253402214400 - 60*i; // unique date before 12/31/9999
+    }
+	if ("$ci_planned_change.chg.need_by_INT_DATE" != "") 
+    {
+        cmdb_change_need_by_int_date = "$ci_planned_change.chg.need_by_INT_DATE";
+    }
+    else
+    {
+        cmdb_change_need_by_int_date = "n/a";
+    }
+	mdr[i] = "ci_planned_change:$ci_planned_change.id@$ci_planned_change.chg.chg_ref_num@" + cmdb_change_specification_type + "@" + cmdb_change_need_by_int_date;
+	
+</PDM_LIST>
+
+//////// end of CACF Change Specifications //////////////
+
+if ( i == num_nr_com_records )
+{
+    <PDM_IF 0>Add a last modified date snapshot when no log entries exist</PDM_IF>
+	i++;
+	who[i]       = "$args.last_mod_by";
+	what[i]      = "Field Updated";  
+	attribute[i] = "Last Modified Date";
+	oldvalue[i]  = "";
+	intDate[i]   = "$args.last_mod_INT_DATE";
+	newvalue[i]  = date_to_string(intDate[i]);
+}
+
+<PDM_IF 0>Only show changed orders since the oldest known update to the CI</PDM_IF>
+var oldest_snapshot_date = intDate[i] - 0;
+
+<PDM_LIST FACTORY="lrel_asset_chgnr" ESC_STYLE="C" PREFIX="chgnr" 
+          WHERE="nr = U'$args.id'" 
+          ORDER_BY="last_mod_dt DESC" 
+          LENGTH="$args.versioning_maxrows">
+// dump Change ticket log, closed
+   <PDM_IF $chgnr.chg.close_date_INT_DATE \> 0 >
+    if ( $chgnr.chg.close_date_INT_DATE >= oldest_snapshot_date  )
+    {
+	    i++;
+	    who[i] = "$chgnr.chg.last_mod_by.userid";
+	    // dont use longDate[i] = 'args.chgnr.close_date';
+	    what[i] = "Change Closed";
+	    attribute[i] = "change order closed";
+	    newvalue[i] =  "$chgnr.chg.chg_ref_num $chgnr.chg.summary";
+	    oldvalue[i]="";
+	    intDate[i] =  "$chgnr.chg.close_date_INT_DATE";
+	    mdr[i] = "";
+    }
+   </PDM_IF>
+
+// dump the change ticket log, opened
+   <PDM_IF $chgnr.chg.open_date_INT_DATE \> 0 >
+    if ( $chgnr.chg.open_date_INT_DATE >= oldest_snapshot_date )
+    {
+	    i++;
+	    who[i] = "$chgnr.chg.last_mod_by.userid";
+	    //longDate[i] = date_to_string('args.chgnr.open_date_INT_DATE',0);
+	    // dont use longDate[i]="args.chgnr.open_date";
+	    what[i] = "Change Opened";
+	    attribute[i] = "change order opened";
+	    newvalue[i] = "$chgnr.chg.chg_ref_num $chgnr.chg.summary";
+	    oldvalue[i]="";
+	    intDate[i] = "$chgnr.chg.open_date_INT_DATE";
+	    mdr[i] = "";
+    }
+   </PDM_IF>
+
+// dump the change ticket log, started
+   <PDM_IF $chgnr.chg.start_date_INT_DATE \> 0 >
+    if ( $chgnr.chg.start_date_INT_DATE >= oldest_snapshot_date )
+    {
+	    i++;
+	    who[i] = "$chgnr.chg.last_mod_by.userid";
+	    //dont use longDate[i] = 'args.chgnr.start_date';
+	    what[i] = "Change Active";
+	    attribute[i] = "change order active";
+	    newvalue[i] = "$chgnr.chg.chg_ref_num $chgnr.chg.summary";
+	    oldvalue[i]="";
+	    intDate[i] = "$chgnr.chg.start_date_INT_DATE";
+	    mdr[i] = "";
+    }
+  </PDM_IF>
+
+// dump the change ticket log, resolved
+   <PDM_IF $chgnr.chg.resolve_date_INT_DATE \> 0 >
+    if ( $chgnr.chg.resolve_date_INT_DATE >= oldest_snapshot_date )
+    {
+	    i++;
+	    who[i] = "$chgnr.chg.last_mod_by.userid";
+	    //dont use longDate[i] = 'args.chgnr.resolve_date';
+	    what[i] = "Change Resolved";
+	    attribute[i] = "change order resolved";
+	    newvalue[i] = "$chgnr.chg.chg_ref_num $chgnr.chg.summary";
+	    oldvalue[i]="";
+	    intDate[i] = "$chgnr.chg.resolve_date_INT_DATE";	
+	    mdr[i] = "";
+    }
+   </PDM_IF>
+</PDM_LIST>
+
+// PES P05544 - UAPM/ITAM integration launch in context support from the versioning tab.
+// Process each active MDR provider and use the first APM, UAPM or ITAM MDR provider designated as
+// mdr_class="GLOBAL" for launch in context for an attribute in the log or detail view.
+var cmdbUAPMMdr = "";
+<PDM_LIST FACTORY="ci_mdr_provider" PREFIX="mdr" WHERE="delete_flag=0" >
+    if ( cmdbUAPMMdr == "" )
+    {
+        var curMDRClass = <PDM_FMT ESC_STYLE=JS2>"$mdr.mdr_class"</PDM_FMT>;
+        curMDRClass = curMDRClass.toUpperCase();
+        var curMDRName = <PDM_FMT ESC_STYLE=JS2>"$mdr.mdr_name"</PDM_FMT>;
+        curMDRName = curMDRName.toUpperCase();
+        if ( ( curMDRName == "ITAM" || curMDRName == "APM" || curMDRName == "UAPM" ) && curMDRClass == "GLOBAL" )
+        {
+            // Save the UAPM MDR label.
+            cmdbUAPMMdr = <PDM_FMT PAD=NO ESC_STYLE=C>"$mdr.name"</PDM_FMT>;
+        }
+    }
+</PDM_LIST>
+
+
+// Include information from UAPM Audit log - QC 1066
+<PDM_IF "$args.id" != "0">
+<PDM_LIST FACTORY="arg_history" ESC_STYLE="C" PREFIX="uapm"
+          WHERE="table_name='ca_owned_resource' and object_uuid=U'$args.id'" 
+          ORDER_BY="last_update_date DESC" 
+          LENGTH="$args.versioning_maxrows">
+    i++;
+    who[i]       = "$uapm.last_update_user";
+    what[i]      = "APM Update";
+    attribute[i] = "$uapm.field_name";
+    newvalue[i]  = "$uapm.hstext";
+    oldvalue[i]  = "$uapm.hsotext";
+    intDate[i]   = "$uapm.last_update_date_INT_DATE";
+
+    // Set the UAPM MDR provider.
+    mdr[i] = cmdbUAPMMdr;
+</PDM_LIST>
+</PDM_IF>
+
+/////////////////
+
+n=i+1;
+
+var cmdbdata;
+  cmdbdata = [longDate, who, mdr, attribute, newvalue, intDate, n, what, oldvalue, cmdbCommon, cmdbCategory, cmdbHeading,
+              cmdbCurrentValue, cmdbAttrHelp, cmdbDBColumn,
+              cmdbAttrDataType];
+
+return cmdbdata;
+}
+
+<PDM_IF 0>
+@(#)$Id: cmdb_versioning.htmpl ASPEN.10 2012/02/23 17:00:51 tomjo02 Exp $;
+</PDM_IF>
+

@@ -1,0 +1,129 @@
+<PDM_IF 0>
+@(#)$Id: menubar_dtbuilder.htmpl ANDERSON.1 2009/05/19 10:01:11 taoyu02 Exp $
+WHEN PRESENTED:
+    Build the Decision Tree Builder tab menubar.
+    This file is included in kt_dtbuider.htmpl, and the function it
+    generates is used by any form in the Decision Tree Builder tab with no
+    explicit menubar specified in the invocation of std_body.htmpl.
+
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder Menubar
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_WSP preview="kt_dtbuilder.htmpl+prop.menubar=dtbuilder">
+
+<PDM_MACRO name=startMenubar>
+<PDM_MACRO name=menubarItem label="Tree" id=mTree variable=__menuDTBuilderTree>
+<PDM_MACRO name=menubarItem label="Node_Actions" id=mNodeActions variable=__menuDTBuilderNodeActions>
+<PDM_MACRO name=menubarItem label="Edit" id=mEdit variable=__menuDTBuilderEdit>
+<PDM_MACRO name=menubarItem label="Options" id=mOptions variable=__menuDTBuilderOptions>
+<PDM_MACRO name=menubarItem label="View" id=mView variable=__menuDTBuilderView>
+<PDM_MACRO name=menubarItem label="Window" id=mWindow>
+<PDM_MACRO name=menubarItem label="Help" id=mHelp>
+<PDM_MACRO name=endMenubar>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder "Tree" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mTree>
+<PDM_MACRO name=menuItem label="Save_and_Close" extended=true function="DTBuilderSaveAndClose()" id=idSaveAndClose>
+<PDM_MACRO name=menuItem label="Save" extended=true function="DTBuilderSave()" id=idSave>
+<PDM_MACRO name=menuItem label="Check_Errors" extended=true function="DTBuilderCheckErrors()" id=idCheckErrors>
+<PDM_MACRO name=menuItem label="Close_Errors_List" extended=true function="DTBuidlerCloseErrorsList()" id=idCloseErrorsList>
+<PDM_MACRO name=menuItem label="Exit" extended=true function="DTBuilderExit()" id=idExit>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder "Node Actions" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mNodeActions>
+<PDM_MACRO name=menuItem label="Add_Query" extended=true function="DTBuilderAddQuery()" id=idAddQuery>
+<PDM_MACRO name=menuItem label="Add_Conclusion" extended=true function="DTBuilderAddConclusion()" id=idAddConclusion>
+<PDM_MACRO name=menuItem label="Add_Jump" extended=true function="DTBuilderAddJump()" id=idAddJump>
+<PDM_MACRO name=menuItem label="Rename" extended=true function="DTBuilderRename()" id=idRename>
+<PDM_MACRO name=menuItem label="Link_Jump_Node" extended=true function="DTBuilderLinkJumpNode()" id=idLinkJumpNode>
+<PDM_MACRO name=menuItem label="Delete" extended=true function="DTBuilderDelete()" id=idDelete>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder "Edit" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mEdit>
+<PDM_MACRO name=menuItem label="Copy" extended=true function="DTBuilderCopy()" id=idCopy>
+<PDM_MACRO name=menuItem label="Copy_Single_Node" extended=true function="DTBuilderCopySingleNode()" id=idCopySingleNode>
+<PDM_MACRO name=menuItem label="Cut" extended=true function="DTBuilderCut()" id=idCut>
+<PDM_MACRO name=menuItem label="Paste" extended=true function="DTBuilderPaste()" id=idPaste>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder "Options" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mOptions>
+<PDM_MACRO name=menuItem label="Copy_Response" extended=true function="DTBuilderCopyResponse()" id=idCopyResponse img="/CAisd/img/ExBuilderCheck.gif">
+<PDM_MACRO name=menuItem label="Prompt_on_Node_Delete" extended=true function="DTBuilderPromptOnNodeDelete()" id=idPromptOnNodeDelete img="/CAisd/img/ExBuilderCheck.gif">
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder "View" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mView>
+<PDM_MACRO name=menuItem label="Show/Hide_Errors" extended=true function="DTBuilderShowHideErrors()" id=idShowHideErrors>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop ) {
+  if ( ! ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Main_Page" function="focus_main_window()">
+  }
+  else {
+<PDM_MACRO name=menuItem label="View_Log_Reader..." function="focus_main_window()">
+  }
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder "Help" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+
+<PDM_OBJECT>
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+<PDM_MACRO name=menuItem label="Support..." function="popupWithURL('http://ca.com/index.html', 1, 1)">
+
+<PDM_OBJECT>
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>

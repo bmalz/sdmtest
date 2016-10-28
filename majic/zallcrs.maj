@@ -1,0 +1,12 @@
+OBJECT cr {
+	FACTORY zallcrs {
+		STANDARD_LISTS {
+			SORT_BY "open_date DESC, id DESC, status=status.sym, priority=priority.sym DESC, ref_num" ;
+			MLIST OFF;
+			RLIST OFF;
+			};
+		FUNCTION_GROUP "call_mgr" ;
+		REL_ATTR persistent_id;
+		COMMON_NAME ref_num;
+		};
+	};

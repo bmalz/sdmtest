@@ -1,0 +1,81 @@
+<PDM_IF 0>
+$Id: list_chg.htmpl,v 1.3 2006/11/10 22:08:46 ralje02 Exp $
+list_cr.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Change Orders.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<script>
+var hdrTitleList = "Change Order List";
+
+function loadActions()
+{
+	var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + 
+		"+OP=TICKET_SEARCH+TICKET_TYPE=Change Orders+SEARCH_COUNT=$record_count";
+	
+	SyncAjaxCall(sURL);
+}
+</script>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="emp" onload="loadActions();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No change orders found";
+var msgFound1 = "1 change order found";
+var msgFound = "%1 change orders found";
+var msgFoundMore = "%1 change orders found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired change order";
+var msgSelectAlg = "Click to select desired change order and add a %1 activity log";
+var ref_num_style;
+var out = "";
+out = '<form action="' + cfgCgi + '" method=POST name=fltrFormSubmit>\n' +
+                        '<input type=hidden name=OP value=STORE_URL>\n' +
+			'<input type=hidden name="URLID">\n' +
+			'<input type=hidden name="URL">\n' +
+			'<input TYPE=hidden name="SID">\n' +
+			'<input TYPE=hidden name="FID">\n' +
+			'</FORM>\n';
+document.writeln(out);
+<PDM_MACRO name=lsStart>
+rs.overrideMenu=true;
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_if @{list.ttv_act_slas.length:0} == 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_ELSE>
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Zmiana #" attr=chg_ref_num exportfmt=ShowLink link=yes style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=DESC>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority label="Prio" sort=DESC>
+<PDM_MACRO name=lsCol hdr="Klasyfikacja" attr=category>
+<PDM_MACRO name=lsCol label="Summary" attr=summary colspan=6 startrow=yes width=50>
+<PDM_MACRO name=lsEnd factory=chg>
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,77 @@
+<PDM_IF 0>
+$Id: list_wrkshft.htmpl,v 1.2 2006/11/08 00:19:22 olsjo01 Exp $
+list_wrkshft.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Workshifts.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Workshift Search";
+var hdrTitleList = "Workshift List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("wrkshftsum.rpt", "wrkshftdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Workshift">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.noSFBtns" == "1">
+<PDM_MACRO name=sfStart button=false export=no factory=wrkshft>
+<PDM_ELSE>
+<PDM_IF $ACCESS.FAC_wrkshft \> 1>
+<PDM_MACRO name=sfStart factory=wrkshft>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=wrkshft>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_wrkshft.htmpl>');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.pcat_svc.pcat.id" != "">
+    document.write('<INPUT TYPE="hidden" NAME="QBE.EQ.pcat_svc.pcat.id" VALUE="$args.QBE.EQ.pcat_svc.pcat.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.isscat_svc.isscat.id" != "">
+    document.write('<INPUT TYPE="hidden" NAME="QBE.EQ.isscat_svc.isscat.id" VALUE="$args.QBE.EQ.isscat_svc.isscat.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.chgcat_svc.chgcat.id" != "">
+    document.write('<INPUT TYPE="hidden" NAME="QBE.EQ.chgcat_svc.chgcat.id" VALUE="$args.QBE.EQ.chgcat_svc.chgcat.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Kalendarz" attr=sym size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No workshifts found";
+var msgFound1 = "1 workshift found";
+var msgFound = "%1 workshifts found";
+var msgFoundMore = "%1 workshifts found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired workshift";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kalendarz" attr=sym exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_wrkshft.htmpl ASPEN.3 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

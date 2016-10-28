@@ -1,0 +1,96 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a single target time template
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Service Target Template Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Update Service Target Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Service Target Template ${args.COMMON_NAME}"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+function copy_from_parent() {}
+function unloadActions() {
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<PDM_IF "$args.object_type" == "">
+    <script type="text/javascript">
+    
+<PDM_MACRO name=dtlForm button=false factory="tgt_time_tpl">
+    _dtl.backfillReq = false;
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Continue" func="detailSave()" hotkey_name="Continue" id="btn001">
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" id="btncncl">
+<PDM_MACRO name=button caption="Reset[r]" func="pdm_reset()" hotkey_name="Reset[r]" id="btn004">
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+    docWriteln("<input type='hidden' name=\"REFRESH_AND_STAY_EDIT\" value=\"1\">");
+	
+<PDM_MACRO name=dtlStartRow>
+    detailDropdown("Object Type", "object_type","macro", 1, 20, "1", "", "$args.object_type",
+	                "no", "", "$args.object_type", "", "", "no", "","0","",
+		       "Request/Incident/Problem", "cr",
+		       "Change Order", "chg",
+		       "Issue", "iss");
+	
+<PDM_MACRO name=dtlEndTable>
+    </script>
+<PDM_ELSE>
+    <script type="text/javascript">
+    
+<PDM_MACRO name=dtlForm factory="tgt_time_tpl">
+<PDM_MACRO name=dtlStart>
+    docWriteln("<input type='hidden' name=\"REFRESH_AND_STAY_EDIT\" value=\"0\">");
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr="sym">
+<PDM_IF "$args.object_type" == "cr">
+	    detailTextboxReadonly("Object Type","object_type",1,"Request/Incident/Problem", "");
+    
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Typ obiektu" attr="object_type" link=no>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Docelowy czas trwania" attr="target_duration">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Kalendarz" attr="work_shift">
+<PDM_MACRO name=dtlTextbox hdr="Koszt" attr="cost">
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Warunek" attr="condition" extraurl="ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND') AND (ob_type='$args.object_type')+KEEP.ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND') AND (ob_type='$args.object_type')">
+<PDM_MACRO name=dtlDropdown hdr="Wymagany rezultat" attr="condition_outcome" lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Allow Set Actual" attr="set_actual" off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Allow Reset Actual" attr="reset_actual" off="No" on="Yes">
+<PDM_MACRO name=dtlEndTable>
+    </script>
+	
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=startNotebook hdr=sdsc_nb>
+<PDM_MACRO name=TAB title="Service Types" height=300 id=sdsc src="OP=SEARCH+FACTORY=sdsc+QBE.EQ.tgttpls.tgt_time_tpl.id=$args.id" tooltip="Service_Type">
+<PDM_MACRO name=endNotebook>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

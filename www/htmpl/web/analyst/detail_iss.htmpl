@@ -1,0 +1,433 @@
+<PDM_IF 0>
+detail_iss.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Issue
+INTENT:
+    Display the detail info for the Issue
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  iss  args	The Issue object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm
+/opt/CApdm/bopcfg/majic/writer.maj:OBJECT iss {.maj for the
+                        definition of attributes for 'OBJECT iss'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "$args.ref_num Issue Detail";
+var hdrTitleUpd = "$args.ref_num Update Issue";
+var hdrTitleNew = "Create New Issue $args.ref_num";
+var hdrTitleTempl = '$args.ref_num Issue Template <PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT> Detail';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var argHumantouchLog = "$args.KEEP.humantouch_log";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argRefNum = "$args.ref_num";
+var argID = "$args.id";
+var argActive = "$args.active";
+var rptName = new Array("issuesum.rpt", "issuedtl.rpt");
+var argSearchSqlClause = "Issue.id = $args.id";
+var formEnduser = new Array("main_form","requestor");
+var prop_ref = "${prop_ref:}";
+var propSearchConfig="$prop.SD_SEARCH_CONFIG_ISS";
+var cawf_procid = "$args.cawf_procid";
+var cawf_defid = "";
+var argDescription = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.description</PDM_FMT>';
+var argSummary = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.summary</PDM_FMT>';
+var cfgCheckAgtInAreaDef = "$env.NX_CHECK_ASSIGNEE_IN_AREA_DEFAULTS";
+var new_attmnts = new Array();
+
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=iss_trans transTrigger=1>
+
+</script>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/change_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/timer.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attevts.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/track_asset.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/wf_visible.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_reply.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+var w_name = get_popup_window_name("ci_window");
+var loadFilterArr=new Array();
+
+function get_find_similar_text()
+{
+	var text;
+	if ( _dtl.edit ) 
+	{
+		text = document.main_form.elements["SET.summary"].value + " " +
+				document.main_form.elements["SET.description"].value;
+	}
+	else
+	{
+		text = argSummary + " " +  argDescription;
+	}
+	return text;
+}
+
+// If it's readonly, we need to set values in loadFilterArr before calling 
+// loadActions(), because the search page in the Knowledge tab that uses this 
+// array to copy values could come up before loadActions() is called.    
+	if (typeof edit_form == "number" && edit_form == 0)
+	{
+	loadFilterArr["summary"]=<PDM_FMT ESC_STYLE=C>"$args.summary"</PDM_FMT>;
+	loadFilterArr["description"]=<PDM_FMT ESC_STYLE=C>"$args.description"</PDM_FMT>;
+	loadFilterArr["severity"]="$args.severity";
+	loadFilterArr["impact"]="$args.impact";
+	loadFilterArr["urgency"]="$args.urgency";
+	loadFilterArr["priority"]="$args.priority";
+	loadFilterArr["category"]=<PDM_FMT ESC_STYLE=C>"$args.category.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["category_relAttr"]="$args.category.REL_ATTR";
+	loadFilterArr["rootcause"]=<PDM_FMT ESC_STYLE=C>"$args.rootcause.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["rootcause_id"]="$args.rootcause";
+	loadFilterArr["product"]=<PDM_FMT ESC_STYLE=C>"$args.product.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["product_id"]="$args.product";
+	loadFilterArr["affected_resource_id"]="$args.asset.0.id";
+	}
+
+
+function loadActions()
+{
+   if ( _dtl.edit ) {
+      save_initial_vals();
+       <PDM_LIST PREFIX=list WHERE="delete_flag = 0" FACTORY=ctimer>
+            addctimer("$list.threshold", "$list.color", $list.beep, "$list.text");
+            <PDM_IF "$list.beep" == "1">
+               <PDM_SET args.needs_beep=1>
+            </PDM_IF>
+      </PDM_LIST>
+		if ('$args.KEEP.use_kd_values_fromahdtop' == '1' && "0" == "$args.id")
+		{
+			//This code used when creating a request from a link that was created by the HTML Editor. SDT 32942
+			ahdframe.detailExtUpdate (ahdtop.KDValuesToUse);
+			ahdtop.KDValuesToUse = null;
+		}      
+      StartTheTimer("main_form","timer");
+      loadFilterArray();
+      //
+      //CI ID is passed using loadFilterArr as it is not an attribute of the issue object
+      loadFilterArr["affected_resource_id"]="$args.asset.0.id";      
+   }
+   
+   // SDT 22046 get around IE 5.5 problem by delaying call
+    if ( _dtl.edit ) {
+		load_from_scratchpad("$args.id", "$args.KEEP.FROM_PROF_BRWS");
+	}
+		   if (  _dtl.edit && "$args.id" == 0  ) {
+      backfill_cnt_event();
+   }
+
+   alert_banner("$args.requestor");
+}
+
+var alert_banner_last="";
+var alert_banner_obj="iss";
+var alert_banner_attr="requestor";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+   cancel_any_lrel_update();
+}
+
+//holdHTMLText();
+var aff_cnt_value = "";
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type, tenant, tenantName )
+{
+  var cat_related_cnt = 0;
+  if ( typeof base_name != "string" ) {
+      form_name = "main_form";
+      base_name = "requestor";
+      caller_type = "";
+   }
+   if ( base_name == "requestor" ) {
+      var f = document.main_form;
+      if ( typeof f == "object" &&
+           typeof f.affected_contact_combo_name == "object" &&
+           typeof f.requestor_combo_name == "object" &&
+           ( f.affected_contact_combo_name.value == aff_cnt_value ||
+             f.affected_contact_combo_name.value == "" ) ) {
+         aff_cnt_value = f.requestor_combo_name.value; 
+         f.affected_contact_combo_name.value = aff_cnt_value;
+         f.affected_contact_fname.value = f.requestor_fname.value;
+         f.affected_contact_mname.value = f.requestor_mname.value;
+         f.affected_contact_lname.value = f.requestor_lname.value;
+         f.elements["SET.affected_contact"].value = f.elements["SET.requestor"].value;
+         f.elements["KEY.affected_contact"].value = f.elements["KEY.requestor"].value;
+	 cat_related_cnt = 1;
+         if ( f.elements["SET.requestor"].value != "" ) {
+            alert_banner(f.elements["SET.requestor"].value);
+         }
+         if ( typeof tenant == "string" && tenant.length > 0 )
+           detailSetTenant( "affected_contact", tenant, tenantName ); 
+         else if ( typeof _dtl.tenantImplyingFields == "object" ) {
+           detailSetTenant( "requestor", "", "" );
+           detailSetTenant( "affected_contact", "", "" );
+         }
+      }
+   }
+   if(base_name == "requestor") {
+	cat_related_cnt = 1;
+   	if(typeof cntID!="undefined" && cntID.length > 0) alert_banner(cntID);
+   }
+   if (_dtl.edit && !_dtl.skip_agt_check)
+   {
+	var f = void(0);
+	var r = form_name.match(/main_form([0-9]*)/);
+	if ( r != null ) {
+	    if ( r[1].length == 0 )
+		f = _dtl.form[0];
+	    else
+		f = _dtl.form[r[1]-0];
+	}
+	detailAgtCheck(f, base_name, cntID, prop_ref);
+   }
+   detailCntBackfill( form_name, base_name, lname, fname, mname,
+                      cntID, caller_type );
+                      
+    if (cat_related_cnt && typeof cancel_cnt_lookup == "integer") 
+	cancel_cnt_lookup = 0;
+    // Contract enforcement:                  
+    if (ahdtop.cfgNX_CLASSIC_SLA_PROCESSING != 'Yes' &&
+	cat_related_cnt && typeof cntID != "undefined" && cntID.length > 1) 
+    {
+        upd_workframe("GET_SVC_CONTRACT", "new_customer=cnt:" + cntID,
+			  "func=parent.ahdframe.get_svc_callback");
+    }
+}
+
+function reset_field(target, newvalue ) { 
+	
+	// Reset a field on the main form to the newvalue passed in
+	if ( typeof document.main_form.elements[target]  == "object" ) {   
+		
+		if ( typeof newvalue == "undefined")  
+			document.main_form.elements[target].value = "";
+		else
+			document.main_form.elements[target].value = newvalue;
+			
+		detailClearSetField(document.main_form.elements[target]);
+	}
+ }
+ 
+function copy_from_iss()
+{
+    if ("$args.KEEP.MAKE_COPY" == "1")
+    {
+	var exceptions = new Array();
+	exceptions[0] = "SET.affected_contact";
+	exceptions[0] = "SET.requestor";
+	detailCopyEditForm(exceptions);
+    }
+}
+</script>
+</head>
+<body class="detailro" onload="loadActions()" onunload="unloadActions()">
+
+<PDM_IF "$args.needs_beep" == "1" && "$prop.form_name_3" == "edit">
+<embed src="/CAisd/img/beep.wav" autostart="false" style="display:none" width="0" height="0" id="beep" name='beep' enablejavascript="true">
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_body.htmpl >
+<center>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=iss>
+<PDM_IF "$prop.form_name_3" == "edit">
+if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SEARCH_ENGINE" ) {
+	//Add the find similar button
+        
+<PDM_MACRO name=button caption="Find Similar" func="find_similar_tickets('iss')" hotkey_name="Find Similar" id=FIND_SIMILAR tooltip="Find Similar">
+} 
+<PDM_MACRO name=button caption="Quick Profile[Q]" disabled=yes func="if ( document.main_form['SET.requestor'].value != '' ) edit_profile_browser('id', document.main_form['SET.requestor'].value); else edit_profile_browser('combo_name', document.main_form['requestor_combo_name'].value)" hotkey_name="Quick Profile[Q]" id=PROFILE_BROWSER>
+<PDM_ELSE>
+<PDM_IF "$args.category" != "" >
+<PDM_IF "$args.category.auto_assign" == "1" || "$args.category.auto_assign" == "2">
+<PDM_MACRO name=button caption="Re Auto Assign" func="re_auto_assign('$args.assignee','$args.group','$args.customer','$args.category','$args.auto_assign','$args.persistent_id','$args.affected_resource','$args.category.auto_assign')" hotkey_name="Re Auto Assign" id=btn010>
+</PDM_IF>
+</PDM_IF>
+if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SEARCH_ENGINE" ) {
+	//Add the find similar button
+        
+<PDM_MACRO name=button caption="Find Similar" func="find_similar_tickets('iss')" hotkey_name="Find Similar" id=FIND_SIMILAR tooltip="Find Similar">
+}           
+<PDM_MACRO name=button caption="Quick Profile[Q]" func="profile_browser('$args.requestor.persistent_id',void(0),void(0),'$args.persistent_id')" hotkey_name="Quick Profile[Q]" id=PROFILE_BROWSER>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=button caption="Use Template[*Q]" func="apply_template('frm001', 'SET.requestor', 'iss')" hotkey_name="Use Template[*Q]" id=btn010>
+</PDM_IF>
+startDetail("", 1);
+
+<PDM_IF "$prop.form_name_3" == "edit">
+</script>
+<input type="hidden" name="change_category" value="0">
+<input type="hidden" name="SET.call_back_flag" value="$args.call_back_flag" id="SET.call_back_flag">
+<input type="hidden" name="NEW_ATTMNTS" id="NEW_ATTMNTS">
+<script type="text/javascript">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Dotknięty użytkownik" attr=requestor>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja" attr=category autofill=no evt="onChange=\\\"change_category_func('iss',null,'isscat')\\\"">
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=status>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+<PDM_MACRO name=dtlDropdown hdr="Produkt" attr=product link=no>
+<PDM_MACRO name=dtlStartExpRow label="Detail" colspan=5 exp_rows="1,2,3" form_name="detail_iss">
+<PDM_MACRO name=dtlReadonly hdr="Organizacja" attr=requestor.organization>
+<PDM_MACRO name=dtlReadonly hdr="Pozycja" attr=requestor.position>
+<PDM_MACRO name=dtlDropdown hdr="Rola użytkownika końcowego" attr=person_contacting link=no>
+<PDM_MACRO name=dtlDateReadonly hdr="On" attr=open_date>
+<PDM_MACRO name=dtlDropdown hdr="Powód" attr=type_of_contact link=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Metoda raportowania" attr=reporting_method link=no>
+<PDM_IF "$env.NX_REQUIRE_ISSUE_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=assignee evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_IF "$env.NX_REQUIRE_ISSUE_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Service #" attr=service_num>
+<PDM_MACRO name=dtlDate hdr="Service Date" attr=service_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data wymagalności" attr=need_by>
+var cbDateCheck = 0;
+if ( _dtl.edit)
+    cbDateCheck = 1;
+    
+if ( "$args.call_back_date_INT_DATE" != "" || ! _dtl.edit ) {
+   
+<PDM_MACRO name=dtlDate hdr="Data/Czas odwołania" attr=call_back_date>
+}
+else {
+   detailDateDropdown("Call Back Date/Time", "call_back_date", 1, 20,
+                      "$args.REQUIRED_call_back_date",
+                      "SET.call_back_flag",
+                      86400, msgtext("In_one_day"),   // In one day
+                      172800, msgtext("In_two_days"),  // In two days
+                      604800, msgtext("In_one_week")); // In one week
+}
+
+<PDM_MACRO name=dtlHier hdr="Przyczyna źródłowa" attr=rootcause evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+<PDM_MACRO name=dtlTextbox hdr="Zgłoszenie w systemie zewnętrznym" attr=external_system_ticket colspan=2 keeptags=yes>
+<PDM_MACRO name=dtlStartExpRow label="Summary Information" colspan=5 exp_rows="1,2,3" form_name="detail_iss"> 
+
+if(propSearchConfig.indexOf("summary*") > -1) 
+{
+	
+<PDM_MACRO name=dtlTextbox hdr="Issue Summary" attr=summary colspan=3 keeplinks=yes size=120 spellchk=no srchknow=yes>
+} else {
+	
+<PDM_MACRO name=dtlTextbox hdr="Issue Summary" attr=summary colspan=3 keeplinks=yes size=120 spellchk=no srchknow=no>
+}
+if ( _dtl.edit ) {
+   detailRowHdr("Timer");
+   detailSetRowData("<input type=text " + detailNextID() +
+                    " name='timer' value='' size=8 readonly " + 
+		    "title=\"Timer\">");
+}
+
+<PDM_MACRO name=dtlStartRow>
+if(propSearchConfig.indexOf("description*") > -1) 
+{
+	
+<PDM_MACRO name=dtlTextbox hdr="Issue Description" attr=description colspan=4 keeplinks=yes rows=4 size=120 spellchk=no srchknow=yes>
+} else {
+	
+<PDM_MACRO name=dtlTextbox hdr="Issue Description" attr=description colspan=4 keeplinks=yes rows=4 size=120 spellchk=no srchknow=no>
+}
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data otwarcia" attr=open_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rozwiązania" attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zamknięcia" attr=close_date>
+	   
+</script>
+
+<!-- Must in in the main_form form -->
+<input type="hidden" name="catg_cawf_defid" value="" size="20">
+
+<script type="text/javascript">
+
+detailEndTable();
+</script>
+
+<PDM_MACRO name=startNotebook hdr=iss_nb>
+<PDM_MACRO name=startTabGroup title="Additional Information">
+<PDM_MACRO name=TAB title="Properties" file="xx_prop_tab.htmpl">
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=TAB title="Attachments" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=iss+PERSID=$args.persistent_id+NO_DP=yes">
+<PDM_ELSE>
+<PDM_MACRO name=TAB title="Attachments" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=iss+PERSID=$args.persistent_id+SDBP_FLAG=1">
+</PDM_IF>
+<PDM_IF $ProductID != "htcs">
+<PDM_MACRO name=TAB title="Service Type" file="xx_stype_tab.htmpl" id=stype>
+<PDM_MACRO name=TAB title="Time/Cost" file="xx_candp_tab.htmpl">
+<PDM_ELSE>
+<PDM_MACRO name=TAB title="Time/Cost" file="xx_candp_tab.htmpl">
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit" || "$args.template_name" != "">
+<PDM_MACRO name=TAB title="Template" file="xx_template_tab.htmpl" filename=issue>
+</PDM_IF>
+<PDM_MACRO name=TAB title="Resolution" file="iss_resol_tab.htmpl" id=resol>
+<PDM_MACRO name=TAB title="Custom Fields" file="iss_custfld_tab.htmpl">
+<PDM_MACRO name=startTabGroup title="Logs">
+<PDM_IF "$prop.view_internal" == "0">
+<PDM_MACRO name=TAB title="Activities" height=300 id=alg src="OP=SEARCH+FACTORY=issalg+QBE.EQ.issue_id=$args.persistent_id+QBE.EQ.internal=0">
+<PDM_ELSE>
+<PDM_MACRO name=TAB title="Activities" height=300 id=alg src="OP=SEARCH+FACTORY=issalg+QBE.EQ.issue_id=$args.persistent_id">
+</PDM_IF>
+<PDM_MACRO name=TAB title="Event Log" height=300 src="OP=SEARCH+FACTORY=event_log+QBE.EQ.sd_obj_type=iss+QBE.EQ.sd_obj_id=$dob.id">
+<PDM_MACRO name=TAB title="Support Automation" height=300 src="OP=SEARCH+FACTORY=sa_event_history+QBE.EQ.sd_obj_id=$args.id+QBE.EQ.sd_obj_type=iss">
+<PDM_MACRO name=startTabGroup title="Knowledge Management">
+<PDM_MACRO name=TAB title="Knowledge" height=300 id=tabKnowledge src="OP=SEARCH+FACTORY=KD+KEEP.SD_LAUNCHED=$args.persistent_id+KEEP.DISPLAY_FROM=iss+KEEP.search_type=ticket+KEEP.tenantWc=buildWc+KEEP.backfill_field=None">
+<PDM_MACRO name=TAB title="Solutions" file="xx_solnalg_tab.htmpl" id=soln>
+<PDM_MACRO name=startTabGroup title="Relationships">
+<PDM_IF "$ProductID" != "htcs">
+<PDM_IF "$args.cawf_procid" != "">
+<PDM_MACRO name=TAB title="Workflow Tasks" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.CAWorkflow+ARG0=getWorkflowInstance+ARG1=+ARG2=$args.category.cawf_defid+ARG3=$args.cawf_procid+ARG4=1+ARG5=1+HTMPL=workitems.htmpl">
+<PDM_ELIF "$args.caextwf_instance_id" != "">
+<PDM_MACRO name=TAB title="Workflow Tasks" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.ItpamWorkflow+ARG0=getProcessInstanceLogs+ARG1=+ARG2=$args.caextwf_instance_id.instance_id+ARG3=1+OBJID=$args.caextwf_instance_id+END_DATE=$args.caextwf_instance_id.endtime+HTMPL=wfITPAMinstance.htmpl">
+<PDM_ELSE>
+<PDM_MACRO name=TAB title="Workflow Tasks" file="xx_wf_tab.htmpl">
+</PDM_IF>
+<PDM_MACRO name=TAB title="Config. Items" height=400 id=issnr src="OP=SEARCH+FACTORY=nr+QBE.EQ.issnr.iss.id=$args.wc_dob_id+KEEP.issnr_iss_id=$args.wc_dob_id+KEEP.forCiTab=1+KEEP.TKT_PERSID=$args.persistent_id+KEEP.parentFac=$prop.factory+KEEP.assetCount=$args.asset.length">
+</PDM_IF>
+<PDM_MACRO name=TAB title="Related Issues" file="iss_reliss_tab.htmpl" id=rel>
+<PDM_MACRO name=endNotebook>
+
+
+<!-- must be in the main form-->
+<input type="hidden" name="category_contract" value="$args.category.owning_contract">
+<input type="hidden" name="user_contract" value="$args.requestor.organization.owning_contract">
+<input type="hidden" name="org_id" value="$args.requestor.organization.id">
+
+<script type="text/javascript">
+endDetail();
+</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_iss.htmpl ASPEN.17 2012/03/01 19:26:45 mahni01 Exp $
+</PDM_IF>
+<PDM_WSP>

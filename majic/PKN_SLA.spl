@@ -1,0 +1,820 @@
+#define MAXSVCTPL 10
+
+void cr.zsdsc::site_set_sla(...)
+{
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+	
+	object top;
+	top = top_object();
+	
+    string method;
+    method = "cr.zsdsc::site_set_sla";
+    logf(TRACE,"%s: Started for %s", method, (string)argv[3]);
+	
+	string old_sdsc_persid, new_sdsc_persid, wc;
+	object gl, slalist;
+	int sdsclenght, slalenght;
+	old_sdsc_persid = argv[2];
+	new_sdsc_persid = argv[3];
+	send_wait(0, top_object(), "get_co_group");
+    gl = msg[0];
+	
+	if (!is_empty(old_sdsc_persid) ) {
+		send_wait( 0, top_object(), "call_attr", "sdsc", "dob_by_persid", NULL, old_sdsc_persid, NULL, NULL );
+		if ( msg_error() ) {
+			logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+			return;
+		}
+		object old_sdsc;
+		old_sdsc = msg[0];
+		logf(MILESTONE, "%s: zsdsc %s removed", method, (string)old_sdsc);
+		object sladob;
+			
+		wc = format(" map_sdsc='%s' AND _mapped_cr = '%s'", old_sdsc.persistent_id, persistent_id);
+		logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+		send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+		slalist = msg[0];
+		slalenght =  msg[1];
+		if (slalenght <= 0) {
+			logf(ERROR, "%s: Attached SLA for SDSC %s unique not found", method, old_sdsc);
+		} else {
+			logf(TRACE, "%s: got list of %d old Attached SLAs", method, slalenght);
+			for(k = 0; k < slalenght; k++)
+			{
+				send_wait( 0, slalist, "dob_by_index", "DEFAULT", k, k );
+				sladob = msg[0];
+				send_wait(0, gl, "checkout", sladob);
+				if (msg_error()) {
+					logf(ERROR, "%s: cannot checkout old attached_sla: %s", method, msg[0]);
+					return;
+				}
+				logf(TRACE, "%s: checkout ok", method);
+				send_wait(0, sladob, "dob_mark_delete");
+				if (msg_error()) {
+					logf(ERROR, "%s: cannot delete old attached_sla: %s", method, msg[0]);
+					return;
+				}
+				logf(TRACE, "%s: dob_mark_delete ok", method);
+				send_wait(0, gl, "checkin");
+				if (msg_error()) {
+					logf(ERROR, "%s: cannot save deletion: %s", method, msg[0]);
+					send_wait(0, lobj0, "uncheck");
+					return;
+				} else {
+					logf(TRACE, "%s: old attached sla and events deleted", method);
+				}
+			}
+		}
+	}
+	if (is_empty(new_sdsc_persid) ) {
+        logf(MILESTONE, "%s: No new zsdsc, leaving", method);
+        return;
+    } else {
+		send_wait( 0, top_object(), "call_attr", "sdsc", "dob_by_persid", NULL, new_sdsc_persid, NULL, NULL );
+		if ( msg_error() ) {
+			logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+			return;
+		}
+		object new_sdsc;
+		new_sdsc = msg[0];
+		int sltlen, iLoop;
+		string tplpid;
+		object q[MAXSVCTPL];
+		sltlen = new_sdsc.cr_sla_templates.length;
+		logf(TRACE, "%s: SLT has %d events", method, sltlen);
+		if (sltlen > MAXSVCTPL) {
+			logf(ERROR, "%s: More than %d events for SVC SLA is not supported", method, MAXSVCTPL);
+			sltlen = MAXSVCTPL;
+		}   
+		logf(TRACE, "%s: Allocating slatpl objects", method);
+		for( iLoop = 0 ; iLoop < sltlen ; iLoop++ ) {
+			send_wait(0, new_sdsc, "call_attr", format("cr_sla_templates.%d.persistent_id",iLoop), "get_val");
+			if (msg_error()) {
+				logf(ERROR, "%s: error in get_val: %s", method, msg[0]);
+				continue;
+			}
+			tplpid = msg[0];
+			logf(TRACE, "%s: template %d persid='%s'", method, iLoop, tplpid);
+			send_wait(0, top_object(), "call_attr", "slatpl", "dob_by_persid", 0, tplpid, NULL, NULL);
+			if (msg_error()) {
+				logf(ERROR, "%s: error in dob_by_persid: %s", method, msg[0]);
+				continue;
+			}
+			q[iLoop] = msg[0];
+			logf(TRACE, "%s: object %d allocated event: %s", method, iLoop, q[iLoop]);
+		}        
+		if ( sltlen == 0 ) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0 );
+		} else if (sltlen == 1) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0] );
+		} else if (sltlen == 2) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1] );
+		} else if (sltlen == 3) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2] );
+		} else if (sltlen == 4) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3] );
+		} else if (sltlen == 5) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4] );
+		} else if (sltlen == 6) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5] );
+		} else if (sltlen == 7) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6] );
+		} else if (sltlen == 8) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7] );
+		} else if (sltlen == 9) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8] );
+		} else if (sltlen == 10) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8],q[9] );
+		}
+		if (msg_error()) {
+			logf(ERROR, "%s: attached_sla.add_ast failed: %s", method, msg[0]);
+			return;
+		}
+		logf(TRACE, "%s: add_ast ok", method);
+		send_wait(0, gl, "checkin");
+	}
+}
+
+void cr.zsla::site_set_sla(...)
+{
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+	
+	object top;
+	top = top_object();
+	
+    string method;
+    method = "cr.zsla::site_set_sla";
+    logf(TRACE,"%s: Started for %s", method, (string)argv[3]);
+	
+	string old_sla, new_sla, wc;
+	object gl, sdsclist, sdsc, slalist;
+	int sdsclenght, slalenght;
+	old_sla = (string)argv[2];
+	new_sla = (string)argv[3];
+	send_wait(0, top_object(), "get_co_group");
+    gl = msg[0];
+	
+	if (!is_empty(old_sla) ) {
+		logf(MILESTONE, "%s: zSLA %s removed", method, old_sla);
+		send_wait( 0, top_object(), "call_attr", "sdsc", "sync_fetch", "MLIST_STATIC", format("zsla=%d",(int)old_sla), -1, 0 );
+		if ( msg_error() ) {
+            logf(ERROR, "%s: Search for old sdsc failed: %s", method, msg[0]);
+            return;
+        }
+        sdsclist = msg[0];
+		sdsclenght=msg[1];
+        logf(TRACE, "%s: got list of %d old sdscs", method, sdsclenght);
+		if (sdsclenght > 0)
+		{
+			object sladob;
+			for(j = 0; j < sdsclenght; j++)
+			{
+				send_wait(0, sdsclist, "dob_by_index", "DEFAULT", j, j);
+				if(msg_error())
+				{
+					logf( ERROR, "%s: Error on dob_by_index for sdsclist: '%s'", method, msg[0] );
+					return;
+				}
+				
+				sdsc = msg[0];
+				wc = format(" map_sdsc='%s' AND _mapped_cr = '%s'", sdsc.persistent_id, persistent_id);
+				logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+				send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+				slalist = msg[0];
+				slalenght =  msg[1];
+				if (slalenght <= 0) {
+					logf(ERROR, "%s: Attached SLA for SDSC %s unique not found", method, sdsc);
+				} else {
+					logf(TRACE, "%s: got list of %d old Attached SLAs", method, slalenght);
+					for(k = 0; k < slalenght; k++)
+					{
+						send_wait( 0, slalist, "dob_by_index", "DEFAULT", k, k );
+						sladob = msg[0];
+						send_wait(0, gl, "checkout", sladob);
+						if (msg_error()) {
+							logf(ERROR, "%s: cannot checkout old attached_sla: %s", method, msg[0]);
+							return;
+						}
+						logf(TRACE, "%s: checkout ok", method);
+						send_wait(0, sladob, "dob_mark_delete");
+						if (msg_error()) {
+							logf(ERROR, "%s: cannot delete old attached_sla: %s", method, msg[0]);
+							return;
+						}
+						logf(TRACE, "%s: dob_mark_delete ok", method);
+						send_wait(0, gl, "checkin");
+						if (msg_error()) {
+							logf(ERROR, "%s: cannot save deletion: %s", method, msg[0]);
+							send_wait(0, lobj0, "uncheck");
+							return;
+						} else {
+							logf(TRACE, "%s: old attached sla and events deleted", method);
+						}
+					}
+				}
+			}
+		
+		}
+	}
+	if (is_empty(new_sla) ) {
+        logf(MILESTONE, "%s: No new zSLA, leaving", method);
+        return;
+    } else {
+		send_wait( 0, top_object(), "call_attr", "sdsc", "sync_fetch", "MLIST_STATIC", format("zsla=%d",(int)new_sla), -1, 0 );
+		if ( msg_error() ) {
+            logf(ERROR, "%s: Search for sdsc failed: %s", method, msg[0]);
+            return;
+        }
+        sdsclist = msg[0];
+		sdsclenght=msg[1];
+        logf(TRACE, "%s: got list of %d sdscs", method, sdsclenght);
+		if (sdsclenght > 0)
+		{
+			for(j = 0; j < sdsclenght; j++)
+			{
+				send_wait(0, sdsclist, "dob_by_index", "DEFAULT", j, j);
+				if(msg_error())
+				{
+					logf( ERROR, "%s: Error on dob_by_index for sdsclist: '%s'", method, msg[0] );
+					return;
+				}
+				
+				sdsc = msg[0];
+				int sltlen, iLoop;
+				string tplpid;
+				object q[MAXSVCTPL];
+				sltlen = sdsc.cr_sla_templates.length;
+				logf(TRACE, "%s: SLT has %d events", method, sltlen);
+				if (sltlen > MAXSVCTPL) {
+					logf(ERROR, "%s: More than %d events for SVC SLA is not supported", method, MAXSVCTPL);
+					sltlen = MAXSVCTPL;
+				}   
+				logf(TRACE, "%s: Allocating slatpl objects", method);
+				for( iLoop = 0 ; iLoop < sltlen ; iLoop++ ) {
+					send_wait(0, sdsc, "call_attr", format("cr_sla_templates.%d.persistent_id",iLoop), "get_val");
+					if (msg_error()) {
+						logf(ERROR, "%s: error in get_val: %s", method, msg[0]);
+						continue;
+					}
+					tplpid = msg[0];
+					logf(TRACE, "%s: template %d persid='%s'", method, iLoop, tplpid);
+					send_wait(0, top_object(), "call_attr", "slatpl", "dob_by_persid", 0, tplpid, NULL, NULL);
+					if (msg_error()) {
+						logf(ERROR, "%s: error in dob_by_persid: %s", method, msg[0]);
+						continue;
+					}
+					q[iLoop] = msg[0];
+					logf(TRACE, "%s: object %d allocated event: %s", method, iLoop, q[iLoop]);
+				}        
+				if ( sltlen == 0 ) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0 );
+				} else if (sltlen == 1) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0] );
+				} else if (sltlen == 2) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1] );
+				} else if (sltlen == 3) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2] );
+		//			logf(TRACE, "%d add_asts persistent_id: %s sdsc.id: %s gl: %s q[0]: %s q[1]: %s q[2]: %s", sltlen, persistent_id, sdsc.id, gl, q[0],q[1],q[2]);
+				} else if (sltlen == 4) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3] );
+				} else if (sltlen == 5) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4] );
+				} else if (sltlen == 6) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5] );
+				} else if (sltlen == 7) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6] );
+				} else if (sltlen == 8) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7] );
+				} else if (sltlen == 9) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8] );
+				} else if (sltlen == 10) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8],q[9] );
+				}
+				if (msg_error()) {
+					logf(ERROR, "%s: attached_sla.add_ast failed: %s", method, msg[0]);
+					return;
+				}
+				logf(TRACE, "%s: add_ast ok", method);
+				send_wait(0, gl, "checkin");
+			}
+		}
+	}
+}
+
+test( ... )
+{
+	string new_sla, sdsclist;
+	new_sla = "400003";
+	string wc;
+	wc = format(" map_sdsc='%s' AND _mapped_cr = '%s'", "sdsc:400001", "cr:400026");
+				logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc);
+	send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "MLIST_STATIC", wc, -1, 0 );
+	slalist = msg[0];
+	logf(TRACE, "%s: got list of %d attached_sla", method, msg[1]);
+}
+
+void cr.zfzsdsc::site_set_sla(...)
+{
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+	
+	object top;
+	top = top_object();
+	
+    string method;
+    method = "cr.zfzsdsc::site_set_sla";
+    logf(TRACE,"%s: Started for %s", method, (string)argv[3]);
+	
+	string old_sdsc_persid, new_sdsc_persid, wc;
+	object gl, slalist;
+	object sladob;
+	int sdsclenght, slalenght;
+	old_sdsc_persid = argv[2];
+	new_sdsc_persid = argv[3];
+	send_wait(0, top_object(), "get_co_group");
+    gl = msg[0];
+	
+	if (!is_empty(old_sdsc_persid) ) {
+		send_wait( 0, top_object(), "call_attr", "sdsc", "dob_by_persid", NULL, old_sdsc_persid, NULL, NULL );
+		if ( msg_error() ) {
+			logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+			return;
+		}
+		object old_sdsc;
+		old_sdsc = msg[0];
+		logf(MILESTONE, "%s: zsdsc %s removed", method, (string)old_sdsc);
+		
+			
+		wc = format(" map_sdsc='%s' AND _mapped_cr = '%s'", old_sdsc.persistent_id, persistent_id);
+		logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+		send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+		slalist = msg[0];
+		slalenght =  msg[1];
+		if (slalenght <= 0) {
+			logf(ERROR, "%s: Attached SLA for SDSC %s unique not found", method, old_sdsc);
+		} else {
+			logf(TRACE, "%s: got list of %d old Attached SLAs", method, slalenght);
+			for(k = 0; k < slalenght; k++)
+			{
+				send_wait( 0, slalist, "dob_by_index", "DEFAULT", k, k );
+				sladob = msg[0];
+				send_wait(0, gl, "checkout", sladob);
+				if (msg_error()) {
+					logf(ERROR, "%s: cannot checkout old attached_sla: %s", method, msg[0]);
+					return;
+				}
+				logf(TRACE, "%s: checkout ok", method);
+				send_wait(0, sladob, "dob_mark_delete");
+				if (msg_error()) {
+					logf(ERROR, "%s: cannot delete old attached_sla: %s", method, msg[0]);
+					return;
+				}
+				logf(TRACE, "%s: dob_mark_delete ok", method);
+				send_wait(0, gl, "checkin");
+				if (msg_error()) {
+					logf(ERROR, "%s: cannot save deletion: %s", method, msg[0]);
+					send_wait(0, lobj0, "uncheck");
+					return;
+				} else {
+					logf(TRACE, "%s: old attached sla and events deleted", method);
+				}
+			}
+		}
+	}
+	if (is_empty(new_sdsc_persid) ) {
+        logf(MILESTONE, "%s: No new zfsdsc, leaving", method);
+        return;
+    } else {
+		send_wait( 0, top_object(), "call_attr", "sdsc", "dob_by_persid", NULL, new_sdsc_persid, NULL, NULL );
+		if ( msg_error() ) {
+			logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+			return;
+		}
+		object new_sdsc;
+		new_sdsc = msg[0];
+		int sltlen, iLoop;
+		string tplpid;
+		object q[MAXSVCTPL];
+		sltlen = new_sdsc.cr_sla_templates.length;
+		logf(TRACE, "%s: SLT has %d events", method, sltlen);
+		if (sltlen > MAXSVCTPL) {
+			logf(ERROR, "%s: More than %d events for SVC SLA is not supported", method, MAXSVCTPL);
+			sltlen = MAXSVCTPL;
+		}   
+		logf(TRACE, "%s: Allocating slatpl objects", method);
+		for( iLoop = 0 ; iLoop < sltlen ; iLoop++ ) {
+			send_wait(0, new_sdsc, "call_attr", format("cr_sla_templates.%d.persistent_id",iLoop), "get_val");
+			if (msg_error()) {
+				logf(ERROR, "%s: error in get_val: %s", method, msg[0]);
+				continue;
+			}
+			tplpid = msg[0];
+			logf(TRACE, "%s: template %d persid='%s'", method, iLoop, tplpid);
+			send_wait(0, top_object(), "call_attr", "slatpl", "dob_by_persid", 0, tplpid, NULL, NULL);
+			if (msg_error()) {
+				logf(ERROR, "%s: error in dob_by_persid: %s", method, msg[0]);
+				continue;
+			}
+			q[iLoop] = msg[0];
+			logf(TRACE, "%s: object %d allocated event: %s", method, iLoop, q[iLoop]);
+		}        
+		logf(TRACE, "%s: adding events for: %s", method, persistent_id);
+		if ( sltlen == 0 ) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0 );
+		} else if (sltlen == 1) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0] );
+		} else if (sltlen == 2) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1] );
+		} else if (sltlen == 3) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2] );
+		} else if (sltlen == 4) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3] );
+		} else if (sltlen == 5) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4] );
+		} else if (sltlen == 6) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5] );
+		} else if (sltlen == 7) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6] );
+		} else if (sltlen == 8) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7] );
+		} else if (sltlen == 9) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8] );
+		} else if (sltlen == 10) {
+			send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, new_sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8],q[9] );
+		}
+		if (msg_error()) {
+			logf(ERROR, "%s: attached_sla.add_ast failed: %s", method, msg[0]);
+			return;
+		}
+		logf(TRACE, "%s: add_ast ok", method);		
+		send_wait(0, gl, "checkin");
+		send_wait(0, top_object(), "call_attr", "attached_sla", "set_zforfz", persistent_id, new_sdsc.id);
+	}
+}
+
+void cr.zfzsla::site_set_sla(...)
+{
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+	
+	object top;
+	top = top_object();
+	
+    string method;
+    method = "cr.zfzsla::site_set_sla";
+    logf(TRACE,"%s: Started for %s", method, (string)argv[3]);
+	
+	string old_sla, new_sla, wc;
+	object gl, sdsclist, sdsc, slalist;
+	int sdsclenght, slalenght;
+	old_sla = (string)argv[2];
+	new_sla = (string)argv[3];
+	send_wait(0, top_object(), "get_co_group");
+    gl = msg[0];
+	
+	if (!is_empty(old_sla) ) {
+		logf(MILESTONE, "%s: zSLA %s removed", method, old_sla);
+		send_wait( 0, top_object(), "call_attr", "sdsc", "sync_fetch", "MLIST_STATIC", format("zsla=%d",(int)old_sla), -1, 0 );
+		if ( msg_error() ) {
+            logf(ERROR, "%s: Search for old sdsc failed: %s", method, msg[0]);
+            return;
+        }
+        sdsclist = msg[0];
+		sdsclenght=msg[1];
+        logf(TRACE, "%s: got list of %d old sdscs", method, sdsclenght);
+		if (sdsclenght > 0)
+		{
+			object sladob;
+			for(j = 0; j < sdsclenght; j++)
+			{
+				send_wait(0, sdsclist, "dob_by_index", "DEFAULT", j, j);
+				if(msg_error())
+				{
+					logf( ERROR, "%s: Error on dob_by_index for sdsclist: '%s'", method, msg[0] );
+					return;
+				}
+				
+				sdsc = msg[0];
+				wc = format(" map_sdsc='%s' AND _mapped_cr = '%s'", sdsc.persistent_id, persistent_id);
+				logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+				send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+				slalist = msg[0];
+				slalenght =  msg[1];
+				if (slalenght <= 0) {
+					logf(ERROR, "%s: Attached SLA for SDSC %s unique not found", method, sdsc);
+				} else {
+					logf(TRACE, "%s: got list of %d old Attached SLAs", method, slalenght);
+					for(k = 0; k < slalenght; k++)
+					{
+						send_wait( 0, slalist, "dob_by_index", "DEFAULT", k, k );
+						sladob = msg[0];
+						send_wait(0, gl, "checkout", sladob);
+						if (msg_error()) {
+							logf(ERROR, "%s: cannot checkout old attached_sla: %s", method, msg[0]);
+							return;
+						}
+						logf(TRACE, "%s: checkout ok", method);
+						send_wait(0, sladob, "dob_mark_delete");
+						if (msg_error()) {
+							logf(ERROR, "%s: cannot delete old attached_sla: %s", method, msg[0]);
+							return;
+						}
+						logf(TRACE, "%s: dob_mark_delete ok", method);
+						send_wait(0, gl, "checkin");
+						if (msg_error()) {
+							logf(ERROR, "%s: cannot save deletion: %s", method, msg[0]);
+							send_wait(0, lobj0, "uncheck");
+							return;
+						} else {
+							logf(TRACE, "%s: old attached sla and events deleted", method);
+						}
+					}
+				}
+			}
+		
+		}
+	}
+	if (is_empty(new_sla) ) {
+        logf(MILESTONE, "%s: No new zSLA, leaving", method);
+        return;
+    } else {
+		send_wait( 0, top_object(), "call_attr", "sdsc", "sync_fetch", "MLIST_STATIC", format("zsla=%d",(int)new_sla), -1, 0 );
+		if ( msg_error() ) {
+            logf(ERROR, "%s: Search for sdsc failed: %s", method, msg[0]);
+            return;
+        }
+        sdsclist = msg[0];
+		sdsclenght=msg[1];
+        logf(TRACE, "%s: got list of %d sdscs", method, sdsclenght);
+		if (sdsclenght > 0)
+		{
+			for(j = 0; j < sdsclenght; j++)
+			{
+				send_wait(0, sdsclist, "dob_by_index", "DEFAULT", j, j);
+				if(msg_error())
+				{
+					logf( ERROR, "%s: Error on dob_by_index for sdsclist: '%s'", method, msg[0] );
+					return;
+				}
+				
+				sdsc = msg[0];
+				int sltlen, iLoop;
+				string tplpid;
+				object q[MAXSVCTPL];
+				sltlen = sdsc.cr_sla_templates.length;
+				logf(TRACE, "%s: SLT has %d events", method, sltlen);
+				if (sltlen > MAXSVCTPL) {
+					logf(ERROR, "%s: More than %d events for SVC SLA is not supported", method, MAXSVCTPL);
+					sltlen = MAXSVCTPL;
+				}   
+				logf(TRACE, "%s: Allocating slatpl objects", method);
+				for( iLoop = 0 ; iLoop < sltlen ; iLoop++ ) {
+					send_wait(0, sdsc, "call_attr", format("cr_sla_templates.%d.persistent_id",iLoop), "get_val");
+					if (msg_error()) {
+						logf(ERROR, "%s: error in get_val: %s", method, msg[0]);
+						continue;
+					}
+					tplpid = msg[0];
+					logf(TRACE, "%s: template %d persid='%s'", method, iLoop, tplpid);
+					send_wait(0, top_object(), "call_attr", "slatpl", "dob_by_persid", 0, tplpid, NULL, NULL);
+					if (msg_error()) {
+						logf(ERROR, "%s: error in dob_by_persid: %s", method, msg[0]);
+						continue;
+					}
+					q[iLoop] = msg[0];
+					logf(TRACE, "%s: object %d allocated event: %s", method, iLoop, q[iLoop]);
+				}        
+				if ( sltlen == 0 ) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0 );
+				} else if (sltlen == 1) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0] );
+				} else if (sltlen == 2) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1] );
+				} else if (sltlen == 3) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2] );
+		//			logf(TRACE, "%d add_asts persistent_id: %s sdsc.id: %s gl: %s q[0]: %s q[1]: %s q[2]: %s", sltlen, persistent_id, sdsc.id, gl, q[0],q[1],q[2]);
+				} else if (sltlen == 4) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3] );
+				} else if (sltlen == 5) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4] );
+				} else if (sltlen == 6) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5] );
+				} else if (sltlen == 7) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6] );
+				} else if (sltlen == 8) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7] );
+				} else if (sltlen == 9) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8] );
+				} else if (sltlen == 10) {
+					send_wait(0, top_object(), "call_attr", "attached_sla", "add_ast", persistent_id, sdsc.id, gl, "SLA", 0, q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8],q[9] );
+				}
+				if (msg_error()) {
+					logf(ERROR, "%s: attached_sla.add_ast failed: %s", method, msg[0]);
+					return;
+				}
+				logf(TRACE, "%s: add_ast ok", method);
+				send_wait(0, gl, "checkin");
+			}
+		}
+	}
+}
+
+void attached_sla::update_sdscs(...)
+{
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+	
+    string method;
+    method = "attached_sla::update_sdscs";
+    logf(TRACE,"%s: Started for %s", method, argv[3]);
+	
+	send_wait( 0, top_object(), "call_attr", "sdsc", "dob_by_persid", NULL, argv[6], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+		return;
+	}
+	object sdsc;
+	sdsc = msg[0] ;
+	logf(TRACE, "%s: sdsc SLA: %s", method, sdsc.zsla);
+	logf(TRACE, "%s: sdsc for F-Z: %i", method, argv[9]);
+	
+	send_wait( 0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, argv[3], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+		return;
+	}
+	object cr;
+	cr = msg[0] ;
+	logf(TRACE, "cr ref_num: %s", cr.ref_num);
+	
+	object gl;
+	send_wait(0, top_object(), "get_co_group");
+	if ( msg_error() ) {
+		logf(ERROR, "%s: Error: %s", method, (string)msg[0]);
+		return;
+	}	
+	gl = msg[0];
+	
+	send_wait(0, gl, "checkout", cr);
+	for(j = 0; j < argc; j++)
+	{
+		if ( msg_error() ) {
+			logf(TRACE, "%s: Checking out cr failed! will retry in %i s", method, j);
+			sleep(j);
+		}
+	}
+	if ( msg_error() ) {
+			logf(ERROR, "%s: Checking out cr failed after %i retries!", method, j);
+			return;
+		}
+
+	if (argv[9])
+	{
+		send_wait(0, cr, "call_attr", "zfzsdsc", "set_val", argv[6], "SURE_SET");
+	}
+	else
+	{
+		send_wait(0, cr, "call_attr", "zsdsc", "set_val", argv[6], "SURE_SET");
+	}
+	
+	// Save change.
+	send_wait(0, gl, "checkin");
+	if( msg_error() ) {
+		logf(ERROR, "%s: Error on save: %s", method, (string)msg[0]);
+
+		send_wait(0, gl, "uncheck");
+		return;
+	}
+
+	logf(TRACE, "%s: Saved, Finished", method);
+}
+
+attached_sla::set_zforfz( string pers_id, int sdsc_id )
+{
+	string method, wc;
+    method = "attached_sla::set_zforfz";
+	object gl, slalist, sladob;
+	int slalenght, k, j;
+	send_wait(0, top_object(), "get_co_group");
+    gl = msg[0];
+	logf(TRACE, "%s: got gl is: %s", method, (string)gl);
+	
+	wc = format(" map_sdsc='sdsc:%s' AND _mapped_cr = '%s'", sdsc_id, pers_id );
+	logf(TRACE,"%s: Looking for attached sla with wc: %s", method, wc); 
+	send_wait( 0, top_object(), "call_attr", "attached_sla", "sync_fetch", "STATIC", wc, -1, 0 );
+	slalist = msg[0];
+	slalenght =  msg[1];
+	if (slalenght <= 0) {
+		logf(ERROR, "%s: Attached SLA for SDSC %i unique not found", method, sdsc_id);
+	} else {
+		logf(TRACE, "%s: got list of %d new Attached SLAs", method, slalenght);
+		for(k = 0; k < slalenght; k++)
+		{
+			send_wait( 0, slalist, "dob_by_index", "DEFAULT", k, k );
+			sladob = msg[0];
+			
+			
+			for(j = 0; j < 5; j++)
+			{
+				send_wait(0, gl, "checkout", sladob);
+				if ( msg_error() ) {
+					logf(TRACE, "%s: Checking out sladob failed! will retry in %i s", method, j);
+					sleep(j);
+				}
+				else {
+					j=6;
+				}
+			}
+			if (msg_error()) {
+				logf(ERROR, "%s: cannot checkout new attached_sla: %s", method, msg[0]);
+				return;
+			}
+			logf(TRACE, "%s: checkout ok", method);
+			send_wait(0, sladob, "call_attr", "zforfz", "set_val", 1, "SURE_SET");
+			if (msg_error()) {
+				logf(ERROR, "%s: cannot set zforfz=1 for new attached_sla: %s", method, msg[0]);
+				return;
+			}
+			logf(TRACE, "%s: zforfz=1 set for new attached_sla ok", method);
+			send_wait(0, gl, "checkin");
+			if (msg_error()) {
+				logf(ERROR, "%s: cannot save new attached_sla: %s", method, msg[0]);
+				send_wait(0, lobj0, "uncheck");
+				return;
+			} else {
+				logf(TRACE, "%s: new attached sla saved", method);
+			}
+		}
+	}
+}
+
+void cr.zfz::site_set_zfzsdsc( ... )
+{
+	string method;
+    method = "cr.zfz::site_set_sla";
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+
+	if (argv[3])
+	{
+		send_wait( 0, top_object(), "call_attr", "pcat", "dob_by_persid", NULL, (string)argv[9], NULL, NULL );
+			if ( msg_error() ) {
+				logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+				return;
+			}
+			object kat;
+			kat = msg[0];
+			
+			logf(TRACE,"%s: Started for %s", method, (string)kat.zfzsdsc.sym);
+		
+		this.zfzsdsc=kat.zfzsdsc;
+	}
+	else
+	{
+		this.zfzsdsc=NULL;
+	}
+	logf(TRACE, "%s: Saved, Finished", method);
+}
+
+cr::set_zsdsc( ... )
+{
+	string method;
+    method = "cr::set_zsdsc";
+	int i, j, k;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "%s, arg[%d]: %s", method, i, (string)argv[i]);
+
+	if (!is_null(argv[3]))
+	{
+		send_wait( 0, top_object(), "call_attr", "pcat", "dob_by_persid", NULL, (string)argv[3], NULL, NULL );
+			if ( msg_error() ) {
+				logf( ERROR, "%s: Error on dob_by_persid: '%s'", method, msg[0] );
+				return;
+			}
+			object kat;
+			kat = msg[0];
+			
+			logf(TRACE,"%s: Started for %s", method, (string)kat.service_type.sym);
+		if (is_null(this.zsdsc)) {
+			this.zsdsc=kat.service_type;
+			logf(TRACE,"%s: Changed sdsc to %s", method, (string)kat.service_type.sym);
+		}
+		else {
+			logf(TRACE,"%s: Sdsc is not null: %s", method, (string)this.zsdsc.sym);
+		}
+	}
+	else
+	{
+		this.zsdsc=NULL;
+		logf(TRACE,"%s: Changed sdsc to NULL", method);
+	}
+	logf(TRACE, "%s: Saved, Finished", method);
+}

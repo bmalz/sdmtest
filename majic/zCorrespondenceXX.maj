@@ -1,0 +1,7 @@
+OBJECT zCorrespondenceIncome {
+    DISPLAY_GROUP "stored_query";
+};
+
+OBJECT zCorrespondanceOucome {
+    DISPLAY_GROUP "stored_query";
+};

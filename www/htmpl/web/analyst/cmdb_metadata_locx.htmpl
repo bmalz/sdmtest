@@ -1,0 +1,58 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/01/30
+// Title  : cmdb_metadata_locx.htmpl (family specific attributes)
+// 05-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+//                     Added standardcivalue and currentcivalue values that require special dot notation for SREL values.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_locx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+NOTE: You must provide standardcivalue and currentcivalue values if the attribute displayed requires special dotted notation for SREL value.
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.name"        heading="Location Name" help="Identifies the location name">
+// Show the base_location.name for the base_location attribute, override standardcivalue and currentcivalue.
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location"             heading="Base Location" standardcivalue=${args.standard_ci.0.assoc_locx.0.base_location.name} currentcivalue=${args.assoc_locx.base_location.name} help="Specifies the location that the CI represents">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.site"        heading="Site" standardcivalue=${args.standard_ci.0.assoc_locx.0.base_location.site.name} currentcivalue=${args.assoc_locx.base_location.site.name} help="Site">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.description" heading="Description" help="Specifies the description of the location">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.address1"    heading="Address" help="This is address line 1">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.address2"    heading="Address (line 2)" help="This is address line 2">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.address3"    heading="Address (line 3)" help="This is address line 3">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.address4"    heading="Address (line 4)" help="This is address line 4">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.address5"    heading="Address (line 5)" help="This is address line 5">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.address6"    heading="Address (line 6)" help="This is address line 6">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.city"        heading="City" help="Specifies the name of the city">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.state"       heading="State" standardcivalue=${args.standard_ci.0.assoc_locx.0.base_location.state.sym} currentcivalue=${args.assoc_locx.base_location.state.sym} help="Specifies the name of the state">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.zip"         heading="Zip Code" help="Identifies the zip code">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="locx" attr="base_location.country"     heading="Country" standardcivalue=${args.standard_ci.0.assoc_locx.0.base_location.country.name} currentcivalue=${args.assoc_locx.base_location.country.name} help="Identifies the name of the county">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>
+

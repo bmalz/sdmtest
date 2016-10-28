@@ -1,0 +1,98 @@
+<!-- <PDM_IF 0>
+@(#)\$Id: std_header.htmpl,v 1.1 2006/11/01 18:09:35 olsjo01 Exp $
+</PDM_IF> -->
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<!-- Start of std_header.htmpl -->
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fid_gen.js"></SCRIPT>
+<SCRIPT>
+if (window.name != "content" &&
+    window.name != "cai_main" &&
+    window.name != "scoreboard" )
+{
+   document.write("<IMG ALT='$ProductName' SRC='$CAisd")
+   document.write("/img/product_banner.png' height='39' width='245' alt=''>")
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_body_site.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCAISD = "$prop.CAisd";
+var cfgCgi = "$cgi";
+var cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+var propFormName = "$prop.form_name";
+var slaViolation="$prop.SetSLAViolation";
+
+var cfgAccessReqMgr = $ACCESS.call_mgr;
+var cfgAccessChgMgr = $ACCESS.change_mgr;
+var cfgAccessIssMgr = $ACCESS.issue_mgr;
+var cfgAccessAdmin = $ACCESS.admin;
+var cfgAccessInventory = $ACCESS.inventory;
+var cfgAccessRef = $ACCESS.reference;
+var cfgAccessNotify = $ACCESS.notify;
+var cfgAccessAnmt = $ACCESS.announcement;
+var cfgAccessCallMgrRef = $ACCESS.call_mgr_reference;
+var cfgAccessCallMgrTpl = $ACCESS.call_mgr_template;
+var cfgAccessChgMgrTpl = $ACCESS.change_mgr_template;
+var cfgAccessChgRef = $ACCESS.change_reference;
+var cfgAccessCi = $ACCESS.ci;
+var cfgAccessCiComn = $ACCESS.ci_common_ro;
+var cfgAccessCiRef = $ACCESS.ci_reference;
+var cfgAccessContact = $ACCESS.contact;
+var cfgAccessGroup = $ACCESS.group;
+var cfgAccessIssMgrTpl = $ACCESS.issue_mgr_template;
+var cfgAccessIssRef = $ACCESS.issue_reference;
+var cfgAccessLoc = $ACCESS.location;
+var cfgAccessNotRef = $ACCESS.notification_reference;
+var cfgAccessOrg = $ACCESS.organization;
+var cfgAccessPri = $ACCESS.prioritization;
+var cfgAccessSvcLvl = $ACCESS.service_level;
+var cfgAccessSite = $ACCESS.site;
+var cfgAccessStoredQuery = $ACCESS.stored_queries;
+var cfgAccessSurvey = $ACCESS.survey;
+var cfgAccessTentAdmin = $ACCESS.tenant_admin;
+var cfgAccessTimeZone = $ACCESS.timezone;
+var cfgAccessWfRef = $ACCESS.workflow_reference;
+var cfgAccessWorkshift = $ACCESS.workshifts;
+
+if ( typeof cfgFileTitle != "string" || 
+     cfgFileTitle.length == 0 )
+    cfgFileTitle="$prop.filename";
+
+cfgUserType = "$prop.user_type";
+cfgGuestUser = "$prop.guest_user";
+var cfgAllowPopupResize = true;
+if ( _browser.supportsLayers )
+    cfgAllowPopupResize = ("1" == "$prop.AllowNetscapePopupResize");
+var browserVersion;
+if (document.all) 
+   browserVersion = "IE" //IE4   
+else 
+  if (document.layers) 
+      browserVersion = "NS" //NS4 
+  else 
+      browserVersion = "?" //other
+<PDM_IF $DebugSource < 1>
+disable_right_click()
+</PDM_IF>
+</SCRIPT>
+<PDM_IF "$AlertMsg" != "">
+<TABLE class=alertmsg width="100%">
+<TH>$AlertMsg</TH>
+</TABLE>
+</PDM_IF>
+<PDM_IF "$prop.release" == "">
+<SCRIPT>
+cfgUserid = '$cst.userid';
+cfgCIEbrUrl = '$SESSION.CIEBRURL';
+cfgFaqInstalled = "$SESSION.FAQInstalled";
+cfgCIEbrInstalled = "$SESSION.CIEBRInstalled";
+</SCRIPT>
+</PDM_IF>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/imgbutton.js"></SCRIPT>
+<!-- End of std_header.htmpl -->

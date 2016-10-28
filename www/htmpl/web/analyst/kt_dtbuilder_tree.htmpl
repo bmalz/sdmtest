@@ -1,0 +1,23 @@
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview=kt_dtbuilder.htmpl>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Tree Designer";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_dtbuilder_xml.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_tree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_dtbuilder_tree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_dtbuilder_menus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY onload="window_onload()" onbeforeunload="return window_onbeforeunload()">
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no menubar=dtbuilder>
+<DIV id="divTree"></DIV>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

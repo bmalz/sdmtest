@@ -1,0 +1,221 @@
+<html lang="en"><PDM_IF 0>
+	menu_frames.htmpl
+	WHEN PRESENTED:
+	    As the main menu when configured to do frames.
+	VARIABLES:
+	    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+	    object      SESSION This object has one member, SID, which is the
+	                        session identifier.  The session identifier is
+	                        needed so that users do not have to log in every
+	                        time they want to see a new page.
+</PDM_IF>
+	<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+	<script type="text/javascript">
+	<!--
+		if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+			window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+
+var sdadmin = $INTERFACE.sd_admin;
+var sdanalyst = $INTERFACE.sd_analyst;
+var sdemployee = $INTERFACE.sd_employee;
+var sdcustomer = $INTERFACE.sd_customer;
+var ktadmin = $INTERFACE.kt_admin;
+var ktmanager = $INTERFACE.kt_manager;
+var ktengineer = $INTERFACE.kt_engineer;
+var ktanalyst = $INTERFACE.kt_analyst;
+var ktcustomer = $INTERFACE.kt_customer;
+var config = $INTERFACE.config;
+
+// Define contents of toolbar
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+var toolbarTab = new Array();
+if (sdanalyst)
+toolbarTab[toolbarTab.length] =
+  { label: " CA CMDB Scoreboard",
+    tooltip: "CA CMDB main form",
+    id:    "sd",
+    src:   "sd_main.htmpl" };
+<PDM_ELIF "$env.NX_CMDB" == "NOTSTANDALONE">
+var toolbarTab = new Array();
+if (sdanalyst)
+toolbarTab[toolbarTab.length] =
+  { label: " Service Desk/CA CMDB",
+    tooltip: "Service Desk/CA CMDB main form",
+    id:    "sd",
+    src:   "sd_main.htmpl" };
+<PDM_ELSE>
+var toolbarTab = new Array();
+if (sdanalyst)
+toolbarTab[toolbarTab.length] =
+  { label: " Service Desk",
+    tooltip: "Service Desk main form",
+    id:    "sd",
+    src:   "sd_main.htmpl" };
+</PDM_IF>
+        
+    
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+if (sdanalyst || ktanalyst || ktcustomer)
+toolbarTab[toolbarTab.length] =
+  { 
+<PDM_IF 0>
+	If this installtion of ServicePlus includes a full-blown version of Knowledge Tools,
+	label the Knowledge tab with 'Knowledge'. Otherwise, label it with 'Keyword Search'
+</PDM_IF>
+
+<PDM_IF "$env.NX_KT" == "Yes">
+	label: "Knowledge",
+<PDM_ELSE>
+	label: "Keyword Search",
+</PDM_IF>
+    tooltip: "Knowledge Tools main form",
+    id:    "kt",
+    src:   "kt_main.htmpl" };
+</PDM_IF>
+    
+if (sdadmin || ktadmin || ktmanager)//Some of KT admin pages are associated with kt_manager and some with kt_admin - kesav02 April 22, 2004
+toolbarTab[toolbarTab.length] =
+  { <PDM_IF "$env.NX_CMDB" == "STANDALONE">
+  	label: "CA CMDB Administration",
+  	<PDM_ELIF "$env.NX_CMDB" == "NOTSTANDALONE">
+  	label: "Administration",
+  	<PDM_ELSE>
+  	label: "Administration",
+  	</PDM_IF>
+    tooltip: "Administration main form",
+    id:    "adm",
+    src:   "sd_kt_admin.htmpl" };
+    
+<PDM_IF 0>
+	If we are opening ServicePlus in popup mode, default the current toolbar tab to the Service Desk tab
+	(i.e. toolbarCurrentTab = 0)
+</PDM_IF>
+
+if (toolbarTab.length == 0)
+{
+    window.location.href = "$CAisd/html/empty.html";
+    alert("Insufficient privilege to access this web interface.");        
+}
+
+<PDM_IF "$prop.initial_popup" == "">
+	var toolbarCurrentTab = -1;
+<PDM_ELSE>
+	var toolbarCurrentTab = 0;
+</PDM_IF>
+
+var tbarFrameCount = 2;
+
+var tbarData = new Object();
+tbarData["lSel"] = "$CAisd/img/portal_tab_selected_left.png";
+tbarData["mSel"] = "$CAisd/img/portal_tab_selected_center.png";
+tbarData["rSel"] = "$CAisd/img/portal_tab_selected_right.png";
+tbarData["lUnsel"] = "$CAisd/img/portal_tab_unselected_left.png";
+tbarData["mUnsel"] = "$CAisd/img/portal_tab_unselected_center.png";
+tbarData["rUnsel"] = "$CAisd/img/portal_tab_unselected_right.png";
+tbarData["space1x1"] = "$CAisd/img/space1x1.gif";
+tbarData["empty"] = "$CAisd/html/empty.html";
+
+
+	//-->
+	</script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fid_gen.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/factory_size.js"></SCRIPT>
+<PDM_INCLUDE FILE=ahdtop.htmpl KT_CACHE=yes>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/profile_browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/antiecho.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">redirect_if_echo('menu_frames.htmpl');</SCRIPT>
+<SCRIPT>
+document.write("<title>" + cfgFormTitle + "<" + "/title>");
+// All available hidden frames that could be used for 
+// issuing the url in the background.
+var ahdframeset = window;
+var work_frames = new Array("workframe_1", "workframe_2", "workframe");
+var work_frame_mgr = void(0);
+var cfgWorkFrameTimeout = "$prop.WorkFrameTimeout";
+<PDM_IF "$prop.URL_CI" != "">
+var ciSearchWindow = get_popup_window_name("ci_window");
+var propUrlCi = "$prop.URL_CI";
+</PDM_IF>
+var toolbarInitialTab = ahdtop.GetUSPPreferences("WEB_TOOLBAR_TAB");
+if ( window.location.search.match(/NBTAB=([^&+]+)/) )
+  toolbarInitialTab = RegExp.\$1;
+if (typeof toolbarInitialTab == "undefined" || toolbarInitialTab == "") toolbarInitialTab = 0;
+setTimeoutWarning();
+</SCRIPT>
+</HEAD>
+<PDM_IF "$prop.browser" == "NS">
+   <PDM_IF "$prop.initial_popup" == "">
+      <frameset rows="80,26,22,*,15,1,1,1,1,1,1"
+   <PDM_ELSE>
+	  <frameset rows="80,26,*,15,1,1,1,1,1,1"
+   </PDM_IF>
+<PDM_ELSE>
+   <PDM_IF "$prop.initial_popup" == "">
+      <frameset rows="80,26,22,*,15,1,1,1,1,1,1"
+   <PDM_ELSE>
+      <frameset rows="80,26,*,15,1,1,1,1,1,1"
+   </PDM_IF>   
+</PDM_IF>
+	frameborder=yes class=gn_container_no_border onunload="closing_main_window()">
+      <FRAME SRC="$CAisd/html/gobtn.html" name=gobtn NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=0 class=gn_container_no_border title="Go button navigation">
+      <FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=welcome_banner.htmpl" name=welcome_banner SCROLLING=NO NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="User name and logoff link">
+      <PDM_IF "$prop.initial_popup" == "">
+         <FRAME name=toolbar NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border SCROLLING=no
+		   SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=toolbar.htmpl" title="Product tabs">
+		 <FRAME name=product MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border SCROLLING=no
+		   SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=product.htmpl" title="Hidden frame - do not navigate here">
+	  <PDM_ELSE>
+	     <FRAME name=product MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border SCROLLING=no
+		    SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=sd_main.htmpl" title="Hidden frame - do not navigate here">
+	  </PDM_IF>     
+      <FRAME name=copyright tabindex=-1 NORESIZE MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border
+		SRC="$CAisd/html/copyright.html" SCROLLING=no title="C A copyright notice - read only">
+      <!-- 
+      DO NOT MODIFY frames oneway_frame, workframe, workframe_1, workframe_2,
+      and top_splash.  These frames are used by the Service Desk application,
+      and any modification to them can cause runtime failures.
+      -->
+      <FRAME SRC="$CAisd/html/empty.html" NORESIZE name=topframe tabindex=-1 SCROLLING=NO MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="Hidden frame - do not navigate here">
+      <FRAME SRC="$CAisd/html/empty.html" name=oneway_frame tabindex=-1 NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="Hidden frame - do not navigate here">
+      <FRAME SRC="$CAisd/html/empty.html" name=workframe tabindex=-1 NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="Hidden frame - do not navigate here">
+      <FRAME SRC="$CAisd/html/empty.html" name=workframe_1 tabindex=-1 NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="Hidden frame - do not navigate here">
+      <FRAME SRC="$CAisd/html/empty.html" name=workframe_2 tabindex=-1 NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="Hidden frame - do not navigate here">
+      <FRAME SRC="$CAisd/html/empty.html" name=top_splash tabindex=-1 NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="Hidden frame - do not navigate here">
+      <NOFRAMES>
+         <PDM_IF "$env.NX_CMDB" == "STANDALONE">
+	 <H2>Frames-Compatible Browser Required</H2>
+         The web interface to CA CMDB requires a browser that
+         supports frames, such as the latest version of
+         <A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A>,
+         <A ID=lnk004 href=http://www.mozilla.org>Mozilla</A>, or
+         <A ID=lnk005 href=http://www.netscape.com>Netscape</A>.
+         <PDM_ELIF "$env.NX_CMDB" == "NOTSTANDALONE">
+	 <H2>Frames-Compatible Browser Required</H2>
+         The web interface to $ProductName/CA CMDB requires a browser that
+         supports frames, such as the latest version of
+         <A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A>,
+         <A ID=lnk004 href=http://www.mozilla.org>Mozilla</A>, or
+         <A ID=lnk005 href=http://www.netscape.com>Netscape</A>.
+         <PDM_ELSE>
+	 <H2>Frames-Compatible Browser Required</H2>
+         The web interface to $ProductName requires a browser that
+         supports frames, such as the latest version of
+         <A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A>,
+         <A ID=lnk004 href=http://www.mozilla.org>Mozilla</A>, or
+         <A ID=lnk005 href=http://www.netscape.com>Netscape</A>.
+        </PDM_IF>
+      </NOFRAMES>
+   </FRAMESET>
+</HTML>
+<PDM_IF 0>
+$Id: menu_frames.htmpl,v 1.3 2006/11/13 22:57:03 jenji01 Exp $
+</PDM_IF>

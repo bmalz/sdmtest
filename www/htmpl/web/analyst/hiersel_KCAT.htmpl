@@ -1,0 +1,367 @@
+<PDM_IF 0>
+@(#)$Id: hiersel_KCAT.htmpl ASPEN.4 2011/10/19 11:41:44 visan03 Exp $;
+WHEN PRESENTED:
+    When we need to display The KT Tree.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="OP=MENU+NBTAB=kt">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<script language="JavaScript" src="$CAisd/scripts/kt_tree_menu.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/hiersel_kcat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/hier_set.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_tree.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript">
+// Tree views vars:
+var m_sMenuType = "$args.Menu";
+var m_sView = "$args.view";
+var m_sCurrRelID = "$args.CurrRelID";//FAQ mode and architect list mode
+var m_bTreeBusy = false;
+var m_NodeToloadChildTo = null;
+var m_MenuNode = null;
+var m_sObjectName = '$args.OBJECT_NAME';
+var m_sFolderType = '$args.FOLDER_TYPE';
+var m_bShowArchitectInListStyle = false;
+var m_sUpLevel = "$args.UpLevel";
+var RepType = '$args.RepType';
+var m_sParentTenant = '$args.ParentTenant';
+if ('$args.ARCHITECT_IN_LIST' == '1')
+{
+	m_bShowArchitectInListStyle = true;
+}
+if (m_sObjectName == 'attmnt_folder')
+{
+	Tree_m_bShowPlusMinusOnFirstLevel = true;
+	m_bShowArchitectInListStyle = false;//We do not support this mode with attmnts
+}
+var m_lArrayNumber = '$args.lArrayNumber';
+var m_sDefaultRep = 0;
+var m_arrArchitectListIDs = new Array();
+var m_arrArchitectListCaptions = new Array();
+var m_arrArchitectListrelIds = new Array();
+var m_arrArchitectListTenants = new Array();
+var m_larrArchitectListCNT = -1;
+var initLoad;
+
+var field_name = "Category";
+var form_title = "Knowledge Categories Tree";
+var form_title = "";
+
+//Misc Args needed:
+args_REP_NAME = '$args.REP_NAME';
+args_NOT_FIRST_LOAD = '$args.NOT_FIRST_LOAD';
+args_ARCHITECT_IN_LIST = '$args.ARCHITECT_IN_LIST';
+var m_lFAQParent = "$args.PARENT_ID";
+var DetailForm = void(0);
+if (typeof parent.propFormName == "string" &&
+    parent.propFormName == "kt_admin_attachments.htmpl")
+{
+    // We don't want to show an extra scrollbar if this is 
+    // for Repository. Set DetailForm to anything to hide 
+    // the scrollbar.
+    DetailForm = "anything";
+}
+
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list" onload="Loaded()" leftmargin=3 topmargin=3>
+<PDM_INCLUDE FILE=std_body.htmpl menubar=no logo=no header=no>
+<PDM_IF $args.view == "FAQ">		
+	<table cellSpacing="0" cellPadding="1" class='gn_container_no_border' width="100%">
+		<tr>
+			<td nowrap>
+				<img align=absmiddle src='$CAisd/img/kt_ArchitectInbox_Folder.gif'>
+				<a class="clsItemNonMarked" href="javascript:FAQClk(-2)"
+					title='<PDM_FMT ESC_STYLE=JS>My Bookmarks</PDM_FMT>'>
+					<script>document.write(msgtext("My_Bookmarks"));</script>
+				</a>
+			</td>
+		</tr>
+		
+		<tr>
+			<td nowrap>
+				<img align=absmiddle src='$CAisd/img/new_document_grey_16.png'>
+				<a class="clsItemNonMarked" href="javascript:FAQClk(-3)"
+					title='<PDM_FMT ESC_STYLE=JS>New Documents</PDM_FMT>'>
+					<script>document.write(msgtext("New_Documents"));</script>
+				</a>
+			</td>
+		</tr>
+		
+		<tr><td><img src='$CAisd/img/shim.gif' height='2'></td></tr>
+		
+		<tr>
+			<td class=clsListHeader nowarp>
+				<script>document.write(msgtext("Categories"));</script>
+			</td>
+		</tr>
+	
+	<PDM_IF $args.UpLevel == "1">
+		<tr><td nowrap>
+		<img align=absmiddle src='$CAisd/img/up_level.gif'>
+		<a class="clsItemNonMarked" href="javascript:FAQClk(-1)" class=clsItemNonMarked>Up one level...</a>
+		</td></tr>
+	</PDM_IF>
+	
+	<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = $args.PARENT_ID" ORDER_BY = "CAPTION">
+		<tr><td nowrap>
+		<img align=absmiddle src='$CAisd/img/kt_tree_node_normal.gif'>
+		<a class="clsItemNonMarked" href="javascript:FAQClk($list.id)"
+		title='<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>'>$list.CAPTION</a>
+		</td></tr>
+		<script>
+			NewFAQ ($list.id,'<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>');
+			ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+		</script>
+	</PDM_LIST>
+	</table>
+<PDM_ELSE>
+	<PDM_IF $args.Menu == "FAQ" && $args.ARCHITECT_IN_LIST == "1">
+		<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="id= $args.PARENT_ID">
+			<script>
+				var m_sArchitectListParentRelID = '$list.RELATIONAL_ID';
+				var m_sArchitectListParentCaption = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>';
+				var m_sArchitectListParentParentsID = '$list.PARENT_ID';
+				ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+			</script>
+		</PDM_LIST>		
+		<table cellSpacing="0" cellPadding="1" class='gn_container_no_border' width="100%">
+			<tr>
+				<td nowrap>
+					<img align=absmiddle src='$CAisd/img/kt_ArchitectInbox_Folder.gif'>
+					<a class="clsItemNonMarked" href="javascript:FAQClk(-2)"
+						title='<PDM_FMT ESC_STYLE=JS>My Bookmarks</PDM_FMT>'>
+						<script>document.write(msgtext("My_Bookmarks"));</script>
+					</a>
+				</td>
+			</tr>
+			
+			<tr>
+				<td nowrap>
+					<img align=absmiddle src='$CAisd/img/new_document_grey_16.png'>
+					<a class="clsItemNonMarked" href="javascript:FAQClk(-3)"
+						title='<PDM_FMT ESC_STYLE=JS>New Documents</PDM_FMT>'>
+						<script>document.write(msgtext("New_Documents"));</script>
+					</a>
+				</td>
+			</tr>
+			
+			<tr><td><img src='$CAisd/img/shim.gif' height='2'></td></tr>
+			
+			<tr>
+				<td class=clsListHeader nowarp>
+					<script>document.write(msgtext("Categories"));</script>
+				</td>
+			</tr>
+		
+		<PDM_IF $args.UpLevel == "1">
+			<tr><td nowrap>
+			<img align=absmiddle src='$CAisd/img/up_level.gif'>
+			<a class="clsItemNonMarked" href="javascript:FAQClk(-1)" class=clsItemNonMarked>Up one level...</a>
+			</td></tr>
+		</PDM_IF>
+		
+		<script>
+		<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="id = $args.PARENT_ID" ORDER_BY = "CAPTION">
+			//Storing Knowledge Tab List data in an array.
+			m_larrArchitectListCNT ++;
+			m_arrArchitectListIDs [m_larrArchitectListCNT] = $list.id;
+			m_arrArchitectListrelIds [m_larrArchitectListCNT] = '$list.RELATIONAL_ID';
+			m_arrArchitectListCaptions [m_larrArchitectListCNT] = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>';
+			m_arrArchitectListTenants [m_larrArchitectListCNT] = '';   // just init
+			<PDM_IF "$prop.MultiTenancy" != "off">
+				m_arrArchitectListTenants [m_larrArchitectListCNT] = '${list.tenant:}';				
+			</PDM_IF>
+			ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+		</PDM_LIST>
+		</script>
+		<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = $args.PARENT_ID" ORDER_BY = "CAPTION">
+			<tr><td nowrap>
+			<img align=absmiddle src='$CAisd/img/kt_tree_node_normal.gif'>
+			<a class="clsItemNonMarked" href="javascript:FAQClk($list.id)"
+			title='<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>'>$list.CAPTION</a>
+			</td></tr>
+			<script>
+				NewFAQ ($list.id,'<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>');
+				//Storing Knowledge Tab List data in an array.
+				m_larrArchitectListCNT ++;
+				m_arrArchitectListIDs [m_larrArchitectListCNT] = $list.id;
+				m_arrArchitectListrelIds [m_larrArchitectListCNT] = '$list.RELATIONAL_ID';
+				m_arrArchitectListCaptions [m_larrArchitectListCNT] = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>';
+				m_arrArchitectListTenants [m_larrArchitectListCNT] = ''; //init
+				<PDM_IF "$prop.MultiTenancy" != "off">
+					m_arrArchitectListTenants [m_larrArchitectListCNT] = '${list.tenant:}';	
+				</PDM_IF>			
+				ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+			</script>
+		</PDM_LIST>
+		</table>
+	<PDM_ELSE>
+		<PDM_IF $args.OBJECT_NAME == "KCAT">
+			<PDM_IF $args.ARCHITECT_IN_LIST == "1">
+				<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="id= $args.PARENT_ID">
+					<script>
+					var m_sArchitectListParentRelID = '$list.RELATIONAL_ID';
+					var m_sArchitectListParentCaption = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>';
+					var m_sArchitectListParentParentsID = '$list.PARENT_ID';
+					ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+				</script>
+				</PDM_LIST>				
+				<table cellSpacing="0" cellPadding="1" class='gn_container_no_border' width="100%">
+				<PDM_IF $args.UpLevel == "1">
+					<tr><td nowrap>
+					<span class="clsItemNonMarked" ONCLICK="return ArcExpand(-1);" class=clsItemNonMarked><img align=absmiddle src='$CAisd/img/up_level.gif'>&nbsp;Up one level...</span>
+					</td></tr>
+				<PDM_ELSE>
+					<tr><td nowrap>
+					<img align=absmiddle src='$CAisd/img/kt_tree_node_normal.gif'>
+					<span id=arclst1 class=clsItemNonMarked  oncontextmenu ="return ArcListRClk(1, event, '1')"
+					ONCLICK="return ArcListClk(1,'1','Top')">Top</span>
+					</td></tr>				
+				</PDM_IF>
+				
+				<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = $args.PARENT_ID" ORDER_BY = "CAPTION">
+					<tr><td nowrap>				
+					<PDM_IF $args.UpLevel == "1">
+					
+					<PDM_ELSE>
+					&nbsp;
+					</PDM_IF>
+					<PDM_IF $list.HAS_CHILDREN == 1>
+						<a href="JavaScript:void(0);" class='gn_cursor_ptr'><img ONCLICK="return ArcExpand($list.id,'0')"
+						align=absmiddle src='$CAisd/img/kt_tree_node_normal.gif' class='gn_container_no_border'></a>
+					<PDM_ELSE>
+						<img align=absmiddle src='$CAisd/img/kt_treenode_empty.png'>
+					</PDM_IF>
+					<script>
+					//Storing Architect List data in an array.
+					m_larrArchitectListCNT ++;
+					m_arrArchitectListIDs [m_larrArchitectListCNT] = $list.id;
+					m_arrArchitectListrelIds [m_larrArchitectListCNT] = '$list.RELATIONAL_ID';
+					m_arrArchitectListCaptions [m_larrArchitectListCNT] = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>';
+					m_arrArchitectListTenants [m_larrArchitectListCNT] = ''; // init
+					<PDM_IF "$prop.MultiTenancy" != "off">
+						m_arrArchitectListTenants [m_larrArchitectListCNT] = '${list.tenant:}';
+					</PDM_IF>
+					ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+					</script>
+
+					<span id='arclst$list.id' class="clsItemNonMarked" oncontextmenu ="return ArcListRClk($list.id, event, '$list.RELATIONAL_ID')"
+					ONCLICK="return ArcListClk($list.id,'0')"
+					title='<PDM_FMT ESC_STYLE=HTML>$list.CAPTION</PDM_FMT>'><PDM_FMT ESC_STYLE=HTML>$list.CAPTION</PDM_FMT></span>
+					</td></tr>
+					<script>
+						NewFAQ ($list.id,'<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>');
+					</script>
+				</PDM_LIST>
+				</table>			
+			<PDM_ELSE>
+				<script language="JavaScript">
+				GetDataStart();
+				<PDM_IF "$args.ParentTenant" == "None">
+					<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = 1" ORDER_BY = "CAPTION">
+						GetData($list.id, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>', $list.HAS_CHILDREN, '$list.RELATIONAL_ID', $list.PARENT_ID, void(0), 
+							<PDM_IF "$prop.MultiTenancy" != "off">
+							'${list.tenant:}', '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>${list.tenant.name:}</PDM_FMT>'
+							<PDM_ELSE>
+							''
+							</PDM_IF>);
+						ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+					</PDM_LIST>	
+				<PDM_ELIF "$args.ParentTenant" == "Global">
+					<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = 1 and (tenant IS NULL)" ORDER_BY = "CAPTION">
+						GetData($list.id, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>', $list.HAS_CHILDREN, '$list.RELATIONAL_ID', $list.PARENT_ID, void(0),
+							<PDM_IF "$prop.MultiTenancy" != "off">
+							'${list.tenant:}', '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>${list.tenant.name:}</PDM_FMT>'
+							<PDM_ELSE>
+							''
+							</PDM_IF>);
+						ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+					</PDM_LIST>					
+				<PDM_ELSE>
+					<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="PARENT_ID = 1 and (PdmTenantFkey(tenant,U'$args.ParentTenant','KD.PRIMARY_INDEX') = 1)" ORDER_BY = "CAPTION">
+						GetData($list.id, '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.CAPTION</PDM_FMT>', $list.HAS_CHILDREN, '$list.RELATIONAL_ID', $list.PARENT_ID, void(0),
+							<PDM_IF "$prop.MultiTenancy" != "off">
+							'${list.tenant:}', '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>${list.tenant.name:}</PDM_FMT>'
+							<PDM_ELSE>
+							''
+							</PDM_IF>);
+						ahdtop.m_arrIsForumEnabled[$list.id] = "$list.ALLOW_QA" - 0;
+					</PDM_LIST>	
+				</PDM_IF>			
+				</script>			
+			</PDM_IF>
+		<PDM_ELSE>
+			<PDM_INCLUDE FILE=kt_tbl_cache.htmpl DOC_REP=1> 
+			<script language="JavaScript">
+			GetDataStart();
+			var arrRepCache = ahdtop.arrRepositoriesRows;
+			var length = arrRepCache.length;
+			<PDM_IF "$args.ParentTenant" != "00" && "$args.ParentTenant" != "Global" && "$args.ParentTenant" != "None">
+				<PDM_LIST PREFIX=doc_rep_MT_list FACTORY=doc_rep WHERE="PdmTenantFkey(tenant,U'$args.ParentTenant','KD.ATTACH_FROM_REP') = 1">
+
+
+					for(var i = 0; i < length; i++)
+					{
+						if (arrRepCache[i+'persistent_id'] == '$doc_rep_MT_list.persistent_id')
+						{
+							if((arrRepCache[i+'repository_type'] >= RepType &&
+								arrRepCache[i+'repository_type'] != '0') ||
+								RepType == '0')
+								{
+									GetData(arrRepCache[i+'persistent_id'], arrRepCache[i+'sym'], arrRepCache[i+'has_children'], 
+										'0', 0, arrRepCache[i+'persistent_id'], arrRepCache[i+'tenant']);
+								}
+						}
+					}
+				</PDM_LIST>
+			<PDM_ELSE>
+				if(length)
+				{
+					for(var i = 0; i < length; i++)
+					{
+						if((ahdtop.cfgMultiTenancy != "on") ||  // multi tenancy disabled
+							(ahdtop.cfgMultiTenancy == "on" && 
+							(arrRepCache[i+'tenant'] == "" ||    // global tenant
+							"$args.ParentTenant" == "00" ||  "$args.ParentTenant" == "None" || 
+							arrRepCache[i+'tenant'] == "$args.ParentTenant")))
+						{
+							if((arrRepCache[i+'repository_type'] >= RepType &&
+								arrRepCache[i+'repository_type'] != '0') ||
+								RepType == '0')
+							{
+								GetData(arrRepCache[i+'persistent_id'], arrRepCache[i+'sym'], arrRepCache[i+'has_children'], 
+									'0', 0, arrRepCache[i+'persistent_id'], arrRepCache[i+'tenant']);				
+							}
+						}
+					}
+				}
+			
+			</PDM_IF>//End of MT check
+			// m_sDefaultRep is used in hiersel_KCAT.js
+			var defRepType = RepType;
+			if(RepType == '0')
+				defRepType = 2; // Knoeldge repository
+			m_sDefaultRep = GetDefaultRepository(defRepType, "$args.ParentTenant");  // knowledge repository
+		
+		</script>
+		</PDM_IF>
+		<script language="JavaScript">
+		var m_ContextMenu = new ContextMenu("KTArchitect");
+		SetCatTreeMenu();	
+		</script>
+	</PDM_IF>
+</PDM_IF>
+
+<div id="divTree"></div>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: hiersel_KCAT.htmpl,v 1.4 2007/01/04 23:11:45 tuach01 Exp $
+</PDM_IF>

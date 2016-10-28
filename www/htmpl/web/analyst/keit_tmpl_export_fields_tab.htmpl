@@ -1,0 +1,284 @@
+<PDM_IF 0>
+@(#)$Id: keit_tmpl_export_fields_tab.htmpl ASPEN.3 2012/05/11 18:33:09 debbi01 Exp $
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=keit_tmpl_export_fields_tab" factory=KEIT_TEMPLATES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript">
+	var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+
+<BODY>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="Export Fields Tab">
+<PDM_FORM NAME="frmDTLRO">
+
+<SCRIPT LANGUAGE="JavaScript">
+var arrExportedFieldsText = new Array();
+var arrExportedFieldsValue = new Array();
+
+var imgTabindex = 0;
+</SCRIPT>
+
+<SCRIPT>
+	tab_banner("Export Fields");
+</SCRIPT>
+
+<TR>
+<TD>
+<TABLE cellSpacing="0" cellPadding="0" width="99%" border="0" summary="Knowledge attributes shown in list settings" ID="TABLE3">
+    <TR>
+        <TD>
+            &nbsp;
+        </TD>
+    </TR>
+    <PDM_OBJECT>
+    <TR>
+        <TD>
+            &nbsp;
+        </TD>
+        <TD>
+			<TABLE cellSpacing="0" cellPadding="0" width="450" border="0" ID="TABLE4">
+				<TR>
+					<TD>
+						<TABLE width="100%" border="0" cellspacing="0" cellpadding="0" ID="TABLE5">
+							<tr>
+								<TD width="4" height="20" class="groupbox_header_left"><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></TD>
+								<TD class="groupbox_header_center"><span  class="groupbox_header_text" >Select Document Attributes</span></TD>
+								<TD width="4" height="20" class="groupbox_header_right"><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></TD>
+							</tr>
+						</TABLE>
+					</TD>
+				</TR>
+				<TR>
+					<TD class="groupbox_content" vAlign="top" align="left">
+						<TABLE cellSpacing="0" cellPadding="0" width="100%" border="0" ID="TABLE6">
+							<TR> 
+								<SCRIPT type="text/javascript">
+									var text1 = "<TD class='page_section_header_center'><span class='page_section_header_text'><label for='";
+									var text2 = "'>";
+									var text3 = "<" + "/label><" + "/span><" + "/TD>\n";
+								</SCRIPT>
+								
+<PDM_IF "$prop.form_name_3" == "edit"> 
+								<TD nowrap>
+									<TABLE width="100%" border="0" cellspacing="0" cellpadding="0" ID="TABLE7">
+										<TR>
+											<TD width="4" height="22" class="page_section_header_left">
+												<img src="$CAisd/img/spacer.png" width="4" height="22" alt="">
+											</TD>
+											<SCRIPT>
+												document.write(text1 + "available fields" + text2 + "Available" + text3);
+											</SCRIPT>
+											<TD width="4" height="22" class="page_section_header_right">
+												<span class="page_section_header_right">
+													<img src="$CAisd/img/spacer.png" width="4" height="22" alt="">
+												</span>
+											</TD>
+										</TR>
+									</TABLE>
+								</TD>
+								
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit"> 
+								<TD width="11">
+									&nbsp;
+								</TD>
+								<TD nowrap>
+								
+<PDM_ELSE>
+								<TD nowrap colspan=3>
+								
+</PDM_IF>
+									<TABLE width="100%" border="0" cellspacing="0" cellpadding="0" ID="TABLE8">
+										<tr>
+											<TD width="4" height="22" class="page_section_header_left">
+												<img src="$CAisd/img/spacer.png" width="4" height="22" alt="">
+											</TD>
+											<SCRIPT>
+												document.write(text1 + "exported fields" + text2 + "Exported" + text3);
+											</SCRIPT>
+											<TD width="4" height="22" class="page_section_header_right">
+												<span class="page_section_header_right">
+													<img src="$CAisd/img/spacer.png" width="4" height="22" alt="">
+												</span>
+											</TD>
+										</tr>
+									</TABLE>
+								</TD>
+							</TR>
+							<TR>
+								
+<PDM_IF "$prop.form_name_3" == "edit"> 
+								<TD>
+									<SCRIPT>
+									document.writeln("<SELECT id=selectAvailableFields tabindex=" + _dtl.tabIndex++ + " class='gn_container_white_background gn_width_100pct' multiple size='18' title=\"Available list\">");
+											if ("$args.id" == "0")
+											{
+//alert("new template mode");
+												strExportedFields = "TITLE@sep@SUMMARY@sep@PROBLEM@sep@RESOLUTION";
+											}
+											else
+											{
+//alert("edit mode");
+												strExportedFields = "$args.FIELD_LIST";
+											}	
+
+											if (strExportedFields != "")
+											{
+												arrExportedFieldsText = strExportedFields.split(strSep);
+												arrExportedFieldsValue = strExportedFields.split(strSep);
+											}
+											
+											//strAvailableFields: defined in detail_KEIT_TEMPLATES.htmpl
+											if (strAvailableFields != "")
+											{
+												var arrTmp = strAvailableFields.split(",");
+												var arrAvailableFieldsText = [];
+												var arrAvailableFieldsValue =[];
+												
+												for (var i = 0; i < arrTmp.length; i++)
+												{
+													if (strExportedFields == "" ||
+														strExportedFields.indexOf(arrTmp[i]) == -1 )
+													{
+														arrAvailableFieldsText.splice(arrAvailableFieldsText.length, 0, arrTmp[i]);
+														arrAvailableFieldsValue.splice(arrAvailableFieldsValue.length, 0, arrTmp[i]);
+
+														strOption = "<OPTION VALUE=" + arrTmp[i] + ">" + 
+																	arrTmp[i] + "</OPTION>";
+														document.writeln(strOption);
+													}
+												}
+											}
+										</SCRIPT>
+									</SELECT>
+								</TD>
+								
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit"> 
+								<TD width="11">
+									<TABLE cellSpacing="4" cellPadding="0" border="0" ID="TABLE3">
+										<TBODY>
+											<TR align="center">
+												<SCRIPT type="text/javascript">
+													var imgtxt = '<TD><a href="javascript:KeitSelectAll()" title="' + "Select all available attributes" + '"';
+													imgtxt += ' tabindex=' + _dtl.tabIndex++;
+													imgtxt += '><img class="image_buttons" style="border:0;" height="20" alt="' + "Select all available attributes" + '" src="$CAisd/img/button-right2.png" width="20"></a></TD>';
+													document.write(imgtxt);
+												</SCRIPT>
+											</TR>
+											<TR align="center">
+												<SCRIPT type="text/javascript">
+													imgtxt = '<TD><a href="javascript:KeitSelectItem()" title="' + "Copy attributes selected in Available list to Selected list" + '"';
+													imgtxt += ' tabindex=' + _dtl.tabIndex++;
+													imgtxt += '><img class="image_buttons" style="border:0;" height="20" alt="' + "Copy attributes selected in Available list to Selected list" + '" src="$CAisd/img/rightarrow.png" width="20"></a></TD>';
+													document.write(imgtxt);
+												</SCRIPT>
+											</TR>
+											<TR align="center">
+												<TD>
+													&nbsp;
+												</TD>
+											</TR>
+											<TR align="center">
+												<SCRIPT type="text/javascript">
+													imgtxt = '<TD><a href="javascript:KeitRemoveItem()" title="' + "Remove attributes selected in Selected list" + '"';
+													imgtxt += ' tabindex=' + _dtl.tabIndex++;
+													imgtxt += '><img class="image_buttons" style="border:0;" height="20" alt="' + "Remove attributes selected in Selected list" + '" src="$CAisd/img/leftarrow.png" width="20"></a></TD>';
+													document.write(imgtxt);
+												</SCRIPT>
+											</TR>
+											<TR align="center">
+												<SCRIPT type="text/javascript">
+													imgtxt = '<TD><a href="javascript:KeitRemoveAll()" title="' + "Remove all attributes from Selected list" + '"';
+													imgtxt += ' tabindex=' + _dtl.tabIndex++;
+													imgtxt += '><img class="image_buttons" style="border:0;" height="20" alt="' + "Remove all attributes from Selected list" + '" src="$CAisd/img/button-left2.png" width="20"></a></TD>';
+													document.write(imgtxt);
+												</SCRIPT>
+											</TR>
+										</TBODY>
+									</TABLE>
+									<!---<a href="javascript:move_right()">right</a> 
+									<br>
+									<a href="javascript:move_left()">left</a>--->
+								</TD>
+								
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit"> 
+								<TD>
+								
+<PDM_ELSE>
+								<TD colspan=3>
+								
+</PDM_IF>
+									<SCRIPT>
+									document.writeln("<SELECT id=selectExportedFields tabindex=" + _dtl.tabIndex++ + " class='gn_container_white_background gn_width_100pct' multiple size='18' title=\"Exported list\">");
+										
+<PDM_IF "$prop.form_name_3" == "edit"> 
+											if (strExportedFields != "")
+											{
+												for (var i = 0; i < arrExportedFieldsValue.length; i++)
+												{
+													strOption = "<OPTION VALUE=" + arrExportedFieldsValue[i] + ">" + 
+																arrExportedFieldsText[i] + "</OPTION>";
+													document.writeln(strOption);
+												}
+											}
+										
+<PDM_ELSE>
+//alert("view mode");
+											strExportedFields = "$args.FIELD_LIST";
+											if (strExportedFields != "")
+											{
+												arrExportedFieldsText = strExportedFields.split(strSep);
+												arrExportedFieldsValue = strExportedFields.split(strSep);
+											}
+
+											if (strExportedFields != "")
+											{
+												for (var i = 0; i < arrExportedFieldsValue.length; i++)
+												{
+													strOption = "<OPTION VALUE=" + arrExportedFieldsValue[i] + ">" + 
+																arrExportedFieldsText[i] + "</OPTION>";
+													document.writeln(strOption);
+												}
+											}
+											document.getElementById("selectExportedFields").disabled = true;
+										
+</PDM_IF>
+										</SCRIPT>
+									</SELECT>
+								</TD>
+							</TR>
+						<TABLE>
+					</TD>
+				</TR>
+			</TABLE>
+		</TD>
+	</TR>
+	</PDM_OBJECT>
+	<TR>
+		<TD>
+			<SCRIPT>
+				
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Eksport załączników" attr="EXP_ATTMNT" off="No" on="Yes">
+<PDM_MACRO name=dtlEndTable>
+			</SCRIPT>
+		</TD>
+	</TR>
+</TABLE>
+</TD>
+</TR>
+
+</TABLE>
+
+</PDM_FORM>
+
+</BODY>
+</HTML>

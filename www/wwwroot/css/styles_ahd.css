@@ -1,0 +1,2331 @@
+/***************************************************************************
+ *         Copyright (C) 1999 Computer Associates International, Inc
+ * as an unpublished work. This notice does not imply unrestricted or public
+ * access to these materials which are a trade secret of Computer Associates
+ * International or its subsidiaries or affiliates (together referred to as
+ * CA), and which may not be reproduced, used, sold or
+ * transferred to any third party without CA's prior written consent.
+ *
+ *                         All Rights Reserved.
+ *
+ *                       RESTRICTED RIGHTS LEGEND
+ * Use, duplication, or disclosure by the Government is subject to
+ * restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+ * Technical Data and Computer Software clause at DFARS 252.227-7013.
+ ***************************************************************************
+ * Module:  styles_ahd.css
+ * Created: 09/14/00
+ ***************************************************************************
+ * Description:
+ *
+ * This file is the main Unicenter ServicePlus Service Desk stylesheet
+ *
+ ***************************************************************************
+ * styles_ahd.css ASPEN.66 2012/05/11 15:15:20
+ */
+
+/*                                       */
+/*            global styles              */
+/*                                       */
+.alertmsg
+{
+	width: 100%;
+	color: #000000;
+	text-align:left;
+	font-weight:normal;
+	font-size: 0.7em;
+	background-color: #fcffb6;
+	border: 1px solid #C0C0C0;
+	font-family: Verdana, Arial, helvetica, sans-serif;
+	white-space:nowrap;
+}
+
+/* the following applies to the text stream of the bin count number */
+.bincounttext
+{
+	FONT: bold 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/* matches BODY's font */
+.bodytext
+{
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.boldlabeltext
+{
+	COLOR: #333333;
+	FONT: bold 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.detail_summary
+{
+	COLOR: #333333;
+	WIDTH: 25%;
+}
+
+/*
+ * These are for the search results
+ */
+.detail_summary, .row_odd, .row_even, .detail
+{
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 0.8em;
+	FONT-WEIGHT: normal;
+}
+
+/* Extended the CA UI standards with a style for disabled buttons */
+.disabled_buttons
+{
+	BACKGROUND-COLOR: #1773cf;
+	BACKGROUND-IMAGE: url(/CAisd/img/pagebutton_bg2.png);
+	BACKGROUND-REPEAT: repeat-x;
+	BORDER-BOTTOM: 0px;
+	BORDER-LEFT: 0px;
+	BORDER-RIGHT: 0px;
+	BORDER-TOP: 0px;
+	COLOR: #999999;
+	CURSOR: default;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 1.0em;
+	FONT-WEIGHT: bold;
+	PADDING-LEFT: 2px;
+	PADDING-RIGHT: 2px;
+    /* WIDTH: 100%; can cause trouble in Firefox 1.5 */
+}
+
+.disabled_buttons_safari
+{
+	BACKGROUND-COLOR: #1773cf;
+	BACKGROUND-IMAGE: url(/CAisd/img/pagebutton_bg2.png);
+	BACKGROUND-REPEAT: repeat-x;
+	BORDER-BOTTOM: 0px;
+	BORDER-LEFT: 0px;
+	BORDER-RIGHT: 0px;
+	BORDER-TOP: 0px;
+	COLOR: #999999;
+	CURSOR: default;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 0.9em;
+	FONT-WEIGHT: bold;
+	PADDING-LEFT: 2px;
+	PADDING-RIGHT: 2px;
+}
+.button_legend
+{
+	COLOR: Black;
+	FONT-FAMILY: Arial,Helvetica,sans-serif;
+	FONT-SIZE: 0.8em;
+	FONT-STYLE: normal;
+	FONT-WEIGHT: bold;
+	white-space:nowrap;
+}
+
+.firefox_fieldset
+{
+    border: 1px solid #7eadd9;
+    -moz-border-radius: 2px;
+    padding: 0px;    
+}
+
+.errorField
+{
+	BORDER: thick red solid;
+}
+
+.focusErrorField
+{
+	BACKGROUND-COLOR: #FFFFFF;
+	BORDER: thick #FF0033 solid;
+}
+
+.focusField
+{
+	background-color: #fcffb6;
+}
+
+.focusField07em
+{
+	background-color: #FFFFFF;
+    font-size: 0.7em;
+}
+
+.hinttext
+{
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.labeltext
+{
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	color:#333333;
+}
+
+.lblistheaderfont
+{
+	COLOR: White;
+	FONT: bold 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.lookup, .lookup1em
+{
+	COLOR: #DD3126;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: bold;
+	TEXT-DECORATION: none;
+    CURSOR: pointer;
+}
+
+.lookup1em
+{
+	FONT-SIZE: 1.0em;
+}
+
+.lookupnolink
+{
+	COLOR: #333333;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: bold;
+}
+
+
+
+/*                                                     */
+/* these styles apply to the menu bars                 */
+/*                                                     */
+.menubar
+{
+	BORDER: 0;
+	COLOR: White;
+	CURSOR: pointer;
+	FONT: bold 0.8em Verdana, Arial, Helvetica, sans-serif;
+	TEXT-DECORATION: none;
+}
+
+.menu_selected_text
+{
+	cursor:pointer;
+}
+
+.messagetext
+{
+	FONT: bold 1.0em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.navigate
+{
+	COLOR: gray;
+	FONT-SIZE: 0.8em;
+	TEXT-DECORATION: none;
+}
+
+.navtext
+{
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.page_header
+{
+	BACKGROUND-IMAGE: url('/CAisd/img/portal_tab_selected_center.png');
+	BORDER-BOTTOM: 1px solid #adb1bc;
+	COLOR: #333333;
+	FONT-FAMILY: Verdana, Arial,Helvetica,sans-serif;
+	FONT-SIZE: 1.05em;
+	FONT-STYLE: normal;
+	FONT-WEIGHT: bold;
+	PADDING-BOTTOM: 2px;
+	PADDING-LEFT: 5px;
+	PADDING-RIGHT: 2px;
+	PADDING-TOP: 2px;
+}
+
+.page_header_container
+{
+	overflow-x: auto;
+	width: 100%;
+	overflow-y: hidden;
+	height: 50px;
+}
+
+.page_header_main
+{
+	width: 100%;
+	background-image: url('/CAisd/img/portal_tab_selected_center.png');
+	border-bottom: 1px solid #adb1bc;
+	color: #333333;
+	font-family: Verdana, Arial,Helvetica,sans-serif;
+	font-size: 1.05em;
+	font-style: normal;
+	font-weight: bold;
+	padding-left: 5px;
+}
+
+.page_header_row
+{
+	height: 25px;
+}
+
+.page_header_title_container
+{
+	text-align: left;
+	width: 99%;
+	border-width: 0px;
+	border-collapse: collapse;
+	margin: 0px;
+	padding: 0px;
+	white-space: nowrap;
+}
+
+.page_header_title
+{
+	margin: 0px;
+}
+
+.page_header_buttons_left
+{
+	text-align: left;
+	width: 1%;
+	border-width: 0px;
+	border-collapse: collapse;
+	margin: 0px;
+	padding: 0px;
+}
+
+.page_header_buttons_right
+{
+	text-align: right;
+	width: 1%;
+	border-width: 0px;
+	border-collapse: collapse;
+	margin: 0px;
+	padding: 0px;
+}
+
+.refdata0
+{
+	BACKGROUND-COLOR: White;
+}
+
+.refdata0, .refdata1
+{
+	COLOR: Black;
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: bold;
+	TEXT-ALIGN: left;
+}
+
+.refdata1
+{
+	BACKGROUND-COLOR: #D3D3D3;
+}
+
+.requiredlabeltext
+{
+	COLOR: #333333;
+	FONT: bold 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.requiredlookup
+{
+	COLOR: #DD3126;
+	FONT: bold 0.7em Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-DECORATION: none; 
+}
+
+.scbd
+{
+	WHITE-SPACE: nowrap;
+}
+
+.scbd, .scbdhead
+{
+	BORDER: 0;
+	COLOR: Black;
+	FONT-FAMILY: Verdana, Arial, Helvetica,  sans-serif;
+	FONT-SIZE: 0.82em;
+	TEXT-DECORATION: none;
+}
+
+/*                                                     */
+/* these styles apply to the scoreboard                */
+/*                                                     */
+.scbdtext, .scbdselected, .scbdfoc, .scbdtextfoc,.fldrlink, .fldrlinkfoc
+{
+	BORDER: 0;
+	COLOR: #333333;
+	FONT-FAMILY: Verdana, Arial, Helvetica,  sans-serif;
+	FONT-SIZE: 1.0em;
+	TEXT-DECORATION: none;
+}
+
+.statuslabeltext
+{
+	COLOR: #FF0000;
+	FONT: bold 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.table_navigation_listall
+{
+	COLOR: #DD3126;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 70%;
+	FONT-WEIGHT: bold;
+	TEXT-DECORATION: none;
+}
+
+.title1text
+{
+	FONT: bold 120% Verdana, Arial, Helvetica,  sans-serif;
+}
+
+.title2text
+{
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 100%;
+	FONT-WEIGHT: bold;
+}
+
+.title3text
+{
+	FONT: bold 70% Verdana, Arial, Helvetica,  sans-serif;
+	MARGIN-BOTTOM: 0;
+	MARGIN-TOP: 0;
+}
+
+.fldrtext
+{
+	FONT: bold 100% Verdana, Arial, Helvetica,  sans-serif;
+	MARGIN-BOTTOM: 0;
+	MARGIN-TOP: 0;
+}
+
+.title4text
+{
+	FONT-WEIGHT: bold;
+}
+
+.updated
+{
+	BACKGROUND: yellow;
+}
+
+.welcomebanner
+{
+	background-image: url('/CAisd/sitemods/img/welcomebanner.png');
+	HEIGHT: 26px;
+	PADDING-BOTTOM: 2px;
+	PADDING-LEFT: 5px;
+	PADDING-RIGHT: 5px;
+	PADDING-TOP: 2px;
+}
+
+.welcomebannerlabel
+{
+	COLOR: #FFFFFF;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: normal;
+	PADDING: 1px;
+	TEXT-DECORATION: none;
+}
+
+.welcomebannerlink
+{
+	COLOR: White;
+	FONT-FAMILY: verdana, arial, helvetica;
+	FONT-SIZE: 70%;
+	FONT-WEIGHT: normal;
+	PADDING: 1px;
+}
+
+.welcomebannerlogin
+{
+	COLOR: #FFCC33;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: bold;
+	PADDING: 1px;
+	TEXT-DECORATION: none;
+}
+
+.welcomebannertimestamp
+{
+	COLOR: #FFFFFF;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: normal;
+	PADDING: 1px;
+	TEXT-DECORATION: none;
+}
+
+A
+{
+	COLOR: #DD3126;
+	FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+	FONT-WEIGHT: bold;
+}
+
+A.detail
+{
+	COLOR: Blue;
+	FONT-SIZE: 0.8em;
+}
+
+A.fldrlink
+{
+	CURSOR: default;
+	FONT-WEIGHT: normal;
+}
+
+A.fldrlink:hover
+{
+	TEXT-DECORATION: none;
+}
+
+A.fldrlinkfoc
+{
+	BACKGROUND-COLOR: #FFFF99;
+	CURSOR: default;
+	FONT-WEIGHT: normal;
+}
+
+A.fldrlinkfoc:hover
+{
+	BACKGROUND-COLOR: #FFFF99;
+	TEXT-DECORATION: none;
+}
+
+A.listAdvisory
+{
+	COLOR: #FFB000;
+	TEXT-DECORATION: underline;
+}
+
+A.listEmergency
+{
+	COLOR: Red;
+	TEXT-DECORATION: underline;
+}
+
+A.listHilite
+{
+	COLOR: Red;
+	TEXT-DECORATION: underline;
+}
+
+A.listWarning
+{
+	COLOR: #FFA000;
+	TEXT-DECORATION: underline;
+}
+
+A.menubar:hover
+{
+	COLOR: #FF9933;
+}
+
+A.menubar:visited
+{
+	COLOR: #FF9933;
+}
+
+A.navigate, A:link.navigate, A:visited.navigate
+{
+	COLOR: Blue;
+}
+
+A.record
+{
+	COLOR: #DD3126;
+	FONT-FAMILY: verdana,Arial,Helvetica,sans-serif;
+	FONT-WEIGHT: normal;
+	TEXT-ALIGN: left;
+	TEXT-DECORATION: none;
+}
+
+A.scbd
+{
+	COLOR: #333333;
+	CURSOR: pointer;
+	FONT-WEIGHT: normal;
+}
+
+A.scbd, A.scbdhead, A.scdbtext, A.scbdselected, A.scbdselectedfoc
+{
+	FONT-SIZE: 1.0em;
+}
+
+A.scbd:active, A.scbd:hover,A.scbdfoc:active, A.scbdfoc:hover,A.scbdselectedfoc:active, A.scbdselectedfoc:hover
+{
+	TEXT-DECORATION: none;
+}
+
+A.scbdfoc
+{
+	BACKGROUND-COLOR: #FCFFB6;
+	CURSOR: pointer;
+	FONT-WEIGHT: normal;
+}
+
+A.scbdhead
+{
+	CURSOR: default;
+	FONT-WEIGHT: bold;
+}
+
+A.scbdselected,A.scbdselectedfoc
+{
+	BACKGROUND-COLOR: #D9ECFF;
+	COLOR: #333333;
+	CURSOR: pointer;
+	FONT-WEIGHT: bold;
+}
+
+A.scbdtext
+{
+	CURSOR: pointer;
+	FONT-WEIGHT: normal;
+}
+
+A.scbdtextfoc
+{
+	BACKGROUND-COLOR: #FCFFB6;
+	CURSOR: pointer;
+	FONT-WEIGHT: normal;
+}
+.imgTreeNodeFolder
+{
+	vertical-align: middle;
+}
+
+.treeNodeImagePlusMinus
+{
+	vertical-align: top;
+}
+
+.spanTreeNodeText
+{
+	vertical-align: middle;
+}
+
+A.scbdupdated
+{
+	COLOR: Blue;
+	FONT-WEIGHT: bold;
+}
+
+A.tab
+/* use images for the background*/
+{
+	BORDER: 0;
+	COLOR: #d8dce4;
+	CURSOR: default;
+	TEXT-DECORATION: none;
+}
+
+A.tab:hover
+{
+	COLOR: #d8dce4;
+}
+
+A.tabUnselected
+{
+	COLOR: #f3f6f9;
+}
+
+A.tabUnselected:hover
+{
+	COLOR: #f3f6f9;
+}
+
+A:active.navigate, A:hover.navigate
+{
+	COLOR: #CD5C5C;
+}
+
+/* After adding Doctype validation, the HTML and BODY tags represent block elements that automatically expand to fill the width of their container, 
+which is the browser's viewport. They DO NOT expand vertically. This is a problem since when the containing elements represent height in percentage, say 100%,
+it would be 100% of their parent elements which may not be as high as the browser's veiwport. To fix this we need to make HTML and BODY elements height to 100% 
+which is 100% of browser viewport  -- SCO36849
+*/
+body, html
+{
+	height:100%;
+}
+
+BODY
+{
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: normal;
+}
+
+/*                                                     */
+/* these styles apply to detail_XXX_ro forms           */
+/* (e.g. view only forms that are record details)      */
+/*                                                     */
+BODY.detailro
+{
+	BACKGROUND-COLOR: White;
+	FONT: 1.0em Verdana, Arial, Helvetica,  sans-serif;
+	white-space:nowrap;
+}
+
+/*                                                     */
+/* these styles apply to detail_XXX_edit	form          */
+/* (e.g. visible read-only tables on the edit forms)   */
+/*                                                     */
+BODY.editform, DIV.editform
+{
+	BACKGROUND-COLOR: White;
+	FONT: 1.0em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/*                                                     */
+/* these styles apply to list_XXX pages                */
+/*                                                     */
+BODY.list
+{
+	BACKGROUND-COLOR: White;
+	FONT: 1.0em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/*                                                     */
+/* these styles apply to the login_form                */
+/*                                                     */
+BODY.loginform
+{
+	BACKGROUND-COLOR: #FFFFFF;
+	FONT: 100% Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/*                                                     */
+/* these styles apply to the read-only messages        */
+/*                                                     */
+BODY.messages
+{
+	BACKGROUND-COLOR: White;
+	FONT: 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/*                                                     */
+/* these styles apply to the no frames menu            */
+/*                                                     */
+BODY.noframesmenu
+{
+	BACKGROUND-COLOR: #9CC2E4;
+	FONT: 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/*                                                     */
+/* these styles apply to the reference data form       */
+/*                                                     */
+BODY.refdata
+{
+	BACKGROUND-COLOR: White;
+	COLOR: Black;
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/*                                                     */
+/* these styles apply to the reports                   */
+/*                                                     */
+BODY.report
+{
+	BACKGROUND-COLOR: White;
+	FONT: 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+BODY.scbd
+{
+	BACKGROUND-COLOR: White;
+	FONT-FAMILY: Verdana, Arial, Helvetica,  sans-serif;
+	FONT-SIZE: 1.0em;
+	MARGIN-LEFT: 5px;
+	MARGIN-RIGHT: 5px;
+}
+
+/*                                                     */
+/* these styles apply to search_XXX  forms             */
+/* (e.g. visible read-only tables on the edit forms)   */
+/*                                                     */
+BODY.searchform
+{
+	BACKGROUND-COLOR: White;
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+DIV.dynLayer, LAYER.dynLayer, .dynLayer
+{
+	BACKGROUND-COLOR: #000080;
+	BORDER-STYLE: outset;
+	BORDER-WIDTH: thin;
+	POSITION: absolute;
+	Z-INDEX: 101;
+}
+
+DIV.notebook
+{
+	BACKGROUND-COLOR: #FFFFFF;
+	BORDER-BOTTOM: inset thin #191970;
+	BORDER-LEFT: inset thin #191970;
+	BORDER-RIGHT: inset thin #191970;
+	DISPLAY: none;
+	HEIGHT: auto;
+	WIDTH: 90%;
+}
+
+DIV.scrollbar
+{
+	HEIGHT: 100%;
+	OVERFLOW: auto;
+	WIDTH: 100%;
+}
+
+H1
+{
+	FONT-SIZE: 1.2em;
+	FONT-WEIGHT: bold;
+}
+
+H1.report
+{
+	FONT: bold 1.0em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+H2
+{
+	CURSOR: default;
+	FONT: bold 0.9em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+H2.report
+{
+	FONT: bold 0.9em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+H3
+{
+	CURSOR: default;
+	FONT: bold 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+H3.report
+{
+	FONT: bold 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+H3.screenReader
+{
+    color: #333333;
+	cursor: default;
+	font: 1.2em Verdana, Arial, Helvetica,  sans-serif;
+    margin: 0px;
+    text-align: left;
+}
+
+H4.report
+{
+	FONT: bold 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+img.scbdnode
+{
+	BACKGROUND-COLOR: inherit;
+	vertical-align: middle;
+}
+
+img.scbdnodeFoc
+{
+	BACKGROUND-COLOR: #FFFFFF;
+}
+
+INPUT, SELECT
+{
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: normal;
+}
+
+TEXTAREA
+{
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: normal;
+	RESIZE:none;
+	
+}
+
+p.advisory
+{
+	COLOR: #FFB000;
+}
+
+p.emergency
+{
+	COLOR: Red;
+}
+
+SELECT.errorField
+{
+	BACKGROUND-COLOR: #FF0033;
+}
+
+SELECT.focusErrorField
+{
+	COLOR: Red;
+}
+
+SELECT.focusField
+{
+	BACKGROUND-COLOR: White;
+}
+
+SPAN.AdvisoryTitle
+{
+	COLOR: #FFB000;
+}
+
+SPAN.EmergencyTitle
+{
+	COLOR: Red;
+}
+
+SPAN.HiliteTitle
+{
+	COLOR: Red;
+}
+
+SPAN.WarningTitle
+{
+	COLOR: #FFA000;
+}
+TABLE.detailro
+{
+	white-space: normal;
+}
+
+TABLE.normalTxt
+{
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 1.0em;
+	FONT-WEIGHT: normal;
+}
+
+TABLE.notebook
+{
+	BORDER: 0;
+	WIDTH: 90%;
+}
+
+TABLE.report
+{
+	FONT: 1.1em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+TABLE.tab
+{
+	WIDTH: 100%;
+}
+
+TD.bincountcells
+{
+	TEXT-ALIGN: center;
+}
+
+TD.binleftlabels
+{
+	FONT: bold 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+TD.detailro
+{
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+TD.detailroTab
+{
+	FONT: 0.85em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+TD.negdur
+{
+	COLOR: Red; 
+	FONT:bold 0.85em Verdana, Arial, Helvetica, sans-serif;
+}
+
+TD.editinfo
+{
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+	VERTICAL-ALIGN: top;
+}
+
+TD.noframesmenu
+{
+	FONT: 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+TD.refdata
+{
+	BACKGROUND-COLOR: White;
+	COLOR: #333333;
+	FONT: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TD.reserr0
+{
+	BACKGROUND-COLOR: White;
+	COLOR: Red;
+	FONT: bold 80% Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TD.reserr1
+{
+	BACKGROUND-COLOR: #D3D3D3;
+	COLOR: Red;
+	FONT: bold 80% Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TD.reserrSel
+{
+	BACKGROUND-COLOR: #FFFF99;
+	COLOR: Red;
+	FONT: bold 80% Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TD.title2text
+{
+}
+
+TH.bintoplabels
+{
+	FONT: bold 0.8em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+TH.detailro
+{
+	background-color: #dfe3e9;
+	COLOR: #333333;
+	FONT-FAMILY: Verdana, Arial, helvetica, sans-serif;
+	FONT-SIZE: 0.7em;
+	FONT-WEIGHT: bold;
+}
+
+TH.editinfo
+{
+	FONT: bold 0.7em Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TH.refdata
+{
+	BACKGROUND-COLOR: White;
+	COLOR: #333333;
+	FONT: bold 0.7em Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+th.results
+{
+	border:solid 1px;
+	border-color:#eeeeee #d0d0d0 #eeeeee #eeeeee;
+	background:#dfe3e9 url(/CAisd/img/grid3-hrow.gif);
+	font-weight:bold;
+	color:#333333;
+	outline:none;
+	font-size:70%;
+	font-family: Verdana, Arial, Helvetica,  sans-serif;
+	padding: 4px;
+	text-align: left;
+}
+
+td.results
+{
+	FONT-FAMILY: Verdana, Arial, Helvetica,  sans-serif;
+	FONT-SIZE: 85%;
+	PADDING: 2px;
+}
+
+TR.results0
+{
+	BACKGROUND-COLOR: White;
+	COLOR: #333333;
+	FONT: 80% Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TR.results1
+{
+	background:#ebf0f9;
+	COLOR: #333333;
+	FONT: 80% Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TR.resultsSel
+{
+	BACKGROUND-COLOR: #D7E8F9;
+	COLOR: #333333;
+	FONT: 80% Verdana, Arial, Helvetica,  sans-serif;
+	TEXT-ALIGN: left;
+}
+
+TR.row_even
+{
+	BACKGROUND-COLOR: White;
+}
+
+TR.row_odd
+{
+	BACKGROUND-COLOR: #D3D3D3;
+}
+
+DIV.ScrollAuto
+{
+    OVERFLOW: auto; 
+    WIDTH: 100%;
+}
+
+DIV.ScrollScroll
+{
+    OVERFLOW: scroll; 
+    WIDTH: 100%;
+}
+
+/* Profile browser */
+
+TD.profile_browser_link
+{
+	font-family: Verdana, Arial, Helvetica,  sans-serif;
+	font-size: 0.7em;
+	white-space: nowrap;
+	text-align: left;
+}
+
+.profile_browser_img
+{
+	width: 16px;
+	height: 22px;
+	border-width: 0px;
+	margin: 0px;
+}
+
+/* Alert Banner */
+
+.alert_banner_img
+{
+	border-width: 0px;
+	width: 14px;
+	height: 14px;
+}
+
+/* Edit in List */
+
+.list_edit_header_screenreader
+{
+	margin: 0px;
+	font-size: 0.75em;
+}
+
+.list_edit_lookup
+{
+	color: #DD3126;
+	font-family: verdana, arial, helvetica, sans-serif;
+	font-size: 1.0em;
+	font-weight: bold;
+	text-decoration: underline;
+    cursor: pointer;
+}
+
+.list_edit_row_header
+{
+	text-align: left;
+	vertical-align: baseline;
+}
+
+.list_edit_cell
+{
+	padding: 1px;
+	border-width: 1px;
+}
+
+.list_edit_container
+{
+	padding: 0px;
+	border-width: 1px;
+	border-spacing: 1px;
+}
+
+
+/* WSP page */
+
+.wspicon_container
+{
+	border-width: 0px;
+	border-spacing: 0px;
+	padding: 0px;
+	border-collapse: collapse;
+	text-align: center;
+}
+
+.wspicon_cell_updates_allowed
+{
+	padding: 0px;
+	border-width: 0px;
+	vertical-align: middle;
+	width: 16px;
+	background-color: #FFFF00;
+}
+
+.wspicon_cell_updates_rejected
+{
+	padding: 0px;
+	border-width: 0px;
+	vertical-align: middle;
+	width: 16px;
+	background-color: #FF6666;
+}
+
+/* Welcome Banner */
+
+.welcome_banner_login_info
+{
+	vertical-align: top;
+	padding: 1px;
+	text-align: right;
+	white-space:nowrap;
+}
+
+.welcome_banner_role_info
+{
+	vertical-align: middle;
+	text-align: right;
+	padding: 0px;
+}
+
+.welcome_banner_close_window_link
+{
+	white-space: nowrap;
+	vertical-align: middle;
+	text-align: right;
+}
+
+.welcome_banner_container
+{
+	border-width: 0px;
+	border-spacing: 0px;
+	padding-top: 5px;
+	border-collapse: collapse;
+	vertical-align: middle;
+}
+
+/* Survey Page */
+
+.survey_area
+{
+	border-spacing: 7px;
+	width: 70%;
+}
+
+/* Terms of Usage */
+
+.terms_of_usage_content_area
+{
+	border-spacing: 0px;
+	padding: 0px;
+	width: 99%;
+	border-width: 0px;
+	border-collapse: collapse;
+}
+
+.terms_of_usage_image
+{
+	width: 99%;
+	height: 1px;
+	border-width: 0px;
+}
+
+
+/* SpellCheck Page */
+
+.spell_check_fields_container
+{
+	width: 100%;
+	margin-top: 8px;
+	margin-bottom: 8px;
+	padding: 0px;
+	border-spacing: 0px;
+	border-width: 0px;
+}
+
+.spell_check_field_header_container
+{
+	width: 20%;
+	padding: 2px;
+}
+
+.spell_check_field_header
+{
+	text-align: right;
+}
+
+.spell_check_field
+{
+	width: 50%;
+	padding: 2px;
+}
+
+.spell_check_text_area_container
+{
+	width: 95%;
+	border-spacing: 0px;
+	border-width: 0px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.spell_check_text_area_field
+{
+	width: 100%;
+	padding: 2px;
+	border-spacing: 0px;
+	border: 1pt blue solid;
+	background-color: #ffffff;
+	vertical-align: top;
+}
+
+.spell_check_text_area
+{
+	font: 9pt Verdana, Arial, Helvetica, sans-serif;
+	height: 100px;
+	width: 100%;
+	overflow: auto;
+}
+
+/* Page Section */
+
+.page_section_container
+{
+    background: #fdf8e2;
+    padding: 4px;
+	border-width: 0px;
+    border-bottom: 4px #ffffff solid;
+	border-spacing: 0px;
+	width: 100%;
+}
+
+/* Logoff Reports Server Message */
+
+.logoff_reports_mesg
+{
+	background-color: #C5DFF9;
+	position: absolute;
+	top: 100px;
+	left: 200px;
+	z-index: 1;
+	width: 255px;
+	height: 100px;
+	border-left: 1px solid #8B9399;
+	border-top: 1px solid #8B9399;
+	border-right: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+	font-weight: bold;
+	overflow: auto;
+	display: none;
+	text-align: center;
+}
+
+
+/* Generic styles - Begin */
+
+.generic_table
+{
+	border-spacing: 0px;
+	padding: 0px;
+	margin: 0px;
+	width: 100%;
+	border-width: 0px;
+	border-collapse: collapse;
+}
+
+.gn_dtbuilder_textbox
+{
+    font-family: arial;
+    font-size: 9pt;
+    width: 345px;
+}
+
+.gn_dtbuilder_caption
+{
+    font-weight: bold;
+    color: white;
+    font-size: 1.2em;
+}
+
+.gn_dtview_navbar
+{
+    font-size :0.3em;
+}
+
+.gn_highlight_search
+{
+    color: blue;
+    background-color: yellow;
+}
+
+.gn_white_smoke_background
+{
+    background-color: #f4f4f4;
+}
+
+.gn_td_font_size
+{
+    font-size: 5px;
+}
+
+.gn_text_big
+{
+    font-size: 0.9em;
+}
+
+.gn_text_small
+{
+    font-size: 0.7em;
+}
+
+.gn_container_no_border
+{
+	border-width: 0px;
+}
+
+.gn_container_no_padding
+{
+	padding: 0px;
+}
+
+.gn_container_border_1
+{
+	border-style: inset;
+	border-width: 1px;
+}
+
+.gn_container_border_3
+{
+	border-style: outset;
+	border-width: 3px;
+}
+
+.gn_container_white_background
+{
+	background-color: white;
+}
+
+.gn_disabled_text
+{
+	background-color:gainsboro;
+}
+
+.gn_content_center
+{
+	text-align: center;
+}
+
+.gn_content_right
+{
+	text-align: right;
+}
+
+.gn_width_100pct
+{
+	width: 100%;
+}
+
+.gn_width_500px
+{
+    width: 500px; 
+}
+
+.gn_width_370px
+{
+    width: 370px; 
+}
+
+.gn_font_size_1em
+{
+	font-size: 1.0em;
+}
+
+.gn_container_no_margin
+{
+	margin: 0px;
+}
+
+.gn_display_block
+{
+	display: block;
+}
+
+.gn_clear_right
+{
+	clear: right;
+}
+
+.gn_overflow_visible
+{
+	overflow: visible;
+}
+
+/* Background color for header cells */
+.gn_attribute_header_background
+{
+	background-color: inherit;
+}
+
+/* Bold text for a label*/
+.gn_bold_label
+{
+	FONT: bold 0.7em Verdana, Arial, Helvetica,  sans-serif;
+}
+
+/* Bold text */
+.gn_bold_text
+{
+	font-weight: bold;
+}
+
+/* For a list to be shown in table(with only border) without any colors and borders for rows */
+.gn_control_list
+{ 
+	background-color: #ffffff;
+	border-left: #8B9399 1px solid; 
+	border-bottom: #1e385d 1px solid; 
+	border-right: #1e385d 1px solid; 
+	padding-top: 0px;
+	padding-bottom: 3px;
+	border-top: 1px solid #000000;
+}
+
+/* Buttonface background */
+.gn_buttonface_background
+{
+	background-color: buttonface;
+}
+
+/* Generic styles - End */
+/*added by manmu01 for css cleanup */
+/*ahdmenu.js*/
+.menuBarContainer
+{
+	BACKGROUND-COLOR: #9CC2E4;
+	COLOR: WHITE;
+	FONT: bold 0.8em Verdana, Arial, Helvetica, sans-serif;
+	TEXT-DECORATION: none;
+	height: 30px;
+	border-style: none;
+	border-width: 0px;
+	border-spacing: 0px;
+	padding:0px;
+}
+
+.subMenuItemContainer
+{
+	width:200px;
+	visibility:hidden;
+	background-color:#9CC2E4;
+	z-index: 99;
+}
+
+.imgBtnText
+{
+	border-style: none;
+	border-width: 0px;
+	height: 23px;
+}
+
+.ctxMenuContainer
+{
+	position:absolute;
+	z-index:1;
+}
+
+.ctxMenuOuterColor
+{
+	background-color:#cccccc;
+}
+
+
+.menuDetailro
+{
+	font: 0.7em Verdana, Arial, Helvetica,  sans-serif;
+	vertical-align: top;
+}
+
+/*apc.js*/
+
+.matrix_outer_container
+{
+	width: 89%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+	border-style: inset;
+	border-width: 0px;
+	border-spacing: 0px;
+	padding: 0px;
+}
+
+.matrix_inner_container_header
+{
+	font-family: Verdana, Arial, helvetica, sans-serif;
+	font-size: 0.7em;
+	margin-left: auto;
+	margin-right: auto;
+	border-style: inset;
+	border-width: 1px;
+}
+
+.matrix_inner_container
+{
+	width: 100%;
+	border-style: outset;
+	border-width: 1px;
+}
+
+.matrix_second_inner_container
+{
+	font-family: Verdana, Arial, helvetica, sans-serif;
+	font-size: 0.7em;
+	float: left;
+	text-align: left;
+	border-style: inset;
+	border-width: 1px;
+	width: 98%;
+}
+
+.apc_matrix_list_value
+{
+	border-style: inset;
+	border-width: 1px;
+}
+
+.apc_matrix_list
+{
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.apc_reset_btn_container
+{
+	border-style: inset;
+	border-width: 1px;
+	width: 100%;
+}
+
+/*change_cat.js*/
+
+.chg_cat
+{
+	font-family: Verdana, Arial, helvetica, sans-serif;
+	font-size: 1.0em;
+}
+
+/*cmdb_twa.js*/
+.list_container
+{
+	height: 420px; 
+	overflow: auto; 
+	width: 100%;
+}
+
+.cmdb_twa_attr_value_ro
+{
+	background-color:gainsboro; 
+	font-size: 1em;
+}
+
+/*cmdb_versioning.js*/
+.build_no_calender
+{
+	background-color: white; 
+}
+
+.cmdb_cal_container
+{
+	width: 80%;
+	border-style: inset;
+	border-width: 1px;
+	padding: 0px;
+	font-size:.9em;
+}
+
+.float_left
+{
+	float:left; 
+	border-style: none;
+	border-width: 0px;
+	cursor: pointer;
+}
+
+.float_left_no_ptr
+{
+	float:left; 
+	border-style: none;
+	border-width: 0px;
+}
+
+.float_right
+{
+	float: right; 
+	text-align:right; 
+	border-style: none;
+	border-width: 0px;
+}
+
+.float_left_chkbox
+{
+	float: left; 
+	border-style: none;
+	border-width: 0px; 
+	height: 13px; 
+	width: 13px; 
+	margin-bottom: 0px;
+}
+
+.adv_basic_view
+{
+	float:left; 
+	width:100%; 
+	background-color:white; 
+	white-space: nowrap; 
+}
+
+/*cst_catitem.js */
+.lnk_image
+{
+	vertical-align: bottom; 
+	width: 12px;
+	height: 12px;
+	border-style: solid;
+	border-width: 0px;
+}
+
+/*date_chooser.js */
+.cal_container
+{
+	border-style:outset;
+	border-width:1px;
+}
+
+.cal_container_cell
+{
+	border-style:inset;
+	border-width:1px;
+	width:14%;
+}
+
+.cal_next_mnth_days
+{
+	color:gray;
+}
+
+.cal_current_day
+{
+	color:red;
+}
+.cal_time_container
+{
+	margin: 0px; 
+	padding: 2px;
+}
+.cal_weekend
+{
+	color: #e0e0e0;
+}
+
+/*detail_form.js*/
+.dtl_page_hdr
+{
+	overflow: auto;
+	width: 100%; 
+	overflow-y: hidden;
+}
+
+.dtl_page_hdr_container
+{
+	padding: 0px;
+	margin: 0px;
+	border: none;
+	width: 100%;
+}
+
+.dtl_page_hdr_left
+{
+	float: left;
+	width: 99%;
+	white-space: nowrap;
+}
+
+.dtl_page_hdr_right
+{
+	float: right;
+	width: 1%;
+}
+
+.dtl_field_val_ro
+{
+	background-color:gainsboro;
+}
+
+.dtl_img_attr
+{
+	width: 12px;
+	height: 12px;
+	border-style: none;
+	border-width: 0px;
+	vertical-align: middle;
+}
+
+.dtl_html_edit_box
+{
+	display:none;
+	overflow:auto;
+	font-size:1.0em;
+	background-color:#f4f4f4;
+	border-style:solid;
+	border-width:1px;
+}
+.dtl_txt_ro
+{
+	border-style: none;
+	border-width: 0px;
+	background-color:white;
+}
+.dtl_html_edit_box_ro
+{
+	width:100%;
+	font-size:1.0em;
+	padding:0px;
+	margin:0px;
+}
+.dtl_html_edit_box_knwl_ro
+{
+	font-family: Verdana, Arial, helvetica, sans-serif;
+	font-size:1.0em;
+	font-weight:normal;
+	text-align:left;
+	color:000000;
+	width:100%;
+	padding:0px;
+	margin:0px;
+}
+.dtl_html_edit_box_knwl_ro_bold
+{
+	font-family: Verdana, Arial, helvetica, sans-serif;
+	font-size:1.0em;
+	font-weight:bold;
+	color:000000;
+}
+.knowledge_report_card_tpl_1
+{
+	text-align:center;
+	background:#DFE3E9;
+	padding:1px;
+	border:1px solid #ffffff;
+}
+
+/*html_editor.js*/
+.html_editor_inner_container
+{
+	display: none;
+	overflow: auto;
+	font-size: 12px;
+	background-color: #f4f4f4;
+	border-style: solid; 
+	border-width: 1px;
+}
+.html_editor_container
+{
+	padding: 0px;
+	border-spacing: 0px;
+}
+.html_editor_edit_box
+{
+	font-family: Verdana, Arial, helvetica, sans-serif;
+	font-size: 0.7em;
+	float: left;
+}
+div.dtl_html_edit_box h2:hover, div.html_heading_ro h2:hover 
+{
+    text-decoration:none;
+}
+div.dtl_html_edit_box h1, div.html_heading_ro h1, 
+div.dtl_html_edit_box h2, div.html_heading_ro h2,
+div.dtl_html_edit_box h3, div.html_heading_ro h3,
+div.dtl_html_edit_box h4, div.html_heading_ro h4,
+div.dtl_html_edit_box h5, div.html_heading_ro h5,
+div.dtl_html_edit_box h6, div.html_heading_ro h6
+{
+    color:#333333;
+    font-family:Verdana,Arial,Helvetica,Sans-serif;
+    font-weight:bold;
+    background-image:none;
+    cursor:default;
+    margin-top:10px;
+    margin-bottom:10px;
+    margin-left:0;
+    margin-right:0;
+    padding-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    text-align:left;
+}
+div.dtl_html_edit_box h1, div.html_heading_ro h1
+{
+    font-size:1.2em;
+}
+div.dtl_html_edit_box h2, div.html_heading_ro h2
+{
+    font-size:1.1em;
+}
+div.dtl_html_edit_box h3, div.html_heading_ro h3
+{
+    font-size:1.0em;
+}
+div.dtl_html_edit_box h4, div.html_heading_ro h4
+{
+    font-size:0.9em;
+}
+div.dtl_html_edit_box h5, div.html_heading_ro h5
+{
+    font-size:0.8em;
+}
+div.dtl_html_edit_box h6, div.html_heading_ro h6
+{
+    font-size:0.7em;
+}
+
+/*about.htmpl */
+.xsmall_font
+{
+	font-size: x-small;
+}
+
+
+.font_normal
+{
+	font-size: 1.0em;
+}
+
+/* Styles for KT forms */
+.recent_doc_search
+{
+    border-bottom: 1px #adb1bc solid;
+    border-right: 1px #adb1bc solid;
+    border-left: 1px #adb1bc solid;
+    background: #e7e7e7;
+}
+
+.doc_solution
+{
+    border-bottom: 1px #adb1bc solid;
+    border-top: 1px #adb1bc solid;
+    border-right: 1px #adb1bc solid;
+    border-left: 1px #adb1bc solid;
+}
+
+.border_0_bg_white
+{
+    border-width: 0px;
+    background-color: white;
+}
+
+.navy_bold
+{
+    color: navy;
+    font-weight: bold;
+}
+
+
+.gn_text_normal
+{
+    font-size: 1.0em;
+}
+
+.gn_text_dot8
+{
+    font-size: 0.8em;
+}
+
+.gn_bg_fdf8e2
+{
+    background: #fdf8e2;
+}
+
+.inset_border_2
+{
+    border-style: inset;
+    border-width: 2px;
+    width: 99%;
+}
+
+.txt_comment
+{
+    font-size:1.0em;
+    width:98%;
+}
+
+.gn_display_none
+{
+	display: none;
+}
+
+.border_0_margin_minus_5
+{
+  border-width: 0px;
+  vertical-align:middle;
+  margin-left:-5px;
+}
+
+.kt_adm_doc_set
+{
+  margin:0px;
+  font-size:1.1em;
+}
+
+.kt_width_200
+{
+  width:200px;
+}
+
+.gn_text_1dot4
+{
+  font-size:1.4em;
+}
+
+.gn_text_1dot5
+{
+  font-size:1.5em;
+}
+
+.kt_adm_faq_aging
+{
+  margin-bottom:-3px;
+}
+
+.kt_isscats
+{
+  margin-top:2px;
+  border-style:inset;
+  border-width:2px;
+  width:650px;
+}
+
+.long_300_wide_650
+{
+  height:300px;
+  width:650px;
+}
+
+.search_solu
+{
+  font-family:verdana,Arial,Helvetica,sans-serif;
+  font-size:8pt;
+  color:#333333;
+  font-weight:normal;
+}
+
+.width_100
+{
+    width: 100%; 
+}
+
+.gn_margin_minus_5
+{
+    margin-left:-5px;
+}
+
+.gn_height_99
+{
+    height: 99%;
+}
+
+.assignee_list
+{
+    border-style: inset;
+    border-width: 2px;
+    height: 100%;
+    width: 550px;
+}
+
+.font_1dot3_margin_20
+{
+    font-size: 1.3em;
+    margin-top: 20px;
+}
+
+.vert_mid_horiz_left
+{
+    vertical-align: middle;
+    /*horizontal-align: left;*/
+}
+
+.gn_cursor_ptr
+{
+    cursor: pointer;
+} 
+
+.gn_margin_6
+{
+    margin-left: 6px;
+}
+
+.gn_left_top_margin_0
+{
+    margin-left: 0px;
+    margin-top: 0px;
+}
+
+.gn_background_color_15
+{
+    background-color: #FFFFFF;
+}
+
+.gn_color_15
+{
+    color: #FFFFFF;
+}
+
+.qp_action_list
+{
+    border-style: inset;
+    border-width: 2px;
+    height: 99%;
+    width: 550px;
+}
+
+.task_list_overflow
+{
+    overflow:auto;
+    height:140px;
+    width:100%;
+}
+
+/*  *lrel*.htmpl    */
+td.multi_list_selection, table.multi_list_selection
+{
+	background-color: #eeeeff;
+	border-width: 0px;
+}
+
+.summary_data
+{
+	width: 90%;
+	background-color: #d3d3d3;
+}
+
+.portlet_body_text
+{
+	font-size:0.8em;
+}
+
+.portlet_body_color
+{
+	background:#fdf8e2;
+}
+
+.highlight_recommended_text
+{
+	color:navy;
+	font-weight:bold;
+}
+
+.kd_suggestion_text
+{
+	color:red;
+}
+
+.menulink_separator
+{
+	color:black;
+}
+
+/* For list page with Workflow process */
+.wf_sel_button
+{
+	background-color: #cdfff6;
+	color: blue;
+}
+
+.wf_sel_cell
+{
+	background-color: #dddddd;
+	color: #333333;
+}
+
+/* For information in list on tips pages */
+TD.help_content_list
+{
+	font-size: 0.7em;
+	text-align: left;
+	vertical-align: top;
+	border-style: inset;
+	border-width: 1px;
+	border-color: #e7e7e7;
+}
+
+TH.help_content_list
+{
+	font-size: 0.7em;
+	font-weight: bold;
+	text-align: left;
+	border-style: inset;
+	border-width: 1px;
+	border-color: #e7e7e7;
+}
+
+/* For frames with border */
+.frame_border
+{
+	border: 1px solid #8b939a;
+}
+
+/* Detail forms which include a Workflow tab included this css for id=invisible */
+#invisible
+{
+visibility: hidden;
+}
+
+/* cmdb_launch_visualizer.htmpl */
+.table_groove_border_1
+{
+	border: 1px groove;
+} 
+
+/* cmdb_versioning_tab.htmpl */
+.versioning_anchor_disabled
+{
+	color: #8B9399;
+}
+
+.versioning_table_layout_fixed
+{
+	table-layout: fixed;
+} 
+
+.versioning_selection_area
+{
+	background-color: white;
+	border-style: solid; 
+	border-width: 1px;
+}
+
+.versioning_padding_top
+{
+	padding-top: 1px;
+}
+
+.versioning_snapshot_select_height_width
+{
+	height: 1.5em;
+	width: 14em;
+}
+
+.versioning_selection_area_border
+{
+	background-color: white;
+	border-top: 1px solid black;
+	height: 300px;
+	overflow: auto;
+}
+
+.versioning_resize_bar
+{
+	background-color: #9cc2e4;
+	width: 4px;
+	cursor: e-resize;
+	font-size: 0px;
+}
+
+.versioning_detail_area_border
+{
+	background-color: white;
+	border-style: solid;
+	border-width: 1px;
+	height: 385px;
+	overflow: auto;
+}
+
+.versioning_detail_area
+{
+	overflow: auto; 
+	height: 20em; 
+}
+
+.versioning_vertical_line_img
+{
+	float: left;
+	border: 0px; 
+	padding: 0px;
+	margin: 0px;
+}
+
+.versioning_close_font_size
+{
+	font-size:0.75em;
+}
+
+.versioning_header_font_size
+{
+	font-size:0.35em;
+}
+
+.alertmsg_center
+{
+	width: 100%;
+	color: #000000;
+	text-align:center;
+	font-weight:normal;
+	font-size: 0.7em;
+	background-color: #fcffb6;
+	border: 1px solid #C0C0C0;
+	font-family: Verdana, Arial, helvetica, sans-serif;
+}
+
+.lrel_table
+{
+	width:90%;
+	border-spacing: 0px;
+}
+
+.sdm_product_name_dark_color
+{
+	color: #333333;
+}
+
+.gobtn_position
+{
+	position: absolute; 
+	top: 14px; 
+	right: 0px;
+}
+
+.busy_indicator_position
+{
+	position: absolute; 
+	top: 15px; 
+	right: 15px;
+}
+
+
+

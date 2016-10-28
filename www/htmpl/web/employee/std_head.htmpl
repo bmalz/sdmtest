@@ -1,0 +1,207 @@
+<PDM_IF 0>
+***************************************************************************
+* DO NOT MODIFY THIS FILE!  This file is not migrated for new releases or
+* Service Packs, and your modifications can be lost.  You can use the file
+* std_head_site.htmpl for site modifications.
+***************************************************************************
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  std_head.htmpl 
+// Created: 08/09/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains JavaScript and other HTML that
+//    appears in the <head>...</head> section of every page.
+////////////////////////////////////////////////////////////////////////////
+// $Id: std_head.htmpl,v 1.1 2006/11/01 18:09:38 olsjo01 Exp $
+//
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<!-- BEGIN employee/std_head.htmpl -->
+<PDM_INCLUDE FILE="styles.htmpl">
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/factory_size.js"></SCRIPT>
+<script language="JavaScript">
+<!--
+function startScrollbar() {} // Disable smart scrollbars
+var ahdframeset = ahdtop;
+var cstId = "$cst.id";
+var cstUserId = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.userid</PDM_FMT>';
+var cfgUserType = "$prop.user_type";
+var cfgGuestUser = "$prop.guest_user";
+var cfgSID = "$SESSION.SID";
+var cfgFID = "$prop.FID";
+var cfgCIurl = "$prop.URL_CI";
+var cfgPromptForKnowledge = <PDM_IF "$env.NX_PROMPT_FOR_KNOWLEDGE" == "Yes">true<PDM_ELSE>false</PDM_IF>;
+
+var propFormName = "$prop.form_name";
+var cfgCAISD = "$CAisd";
+var cfgCgi = "$cgi";
+var cfgMenu = "$prop.Menu";
+var currDocument = document;
+
+var propIsITIL = ( null != "$env.NX_OTB_MARKET".match(/itil/) );
+
+var propFormName1 = "$prop.form_name_1";
+var propFormName2 = "$prop.form_name_2";
+var propFormName3 = "$prop.form_name_3";
+var propFactory = "$prop.factory";
+
+var jq = jQuery.noConflict();
+
+var cfgDateFormat = '<PDM_FMT PAD=NO ESC_STYLE=C>${date_format:}</PDM_FMT>';
+var cfgDateFormatNoTime = '<PDM_FMT PAD=NO ESC_STYLE=C>${date_format_no_time:}</PDM_FMT>';
+var cfgListAll = "${LIST_ALL:}";
+var cfgAccessReqMgr = $ACCESS.call_mgr;
+var cfgAccessChgMgr = $ACCESS.change_mgr;
+var cfgAccessIssMgr = $ACCESS.issue_mgr;
+var cfgAccessAdmin = $ACCESS.admin;
+var cfgAccessInventory = $ACCESS.inventory;
+var cfgAccessRef = $ACCESS.reference;
+var cfgAccessNotify = $ACCESS.notify;
+var cfgAccessAnmt = $ACCESS.announcement;
+var cfgAccessCallMgrRef = $ACCESS.call_mgr_reference;
+var cfgAccessCallMgrTpl = $ACCESS.call_mgr_template;
+var cfgAccessChgMgrTpl = $ACCESS.change_mgr_template;
+var cfgAccessChgRef = $ACCESS.change_reference;
+var cfgAccessCi = $ACCESS.ci;
+var cfgAccessCiComn = $ACCESS.ci_common_ro;
+var cfgAccessCiRef = $ACCESS.ci_reference;
+var cfgAccessContact = $ACCESS.contact;
+var cfgAccessGroup = $ACCESS.group;
+var cfgAccessIssMgrTpl = $ACCESS.issue_mgr_template;
+var cfgAccessIssRef = $ACCESS.issue_reference;
+var cfgAccessLoc = $ACCESS.location;
+var cfgAccessNotRef = $ACCESS.notification_reference;
+var cfgAccessOrg = $ACCESS.organization;
+var cfgAccessPri = $ACCESS.prioritization;
+var cfgAccessSvcLvl = $ACCESS.service_level;
+var cfgAccessSite = $ACCESS.site;
+var cfgAccessStoredQuery = $ACCESS.stored_queries;
+var cfgAccessSurvey = $ACCESS.survey;
+var cfgAccessTentAdmin = $ACCESS.tenant_admin;
+var cfgAccessTimeZone = $ACCESS.timezone;
+var cfgAccessWfRef = $ACCESS.workflow_reference;
+var cfgAccessWorkshift = $ACCESS.workshifts;
+var cfgAllowPopupResize = true;
+var edit_form = 0, editing = 0;
+var UserAuth = "${UserAuth:0}" - 0;
+if ( _browser.supportsLayers )
+    cfgAllowPopupResize = ("1" == "$prop.AllowNetscapePopupResize");
+if ( typeof ahdtop == "object" && ahdtop != null ){//versa01
+var cfgFormTitle = ahdtop.cfgFormTitle;
+}    
+
+<PDM_IF "$prop.form_name_1" == "list">
+   <PDM_IF "${current:n/a}" != "n/a">
+   form_title = ( typeof hdrTitleList == "string" ? hdrTitleList : "List ?" );
+   <PDM_ELSE>
+   form_title = ( typeof hdrTitle == "string" ? hdrTitle : "" );
+   </PDM_IF>
+<PDM_ELIF "$prop.form_name_1" == "detail">
+			<PDM_IF "$prop.form_name_3" == "edit">
+			      <PDM_IF "$args.id" == "0">
+			   		form_title = ( typeof hdrTitleNew == "string" ? hdrTitleNew : "Create New ?" );
+			      <PDM_ELSE>
+			   		form_title = ( typeof hdrTitleUpd == "string" ? hdrTitleUpd : "Update ?" );
+			       </PDM_IF>
+			<PDM_ELSE>   
+			   form_title = ( typeof hdrTitle == "string" ? hdrTitle : "" );
+			</PDM_IF>   
+</PDM_IF> 
+
+var propFormRelease = "$prop.release" - 0;
+var propBusy = "$prop.busy";
+if (propFormRelease < 60)
+    propBusy= "no";
+std_head_setup(propBusy,"$args.KEEP.ForLrel");
+<PDM_IF "$prop.form_name_1" == "detail" && "$prop.form_name_3" == "edit">
+   edit_form = 1;
+   editing = ( "$args.id" != "0" );
+</PDM_IF>
+
+//Disable the browser context menu
+<PDM_IF "$prop.DebugScript" != "1" || "$prop.NoRClickMenu" == "1">
+document.oncontextmenu = function (e)
+{
+	return false;
+}
+<PDM_ELSE>
+disable_right_click();
+</PDM_IF>
+
+// Enable action keys on buttons
+activateActionKeys();
+<PDM_IF "$env.NX_OTB_MARKET" != "itil">
+var factoryDisplayName = "${args.DISPLAY_NAME:}";
+<PDM_ELSE>
+<PDM_IF "$prop.factory" == "cr">
+var factoryDisplayName = "$args.type.sym";
+<PDM_ELSE>
+var factoryDisplayName = "${args.DISPLAY_NAME:}";
+</PDM_IF>
+</PDM_IF>
+var argCommonNameAttr = "${args.COMMON_NAME_ATTR:}";
+var saveAckMsgObjectName = '<PDM_FMT ESC_STYLE=C PAD=NO>${args.COMMON_NAME:}</PDM_FMT>';
+
+<PDM_IF 0>
+We need to add the following parameters so that popup window 
+with search filter list can work properly
+</PDM_IF>
+var argDurationList = '${args.duration_list:}';
+var argBackfillField = '${args.KEEP.backfill_field:}';
+var argBackfillForm = '${args.KEEP.backfill_form:}';
+var argBackfillAttr = '${args.KEEP.backfill_attr:}';
+var argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+var argSearchWhereClause_aux = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+argSearchWhereClause_aux = argSearchWhereClause_aux.replace("\&gt;", ">");
+argSearchWhereClause_aux = argSearchWhereClause_aux.replace("\&lt;", "<");
+var argSearchWhereClause = argSearchWhereClause_aux;
+var argSaveSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.KEEP.save_sql_clause</PDM_FMT>';
+var argSortKeys = '${args.sort_keys:}';
+var argCurSortKey = '${args.KEEP.cur_sort_key:}';
+var argListSortCol = '${args.KEEP.prev_sort_col_value:}';	
+var argListOrderBy = '${args.KEEP.prev_order_by_value:}';
+var cfgListAll = "${LIST_ALL:}";
+var servletURL = "${env.NX_SERVLET_SERVER_URL}";
+<PDM_IF "${current:n/a}" == "n/a">
+var searchFilterInitialState = "show";
+<PDM_ELSE>
+var cfgCurrent = '$current';
+var cfgTotal = '$total';
+var cfgRecordCount = '$record_count';
+var cfgStart = '$start';
+var cfgLength = '$length';
+</PDM_IF>
+var argAddlWhere = '<PDM_FMT PAD=NO ESC_STYLE=C>${args.KEEP.ADDITIONAL_WHERE:}</PDM_FMT>';
+var cfgIsPopup = '${args.KEEP.IsPopUp:}';
+var cfgUseTemplate = '${args.use_template:}';
+function full_priority_list()
+{
+return '<PDM_LIST PREFIX=list WHERE="enum>=0" FACTORY=pri ORDER_BY="enum DESC"><PDM_FMT PAD=NO ESC_STYLE=C>$list.sym,$list.enum@,@</PDM_FMT></PDM_LIST>';
+}
+function full_urgency_list()
+{
+return '<PDM_LIST PREFIX=list WHERE="enum>=0" FACTORY=urg ORDER_BY="enum"><PDM_FMT PAD=NO ESC_STYLE=C>$list.sym,$list.enum@,@</PDM_FMT></PDM_LIST>';
+}
+//-->
+</script> 
+<PDM_INCLUDE FILE=tenant_include.htmpl>
+<PDM_INCLUDE FILE="std_head_site.htmpl">
+<!-- END employee/std_head.htmpl -->

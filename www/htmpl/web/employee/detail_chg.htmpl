@@ -1,0 +1,657 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2005 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  detail_chg.htmpl
+// Created: 12/14/05
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////
+//"@(#)$Id: detail_chg.htmpl ASPEN.6 2012/02/16 09:36:00 kumka02 Exp $";
+</PDM_IF>
+
+
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.chg_ref_num Change Order Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.chg_ref_num Update Change Order"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Change Order $args.chg_ref_num"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/cst_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cst_catitem.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/resultset.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$prop.form_name_3" == "ro">
+			var cfgAllowPopupResize = true;
+			var lnkid = -1;
+			var attdata = new Array();
+</PDM_IF>
+
+var default_trans_code="$args.status";     
+var default_trans_sym="$args.status.sym";  
+var prop_ref = "${prop_ref:}";             
+
+argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+if ( ! _browser.supportsLayers )
+   document.writeln('<scr' + 'ipt language="JavaScript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+
+function loadActions()
+{
+<PDM_IF "$prop.form_name_3" == "edit">
+	init_properties('chg', document.main_form);
+<PDM_ELSE>
+	if ("0" != "$args.id")	// ticket exists
+	{
+		for (var lTicket = 0; lTicket < ahdtop.m_arrViewedTickets.length; lTicket++)
+		{
+			if ("$args.id" == ahdtop.m_arrViewedTickets[lTicket])
+				return;		// ticket have already been viewed in this session and a log record have been already added
+		}
+		
+		// ticket have not been viewed yet in this session
+		ahdtop.m_arrViewedTickets[ahdtop.m_arrViewedTickets.length] = "$args.id";
+
+		var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + 
+			"+OP=TICKET_VIEW+TICKET_PERSID=$args.persistent_id";
+			
+		SyncAjaxCall(sURL);
+	}
+</PDM_IF>	    
+}     
+
+
+</SCRIPT>
+<PDM_INCLUDE FILE="dyn_properties.htmpl">
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</HEAD>
+<BODY class=detailro onload="loadActions();">
+<PDM_INCLUDE FILE="std_body.htmpl">
+<script language="JavaScript">
+<!--
+	var maxSize=new Array("SET.description","Change Order Description", $args.LENGTH_description);
+//-->
+
+function change_category_func(factory)
+{
+    sink.show_error("");
+    sink.handleEvent();
+}
+
+function check_and_save() { 
+  if ( window.document.forms["main_form"].elements["SET.SET.OPHONE"].value.length > 0 ||
+       window.document.forms["main_form"].elements["SET.SET.OEMAIL"].value.length > 0 )
+    call_save();
+  else {
+    var e = document.getElementById(ophoneID);
+    if ( e != null )
+      e.focus();
+    window.setTimeout("alertmsg('You_must_provide_either_a_phon')",1); // You must provide either a phone number or an email address
+  }
+}
+
+function call_save()
+{
+	window.setTimeout("detailSave()", 500);
+}
+
+</script>
+
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=chg>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_IF  "$prop.guest_user" == 1 && "$args.id" == "0">
+<PDM_MACRO name=button Caption="Save" Func="check_and_save()" hotkey_name="Save" ID=btn001 NewRow=yes Width=120>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Save" Func="call_save()" hotkey_name="Save" ID=btn001 NewRow=yes Width=120>
+</PDM_IF>
+<PDM_MACRO name=button Caption="Cancel" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','', 'home.htmpl')" hotkey_name="Cancel" ID=btn002 Width=120>
+<PDM_MACRO name=button Caption="Reset" Func="check_reset()" hotkey_name="Reset" ID=btn003 Width=120>
+var query_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" + 
+		"+OP=CREATE_NEW+FACTORY=attmnt+KEEP.attmnt_for_edit=1+attmnt_parent=chg";
+<PDM_MACRO name=button Caption="Attach Document" Func=popupWithURL(query_str,'1') hotkey_name="Attach Document" ID=btn004>
+ImgBtnEndRow();
+
+<PDM_ELSE>
+ImgBtnRow();
+<PDM_IF "$ACCESS.FAC_chg" \> 1>
+<PDM_IF "$args.active" == "1" &&  "$args.status" != "CL">
+<PDM_IF "$prop.guest_user" != 1>
+<PDM_MACRO name=button Caption="Edit Change" Func="pdm_submit('main_form','UPDATE')" hotkey_name="Edit Change" ID=btn001>
+</PDM_IF>
+<PDM_MACRO name=button Caption="Add Comment" Func="add_activity_log('$args.persistent_id', true)" hotkey_name="Add Comment" ID=btn002>
+	var query_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" +
+			"+OP=CREATE_NEW+FACTORY=attmnt+NEXT_PERSID=$args.persistent_id" +
+			"+attmnt_parent=chg";
+	
+<PDM_MACRO name=button Caption="Attach Document" Func=browseWithURL(query_str) hotkey_name="Attach Document" ID=btn004>
+<PDM_IF "$prop.guest_user" != 1>
+	    function close_change()
+	    {
+		var query_str = cfgCgi +
+				"?SID=" + cfgSID +
+				"+FID=" + fid_generator() +
+				"+FACTORY=chg" +
+				"+PERSID=$args.persistent_id" +
+				"+OP=UPDATE" +
+				"+AUTO_OVERRIDE_LOCK=true" +
+				"+EDIT_HTMPL=change_status_change.htmpl" +
+				"+ACTIVITY_LOG_TYPE=CL" +
+				"+KEEP.useClose=1";
+		
+<PDM_IF "1" == "${args.KEEP.IsPopUp:0}">
+		    query_str += "+KEEP.IsPopUp=1";
+		
+</PDM_IF>
+		document.location.href=query_str;
+	    }
+		
+<PDM_MACRO name=button Caption="Close Change" Func=close_change() hotkey_name="Close Change" ID=btn003>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$prop.guest_user" != 1>
+	    function reopen_change()
+	    {
+		var query_str = cfgCgi +
+				"?SID=" + cfgSID +
+				"+FID=" + fid_generator() +
+				"+FACTORY=chg" +
+				"+PERSID=$args.persistent_id" +
+				"+OP=UPDATE" +
+				"+AUTO_OVERRIDE_LOCK=true" +
+				"+EDIT_HTMPL=change_status_change.htmpl" +
+				"+ACTIVITY_LOG_TYPE=RO";
+		
+<PDM_IF "1" == "${args.KEEP.IsPopUp:0}">
+		    query_str += "+KEEP.IsPopUp=1";
+		
+</PDM_IF>
+		document.location.href=query_str;
+	    }
+		
+<PDM_MACRO name=button Caption="Reopen Change" Func=reopen_change() hotkey_name="Reopen Change" ID=btn003>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+          "+OP=SHOW_DETAIL+PERSID=" + nx_escape("$args.persistent_id");
+<PDM_MACRO name=button Caption="Refresh" Func=window.location.replace(url) hotkey_name="Refresh" ID=btn005>
+
+ImgBtnEndRow();
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+</SCRIPT>
+
+<PDM_IF "$prop.form_name_3" == "ro">
+	<input type=hidden name=AUTO_OVERRIDE_LOCK VALUE=true>
+	
+<PDM_ELSE>
+	<input type=hidden name=change_category value=0>
+	<INPUT TYPE=hidden NAME="SET.call_back_flag" VALUE="$args.call_back_flag" ID="SET.call_back_flag">	
+	<input type=hidden name="SET.requestor" value="$cst.id">
+	<input type=hidden name="SET.affected_contact" value="$cst.id">
+	<INPUT TYPE=hidden NAME="NEW_ATTMNTS" ID="NEW_ATTMNTS">	
+	<input type="hidden" name="INPUT_FIELDS_TO_PARSE">
+	<input type=hidden name=SELF_SERVICE value=1>
+	
+<PDM_IF $args.id>
+<PDM_ELSE>
+	<input type=hidden name=AppendCustInfo value="Yes">
+	
+</PDM_IF>
+<PDM_IF 0>
+	<!-- The following PDM_IF block forces the web interface
+     		to send the customer back to the home page rather than
+     		the request read-only form.
+     		If you want to revert back to pre-6.0 behaviour:
+    		 1. Copy this file to $NX_ROOT/site/mods/www/htmpl/web/customer,
+    		 2. Remove the PDM_IF block. -->
+	
+</PDM_IF>
+<PDM_IF "$args.id" == "">
+				<input type="hidden" name="HTMPL" value="home.htmpl">
+	
+</PDM_IF>
+</PDM_IF>
+<SCRIPT>
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.category.ss_include" == "1" && "$args.category.ss_sym" != "">
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr="category.ss_sym">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr="category">
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Priorytet" attr=priority>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=status>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data wymagalności" attr=need_by>
+<PDM_MACRO name=dtlDate hdr="Rzeczywista data rozpoczęcia" attr=start_date>
+<PDM_MACRO name=dtlDate hdr="Data/Czas zamknięcia" attr=close_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data/Czas otwarcia" attr=open_date>
+<PDM_MACRO name=dtlReadonly hdr="Wpływ" attr=impact>
+<PDM_MACRO name=dtlReadonly hdr="Aktywne" attr=active>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Podsumowanie" attr=summary colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.guest_user" == 1>
+<PDM_MACRO name=dtlReadonly hdr="Reported by" attr="combo_name" value="Guest">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Reported by" attr="combo_name" value="$cst.combo_name">
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit" && "$args.id" == "0">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.SET.OPHONE" == "">
+			<PDM_SET args.SET.OPHONE="$cst.phone_number">
+		
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Telefon" attr=SET.OPHONE size=30>	
+             var ophoneID = _dtl.currID;
+		
+
+		
+<PDM_IF "$args.SET.OEMAIL" == "">
+			<PDM_SET args.SET.OEMAIL="$cst.email_address">		
+		
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="e-mail" attr=SET.OEMAIL size=30>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF 0>
+		Use prepare_self_serve_priority_dropdown() to determine the sym and enum of the
+		user's default priority based on the web.cfg, a data partition Defaults setting
+		or the priority of a saved ticket.
+		Also build the prio_string, a list of priorities base on the web.cfg.
+		Feed these values into a detailDropdown().
+	
+</PDM_IF>
+<PDM_IF "$prop.guest_user" == 1>
+		prepare_self_serve_priority_dropdown ("$prop.AnonymousPrio", "$args.priority", "$args.id", "$args.priority.sym");
+	
+<PDM_ELSE>
+		prepare_self_serve_priority_dropdown ("$prop.EmpPrio", "$args.priority", "$args.id", "$args.priority.sym");
+	
+</PDM_IF>
+	var def_prio_sym = "";
+	var def_prio_enum = "";
+	var prio_string = "";
+	if ( typeof ahdtop != "object" || typeof ahdtop.default_webcfg_prio_sym != "string" || 
+	     typeof ahdtop.default_webcfg_prio_enum != "string" || typeof ahdtop.self_serve_priority_string != "string" ) 
+	{
+		// Should only get in here if there was a problem with prepare_self_serve_priority_dropdown().
+		// In that case, just go with the default priority.
+		def_prio_sym  = "$args.priority.sym";
+		def_prio_enum = "$args.priority";
+		prio_string   = def_prio_sym + "@,@" + "$args.priority";
+	}
+	else 
+	{
+		// These values calculated by prepare_self_serve_priority_dropdown().
+		def_prio_sym  = ahdtop.default_webcfg_prio_sym;
+		def_prio_enum = ahdtop.default_webcfg_prio_enum;
+		prio_string   = ahdtop.self_serve_priority_string;
+	}
+
+	detailDropdown("Priority", "priority","pri", 1, 20,
+		true, "$args.priority.persistent_id", def_prio_enum,
+		"no", "$args.priority.COMMON_NAME_ATTR", def_prio_sym,
+		"", "", "no", "", "", "",
+		prio_string );
+
+	
+<PDM_IF "$args.category.ss_include" != "1" && "$args.id" != "0" && "$args.category" != "">
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr="category">
+<PDM_ELSE>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja" attr="category" autofill=no common_name="ss_sym" evt="onChange=\\\"change_category_func('chg')\\\"" factory=chgcat_ss size=30>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes make_required=yes rows=6 size=100 spellchk=no>
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Estymowany czas kompletacji" attr=est_comp_date colspan=2>
+<PDM_MACRO name=dtlDate hdr="Data kompletacji" attr=actual_comp_date colspan=2>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_IF $args.act_log.length != 0 >
+			<p>
+              	<table width="90%">
+					<tr><TH ALIGN=left VALIGN=baseline COLSPAN=3 CLASS=detailro>Properties</TH></tr>
+                </table>
+				<table width="90%" summary="$args.chg_ref_num Change Order Detail row 7 - Properties">
+					<tr>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro scope=col>Name</TH>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro scope=col>Value</TH>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro scope=col>Example</TH>
+					</tr>
+<PDM_LIST SOURCE=args.property_list>
+					<tr>
+						<TD CLASS=detailro ALIGN=left VALIGN=top>$args.property_list.label</TD>
+						<TD CLASS=detailro ALIGN=left VALIGN=top><PDM_FMT ESC_STYLE=NONE>$args.property_list.value</PDM_FMT></TD>
+						<TD CLASS=detailro ALIGN=left VALIGN=top>$args.property_list.sample</TD>
+					</tr>
+</PDM_LIST>
+				</table>
+			</p>
+			<p>
+				<table id="tbl007" width="90%">
+					<tr>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro colspan=4>History</th>
+					</tr>
+                </table>
+				<table width=90% summary="$args.chg_ref_num Change Order Detail row 8 - History">
+					<tr>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro scope=col>Type</th>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro scope=col>Time Spent</th>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro scope=col>Date</th>
+						<TH ALIGN=left VALIGN=baseline CLASS=detailro scope=col>Description</th>
+					</tr>
+<!-- SDT 8275 Different list source depending if login user can see internal logs -->
+<PDM_IF $prop.view_internal == 0>
+<pdm_list SOURCE=args.act_log>
+					<tr>
+					<SCRIPT>
+						if ( "$args.act_log.type.code" == "SBLIVELOG")
+						{
+						    var alghtml = "<TD NOWRAP VALIGN=TOP class=detailro>";
+						    alghtml += "$args.act_log.type.sym</TD>\n";
+						    document.writeln(alghtml);
+						}
+						else
+						{
+						    document.writeln("<TD CLASS=detailro ALIGN=left VALIGN=top>$args.act_log.type.sym</TD>");
+						}					
+						</SCRIPT>
+						<td CLASS=detailro ALIGN=left VALIGN=top>$args.act_log.time_spent</TD>
+						<td CLASS=detailro ALIGN=left VALIGN=top>
+							<script>
+								date_to_string('$args.act_log.time_stamp_INT_DATE', 1);
+							</script>
+						</td>
+						<td CLASS=detailro ALIGN=left VALIGN=top>
+							<pdm_fmt JUSTIFY=LINE WIDTH=80>$args.act_log.description</pdm_fmt>
+						</td>
+					</tr>
+</pdm_list>
+<PDM_ELSE>
+<pdm_list SOURCE=args.act_log_all>
+					<tr>
+						<SCRIPT>
+						if ( "$args.act_log_all.type.code" == "SBLIVELOG")
+						{
+						    var alghtml = "<TD NOWRAP VALIGN=TOP class=detailro>";
+						    alghtml += "$args.act_log_all.type.sym</TD>\n";
+						    document.writeln(alghtml);
+						}
+						else
+						{
+						    document.writeln("<TD CLASS=detailro ALIGN=left VALIGN=top>$args.act_log_all.type.sym</TD>");
+						}
+						</SCRIPT>					
+						<td CLASS=detailro ALIGN=left VALIGN=top>$args.act_log_all.time_spent</TD>
+						<td CLASS=detailro ALIGN=left VALIGN=top>
+							<script>
+								date_to_string('$args.act_log_all.time_stamp_INT_DATE', 1);
+							</script>
+						</td>
+						<td CLASS=detailro ALIGN=left VALIGN=top>
+							<pdm_fmt JUSTIFY=LINE WIDTH=80>$args.act_log_all.description</pdm_fmt>
+						</td>
+					</tr>
+</PDM_LIST>
+</PDM_IF>
+				</table>
+			</p>
+</PDM_IF>
+<PDM_IF $args.attachments.length != 0 >
+			<P>
+			<TABLE ID=tbl004 WIDTH=90%>
+			<TR>
+			    <TH ALIGN=LEFT COLSPAN=4 class=detailro>Attachments</TD>
+			</TR>
+            </table>
+			<TABLE WIDTH=90% summary="$args.ref_num Change Order Detail row 5 - Attachments">
+			<TR>
+			    <TH ALIGN=LEFT class=detailro scope=col>Document</TD>
+			    <TH ALIGN=LEFT class=detailro scope=col>Description</TD>
+			    <TH ALIGN=LEFT class=detailro scope=col>Attached On</TD>
+			    <TH ALIGN=LEFT class=detailro scope=col>Status</TD>
+			</TR>
+			<SCRIPT>
+			<PDM_LIST SOURCE=args.attachments>
+			    attdata[++lnkid] = new Object();
+			    attdata[lnkid].id = "$args.attachments.id";
+			    attdata[lnkid].attmnt_name = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$args.attachments.attmnt_name</PDM_FMT>');
+			    attdata[lnkid].orig_file_name = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$args.attachments.orig_file_name</PDM_FMT>');
+			    attdata[lnkid].status = "$args.attachments.status";
+			
+<PDM_IF "$args.attachments.link_only" != "1">
+			    attdata[lnkid].cgi_path ="$args.attachments.repository.servlet_path";
+			    attdata[lnkid].protocol = "servlet";
+			    attdata[lnkid].server = "$args.attachments.repository.server";
+			    attdata[lnkid].retrieve_path = "$args.attachments.repository.retrieve_path";
+			    attdata[lnkid].file_name = "$args.attachments.file_name";
+			
+</PDM_IF>
+			document.writeln("<TR>");
+			document.write("<TD CLASS=detailro ALIGN=left VALIGN=top>");
+
+			    var link = "<A HREF=\"javascript:download_exec(attdata[" + lnkid + "])\">";
+			    document.write(link + '<PDM_FMT esc_style=c><PDM_FMT JUSTIFY=TRUNCATE WIDTH=40>$args.attachments.attmnt_name</PDM_FMT></PDM_FMT></A>');
+
+			document.writeln("</TD>");
+			document.write("<TD CLASS=detailro ALIGN=left VALIGN=top>");
+			document.write(nx_unescape('<PDM_FMT JUSTIFY=TRUNCATE WIDTH=40 ESC_STYLE=JS2>$args.attachments.description</PDM_FMT>'));
+			document.writeln("</TD>");
+			document.write("<TD CLASS=detailro ALIGN=left VALIGN=top>");
+			document.write(date_to_string('$args.attachments.created_dt_INT_DATE', 0));
+			document.writeln("</TD>");
+			document.write("<TD CLASS=detailro ALIGN=left VALIGN=top>");
+			if ( "$args.attachments.status" == "INSTALLED" )
+			    document.write("Installed");
+			else if ( "$args.attachments.status" == "LINK_ONLY" )
+			    document.write("Link Only");
+			else if ( "$args.attachments.status" == "NOTINSTALLED" )
+			    document.write("Not Installed");
+			document.writeln("</TD>");
+			document.writeln("</TR>");
+			</PDM_LIST>
+			</SCRIPT>
+			</table>
+			</P>
+</PDM_IF>
+<PDM_ELSE>
+<!-- The properties for the EDIt form begins here  -->
+
+<PDM_IF 0>
+	20130830 bmalz @ e-xim
+</PDM_IF>
+	<table width="90%" class="detailro">
+		<tr>
+			<td>
+<PDM_IF "" != "$args.prop0.id">
+				<table id="tblProperties" align="left">
+<PDM_ELSE>
+				<table id="tblProperties" style="display: none;">
+</PDM_IF>
+					<tr>
+						<th id="CatLabel">
+						</th>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+<script>
+if ( _browser.supportsLayers ) {
+	document.writeln("<layer " +
+					"id='prop_layer' " +
+					"left='" + String(document.anchors["prop_anchor"].x) + "' " +
+					"top='" + String(document.anchors["prop_anchor"].y) + "' " +
+					"height='1400'>");
+
+/* Has to cover 22 properties. */
+<PDM_IF "" != "$args.prop0.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop0.label" make_required="prop0.required" propNum=0 value="prop0.value">
+<PDM_IF "" != "$args.prop1.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop1.label" make_required="prop1.required" propNum=1 value="prop1.value">
+<PDM_IF "" != "$args.prop2.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop2.label" make_required="prop2.required" propNum=2 value="prop2.value">
+<PDM_IF "" != "$args.prop3.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop3.label" make_required="prop3.required" propNum=3 value="prop3.value">
+<PDM_IF "" != "$args.prop4.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop4.label" make_required="prop4.required" propNum=4 value="prop4.value">
+<PDM_IF "" != "$args.prop5.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop5.label" make_required="prop5.required" propNum=5 value="prop5.value">
+<PDM_IF "" != "$args.prop6.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop6.label" make_required="prop6.required" propNum=6 value="prop6.value">
+<PDM_IF "" != "$args.prop7.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop7.label" make_required="prop7.required" propNum=7 value="prop7.value">
+<PDM_IF "" != "$args.prop8.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop8.label" make_required="prop8.required" propNum=8 value="prop8.value">
+<PDM_IF "" != "$args.prop9.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop9.label" make_required="prop9.required" propNum=9 value="prop9.value">
+<PDM_IF "" != "$args.prop10.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop10.label" make_required="prop10.required" propNum=10 value="prop10.value">
+<PDM_IF "" != "$args.prop11.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop11.label" make_required="prop11.required" propNum=11 value="prop11.value">
+<PDM_IF "" != "$args.prop12.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop12.label" make_required="prop12.required" propNum=12 value="prop12.value">
+<PDM_IF "" != "$args.prop13.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop13.label" make_required="prop13.required" propNum=13 value="prop13.value">
+<PDM_IF "" != "$args.prop14.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop14.label" make_required="prop14.required" propNum=14 value="prop14.value">
+<PDM_IF "" != "$args.prop15.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop15.label" make_required="prop15.required" propNum=15 value="prop15.value">
+<PDM_IF "" != "$args.prop16.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop16.label" make_required="prop16.required" propNum=16 value="prop16.value">
+<PDM_IF "" != "$args.prop17.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop17.label" make_required="prop17.required" propNum=17 value="prop17.value">
+<PDM_IF "" != "$args.prop18.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop18.label" make_required="prop18.required" propNum=18 value="prop18.value">
+<PDM_IF "" != "$args.prop19.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop19.label" make_required="prop19.required" propNum=19 value="prop19.value">
+<PDM_IF "" != "$args.prop20.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop20.label" make_required="prop20.required" propNum=20 value="prop20.value">
+<PDM_IF "" != "$args.prop21.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop21.label" make_required="prop21.required" propNum=21 value="prop21.value">
+<PDM_IF "" != "$args.prop22.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop22.label" make_required="prop22.required" propNum=22 value="prop22.value">
+<PDM_IF 0><!-- Prop22 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop21 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop20 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop19 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop18 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop17 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop16 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop15 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop14 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop13 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop12 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop11 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop10 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop9 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop8 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop7 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop6 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop5 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop4 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop3 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop2 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop1 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop0 --></PDM_IF>
+</PDM_IF>
+
+	document.writeln('</layer>');
+<PDM_IF 0><!-- Properties for NS4 --></PDM_IF>
+}
+</script>				
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

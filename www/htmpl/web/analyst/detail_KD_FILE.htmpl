@@ -1,0 +1,429 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var docTitle = '<PDM_FMT ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+if(docTitle.length > 50)
+	var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>...';
+else	
+	var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>';
+var hdrTitleNew = "Create New Knowledge File";
+if (docTitle.length > 50)
+	var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>... Update Knowledge File';
+else
+	var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT> Update Knowledge File';
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/cst_cat.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/spellcheck.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+var cfgFocusOnTabDisabled = true;
+factoryDisplayName = "Knowledge File";//Need to be here so all alert msg will use it
+argPersistentID = "$args.persistent_id";
+var doc;
+var m_bRunSave = false;	//save started? We need this boolean variable in Avoid Popup mode
+// flag to allow loading combo after tenant is set SCO31231
+var m_bLoadFirst = true;
+
+function detailTenantChange(e)
+{
+   var o = e.options[e.selectedIndex];
+   detailSetTenant( e.name, o.value, o.text );
+   loadRepCombo(2, 0, o.value); // reload repository dropdown per user selection
+}
+
+function loadActions()
+{
+	if("$args.id" == "0")
+	{
+		doc = document.forms["main_form"].elements;
+		LoadUploadActions();
+	}
+	convertFAQRating();
+}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function preSaveTrigger()
+{
+	m_bRunSave = true;
+	<PDM_IF "$args.id" == "0">
+		// If Title is empty, get file name as a title
+		if (system_Trim(doc["SET.TITLE"].value) == "")
+		{
+			var sPath = document.getElementById("inpFileUpload").value;
+			sPath = sPath.replace(/\\/ig,"/");
+			var arrPath = sPath.split("/");
+			var sTitle = arrPath[arrPath.length-1];
+			doc["SET.TITLE"].value = sTitle;
+		}	
+		<PDM_IF 0>When creating a new Knowledge File the file is mandatory</PDM_IF>
+		if (doc["SET.FILE_ID"].value == "")
+		{
+			if (isAttmntToSubmit())
+			{
+				Submit();
+				return false;	// Stop saving. Will be saved when attachment will be saved
+			}
+			else
+			{
+				m_bRunSave = false;	//Save is stopped
+				AlertMsg = "";  // Remove previous error message
+				showAlertMsg("File is required");
+				return false; // Need to add an attahcment
+			}
+		}
+	<PDM_ELSE>
+		// If Title is empty, get file name as a title
+		var oTitle = document.getElementsByName("SET.TITLE"[0]);
+		if (system_Trim(oTitle.value) == "" && '$args.FILE_ID' != '' && '$args.FILE_ID' != '0' )
+		{
+			oTitle.value = '$args.FILE_ID.file_name';
+		}
+	</PDM_IF>
+	return true;	// Continue saving
+}
+
+function preCancelTrigger()
+{
+	if ( m_bRunSave )
+		return false;
+	else
+		return true;
+}
+
+function getAttmntId(lAttmntId)
+{
+	doc["SET.FILE_ID"].value = lAttmntId;
+	detailSave();
+}
+
+function convertFAQRating()
+{
+	var iBuResult = "$args.BU_RESULT";
+	//in case of regional settings is different
+	iBuResult = iBuResult.replace("," , ".");
+	if ( !isNaN(iBuResult ))
+	{
+		iBuResult = Math.round(iBuResult);
+		var sFaqRating = document.getElementById("faq_rating");
+		if ( sFaqRating != null ) {
+          if ( sFaqRating.tagName == "INPUT" )
+            sFaqRating.value = iBuResult;
+          else
+            sFaqRating.innerHTML = iBuResult;
+        }
+	}
+	var iAvgRate = "$args.AVG_RATING";
+	//in case of regional settings is different
+	iAvgRate  = iAvgRate .replace("," , ".");
+	if ( !isNaN(iAvgRate  ))
+	{
+		iAvgRate  = Math.round(iBuResult);
+		var sFaqRating = document.getElementById("avg_rate");
+		if ( sFaqRating != null ) {
+          if ( sFaqRating.tagName == "INPUT" )
+            sFaqRating.value = iAvgRate;
+          else
+            sFaqRating.innerHTML = iAvgRate;
+        }
+	}	
+	return;
+}
+
+function DownloadFile()
+{
+	var nAttmntId = "$args.FILE_ID";
+	
+	if (nAttmntId != "" && nAttmntId != "0")
+	{
+		var sGatewayPath = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.FILE_ID.repository.servlet_path</PDM_FMT>';
+		var sServer = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.FILE_ID.repository.server</PDM_FMT>';
+		Download(nAttmntId, sGatewayPath, sServer, 0);
+	}
+	return;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// FUNCTION ConvertToDocument
+// Description: converts KD_FILE to a KD using the kt daemon method: convert_to_document
+//////////////////////////////////////////////////////////////////////////////
+function ConvertToDocument()
+{
+	if (!action_in_progress())
+	{
+		if ("$prop.form_name_3" == "edit")
+		{
+			if (confirm(msgtext("Converting_this_Knowledge_File_to_a_Knowledge_Document_is_allowed_only_after_saving_changes")))
+			{
+				detailSave();
+			}
+			return;
+		}	
+		if (confirm(msgtext("Are_you_sure_you_want_to_convert_this_Knowledge_File")))
+		{
+			var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=CONVERT_TO_DOCUMENT" + 
+					"+KD_ID=$args.id" + 
+					"+FILE_ID=$args.FILE_ID" + 
+					"+IS_QA_THREAD=0";
+			set_action_in_progress(ACTN_SAVE);
+			var odivData = document.getElementById("divData");	
+			odivData.innerHTML = "<IFRAME id=QAData name=QAData title='" + msgtext("Hidden_frame_-_do_not_navigate") + "' src='" + url + "'></IFRAME>";
+		}
+	}
+}
+
+function KT_REPLY(sOP,msg)
+{
+	set_action_in_progress(ACTN_COMPLETE);
+	if (msg[0] == 'ERROR')
+	{
+		alert (msg[1]);
+		return;
+	}
+	else 
+	{
+		//Replace current page with KD Editor
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=UPDATE+PERSID=KD:$args.id";;
+		document.location.href = url;
+	}
+}
+
+
+function ReplaceFile()
+{
+	var nAttmntId = "$args.FILE_ID";
+	UploadFile("", "", nAttmntId, undefined, undefined, false);	
+}
+
+function RefreshNotificationList()
+{
+	var iframe = window.frames["tabNotifications_iframe"];
+	iframe.window.location = iframe.window.location;
+}
+
+function KT_REPLY(sOP,msg)
+{
+	ahdframeset.workframe.location.href = "$CAisd/html/empty.html";
+	if(sOP == "KT_NOTIFICATION_DELETE")
+	{
+		var iRet = msg[0];
+		if (iRet == 0)
+		{
+			RefreshNotificationList();
+		}
+		else
+		{
+			alertmsg("An_error_occured_while_trying_5");//("An error occured while trying to delete this notification.");
+		}
+	}
+	else if(sOP == "CONVERT_TO_DOCUMENT")
+	{
+		//Open the KD Editor page
+		var sPersID = "KD:" + msg[0];
+		//Replace current page with KD Editor
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=UPDATE+PERSID=" + sPersID;
+		document.location.href = url;
+		//OpenDocumentEditor(sPersID);
+	}
+	else
+	{
+		alert ("Unexpected call to KT_REPLY (detail_KD_FILE.htmpl) with op code of:" + sOP);
+	}
+}
+
+function setTenants()
+{
+	//flag to allow loading combo
+	m_bLoadFirst = false;
+	<PDM_IF "$prop.MultiTenancy" != "off">
+		detailSetTenantFromPresetField( "PRIMARY_INDEX", '${args.PRIMARY_INDEX.tenant:}', '<PDM_FMT ESC_STYLE=C>${args.PRIMARY_INDEX.tenant.name:}</PDM_FMT>' );
+		//used to load rep combo
+		propTenant=	'${args.PRIMARY_INDEX.tenant:}';
+	</PDM_IF>
+	<PDM_IF "$args.id" == "0">
+			// load rep combo
+			propRepId = loadRepCombo(2, 0, '${args.PRIMARY_INDEX.tenant:}'); // reload repository dropdown per user selection
+	</PDM_IF>
+}
+
+
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onload="setTenants();loadActions();"  onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl> 
+
+<PDM_IF "$args.id" == "0">
+	<SCRIPT LANGUAGE="JavaScript">
+	
+<PDM_MACRO name=dtlForm factory="KD_FILE" saveclose=true>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł" attr="TITLE" size=90>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Podsumowanie" attr="SUMMARY" rows=3 size=90>
+<PDM_MACRO name=dtlEndTable>
+	</SCRIPT>	
+	<INPUT TYPE=HIDDEN NAME="STAY_EDIT" VALUE="1">
+	<INPUT TYPE=HIDDEN NAME="SET.SUBMIT_ATTMNT">
+	<INPUT TYPE=hidden NAME="SET.ACTIVE_STATE" value="100">
+	<INPUT TYPE=hidden NAME="SET.FILE_ID">	
+	
+<PDM_MACRO name=dtlEnd>
+	<table><tr><td>
+		
+<PDM_IF "$prop.browser" == "IE">			
+			<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=80 ShowImgStatus="Yes" SubmitKnowledge="Yes" View="Attachment" Caption="File&nbsp;*" Required="Yes" FolderId="KnowledgeFiles" ShowRepList="Yes" RepType="2" Status="KD_FILE">
+		
+<PDM_ELSE>
+			<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=104 ShowImgStatus="Yes" SubmitKnowledge="Yes" View="Attachment" Caption="File&nbsp;*" Required="Yes" FolderId="KnowledgeFiles" ShowRepList="Yes" RepType="2" Status="KD_FILE">
+		
+</PDM_IF>
+	</td></tr></table>
+<PDM_ELSE>
+	<SCRIPT LANGUAGE="JavaScript">
+	
+<PDM_MACRO name=dtlForm factory="KD_FILE">
+	
+	ImgBtnCreate("Download", "View", "DownloadFile()", true, 0);
+	
+<PDM_IF "$args.KEEP.ALLOW_EDIT" == "1">
+	//Allow these 2 buttons only to user with edit rights
+	ImgBtnCreate("ConvertToKD", "Convert_to_Knowledge_Document", "ConvertToDocument()", true, 0);
+	ImgBtnCreate("ReplaceFile", "Replace_File", "ReplaceFile()", true, 0);
+	
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+	detailCloseForm();  // Nothings on the form before the notebook
+	</SCRIPT>
+	
+	
+<PDM_MACRO name=startNotebook hdr="skeletons_nb">
+<PDM_MACRO name=TAB title="Content" file="kd_file_prop_tab.htmpl" id=tabProp>
+<PDM_MACRO name=TAB title="Attributes" file="kd_qa_attributes_tab.htmpl" id=tabAttributes>
+<PDM_MACRO name=TAB title="Comments" height=500 id=tabComments src="OP=SEARCH+FACTORY=O_COMMENTS+QBE.EQ.DOC_ID=$args.id+SkeletonId=$args.id">
+<PDM_MACRO name=TAB title="History" height=500 id=tabHistory src="OP=SEARCH+FACTORY=O_EVENTS+QBE.EQ.ENTITY_ID=$args.id">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>	
+<SCRIPT>
+	if (ahdtop.CanUserPerformAction("ROLE_RELATED_TICKET")) 
+	{
+		var relatedTicketsHTML = "&nbsp;<b>Related Tickets:</b><BR>&nbsp;This Knowledge File has been used as a solution to:<BR>";
+		
+<PDM_IF 0>
+		We are using the REQ_SOLVED_CNT_SPL and not REQ_SOLVED_CNT and so on ...
+		as freeaccess spl has some code that assign REQ_SOLVED_CNT to REQ_SOLVED_CNT_SPL and so on ...
+		only for authorized users, so we will not cause extra database fetches when it's not needed.
+		
+</PDM_IF>
+<PDM_IF '$args.REQ_SOLVED_CNT_SPL' != ''>
+			relatedTicketsHTML += "&nbsp;<a class='clsAnchor' href=javascript:kdlinks('REQ_SOLVED','$args.id')><span class='clsAnchor'>$args.REQ_SOLVED_CNT_SPL requests</span></a>";
+		
+<PDM_ELSE>
+			relatedTicketsHTML += "&nbsp;<a class='clsAnchor' href=javascript:kdlinks('REQ_SOLVED','$args.id')><span class='clsAnchor'>0 requests</span></a>";
+		
+</PDM_IF>
+<PDM_IF '$args.IN_SOLVED_CNT_SPL' != ''>
+			relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('IN_SOLVED','$args.id')><span class='clsAnchor'>$args.IN_SOLVED_CNT_SPL incidents</span></a>";
+		
+<PDM_ELSE>
+			relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('IN_SOLVED','$args.id')><span class='clsAnchor'>0 incidents</span></a>";
+		
+</PDM_IF>
+<PDM_IF '$args.PR_SOLVED_CNT_SPL' != ''>
+			relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('PR_SOLVED','$args.id')><span class='clsAnchor'>$args.PR_SOLVED_CNT_SPL problems</span></a>";
+		
+<PDM_ELSE>
+			relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('PR_SOLVED','$args.id')><span class='clsAnchor'>0 problems</span></a>";
+		
+</PDM_IF>
+<PDM_IF '$args.ISS_SOLVED_CNT_SPL' != ''>
+			relatedTicketsHTML += " and <a class='clsAnchor' href=javascript:kdlinks('ISS_SOLVED','$args.id')><span class='clsAnchor'>$args.ISS_SOLVED_CNT_SPL issues</span></a>.<BR>";
+		
+<PDM_ELSE>
+			relatedTicketsHTML += " and <a class='clsAnchor' href=javascript:kdlinks('ISS_SOLVED','$args.id')><span class='clsAnchor'>0 issues</span></a>.<BR>";
+		
+</PDM_IF>
+		
+		document.write(relatedTicketsHTML);
+	}
+
+// ----------------------------------------------------------------------
+// FUNCTION kdlinks
+// Description: Used to show list of related tickets 
+// in: 
+//		type -	REQ_SOLVED / ISS_SOLVED / IN_SOLVED / ISS_SOLVED
+//		lKdID - Document record ID
+// ----------------------------------------------------------------------
+function kdlinks(type,lKdID)
+{
+	var sFactory;
+	var sWC1 = "";
+	if (type == 'REQ_SOLVED')
+	{
+		sFactory = "cr";
+		sWC1 = "ADDITIONAL_WHERE=(type = 'R' OR type = '' OR type IS NULL) AND (solved_by_kd.kd=" + lKdID + ")";
+	}
+	else if (type == 'ISS_SOLVED')
+	{
+		sFactory = "iss";
+		sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+	}
+	else if (type == 'IN_SOLVED')
+	{
+		sFactory = "in";
+		sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+	}
+	else if (type == 'PR_SOLVED')
+	{
+		sFactory = "pr";
+		sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+	}
+	else if (type == 'REQ_OPENED')
+	{
+		sFactory = 'cr';
+		sWC1 = "ADDITIONAL_WHERE=(type = 'R' OR type = '' OR type IS NULL) AND (created_from_kd.kd=" + lKdID + ")";
+	}
+	else if (type == 'ISS_OPENED')
+	{
+		sFactory = "iss";
+		sWC1 = "ADDITIONAL_WHERE=created_from_kd.kd=" + lKdID;
+	}
+	else if (type == 'IN_OPENED')
+	{
+		sFactory = "in";
+		sWC1 = "ADDITIONAL_WHERE=created_from_kd.kd=" + lKdID;
+	}
+	popup_window('','SEARCH', 0, 0, '', 'FACTORY=' + sFactory, 'KEEP.IsPopUp=1', sWC1)
+}
+
+</SCRIPT>
+</PDM_IF>
+
+<div style="display:none" id=divData></div>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,238 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=kd_categories_tab" factory=KD>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+<PDM_ELSE>
+	var form_title = "Insert Document Link";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/castyles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/webtab.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var m_nSkeletonId='$args.SkeletonId';
+
+if(argPersistentID == "")
+	argPersistentID = '$args.parentPersid';
+if(m_nSkeletonId == "")
+	m_nSkeletonId = argPersistentID.substring(argPersistentID.lastIndexOf(":")+1);
+	
+var KTTreeNumber;
+function CatTreeOnClick(lCurrCatID,sCurrPathIDs,sCurrPathText)
+{
+	var m_arrIDs=sCurrPathIDs.split("-");
+	LoadSkeletons(m_arrIDs[m_arrIDs.length-1]);
+}
+function loadActions()
+{
+	if ("$args.KEEP.IS_EDIT" == "edit") //In edit mode
+	{
+		KTTreeNumber = InitTree();
+		LoadSkeletons(1);
+	}
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">	
+	LoadCategoryLinks(m_nSkeletonId);	//Category Links
+	LoadDocLinks(m_nSkeletonId);		//Document Links
+</PDM_IF>
+}
+// Set up hotkeys
+var titleDocuments = "Documents";
+var titleCatlinks = "Category Links";
+var titleDoclinks = "Document Links";
+var titleDoc_loc = "Documents";
+var titleCatlnk_loc = "Category Links";
+var titleDoclnk_loc = "Document Links";
+if (!nonLatinFlag)
+{
+    titleDoc_loc = titleDocuments;
+    titleCatlnk_loc = titleCatlinks;
+    titleDoclnk_loc = titleDoclinks;
+}
+var actkeyDocuments = registerActionKey("", titleDoc_loc,
+                                        setIframeFocus, "KTSkeletons" );
+var actkeyCatlinks = registerActionKey("", titleCatlnk_loc,
+                                       setIframeFocus, "KTSkeletonLinks" );
+var actkeyDoclinks = registerActionKey("", titleDoclnk_loc,
+                                       setIframeFocus, "KTDocLinks" );
+if ( actkeyDocuments != "" )
+  titleDocuments = fmtLabelWithActkey( titleDocuments, actkeyDocuments );
+if ( actkeyCatlinks != "" )
+  titleCatlinks = fmtLabelWithActkey( titleCatlinks, actkeyCatlinks );
+if ( actkeyDoclinks != "" )
+  titleDoclinks = fmtLabelWithActkey( titleDoclinks, actkeyDoclinks );
+function setIframeFocus(id)
+{
+  var f = document.getElementById(id);
+  if ( f != null ) {
+    var e = f.contentWindow.document.getElementById("rslnk_0_0");
+    if ( e != null )
+      e.focus();
+  }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="loadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Content Tab">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT>
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+tab_banner("Categories");
+</PDM_IF>
+</SCRIPT>
+<TABLE CELLPADDING=6>
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+	<TR>
+		<TD>
+			<SPAN class=label>Primary Category:</SPAN>
+		</TD>
+	</TR>
+	<TR>
+		<TD colspan=2>
+			<SPAN class=data>
+				<SCRIPT>
+					document.write(parent.GetIndexPath());
+				</SCRIPT>
+			</SPAN>
+		</TD>
+	</TR>
+</PDM_IF>
+<PDM_IF "$args.KEEP.IS_EDIT" == "edit">
+<TR>
+	<TD>
+		<SPAN class=label ID=lblCategories Name=lblCategories>Categories (<u>X</u>)</SPAN><br>
+		
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+			<div style="margin-top:2px;border-style:inset;border-width:2;width:366px;" name=divCategoryTree id=divCategoryTree>
+		
+<PDM_ELSE>
+			<div style="border-style:inset;border-width:2;width:366px;height:300px" name=divCategoryTree id=divCategoryTree>
+		
+</PDM_IF>
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+<PDM_MACRO name=kt_Categories_Tree frameborder="0" height="150px" menu="DOCUMENT_EDITOR" parenttenant="$args.ParentTenant" usetenant="1" width="366px">
+<PDM_ELSE>
+<PDM_MACRO name=kt_Categories_Tree frameborder="0" height="300px" menu="HTML_EDITOR" parenttenant="$args.ParentTenant" usetenant="1" width="366px">
+</PDM_IF>
+		</div>
+	</TD>
+	<TD>
+		<SPAN class=label ID=lblDocuments Name=lblDocuments>
+        <script>document.write(titleDocuments)</script></SPAN><br>
+		
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+			<div style="margin-top:2px;border-style:inset;border-width:2;width:366px;" name=divSkeletons id=divSkeletons>
+			<IFRAME frameborder=0 scrolling=no id=KTSkeletons name=KTSkeletons title="Documents" style='height:150px;width:366px'></IFRAME>
+			</div>
+		
+<PDM_ELSE>
+			<div style="border-style:inset;border-width:2;width:366px;height:300px" name=divSkeletons id=divSkeletons>
+			<IFRAME frameborder=0 scrolling=no id=KTSkeletons name=KTSkeletons title="Documents" style='height:300px;width:366px'></IFRAME>
+			</div>
+		
+</PDM_IF>
+		<script>
+			function LoadSkeletons(nIndex)
+			{
+				var url = cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=INDEX_DOC_LINKS+HTMPL=list_kd_INDEX_DOC_LINKS.htmpl+QBE.NE.DOC_ID=" + m_nSkeletonId + "+QBE.EQ.INDEX_ID=" + nIndex + "+KEEP.IS_EDIT=" + "$args.KEEP.IS_EDIT";	
+				var addWC = "+ADDITIONAL_WHERE=" + nx_escape("(DOC_ID.ACTIVE_STATE = 0)");//Documents only
+				url += addWC; 
+				
+<PDM_IF "$args.KEEP.HTMLEditor" == "1">		
+					if(ahdtop.cfgMultiTenancy != "off"){
+						url += "+KEEP.backfillFactory=KD+KEEP.backfill_field=VER_CROSS_REF_ID" + 
+							"+KEEP.objectTenant=$args.ParentTenant" + "+KEEP.backfillPersid=" + argPersistentID +
+							"+KEEP.objectTenantName="+encodeURIComponent("$args.ParentTenantName");							
+					}
+				
+<PDM_ELSE>		
+					// Tack on tenant restriction information if appropriate
+					var e;
+					try {
+						if ( cfgAccessTenantRestriction != "1" &&
+							( ahdframe.argTenantId.length > 0 )  ) {
+							url += "+KEEP.backfillFactory=KD+KEEP.backfill_field=VER_CROSS_REF_ID" + 
+								"+KEEP.objectTenant=" + ahdframe.argTenantId + "+KEEP.backfillPersid=" + argPersistentID +
+								"+KEEP.objectTenantName=" + encodeURIComponent(ahdframe.argTenant);
+						}
+					}
+					catch(e) {}
+					//		
+				
+</PDM_IF>					
+				var odivSkeletons = document.getElementById("divSkeletons");	
+				
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+					url += "+KEEP.SKELETONS_VIEW=1";
+				
+<PDM_ELSE>
+					url += "+KEEP.HTMLEditor=1";
+				
+</PDM_IF>
+				var oIframe = document.getElementById("KTSkeletons");
+				oIframe.src = url;
+			}
+		</script>
+	</TD>
+</TR>
+</PDM_IF>
+<PDM_IF "$args.KEEP.HTMLEditor" != "1">
+<TR>
+	<TD colspan=2>
+		<SPAN class=label><script>document.write(titleCatlinks);</script></SPAN><br>
+			<div style="margin-top:2px;border-style:inset;border-width:2;width:750px" name=divSkeletonLinks id=divSkeletonLinks></div>
+		<script>
+			//The old function is not in use anymore, but kept here just in case ...
+			function LoadCategoryLinks_old(nSkeletonId)
+			{
+	   			var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=INDEX_DOC_LINKS+HTMPL=list_kd_INDEX_DOC_LINKS.htmpl+KEEP.SKELETONS_VIEW=0+KEEP.isHierSearch=0+QBE.EQ.DOC_ID=" + nSkeletonId + "+KEEP.IS_EDIT=" + "$args.KEEP.IS_EDIT";
+				var odivSkeletonLinks = document.getElementById("divSkeletonLinks");	
+				
+				odivSkeletonLinks.innerHTML = "<IFRAME scrolling=no frameborder=0 id=KTSkeletonLinks title=\"Category Links\" name=KTSkeletonLinks " + 
+				"style='height:150px;width:750px;' " + 
+				"src='" + url + "'></IFRAME>";
+			}
+
+			function LoadCategoryLinks(nSkeletonId)
+			{
+	   			var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=KCAT+" + 
+	   					"KEEP.HTMPL=list_KCAT_LINKED.htmpl+KEEP.SKELETONS_VIEW=0+KEEP.isHierSearch=0+" + 
+	   					"QBE.EQ.DOC_LINKS.DOC_ID=" + nSkeletonId + "+KEEP.IS_EDIT=" + "$args.KEEP.IS_EDIT";
+				var odivSkeletonLinks = document.getElementById("divSkeletonLinks");	
+				
+				odivSkeletonLinks.innerHTML = "<IFRAME scrolling=no frameborder=0 id=KTSkeletonLinks title=\"Category Links\" name=KTSkeletonLinks " + 
+				"style='height:150px;width:750px;' " + 
+				"src='" + url + "'></IFRAME>";
+			}
+		</script>
+	</TD>
+</TR>
+<TR>
+	<TD colspan=2>	
+		<SPAN class=label><script>document.write(titleDoclinks);</script></SPAN><br>
+			<div style="margin-top:2px;border-style:inset;border-width:2;width:750px" name=divDocLinks id=divDocLinks></div>
+		<script>
+			function LoadDocLinks(nSkeletonId)
+			{
+	   			var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=CI_DOC_LINKS+HTMPL=list_kd_CI_DOC_LINKS.htmpl+KEEP.isHierSearch=0" + "+ADDITIONAL_WHERE=(((DOC_ID1=" + nSkeletonId + ") OR (DOC_ID2=" + nSkeletonId + "))" + " AND (DOC_ID1.ACTIVE_STATE >= 0 AND DOC_ID2.ACTIVE_STATE >= 0))" + "+KEEP.DOC_ID=" + nSkeletonId + "+KEEP.IS_EDIT=" + "$args.KEEP.IS_EDIT";
+				var odivDocLinks = document.getElementById("divDocLinks");	
+				odivDocLinks.innerHTML = "<IFRAME frameborder=0 scrolling=no id=KTDocLinks title=\"Document Links\" name=KTDocLinks " + 
+				"style='height:150px;width:750px;' " + 
+				"src='" + url + "'></IFRAME>";
+			}
+		</script>
+	</TD>
+</TR>
+</PDM_IF>
+</TABLE>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: kd_categories_tab.htmpl ANDERSON.2 2009/11/02 19:38:29 lilel01 Exp $
+</PDM_IF>

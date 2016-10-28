@@ -1,0 +1,322 @@
+<PDM_IF 0>
+list_cr.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Call Requests.
+</PDM_IF>
+<PDM_IF "$args.search_sql_clause" : "type = *'[Ii]'" && "$args.KEEP.ALWAYS_LIST_CR" != "1">
+	<!-- Stored query can use all of the following '=','LIKE', 'like' and 'LiKe' -->
+	<PDM_INCLUDE FILE=list_in.htmpl>
+<PDM_ELIF "$args.KEEP.save_sql_clause" : "type = *'[Ii]'" && "$args.KEEP.ALWAYS_LIST_CR" != "1">
+	<!-- After a scoreboard query, when using List All. -->
+	<PDM_INCLUDE FILE=list_in.htmpl>
+<PDM_ELIF "$args.additional_where_clause" : "type = *'[Ii]'" && "$args.KEEP.ALWAYS_LIST_CR" != "1">
+	<!-- New Incident from Template -->
+	<PDM_INCLUDE FILE=list_in.htmpl>
+<PDM_ELIF "$args.search_sql_clause" : "type = *'[Pp]'" && "$args.KEEP.ALWAYS_LIST_CR" != "1">
+	<PDM_INCLUDE FILE=list_pr.htmpl>
+<PDM_ELIF "$args.KEEP.save_sql_clause" : "type = *'[Pp]'" && "$args.KEEP.ALWAYS_LIST_CR" != "1">
+	<!-- After a scoreboard query, when using List All. -->
+	<PDM_INCLUDE FILE=list_pr.htmpl>
+<PDM_ELIF "$args.additional_where_clause" : "type = *'[Pp]'" && "$args.KEEP.ALWAYS_LIST_CR" != "1">
+	<!-- New Problem from Template -->
+	<PDM_INCLUDE FILE=list_pr.htmpl>
+<PDM_ELSE>
+
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+// When the user sets Status field to Closed (or)Closed-Unresolved (or) Problem-Closed, this function sets Active field to Inactive
+function setInactive() {	
+	var lookupObj = document.forms["fltrForm0"].elements["QBE.EQ.status"];	
+	if(typeof lookupObj == "undefined") { 	// if status is a dropdown box, not a lookup
+		var statusObj = document.forms["fltrForm0"].elements["QBE.EQ.status"];
+		if(typeof statusObj == "undefined")
+			return;
+		var stat = statusObj.options[statusObj.selectedIndex].value; 	
+		if( stat == "CL" || stat == "CLUNRSLV" || stat == "PC" ) {
+			var activeDropdown = document.forms["fltrForm0"].elements["QBE.EQ.active"];
+			for(var i = 0; i < activeDropdown.length; ++i) {		
+				if(activeDropdown.options[i].value == "") {
+					activeDropdown.options[i].selected = true;
+					break;
+				}
+			}
+		}
+	}
+	else { 		// else, status is a lookup, not a dropdown box
+			var stat = lookupObj.value;
+			if( stat == "CL" || stat == "CLUNRSLV" || stat == "PC" ) {
+			var activeDropdown = document.forms["fltrForm0"].elements["QBE.EQ.active"];
+			for(var i = 0; i < activeDropdown.length; ++i) {		
+				if(activeDropdown.options[i].value == "") {
+					activeDropdown.options[i].selected = true;
+					break;
+				}
+			}
+		}			
+	}
+	
+}
+
+<PDM_IF "$args.KEEP.forChangeCrList" == "1">
+    var argChgRefNum = "$args.KEEP.chgRefNum";
+    var chgRefNumStr = "Change $args.KEEP.chgRefNum";
+    var cfgExtraButtonBefore;
+    <PDM_IF "$args.KEEP.CHG_ID" != "0">
+        cfgExtraButtonBefore = new Array("Attach_Incidents", "UpdateIncidents()",
+                                         "Attach_Problems",  "UpdateProblems()",
+                                         "Attach_Requests",  "UpdateRequests()" );
+    </PDM_IF>
+
+    function UpdateIncidents() {
+        update_child("chg", "chg:"+"$args.KEEP.CHG_ID", "$args.KEEP.UPD_LIST", "in", "$args.KEEP.UPD_ATTR", "Incidents", chgRefNumStr);
+    }
+    function UpdateProblems() {
+        update_child("chg", "chg:"+"$args.KEEP.CHG_ID", "$args.KEEP.UPD_LIST", "pr", "$args.KEEP.UPD_ATTR", "Problems", chgRefNumStr);  
+    }
+    function UpdateRequests() {
+        update_child("chg", "chg:"+"$args.KEEP.CHG_ID", "$args.KEEP.UPD_LIST", "cr", "$args.KEEP.UPD_ATTR", "Requests", chgRefNumStr);
+    }
+</PDM_IF>
+
+
+<PDM_IF "$args.KEEP.ForChild" == "1" && "$args.KEEP.exclude_chg_ref_num" == "">
+	var hdrTitle = "Wyszukiwanie podrzędnych Wniosków";
+	var hdrTitleList = "Lista podrzędnych Wniosków";
+	var hdrTitleTempl = "Wyszukiwanie szablonów podrzędnych Wniosków";
+<PDM_ELIF "$args.KEEP.forCrChildList" == "1">
+	var hdrTitle = "Wyszukiwanie podrzędnych Wniosków";
+	var hdrTitleList = "Lista podrzędnych Wniosków";
+<PDM_ELIF "$args.KEEP.forChangeCrList" == "1" && "$args.KEEP.UPD_LIST" == "cr_list">
+	var hdrTitle = "Wyszukiwanie powiązanych Wniosków";
+	var hdrTitleList = "Lista powiązanych Wniosków";
+<PDM_ELIF "$args.KEEP.forChangeCrList" == "1" && "$args.KEEP.UPD_LIST" == "caused_cr_list">
+	var hdrTitle = "Wyszukiwanie Wniosków źródłowych";
+	var hdrTitleList = "Lista źródłowych Wnioskó";
+<PDM_ELSE>
+	var hdrTitle = "Wyszukiwanie Wniosków";
+	var hdrTitleList = " Lista Wniosków";
+	var hdrTitleTempl = "Wyszukiwanie szablonów Wniosków";
+</PDM_IF>
+
+var enableExtraBtn = true;
+cfgExtraButton = new Array("Utwórz nowy wniosek", "AddCr()", enableExtraBtn);
+
+function AddCr() {
+	popup_window('RequestDetail', 'CREATE_NEW', 0, 0, 
+	'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+	'FACTORY=cr', 
+	'', 
+	'');
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("crsum.rpt", "crdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+var cfgContextActivities = true;
+var cfgContextSolution = true;
+var from_detail = "$args.KEEP.from_detail";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Request">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=cr>
+<PDM_IF "$args.KEEP.forNrtoCr" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.affected_resource" value="$args.QBE.EQ.affected_resource">');
+    document.write('<INPUT TYPE=hidden NAME="QBE.NE.type" value="P">');
+    document.write('<INPUT TYPE=hidden NAME="QBE.NE.type" value="I">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forCrChildList" == "1">
+document.writeln('<INPUT TYPE=hidden NAME="QBE.EQ.parent.id" VALUE="$args.QBE.EQ.parent.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForChild" == "1">
+document.writeln('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_cr.htmpl>');
+</PDM_IF>
+<PDM_IF "" != "$args.KEEP.exclude_ref_num">
+document.write('<INPUT TYPE=hidden NAME=QBE.NE.ref_num VALUE="$args.KEEP.exclude_ref_num">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forChangeCrList" == "1" && "$args.QBE.EQ.change.id" != "">
+document.writeln('<INPUT TYPE=hidden NAME="QBE.EQ.change.id" VALUE="$args.QBE.EQ.change.id">');
+</PDM_IF>
+<PDM_IF"$args.KEEP.forChangeCrList" == "1" && "$args.QBE.EQ.caused_by_chg.id" != "">
+document.writeln('<INPUT TYPE=hidden NAME="QBE.EQ.caused_by_chg.id" VALUE="$args.QBE.EQ.caused_by_chg.id">');
+</PDM_IF>
+
+var argCreateAlg = "${args.CREATE_ALG:}";
+if ( argCreateAlg.length > 0 ) {
+   var argAlgPreset = "${args.ALG_PRESET:}";
+   var argAlgPresetRel = "${args.ALG_PRESET_REL:}";
+   
+   document.write('<INPUT TYPE=hidden NAME=CREATE_ALG VALUE="' + argCreateAlg + '">');
+   if ( argAlgPreset.length > 0 )
+      document.write('<INPUT TYPE=hidden NAME=ALG_PRESET VALUE="$args.ALG_PRESET">');
+    if ( argAlgPresetRel.length > 0 )
+      document.write('<INPUT TYPE=hidden NAME=ALG_PRESET_REL VALUE="$args.ALG_PRESET_REL">');
+
+}
+
+<PDM_IF "$args.KEEP.backfill_field" == "KEY.PARENT_CR">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Typ zgłoszenia" attr=type codename=crtype default="Wniosek">
+<PDM_ELIF "$args.KEEP.forChangeCrList" == "1">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Typ zgłoszenia" attr=type codename=crtype>
+<PDM_ELSE>
+      	var awc="( type = 'R' OR type = '' OR type IS NULL )";
+    	document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE="'+awc+'">');
+    
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Status przypisania","","",
+"Posiada właściciela","(assignee IS NOT NULL)",
+"Posiada grupę","(group IS NOT NULL)",
+"Właścicel lub grupa","(assignee IS NOT NULL OR group IS NOT NULL)",
+"Właścicel i grupa","(assignee IS NOT NULL AND group IS NOT NULL)",
+"Właścicel bez grupy","(assignee IS NOT NULL AND group IS NULL)",
+"Grupa bez właściela","(assignee IS NULL AND group IS NOT NULL)",
+"Brak właściela","(assignee IS NULL)",
+"Brak grupy","(group IS NULL)",
+"Brak właścicela i grupy","(assignee IS NULL AND group IS NULL)",2);
+<PDM_MACRO name=sfLookup hdr="Właściciel" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+searchFilterSetEventHandler("onChange='setInactive()'")
+<PDM_MACRO name=sfLookup hdr="Status" attr=status factory=crs_cr>
+<PDM_IF "$args.KEEP.PARENT_SEARCH" != "">
+<PDM_MACRO name=sfTextbox hdr=" " attr="persistent_id" disabled="yes" display_value=" " qbe_condition="NE" value="$args.KEEP.PARENT_SEARCH">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+<PDM_IF "$args.use_template" == "1">
+searchFilterDropdown("Status rekordu","active","","noempty","< empty >","(active = 0 OR active = 1)","<selected>","Aktywny","1","Zamknięty","0");
+<PDM_ELSE>
+searchFilterDropdown("Status rekordu","active","","Aktywny","1","Zamknięty","0");
+</PDM_IF>
+<PDM_MACRO name=sfHier hdr="Klasyfikacja wniosku" attr="category.sym" factory=pcat_cr>
+<PDM_MACRO name=sfLookup hdr="Rejestrujący" attr=log_agent factory=cnt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nazwa pracownika" attr=customer colspan=2 factory=cnt>
+<PDM_MACRO name=sfTextbox hdr="User ID pracownika" attr=customer.userid size=20>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja pracownika" attr=customer.location.name factory=loc>
+<PDM_MACRO name=sfLookup hdr="Organizacja pracownika" attr=customer.organization.name factory=org>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas otwarcia" attr=open_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas otwarcia" attr=open_date qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rozwiązania" attr=resolve_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rozwiązania" attr=resolve_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Kod rozwiązania" attr="resolution_code.sym" factory=resocode>
+<PDM_MACRO name=sfDropdown hdr="Metoda rozwiązania" attr="resolution_method.sym" factory=resomethod>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas zamknięcia" attr=close_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas zamknięcia" attr=close_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfTextbox hdr="Temat zgłoszenia" attr=summary colspan=2 size=42>
+<PDM_MACRO name=sfTextbox hdr="Opis zgłoszenia" attr=description colspan=2 size=42>
+<PDM_MACRO name=sfEnd>
+
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+
+var msgFoundNone = "No requests found";
+var msgFound1 = "1 request found";
+var msgFound = "%1 requests found";
+var msgFoundMore = "%1 requests found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired request";
+var msgSelectAlg = "Click to select desired request and add a %1 activity log";
+var msgSelectTempl = "Click to select desired request template";
+
+var show_template_name = ("$args.use_template" == "1");
+if ( searchFilterValueOf("template_name").indexOf("NOT NULL") != -1 )
+   show_template_name = true;
+
+var summary_colspan = 3;
+var ref_num_style;
+var add_icon_to_cust;
+
+// Writes a special handling icon next to the 'customer/end user' if they have special handling
+// needs. It defaults to the 'SpecialHandlingIcon' in web.cfg, else it uses the 'announcements_16.png'.  
+function writeIcon(name)
+{
+    var htmlStr = name;
+    if (add_icon_to_cust)
+    {
+        var specialHandlingAlertIcon = "$SpecialHandlingIcon";
+        if(specialHandlingAlertIcon == "") // did they provide a icon in the config file?
+        {
+            specialHandlingAlertIcon = "$CAisd/img/announcements_16.png";
+        }
+        htmlStr = htmlStr + "&nbsp <img src='" + specialHandlingAlertIcon 
+                  +"' border=0 height=14 width=14 alt='Special Handling Alert' title='Special Handling Alert'/>";
+    }
+    rs.data(htmlStr);
+}
+function showReqType (value)
+{
+  if ( value == "" ) {
+     value = "Request";
+  }
+  rs.data(value);     
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0' || \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_elif @{list.ttv_att_slas.length:0} != 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.customer.active_special_handling.length:0}' != '0'">
+<PDM_MACRO name=lsWrite text="add_icon_to_cust = 1;">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="add_icon_to_cust = 0;">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_IF "$args.KEEP.forChangeCrList" != "1">
+<PDM_MACRO name=lsCol hdr="Zgłoszenie #" attr=ref_num exportFmt="ShowLink" fmtfunc=writeIcon link=yes style=ref_num_style>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr=" #" attr=ref_num exportFmt="ShowLink" fmtfunc=writeIcon link=yes style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Typ" attr=type fmtfunc=showReqType>
+</PDM_IF>
+<PDM_MACRO name=lsWrite both=yes text="if (show_template_name) {">
+							summary_colspan++;
+		
+<PDM_MACRO name=lsCol hdr="Szablon" attr=template_name exportFmt="ShowLink" link=yes>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsCol hdr="Temat" attr=summary max_char=60>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort="DESC">
+<PDM_MACRO name=lsCol hdr="Klasyfikacja" attr=category sort="DESC" width=300>
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_MACRO name=lsCol hdr="Przypisany do" attr=assignee>
+<PDM_MACRO name=lsCol hdr="Grupa" attr=group>
+<PDM_MACRO name=lsCol hdr="Prognozowane naruszenie" attr=ztermin_realizacji>
+<PDM_MACRO name=lsCol attr=open_date label="Data otwarcia" startrow=yes>
+<PDM_MACRO name=lsCol attr=group label="Grupa">
+<PDM_MACRO name=lsCol attr=customer colspan=3 fmtfunc=writeIcon label="Pracownik">
+<PDM_MACRO name=lsEnd isTicketFactory=1>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+</PDM_IF>
+<PDM_IF 0>
+@(#)$Id: list_cr.htmpl ASPEN.10 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

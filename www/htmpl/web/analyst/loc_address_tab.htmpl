@@ -1,0 +1,42 @@
+<PDM_IF 0>
+loc_address_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=loc_address_tab" factory=loc>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=tabBanner title="Address">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Adres" attr=address1 colspan=3 size=30>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="" attr=address2 colspan=3 size=30 title="Address line 2">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="" attr=address3 colspan=3 size=30 title="Address line 3">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="" attr=address4 colspan=3 size=30 title="Address line 4">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="" attr=address5 colspan=3 size=30 title="Address line 5">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="" attr=address6 colspan=3 size=30 title="Address line 6">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Miasto" attr=city colspan=3 size=45>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Województwo" attr=state lookup=no size=20>
+<PDM_MACRO name=dtlTextbox hdr="Kod pocztowy" attr=zip size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Państwo" attr=country colspan=3 size=45>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: loc_address_tab.htmpl ASPEN.1 2010/10/26 12:17:32 saima01 Exp $;
+</PDM_IF>

@@ -1,0 +1,245 @@
+<PDM_IF 0>
+detail_zchgcat.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Request Area
+INTENT:
+    Display the detail info for the Request Area
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  pcat  args	The Request Area object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/base.maj for the
+                        definition of attributes for 'OBJECT pcat'
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Request/Incident/Problem Area Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Request/Incident/Problem Area"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Request/Incident/Problem Area $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var factoryDisplayName = "Request/Incident/Problem Area";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/wf_visible.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+
+argPersistentID = "$args.persistent_id";
+var cawfid = "$args.cawf_defid";
+var pmURL = "$env.NX_CAWF_PM_URL";
+var pmLocal = "$env.NX_CAWF_PM_LOCATION";
+var itpam = "$env.NX_CAEXTWF_ENDPOINT";
+var wf_flag = "$args.flow_flag";			// current workflow in use (0=Classic, 1=CAWF, 2=ITPAM)
+
+var argID = "$args.id";
+var ss_sym_fldNum;
+var ss_sym_fld;
+
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function formLoad()
+{
+	// Show popup warning message when CAWF definition exists without CAWF integration
+	if (pmURL == "" || pmLocal == "") {
+		if (wf_flag == "1" && cawfid != "") {
+			alertmsg("Wf_Def_not_found_cawf_only");  // re-install CA Workflow
+		}
+	}
+	// Show popup warning message when ITPAM definition exists without ITPAM integration
+	if (itpam == "") {
+		if (wf_flag == "2" && "$args.caextwf_start_id" != "") {
+			alertmsg("ITPAM_Not_Found");  // re-install ITPAM service
+		}
+	}
+}
+function get_assignable_ci_attr_extra_url()
+{
+    return "+ADDITIONAL_WHERE=TABLE_NAME='nr' AND IS_ATTR_ALIAS=0 AND (SREL_FACTORY='cnt' OR SREL_FACTORY='grp')" +
+            "+KEEP.ADDITIONAL_WHERE=TABLE_NAME='nr' AND IS_ATTR_ALIAS=0 AND (SREL_FACTORY='cnt' OR SREL_FACTORY='grp')";
+}
+
+// Toggle the Self-Service Symbol field on the Edit form.
+function ss_include_click ( select_obj ) 
+{
+   var ss_inc_val = select_obj.checked;
+
+   if (ss_inc_val) {
+      document.main_form.elements["SET.ss_include"].value = 1;
+   }
+   else {
+      document.main_form.elements["SET.ss_include"].value = 0;
+   }
+
+   // Find the ss_sym field 
+   if ( typeof ss_sym_fld == "undefined" ) {
+	ss_sym_fld = findFieldAndLabelFromTable("ss_sym",1);
+   }
+
+   if (ss_inc_val == 1) {
+      if ( ss_sym_fld != null ) {
+         _dtl.fieldToValidate[ss_sym_fldNum].is_required = 1;
+         ss_sym_fld[0].style.display = "block";
+         ss_sym_fld[1].style.display = "block";
+      }
+   }
+   else {
+      if ( ss_sym_fld != null ) {
+         _dtl.fieldToValidate[ss_sym_fldNum].is_required = 0;
+         ss_sym_fld[0].style.display = "none";
+         ss_sym_fld[1].style.display = "none";
+      }
+   }
+}
+
+</script>
+
+</HEAD>
+
+<BODY class=detailro onLoad="formLoad()" onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Request/Incident/Problem Area" key="$args.sym">
+<CENTER>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=zchgcat>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_MACRO name=dtlLookup hdr="Organizacja" attr=organization>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=dtlCheckbox hdr="Propagować do SAP" attr="sap_prop" off="No" on="Yes" title="Propagate to SAP Checkbox">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group>
+</PDM_IF>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=assignee>
+<PDM_IF $args.owning_contract \> 0>
+	<!-- Search only for Service Types belonging to the category's Svc Contract -->
+	
+<PDM_MACRO name=dtlLookup hdr="Typ serwisowy" attr=service_type extraURL="ADDITIONAL_WHERE=owning_contract=$args.owning_contract+KEEP.SVC_CONTRACT_ID=$args.owning_contract+KEEP.SVC_CONTRACT_SYM=$args.owning_contract.sym">
+<PDM_ELSE>
+	<!-- Search only service types that are public, with no service contract -->
+	
+<PDM_MACRO name=dtlLookup hdr="Typ serwisowy" attr=service_type extraURL="ADDITIONAL_WHERE=owning_contract IS NULL+KEEP.SVC_CONTRACT_ID=0+KEEP.SVC_CONTRACT_SYM=(empty)">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=dtlLookup hdr="Ankieta" attr=survey colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Ankieta" attr=survey>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlReadonly hdr="Usługa" attr=owning_contract colspan=1>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Usługa" attr=owning_contract colspan=1>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Pilność klasyfikacji" attr="category_urgency" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit" >
+<PDM_MACRO name=dtlCheckbox hdr="Widoczny wSelfService" attr=ss_include evt="onClick='ss_include_click(this)'" off=No on=Yes>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa w SelfService" attr=ss_sym colspan=2 make_required=yes>
+    ss_sym_fldNum = _dtl.fieldToValidate.length - 1;
+
+    
+<PDM_MACRO name=dtlStartRow>
+    if ( typeof ss_sym_fld == "undefined" ) {
+        ss_sym_fld = findFieldAndLabelFromTable("ss_sym",1);
+    }
+    if ("$args.ss_include" == "1") {
+        if ( ss_sym_fld != null ) {
+            _dtl.fieldToValidate[ss_sym_fldNum].is_required = 1;
+            ss_sym_fld[0].style.display = "block";
+            ss_sym_fld[1].style.display = "block";
+        }
+    }
+    else {
+        if ( ss_sym_fld != null ) {
+            _dtl.fieldToValidate[ss_sym_fldNum].is_required = 0;
+            ss_sym_fld[0].style.display = "none";
+            ss_sym_fld[1].style.display = "none";
+        }
+    }
+<PDM_ELSE>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Widoczny wSelfService" attr="ss_include" off=No on=Yes>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa w SelfService" attr="ss_sym" colspan=2>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis w GUI" attr=zguidesc colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kolejność" attr="zsort">
+<PDM_MACRO name=dtlTextbox hdr="Grafika" attr="zimage">
+<PDM_MACRO name=dtlTextbox hdr="SC URL" attr="zsc_url">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=4 size=60>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_IF "$prop.form_name_3" != "edit">
+<TABLE ID="tbl005" WIDTH=90%>
+<TR>
+<TH COLSPAN=3 class=detailro>This category is valid for the following:</TH>
+</TR>
+</TABLE>
+<PDM_ELSE>
+<script type="text/javascript">
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("This category is valid for the following:");
+</script>
+</PDM_IF>
+<script type="text/javascript">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Wnioski" attr=cr_flag off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Incydenty" attr=in_flag off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Problemy" attr=pr_flag off=No on=Yes>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr="pcat_nb">
+<PDM_MACRO name=tab title="Properties" height=300 id=att_prop src="OP=SEARCH+FACTORY=cr_prptpl+QBE.EQ.owning_area.id=$dob.id+KEEP.forPcattoPrptpl=1+KEEP.PCAT_PERSID=$args.persistent_id+KEEP.PCAT_ID=$args.id+QBE.EQ.delete_flag=0+KEEP.IS_EDIT=$prop.form_name_3">
+<PDM_IF "$env.NX_CAWF_PM_URL" != "" && "$env.NX_CAWF_PM_LOCATION" != "">
+<PDM_MACRO name=tab title="Workflow" file="pcat_wftpl_tab.htmpl">
+<PDM_ELIF "$env.NX_CAEXTWF_ENDPOINT" != "" || "$args.cawf_defid" != "">
+<PDM_MACRO name=tab title="Workflow" file="pcat_wftpl_tab.htmpl">
+</PDM_IF>
+<PDM_MACRO name=tab title="Auto Assignment" file="pcat_auto_assignment_tab.htmpl">
+<PDM_MACRO name=tab title="Akceptacje" file="pcat_akceptacje_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_pcat.htmpl ASPEN.9 2012/06/12 14:46:17 debbi01 Exp $;
+</PDM_IF>
+<PDM_WSP>

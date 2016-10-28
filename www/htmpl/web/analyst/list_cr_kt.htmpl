@@ -1,0 +1,307 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to search requests using FAST search engine
+INTENT:
+    Requests keyword Search
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general factory=cr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+function OnBeforeSearchFilter()
+{
+	var sType = msgtext("Request #");
+	var sSelType = document.getElementsByName("QBE.EQ.type")[0][document.getElementsByName("QBE.EQ.type")[0].selectedIndex].value;
+	
+	if (sSelType == "R")
+		sType = msgtext("Request #");
+	else if	(sSelType == "I")
+		sType = msgtext("Incident #");
+	else if	(sSelType == "P")
+		sType = msgtext("Problem #");
+
+	document.getElementsByName("KEEP.TYPE_HEADER")[0].value = sType;
+}
+
+var hdrTitle = "Request Incident Problem Keyword Search";
+var hdrTitleList = "Request Incident Problem Keyword Search";
+var sFindSimilarPersID = "";
+var sFindSimilarFactory = "";
+<PDM_IF "$args.KEEP.FIND_SIMILAR_PERSID" != "" >
+var _sFindSimilarPersID = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.FIND_SIMILAR_PERSID</PDM_FMT>');
+var _sFindSimilarFactory = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.FIND_SIMILAR_FACTORY</PDM_FMT>');
+var _sFindSimilarFactoryName = "";
+var _sFindSimilarRefNum= "";
+var _sFindSimilarSummary = "";
+var _sFindSimilarDescription = "";
+switch ( _sFindSimilarFactory ) {
+	case "cr":
+		_sFindSimilarFactoryName = "Request";
+		break;
+	case "in":
+		_sFindSimilarFactoryName = "Incident";
+		break;
+	case "pr":	
+		_sFindSimilarFactoryName = "Problem";
+		break;
+}
+
+	var bTicketFound = false;
+	<PDM_LIST PREFIX=listSimilar FACTORY="cr" WHERE="persistent_id='$args.KEEP.FIND_SIMILAR_PERSID'">
+		bTicketFound = true;
+		_sFindSimilarRefNum = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$listSimilar.ref_num</PDM_FMT>');
+		_sFindSimilarSummary = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$listSimilar.summary</PDM_FMT>');
+		_sFindSimilarDescription = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$listSimilar.description</PDM_FMT>');
+	</PDM_LIST>
+	if ( !bTicketFound ) // if the ticket was not found this could be b/c it's a new ticket that has not been saved yet, 
+						 //try hook th information from is window
+	{
+		var winTicket = ahdtop.detailForms[_sFindSimilarPersID];
+		if ( typeof winTicket != "undefined" && winTicket != null ){
+			try {
+				_sFindSimilarDescription = winTicket.ahdframe.document.forms["main_form"].elements["SET.description"].value;
+				_sFindSimilarSummary = winTicket.ahdframe.document.forms["main_form"].elements["SET.summary"].value;
+				_sFindSimilarRefNum = winTicket.ahdframe.argRefNum;
+				}
+			catch(e){}
+		}
+	}
+	hdrTitle = "Find Similar for " + _sFindSimilarFactoryName + " " + _sFindSimilarRefNum;
+	hdrTitleList = "Find Similar results for " + _sFindSimilarFactoryName + " " + _sFindSimilarRefNum;
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("&{factory}sum.rpt", "&{factory}dtl.rpt");
+var cfgCanEdit = true;
+
+function List_cr_kt_onload() {
+	<PDM_IF "$args.KEEP.FIND_SIMILAR_PERSID" != "">
+	if ( typeof parent.FirstFindSeimilar == "undefined" ){
+		parent.FirstFindSeimilar = false;
+		document.getElementById("ebr_search_text").value = _sFindSimilarSummary + " " + _sFindSimilarDescription;
+		//Added try & catch here for cases persID parsing go worng 
+		try
+		{
+			var sFindSimilarID = _sFindSimilarPersID.split(":")[1];
+			document.getElementById("QBE.NE.id").value = sFindSimilarID;
+		}
+		catch(e)
+		{
+		}
+	}
+	</PDM_IF>
+}
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onLoad="List_cr_kt_onload();">
+<PDM_INCLUDE FILE=std_body.htmpl logo=no>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory="cr" forcesearchwithkeywords="true" knowledgesearchtext="true">
+document.writeln("<input type=hidden id=HTMPL NAME=HTMPL VALUE='list_cr_kt.htmpl'>");
+document.writeln("<input type=hidden NAME=KEEP.FIND_SIMILAR_PERSID VALUE='$args.KEEP.FIND_SIMILAR_PERSID'>");
+document.writeln("<input type=hidden NAME=KEEP.FIND_SIMILAR_FACTORY VALUE='$args.KEEP.FIND_SIMILAR_FACTORY'>");
+document.writeln("<input type=hidden NAME=KEEP.TYPE_HEADER");
+<PDM_IF "$args.KEEP.FIND_SIMILAR_PERSID" != "">
+document.writeln("<input type=hidden name=QBE.NE.id id=QBE.NE.id value='$args.QBE.NE.id'>");
+</PDM_IF>
+<PDM_MACRO name=ebr_search_filter factory="cr" order_by="false" view="Knowledge">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Typ" attr=type colspan=5 factory=crt>
+<PDM_MACRO name=sfStartRow>
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=''>");
+searchFilterDropdown("Assignment Status","","",
+"Has assignee","(assignee IS NOT NULL)",
+"Has group","(group IS NOT NULL)",
+"Assignee or group","(assignee IS NOT NULL OR group IS NOT NULL)",
+"Assignee and group","(assignee IS NOT NULL AND group IS NOT NULL)",
+"Assignee; no group","(assignee IS NOT NULL AND group IS NULL)",
+"Group; no assignee","(assignee IS NULL AND group IS NOT NULL)",
+"No assignee","(assignee IS NULL)",
+"No group","(group IS NULL)",
+"No assignee; no group","(assignee IS NULL AND group IS NULL)",2);
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfLookup hdr="Nazwa użytkownika końcowego" attr=customer colspan=2 factory=cnt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status factory=crs_cr>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas otwarcia" attr=open_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas otwarcia" attr=open_date qbe_condition=LE>
+<PDM_MACRO name=sfLookup hdr="Nadrzędne zgłoszenie" attr=parent.ref_num factory=cr>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Surowość" attr=severity factory=sev>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=urgency factory=urg>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rozwiązania" attr=resolve_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rozwiązania" attr=resolve_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas zamknięcia" attr=close_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas zamknięcia" attr=close_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfHier hdr="Przyczyna źródłowa" attr="rootcause.sym" factory=rc>
+<PDM_MACRO name=sfDropdown hdr="Kod rozwiązania" attr="resolution_code" factory=resocode>
+<PDM_MACRO name=sfDropdown hdr="Metoda rozwiązania" attr="resolution_method" factory=resomethod>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript"> 
+  var msgFoundNone = "No Requests found";
+  var msgFound1 = "1 Request found";
+  var msgFound = "%1 Requests found";
+  var msgFoundMore = "%1 Requests found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Request";
+  
+  var _arrReqs = new Array();//Holding Ticket information for doing the "Copy Problem" Later
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0' || \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_elif @{list.ttv_att_slas.length:0} != 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_IF 0>Information for "Copy Problem" feature</PDM_IF>
+<PDM_MACRO name=lsWrite text="var req = new Object();">
+<PDM_MACRO name=lsWrite text="req.persid = '@{list.persistent_id}';">
+<PDM_MACRO name=lsWrite text="req.type = '@{list.type}';">
+<PDM_MACRO name=lsWrite text="req.problem = '';">
+<PDM_MACRO name=lsWrite text="if ( '@{list.type}' == 'I' ){">
+<PDM_MACRO name=lsWrite text="	req.problem = '@{list.problem}';">
+<PDM_MACRO name=lsWrite text="	req.problemRefNum = '@{list.problem.ref_num}';">
+<PDM_MACRO name=lsWrite text="}">
+<PDM_MACRO name=lsWrite text="if ( '@{list.type}' == 'P' ){">
+<PDM_MACRO name=lsWrite text="	req.problem = req.persid;">
+<PDM_MACRO name=lsWrite text="	req.problemRefNum = '@{list.ref_num}';">
+<PDM_MACRO name=lsWrite text="}">
+<PDM_MACRO name=lsWrite text="_arrReqs[req.persid] = req;">
+<PDM_MACRO name=lsCol hdr=$args.KEEP.TYPE_HEADER attr=ref_num exportfmt=ShowLink link=yes required=yes sort=no style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Status" attr=status sort=no>
+<PDM_MACRO name=lsCol hdr="Typ" attr=type sort=no>
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=no>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort=no>
+<PDM_MACRO name=lsCol hdr="Grupa/Nadrzędny" attr=group sort=no>
+<PDM_MACRO name=lsCol hdr="Kontakty" attr=assignee label="Assignee" sort=no>
+<PDM_MACRO name=lsCol attr=summary colspan=5 startrow=yes>
+<PDM_MACRO name=lsCol attr=parent.ref_num exporthdr="Rodzic">
+<PDM_MACRO name=lsCol label="Customer" attr=customer>
+<PDM_MACRO name=lsEnd>
+
+var m_copyProblemMenu = null;
+<PDM_IF "$args.KEEP.FIND_SIMILAR_PERSID" != "">
+	if ( _sFindSimilarFactory == "in" ) {
+		//Setting the context menu items for find similar case:
+		rs.setLinkOnclick(function(){rsShowDetailPopup(self.activePersid);});
+		rs.backfillReq = false;//We would like to manually trigger it
+		var ctxMenu = new ContextMenu("idFindSimilar");
+		m_copyProblemMenu = ctxMenu.addItem( "Copy Problem", "copyPeroblem(self.activePersid, self)" );
+		ctxMenu.addItem( msgtext("View"), "rsShowDetailPopup(self.activePersid)" );
+		ctxMenu.addItem( msgtext("Edit"), "showEdit(self.activePersid)" );
+		ctxMenu.addItem( msgtext("Help_on_This_Window..."),	// Help on this window
+			"help_on_form('"+window.propFormName+"')");
+		ctxMenu.finish();	
+	}
+</PDM_IF>
+
+//
+// Copy the problem field to the incident searching for:
+// Used to either:
+	// Copy the problem field from the selected incident to the incident find similar was clicked
+	// Copy the persId of a selected problem to the incident find similar was clicked
+function copyPeroblem(sPersID) {
+	if (action_in_progress())
+	{
+		return; //Check if the page finish loading / prev action
+	}	
+	//
+	if ( typeof _arrReqs[sPersID] == "undefined" )
+		return;//Should not be here in this case
+	
+	var sType = _arrReqs[sPersID].type;
+	
+	var sProblem = _arrReqs[sPersID].problem;//See how lswrite set the problem here
+	sProblemRefNum = _arrReqs[sPersID].problemRefNum
+	
+	if ( !(sProblem != "" && ( sType == "P" || sType == "I" ) ) ){
+		return; //No problem to copy, should not be here in first place as the menu should be disabled
+	}
+	//Copy the problem to the target Incident
+	//
+	
+<PDM_IF "$args.KEEP.backfill_field" != "" && "$args.KEEP.backfill_fieldRO" != "1">
+		//Implement the standard copy back feature
+		rsBackfill("", sProblemRefNum, sProblem);
+		return;
+	
+</PDM_IF>
+	//
+	//
+	//Copy the problem using the backend method:
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	"+OP=SD_INTEG_COPY_PROBLEM+INCIDENT=" + _sFindSimilarPersID;
+	url += "+PROBLEM=" + sProblem ;
+	set_action_in_progress(ACTN_SAVE);	
+	ahdframeset.workframe.location.href = url;		
+}
+//
+// Call back from kt_reply. js when OP=SD_INTEG_COPY_PROBLEM is done
+function copyPeroblem_callback(){
+	var winIncident = ahdtop.detailForms[_sFindSimilarPersID];
+	if ( typeof winIncident != "undefined" && winIncident != null ){
+		if ( typeof winIncident.ahdframe.refreshForm != "undefined" ){
+			//Comunication between 2 windoes is allways little risky, so try & catch was added here
+			try {
+				winIncident.ahdframe.refreshForm();
+				winIncident.focus();
+				top.close()
+				return;
+			}
+			catch(e){}
+		}
+	}
+}
+// Called by resultSet.js and used to change the context menu for each row selected in the list
+// in this case we use it to hide the copy problem menu element when either:
+//	Current row is a request
+//	Current row is an incident with no problem
+function updateCtxMenuItems(row)
+{
+	var sPersID = self.activePersid;
+	if ( m_copyProblemMenu == null )
+		return;
+		
+	ctxMenu.hideItem ( m_copyProblemMenu  );
+	if ( typeof _arrReqs[sPersID] == "undefined" )
+		return;//Should not be here in this case
+	
+	var sType = _arrReqs[sPersID].type;
+	
+	var sProblem = _arrReqs[sPersID].problem;//See how lswrite set the problem here
+	sProblemRefNum = _arrReqs[sPersID].problemRefNum
+	
+	if ( !(sProblem != "" && ( sType == "P" || sType == "I" ) ) ){
+		return; //No problem to copy
+	}
+	
+	ctxMenu.showItem ( m_copyProblemMenu  );
+}
+
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

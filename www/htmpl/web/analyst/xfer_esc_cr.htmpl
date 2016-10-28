@@ -1,0 +1,549 @@
+<PDM_IF 0>
+xfer_esc_cr.htmpl
+WHEN PRESENTED:
+    When the app needs input to create an activity log for Transfer or Escalate.  
+INTENT:
+    Capture user input for a new Activity Log, create an Activity Log and update
+    Call Request when submitted.
+VARIABLES:
+                            See $NX_ROOT/bopcfg/majic/cm.maj for the
+                            definition of attributes for 'OBJECT alg'
+    int   	logged_in   A flag to say we have a user login object.
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+alg_factory = "alg";
+<PDM_IF "ESC" == "$args.alg.type">
+<PDM_IF "$args.type" == "I">
+	form_title = "Eskalacja incydentu $args.ref_num";
+<PDM_ELIF "$args.type" == "P">
+	form_title = "Eskalacja problemu $args.ref_num";
+<PDM_ELSE>
+	form_title = "Eskalacja wniosku $args.ref_num";
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$args.type" == "I">
+	form_title = "Przekazanie incydentu $args.ref_num";
+<PDM_ELIF "$args.type" == "P">
+	form_title = "Przekazanie problemu $args.ref_num";
+<PDM_ELSE>
+	form_title = "Przekazanie wniosku $args.ref_num";
+</PDM_IF>
+<PDM_IF "$args.type" == "I">
+	var escalate_title = "Eskalacja incydentu $args.ref_num";
+<PDM_ELIF "$args.type" == "P">
+	var escalate_title = "Eskalacja problemu $args.ref_num";
+<PDM_ELSE>
+	var escalate_title = "Eskalacja wniosku $args.ref_num";
+</PDM_IF>
+
+function switch_to_escalate()
+{
+   detailSwitchToEsc(document.main_form.elements["SET.alg.type"]);
+}
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+edit_form = 1;
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argRefNum = "$args.ref_num";
+var argID = "$args.id";
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/apc.js"></script>
+<script type="text/javascript">
+var resp_sym = new Array();
+var resp_ids = new Array();
+resp_sym[0] = "";
+resp_ids[0] = "";
+resp_field="SET.alg.description";
+resp_persid='$args.persistent_id';
+
+///////  Variables for Priority calculation Starts/////////
+var pri_cal_matrix=new Array();
+var ticket_factory='$args.KEEP.ticket_factory';
+var pri_cal_enabled = "$args.KEEP.auto_pri_cal";
+var capture_reason = "$args.KEEP.cap_reason";
+var matrix_data = '$args.KEEP.mat_data';
+pri_cal_matrix = matrix_data.split("@,@");
+var defualt_impact = "$args.KEEP.imp_def";
+var defualt_urgency = "$args.KEEP.urg_def";
+var current_impact = "$args.impact";
+var current_urgency = "$args.urgency";
+var escalate_form = true;
+var manual_change = false;
+var parent_cai_main = null;
+///////  Variables for Priority calculation Ends/////////
+//////////////////////Functions for priority calculations Starts/////////////////////////////////
+//This function will get called  detail_form.js and it will get called on Blur event of tenant combo control.
+function tenantOnBlur()
+{
+    if ( ahdframe.currentAction != ACTN_COMPLETE ) {
+        if ( typeof ahdframe.resumeAction != "string" ||
+             ahdframe.resumeAction.length == 0 )
+        {     
+            ahdframe.resumeAction = "tenantOnBlur()";
+        }
+        return;
+    }
+    
+    var tenantUUID = "";
+	if (ticket_factory.length <= 0 && ( "$args.type" == "I" || "$args.type" == "P" ))
+		ticket_factory = "$args.type" == "I" ? "in" : "$args.type" == "P" ? "pr" : "" ;
+	
+    if (ticket_factory.length > 0 && ( ticket_factory == "in" || ticket_factory == "pr" ))
+    {
+        tenantUUID = get_form_tenant_id();
+        var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+                  "+OP=GET_PRI_CAL"+
+                  "+TENANT_ID="+tenantUUID+
+                  "+FACTORY="+ ticket_factory+
+                  "+CALLBACK=got_pri_cal_info";
+        SyncAjaxJSCall(url);
+        //alert(url);
+    }
+}
+
+//////////////////////Functions for priority calculations Ends/////////////////////////////////
+
+<PDM_IF "$args.type" == "R" || "$args.type" == ""> 
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND cr_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+<PDM_ELIF "$args.type" == "I">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND in_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+<PDM_ELIF "$args.type" == "P">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND pr_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+</PDM_IF>
+
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type )
+{
+   detailCntBackfill( form_name, base_name, lname, fname, mname,
+                      cntID, caller_type );
+   detailXferEscBackfill( base_name, lname, fname, mname, cntID, caller_type );
+}
+
+// Returns the parent window of this form if both the forms are in edit mode.
+function getParentWindow()
+{
+	var cai_main = null;
+	var ahdwin = null;
+	var edit_windows = getEditWindows(argPersistentID);
+	for ( var i = edit_windows.length-1; i >= 0 ; i-- ) {
+		var w = edit_windows[i];
+		if ( typeof w._dtl == "object" ) {
+				ahdwin = w.ahdframeset;
+				break;
+		}
+	}
+	if ( ahdwin != null ) {
+		if ( ahdwin.ahdframe.name == "frmDTUserNode" && // Case when switching from DT viewer to DT editor
+			ahdwin.ahdframe.parent.name == "cai_main")
+		{
+			cai_main = ahdwin.ahdframe.parent; 
+		}
+		else
+		{
+			cai_main = ahdwin.ahdframe;
+		}
+	}
+	return cai_main;
+}
+
+// Returns 1 if a manual change has been made.
+function chk_for_manual_change()
+{
+	//var parent_cai_main = getParentWindow();
+	var man_change = false;
+	var impact_ele = document.main_form.elements["SET.impact"];
+	var urgency_ele = document.main_form.elements["SET.urgency"];
+	if ( impact_ele != null && urgency_ele != null && parent_cai_main ) // The incident form is in edit mode
+	{
+		var auto_urgency = parent_cai_main.document.main_form.elements["SET.auto_urg"];
+		var auto_impact = parent_cai_main.document.main_form.elements["SET.auto_imp"];
+		if ( auto_urgency.value == "-1" && auto_impact.value == "-1" && 
+			( ( current_impact != impact_ele.value ) || ( current_urgency != urgency_ele.value ) ) )
+		{
+			man_change = true;
+		}
+		if ( ( auto_urgency.value != "-1" && auto_urgency.value != urgency_ele.value )
+			|| ( auto_urgency.value == "-1" && current_urgency != urgency_ele.value ) )
+		{
+			if ( parent_cai_main.esc_urg == -1 
+				|| ( parent_cai_main.esc_urg != -1 && parent_cai_main.esc_urg != urgency_ele.value ) )
+				man_change = true;
+		}
+		if ( ( auto_impact.value != "-1" && auto_impact.value != impact_ele.value )
+			|| ( auto_impact.value == "-1" && current_impact != impact_ele.value ) )
+		{
+			if ( parent_cai_main.esc_imp == -1 
+				|| ( parent_cai_main.esc_imp != -1 && parent_cai_main.esc_imp != impact_ele.value ) )
+				man_change = true;
+		}
+	}
+	else if ( parent_cai_main == null ) // If the parent is in RO mode
+	{
+		if ( ( current_impact != impact_ele.value ) || ( current_urgency != urgency_ele.value ) )
+		{
+			man_change = true;
+		}
+	}
+
+	return man_change;
+}
+
+// To update the 'Current Impact' and 'Current Urgency' when the escalate form is loaded for new tickets
+function updateCurrentFields()
+{
+	var fields = ["urgency", "impact"];
+	// For tickets created from templates, current impact and urgency are set already.
+	if ( typeof parent_cai_main.base_template != "undefined" && parent_cai_main.base_template.length != 0 )
+	{
+		if ( parent_cai_main.esc_imp == -1 && parent_cai_main.esc_urg == -1 && parent_cai_main.escalateActivity != 3 )
+		{
+			addHtmlElementToForm("KEEP.FOR_CAPREASON", "3"); // For disabling the parent's tenant field
+			if ( parent_cai_main.pri_cal_enabled != 'true' )
+				pri_cal_enabled = 'false';
+		}
+	}
+	// Sync the current elements with the parent form when priority calculation is enabled.
+	else if ( ( parent_cai_main && parent_cai_main.context == "initial" && parent_cai_main.esc_imp == -1 && parent_cai_main.esc_urg == -1 && parent_cai_main.escalateActivity != 3 ) 
+			 )
+	{
+		if ( ( pri_cal_enabled == "true" ) || 
+					( typeof parent_cai_main.created_from_other_src != "undefined" && 
+						parent_cai_main.created_from_other_src.length > 0 ) )
+		{
+			var init_urgency = parent_cai_main.document.main_form.elements["SET.init_urg"];
+			var init_impact = parent_cai_main.document.main_form.elements["SET.init_imp"];
+			if ( init_urgency )
+				current_urgency = init_urgency.value;
+			if ( init_impact )
+				current_impact = init_impact.value;
+		}
+		// For tickets created from KDs, current impact and urgency are set already.
+		if ( typeof parent_cai_main.created_from_KD != "undefined" && parent_cai_main.created_from_KD.length > 0 )
+			; // do nothing
+		else if ( ( pri_cal_enabled == "true" ) || 
+					( typeof parent_cai_main.created_from_other_src != "undefined" && 
+						parent_cai_main.created_from_other_src.length > 0 ) )
+		{
+			values = [ current_urgency, current_impact ];
+			var new_element, current_element;
+			for ( var i=fields.length-1; i>=0 ; i-- )
+			{
+				current_element = document.getElementById("current_" + fields[i]);
+				new_element = document.main_form.elements["SET."+fields[i]];
+				if ( values[i].length == 0 )
+				{
+					current_element.innerHTML = "";
+					continue;
+				}
+				for ( var j=new_element.options.length-1; j>=0 ; j-- )
+				{
+					if ( new_element.options[j].value == values[i] )
+					{
+						current_element.innerHTML = new_element.options[j].innerHTML;
+					}
+				}
+			}
+		}
+		addHtmlElementToForm("KEEP.FOR_CAPREASON", "3"); // For escalate activity without a manual change
+	}
+}
+
+// Check if the latest values of Urgency/Impact are different from the current values and if so make them disabled
+function setFieldsForCapReason()
+{
+	if ( ("$args.type" == "I" || "$args.type" == "P") && parent_cai_main )
+	{
+		updateCurrentFields();
+		if ( pri_cal_enabled == "true" && capture_reason == "1" && parent_cai_main )
+		{
+			if ( parent_cai_main.reasonCaptured == 1 )
+			{
+				if ( chk_for_manual_change() )
+				{
+					manual_change = true;
+					CapReasonFormUpdates(1);
+				}
+			}
+		}
+	}
+}
+
+// Adds hidden html element to the form
+function addHtmlElementToForm(name, value)
+{
+	var element = document.main_form.elements[name];
+	if ( element == null )
+	{
+		var newinput = document.createElement("input");
+		newinput.setAttribute("id", name);
+		newinput.setAttribute("name", name);
+		newinput.setAttribute("type", "hidden");
+		newinput.setAttribute("value", value);
+		document.main_form.appendChild(newinput);
+	}
+	else
+		element.value = value;
+}
+
+// When Urgency/Impact are modified, check if they are differnt from the current values and update the form accordingly.
+function CapReasonFormUpdates(override_check)
+{
+	if ( parent_cai_main && typeof parent_cai_main.base_template != "undefined" && parent_cai_main.base_template.length != 0 )
+	{
+		if ( ("$args.type" == "I" || "$args.type" == "P") && parent_cai_main.pri_cal_enabled != 'true' && pri_cal_enabled == 'true' )
+		{
+			pri_cal_enabled = 'false';
+			return;
+		}
+	}
+	if ( ("$args.type" == "I" || "$args.type" == "P") && (pri_cal_enabled == "true") && capture_reason == "1" )
+	{
+		var back_to_original_values = true;
+		if ( override_check == 1 || chk_for_manual_change() )
+		{
+			back_to_original_values = false;
+		}
+		if ( ( manual_change == false || override_check == 1 ) && back_to_original_values == false )
+		{
+			detailMakeReq("alg.description");
+			var alertmsgdiv = document.getElementById("alertmsgText");
+			if ( alertmsgdiv )
+			{
+				alertmsgdiv.innerHTML = msgtext("Reason_for_manual_change");
+				var alertmsgtable = document.getElementById("alertmsg");
+				if ( alertmsgtable != null && alertmsgtable.style.display != "block" )
+				{
+					alertmsgtable.style.display = "block";
+					adjScrollDivHeight();
+				}
+			}
+			addHtmlElementToForm("KEEP.FOR_CAPREASON", "1"); // For escalate activity with a manual change
+			manual_change = true;
+		}
+		else if ( back_to_original_values == true && manual_change == true )
+		{
+			detailMakeReq("alg.description", true);
+			var alertmsgtable = document.getElementById("alertmsg");
+			if ( alertmsgtable != null )
+			{
+				alertmsgtable.style.display = "none";
+				adjScrollDivHeight();
+			}
+			//var parent_cai_main = getParentWindow();
+			if ( parent_cai_main && parent_cai_main.context == "initial" && parent_cai_main.esc_imp == -1 && parent_cai_main.esc_urg == -1 && parent_cai_main.escalateActivity != 3 )
+				addHtmlElementToForm("KEEP.FOR_CAPREASON", "3"); // For escalate activity without a manual change
+			else
+				document.main_form.removeChild(document.getElementById("KEEP.FOR_CAPREASON"));
+			manual_change = false;
+		}
+	}
+}
+
+// Clears the parent resumeAction (and resets it in apc.js) if escalate activity has been performed. This is done to clear the detailSave() action, when the user cancels the escalate window opened after clicking save in the incident form
+function clearParentResumeAction()
+{
+	var capreason = document.getElementById("KEEP.FOR_CAPREASON");
+	if ( capreason && capreason.value != "3" && ("$args.type" == "I" || "$args.type" == "P") && (pri_cal_enabled == "true") && capture_reason == "1" )
+	{
+		//var parent_cai_main = getParentWindow();
+		if ( parent_cai_main )
+		{
+			parent_cai_main.nextAction = parent_cai_main.resumeAction;
+			parent_cai_main.resumeAction = void(0);
+		}
+	}
+}
+
+function initApcForNewTicket()
+{
+	if ( "$args.type" == "I" || "$args.type" == "P" )
+	{
+		parent_cai_main = getParentWindow(); // Get the parent window
+		// When MT is on for a new ticket, load APC details for that tenant
+		if ( parent_cai_main && parent_cai_main.context == "initial" && 
+				ahdtop.cfgMultiTenancy == "on" && _dtl.tenantFieldEditable == true )
+		{
+			detailCopyTenant(parent_cai_main);
+			ticket_factory = "$args.type" == "I" ? "in" : "$args.type" == "P" ? "pr" : "" ;
+			var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+			  "+OP=GET_PRI_CAL"+
+			  "+TENANT_ID="+get_form_tenant_id()+
+			  "+FACTORY="+ticket_factory+
+			  "+CALLBACK=got_pri_cal_info";
+
+			SyncAjaxJSCall(url);
+		}
+		if ( pri_cal_enabled == '' )
+			pri_cal_enabled = 'false';
+		if (pri_cal_enabled == 'true' || "$args.KEEP.auto_pri_cal_mt" == "true")
+		{
+			var priority = document.main_form.elements["SET.priority"];
+			priority.disabled = "true";
+			priority.style.backgroundColor = "gainsboro";
+		}
+	}
+}
+
+</script>
+</head>
+<body onload="load_from_scratchpad('0');initApcForNewTicket();setFieldsForCapReasonAsync()" onunload="clearParentResumeAction();unload_check()" class=editform>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script type="text/javascript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+if ( typeof parent.opener == "object" && parent.opener != null &&
+     typeof parent.opener._dtl == "object" )
+    parent.opener._dtl.tabReloadOnSave = "";
+<PDM_MACRO name=dtlForm factory=cr>
+<PDM_MACRO name=dtlStart>
+docWriteln("<input type=hidden name=HTMPL value='show_main_detail.htmpl'>");
+docWriteln("<input type=hidden name=KEEP.IsModified value='1'>");
+docWriteln("<input type=hidden name=SET.alg.type value='$args.alg.type'>");
+docWriteln("<input type=hidden name=SET.escalate_priority value='$args.priority'>");
+docWriteln("<input type=hidden name=SET.man_imp value='-1'>");
+docWriteln("<input type=hidden name=SET.man_urg value='-1'>");
+docWriteln("<input type=hidden name=SET.view_type value='0'>");
+
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type" == "I">
+	<PDM_MACRO name=dtlReadonly hdr="Numer incydentu" attr=ref_num>
+	<PDM_MACRO name=dtlReadonly hdr="Temat incydentu" attr=summary colspan=2>
+<PDM_ELIF "$args.type" == "P">
+	<PDM_MACRO name=dtlReadonly hdr="Numer problemu" attr=ref_num>
+	<PDM_MACRO name=dtlReadonly hdr="Temat problemu" attr=summary colspan=2>
+<PDM_ELSE>
+	<PDM_MACRO name=dtlReadonly hdr="Numer wniosku" attr=ref_num>
+	<PDM_MACRO name=dtlReadonly hdr="Temat wniosku" attr=summary colspan=2>
+</PDM_IF>
+<PDM_IF "$args.type" == "I" || "$args.type" == "P">
+<PDM_IF "$args.KEEP.auto_pri_cal" == true || "$args.KEEP.auto_pri_cal_mt" == true >
+<PDM_MACRO name=dtlDropdown hdr="Aktualny priorytet" attr="priority" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Aktualny priorytet" attr="priority" evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Aktualna pilność" attr="urgency" id="current_urgency">
+<PDM_MACRO name=dtlReadonly hdr="Aktualny wpływ" attr="impact" id="current_impact">
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Aktualny priorytet" attr=priority>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Aktualna grupa" attr=group>
+<PDM_MACRO name=dtlReadonly hdr="Aktualny właściciel" attr=assignee>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type" == "I" || "$args.type" == "P">
+<PDM_MACRO name=dtlDropdown hdr="Nowa pilność" attr="urgency" evt="onBlur='detailSyncEditForms(this); CapReasonFormUpdates(); manual_modify()'" lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Nowy wpływ" attr="impact" evt="onBlur='detailSyncEditForms(this); CapReasonFormUpdates(); manual_modify()'" lookup=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Nowy priorytet" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+</PDM_IF>
+
+var prio_id = _dtl.currID;
+
+<PDM_IF "$args.type" == "R" || "$args.type" == "">
+<PDM_IF "$env.NX_REQUIRE_REQUEST_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Nowa grupa" attr=group make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Nowa grupa" attr=group>
+</PDM_IF>
+<PDM_ELIF "$args.type" == "I" && "$env.NX_REQUIRE_INCIDENT_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Nowa grupa" attr=group make_required=yes>
+<PDM_ELIF "$args.type" == "P" && "$env.NX_REQUIRE_PROBLEM_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Nowa grupa" attr=group make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Nowa grupa" attr=group>
+</PDM_IF>
+<PDM_IF "$args.type" == "R" || "$args.type" == "">
+<PDM_IF "$env.NX_REQUIRE_REQUEST_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Nowy właściciel" attr=assignee make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Nowy właściciel" attr=assignee>
+</PDM_IF>
+<PDM_ELIF "$args.type" == "I" && "$env.NX_REQUIRE_INCIDENT_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Nowy właściciel" attr=assignee make_required=yes>
+<PDM_ELIF "$args.type" == "P" && "$env.NX_REQUIRE_PROBLEM_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Nowy właściciel" attr=assignee make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Nowy właściciel" attr=assignee>
+</PDM_IF>
+var assignee_id = _dtl.currID;
+
+
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Czas spędzony" attr=alg.time_spent evt="onBlur='validate_duration_ts(this)'" maxlength=100>
+<PDM_MACRO name=dtlDate hdr="Data czynności" attr=alg.time_stamp>
+<PDM_IF 0>
+	<PDM_MACRO name=dtlDateReadonly hdr="Znacznik czasu" attr=alg.system_time>
+</PDM_IF>
+<PDM_IF "$prop.view_internal" == "1">
+<PDM_MACRO name=dtlCheckbox hdr="Wewnętrzne?" attr=alg.internal>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=alg.description colspan=4 rows=8 size=80 spellchk=no>
+
+if (resp_ids.length > 1)
+{
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type" == "R" || "$args.type" == "">
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory=response list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND cr_flag=1">
+<PDM_ELIF "$args.type" == "I">
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory=response list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND in_flag=1">
+<PDM_ELIF "$args.type" == "P">
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory=response list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND pr_flag=1">
+</PDM_IF>
+}
+
+</script>
+<PDM_MACRO name=dtlEnd>
+<script>
+// This method calls setFieldsForCapReason() with a delay of 500ms after onload
+// So that the value of the new SET.Impact and SET.Urgency is set after the onload of body tag completes.
+// else if its called immediately, the values of the newly selected SET.Impact and 
+// SET.Urgency in the main form that launches this form are not set.
+function setFieldsForCapReasonAsync() {
+/////////////////Added for priority calculations/////////
+	if ( "$args.type" == "I" || "$args.type" == "P" )
+	{
+		setTimeout("setFieldsForCapReason()",200);
+	}
+///////////////////////////////////////////////////////
+}
+<PDM_IF "TR" == "$args.alg.type">
+var prioElements = detailHideElements(prio_id, 2, assignee_id);
+</PDM_IF>
+</script>
+</PDM_FORM>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: xfer_esc_cr.htmpl ASPEN.7 2012/05/01 14:57:04 pitva01 Exp $
+</PDM_IF>
+<PDM_WSP>

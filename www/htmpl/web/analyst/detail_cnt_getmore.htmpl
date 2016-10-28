@@ -1,0 +1,46 @@
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	var frm = "";
+	if ( !parent.cai_main )
+	{
+		frm = parent.ahdframe;
+	}
+	else { frm = parent.cai_main; }
+    if (typeof frm.zcst_getmore == "function")
+    {
+        // mpk_id, mpk_name, email, phone, nazwa
+        frm.zcst_getmore("$args.billing_code.id", "$args.billing_code.name", "$args.email_address", "$args.phone_number", "$args.combo_name");
+    }
+	
+	// 20130823 bmalz @ e-xim
+	if (typeof frm.GetCustomerLocSiteId == "function")
+    {
+        frm.GetCustomerLocSiteId("$args.location.site.id");
+    }
+
+	// 20130907 bmalz @ e-xim
+	if (typeof frm.GetOwningContracts == "function")
+    {
+		var Contracts = new Array();
+		<PDM_LIST PREFIX=list FACTORY=zlrel_org_kontr WHERE="org.id=U'$args.organization.id'">
+			Contracts.push("$list.kontr.id");
+		</PDM_LIST>
+        frm.GetOwningContracts(Contracts);
+    }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+

@@ -1,0 +1,127 @@
+<PDM_IF 0>
+bhvtpl_todo_tab.htmpl
+WHEN PRESENTED:
+   When we need the To Do infromation tab on the Behavior Detail screen 
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=bhvtpl_todo_tab" factory=bhvtpl>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+
+function add_button_to_tab_banner(){
+<PDM_IF "$args.id" == 0>  
+    <PDM_SET args.disable_btns="yes">
+<PDM_ELSE>
+    <PDM_SET args.disable_btns="no">
+</PDM_IF>
+<PDM_MACRO name=button caption="Update Actions on True" disabled=$args.disable_btns func="update_lrel_macro('bhvtpl', '$args.persistent_id', 'macro', 'true',  'Possible Actions', 'Actions on True', '',holdtext)" hotkey_name="Update Actions on True" id="ACT_ON_TRUE" newrow=yes>
+<PDM_MACRO name=button caption="Update Actions on False" disabled=$args.disable_btns endrow=yes func="update_lrel_macro('bhvtpl', '$args.persistent_id', 'macro', 'false',  'Possible Actions', 'Actions on False', '',holdtext)" hotkey_name="Update Actions on False" id="ACT_ON_FALSE">                           
+}
+<PDM_MACRO name=tabBanner title="Macro List" add_btns=true>
+<PDM_IF "$args.id" == 0>  
+detailStartRow("Center");
+detailRowHdr("The Behavior must be saved before adding Actions");
+<PDM_MACRO name=dtlEndTable>
+</PDM_IF>
+
+if ("$args.context_type" == "")
+{
+	if ("$args.KEEP.fac" == "chg")
+	var holdtext = 'wf';
+	else if ("$args.KEEP.fac" == "iss")
+	var holdtext = 'iss_wf';
+}
+else 
+{
+var holdtext = '$args.context_type';
+}
+<PDM_MACRO name=dtlStartRow>      
+if (holdtext == 'wf')     
+<PDM_MACRO name=dtlLookup hdr="Warunek" attr=macro_condition extraurl="ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND')AND(ob_type='wf')+KEEP.RESTRICT_FROM_BHVTPL=1" size=50>
+else if(holdtext == 'iss_wf') 
+<PDM_MACRO name=dtlLookup hdr="Warunek" attr=macro_condition extraurl="ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND')AND(ob_type='iss_wf')+KEEP.RESTRICT_FROM_BHVTPL=1" size=50>
+<PDM_MACRO name=dtlEndTable>
+
+docWriteln("<table cellpadding='1' cellspacing='5' width='90%' summary='Macro List'>");
+docWriteln("<tr valign='top'>");
+docWriteln("<th scope='col' colspan='5' align='middle' valign='baseline' class='results'>Actions on True Macro List</th>");
+docWriteln("</tr>");
+<PDM_IF $args.true.length == 0>
+<PDM_MACRO name=dtlStartRow>    
+docWriteln("<td align='middle' class='detailro'>");  
+docWriteln("No Macros Attached");
+docWriteln("</td>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_ELSE>
+var counter=0; 
+<PDM_LIST SOURCE=args.true ESC_STYLE=C>
+			var sClass;			
+			if(counter%2)
+				sClass = "results1";
+			else
+				sClass = "results0";
+			counter++;
+			var strHTML="<tr class='" + sClass +  "'>";
+docWriteln(strHTML);
+docWriteln("<td valign='top' class='detailroTab'>");
+docWriteln("<a" + detailNextID(true) +
+           " href=\"javascript:showDetailWithPersidKeep('$args.true.persistent_id','ForBhvtpl','$args.persistent_id')\"" 
+           + getMOPreviewEventHtml( '$args.true.persistent_id' ) + ">$args.true.sym</a>");
+docWriteln("</td>");
+docWriteln("</tr>");
+</PDM_LIST>
+</PDM_IF>
+docWriteln("</table>");
+
+docWriteln("<br>");
+
+docWriteln("<table cellpadding='1' cellspacing='5' width='90%'>");
+docWriteln("<tr valign='top'>");
+docWriteln("<th scope='col' colspan='5' align='middle' valign='baseline' class='results'>Actions on False Macro List</th>");
+docWriteln("</tr>");
+<PDM_IF $args.false.length == 0>
+docWriteln("<td align='middle' class='detailro'>");  
+docWriteln("No Macros Attached");
+docWriteln("</td>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_ELSE>
+var counter=0; 
+<PDM_LIST SOURCE=args.false ESC_STYLE=C>
+			var sClass;			
+			if(counter%2)
+				sClass = "results1";
+			else
+				sClass = "results0";
+			counter++;
+			var strHTML="<tr class='" + sClass +  "'>";
+docWriteln(strHTML);
+docWriteln("<td valign='top' class='detailroTab'>");
+docWriteln("<a" + detailNextID(true) +
+           " href=\"javascript:showDetailWithPersidKeep('$args.false.persistent_id','ForBhvtpl','$args.persistent_id')\"" 
+           + getMOPreviewEventHtml( '$args.false.persistent_id' ) + ">$args.false.sym</a>");
+docWriteln("</td>");
+docWriteln("</tr>");
+</PDM_LIST>
+</PDM_IF>
+docWriteln("</table>");
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: bhvtpl_todo_tab.htmpl ASPEN.1 2010/11/22 14:30:05 tomjo02 Exp $;
+</PDM_IF>

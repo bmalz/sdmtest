@@ -1,0 +1,412 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a tab page with details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for tab detail screens
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+In order to have WSP Preview work, the PDM_WSP tag must be edited.
+Add the new tab page to the notetbook tab of a detail page (detail_xx.htmpl). 
+Then assign the name of the detail page (detail_xx.htmpl) to the preview attribute
+of the PDM_WSP tag. 
+</SCRIPT>
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_xx.htmpl" factory=cr>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=tabBanner title="Akceptacje" add_btns=false>
+
+<PDM_IF "$prop.form_name_3" == "edit">
+	document.write('<div style="padding:10px; width:90%; text-align:left;">Wymagana ilość poziomów akceptacji: <select id="Levels"><option>&lt;brak&gt;</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>');
+</PDM_IF>
+
+if(document.getElementById("Levels") != null) {
+	var selectmenu=document.getElementById("Levels")
+	selectmenu.onchange=function(){
+		LevelsOnChange(this.selectedIndex);
+	}
+}
+
+document.write("<div id='divLvl1' style='border: 1px solid gray; align: left;'>");
+document.write("<div style='padding-top:5px;'>Poziom 1</div>");
+document.write("<table style='width:100%;'>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ akceptacji" attr="zacctype1" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</td>");
+document.write("</tr>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+document.write("<div id='1_o1' style='font-size:10px;'>Akceptujący jest wybierany przez osobę składającą zgłoszenia spośród uprawnionych do akceptacji zgłoszeń z poziomu organizacyjnego <br />składającego zgłoszenie oraz poziomu o jeden wyższego w stosunku do poziomu organizacji składającego zgłoszenie.</div>");
+document.write("<div id='1_o2'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Domyślny akceptujący" attr="zmanager1" colspan="4" extraURL="ADDITIONAL_WHERE=zakceptujacy=1">
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='1_o3'>");
+<PDM_OBJECT>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button Caption="Aktualizuj kontakty" EndRow=yes Func="update_lrel('cr', '$args.persistent_id', 'cnt', 'zcntref',  'Użytkownik', 'Przypisane do kategorii', '')" hotkey_name="Aktualizuj kontakty" ID=UPDATE_LREL NewRow=yes>
+</PDM_IF>
+</PDM_OBJECT>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList brbefore=yes btntitle="Dowolna grupa" colspan=4 height=250 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.zcrref.cr.id=$args.wc_dob_id+QBE.EQ.delete_flag=0+KEEP.forPcatoCnt=1">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zcntref1rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='1_o4'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Grupa z SD" attr="zgroup1" colspan="4">
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zgroup1rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("</td>");
+document.write("</tr>");
+document.write("</table>");
+document.write("</div>");
+
+document.write("<div id='divLvl2' style='border: 1px solid gray; margin-top: 10px;'>");
+document.write("<div style='padding-top:5px;'>Poziom 2</div>");
+document.write("<table style='width:100%;'>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ akceptacji" attr="zacctype2" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</td>");
+document.write("</tr>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+document.write("<div id='2_o1' style='font-size:10px;'>Akceptujący jest wybierany przez osobę składającą zgłoszenia spośród uprawnionych do akceptacji zgłoszeń z poziomu organizacyjnego <br />składającego zgłoszenie oraz poziomu o jeden wyższego w stosunku do poziomu organizacji składającego zgłoszenie.</div>");
+document.write("<div id='2_o2'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Domyślny akceptujący" attr="zmanager2" colspan="4" extraURL="ADDITIONAL_WHERE=zakceptujacy=1">
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='2_o3'>");
+<PDM_OBJECT>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button Caption="Aktualizuj kontakty" EndRow=yes Func="update_lrel('cr', '$args.persistent_id', 'cnt', 'zcntref1',  'Użytkownik', 'Przypisane do kategorii', '')" hotkey_name="Aktualizuj kontakty" ID=UPDATE_LREL NewRow=yes>
+</PDM_IF>
+</PDM_OBJECT>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList brbefore=yes btntitle="Dowolna grupa" colspan=4 height=250 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.zcrref1.pcat.id=$args.wc_dob_id+QBE.EQ.delete_flag=0+KEEP.forPcatoCnt=1">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zcntref2rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='2_o4'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Grupa z SD" attr="zgroup2" colspan="4">
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zgroup2rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("</td>");
+document.write("</tr>");
+document.write("</table>");
+document.write("</div>");
+
+document.write("<div id='divLvl3' style='border: 1px solid gray; margin-top: 10px;'>");
+document.write("<div style='padding-top:5px;'>Poziom 3</div>");
+document.write("<table style='width:100%;'>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ akceptacji" attr="zacctype3" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</td>");
+document.write("</tr>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+document.write("<div id='3_o1' style='font-size:10px;'>Akceptujący jest wybierany przez osobę składającą zgłoszenia spośród uprawnionych do akceptacji zgłoszeń z poziomu organizacyjnego <br />składającego zgłoszenie oraz poziomu o jeden wyższego w stosunku do poziomu organizacji składającego zgłoszenie.</div>");
+document.write("<div id='3_o2'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Domyślny akceptujący" attr="zmanager3" colspan="4" extraURL="ADDITIONAL_WHERE=zakceptujacy=1">
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='3_o3'>");
+<PDM_OBJECT>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button Caption="Aktualizuj kontakty" EndRow=yes Func="update_lrel('cr', '$args.persistent_id', 'cnt', 'zcntref2',  'Użytkownik', 'Przypisane do kategorii', '')" hotkey_name="Aktualizuj kontakty" ID=UPDATE_LREL NewRow=yes>
+</PDM_IF>
+</PDM_OBJECT>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList brbefore=yes btntitle="Dowolna grupa" colspan=4 height=250 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.zcrref2.cr.id=$args.wc_dob_id+QBE.EQ.delete_flag=0+KEEP.forPcatoCnt=1">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zcntref3rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='3_o4'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Grupa z SD" attr="zgroup3" colspan="4">
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zgroup3rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("</td>");
+document.write("</tr>");
+document.write("</table>");
+document.write("</div>");
+
+document.write("<div id='divLvl4' style='border: 1px solid gray; margin-top: 10px;'>");
+document.write("<div style='padding-top:5px;'>Poziom 4</div>");
+document.write("<table style='width:100%;'>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ akceptacji" attr="zacctype4" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</td>");
+document.write("</tr>");
+document.write("<tr>");
+document.write("<td width='100%'>");
+document.write("<div id='4_o1' style='font-size:10px;'>Akceptujący jest wybierany przez osobę składającą zgłoszenia spośród uprawnionych do akceptacji zgłoszeń z poziomu organizacyjnego <br />składającego zgłoszenie oraz poziomu o jeden wyższego w stosunku do poziomu organizacji składającego zgłoszenie.</div>");
+document.write("<div id='4_o2'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Domyślny akceptujący" attr="zmanager4" colspan="4" extraURL="ADDITIONAL_WHERE=zakceptujacy=1">
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='4_o3'>");
+<PDM_OBJECT>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button Caption="Aktualizuj kontakty" EndRow=yes Func="update_lrel('cr', '$args.persistent_id', 'cnt', 'zcntref3',  'Użytkownik', 'Przypisane do kategorii', '')" hotkey_name="Aktualizuj kontakty" ID=UPDATE_LREL NewRow=yes>
+</PDM_IF>
+</PDM_OBJECT>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList brbefore=yes btntitle="Dowolna grupa" colspan=4 height=250 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.zcrref3.cr.id=$args.wc_dob_id+QBE.EQ.delete_flag=0+KEEP.forPcatoCnt=1">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zcntref4rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("<div id='4_o4'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Grupa z SD" attr="zgroup4" colspan="4">
+<PDM_MACRO name=dtlDropdown hdr="Reguła akceptacji" attr="zgroup4rules" evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+document.write("</td>");
+document.write("</tr>");
+document.write("</table>");
+document.write("</div>");
+
+document.write("<div id='LevelsRows'>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="" attr="zlvl" colspan="4">
+<PDM_MACRO NAME=dtlEndTable>
+document.write("</div>");
+
+document.write("<div id='NoLevels' style='font-size: 11px; padding: 10px;'>Brak akceptacji</div>");
+
+jq(function(){
+	if(jq('select[pdmqa=zacctype1]') != null) {
+		jq('select[pdmqa=zacctype1]').change( function() {
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype1]').get(0).selectedIndex, "#1_o1", "#1_o2", "#1_o3", "#1_o4");
+		});
+	}
+	
+	if(jq('select[pdmqa=zacctype2]') != null) {
+		jq('select[pdmqa=zacctype2]').change( function() {
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype2]').get(0).selectedIndex, "#2_o1", "#2_o2", "#2_o3", "#2_o4");
+		});
+	}
+	
+	if(jq('select[pdmqa=zacctype3]') != null) {
+		jq('select[pdmqa=zacctype3]').change( function() {
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype3]').get(0).selectedIndex, "#3_o1", "#3_o2", "#3_o3", "#3_o4");
+		});
+	}
+	
+	if(jq('select[pdmqa=zacctype4]') != null) {
+		jq('select[pdmqa=zacctype4]').change( function() {
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype4]').get(0).selectedIndex, "#4_o1", "#4_o2", "#4_o3", "#4_o4");
+		});
+	}
+
+	jq("#NoLevels").hide();
+
+	jq("#1_o1").hide();
+	jq("#1_o2").hide();
+	jq("#1_o3").hide();
+	jq("#1_o4").hide();
+	jq("#2_o1").hide();
+	jq("#2_o2").hide();
+	jq("#2_o3").hide();
+	jq("#2_o4").hide();
+	jq("#3_o1").hide();
+	jq("#3_o2").hide();
+	jq("#3_o3").hide();
+	jq("#3_o4").hide();
+	jq("#4_o1").hide();
+	jq("#4_o2").hide();
+	jq("#4_o3").hide();
+	jq("#4_o4").hide();
+
+	jq("#divLvl1").hide();
+	jq("#divLvl2").hide();
+	jq("#divLvl3").hide();
+	jq("#divLvl4").hide();
+
+	<PDM_IF "$prop.form_name_3" == "edit">
+		if(jq('select[pdmqa=zacctype1]') != null)
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype1]').get(0).selectedIndex, "#1_o1", "#1_o2", "#1_o3", "#1_o4");
+		
+		if(jq('select[pdmqa=zacctype2]') != null) 
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype2]').get(0).selectedIndex, "#2_o1", "#2_o2", "#2_o3", "#2_o4");
+		
+		if(jq('select[pdmqa=zacctype3]') != null)
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype3]').get(0).selectedIndex, "#3_o1", "#3_o2", "#3_o3", "#3_o4");
+		
+		if(jq('select[pdmqa=zacctype4]') != null)
+			AcceptTypeOnChange(jq('select[pdmqa=zacctype4]').get(0).selectedIndex, "#4_o1", "#4_o2", "#4_o3", "#4_o4");
+			
+		if(jq('input[pdmqa=zlvl]') != null) {
+			jq('input[pdmqa=zlvl]').hide();
+
+			if (document.getElementById("Levels") != null)
+				document.getElementById("Levels").selectedIndex = jq('input[pdmqa=zlvl]').val();
+
+			if (jq('input[pdmqa=zlvl]').val() != '') {
+				LevelsOnChange(jq('input[pdmqa=zlvl]').val());
+			}
+		}
+	<PDM_ELSE>
+		if(jq('td[pdmqa=zacctype1]') != null)
+			AcceptTypeOnChange(AcceptationTypeToIndex(jq('td[pdmqa=zacctype1]').html()), "#1_o1", "#1_o2", "#1_o3", "#1_o4");
+			
+		if(jq('td[pdmqa=zacctype2]') != null)
+			AcceptTypeOnChange(AcceptationTypeToIndex(jq('td[pdmqa=zacctype2]').html()), "#2_o1", "#2_o2", "#2_o3", "#2_o4");
+		
+		if(jq('td[pdmqa=zacctype3]') != null)
+			AcceptTypeOnChange(AcceptationTypeToIndex(jq('td[pdmqa=zacctype3]').html()), "#3_o1", "#3_o2", "#3_o3", "#3_o4");
+			
+		if(jq('td[pdmqa=zacctype4]') != null)
+			AcceptTypeOnChange(AcceptationTypeToIndex(jq('td[pdmqa=zacctype4]').html()), "#4_o1", "#4_o2", "#4_o3", "#4_o4");
+			
+		if(jq('td[pdmqa=zlvl]') != null) {
+			jq('td[pdmqa=zlvl]').hide();
+
+			if (document.getElementById("Levels") != null)
+				document.getElementById("Levels").selectedIndex = jq('td[pdmqa=zlvl]').val();
+
+			if (jq('td[pdmqa=zlvl]').html() != '') {
+				LevelsOnChange(jq('td[pdmqa=zlvl]').html());
+			} 
+		}
+	</PDM_IF>
+});
+
+function AcceptationTypeToIndex(AcceptationType) {
+	switch(jq.trim(AcceptationType)) {
+		case '<brak>':
+			return 0;
+			break;
+		case '1 Osoba':
+			return 1;
+			break;
+		case 'Domyślny Akceptujący':
+			return 2;
+			break;
+		case 'Grupa Dowolna':
+			return 3;
+			break;
+		case 'Grupa Wsparcia':
+			return 4;
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
+function LevelsOnChange(ChosenOption) {
+	if (ChosenOption == 1) {
+		jq("#divLvl1").show("slow");
+		jq("#divLvl2").hide("slow");
+		jq("#divLvl3").hide("slow");
+		jq("#divLvl4").hide("slow");
+		jq("#NoLevels").hide();
+		jq('input[pdmqa=zlvl]').val("1");
+	} else if (ChosenOption == 2) {
+		jq("#divLvl1").show("slow");
+		jq("#divLvl2").show("slow");
+		jq("#divLvl3").hide("slow");
+		jq("#divLvl4").hide("slow");
+		jq("#NoLevels").hide();
+		jq('input[pdmqa=zlvl]').val("2");
+	} else if (ChosenOption == 3) {
+		jq("#divLvl1").show("slow");
+		jq("#divLvl2").show("slow");
+		jq("#divLvl3").show("slow");
+		jq("#divLvl4").hide("slow");
+		jq('input[pdmqa=zlvl]').val("3");
+	} else if (ChosenOption == 4) {
+		jq("#divLvl1").show("slow");
+		jq("#divLvl2").show("slow");
+		jq("#divLvl3").show("slow");
+		jq("#divLvl4").show("slow");
+		jq("#NoLevels").hide();
+		jq('input[pdmqa=zlvl]').val("4");
+	} else {
+		jq("#divLvl1").hide("slow");
+		jq("#divLvl2").hide("slow");
+		jq("#divLvl3").hide("slow");
+		jq("#divLvl4").hide("slow");
+		jq("#NoLevels").show();
+		jq('input[pdmqa=zlvl]').val("");
+	}
+}
+
+function AcceptTypeOnChange(ChosenOption, Element1, Element2, Element3, Element4) {
+	if (ChosenOption == 0) {
+		jq(Element1).hide("slow");
+		jq(Element2).hide("slow");
+		jq(Element3).hide("slow");
+		jq(Element4).hide("slow");
+	} else if (ChosenOption == 1) {
+		jq(Element1).show("slow");
+		jq(Element2).hide("slow");
+		jq(Element3).hide("slow");
+		jq(Element4).hide("slow");
+	} else if (ChosenOption == 2) {
+		jq(Element1).hide("slow");
+		jq(Element2).show("slow");
+		jq(Element3).hide("slow");
+		jq(Element4).hide("slow");
+	} else if (ChosenOption == 3) {
+		jq(Element1).hide("slow");
+		jq(Element2).hide("slow");
+		jq(Element3).show("slow");
+		jq(Element4).hide("slow");
+	} else if (ChosenOption == 4) {
+		jq(Element1).hide("slow");
+		jq(Element2).hide("slow");
+		jq(Element3).hide("slow");
+		jq(Element4).show("slow");
+	}
+} 
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+

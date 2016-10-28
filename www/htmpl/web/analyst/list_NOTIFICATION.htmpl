@@ -1,0 +1,151 @@
+<PDM_IF 0>
+$Id: list_NOTIFICATION.htmpl,v 1.3 2006/11/09 17:47:14 kubtr01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of Notifications.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Document Notification Search";
+var hdrTitleList = "Document Notification List";
+var argSkeletonId = "$args.SkeletonId";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kd_tabs.js"></SCRIPT>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list" onload="LoadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="notification" header=no>
+<SCRIPT>
+	var docID = 0;
+	if ( typeof parent.GetSkeletonId != "undefined" )
+      docID = parent.GetSkeletonId();
+
+	
+<PDM_MACRO name=sfStart create=false factory=NOTIFICATION>
+<PDM_MACRO name=sfStartRow>
+	if (docID>0)//Come from Document Editor
+	{
+		
+<PDM_MACRO name=sfLookup hdr="Nazwa" attr=ANALYST_ID>
+<PDM_MACRO name=sfTextbox hdr="Alternatywny e-mail" attr=ALT_EMAIL colspan=6 size=50>
+		document.writeln("<INPUT TYPE=hidden NAME=QBE.EQ.DOC_ID ID=QBE.EQ.DOC_ID VALUE='$args.id'>");
+	}
+	else
+	{
+		
+<PDM_MACRO name=sfTextbox hdr="e-mail" attr=ALT_EMAIL colspan=6 size=50>
+		document.writeln("<INPUT TYPE=hidden NAME=QBE.EQ.DOC_ID ID=QBE.EQ.DOC_ID VALUE='-$args.kd_notify_info.id'>");
+		document.writeln("<INPUT TYPE=hidden NAME=QBE.GE.NTF_LEVEL ID=QBE.GE.NTF_LEVEL VALUE='0'>");
+	}
+
+	
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+
+if( docID > 0)
+{
+	var msgFoundNone = "No notifications found";
+	var msgFound1 = "1 notification found";
+	var msgFound = "%1 notifications found";
+	var msgFoundMore = "%1 notifications found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired notifications";
+	var msgSelectAlg = "Click to select desired notifications and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired notifications template";
+
+	if (typeof parent.getEdit != "undefined" &&
+        parent.getEdit() != 0) //check if the document is in edit mode
+	{
+		ImgBtnRow();
+		ImgBtnCreate("btnAddNotification", "Add_Notification", "AddNotification();");
+		ImgBtnEndRow();
+	}
+}
+else
+{
+	var msgFoundNone = "No emails found";
+	var msgFound1 = "1 email found";
+	var msgFound = "%1 emails found";
+	var msgFoundMore = "%1 emails found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired emails";
+	var msgSelectAlg = "Click to select desired emails and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired emails template";
+	
+	if (typeof parent.getEdit != "undefined" &&
+        parent.getEdit() != 0) //check if the document is in edit mode
+	{
+		ImgBtnRow();
+		ImgBtnCreate("btnAddNotification", "Add_Email", "AddNotification();");
+		ImgBtnEndRow();
+	}
+}
+
+//Note: This function is used for list macro
+function IncludeLink(value)
+{
+	if (typeof parent.getEdit != "undefined" &&
+	    parent.getEdit() != 0)
+	{
+		rs.showDataWithLink("", value);
+	}
+	else
+	{
+		rs.data(value);
+	}
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite both=yes text="if (docID <= 0) {">
+<PDM_MACRO name=lsCol hdr="e-mail" attr=ALT_EMAIL export=no fmtfunc=IncludeLink sort=no>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="else {">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.ANALYST_ID.combo_name:}' != ''">
+<PDM_MACRO name=lsCol hdr="Alternatywny e-mail" attr=ALT_EMAIL>
+<PDM_MACRO name=lsCol hdr="login" attr=ANALYST_ID.userid>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=ANALYST_ID.combo_name export=no fmtfunc=IncludeLink sort=no>
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.ANALYST_ID.userid:}' != ''">
+<PDM_MACRO name=lsCol hdr="Alternatywny e-mail" attr=ALT_EMAIL>
+<PDM_MACRO name=lsCol hdr="login" attr=ANALYST_ID.userid export=no fmtfunc=IncludeLink sort=no>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=ANALYST_ID.combo_name>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsCol hdr="Alternatywny e-mail" attr=ALT_EMAIL export=no fmtfunc=IncludeLink sort=no>
+<PDM_MACRO name=lsCol hdr="login" attr=ANALYST_ID.userid>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=ANALYST_ID.combo_name>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd factory=NOTIFICATION>
+
+
+rs.setLinkOnclick(function(){EditNotification(self.activePersid)});
+//rs.overrideMenu=true;
+
+if (typeof parent.getEdit != "undefined" &&
+    parent.getEdit() != 0) 
+{
+	var ctxMenu=new ContextMenu("idMenuTabNotifications");
+	ctxMenu.addItem("View", "ViewNotification(self.activePersid);");
+	ctxMenu.addItem("Edit", "EditNotification(self.activePersid);");
+	ctxMenu.addItem("Delete", "DeleteNotification(self.activePersid);");
+	ctxMenu.finish();
+}
+
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

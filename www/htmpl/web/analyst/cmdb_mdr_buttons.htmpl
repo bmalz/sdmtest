@@ -1,0 +1,372 @@
+<PDM_IF 0>
+Purpose:
+   This file creates the CMDB MDR launch in context buttons on a notebook tab.
+   Displays the MDR launch in context buttons, when the form is in read-only mode, displays
+   MDR Edit buttons and Add MDR button for mapping a CI to a MDR when the form is in edit mode.
+
+Usage:
+   Include this file, for example:
+
+   PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename=""
+   <PDM_MACRO NAME=tabBanner title="Attributes" add_btns=true> 
+
+History:
+   05/12/2008 mckpe04/tomjo02 Initial Version shipped with CMDB 11.2
+   07/30/2008 tomjo02 PES P05544 - CMDB-UAPM integration phase 1 - added UAPM launch-in-context support
+   09/08/2008 tomjo02 SCO 16454 - Localization support
+   11/19/2008 tomjo02 SCO 18967 - Multi-tenancy - show MDR buttons for read-only public CIs
+   02/10/2009 tomjo02 SCO 19251 - Support display MDR buttons for read-only CIs per changes made in SCO 18969
+   03/04/2009 tomjo02 SCO 21986 - Hide MDR buttons for inactive federated CI mappings
+   12/11/2009 tomjo02 SCO 31206 - Prevent duplicate MDR buttons 
+   12/18/2009 tomjo02 SCO 31405 - Add ITAM 12.5 MDR launch in context support.
+   02/01/2010 mckpe04 SCO 30196 - allow use of & in federated_asset_id (requested by Wily CEM)
+
+</PDM_IF>
+
+<PDM_IF 0>
+SCO 18967 and 19251 - Force display of MDR buttons when user has read-only access to the CI.
+Defining the global variable tabButtonAuth to 1 will cause tab_banner() (in webtab.js) to show 
+the notebook buttons when user has read-only access (cfgUserAuth <= 1) for the CI.
+</PDM_IF>
+var tabButtonAuth = 1;
+
+// Routine that adds the MDR buttons to a notebook tab.
+function add_button_to_tab_banner()
+{
+    // invoked by tab_banner... 2nd parameter must be (true)
+    
+    var curLaunchURL = "";
+    var curMDRId = "";
+    var curMDRName = "";
+    var curMDRNameUC = "";
+    var curMDRClass = "";
+    var curMDRClassUC = "";
+    var curHostname = "";
+    var onClickFunc = "";
+    var user = "";
+    var btnCaption = "";
+    var btnTooltip = "";
+    var launchTooltip = "Launch" + " ";
+    var editTooltip = "Edit" + " ";
+    var shownMDRIdArr = new Array();
+    var bMDRShown = false;
+    <PDM_IF 0>
+        // SCO 31405 - tomjo02 18-Dec-2009 - Dynamic ITAM TicketID substitution support. 
+        // Enable the following lines of code and corresponding code in detail_ci_mdr_provider.htmpl that
+        // will not hard code the TicketID parameter and will be dynamically added when the MDR button is created.
+        var strItamTicketID = "&TicketID={itam_ticketid}";  
+    </PDM_IF>
+
+    docWriteln("<table><tr>");
+
+    <PDM_IF $args.id != '0'>
+
+        <PDM_LIST FACTORY="ci_mdr_idmap" PREFIX="list" WHERE="cmdb_asset_id = U'$args.id' AND delete_flag = 0">
+
+            // Save the MDR button label.
+            btnCaption = <PDM_FMT PAD=NO ESC_STYLE=C>"$list.mdr_provider_id.name"</PDM_FMT>;
+            curMDRId = <PDM_FMT PAD=NO ESC_STYLE=C>"$list.mdr_provider_id"</PDM_FMT>;
+            bMDRShown = false;
+            
+            <PDM_IF "$prop.form_name_3" == "ro">
+
+                // In read-only mode - add the MDR Launch button.
+
+                // Save the base URL and host name, required parameters for launch in context.
+                curLaunchURL = <PDM_FMT ESC_STYLE=JS2>"$list.mdr_provider_id.launchurl"</PDM_FMT>;
+                curHostname = <PDM_FMT ESC_STYLE=JS2>"$list.mdr_provider_id.hostname"</PDM_FMT>;
+
+                curMDRClass = '<PDM_FMT PAD=NO ESC_STYLE=C>$list.mdr_provider_id.mdr_class</PDM_FMT>';
+                curMDRClassUC = curMDRClass.toUpperCase();
+                curMDRName  = '<PDM_FMT PAD=NO ESC_STYLE=C>$list.mdr_provider_id.mdr_name</PDM_FMT>';
+                curMDRNameUC = curMDRName.toUpperCase();
+                if ( curMDRClassUC == "COHESION" && curLaunchURL == "http://{hostname}:{port}/{path}?{parameters}" )
+                {
+                    // Set the URL for backward support for existing 11.1 URLs.
+                    curLaunchURL = "/CAisd/html/cmdb_cohesion.html?" +
+                                   "hostname={hostname}" +
+                                   "+port={port}" +
+                                   "+family={family}" +
+                                   "+name={name}" +
+                                   "+secret={password}" +
+                                   "+federated_asset_id={federated_asset_id}";
+                }
+
+                // Save the MDR and CI parameters and values for substitution.
+                // The parameter array element name specifies the parameter tag (e.g. {mdr_name} ),
+                // the array value contains the literal value to be substituted for the corresponding
+                // parameter tag.
+                var paramArr = new Array();
+
+                // "{parameters}" must be first in the list to allow other parameters in the
+                // parameter string to be replaced in the base launch URL specified for the MDR.
+                paramArr["{parameters}"] = <PDM_FMT ESC_STYLE=JS2>"$list.mdr_provider_id.parameters"</PDM_FMT>;
+                
+                <PDM_IF 0>
+                    // SCO 31405 - tomjo02 18-Dec-2009 - Dynamic ITAM TicketID substitution support. 
+                    // Enable the following lines of code and corresponding code in detail_ci_mdr_provider.htmpl that
+                    // will not hard code the TicketID parameter and will be dynamically added when the MDR button is created.
+                    if ( curMDRNameUC == "ITAM" &&  curMDRClassUC == "GLOBAL" )
+                    {
+                       // Add on the &TargetID= substitution parameter for ITAM auto-login support.
+                       paramArr["{parameters}"] += strItamTicketID;
+                    } 
+                </PDM_IF>
+
+                // MDR parameters.
+                paramArr["{mdr_class}"] = nx_escape( curMDRClass );
+                paramArr["{mdr_name}"]  = nx_escape( curMDRName );
+                paramArr["{path}"]      = <PDM_FMT ESC_STYLE=JS2>"$list.mdr_provider_id.path"</PDM_FMT>;
+                paramArr["{hostname}"]  = curHostname;
+                paramArr["{port}"]      = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$list.mdr_provider_id.port</PDM_FMT>' );
+                paramArr["{password}"]  = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$list.mdr_provider_id.password</PDM_FMT>' );
+
+                // Federated asset ID
+                paramArr["{federated_asset_id}"] = <PDM_FMT ESC_STYLE=JS2>"$list.federated_asset_id"</PDM_FMT>;
+
+                // Set the userid, use the one specified in the MDR definition, otherwise, use the current CMDB/SD user id.
+                user = '<PDM_FMT PAD=NO ESC_STYLE=C>$list.mdr_provider_id.userid</PDM_FMT>';
+                if ( user == "" )
+                {
+                    user = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.userid</PDM_FMT>';
+                }
+                paramArr["{userid}"] = nx_escape( user );
+
+                // CI parameters
+                paramArr["{name}"]      = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$list.cmdb_asset_id.name</PDM_FMT>' );
+                paramArr["{class}"]     = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.class.type</PDM_FMT>' );
+                paramArr["{family}"]    = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.family.sym</PDM_FMT>' );
+                paramArr["{cmdb_asset_id}"] = nx_escape( '<PDM_FMT EPAD=NO ESC_STYLE=C>$list.cmdb_asset_id</PDM_FMT>' );
+                paramArr["{alarm_id}"]  = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$list.cmdb_asset_id.alarm_id</PDM_FMT>' ); //Added for QC Problem 590 (banat01)
+                paramArr["{model}"]     = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.model.sym</PDM_FMT>' );
+                paramArr["{manufacturer}"] = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.manufacturer.sym</PDM_FMT>' );
+
+                if ( $list.mdr_provider_id.delete_flag != 1 && curLaunchURL != "" && curHostname != "" )
+                {
+                    if ( curMDRClassUC == "COHESION")
+                    {
+                        // COHESION launch in context.
+                        curLaunchFunc = "popupCohesion";
+                    }
+                    else
+                    {
+                        // Generic launch in context.
+                        curLaunchFunc = "popupLaunchInContext";
+                    }
+
+                    // Build tooltip using HTML chars for proper display.
+                    btnTooltip = launchTooltip + <PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.mdr_provider_id.name"</PDM_FMT>;
+
+                    // Create the MDR launch button - builds the URL and appropriate launch function.
+                    cmdbCreateMdrLaunchBtn( btnCaption, btnTooltip, curLaunchURL, paramArr, curLaunchFunc );
+                    bMDRShown = true;
+                }
+
+            <PDM_ELIF "$prop.form_name_3" == "edit">
+
+                // In edit mode - add the MDR Edit button that pops up the MDR detail from with the specific provider.
+
+                // Build tooltip using HTML chars for proper display.
+                btnTooltip = editTooltip + <PDM_FMT PAD=NO ESC_STYLE=HTML>"$list.mdr_provider_id.name"</PDM_FMT>;
+                cmdbCreateMdrEditBtn( btnCaption, btnTooltip, curMDRId );
+                bMDRShown = true;
+
+            </PDM_IF>
+            
+            if ( bMDRShown )
+            {
+               // Add ID to list of displayed MDR buttons to prevent duplicate later.
+               shownMDRIdArr[curMDRId] = curMDRId;
+            }
+        </PDM_LIST>
+
+        // PES P05544 - UAPM integration launch in context support
+        // Add buttons for each MDR identified as a "GLOBAL" MDR. Global MDRs
+        // don't require CI's to be mapped to a particular MDR.
+        <PDM_LIST FACTORY="ci_mdr_provider" PREFIX="mdr" WHERE="delete_flag=0" >
+
+            // Process each active MDR provider and add a MDR button for each one designated as mdr_class="GLOBAL".
+            curMDRClass = '<PDM_FMT PAD=NO ESC_STYLE=C>$mdr.mdr_class</PDM_FMT>';
+            curMDRClassUC = curMDRClass.toUpperCase();
+            curMDRId = <PDM_FMT PAD=NO ESC_STYLE=C>"$mdr.id"</PDM_FMT>;
+            curMDRName = '<PDM_FMT PAD=NO ESC_STYLE=C>$mdr.mdr_name</PDM_FMT>';
+            curMDRNameUC = curMDRName.toUpperCase();
+            
+            if ( curMDRClassUC == "GLOBAL" && typeof shownMDRIdArr[curMDRId] == "undefined" )
+            {
+                // Add the "global" MDR button if not already defined.
+
+                // Save the MDR button label.
+                btnCaption = <PDM_FMT PAD=NO ESC_STYLE=C>"$mdr.name"</PDM_FMT>;
+
+                <PDM_IF "$prop.form_name_3" == "ro">
+
+                    // In read-only mode - add the MDR Launch button.
+
+                    // Save the base URL and host name, required parameters for launch in context.
+                    curLaunchURL = <PDM_FMT ESC_STYLE=JS2>"$mdr.launchurl"</PDM_FMT>;
+                    curHostname = <PDM_FMT ESC_STYLE=JS2>"$mdr.hostname"</PDM_FMT>;
+
+                    // Save the MDR and CI parameters and values for substitution.
+                    // The parameter array element name specifies the parameter tag (e.g. {mdr_name} ),
+                    // the array value contains the literal value to be substituted for the corresponding
+                    // parameter tag.
+                    var paramArr = new Array();
+
+                    // "{parameters}" must be first in the list to allow other parameters in the
+                    // parameter string to be replaced in the base launch URL specified for the MDR.
+                    paramArr["{parameters}"] = <PDM_FMT ESC_STYLE=JS2>"$mdr.parameters"</PDM_FMT>;
+                    
+                    <PDM_IF 0>
+                        // SCO 31405 - tomjo02 18-Dec-2009 - Dynamic ITAM TicketID substitution support. 
+                        // Enable the following lines of code and corresponding code in detail_ci_mdr_provider.htmpl that
+                        // will not hard code the TicketID parameter and will be dynamically added when the MDR button is created.
+                        if ( curMDRNameUC == "ITAM" )
+                        {
+                           // Add on the &TargetID= substitution parameter for auto-login support.
+                           paramArr["{parameters}"] += strItamTicketID;
+                        } 
+                    </PDM_IF>
+
+                    // MDR parameters
+                    paramArr["{mdr_class}"] = nx_escape( curMDRClass );
+                    paramArr["{mdr_name}"]  = nx_escape( curMDRName );
+                    paramArr["{path}"]      = <PDM_FMT ESC_STYLE=JS2>"$mdr.path"</PDM_FMT>;
+                    paramArr["{hostname}"]  = curHostname;
+                    paramArr["{port}"]      = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$mdr.port</PDM_FMT>' );
+                    paramArr["{password}"]  = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$mdr.password</PDM_FMT>' );
+
+                    // Federated asset ID is not defined, special case for GLOBAL MDRs to use asset ID instead.
+                    paramArr["{federated_asset_id}"] = <PDM_FMT ESC_STYLE=JS2>"$args.id"</PDM_FMT>;
+                    
+                    // Set the userid, use the one specified in the MDR definition, otherwise, use the current CMDB/SD user id.
+                    user = '<PDM_FMT PAD=NO ESC_STYLE=C>$mdr.userid</PDM_FMT>';
+                    if ( user == "" )
+                    {
+                        user = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.userid</PDM_FMT>';
+                    }
+                    paramArr["{userid}"] = nx_escape( user );
+
+                    // CI parameters
+                    paramArr["{name}"]      = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.name</PDM_FMT>' );
+                    paramArr["{class}"]     = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.class.type</PDM_FMT>' );
+                    paramArr["{family}"]    = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.family.sym</PDM_FMT>' );
+                    paramArr["{cmdb_asset_id}"] = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.id</PDM_FMT>' );
+                    paramArr["{alarm_id}"]  = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.alarm_id</PDM_FMT>' ); //Added for QC Problem 590 (banat01)
+                    paramArr["{model}"]     = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.model.sym</PDM_FMT>' );
+                    paramArr["{manufacturer}"] = nx_escape( '<PDM_FMT PAD=NO ESC_STYLE=C>$args.manufacturer.sym</PDM_FMT>' );
+
+                    if ( curLaunchURL != "" && curHostname != "" )
+                    {
+                        // Build tooltip using HTML chars for proper display.
+                        btnTooltip = launchTooltip +  <PDM_FMT PAD=NO ESC_STYLE=HTML>"$mdr.name"</PDM_FMT>;
+
+                        // Create the MDR launch button - builds the URL and invokes popupLaunchInContext()
+                        cmdbCreateMdrLaunchBtn( btnCaption, btnTooltip, curLaunchURL, paramArr, "popupLaunchInContext" );
+                    }
+
+                <PDM_ELIF "$prop.form_name_3" == "edit">
+
+                    // In edit mode - add the MDR Edit button that pops up the MDR detail from with the specific provider.
+
+                    // Build tooltip using HTML chars for proper display.
+                    btnTooltip = editTooltip +  <PDM_FMT PAD=NO ESC_STYLE=HTML>"$mdr.name"</PDM_FMT>;
+                    cmdbCreateMdrEditBtn( btnCaption, btnTooltip, curMDRId );
+
+                </PDM_IF>
+            }
+
+        </PDM_LIST>
+
+        <PDM_IF "$prop.form_name_3" == "edit">
+
+            // In read-only mode - add the Add MDR button for mapping the CI to a MDR
+
+            docWriteln("<td>");
+
+            onClickFunc = "popup_window('','CREATE_NEW', 0, 0, '', 'FACTORY=ci_mdr_idmap', 'KEEP.IsPopUp=1', 'PRESET=cmdb_asset_id:$args.id', '')"
+
+            <PDM_MACRO NAME=button id="AddMDR"
+                          caption="Add MDR"
+                          func="\" + onClickFunc + \"" 
+                          tooltip="Create a new mapping to this CI from an MDR"
+                          hotkey_name="Add MDR"
+                       > 
+            docWriteln("</td>");
+
+        </PDM_IF>
+    </PDM_IF>
+    docWriteln("</tr></table>");
+
+}
+
+// Routine that creates a MDR Launch button on a form tab, performs the parameter
+// tag/value substitution to build the target URL to launch, invoked from add_button_to_tab_banner().
+//    btnCaption - MDR button label
+//    btnTooltip - MDR button tooltip
+//    launchURL - MDR launch URL
+//    paramArr - substitution parameter array containing tag/values used to build the URL
+//    launchFunc - Javascript function to invoked for URL launch in context.
+function cmdbCreateMdrLaunchBtn( btnCaption, btnTooltip, launchURL, paramArr, launchFunc )
+{
+    var resultURL = "";
+
+    if ( launchURL != undefined && launchURL != "" )
+    {
+        // Set the base URL for all substitutes from which all
+        // parameter substitutions will occur.
+        resultURL = launchURL;
+    }
+
+    // Process the parameter array and replace all parameter tags with corresponding values.
+    // The parameter array element name specifies the parameter tag (e.g. {mdr_name} ),
+    // the array value contains the literal value to be substituted for the corresponding
+    // parameter tag.
+    for ( paramTag in paramArr )
+    {
+        // Replace parameter tag name with it's corresponding value globally ignoring case.
+        var regexp = new RegExp( paramTag, "gi" );
+        resultURL = resultURL.replace( regexp, paramArr[paramTag] );
+    }
+
+    if ( resultURL != "" && launchFunc != "" )
+    {
+        // Setup the MDR launch function.
+        var onClickFunc = launchFunc + "('"  + resultURL + "')";
+
+        // Create the MDR launch button.
+        docWriteln("<td>");
+        <PDM_MACRO NAME=button id="btn_\" + btnCaption + \""
+              caption="\" + btnCaption + \"" 
+              func="\" + onClickFunc + \"" 
+              tooltip="\" + btnTooltip + \"" 
+              hotkey_name="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" 
+                       > 
+        docWriteln("</td>");
+    }
+}
+
+// Routine that creates a MDR Edit button that pops up the MDR provider
+// list with specific provider listed, invoked from add_button_to_tab_banner().
+//    btnCaption - MDR button label
+//    btnTooltip - MDR button tooltip 
+//    mdrId - MDR name used for edit operation
+function cmdbCreateMdrEditBtn( btnCaption, btnTooltip, mdrId )
+{
+    if ( btnCaption != "" && mdrId != "" )
+    {
+        // Setup the function that popups up the MDR provider list with the provider listed.
+        var onClickFunc = "popup_window('','UPDATE', 0, 0, '', 'FACTORY=ci_mdr_provider', 'SET.id=" + mdrId + "', 'RELOAD_WIN=0')";
+
+        // Create the MDR edit button.
+        docWriteln("<td>");
+        <PDM_MACRO NAME=button id="btn_\" + btnCaption + \""
+              caption="\" + btnCaption + \"" 
+              func="\" + onClickFunc + \"" 
+              tooltip="\" + btnTooltip + \"" 
+              hotkey_name="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" 
+                       > 
+        docWriteln("</td>");
+    }
+}
+

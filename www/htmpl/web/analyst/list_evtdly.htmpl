@@ -1,0 +1,67 @@
+<PDM_IF 0>
+list_chg.htmpl
+WHEN PRESENTED:
+    When we need to display an Event Delay History list
+INTENT:
+    Display the Event Delay History list
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object atev list The list object containing the delay events
+                        See $NX_ROOT/bopcfg/majic/bopevt
+/opt/CApdm/bopcfg/majic/bopevt.maj:OBJECT atev { .maj for the
+                        definition of attributes for 'OBJECT atev'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Event Delay History Search";
+var hdrTitleList = "Event Delay History List";
+form_title = "Event Delay History";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("no", "no");
+var cfgCanEdit = false;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=list>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Event Delay History">
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+cfgCanView = false;
+var msgFoundNone = "No event delays found";
+var msgFound1 = "1 event delay found";
+var msgFound = "%1 event delays found";
+var msgFoundMore = "%1 event delays found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired event delay";
+<pdm_macro name=lsStart>
+<pdm_macro name=lsCol hdr="Czas ropzoczęcia" attr=start_time>
+<pdm_macro name=lsCol hdr="Czas zatrzymania" attr=stop_time>
+<pdm_macro name=lsCol hdr="Rzeczywiste opóźnienie" attr=act_delay>
+<pdm_macro name=lsCol hdr="Efektywne opóźnienie" attr=eff_delay>
+<pdm_macro name=lsCol hdr="Typ serwisowy" attr=support_lev>
+<pdm_macro name=lsCol hdr="Opis" attr=description width=50>
+<pdm_macro name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<SPAN class=detailro>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</SPAN>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_evtdly.htmpl ANDERSON.1 2009/09/28 17:43:36 hu$ho01 Exp $
+</PDM_IF>

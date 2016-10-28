@@ -1,0 +1,194 @@
+<PDM_IF 0>
+list_atomic_cond.htmpl
+WHEN PRESENTED:
+	For displaying atomic conditions.  This htmpl is assumed to be within 
+	a deferred tab on detail_macro.htmpl
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Atomic Condition Search";
+var hdrTitleList = "Atomic Condition List";
+var cfgCanView = true;
+var cfgCanEdit = true;
+var tenantSort = "no"; //By default all tenant columns are sortable. This variable is needed to make the
+						//tenant column not sortable
+
+var autoRefreshWindows = new Object();
+// do this check so that the code works when Avoid Popup is set
+if (typeof parent.parent != "undefined" && typeof parent.parent.cai_main != "undefined") {
+   var this_parent = parent.parent.cai_main;
+}
+else {
+   var this_parent = parent;
+}
+
+function addAtomic() {
+	// Do not add new atomics if we're in an edit-in-list session
+	if (this_parent._dtl.edit && ImgBtnDisabled("btnEdit") && cfgRecordCount > 0) {
+		alert(msgtext("Please_save_your_Edit_in_List_"));
+	} else {
+		add_macro_atomic_cond('$args.QBE.EQ.owning_macro');
+	}
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+
+<SCRIPT LANGUAGE="JavaScript">
+   var enableBtn = false;
+   
+<PDM_IF $ACCESS.FAC_atomic_cond \> 1 >
+      if (this_parent.argID != 0) {
+         enableBtn = true;
+      }
+   
+</PDM_IF>
+    cfgExtraButton = new Array("Add_Condition", "addAtomic()", enableBtn);
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="Atomic Condition">
+
+<script language="JavaScript">
+	
+var saveUsingScreenReader = ahdtop.cstUsingScreenReader;
+ahdtop.cstUsingScreenReader = false;
+<PDM_MACRO name=sfStart create=false export=no factory=atomic_cond>
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.owning_macro" VALUE="$args.QBE.EQ.owning_macro">');
+
+// We use locals for some of the fields eligible for update via Edit in List;
+// required so we can display human-friendly text and use edit in list.
+searchFilterDropdown("Open Group","l_paran_local","", "noempty", "(","","","");
+searchFilterDropdown("Close Group","r_paran_local","", "noempty", ")","","","");
+searchFilterDropdown("Connector","connecter_local","", "noempty", "OR","","AND","");
+document.writeln('<input type=hidden name="KEEP.REFRESH_PARENT_MACRO" value="1">');
+<PDM_MACRO name=sfEnd>
+ahdtop.cstUsingScreenReader = saveUsingScreenReader;
+</script>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+<pdm_jscript file=list_edit.js>
+startListEdit(__search_filter);
+listEditStartRow();
+listEditField("sequence", "Sequence");
+listEditField("l_paran_local", "Open Group");
+listEditField("r_paran_local");
+listEditField("connecter_local");
+listEditEndRow();
+endListEdit();
+
+var msgFoundNone = "No conditions found";
+var msgFound1 = "1 conditions found";
+var msgFound = "%1 conditions found";
+var msgFoundMore = "%1 conditions found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired conditions";
+
+function operator_format(val) {
+	var c_operator;
+	switch ( val ) { 
+	case "0" : 
+		c_operator = "Equals";
+		break;
+	case "1" :
+		c_operator = "Does not Equal";
+		break;
+	case "2" :
+		c_operator = "Greater Than";
+		break;
+	case "3" :
+		c_operator = "Less Than";
+		break;
+	case "4" :
+		c_operator = "Empty/Null";
+		break;		
+	case "5" :
+		c_operator = "Not Empty/Null";
+		break;						
+		
+	default :
+		c_operator = "???"
+         }
+
+	rs.data(c_operator);
+}
+
+function operator_formatExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("Equals") + ",1," + msgtext("Does not Equal") + ",2," + msgtext("Greater Than") + ",3," 
+	+ msgtext("Less Than") + ",4," + msgtext("Empty/Null") + ",5," + msgtext("Not Empty/Null") + ",OTHERWISE,???";
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence exportfmt=ShowLink link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Otwórz grupę" attr=l_paran_local sort=no>
+<PDM_MACRO name=lsCol hdr="Atrybut" attr=lval.sym sort=no>
+<PDM_MACRO name=lsCol hdr="Operator" attr=operator exportfmt=operator_formatExp fmtfunc=operator_format sort=no>
+<PDM_MACRO name=lsCol hdr="Wartość" attr=rval_display sort=no>
+<PDM_MACRO name=lsCol hdr="Zamknij grupę" attr=r_paran_local sort=no>
+<PDM_MACRO name=lsCol hdr="Connector" attr=connecter_local sort=no>
+<PDM_MACRO name=lsEnd factory=atomic_cond>
+</SCRIPT>
+</PDM_IF>
+
+<script language="JavaScript">
+// Search filter is not appropriate when we're displayed in a deferred tab, and use
+// of locals will give bad results if a search is performed.
+ImgBtnHideButton("btnShowHide");
+ImgBtnHideButton("btndflt");
+ImgBtnHideButton("btnClear");
+
+// Change all is not appropriate for these rows!
+ImgBtnHide("btnChangeAll");
+
+if (typeof parent.parent != "undefined" && typeof this_parent != "undefined") {
+ if (!this_parent._dtl.edit)
+ {
+ 	// Hide "Edit in List" btn if in the RO Mode
+ 	ImgBtnHideButton("btnEdit");
+ }
+ else
+ {
+			// Disable if not on RO mode of the macro detail screen and if new macro detail screen and
+			// if the number of records is less than 1
+			if (this_parent.argID.length <= 1 || cfgRecordCount < 1) {
+				ImgBtnDisableButton("btnEdit");
+			} 
+ }
+
+	if (typeof this_parent.argID == "undefined" || this_parent.argID.length <= 1) {
+		ImgBtnDisableButton("ADD_ATOMIC_COND");
+	}
+	
+	// Refresh the parent when the list is refetched, usually after a delete.
+	if ("$args.KEEP.REFRESH_PARENT_MACRO" == "1") {
+		if (!this_parent._dtl.edit) {
+			this_parent.refreshForm();
+		}
+	}
+}
+
+
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: list_atomic_cond.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $";
+</PDM_IF>
+
+
+
+<PDM_WSP>

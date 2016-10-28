@@ -1,0 +1,257 @@
+<PDM_IF 0>
+detail_ztask.htmpl
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "";
+var hdrTitleUpd = "";
+var hdrTitleNew = "";
+
+var taskType = "$args.KEEP.ETaskType";
+if(taskType == "ZA") {
+	hdrTitle = "Szczegóły zadania akceptacyjnego";
+	hdrTitleUpd = "Aktualizowanie zadania akceptacyjnego";
+	hdrTitleNew = "Tworzenie zadania akceptacyjnego";
+}
+else if (taskType == "ZZ") {
+	hdrTitle = "Szczegóły zadania dla firmy zewnętrznej";
+	hdrTitleUpd = "Aktualizowanie zadania dla firmy zewnętrznej";
+	hdrTitleNew = "Tworzenie zadania dla firmy zewnętrznej";
+}
+else if (taskType == "ZW") {
+	hdrTitle = "Szczegóły zadania wewnętrznego";
+	hdrTitleUpd = "Aktualizowanie zadania wewnętrznego";
+	hdrTitleNew = "Tworzenie zadania wewnętrznego";
+}
+
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script>
+cfgDateFormat = "$date_format"
+</script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function approveTask() {
+	var query_str = cfgCgi +
+	                "?SID=" + cfgSID +
+	                "+FID=" + fid_generator() +
+	                "+FACTORY=ztask" +
+	                "+PERSID=$args.persistent_id" +
+	                "+OP=UPDATE" +
+	                "+KEEP.StatusCode=APP" +
+	                "+KEEP.POPUP_NAME=1" +
+	                "+KEEP.autoApproved=1";
+	parent.frames["workframe3"].window.document.location.href = query_str;
+}
+
+function rejectTask() {
+	var query_str = cfgCgi +
+	                "?SID=" + cfgSID +
+	                "+FID=" + fid_generator() +
+	                "+FACTORY=ztask" +
+	                "+PERSID=$args.persistent_id" +
+	                "+OP=UPDATE" +
+	                "+KEEP.StatusCode=REJ" +
+	                "+KEEP.POPUP_NAME=1" +
+	                "+KEEP.autoApproved=1";
+
+	parent.frames["workframe3"].window.document.location.href = query_str;
+}
+
+jq(document).ready(function() {
+	<PDM_IF "$args.KEEP.autoApproved" == "1">
+		<PDM_IF "$args.KEEP.StatusCode" != "">
+			jq("input[name='SET.status']").val("$args.KEEP.StatusCode");
+			if(_dtl.edit) {
+				window.setTimeout(function(){
+					ImgBtnExecute(0);
+				},1000);
+			}
+			else if(!_dtl.edit) {
+				var fid = fid_generator();
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid + "+OP=UPDATE+KEEP.POPUP_NAME=1+HTMPL=";
+
+				if("$args.task" != "CRAPPTSK") {
+					if("$args.task.zparent_type" == "chg") {
+						url += "detail_chg.htmpl+PERSID=" + "$args.chg.persistent_id";
+					}
+					else if("$args.ParentType" == "cr") {
+						url += "detail_cr.htmpl+PERSID=" + "$args.cr.persistent_id";
+					}
+					if("$args.KEEP.StatusCode" == "APP") {
+						parent.frames["cai_main"].window.document.location.href = url;
+					}
+					else {
+						parent.window.close();
+					}
+				}
+				else {
+					parent.window.close();
+				}
+			}
+		</PDM_IF>
+	</PDM_IF>
+});
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+
+
+
+</script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Zadania">
+<center>
+
+
+<input type="hidden" name=FACTORY value=ztask>
+<PDM_IF "$prop.form_name_3" == "edit">
+<input type="hidden" name=OP value="UPDATE">
+<PDM_IF 0 == $args.id>
+<!--<span class="labeltext">You are not allowed to create a new Workflow</span>-->
+<PDM_ELSE>
+<PDM_IF $args.id>
+<input type="hidden" name=SET.id  value="$args.id">
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=ztask>
+// alert("$args.KEEP.ParentType");
+// alert("$args.ParentType");
+// alert("$args.task.zparent_type");
+
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Zapisz[s]" Func="detailSave()" hotkey_name="Zapisz[s]" ID="btn001" Width=120>
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Anuluj[n]" ID="btncncl" Width=120>
+<PDM_MACRO name=button Caption="Resetuj[r]" Func="pdm_reset()" hotkey_name="Resetuj[r]" ID="btn003" Width=120>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+</script>
+<PDM_IF "$prop.form_name_3" == "ro">
+<script type="text/javascript">
+<PDM_MACRO name=btnStartRow>
+</script>
+<PDM_IF $UserAuth \> 1>
+<PDM_FORM NAME="frmDTLRO">
+<input type="hidden" name=FACTORY value=ztask>
+<input type="hidden" name=SET.id  value="$args.id">
+<input type="hidden" name=OP>
+<script type="text/javascript">
+
+<PDM_IF "$args.status" != "APP" && "$args.status" != "REJ">
+	<PDM_MACRO name=button Caption="Edytuj[d]" Func="pdm_submit('frmDTLRO','UPDATE')" hotkey_name="Edytuj[d]" ID="btn001" Width=120>
+</PDM_IF>
+
+</script>
+</PDM_FORM>
+</PDM_IF>
+<script type="text/javascript">
+
+<PDM_IF "$cst.id" == "$args.assignee">
+	<PDM_IF "$args.status" != "APP" && "$args.status" != "REJ">  
+		<PDM_MACRO name=button Caption="Akceptacja[A]" Func="approveTask()" hotkey_name="Akceptacja[A]" ID="btn015" Width=120>
+		<PDM_MACRO name=button Caption="Odmowa realizacji[O]" Func="rejectTask()" hotkey_name="Odmowa realizacji[O]" ID="btn016" Width=120>
+	</PDM_IF>
+</PDM_IF>
+
+<PDM_MACRO name=button Caption="Historia" Func="show_evt('ztask', 'atev', $args.id)" hotkey_name="Historia" ID="SHOW_EVT_HISTORY" Width=0>
+<PDM_MACRO name=btnEndRow>
+</script>
+</PDM_IF>
+<script>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Typ zadania" attr=task extraURL="ADDITIONAL_WHERE=zparent_type='$args.KEEP.ParentType'">
+
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=status lookup=no>
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=assignee size=30>
+<PDM_MACRO name=dtlDropdown hdr="Grupa" attr=sdgroup lookup="no" size=30>
+<PDM_MACRO name=dtlLookup hdr="Element konfiguracji" attr=asset>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Powiązany wniosek" attr=cr>
+<PDM_MACRO name=dtlLookup hdr="Powiązana zmiana" attr=chg>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_IF 0>
+	detailRowHdr("Status", 1 , "$args.REQUIRED_status");
+	var item = '<PDM_SELECT NAME=SET.status ESC_STYLE=HTML FACTORY=tskstat WF_FAC_FOR_TSKSTAT=ztask SELECTED="$args.status" SELECTED_SYM="$args.status.COMMON_NAME" TITLE="' + _dtl.lastHdrtext + '">';
+	var ins_pos = item.indexOf("NAME=");
+	if (ins_pos > 0) 
+	{
+		_dtl.tabIndex++;
+		item = item.substring(0, ins_pos) + " TABINDEX=" + _dtl.tabIndex + " " + item.substring(ins_pos, item.length);
+	}
+	detailSetRowData(item);
+	
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Przewidywany czas trwania" attr=est_duration evt="onBlur='validate_duration_ts(this)'" size=30>
+<PDM_MACRO name=dtlTextbox hdr="Przewidywany koszt" attr=est_cost size=30>
+<PDM_MACRO name=dtlDate hdr="Przewidywana data skompletowania" attr=est_completion_date>
+<PDM_IF 0>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rzeczywisty czas trwania" attr=actual_duration evt="onBlur='validate_duration_ts(this)'" size=30>
+<PDM_MACRO name=dtlTextbox hdr="Rzeczywisty koszt" attr=cost size=30>
+<PDM_MACRO name=dtlDate hdr="Rzeczywista data skompletowania" attr=completion_date>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Rzeczywista data rozpoczęcia" attr=start_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF 0>
+//detailRowHdr("Status", 1 , "$args.REQUIRED_status");
+//var item = '<PDM_SELECT NAME=SET.status ESC_STYLE=HTML FACTORY=tskstat WF_FAC_FOR_TSKSTAT=wf SELECTED="$args.status" SELECTED_SYM="$args.status.COMMON_NAME" TITLE="' + _dtl.lastHdrtext + '">';
+//var ins_pos = item.indexOf("NAME=");
+//if (ins_pos > 0) 
+//{
+//    _dtl.tabIndex++;
+//    item = item.substring(0, ins_pos) + " TABINDEX=" + _dtl.tabIndex + " " + item.substring(ins_pos, item.length);
+//}
+//detailSetRowData(item);
+</PDM_IF>
+<PDM_ELSE>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Typ serwisowy" attr=support_lev>
+<PDM_MACRO name=dtlReadonly hdr="Kolejność" attr=sequence colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=4 size=70>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Informacja" attr=comments colspan=4 rows=4 size=70>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Utworzone przez" attr=creator>
+<PDM_MACRO name=dtlDateReadonly hdr="Data utworzenia" attr=date_created>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<input type="hidden" name=SET.status value="$args.status">
+<PDM_MACRO name=dtlEnd>
+<PDM_MACRO name=startNotebook hdr=ztask_nb>
+<PDM_MACRO name=tab title="Service Type" file="xx_stype_tab_cr.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

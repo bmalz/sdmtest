@@ -1,0 +1,64 @@
+<PDM_IF 0>
+nr_cmdb_invidex_tab.htmpl
+WHEN PRESENTED:
+    Display Investment.Idea family attributes of the selected CI
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+
+History:
+       24-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_invidex.htmpl" where="family.extension_name='invidex'" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr=bm_status factory=bms lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Idea Priority" attr=assoc_invidex.idea_priority>
+<PDM_MACRO name=dtlTextbox hdr="Idea Active?" attr=assoc_invidex.active>
+<PDM_MACRO name=dtlTextbox hdr="Target Manager" attr=assoc_invidex.target_manager>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Jednostka biznesowa" attr=assoc_invidex.business_unit>
+<PDM_MACRO name=dtlTextbox hdr="Właściciel" attr=assoc_invidex.owner>
+<PDM_MACRO name=dtlDate hdr="Estimated Start Date" attr=assoc_invidex.est_start_date>
+<PDM_MACRO name=dtlDate hdr="Estimated Finish Date" attr=assoc_invidex.est_finish_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Temat" attr=assoc_invidex.subject keeplinks=yes rows=3 size=30 spellchk=no>
+<PDM_MACRO name=dtlTextbox hdr="Existing Initiative Impact" attr=assoc_invidex.existing_initiative_impact keeplinks=yes rows=3 size=30 spellchk=no>
+<PDM_MACRO name=dtlTextbox hdr="Dependencies" attr=assoc_invidex.dependencies keeplinks=yes rows=3 size=30 spellchk=no>
+<PDM_MACRO name=dtlTextbox hdr="Risks" attr=assoc_invidex.risks keeplinks=yes rows=3 size=30 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="General Notes" attr=assoc_invidex.general_notes colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>

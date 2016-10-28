@@ -1,0 +1,442 @@
+<PDM_IF 0>
+role_kt_ct_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=role_kt_ct_tab" factory=role>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY onload='detailSetCbxFlag(document.getElementsByName("CBX.ACCTYP_KT.c_qa_browse_search")[0]);detailSetCbxFlag(document.getElementsByName("CBX.ACCTYP_KT.c_file_browse_search")[0])'>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+tab_banner("Knowledge Management");
+var sBookmarkList = "";
+var sAddEditKCatList = "";
+var sDelKCatList = "";
+var sDelMass_KD_KCat_List ="";
+var sOpenTicketList = "";
+var sUserPrefList = "";
+var sSubmitKDList ="";
+var sSubmitKD_Attmn_List = "";
+var sOpenTicket_KD_list = "";
+var sByPassWFList = "";
+var sChangeWFTemplList = "";
+var sSearchFreeText = "";
+var sQABrowseSearch = "";
+var sQASubmit = "";
+var sQAAnswer = "";
+var sQAClose = "";
+var sFileBrowseSearch = "";
+var sFileEdit = "";
+var sAllowExport = "";
+var sAllowImport = "";
+var sDeleteDocument = "";
+var sRelatedTickets = "";
+
+var iCkBookmark;
+var iCkAddKCat;
+var iCkDelKCat;
+var iCkDelMass;
+var iCkOpenTic;
+var iCkUserPref;
+var iCkSubKD;
+var iCkSubKDAttmnt;
+var iCkOpenTicKD;
+var iCkByPassWF;
+var iCkChangeWF;
+var iCkSearchFT;
+var iCkQABrowseSearch = "";
+var iCkQASubmit = "";
+var iCkQAAnswer = "";
+var iCkQAClose = "";
+var iCkFileBrowseSearch = "";
+var iCkFileEdit = "";
+var iCkAllowExport = "";
+var iCkAllowImport = "";
+var iCkDeleteDocument = "";
+var iCkRelatedTickets = "";
+
+<PDM_LIST PREFIX=uspProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+	
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_BOOKMARKS">
+		sBookmarkList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_CATEGORIES_ADD_EDIT_COPY_PASTE">
+		sAddEditKCatList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_CATEGORIES_CUT_DELETE">
+		sDelKCatList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_MASS_DELETE">
+		sDelMass_KD_KCat_List = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_OPEN_TICKET">
+		sOpenTicketList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_PREFERENCES">
+		sUserPrefList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_SUBMIT_KNOWLEDGE">
+		sSubmitKDList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS">
+		sSubmitKD_Attmn_List = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_TICKET_BASED_ON_DOC">
+		sOpenTicket_KD_list = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_WORKFLOW_BYPASS">
+		sByPassWFList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_WORKFLOW_CHANGE_TEMPLATE">
+		sChangeWFTemplList = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_SEARCH_FREE_TEXT">
+		sSearchFreeText = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_FORUM_BROWSE_SEARCH">
+		sQABrowseSearch = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_FORUM_SUBMIT">
+		sQASubmit = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_FORUM_ANSWER">
+		sQAAnswer = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_FORUM_CLOSE">
+		sQAClose = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_FILE_BROWSE_SEARCH">
+		sFileBrowseSearch = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_FILE_EDIT">
+		sFileEdit = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_KNOWLEDGE_EXPORT">
+		sAllowExport = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_KNOWLEDGE_IMPORT">
+		sAllowImport = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_DOCUMENT_DELETE">
+		sDeleteDocument = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>
+<PDM_IF "$uspProps.PROPERTY_NAME" == "ROLE_RELATED_TICKET">
+		sRelatedTickets = '<PDM_FMT ESC_STYLE=C>$uspProps.PROPERTY_VALUE</PDM_FMT>';
+	
+</PDM_IF>	
+</PDM_LIST>
+
+if ("$args.id" == 0)
+{
+    iCkBookmark = "1";
+    iCkAddKCat = "0";
+    iCkDelKCat = "0";
+    iCkDelMass = "0";
+    iCkOpenTic = "1";
+    iCkUserPref = "1";
+    iCkSubKD = "1";
+    iCkSubKDAttmnt = "1";
+    iCkOpenTicKD = "1";
+    iCkByPassWF = "0";
+    iCkChangeWF = "0";
+    iCkSearchFT = "0";    
+    iCkQABrowseSearch = "0";
+    iCkQASubmit = "0";
+    iCkQAAnswer = "0";
+    iCkQAClose = "0";
+    iCkFileBrowseSearch = "0";
+    iCkFileEdit = "0";
+    iCkAllowExport = "0";
+    iCkAllowImport = "0";
+    iCkDeleteDocument = "0";
+    iCkRelatedTickets = "0";
+}
+else
+{
+    if (sBookmarkList != 0)
+    {
+	    iCkBookmark = ParseList(sBookmarkList);
+    }
+    else
+    {
+	    iCkBookmark = "1";
+    }
+
+    if (sAddEditKCatList != 0)
+    {
+	    iCkAddKCat = ParseList(sAddEditKCatList);
+    }
+    else
+    {
+	    iCkAddKCat = "1";
+    }
+
+    if (sDelKCatList != 0)
+    {
+	    iCkDelKCat = ParseList(sDelKCatList);
+    }
+    else
+    {
+	    iCkDelKCat = "1";
+    }
+
+    if (sDelMass_KD_KCat_List != 0)
+    {
+	    iCkDelMass = ParseList(sDelMass_KD_KCat_List);
+    }
+    else
+    {
+	    iCkDelMass = "1";
+    }
+
+    if (sOpenTicketList != 0)
+    {
+	    iCkOpenTic = ParseList(sOpenTicketList);
+    }
+    else
+    {
+	    iCkOpenTic = "1";
+    }
+    if (sUserPrefList != 0)
+    {
+	    iCkUserPref = ParseList(sUserPrefList);
+    }
+    else
+    {
+	    iCkUserPref = "1";
+    }
+    if (sSubmitKDList != 0)
+    {
+	    iCkSubKD = ParseList(sSubmitKDList);
+    }
+    else
+    {
+	    iCkSubKD = "1";
+    }
+    if (sSubmitKD_Attmn_List != 0)
+    {
+	    iCkSubKDAttmnt = ParseList(sSubmitKD_Attmn_List);
+    }
+    else
+    {
+	    iCkSubKDAttmnt = "1";
+    }
+    if (sOpenTicket_KD_list != 0)
+    {
+	    iCkOpenTicKD = ParseList(sOpenTicket_KD_list);
+    }
+    else
+    {
+	    iCkOpenTicKD = "1";
+    }
+
+    if (sByPassWFList != 0)
+    {
+	    iCkByPassWF = ParseList(sByPassWFList);
+    }
+    else
+    {
+	    iCkByPassWF = "1";
+    }
+
+    if (sChangeWFTemplList != 0)
+    {
+	    iCkChangeWF = ParseList(sChangeWFTemplList);
+    }
+    else
+    {
+	    iCkChangeWF = "1";
+    }
+
+    if (sSearchFreeText != 0)
+    {
+	    iCkSearchFT = ParseList(sSearchFreeText);
+    }
+    else
+    {
+	    iCkSearchFT = "1";
+    }
+    
+    if (sQABrowseSearch != 0)
+    {
+	    iCkQABrowseSearch = ParseList(sQABrowseSearch);
+    }
+    else
+    {
+	    iCkQABrowseSearch = "1";
+    }
+    if (sQASubmit != 0)
+    {
+	    iCkQASubmit = ParseList(sQASubmit);
+    }
+    else
+    {
+	    iCkQASubmit = "1";
+    }
+    if (sQAAnswer != 0)
+    {
+	    iCkQAAnswer = ParseList(sQAAnswer);
+    }
+    else
+    {
+	    iCkQAAnswer = "1";
+    }
+    if (sQAClose != 0)
+    {
+	    iCkQAClose = ParseList(sQAClose);
+    }
+    else
+    {
+	    iCkQAClose = "1";
+    }
+    if (sFileBrowseSearch != 0)
+    {
+	    iCkFileBrowseSearch = ParseList(sFileBrowseSearch);
+    }
+    else
+    {
+	    iCkFileBrowseSearch = "1";
+    }
+    if (sFileEdit != 0)
+    {
+	    iCkFileEdit = ParseList(sFileEdit);
+    }
+    else
+    {
+	    iCkFileEdit = "1";
+    }
+    if (sAllowExport != 0)
+    {
+	    iCkAllowExport = ParseList(sAllowExport);
+    }
+    else
+    {
+	    iCkAllowExport = "1";
+    }
+    if (sAllowImport != 0)
+    {
+	    iCkAllowImport = ParseList(sAllowImport);
+    }
+    else
+    {
+	    iCkAllowImport = "1";
+    }
+    if (sDeleteDocument != 0)
+    {
+	    iCkDeleteDocument = ParseList(sDeleteDocument);
+    }
+    else
+    {
+	    iCkDeleteDocument = "1";
+    }    
+     if (sRelatedTickets != 0)
+    {
+	     iCkRelatedTickets = ParseList(sRelatedTickets);
+    }
+    else
+    {
+	    iCkDeleteDocument = "1";
+    }      
+}    
+function ParseList(sList)
+{
+	var arrMatch;
+	arrMatch = sList.split(",");
+	for ( var i = 0; i < arrMatch.length; i++)
+	{
+		if (arrMatch[i] == "$args.id")
+		{	
+			return "1";
+			break;
+		}
+	}
+	return "0";
+}
+
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("Allow privileges in Knowledge Management", 4);
+detailSetRowData("");
+detailWriteRow();
+
+<PDM_MACRO name=dtlStartRow>   
+detailCheckbox("Open Issue/Request",ktPrefix+".c_open_ticket",2, iCkOpenTic , "Yes", "No");
+detailCheckbox("Open Issue/Request based on Document",ktPrefix+".c_ticket_kd",2, iCkOpenTicKD , "Yes", "No");
+
+<PDM_IF "$args.interface_type" == 3>
+<PDM_MACRO name=dtlStartRow hrspan=4>  
+detailCheckbox("Bypass Approval Process",ktPrefix+".c_bypass_wf",2, iCkByPassWF , "Yes", "No");
+detailCheckbox("Change Approval Process Template",ktPrefix+".c_change_wf",2, iCkChangeWF , "Yes", "No");
+</PDM_IF>
+<PDM_IF "$args.interface_type" == 3>
+<PDM_MACRO name=dtlStartRow hrspan=4>    
+detailCheckbox("Add, Edit, Copy and Paste Category",ktPrefix+".c_add_categories",2, iCkAddKCat , "Yes", "No");
+detailCheckbox("Delete Multiple Categories and Documents",ktPrefix+".c_mass_delete",1, iCkDelMass , "Yes", "No");
+detailCheckbox("Delete Category",ktPrefix+".c_delete_categories",1, iCkDelKCat , "Yes", "No");
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow hrspan=4>  
+detailSetEventHandler("onClick='submitKD_click(this)'");
+detailCheckbox("Create Document",ktPrefix+".c_submit_kd",2, iCkSubKD , "Yes", "No");
+detailCheckbox("Create Document with Attachments",ktPrefix+".c_submit_kd_attmnt",1, iCkSubKDAttmnt , "Yes", "No");
+<PDM_IF "$args.interface_type" == 3>
+detailCheckbox("Delete Knowledge",ktPrefix+".c_delete_documents",1, iCkDeleteDocument , "Yes", "No");
+</PDM_IF>
+<PDM_IF "$args.interface_type" == 3>
+<PDM_MACRO name=dtlStartRow hrspan=4> 
+detailCheckbox("View Forum",ktPrefix+".c_qa_browse_search",1, iCkQABrowseSearch , "Yes", "No");
+detailCheckbox("Create Forum",ktPrefix+".c_qa_submit",1, iCkQASubmit , "Yes", "No");
+detailCheckbox("Reply Forum",ktPrefix+".c_qa_answer",1, iCkQAAnswer , "Yes", "No");
+detailCheckbox("Edit Forum",ktPrefix+".c_qa_close",1, iCkQAClose , "Yes", "No");
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow hrspan=4>
+<PDM_IF "$args.interface_type" == 3>
+detailCheckbox("View File",ktPrefix+".c_file_browse_search",1, iCkFileBrowseSearch , "Yes", "No");
+detailCheckbox("Edit File",ktPrefix+".c_file_edit",1, iCkFileEdit , "Yes", "No");
+detailCheckbox("View External Repository",ktPrefix+".c_search_ft",1, iCkSearchFT , "Yes", "No");
+detailCheckbox("View Related Tickets",ktPrefix+".c_related_tickets",1, iCkRelatedTickets ,"Yes", "No");
+<PDM_ELSE>	
+detailCheckbox("View Related Tickets",ktPrefix+".c_related_tickets",2, iCkRelatedTickets ,"Yes", "No");
+</PDM_IF>
+<PDM_IF "$args.interface_type" == 3>
+<PDM_MACRO name=dtlStartRow hrspan=4>
+detailCheckbox("Add Bookmark",ktPrefix+".c_add_bookmark",1, iCkBookmark , "Yes", "No");
+<PDM_ELSE>	
+detailCheckbox("Add Bookmark",ktPrefix+".c_add_bookmark",2, iCkBookmark , "Yes", "No");
+</PDM_IF>
+<PDM_IF "$args.interface_type" == 3>
+detailCheckbox("Use Preferences",ktPrefix+".c_use_preference",1, iCkUserPref , "Yes", "No");
+detailCheckbox("Allow Export",ktPrefix+".c_allow_export",1, iCkAllowExport , "Yes", "No");
+detailCheckbox("Allow Import",ktPrefix+".c_allow_import",1, iCkAllowImport , "Yes", "No");
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: role_kt_ct_tab.htmpl ANDERSON.2 2010/02/25 15:17:53 ralje02 Exp $
+</PDM_IF>

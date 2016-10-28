@@ -1,0 +1,217 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a document version and when creating a new one
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Save Version - Document ID: $args.DOC_ID.id"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Update Version"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Version ${args.COMMON_NAME}"</PDM_FMT>;
+function ShowTree()
+{
+	var url=cfgCgi+
+        "?SID="+cfgSID+
+        "+FID="+fid_generator()+
+        "+OP=DISPLAY_FORM"+
+        "+HTMPL=kt_dtbuilder.htmpl"+
+        "+RELOAD_WIN=0" +
+        "+RO=1" +
+        "+KEEP.OPENER=" + argPopupName + 
+        "+KEEP.CURRENT_STATUS=$args.STATUS_ID" + 
+        "+DTRootID=$args.EXT_DOC_ID" +
+        "+DTDocID=$args.DOC_ID";
+    var strFeatures = "scrollbars=yes,toolbars=no,menubar=no,fullscreen=no,resizable=yes";
+   
+    preparePopup(url, "TREE_WIN"+"$args.id", strFeatures, undefined, undefined, 'GOBUTTON=no+MENUBAR=no');
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+_bHideTenantSelection = true;//Tenant should be copied form the document
+<PDM_IF "$args.id" == "0">
+	ahdframeset.top_splash.next_persid = "KD:$args.DOC_ID";
+</PDM_IF>
+
+//
+var _sKDPersID = "KD:$args.DOC_ID";
+var _sVersionPersID = "DOC_VERSIONS:$args.id";
+<PDM_IF "$args.id" != "0">
+//
+//Adding the rollback button for saved versions only -> "args.id" != "0"
+function detailExtraROButtons(){
+<PDM_MACRO NAME=button caption="Rollback" hotkey_name="Rollback" id="btnRollback"
+    func="Rollback()">
+}
+</PDM_IF>
+//
+//Performing Rollback
+function Rollback(){
+	if ( !action_in_progress() )
+	{
+		var DocumentWin = ahdtop.detailForms[_sKDPersID];
+		if ( typeof DocumentWin == 'object' && typeof DocumentWin.ahdframe._dtl != "undefined")
+		{
+			if ( DocumentWin.ahdframe._dtl.edit )
+			{
+				//The document is edit mode, cannot perform changes on it, 
+				//need to ask the user to save his changes first.
+				if ( !confirm("The document is opened for editing. Changes must be saved before proceeding. Click OK to save your changes and perform the rollback.") )
+				{
+					return;
+				}
+				else
+				{
+					DocumentWin.focus();
+					DocumentWin.ahdframe.RollbackWhenInEditMode(_sVersionPersID);
+					return;
+				}
+			}
+		}
+		set_action_in_progress(ACTN_SAVE);
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=ROLLBACK_VERSION" + 
+			"+version_id=$args.id";
+		set_action_in_progress(ACTN_SAVE);
+		var odivData = document.getElementById("divData");	
+		odivData.innerHTML = "<IFRAME id=KTCatData name=KTCatData title='" + msgtext("Hidden_frame_-_do_not_navigate") + "' src='" + url + "'></IFRAME>";
+	}
+}
+//Performing Rollback - kt_reply
+function KT_REPLY(sOP,msg){
+	set_action_in_progress(ACTN_COMPLETE);
+	if (msg[0] == 'ERROR'){
+		alert (msg[1]);
+		return;
+	}
+	var lKDId = msg[1];
+	var KDPersID = "KD:" + lKDId;
+	var bRework = false;
+	if ("$args.DOC_ID" != lKDId){
+		ahdtop.saveKTAckMsgNum = 2229; // -Rework Version created for %1%2
+		bRework = true;
+	}
+	else
+		ahdtop.saveKTAckMsgNum = 2232; //Rollback of version done for %1%2;
+	//
+	var objWin = window;
+	try
+	{	
+		if (!ahdtop.cstReducePopups && typeof top.opener.parent != "unknown"){
+			objWin = top.opener.parent;
+		}	
+	}
+	catch(e){};
+	objWin.switchToDetail( KDPersID ,"", true, void(0), void(0), void(0), "", true);	
+	if (!ahdtop.cstReducePopups){
+		top.close();
+	}
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+function WinLoad()
+{
+	if ('$args.id' == '0') //New rec
+	{
+		if (location.search.indexOf("SAVE_KD=1") > 0) 
+		{
+			top.SaveKD = "1";
+		}
+		else
+		{
+			top.SaveKD = "0";
+		}
+	}
+	else if (top.SaveKD == "1")
+	{
+	
+		if (typeof top.opener.checkBeforeSave != "undefined")
+		{
+			try
+			{
+				top.opener.document.forms["main_form"].elements["SET.VER_COUNT"].value = 
+					Number( top.opener.document.forms["main_form"].elements["SET.VER_COUNT"].value) + 1			
+				top.opener.checkBeforeSave();
+			}
+			catch(e)
+			{
+				alert ("ERROR: Cannot update the document's version number");
+			}
+		}
+	}
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()" onLoad="WinLoad()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlForm button=true factory="CI_DOC_VERSIONS">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł dokumentu" attr="DOC_ID.TITLE">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Status dokumentu" attr="DOC_ID.STATUS_ID.STATUS">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="VER_COMMENT" rows=3 size=105>
+	</SCRIPT>
+	<INPUT TYPE=hidden NAME="HTMPL" VALUE="show_main_detail.htmpl">
+	<SCRIPT LANGUAGE="JavaScript">
+<PDM_ELSE>
+<PDM_MACRO name=dtlForm button=true factory="CI_DOC_VERSIONS" hideeditbtn=true>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Numer wesji" attr="VER_COUNT">
+<PDM_MACRO name=dtlReadonly hdr="Data rozpoczęcia" attr="START_DATE">
+<PDM_MACRO name=dtlReadonly hdr="Data zakończenia" attr="END_DATE">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr="STATUS_ID">
+<PDM_MACRO name=dtlReadonly hdr="Rozpoczęte przez" attr="STARTED_BY">
+<PDM_MACRO name=dtlReadonly hdr="Opublikowane przez" attr="PUBLISHED_BY">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Komentarz" attr="VER_COMMENT" colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł" attr="TITLE" colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Podsumowanie" attr="SUMMARY" colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Problem" attr="PROBLEM" colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.DOC_TYPE_ID" == "1">
+<PDM_MACRO name=dtlHTMLEditBox hdr="Rozwiązanie" attr="RESOLUTION" colspan=3 readonly="yes">
+<PDM_ELSE>
+<PDM_MACRO name=button caption="Show Tree" func="ShowTree()" hotkey_name="Show Tree" id="btnTree">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Uwagi" attr="NOTES" colspan=3>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+<div style="display:none" id=divData></div>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

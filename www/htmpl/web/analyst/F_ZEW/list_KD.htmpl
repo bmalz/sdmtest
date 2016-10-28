@@ -1,0 +1,1214 @@
+<PDM_IF 0>
+@(#)$Id: list_KD.htmpl ASPEN.7 2012/05/09 06:10:53 siwst01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of Knowledge Documents.	
+</PDM_IF>	
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<LINK REL="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.search_type" == "SimilarDocs" || "$args.KEEP.search_type" == "ticket">
+	m_prv_applyOwnTenantRestriction = true;//Init the member variable to apply special tenant filtering
+</PDM_IF>
+//Defult all settings for faactory=KD
+var hdrTitle = "Wyszukiwanie w Bazie Wiedzy";
+var hdrTitleList = "Lista dokumentów Bazy Wiedzy";
+var hdrTitleTempl = "Wyszukiwanie szablonów dokumentów Bazy Wiedzy ";
+var hdrTitlePopup = "Przeglądaj kategorie";
+//
+var m_sArgsSD_LAUNCHED = "$args.KEEP.SD_LAUNCHED";
+if (m_sArgsSD_LAUNCHED == "")
+	m_sArgsSD_LAUNCHED = "$args.SD_LAUNCHED";
+var m_sArgsSD_LAUNCHEDTopassOn =m_sArgsSD_LAUNCHED;
+var m_bOpenDocInPopUp = false;
+if ( m_sArgsSD_LAUNCHED != "") 
+	m_bOpenDocInPopUp = true;//Force popup when running a search from a ticket
+var m_sArgsLAUNCHED_ITIL = "$args.KEEP.LAUNCHED_ITIL";
+var m_sArgsFAQ_WINDOW_NAME = "$args.FAQ_WINDOW_NAME";
+var m_sArgsPROF_BRWS_USER = "$args.KEEP.PROF_BRWS_USER";
+var m_sArgsevent_log_on = "$args.event_log_on";
+var m_sFactory = "$args.FACTORY";
+var tenantSort = "no"; //By default all tenant columns are sortable. This variable is needed to make the
+						//tenant column not sortable
+// This flag made global from OpenPageonTicketFirstTime() to identify the first load for the case of AutoSearch used in search_filter.js 
+var m_bFirstLoad = true;
+
+
+//
+<PDM_IF "$args.FACTORY" == "KD_QA">
+	var hdrTitle = "Przeszukiwanie for";
+	var hdrTitleList = "List for";
+<PDM_ELIF "$args.FACTORY" == "KD_FILE">
+	var hdrTitle = "Wyszukiwanie plików";
+	var hdrTitleList = "Lista plików";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var m_Factory = "$args.FACTORY";
+if (m_Factory == "")
+{
+	m_Factory = "KD";
+}
+ahdtop.m_KSType = m_Factory;//Make sure ahdtop KS type is set properly
+//
+var rptName = new Array("KDsum.rpt", "KDdtl.rpt");
+var argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+<PDM_IF "$args.OP" == "LIST_ALL">
+	var argSearchWhereClause = "$args.KEEP.save_where_clause";
+</PDM_IF>
+var argSearchType = "$args.KEEP.search_type";
+
+var cfgCanEdit = true;
+var propSearchConfigCr="$prop.SD_SEARCH_CONFIG_CR";
+var propSearchConfigIss="$prop.SD_SEARCH_CONFIG_ISS";
+var displayFrom="$args.KEEP.DISPLAY_FROM";
+var m_args_search_type = "$args.KEEP.search_type";
+
+var f=m_sArgsSD_LAUNCHED.split(":");
+var factoryFrom="";
+factoryFrom=f[0];
+
+var m_args_set_search_text = nx_unescape("$args.set_search_text");
+var m_iNumberOfDocsSubmitted = 0; //Number of documents subbmitted from this ticket - when opening inside SD ticket.
+<PDM_IF "$args.KEEP.search_type" == "ticket" && "$env.NX_KT" == "Yes">
+	<PDM_IF 0>
+		When lunching from a ticket, we want to know if the analyst has submitted a KD from ticket before, 
+		so in case he has more knowledge to submit he could use the same KD
+	</PDM_IF>
+	var m_iNumberOfDocsSubmitted = 0;//Number of documents subbmitted from this document.
+	var m_lSubbmitedDocumentID = "";
+	<PDM_IF "$args.KEEP.DISPLAY_FROM" == "cr">
+		<PDM_LIST FACTORY=kdlinks PREFIX=kdlinks WHERE="cr='$args.KEEP.SD_LAUNCHED' and link_type=3">
+			m_iNumberOfDocsSubmitted ++;
+			m_lSubbmitedDocumentID = "$kdlinks.kd";
+		</PDM_LIST>
+	<PDM_ELSE>
+		<PDM_LIST FACTORY=kdlinks PREFIX=kdlinks WHERE="iss='$args.KEEP.SD_LAUNCHED' and link_type=3">
+			m_iNumberOfDocsSubmitted ++;
+			m_lSubbmitedDocumentID = "$kdlinks.kd";
+		</PDM_LIST>
+	</PDM_IF>
+</PDM_IF>
+
+var isPopup = "$args.KEEP.IsPopUp";
+//if loading from the scoreboard Knowledge Documents nodes, the domset should be emptied
+var ahdframeURL = ahdframe.location.href;
+if(ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].id=="sd" && ahdframeURL.search("OP=SEARCH") != -1 && isPopup != "1")
+	ahdframe.parent.curr_domset = "";
+
+if(typeof ahdframe.parent.curr_domset == "undefined" || ahdframe.parent.curr_domset == "")
+	ahdframe.parent.curr_domset = "$args.DOMSET";
+if(typeof ahdframe.parent.curr_ebr_primary_order == "undefined" || ahdframe.parent.curr_ebr_primary_order == "")
+{
+	ahdframe.parent.curr_ebr_primary_order = "$args.QBE.EQ.ebr_primary_order";
+}	
+if(typeof ahdframe.parent.curr_ebr_search_text == "undefined" || ahdframe.parent.curr_ebr_search_text == "")
+{
+	ahdframe.parent.curr_ebr_search_text = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.QBE.IN.ebr_search_text</PDM_FMT>';
+}	
+//Added to help check if search filter was altered from default in list_KD.js - ADDL_WHERE_HARDCODE_change	
+var NoFilter;
+//
+var m_iDocViewMode = 0;
+
+function get_find_similar_text()
+{
+	var title = "";
+	if(typeof parent.document.forms["main_form"].elements["SET.TITLE"]!= "undefined")
+	{
+		title = parent.document.forms["main_form"].elements["SET.TITLE"].value;
+	}
+	else
+	{
+		title = parent.sTitle;
+	}
+	var summary = "";
+	if(typeof parent.document.forms["main_form"].elements["SET.SUMMARY"]!= "undefined")
+	{
+		summary = parent.document.forms["main_form"].elements["SET.SUMMARY"].value;
+	}
+	else
+	{
+		summary = parent.sSummary;
+	}	
+	var problem = "";
+	if(typeof parent.document.forms["main_form"].elements["SET.PROBLEM"]!= "undefined")
+	{
+		problem = parent.document.forms["main_form"].elements["SET.PROBLEM"].value;
+	}
+	else
+	{
+		problem = parent.sProblem;
+	}
+	var text_to_search = title + " " + summary + " " + problem;
+	document.getElementById("QBE.NE.id").value = '$args.KEEP.SkeletonId';
+	<PDM_IF "$prop.EBR_SEARCH_PROHIBIT_RESOLUTION" == "1">
+		if(typeof parent.document.forms["main_form"].elements["SET.RESOLUTION"]!= "undefined")
+		{
+			var resolution = parent.document.forms["main_form"].elements["SET.RESOLUTION"].value;
+			text_to_search += " " + resolution;
+		}
+	</PDM_IF>
+	return parent.trim(text_to_search);
+}
+
+function do_window_onload() {
+	// if coming from a ticket, have to wait for default_scratchpad() to finish on ticket detail form
+	// see window.setTimeout('default_scratchpad()', 250); on detail_xx.htmpl
+	<PDM_IF "$args.KEEP.search_type" == "ticket">
+		window.setTimeout('window_onload()', 500);
+	<PDM_ELSE>
+		window_onload();
+	</PDM_IF>
+} 
+
+function window_onload()
+{
+	if(typeof __search_filter == "undefined" || typeof __search_filter.form == "undefined") return;
+	if (m_sFactory == "KD")
+	{
+		document.getElementById("QBE.EQ.ebr_kcat_id").value = '';
+		document.getElementById("QBE.EQ.ebr_faq_query").value = '';
+	}
+	<PDM_IF "$args.DO_SEARCH" == 1 || "$args.DO_SEARCH" == 2>
+		do_search_with_text('$args.DO_SEARCH');
+	</PDM_IF>
+	var loc = window.location.href; 
+	//apply default values for status checkboxes when first loading and not after search
+	if (loc.search("SEARCH_FILTER=1") == -1 && loc.search("OP=PG") == -1)
+	{
+		InsertADDLSelections(1);	
+		ADDL_WHERE_HARDCODE_change();
+	}
+		if (m_sFactory == "KD_ALL")
+	{	
+		var sWCKDAll = "(" + ahdtop.m_sDefStatusWhereClause;
+		
+		if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH")) //enforcing permissions
+			sWCKDAll += " AND NOT ACTIVE_STATE = 200";
+
+		if (!ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH")|| ahdtop.cfgEBRVersion != 'SEARCH_ENGINE')			
+			sWCKDAll += " AND NOT ACTIVE_STATE = 100";
+			
+		if (ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+			sWCKDAll += " OR ACTIVE_STATE = 200";
+		
+		if (ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH") && ahdtop.cfgEBRVersion == 'SEARCH_ENGINE')			
+			sWCKDAll += " OR ACTIVE_STATE = 100";
+		
+		sWCKDAll += ")";
+		document.getElementById("ADDL_WHERE_HARDCODE").value = sWCKDAll;
+
+		parent.sAddlWC = document.getElementById("ADDL_WHERE_HARDCODE").value;
+		NoFilter=sWCKDAll;
+	}
+	<PDM_IF "$args.KEEP.search_type" == "SimilarDocs">
+		ahdframeset.similarTabLoaded = true;
+		//do search only on the first time
+		if(document.getElementById("QBE.IN.ebr_search_text").value == "")
+		{
+			var text_to_search = get_find_similar_text();
+			if(typeof text_to_search != "undefined" && text_to_search != "")
+			{
+				document.getElementById("QBE.IN.ebr_search_text").value = text_to_search;
+				ebrTextChanged(document.getElementById("QBE.IN.ebr_search_text"));
+				setTimeout("doClick('search');", 1);
+			}
+		}
+	</PDM_IF>
+	var ONE_B_DOCS_TO_DISPLAY = ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY");
+	document.getElementById("KEEP.RowsPerPage").value = ONE_B_DOCS_TO_DISPLAY;
+	//this needs to be replaced with pref server variable once it is implemented
+	<PDM_LIST FACTORY=USP_PREFERENCES PREFIX=pref WHERE="ANALYST_ID=U'$cst.id'">
+		m_iDocViewMode = "$pref.ONE_B_DOC_VIEW_MODE";
+	</PDM_LIST>
+
+	<PDM_IF "$args.KEEP.search_type" != "ticket">
+		if(typeof header_count=="undefined" 
+			&& typeof parent.hdrTitle!="undefined"
+			&& argSearchSqlClause=="")
+		{
+			loadFilter(true);
+		}
+	</PDM_IF>
+	UpdateSubmenusOnCreation();
+	<PDM_IF "$args.KEEP.search_type" == "ticket">
+		loadFilter(true);
+		OpenPageonTicketFirstTime();
+	</PDM_IF>
+	if (typeof writeRecommendedResults == "function")
+	{
+		writeRecommendedResults();
+	}
+	var e = document.getElementById("ebr_search_text");
+		if((typeof e=="object")&&(e!=null))
+		{
+		try
+		{
+			e.focus();
+		}
+		catch(e){};
+		
+	}
+	//To make sure the tables do not cause a whitespace	on header
+	listResize();
+}
+//This function is to open the knowledge tab at the first time it is loaded on a ticket
+function OpenPageonTicketFirstTime()
+{
+	<PDM_IF "$args.KEEP.search_type" == "ticket">
+		if (!m_bloadFilterCompleted)
+		{
+			return;
+		}
+		<PDM_IF 0>When opening the list KD from a ticket perform auto search or 
+				show the adv. search page as per admin setting SD_AUTO_SEARCH_ISS & SD_AUTO_SEARCH_CR
+		</PDM_IF>
+		var sSearchText = getSearchText();
+		if (sSearchText != "")
+		{
+			m_bFirstLoad = true;	// First time loading the knowledge tab from the ticket, 
+									// we would like start the search or show the adv. search as per as admin setting
+			if (typeof(parent.DoSearchFromTicket) != "undefined")
+			{
+				if (parent.DoSearchFromTicket == m_sArgsSD_LAUNCHEDTopassOn)
+				{
+					m_bFirstLoad = false;
+				}
+			}
+			parent.DoSearchFromTicket = m_sArgsSD_LAUNCHEDTopassOn;
+			if (m_bFirstLoad)
+			{
+				if(factoryFrom =="iss")
+				{
+					<PDM_IF "$prop.SD_AUTO_SEARCH_ISS" == "1">
+						m_bFirstLoad=false;
+						setTimeout("doClick('search');", 1);
+					<PDM_ELIF "${current:n/a}" == "n/a">
+						setTimeout("advSearch();", 1);
+					</PDM_IF>
+				}
+				else
+				{
+					<PDM_IF "$prop.SD_AUTO_SEARCH_CR" == "1">
+						m_bFirstLoad=false;
+						setTimeout("doClick('search');", 1);
+					<PDM_ELIF "${current:n/a}" == "n/a">
+						setTimeout("advSearch();", 1);
+					</PDM_IF>
+				}
+			}
+		} 
+	</PDM_IF>
+}
+//
+// ------------------------------------------------------------------------//
+// FUNCTION AcceptFromList(sKDPersID)
+//		Accept KD, File or Forum as a solution to the ticket from the list_KD.htmpl 
+//		without opening the KD
+// In:
+//		sKDPersID: KD Record persid
+// ------------------------------------------------------------------------//
+function AcceptFromList(sKDPersID)
+{
+	if (action_in_progress())
+	{
+		return; //Check if the page finish loading
+	}
+	m_bOnAccept = true;//Initialized as false in kt_reply.js
+	m_bOnAcceptFromList = true;//Initialized as false in kt_reply.js
+	//
+	set_action_in_progress(ACTN_SAVE);
+	//
+	var lKDID = sKDPersID.split(":")[1];
+	var url=cfgCgi+ "?SID=" + cfgSID + "+FID=" + fid_generator()+ "+OP=KT_LINK_KD_FROM_LIST+SD_LAUNCHED=$args.KEEP.SD_LAUNCHED" +
+			'+ACCEPT=1+LAUNCHED_ITIL=$args.KEEP.LAUNCHED_ITIL+DT_PATH_IDS=$args.event_log_textdata1+' + 
+			"SKELETON_ID=" + lKDID + "+BU_ID=0";//Zero BUID means that server need to create bu_trans record before rate is done
+	ahdframeset.workframe.location.href = url;		
+}
+//
+
+function GetDocViewMode()
+{
+	return m_iDocViewMode;
+}
+
+//This function is to avoid white space because os different width of the tables on resize
+ function listResize()
+{   
+	try //No table exists for KT lite, so try & catch is needed to prevent run time errors
+	{ 
+		var t1=document.getElementById("hdrTbl");
+		t1.width=document.getElementById("sfKTTbl").clientWidth ;
+	}
+	catch (e)
+	{}
+}
+
+//holdHTMLText();
+<pdm_include file=menubar_kt.htmpl>
+</script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/comboname.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/breadcrumb.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_category_path.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/list_KD_common.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/list_KD.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_relevance.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_reply.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_submit_kd.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_menus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script>
+var oTicketForm = getParentDetailPage_prv();
+if ( oTicketForm !=null && !(oTicketForm.cfgUserAuth > 1) )
+{	  
+	m_sArgsSD_LAUNCHEDTopassOn = "";//Do not pass the ticket persID in this case
+}
+</script>
+</head>
+
+<body class="list" onresize="listResize()" onload="do_window_onload()">
+<PDM_IF "$args.KEEP.search_type" == "RecommendedResults">
+	<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_ELSE>
+	<PDM_INCLUDE FILE=std_body.htmpl filename="Document_filename" logo=no>
+</PDM_IF>
+<script type="text/javascript">	
+<PDM_IF 0>
+	If the search type is FAQ or SearchTools, then we are in the Knowledge tab
+</PDM_IF>
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools" || "$args.KEEP.search_type" == "ticket" || "$args.KEEP.search_type" == "SimilarDocs" || "$args.KEEP.search_type" == "ScoreBoard" || "$args.KEEP.search_type" == "nr">
+	document.writeln("<table id='hdrTbl' cellspacing=0 cellpadding=5 width='100%' class='page_header gn_container_no_border'>");
+	document.writeln("<tr>");
+	
+<PDM_IF "$args.KEEP.search_type" != "ticket" && "$args.KEEP.search_type" != "nr">
+<PDM_IF "$args.KEEP.search_type" == "ScoreBoard" >
+			document.writeln("<td align='left' width='40%'>" + hdrTitleList + "</td>");
+		
+<PDM_ELSE>	
+			document.writeln("<td align='left' width='40%'>" + hdrTitle + "</td>");
+		
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$args.KEEP.search_type" == "nr">
+		document.writeln("<td valign='top' align='right'>");
+		document.writeln("<table cellspacing=0 cellpadding=2  class='gn_container_no_border'>");
+		document.writeln("<tr align='right'>");
+		document.writeln("<td  align='center'>");
+
+		//displaySearchButtons();
+
+		document.writeln("</td>");
+		document.writeln("</tr></table>");
+		document.writeln("</td>");
+	
+<PDM_ELIF "$args.KEEP.search_type" == "ticket" && "$env.NX_KT" == "Yes">
+		document.writeln("<td valign='top' align='right'>");
+		document.writeln("<table cellspacing=0 cellpadding=2  class='gn_container_no_border'>");
+		document.writeln("<tr align='right'>");
+		document.writeln("<td  align='center'>");
+
+		displaySearchButtons();
+
+		document.writeln("</td>");
+		document.writeln("<td valign='center' align='right'>");
+                
+<PDM_MACRO name=button Caption="Zatwierdz dokument" Func="SubmitKD()" hotkey_name="Zatwierdz dokument" ID="btnSubmitKD">  // Submit KD
+		document.writeln("</td>");
+		if (ahdtop.CanUserPerformAction("ROLE_FORUM_SUBMIT") && "$env.NX_KT_DISALLOW_FORUMS" != "Yes")
+		{
+			document.writeln("<td valign='center' align='right'>");	
+                        
+<PDM_MACRO name=button Caption="Nowe forum" Func="SubmitQA()" hotkey_name="New Forum" ID="btnQA">
+			document.writeln("</td>");
+		}
+		document.writeln("<td valign='center' align='right'>");	
+                
+<PDM_MACRO name=button Caption="Przeszukaj kategorie" Func="faq_browse()" hotkey_name="Przeszukaj kategorie" ID="btnFAQBrowse">
+		document.writeln("</td>");
+		document.writeln("</tr></table>");
+		document.writeln("</td>");
+	
+<PDM_ELSE>	
+		document.writeln("<td  align='right'>");
+
+		displaySearchButtons();
+
+		document.writeln("</td>");
+	
+</PDM_IF>
+<PDM_IF "$args.KEEP.search_type" != "ScoreBoard" >
+		displaySimpleEBRSearch("$args.KEEP.cat_filter_type");
+	
+</PDM_IF>	
+		document.writeln("</tr></table>");		
+		searchFilterInitialState = "hide";	
+	
+</PDM_IF>
+<PDM_IF "$args.FACTORY" == "KD_QA">
+<PDM_MACRO name=sfStart create=false factory="KD_QA">
+			// Hide the filter buttons
+			var sfButtonTable = document.getElementById("sfButtonTable");
+			sfButtonTable.style.display = "none";
+		</script>
+		<input type="hidden" name=ebr_primary_order_holder id=ebr_primary_order_holder>
+		<input id=KEEP.RowsPerPage name=KEEP.RowsPerPage type=hidden>
+		<input type="hidden" name=KEEP.backfill_field id=KEEP.backfill_field value="$args.KEEP.backfill_field">
+		<input type="hidden" name=KEEP.backfillFactory id=KEEP.backfillFactory value="$args.KEEP.backfillFactory">
+		<input type="hidden" name=KEEP.backfillPersid id=KEEP.backfillPersid value="$args.KEEP.backfillPersid">
+		<input type="hidden" name=KEEP.backfill_attr id=KEEP.backfill_attr value="$args.KEEP.backfill_attr">
+		<input type="hidden" name=KEEP.objectTenant id=KEEP.objectTenant value="$args.KEEP.objectTenant">
+		<input type="hidden" name=KEEP.objectTenantName id=KEEP.objectTenantName value="$args.KEEP.objectTenantName">
+		<script>
+		document.writeln("<input type='hidden' name=KEEP.SD_LAUNCHED value='"+ m_sArgsSD_LAUNCHEDTopassOn +"'>");<PDM_IF 0>Keeping the SD Ticket ID for launching KT from SD ticket</PDM_IF>
+		document.writeln("<input type='hidden' name=QBE.EQ.ebr_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");<PDM_IF 0>Send the SD Ticket ID to EBR</PDM_IF>
+		document.writeln("<input type='hidden' name=event_log_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");
+        </script>	
+        <input type="hidden" name=KEEP.LAUNCHED_ITIL id=KEEP.LAUNCHED_ITIL value="$args.KEEP.LAUNCHED_ITIL"><PDM_IF 0>Keeping the ITIL Ticket Type for launching KT from SD ticket</PDM_IF>
+		<input type="hidden" name=FAQ_WINDOW_NAME value="$args.FAQ_WINDOW_NAME"><PDM_IF 0>Keeping the name of the FAQ window when laucnhed SD ticket</PDM_IF>
+		<input type="hidden" name=KEEP.PROF_BRWS_USER value="$args.KEEP.PROF_BRWS_USER"><PDM_IF 0>Keeping Profile Browser Context</PDM_IF>
+		<input type="hidden" name=event_log_on value=1>
+		<input type="hidden" name=event_log_type value=KD_SEARCH>
+		<input type="hidden" name=event_search_filter value=>
+		<input type="hidden" id=ADDL_WHERE_HARDCODE name=ADDL_WHERE_HARDCODE value='$args.ADDL_WHERE_HARDCODE'>
+		
+		<input type="hidden" id=QBE.EQ.ACTIVE_STATE name=QBE.EQ.ACTIVE_STATE value='200'>
+		<input type="hidden" name=HTMPL value='list_KD.htmpl'>
+		
+<PDM_IF "$args.KEEP.search_type" == "SimilarDocs">
+			<input type="hidden" name="QBE.NE.id" id="QBE.NE.id" value="$args.QBE.NE.id">
+		
+</PDM_IF>
+		<script type="text/javascript">
+		
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools" || "$args.KEEP.search_type" == "ticket" || "$args.KEEP.search_type" == "SimilarDocs">
+<PDM_MACRO name=ebr_search_filter factory="KD_QA" view="Knowledge">
+<PDM_ELSE>
+<PDM_MACRO name=ebr_search_filter factory="KD_QA" order_by="true" view="Generic">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Zgłaszający" attr=INITIATOR_ID>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="QA_STATUS">
+<PDM_MACRO name=sfStartRow>
+		searchFilterDate("Earliest Creation Date","CREATION_DATE","QBE.GE");
+		searchFilterDate("Latest Creation Date","CREATION_DATE","QBE.LE");
+		
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfHier hdr="Przyczyna źródłowa" attr=SD_ROOTCAUSE_ID>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=SD_PRIORITY_ID>
+		if(factoryFrom!="iss")
+		{
+			
+<PDM_MACRO name=sfDropdown hdr="Surowość" attr=SD_SEVERITY_ID>
+		}
+		if(factoryFrom!="iss")
+		{
+			
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=SD_IMPACT_ID>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=SD_URGENCY_ID>		
+		}
+		
+<PDM_MACRO name=sfEnd>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_IF 0>End of FACTORY=KD_QA -> filter</PDM_IF>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_ELIF "$args.FACTORY" == "KD_FILE">
+<PDM_MACRO name=sfStart create=false factory="KD_FILE">
+		// Hide the filter buttons
+		var sfButtonTable = document.getElementById("sfButtonTable");
+		sfButtonTable.style.display = "none";
+		</script>
+		<input type="hidden" name=ebr_primary_order_holder id=ebr_primary_order_holder>
+		<input id=KEEP.RowsPerPage name=KEEP.RowsPerPage type=hidden>
+		<input type="hidden" name=KEEP.backfill_field id=KEEP.backfill_field value="$args.KEEP.backfill_field">
+		<input type="hidden" name=KEEP.backfillFactory id=KEEP.backfillFactory value="$args.KEEP.backfillFactory">
+		<input type="hidden" name=KEEP.backfillPersid id=KEEP.backfillPersid value="$args.KEEP.backfillPersid">
+		<input type="hidden" name=KEEP.backfill_attr id=KEEP.backfill_attr value="$args.KEEP.backfill_attr">
+		<input type="hidden" name=KEEP.objectTenant id=KEEP.objectTenant value="$args.KEEP.objectTenant">
+		<input type="hidden" name=KEEP.objectTenantName id=KEEP.objectTenantName value="$args.KEEP.objectTenantName">
+		<script>
+		document.writeln("<input type='hidden' name=KEEP.SD_LAUNCHED value='"+ m_sArgsSD_LAUNCHEDTopassOn +"'>");<PDM_IF 0>Keeping the SD Ticket ID for launching KT from SD ticket</PDM_IF>
+		document.writeln("<input type='hidden' name=QBE.EQ.ebr_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");<PDM_IF 0>Send the SD Ticket ID to EBR</PDM_IF>
+		document.writeln("<input type='hidden' name=event_log_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");
+        </script>	
+        <input type="hidden" name=KEEP.LAUNCHED_ITIL id=KEEP.LAUNCHED_ITIL value="$args.KEEP.LAUNCHED_ITIL"><PDM_IF 0>Keeping the ITIL Ticket Type for launching KT from SD ticket</PDM_IF>
+		<input type="hidden" name=FAQ_WINDOW_NAME value="$args.FAQ_WINDOW_NAME"><PDM_IF 0>Keeping the name of the FAQ window when laucnhed SD ticket</PDM_IF>
+		<input type="hidden" name=KEEP.PROF_BRWS_USER value="$args.KEEP.PROF_BRWS_USER"><PDM_IF 0>Keeping Profile Browser Context</PDM_IF>
+		<input type="hidden" name=event_log_on value=1>
+		<input type="hidden" name=event_log_type value=KD_SEARCH>
+		<input type="hidden" name=event_search_filter value=>
+		<input type="hidden" id=ADDL_WHERE_HARDCODE name=ADDL_WHERE_HARDCODE value='$args.ADDL_WHERE_HARDCODE'>
+		
+		<input type="hidden" id=QBE.EQ.ACTIVE_STATE name=QBE.EQ.ACTIVE_STATE value='100'>
+		<input type="hidden" name=HTMPL value='list_KD.htmpl'>
+		
+<PDM_IF "$args.KEEP.search_type" == "SimilarDocs">
+			<input type="hidden" name="QBE.NE.id" id="QBE.NE.id" value="$args.QBE.NE.id">
+		
+</PDM_IF>
+		<script type="text/javascript">
+		
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools" || "$args.KEEP.search_type" == "ticket" || "$args.KEEP.search_type" == "SimilarDocs">
+<PDM_MACRO name=ebr_search_filter factory="KD_FILE" view="Knowledge">
+<PDM_ELSE>
+<PDM_MACRO name=ebr_search_filter factory="KD_FILE" order_by="true" view="Generic">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Utworzono przez" attr=INITIATOR_ID>
+<PDM_MACRO name=sfTextbox hdr="ID zdefiniowane przez użytkownika" attr="USER_DEF_ID" size=20>
+<PDM_MACRO name=sfDropdown hdr="Typ pliku" attr=FILE_TYPE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfHier hdr="Przyczyna źródłowa" attr=SD_ROOTCAUSE_ID>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=SD_PRIORITY_ID>
+		if(factoryFrom!="iss")
+		{
+			
+<PDM_MACRO name=sfDropdown hdr="Surowość" attr=SD_SEVERITY_ID>
+		}
+		if(factoryFrom!="iss")
+		{
+			
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=SD_IMPACT_ID>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=SD_URGENCY_ID>		
+		}
+		
+<PDM_MACRO name=sfEnd>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_IF 0>End of FACTORY=KD_FILE -> filter</PDM_IF>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_ELIF "$args.FACTORY" == "KD_ALL">
+<PDM_MACRO name=sfStart create=false factory="KD_ALL">
+		// Hide the filter buttons
+		var sfButtonTable = document.getElementById("sfButtonTable");
+		sfButtonTable.style.display = "none";
+		</script>
+		
+	    <select id=QBE.EQ.STATUS class="status_all" title="Status" tabindex=100 name=QBE.EQ.STATUS> 
+			<option selected value="">empty</option>
+			<option value="$args.ADDL_WHERE_HARDCODE">ADDL_WHERE_HARDCODE:$args.ADDL_WHERE_HARDCODE</option>
+		</select>			
+		<input type="hidden" name=KEEP.backfill_field id=KEEP.backfill_field value="$args.KEEP.backfill_field">
+		<input type="hidden" name=KEEP.backfillFactory id=KEEP.backfillFactory value="$args.KEEP.backfillFactory">
+		<input type="hidden" name=KEEP.backfillPersid id=KEEP.backfillPersid value="$args.KEEP.backfillPersid">
+		<input type="hidden" name=KEEP.backfill_attr id=KEEP.backfill_attr value="$args.KEEP.backfill_attr">
+		<input type="hidden" name=KEEP.objectTenant id=KEEP.objectTenant value="$args.KEEP.objectTenant">
+		<input type="hidden" name=KEEP.objectTenantName id=KEEP.objectTenantName value="$args.KEEP.objectTenantName">			
+		<script>
+		if (typeof parent.sAddlWC != "undefined" ){
+			var oOptionWC = document.createElement("OPTION");
+			oSelectStatus = document.getElementById("QBE.EQ.STATUS");
+			oSelectStatus.options.add(oOptionWC);
+			oOptionWC.value = parent.sAddlWC;
+			oOptionWC.innerText = parent.sAddlWC;
+			//document.write("<option value='" + parent.sAddlWC + "'>" + parent.sAddlWC + "</option>");
+		}
+		</script>
+		
+		<input type="hidden" name=ebr_primary_order_holder id=ebr_primary_order_holder>
+		<input id=KEEP.RowsPerPage name=KEEP.RowsPerPage type=hidden>
+		<script>
+		document.writeln("<input type='hidden' name=KEEP.SD_LAUNCHED value='"+ m_sArgsSD_LAUNCHEDTopassOn +"'>");<PDM_IF 0>Keeping the SD Ticket ID for launching KT from SD ticket</PDM_IF>
+		document.writeln("<input type='hidden' name=QBE.EQ.ebr_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");<PDM_IF 0>Send the SD Ticket ID to EBR</PDM_IF>
+		document.writeln("<input type='hidden' name=event_log_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");
+        </script>
+        <input type="hidden" name=KEEP.LAUNCHED_ITIL id=KEEP.LAUNCHED_ITIL value="$args.KEEP.LAUNCHED_ITIL"><PDM_IF 0>Keeping the ITIL Ticket Type for launching KT from SD ticket</PDM_IF>
+		<input type="hidden" name=FAQ_WINDOW_NAME value="$args.FAQ_WINDOW_NAME"><PDM_IF 0>Keeping the name of the FAQ window when laucnhed SD ticket</PDM_IF>
+		<input type="hidden" name=KEEP.PROF_BRWS_USER value="$args.KEEP.PROF_BRWS_USER"><PDM_IF 0>Keeping Profile Browser Context</PDM_IF>
+		<input type="hidden" name=event_log_on value=1>
+		<input type="hidden" name=event_log_type value=KD_SEARCH>
+		<input type="hidden" name=event_search_filter value=>
+		<input type="hidden" id=ADDL_WHERE_HARDCODE name=ADDL_WHERE_HARDCODE value='$args.ADDL_WHERE_HARDCODE'>
+		
+		<input type="hidden" id=QBE.GE.ACTIVE_STATE name=QBE.GE.ACTIVE_STATE value='0'>
+		
+		<input type="hidden" id=QBE.EQ.ebr_kcat_id name=QBE.EQ.ebr_kcat_id value=''>
+		<input type="hidden" id=QBE.EQ.ebr_faq_query name=QBE.EQ.ebr_faq_query value=''>
+		<input type="hidden" id=QBE.EQ.ebr_add_blc name=QBE.EQ.ebr_add_blc value='1'>
+		
+<PDM_IF "$args.KEEP.search_type" == "SimilarDocs">
+			<input type="hidden" name="QBE.NE.id" id="QBE.NE.id" value="$args.QBE.NE.id">
+		
+</PDM_IF>
+		<input type="hidden" name=HTMPL value='list_KD.htmpl'>
+
+		<script type="text/javascript">
+		if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH") && !ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH"))
+		{	
+			document.write("<input type='hidden' id=QBE.LT.ACTIVE_STATE name=QBE.LT.ACTIVE_STATE value='100'>");	
+		}
+		else
+		{	
+			document.write("<input type='hidden' id=QBE.LT.ACTIVE_STATE name=QBE.LT.ACTIVE_STATE value='300'>");	 
+		
+			if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+			{
+				document.write("<input type='hidden' id=QBE.NE.ACTIVE_STATE name=QBE.NE.ACTIVE_STATE value='200'>");
+			}
+			if (!ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH"))
+			{
+				document.write("<input type='hidden' id=QBE.NE.ACTIVE_STATE name=QBE.NE.ACTIVE_STATE value='100'>");
+			}
+		}
+		
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools" || "$args.KEEP.search_type" == "ticket" || "$args.KEEP.search_type" == "SimilarDocs">
+<PDM_MACRO name=ebr_search_filter factory="KD_ALL" view="Knowledge">
+<PDM_ELSE>
+<PDM_MACRO name=ebr_search_filter factory="KD_ALL" order_by="true" view="Generic">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfHier hdr="Przyczyna źródłowa" attr=SD_ROOTCAUSE_ID>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=SD_PRIORITY_ID>
+		if(factoryFrom!="iss")
+		{
+			
+<PDM_MACRO name=sfDropdown hdr="Surowość" attr=SD_SEVERITY_ID>
+		}
+		if(factoryFrom!="iss")
+		{
+			
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=SD_IMPACT_ID>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=SD_URGENCY_ID>		
+		}
+		
+<PDM_MACRO name=sfEnd>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_IF 0>End of FACTORY=KD_ALL -> filter</PDM_IF>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_ELIF "$args.FACTORY" == "KD" || "$args.FACTORY" == "">
+<PDM_MACRO name=sfStart create=false factory=KD>
+
+		// Hide the filter buttons
+		
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools" || "$args.KEEP.search_type" == "ticket" || "$args.KEEP.search_type" == "SimilarDocs" || "$args.KEEP.search_type" == "nr">
+			var sfButtonTable = document.getElementById("sfButtonTable");
+			sfButtonTable.style.display = "none";
+		
+</PDM_IF>
+		</script>
+				
+	    <select id=QBE.EQ.STATUS class="status_all" title="Status" tabindex=100 name=QBE.EQ.STATUS> 
+			<option selected value="">empty</option>
+			<option value="$args.ADDL_WHERE_HARDCODE">ADDL_WHERE_HARDCODE:$args.ADDL_WHERE_HARDCODE</option>
+		</select>	
+		<script>
+		if (typeof parent.sAddlWC != "undefined" ){
+			var oOptionWC = document.createElement("OPTION");
+			oSelectStatus = document.getElementById("QBE.EQ.STATUS");
+			oSelectStatus.options.add(oOptionWC);
+			oOptionWC.value = parent.sAddlWC;
+			oOptionWC.innerText = parent.sAddlWC;
+			//document.write("<option value='" + parent.sAddlWC + "'>" + parent.sAddlWC + "</option>");
+		}
+		</script>
+
+		<input type="hidden" name=KEEP.backfill_field id=KEEP.backfill_field value="$args.KEEP.backfill_field">
+		<input type="hidden" name=KEEP.backfillFactory id=KEEP.backfillFactory value="$args.KEEP.backfillFactory">
+		<input type="hidden" name=KEEP.backfillPersid id=KEEP.backfillPersid value="$args.KEEP.backfillPersid">
+		<input type="hidden" name=KEEP.backfill_attr id=KEEP.backfill_attr value="$args.KEEP.backfill_attr">
+		<input type="hidden" name=KEEP.objectTenant id=KEEP.objectTenant value="$args.KEEP.objectTenant">
+		<input type="hidden" name=KEEP.objectTenantName id=KEEP.objectTenantName value="$args.KEEP.objectTenantName">
+		<input type="hidden" name=ebr_primary_order_holder id=ebr_primary_order_holder>
+		<input id=KEEP.RowsPerPage name=KEEP.RowsPerPage type=hidden>
+		<script>
+		document.writeln("<input type='hidden' name=KEEP.SD_LAUNCHED value='"+ m_sArgsSD_LAUNCHEDTopassOn +"'>");<PDM_IF 0>Keeping the SD Ticket ID for launching KT from SD ticket</PDM_IF>
+		document.writeln("<input type='hidden' name=QBE.EQ.ebr_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");<PDM_IF 0>Send the SD Ticket ID to EBR</PDM_IF>
+		document.writeln("<input type='hidden' name=event_log_sd_persid value='"+m_sArgsSD_LAUNCHEDTopassOn+"'>");
+        
+<PDM_IF "$args.QBE.EQ.SD_ASSET_ID" != "">
+			document.writeln('<input type="hidden" name="QBE.EQ.SD_ASSET_ID" value="$args.QBE.EQ.SD_ASSET_ID">');
+        
+</PDM_IF>
+        </script>			
+        <input type="hidden" name=KEEP.LAUNCHED_ITIL id=KEEP.LAUNCHED_ITIL value="$args.KEEP.LAUNCHED_ITIL"><PDM_IF 0>Keeping the ITIL Ticket Type for launching KT from SD ticket</PDM_IF>
+		<input type="hidden" name=FAQ_WINDOW_NAME value="$args.FAQ_WINDOW_NAME"><PDM_IF 0>Keeping the name of the FAQ window when laucnhed SD ticket</PDM_IF>
+		<input type="hidden" name=KEEP.PROF_BRWS_USER value="$args.KEEP.PROF_BRWS_USER"><PDM_IF 0>Keeping Profile Browser Context</PDM_IF>
+		<input type="hidden" name=event_log_on value=1>
+		<input type="hidden" name=event_log_type value=KD_SEARCH>
+		<input type="hidden" name=event_search_filter value=>
+
+		<input type="hidden" id=ADDL_WHERE_HARDCODE name=ADDL_WHERE_HARDCODE value='$args.ADDL_WHERE_HARDCODE'>
+		<input type="hidden" name=QBE.EQ.BM_LINKS.USER_ID value="$args.QBE.EQ.BM_LINKS.USER_ID">
+		<input type="hidden" id=RETURN_SOLUTIONS name=RETURN_SOLUTIONS value='$args.RETURN_SOLUTIONS'>
+		<input type="hidden" id=STATUS_NOT_STARTED name=STATUS_NOT_STARTED value='$args.STATUS_NOT_STARTED'>
+		<input type="hidden" id=DEFAULT_WC name=DEFAULT_WC value='$args.DEFAULT_WC'>
+		<input type="hidden" id=QBE.EQ.ebr_add_blc name=QBE.EQ.ebr_add_blc value='1'>
+		<input type="hidden" id=QBE.EQ.ebr_kcat_id name=QBE.EQ.ebr_kcat_id value=''>
+		<input type="hidden" id=QBE.EQ.ebr_faq_query name=QBE.EQ.ebr_faq_query value=''>
+		
+<PDM_IF "$args.KEEP.search_type" == "SimilarDocs">
+			<input type="hidden" name="QBE.NE.id" id="QBE.NE.id" value="$args.QBE.NE.id">
+		
+</PDM_IF>		
+		<script type="text/javascript">
+		
+<PDM_IF 0>When non published KDs is allowed remove this constraint</PDM_IF>
+		if (!ahdtop.m_bAllowViewNonPublished || argSearchType == "")
+		{
+			document.writeln("<input type='hidden' id=QBE.EQ.ACTIVE_STATE name=QBE.EQ.ACTIVE_STATE value='0'>");
+		}
+		else 
+		{
+			document.writeln("<input type='hidden' id=QBE.EQ.ACTIVE_STATE name=QBE.EQ.ACTIVE_STATE value='$args.QBE.EQ.ACTIVE_STATE'>");
+			document.writeln("<input type='hidden' id=QBE.GE.ACTIVE_STATE name=QBE.GE.ACTIVE_STATE value='$args.QBE.GE.ACTIVE_STATE'>");
+			document.writeln("<input type='hidden' id=QBE.LT.ACTIVE_STATE name=QBE.LT.ACTIVE_STATE value='$args.QBE.LT.ACTIVE_STATE'>");
+			document.writeln("<input type='hidden' id=ADDL_SELECTION name=ADDL_SELECTION value='$args.ADDL_SELECTION'>");
+		}
+			
+		
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools" || "$args.KEEP.search_type" == "ticket" || "$args.KEEP.search_type" == "SimilarDocs">
+<PDM_MACRO name=ebr_search_filter order_by="true" view="Knowledge">
+<PDM_ELSE>
+<PDM_MACRO name=ebr_search_filter order_by="true" view="Generic">
+</PDM_IF>
+<PDM_IF 0>
+			Use the NX_KT environment variable to see if full-blown Knowledge Tools is installed.
+			If it is Yes, then display the User Defined ID
+		
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+		<PDM_OBJECT>
+		// If allowed view non-published KDs
+		if (ahdtop.m_bAllowViewNonPublished && argSearchType != "")
+		{
+			document.writeln("<th valign='baseline' align='left' colspan=3><span class='labeltext'>Wyszukaj dokumenty w  niniejszych statusach: </span></th>");
+			document.writeln("<tr><td nowrap colspan=3>");
+			ShowCheckbox("cbStatus_70", "Opublikowane");
+			for (var lStatus = 0; lStatus < ahdtop.m_arrStatusCnt; lStatus++)
+			{
+				ShowCheckbox("cbStatus_" + ahdtop.m_arrAllowedStatusIDs[lStatus],
+							ahdtop.m_arrAllowedStatusNames[lStatus]);
+			}
+			document.writeln("</td></tr>");
+		}
+		//display default query checkbox if one exists for this user role
+		if(ahdtop.default_crsq_persid != "" && ahdtop.default_crsq_desc != "")
+		{
+			
+<PDM_MACRO name=sfStartRow>	
+			document.writeln("<td nowrap colspan=3><input type=checkbox class='labeltext' title='"  + ahdtop.default_crsq_desc +  "' name=cbDefaultWC id=cbDefaultWC onfocus=\"searchFilterFocus('cbDefaultWC')\"");
+			document.writeln("onBlur=\"searchFilterBlur('cbDefaultWC')\" tabindex=100 onchange='ADDL_WHERE_HARDCODE_change()'><span class='bodytext'><label for='cbDefaultWC'><b>");
+			document.writeln(ahdtop.default_crsq_desc + "</b></label></span></td></tr>");
+			saveAttrObj( "checkbox", "cbDefaultWC", ahdtop.default_crsq_desc );
+		}
+		//create checkbox for documents that solved tickets
+		
+<PDM_IF $env.NX_KT == "Yes">
+<PDM_MACRO name=sfStartRow>	
+
+			document.writeln("<td nowrap colspan=3>");
+			document.writeln("<input type=checkbox class='labeltext' title='Return only documents that solved tickets' name=cbSolutions id=cbSolutions onfocus=\"searchFilterFocus('cbSolutions')\""); 
+			document.writeln("onBlur=\"searchFilterBlur('cbSolutions')\" tabindex=100 onchange='ADDL_WHERE_HARDCODE_change()'>"); 
+			document.writeln("<span class='bodytext'><label for='cbSolutions'><b>Return only documents that solved tickets</b></label></span>"); 
+			document.writeln("</td></tr>");		
+
+			saveAttrObj( "checkbox", "cbSolutions", "Return only document that solved tickets");
+			//end checkbox for documents that solved tickets
+		
+</PDM_IF>
+		</PDM_OBJECT>
+		
+		
+<PDM_IF $env.NX_KT == "Yes">
+<PDM_MACRO name=sfTextbox hdr="ID zdefiniowane przez użytkownika" attr=USER_DEF_ID size=15>
+</PDM_IF>
+<PDM_IF "$args.KEEP.search_type" != "nr" >
+<PDM_MACRO name=sfLookup hdr="Produkt" attr=SD_PRODUCT_ID>
+<PDM_MACRO name=sfLookup hdr="Element konfiguracji" attr=SD_ASSET_ID>
+</PDM_IF>
+<PDM_IF 0>
+			Use the NX_KT environment variable to see if full-blown Knowledge Tools is installed.
+			If it is Yes, then display the category filter
+		
+</PDM_IF>
+<PDM_IF $env.NX_KT == "Yes">
+<PDM_MACRO name=sfStartRow>		
+			searchCategoriesMultiLookup(2);
+		
+</PDM_IF>
+		</script>
+		<script type="text/javascript">	
+			
+		
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfLookup hdr="Właściciel" attr=OWNER_ID>
+<PDM_MACRO name=sfLookup hdr="Autor" attr=AUTHOR_ID>
+<PDM_MACRO name=sfLookup hdr="Znawca tematu" attr=SUBJECT_EXPERT_ID>
+<PDM_IF 0>
+			Use the NX_KT environment variable to see if full-blown Knowledge Tools is installed.
+			If it is Yes, then display the Doc Type and Document Approval Process Priority
+		
+</PDM_IF>
+<PDM_IF $env.NX_KT == "Yes">
+<PDM_MACRO name=sfDropdown hdr="Typ dokumetu" attr=DOC_TYPE_ID factory=CI_DOC_TYPES>
+<PDM_MACRO name=sfDropdown hdr="Priorytet procesu akceptacji" attr=PRIORITY_ID factory=CI_PRIORITIES>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+			if(factoryFrom!="nr")
+			{
+				
+<PDM_MACRO name=sfHier hdr="Przyczyna źródłowa" attr=SD_ROOTCAUSE_ID>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=SD_PRIORITY_ID>
+				if(factoryFrom!="iss")
+				{
+					
+<PDM_MACRO name=sfDropdown hdr="Surowość" attr=SD_SEVERITY_ID>
+				}
+				if(factoryFrom!="iss")
+				{
+					
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=SD_IMPACT_ID>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=SD_URGENCY_ID>		
+				}
+			}
+			
+<PDM_MACRO name=sfEnd>
+</PDM_IF>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_IF 0>End of FACTORY=KD -> Filter</PDM_IF>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools" || "$args.KEEP.search_type" == "ticket" || "$args.KEEP.search_type" == "SimilarDocs">
+	// Set the ebr search text box to the previous search
+    if(typeof ahdframe.parent.curr_ebr_search_text == "string" && ahdframe.parent.curr_ebr_search_text.length > 0)
+    {
+	try 
+	{
+		var search_text = ahdframe.parent.curr_ebr_search_text;
+		search_text = replaceGT_LT(search_text);		    
+		document.getElementById("ebr_search_text").value = search_text;
+		document.getElementById("ebr_search_text").focus();	
+	}
+	catch(e) {}
+	}	
+</PDM_IF>
+	
+	
+var catFilterType = "$args.KEEP.category_filter_type";
+var advSearchCatIds = "$args.KEEP.catIds";				
+var advSearchCatPathCaptions = "$args.KEEP.catPathCaptions";
+// Clean the additional where clause by removing from it attributes 
+// that we do not want to the additional search arguments
+listKDInit(catFilterType, advSearchCatIds, advSearchCatPathCaptions);						
+<PDM_IF $args.KEEP.cat_filter_type == "current">
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools">
+		toggleCatRadio("current");
+	
+</PDM_IF>
+</PDM_IF>
+/////////////////////////////////////////////////////////////////////
+// FUNCTION OnAfterSearchFilter
+//		Post-doSearch (in search_filter.js) processing for Knowledge screen
+/////////////////////////////////////////////////////////////////////
+function OnAfterSearchFilter(url) {
+	var url = OnAfterSearchFilterProc(url);
+	
+	
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools">
+		// Store the fact that we came from the Search tools screen
+		url += "+KEEP.search_type=SearchTools";
+
+		// Store the url
+		if (typeof ahdframe.parent.setPreviousSearchUrl == "function")
+			ahdframe.parent.setPreviousSearchUrl(url);
+	
+</PDM_IF>
+	return url;
+}	
+
+<PDM_IF "$args.KEEP.search_type" == "FAQ" || "$args.KEEP.search_type" == "SearchTools">
+	// Display the FAQ Path and order by drop-down in the view options section of
+	// the result set list
+	// Result set list (resultset.js) will call this function for each list page
+	// Do not implement this function unless full-blown Knowledge Tools is installed
+	// (i.e. env.NX_KT == 'Yes'
+	
+<PDM_IF "$env.NX_KT" == "Yes">
+		function getResultSetViewOptions() {
+			html = displayFAQPathAndOrderBy(ahdframe.parent.curr_domset, "$args.KEEP.search_type", "$args.KEEP.cur_sort_key", ahdframe.parent.curr_ebr_primary_order, "$env.NX_SD");
+			return html;
+		}
+	
+</PDM_IF>
+</PDM_IF>
+
+// Display the query result message in the navigation-level section section of
+// the result set list
+// Result set list (resultset.js) will call this function for each list page
+function getNavLevelHtml() {
+	html = displayQueryMessage("$args.KEEP.search_type", "$args.KEEP.cat_filter_type", "$args.QBE.EQ.ebr_match_type", "$args.KEEP.catCaptions");
+	return html;
+}
+</script>
+
+<PDM_IF "${current:n/a}" != "n/a">
+
+<script type="text/javascript">
+//nx_unescape added to accommadate % charachter in search string
+var highlightWords = '<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.ebr_parsed_search_text</PDM_FMT>'; 
+var ebrSearchKeywords = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.ebr_search_keywords</PDM_FMT>');
+//PDM_FMT & nx_unescape added for charachters needing escape
+var ebrSearchKeywordsString = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.ebr_search_keywords_string</PDM_FMT>');
+//treating the <b> returned from highlightWord function
+if (ebrSearchKeywordsString.match(/&lt;b/)){
+	ebrSearchKeywordsString=ebrSearchKeywordsString.replace(/&lt;/ig,'<');
+	ebrSearchKeywordsString=ebrSearchKeywordsString.replace(/&gt;/ig,'>');
+	}
+if (ebrSearchKeywords.match(/&lt;b/)){
+	ebrSearchKeywords=ebrSearchKeywords.replace(/&lt;/ig,'<');
+	ebrSearchKeywords=ebrSearchKeywords.replace(/&gt;/ig,'>');
+	}
+var ebrSearchComment = "$args.KEEP.ebr_search_comment";
+var ebrDidYouMean = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.ebr_search_suggestion</PDM_FMT>');
+var envShowKeywordFrequency = "$env.EBR_SHOW_WORDS_DF";
+var envShowDidYouMean = "$env.KNOWLEDGE_SHOW_DID_YOU_MEAN";
+var fuzziness = "$args.QBE.EQ.ebr_fuzziness";
+
+<PDM_IF "$args.FACTORY" == "KD_QA">
+	<PDM_INCLUDE FILE="list_KD_QA.htmpl">
+<PDM_ELIF "$args.FACTORY" == "KD_FILE">
+   <PDM_INCLUDE FILE="list_KD_FILE.htmpl">
+<PDM_ELIF "$args.FACTORY" == "KD_ALL">
+    <PDM_INCLUDE FILE="list_KD_ALL.htmpl"> 
+<PDM_ELIF "$args.FACTORY" == "KD" || "$args.FACTORY" == "">
+	var msgFoundNone = "No Documents found";
+	var msgFound1 = "1 Document found";
+	var msgFound = "%1 Documents found";
+	var msgFoundMore = "%1 Documents found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Document";
+
+	var imgPath='$CAisd' + '/img/';
+	var img = "";
+	var doctype = "";
+	var arrIDs = new Array;
+	var arrTitles = new Array();
+	var arrKSTypes = new Array;
+	var arrStatusID = new Array;
+	var arrDoc_blc = new Array;
+	var nCount = 0;
+	var hideDetails = ahdtop.GetUSPPreferences("ONE_B_HIDE_DETAILS");
+	//
+	function fmtRelevance(value)
+	{
+		var quality = get_ebr_relevance_quality(value);
+		rs.data(quality);
+	}
+
+	var bRework = false;
+	function fmtStatus(value)
+	{
+		if (bRework)
+		{
+			var sStatus = "<I>Rework-</I>" + value;
+			rs.data(sStatus);
+		}
+		else
+		{
+			rs.data(value);
+		}
+	}
+	function writeRecommendedResults()
+	{
+		for ( i = 0; i < arrDoc_blc.length ; i++)
+		{
+			if(arrDoc_blc[i] > 0)
+			{
+				var currTD_Id="rslnk_" + i + "_0";
+				var e = document.getElementById(currTD_Id);
+				if(e)
+				{
+					var html = e.innerHTML;
+					if(html.indexOf("id=spnRec" + i) == -1)
+					{
+						if(_browser.isIE) {		// IE has tags in upper case, Firefox uses lower case
+							html = html.split("<IMG").join("<IMG");
+							html = html.split("><IMG").join("> <SPAN id=spnRec" + i + " class='navy_bold'>" + msgtext("Recommended") + "</SPAN> <IMG");
+						} else {
+							html = html.split("<img").join("<img");
+							html = html.split("><img").join("> <SPAN id=spnRec" + i + " class='navy_bold'>" + msgtext("Recommended") + "</SPAN> <img");
+						}
+						e.innerHTML = html;
+					}
+				}
+			}	 
+		}
+	}
+	
+<PDM_MACRO name=lsStart search_type=DISPLAY>
+<PDM_MACRO name=lsWrite text="arrIDs[nCount] = '@{list.id}';">
+<PDM_MACRO name=lsWrite text="arrTitles[nCount]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.TITLE}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrKSTypes[nCount]=@{list.KS_TYPE}-0;">
+<PDM_MACRO name=lsWrite text="arrDoc_blc[nCount] = '@{list.ebr_doc_blc}';">
+<PDM_MACRO name=lsWrite text="arrStatusID[nCount++] = '@{list.STATUS_ID}';">
+<PDM_MACRO name=lsWrite both=no text="doctype = \"@{list.DOC_TYPE_ID:0}\";">
+<PDM_MACRO name=lsWrite both=yes text="if (doctype == '2') img = imgPath + 'tree.gif'; else img = imgPath + 'doc.gif';">
+<PDM_MACRO name=lsCol hdr="Tytuł" attr=TITLE disp_entities=no fmtfunc=highlightSearchTerms img=img link=yes sort=no startrow="no">
+<PDM_MACRO name=lsWrite both=yes text="if (hideDetails == '0') {">
+<PDM_MACRO name=lsCol hdr="ID" attr=id nowrap=yes sort=no startrow="no">
+<PDM_MACRO name=lsCol hdr="Data modyfikacji" attr=MODIFY_DATE nowrap=yes sort=no startrow="no">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.m_bAllowViewNonPublished) {">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.REWORK_VER:}' == '1'">
+<PDM_MACRO name=lsWrite text="bRework = true;">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="bRework = false;">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Status" attr=STATUS_ID.STATUS export=no fmtfunc=fmtStatus nowrap=yes sort=no startrow="no">
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.DOC_TEMPLATE_ID.HIDE_S:}' != '1'">
+
+<PDM_MACRO name=lsWrite text="pdm_elif '@{list.DOC_TEMPLATE_ID.HIDE_P:}' != '1'">
+<PDM_MACRO name=lsCol attr="SUMMARY" colspan=4 disp_entities=no export=no fmtfunc=highlightSearchTerms label="Opis" sort=no startrow=yes width=255>
+<PDM_MACRO name=lsCol attr="PROBLEM_SHORT" colspan=4 disp_entities=no export=no fmtfunc=highlightSearchTerms label="Problem" sort=no startrow=yes width=255>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsCol attr="RESOLUTION_SHORT" colspan=4 disp_entities=no export=no fmtfunc=highlightSearchTerms label="Rozwiązanie" sort=no startrow=yes width=255>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd>
+	rs.setLinkOnclick(function(){OpenDoc(self.activePersid)});
+	var ctxMenu=new ContextMenu("idKD");
+	
+	ctxMenu.addItem("View", "OpenDoc(self.activePersid);");
+	
+	ctxMenu.addItem("Edit", "OpenDocumentEditor(self.activePersid);");
+	
+	
+<PDM_IF "$env.NX_KT" == "Yes">
+		if (argSearchType == "ticket" && m_sArgsSD_LAUNCHEDTopassOn != "")
+		{
+			ctxMenu.addItem("Accept as Solution", "AcceptFromList(self.activePersid);");
+		}
+	
+</PDM_IF>
+<PDM_IF "$env.NX_KT" == "Yes">
+	if (ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE") || ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS"))
+	{
+		ctxMenu.addItem("Create Copy of this Document", "SaveAs(self.activePersid);");
+	}
+	
+</PDM_IF>
+<PDM_IF '$args.KEEP.SkeletonId'!= "0" && "$args.KEEP.search_type" == "SimilarDocs" && "$args.KEEP.IS_EDIT" == "edit">
+		ctxMenu.addItem("Link this Document as See Also", "parent.AddDocLink(self.activePersid);");
+		ctxMenu.addItem("Link this Document as Parent", "parent.AddDocLink(self.activePersid,1);");// 1 means as parent
+		ctxMenu.addItem("Link this Document as Child", "parent.AddDocLink(self.activePersid,2);");// 2 means as child
+
+	
+</PDM_IF>
+	if (ahdtop.CanUserPerformAction("ROLE_DOCUMENT_DELETE"))
+	{
+		ctxMenu.addItem(msgtext("Delete"), "DeleteSelectedObject(self.activeRow);");
+	}
+	// Add standard menu items to context menu if our user preference
+	// is to activate the resultset context menu using a right-click
+	if (ahdtop.GetUSPPreferences("CLASSIC_RESULTSET_CONTEXT") == "0") {
+		ctxMenu.addItem( msgtext("Refresh"), // refresh
+				"refreshForm()");
+		ctxMenu.addItem( msgtext("Print_Form%1...", " " + window.propFormName), // Print this window
+				"CAisdPrint();"); 
+		ctxMenu.addItem( msgtext("Help_on_This_Window..."),	// Help on this window
+							"help_on_form('"+window.propFormName+"')");
+	}	
+	ctxMenu.finish();
+	
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+<PDM_IF 0>End of FACTORY=KD -> List</PDM_IF>
+<PDM_IF 0>------------------------------------------------------------------------------------------</PDM_IF>
+</PDM_IF>
+
+//////////////////////////////////////////////////////////////////
+// FUNCTION OpenDocumentEditor
+//	Description: opens the document editor page, 
+//		not under factory=KD as it is being called from other factories if 
+//		convert to KD clicked
+//	in:
+//		lKDPersID - document persid
+//////////////////////////////////////////////////////////////////
+function OpenDocumentEditor(lKDPersID)
+{
+	showEdit(lKDPersID, void(0), void(0), void(0), m_bOpenDocInPopUp);
+}
+
+var ipop="$args.KEEP.INITIAL_POPUP";
+//////////////////////////////////////////////////////////////////
+// FUNCTION OpenDoc
+//	Description: opens the document viewer page, 
+//		not under factory=KD as it is being called 
+//		from other factories as well
+//	in:
+//		lKDPersID - document persid
+//////////////////////////////////////////////////////////////////
+function OpenDoc(lKDPersid)
+{
+	// this is for when we are poped from java client
+	if(ipop!="") ahdtop.propInitialPopup=ipop;
+
+	var lKD_ID = lKDPersid.substr(lKDPersid.indexOf(":") + 1);
+	var treeID;
+	if (typeof ahdframe.parent.getTreeId == "function")
+		treeID  = ahdframe.parent.getTreeId();
+	if (m_sArgsSD_LAUNCHEDTopassOn != "")
+	{
+		//Getting the ticket factory
+		var sTicketPersID = m_sArgsSD_LAUNCHEDTopassOn;
+		var sITIL = '$args.KEEP.LAUNCHED_ITIL';
+		var sTicketFactory = "";
+		if (sTicketPersID != '')
+		{
+			var arrtmp= sTicketPersID.split(":");
+			if (arrtmp.length > 0)
+			{
+				sTicketFactory = arrtmp[0];
+			}	
+		}
+		
+<PDM_IF "$args.KEEP.IsPopUp" == 1> //category browse window
+			var opener = "category_browse";	
+		
+<PDM_ELSE>
+			var opener = "search_tool";	
+		
+</PDM_IF>
+		OpenDocumentViewer(lKD_ID, 2, opener, undefined, treeID, undefined, undefined, undefined, undefined, 
+			"SD_LAUNCHED=" + m_sArgsSD_LAUNCHEDTopassOn, "TICKET_FACTORY=" + sTicketFactory, "PROF_BRWS_USER=$args.KEEP.PROF_BRWS_USER", 
+			"FAQ_WINDOW_NAME=$args.FAQ_WINDOW_NAME","LAUNCHED_ITIL=" + sITIL, "KEEP.ebr_parsed_search_text=" + highlightWords);
+	}
+	else 
+	{
+		OpenDocumentViewer(lKD_ID, 2, "search_tool", undefined, treeID, undefined, undefined, undefined, undefined, "PROF_BRWS_USER=$args.KEEP.PROF_BRWS_USER", "KEEP.ebr_parsed_search_text=" + highlightWords);		
+	}
+}
+
+//////////////////////////////////////////////////////////////////
+// FUNCTION updateCtxMenuItems - Callback Function
+//////////////////////////////////////////////////////////////////
+
+function updateCtxMenuItems(row)
+{
+	//update for KD_ALL checks for permissions by role
+	
+	if ( typeof arrActiveStates == "undefined" )
+		return;//Should not be here in this case
+	var AST = arrActiveStates[Number(row)];
+	
+	if ((AST==200 && (!ahdtop.CanUserPerformAction("ROLE_FORUM_CLOSE") || "$env.NX_KT_DISALLOW_FORUMS" == "Yes"))||(AST==100 && !ahdtop.CanUserPerformAction("ROLE_FILE_EDIT"))||(AST==0 && !ahdtop.CanUserPerformAction("ROLE_DOCUMENT_DELETE")))
+	{
+		ctxMenu.hideItem(m_nCtxEdit);	
+	}
+	else
+	{
+		ctxMenu.showItem(m_nCtxEdit);	
+	}
+}
+</script>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+<div id=divData style=display:none;"></div>
+
+</body>
+</html>
+<PDM_WSP>

@@ -1,0 +1,17 @@
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT>
+// Used by inner frames to determine if they are inside a popup or not
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+var strStatusID = "$args.KEEP.CURRENT_STATUS";
+var strWinName = "$args.KEEP.POPUP_NAME";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<body>
+<iframe style="width:100%;height:100%;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=$args.FID+HTMPL=kt_dtbuilder3.htmpl+DTDocID=$args.DTDocID+Tenant=$args.Tenant+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" NAME=ktdtbldr_window_menuOK SCROLLING=no MARGINHEIGHT=2 MARGINWIDTH=0 FRAMEBORDER=1 title="Hidden frame - do not navigate here">This window requires iframe support</iframe>
+</body>
+</HTML>

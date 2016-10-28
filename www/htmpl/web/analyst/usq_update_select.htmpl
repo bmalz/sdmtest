@@ -1,0 +1,109 @@
+<PDM_IF 0>
+@(#)$Id: usq_update_select.htmpl ANDERSON.1 2009/07/10 12:55:38 xiewe01 Exp $
+WHEN PRESENTED:
+    During scoreboard maintenance
+INTENT:
+    Allow administrative user to select the access type for which the scoreboard is customized
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+function selectTabOff(direction)
+{
+  if ( direction == 1 )
+    parent.usq_update_tree.setTimeout("try{fldrtreeTabOff()}catch(e){}",0);
+  else
+    parent.usq_update_control.setTimeout("try{FocusOnField()}catch(e){}",0);
+}
+
+function radioButton( number, checked, caption, actkey )
+{
+  var text = "<tr><td><input type=radio id=Radio" + number + " name=OPTS";
+  if ( ! ahdtop.cstUsingScreenReader )
+    text += " tabindex=" + (number + 900);
+  text += " onFocus=\"this.className='focusField'\"" +
+          " onBlur=\"this.className=''\"";
+  if ( checked )
+    text += " checked";
+  text += " title=\"" + caption + "\"" +
+          " onClick='parent.do_target_sel(" + number + ")'>" +
+          "<span class=labeltext>" + fmtLabelWithActkey(caption,actkey) +
+          "</" + "span></" + "td></" + "tr>";
+  document.writeln(text);
+}
+
+function roleSelect(caption)
+{
+  var text = '<tr><td><select id=ROLE name=ROLE title="' + caption + '"';
+  if ( ! ahdtop.cstUsingScreenReader )
+     text += " tabindex=903";
+  text += " onFocus=\"this.className='focusField'\"" +
+          " onBlur=\"this.className=''\"" +
+          " onChange=\"parent.do_role_sel()\">";
+  document.writeln(text);
+}
+</script>
+</HEAD>
+<BODY class=editform>
+<FORM Name=Form1>
+
+<PDM_IF $ACCESS.admin <= 1 ||
+        "$prop.MultiTenancy" == "on" && 
+        "$cst.tenant" != "$prop.SERVICE_PROVIDER_UUID" &&
+        "$prop.SERVICE_PROVIDER_UUID" != "00">
+<p>
+To customize your scoreboard, enter details to the right, select an item below,
+and then press the button for the desired operation.
+</p>
+
+<PDM_ELSE>
+
+<H2>Wybierz Tablice Wyników</H2>
+<table>
+<script type="text/javascript">
+activateActionKeys();
+var keep_usq_owner = "";
+<PDM_IF "$args.KEEP.USQ_OWNER" != "">
+<PDM_IF "$args.KEEP.USQ_OWNER" != "$cst.persistent_id">
+keep_usq_owner = "$args.KEEP.USQ_OWNER";
+</PDM_IF>
+</PDM_IF>
+if ( ! ahdtop.cstUsingScreenReader )
+  document.writeln('<A HREF="javascript:void(0)" onFocus="selectTabOff(-1)" tabindex=900></A>');
+var caption = "Użytkownik $cst.combo_name";
+var caption_loc = "Użytkownik $cst.combo_name";
+if (!nonLatinFlag)
+    caption_loc = caption;
+var actkey = registerActionKey("s", caption_loc, ahdframe.do_target_sel,"0");
+radioButton( 0, (keep_usq_owner == ""), caption, actkey );
+caption = "Rola";
+caption_loc = "Rola";
+if (!nonLatinFlag)
+    caption_loc = caption;
+actkey = registerActionKey("A", caption_loc, ahdframe.do_target_sel,"1");
+radioButton( 1, (keep_usq_owner != ""), caption, actkey );
+roleSelect(caption);
+var html = "";
+var i, idx = 0;
+for ( i = 0; i < parent.role_persid_opts.length; i++ ) {
+  html += '<option value="' + parent.role_persid_opts[i] + '" ';
+  if ( keep_usq_owner == parent.role_persid_opts[i] ) {
+    idx = i;
+    html += 'selected ';
+    keep_usq_sym = parent.role_sym_opts[i];
+  }
+  html += '>' + parent.role_sym_opts[i] +'</' + 'option>\n';
+}
+parent.curr_role = idx;
+html += '</select>'
+if ( ! ahdtop.cstUsingScreenReader )
+  html += '<A HREF="javascript:void(0)" onFocus="selectTabOff(1)" tabindex=910></A>\n';
+document.write(html);
+</script>
+</td></tr></table>
+</PDM_IF>
+</form>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<PDM_IF 0>
+list_cnt.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Contacts.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<pdm_set PRE.Is3FieldContact=1>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript">
+var groupOnly = ("$args.KEEP.type.id" == "2308") || ( "$args.KEEP.ForGrp" == "1" )|| ( "$args.KEEP.from_auto_assign_tab" == "1") || ("$args.KEEP.lrel_sla_grp" == "1");
+var assignee = ("$args.KEEP.AgtGrp" == "1");
+var hdrTitle, hdrTitleList;
+<PDM_IF "${args.KEEP.IsProfileBrowser:}" == "1">
+   hdrTitle = "Wyszukiwanie podglądu profilu";
+   hdrTitleList = "List podglądów profili";
+<PDM_ELSE>
+if ( groupOnly ) {
+   hdrTitle = "Wyszukiwanie grup";
+   hdrTitleList = "Lista grup";
+}
+else if (assignee)
+{
+   hdrTitle = "Assignee Search"; //analyst and group
+   hdrTitleList = "Assignee List";
+}
+else
+   switch ("$args.KEEP.type.id") {
+      case "2305": // Employee
+         hdrTitle = "Wyszukiwanie pracowników";
+         hdrTitleList = "Lista pracowników";
+         break;
+      case "2307": // Analyst
+         hdrTitle = "Wyszukiwanie analityków";
+         hdrTitleList = "Lista analityków";
+         break;
+      case "2308": // Group
+         hdrTitle = "Wyszukiwanie grup";
+         hdrTitleList = "Lista grup";
+         break;
+      case "2310": // Customer
+         hdrTitle = "Wyszukiwanie klienta";
+         hdrTitleList = "Lista klientów";
+         break;
+      default: // Contacts
+         hdrTitle = "Wyszukiwanie kontaktu";
+         hdrTitleList = "Lista kontaktów";
+         break;
+   }
+</PDM_IF>
+function lstCntOnLoad()
+{
+	if ("$args.KEEP.AgtGrp" == "1")
+	{
+		document.getElementById("ADDITIONAL_WHERE").value = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.ADDITIONAL_WHERE</PDM_FMT>';
+	}
+}
+<PDM_IF "$args.KEEP.forNrtoCnt" == "1">
+    hdrTitle = "Wyszukiwanie przypisanych kontaktów";
+    hdrTitleList = "Lista przypisanych dodatkowych kontaktów";
+</PDM_IF>
+// For using 5.5 in 6.0
+<PDM_IF "$args.KEEP.type.sym" != "">
+hdrTitle = "$args.KEEP.type.sym Search";
+var hdrTitleList = "$args.KEEP.type.sym List";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var cfgIsProfileBrowser = '$args.KEEP.IsProfileBrowser';
+if ( groupOnly ) {
+var rptName = new Array("grpsum.rpt", "grpdtl.rpt");
+}
+else {
+var rptName = new Array("cntsum.rpt", "cntdtl.rpt");
+}
+var cfgCanEdit = true;
+if(typeof ahdtop != "undefined" && typeof ahdtop.toolbarTab != "undefined" && ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].code=='sd')
+	var cfgCanCopy = false;
+else
+	var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+	
+cfgUserAuth = parseInt("$UserAuth",10);
+	var autoRefreshWindows;
+<PDM_IF "$args.KEEP.forCntToGrp" != "1">
+    if( window.parent != null &&
+        typeof window.parent.updateLrelButton == "string" && 
+        typeof window.parent.updateLrelButtonShowBool == "boolean" && window.parent.updateLrelButtonShowBool )
+    {
+        var label;
+        if(typeof window.parent.updateLrelButtonLabel == "string" && window.parent.updateLrelButtonLabel != "") { label = window.parent.updateLrelButtonLabel; }
+        else { label = "Update the " + window.parent.updateLrelButtonParentFactory + " to " + window.parent.updateLrelButtonFactory + " Relationship"; }
+        autoRefreshWindows = new Object();
+	    cfgExtraButton = new Array(label, "UpdateLrelButton()");
+    }
+    function UpdateLrelButton() {                                               // E.G. (for managing the "special_handling" to "cnt" LREL table, "contact_handling")
+        update_with_lrel_style( window.parent.updateLrelButtonParentFactory,    //= "special_handling"
+	                            window.parent.updateLrelButtonParentPersId,     //= "special_handling:dob.id"
+	                            window.parent.updateLrelButtonFactory,          //= "cnt"
+	                            window.parent.updateLrelButtonInLrelName,       //= "cnthandling_list"
+	                            window.parent.updateLrelButtonLabel1,           //= "Contacts"
+	                            window.parent.updateLrelButtonLabel2,           //= "$args.sym Contacts"
+	                            window.parent.updateLrelButtonParentHtmpl,      //= ""
+	                            window.parent.updateLrelButtonExtra );          //= "KEEP.forShToCnt=1"
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forNtfrToCnt" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.NTFR_ID" != "0" && $ACCESS.FAC_ntfr \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Contacts", "UpdateNtfrContacts()", enableExtraBtn);
+
+    function UpdateNtfrContacts() {
+        update_with_lrel_style("ntfr", "$args.KEEP.NTFR_PERSID", "cnt", "ntfr_cntlist", "Contacts", 
+                               "Notification Recipients", "", "KEEP.forNtfrToCnt=0");
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forMgsToCnt" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.MGS_ID" != "0" && $ACCESS.FAC_mgs \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Contacts", "UpdateMgsContacts()", enableExtraBtn);
+
+    function UpdateMgsContacts() {
+        update_with_lrel_style("mgs", "$args.KEEP.MGS_PERSID", "cnt", "dist_cntlist", "Contacts", 
+                               "Notification Recipients", "", "KEEP.forMgsToCnt=0");
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forMacroToCnt" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.MACRO_ID" != "0" && $ACCESS.FAC_macro \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Contacts", "UpdateMacroContacts()", enableExtraBtn);
+
+    function UpdateMacroContacts() {
+        update_with_lrel_style("macro", "$args.KEEP.MACRO_PERSID", "cnt", "att_cntlist", "Contacts", 
+                               "Notification Recipients", "", "KEEP.forMacroToCnt=0");
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forCntToGrp" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.CNT_ID" != "0" && $ACCESS.FAC_cnt \> 1 && $ACCESS.FAC_grpmem \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Groups", "UpdateCntGroups()", enableExtraBtn);
+
+    function UpdateCntGroups() {
+        var cnt_combo_name = "";
+        if ( typeof parent.combo_name == "string" && parent.combo_name != "") {
+            cnt_combo_name = parent.combo_name;
+        }
+        update_grp("cnt", "$args.KEEP.CNT_PERSID", "cnt", "group_list",  "Groups", msgtext("%1_Groups", cnt_combo_name));
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forNFAtyList" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.ATY_ID" != "0" && $ACCESS.FAC_aty \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Contacts", "UpdateAtyNFContacts()", enableExtraBtn);
+
+    function UpdateAtyNFContacts() {
+       update_lrel_nf_cnt("aty", "aty:" + "$args.KEEP.ATY_ID", "cnt", "$args.KEEP.obj_type" + "_nf_cntlist", 
+                          "Contacts", "Notification Recipients", 
+                           "", "$args.KEEP.obj_type");
+    }
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list" onload="lstCntOnLoad();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Contact">
+<script language="JavaScript">
+
+<PDM_IF "$args.KEEP.noSFBtns" == "1">
+<PDM_MACRO name=sfStart button=false export=no factory=cnt>
+<PDM_ELIF "$args.KEEP.noCreateBtn" == "1">
+<PDM_MACRO name=sfStart create=false factory=cnt>
+<PDM_ELIF $ACCESS.FAC_cnt \> 1 && "$args.KEEP.forNtfrToCnt" != "1" && "$args.KEEP.forMgsToCnt" != "1" && "$args.KEEP.forCntToGrp" != "1" && "$args.KEEP.forNrtoCnt" != "1" && "$args.KEEP.forMacroToCnt" != "1">
+<PDM_IF 0>When restricting a contact type, need to restrict the same contact type on create new</PDM_IF>
+<PDM_IF "$args.KEEP.type.id" != "">
+<PDM_IF "$args.KEEP.type.id" == "2308" && $ACCESS.FAC_grp \< 2>
+<PDM_MACRO name=sfStart create=false extracreateurl="KEEP.disable_contact_type=1+PRESET=type:$args.KEEP.type.id" factory=cnt>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart extracreateurl="KEEP.disable_contact_type=1+PRESET=type:$args.KEEP.type.id" factory=cnt>
+</PDM_IF>
+<PDM_IF 0>When restricting a to agtgrp: analyst or group, we will pass the analyst option to the create new page</PDM_IF>
+<PDM_ELIF "$args.KEEP.AgtGrp" == "1">
+<PDM_MACRO name=sfStart extracreateurl="KEEP.disable_contact_type=1+PRESET=type:2307" factory=cnt>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=cnt>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=cnt>
+</PDM_IF>
+<PDM_IF 0>//These are for BLREL editing pass through uses of this form.</PDM_IF>
+<PDM_IF "$args.KEEP.forShToCnt" == "1">
+document.writeln('<input type="hidden" name="HTMPL" value="update_lrel_spclhndlng_cnt.htmpl">');
+<PDM_ELIF "$args.KEEP.ForLrel" == "1">
+document.writeln('<input type="hidden" name="HTMPL" value="update_lrel_cnt.htmpl">');
+<PDM_ELIF "$args.KEEP.ForGrp" == "1" || "$args.KEEP.from_auto_assign_tab" == "1">
+document.writeln('<input type="hidden" name="HTMPL" value="update_lrel_cnt.htmpl">');
+<PDM_ELIF "$args.KEEP.ForMem" == "1">
+document.writeln('<input type="hidden" name="HTMPL" value="update_lrel_cnt.htmpl">');
+<PDM_ELIF "$args.KEEP.ForCnt" == "1">
+document.writeln('<input type="hidden" name="HTMPL" value="update_lrel_cnt.htmpl">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forResponse" == "1">
+    document.write('<input type="hidden" name="QBE.NE.type" value="$args.QBE.NE.type">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.service_pcat.pcat.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_pcat.pcat.id" value="$args.QBE.EQ.service_pcat.pcat.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.service_isscat.isscat.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_isscat.isscat.id" value="$args.QBE.EQ.service_isscat.isscat.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.service_chgcat.chgcat.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_chgcat.chgcat.id" value="$args.QBE.EQ.service_chgcat.chgcat.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.service_wftpl.wftpl.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_wftpl.wftpl.id" value="$args.QBE.EQ.service_wftpl.wftpl.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.service_locs.loc.id" != "">
+    document.write('<input type="hidden" name="QBE.EQ.service_locs.loc.id" value="$args.QBE.EQ.service_locs.loc.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.type.id" == "2308" || "$args.KEEP.lrel_sla_grp" == "1">
+document.writeln('<input type="hidden" name="KEEP.type.id" value="2308">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.grp_id" != "">
+document.writeln('<input type="hidden" name="QBE.NE.id" value="$args.KEEP.grp_id">');
+</PDM_IF>
+<PDM_IF 0>//For the special handling object's Contacts tab.</PDM_IF>
+<PDM_IF "$args.KEEP.cnthandling_list_special_handling_id" != 0>
+    document.write('<input type="hidden" name="QBE.EQ.cnthandling_list.special_handling.id" value="$args.KEEP.cnthandling_list_special_handling_id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forNtfrToCnt" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.att_ntfrlist.ntfr.id" value="$args.QBE.EQ.att_ntfrlist.ntfr.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forMacroToCnt" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.macro_ntf.macro.id" value="$args.QBE.EQ.macro_ntf.macro.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forMgsToCnt" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.mgs_ntf.mgs.id" value="$args.QBE.EQ.mgs_ntf.mgs.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forCntToGrp" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.member_list.member.id" value="$args.QBE.EQ.member_list.member.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forNrtoCnt" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.cenv.nr.id" value="$args.QBE.EQ.cenv.nr.id">');
+    document.write('<input type="hidden" name="QBE.NE.id" value="$args.QBE.NE.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.cr_nf_list.aty_srel.id" != "">
+    docWrite('<input type="hidden" name="QBE.EQ.cr_nf_list.aty_srel.id" value="$args.QBE.EQ.cr_nf_list.aty_srel.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.chg_nf_list.aty_srel.id" != "">
+    docWrite('<input type="hidden" name="QBE.EQ.chg_nf_list.aty_srel.id" value="$args.QBE.EQ.chg_nf_list.aty_srel.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.iss_nf_list.aty_srel.id" != "">
+    docWrite('<input type="hidden" name="QBE.EQ.iss_nf_list.aty_srel.id" value="$args.QBE.EQ.iss_nf_list.aty_srel.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+if ( groupOnly )
+   
+<PDM_MACRO name=sfTextbox hdr="Nazwa grupy" attr=last_name colspan=2 size=40>
+else {
+<PDM_MACRO name=sfTextbox hdr="NRE" attr=zNRE size=20> // 20131016 bmalz @ e-xim : Added
+<PDM_MACRO name=sfTextbox hdr="Nazwisko" attr=last_name size=20>
+<PDM_MACRO name=sfTextbox hdr="Imię" attr=first_name size=20>
+<PDM_MACRO name=sfTextbox hdr="Drugie imię" attr=zmiddle_name_alt size=20>
+}
+<PDM_IF "1" != "$args.KEEP.IsPopUp">
+<PDM_IF "$args.KEEP.ForGrp" == "1" || "$args.KEEP.from_auto_assign_tab" == "1" || "$args.KEEP.type.id" == "2308">
+		searchFilterTextDisabled("Typ kontaktu","type",10, "2308", "Group", "EQ");		
+	
+<PDM_ELSE>
+		searchFilterDropdown("Typ kontaktu","type", ""
+		<PDM_LIST PREFIX=list WHERE=" " FACTORY=ctp>
+		<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.sym","$list.id"</PDM_FMT></PDM_LIST>);
+		searchFilterSetSelected("type","$args.KEEP.type.id", "$args.KEEP.type.sym");
+	
+</PDM_IF>
+<PDM_ELSE>
+	<!-- Hardcode contact type if passed in -->
+	
+<PDM_IF "$args.KEEP.AgtGrp" == "1">
+		document.write('<input type="hidden" name="ADDITIONAL_WHERE" id="ADDITIONAL_WHERE" value=>');
+	
+<PDM_ELIF "" == "$args.KEEP.type.id" && "" == "$args.KEEP.type.sym">
+		searchFilterDropdown("Typ kontaktu","type", ""
+		<PDM_LIST PREFIX=list WHERE=" " FACTORY=ctp>
+		<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.sym","$list.id"</PDM_FMT></PDM_LIST>);
+	
+<PDM_ELSE>
+		<PDM_LIST PREFIX=list WHERE=" " FACTORY=ctp>
+		if ("$list.id" == "$args.KEEP.type.id" || 
+		    '<PDM_FMT ESC_STYLE=C PAD=NO>$list.sym</PDM_FMT>' == '<PDM_FMT ESC_STYLE=C PAD=NO>$args.KEEP.type.sym</PDM_FMT>') 
+			searchFilterTextDisabled("Typ kontaktu","type",10, "$list.id", '<PDM_FMT ESC_STYLE=C PAD=NO>$list.sym</PDM_FMT>', "EQ");
+		</PDM_LIST>
+	
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_IF "$args.KEEP.type.id" == "2308">
+<PDM_MACRO name=sfTextbox hdr="Kod grupy" attr=contact_num size=20>
+<PDM_MACRO name=sfDropdown hdr="Typ Helpdesk" attr="zHelpDeskType">
+<PDM_ELSE>
+<PDM_MACRO name=sfTextbox hdr="Nr kontaktu" attr=contact_num size=20>
+</PDM_IF>
+if ( ! groupOnly ) { 
+	
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=sfTextbox hdr="ID osoby w SAP" attr="sap_personID" size=20>
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="ID użytkownika" attr=userid size=20>
+	searchFilterDropdown("Access Type","access_type", ""
+		<PDM_LIST PREFIX=list WHERE=" " FACTORY=acctyp>
+		<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.sym","$list.id"</PDM_FMT></PDM_LIST>);
+	searchFilterSetSelected("access_type","$args.KEEP.acctyp.id");
+}
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja" attr=location.name factory=loc>
+<PDM_MACRO name=sfLookup hdr="Organizacja" attr=organization.name factory=org>
+<PDM_MACRO name=sfLookup hdr="Departament" attr=dept.name factory=dept>
+<PDM_MACRO name=sfTextbox hdr="Numer telefonu" attr=phone_number size=20>
+<PDM_IF "$prop.MultiTenancy" != "off">
+if ( ! groupOnly )
+{
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Analyst&#39;s Tenant Group" attr=tenant_group>
+}
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var groupOnly = false;
+var msgFoundNone, msgFound1, msgFound, msgFoundMore, msgSelect;
+var searchFilterValue;
+<PDM_IF "$args.KEEP.forResponse" == "1">
+	searchFilterValue = "";
+<PDM_ELSE>
+	searchFilterValue = searchFilterValueOf("type", true);
+</PDM_IF>
+switch (searchFilterValue) {
+   case "2305": // Employee
+      msgFoundNone = "Nie znaleziono użytkowników";
+      msgFound1    = "Znaleziono 1 użytkownika";
+      msgFound     = "Znaleziono %1 użytkowników";
+      msgFoundMore = "Znaleziono %1 użytkowników.  Wyświetlam %2 do %3";
+      msgSelect    = "Click to select desired employee";
+      break;
+   case "2307": // Analyst
+      
+<PDM_IF "$args.in_group_name" != "">
+         msgFoundNone = "Nie znaleziono analityków w grupie $args.in_group_name";
+         msgFound1 = "Znaleziono 1 analityka w grupie $args.in_group_name";
+         msgFound = "Znaleziono %1 analityków w grupie $args.in_group_name";
+         msgFoundMore = "Znaleziono %1 analityków w grupie $args.in_group_name.  Wyświetlam %2 do %3";
+      
+<PDM_ELSE>
+         msgFoundNone = "Nie znaleziono analityków";
+         msgFound1 = "Znaleziono 1 analityka";
+         msgFound = "Znaleziono %1 analityków";
+         msgFoundMore = "Znaleziono %1 analityków.  Wyświetlam %2 do %3";
+      
+</PDM_IF>
+      msgSelect = "Click to select desired analyst";
+      break;
+   case "2308": // Group
+      groupOnly = true;
+      msgFoundNone = "Nie znaleziono grup";
+      msgFound1    = "Znaleziono 1 grupę";
+      msgFound     = "Znaleziono %1 grup";
+      msgFoundMore = "Znaleziono %1 grup.  Wyświetlam %2 do %3";
+      msgSelect    = "Click to select desired group";
+      break;
+   case "2310": // Customer
+      msgFoundNone = "No customers found";
+      msgFound1    = "1 customer found";
+      msgFound     = "%1 customers found";
+      msgFoundMore = "%1 customers found.  Wyświetlam %2 do %3";
+      msgSelect    = "Click to select desired customer";
+      break;
+   default: // Contacts
+      if ("$args.KEEP.AgtGrp" == "1")
+      {
+         msgFoundNone = "No assignees found";
+         msgFound1    = "1 assignee found";
+         msgFound     = "%1 assignees found";
+         msgFoundMore = "%1 assignees found.  Wyświetlam %2 do %3";
+         msgSelect    = "Click to select desired assignee";
+      }
+      else
+      {
+         msgFoundNone = "No contacts found";
+         msgFound1    = "1 contact found";
+         msgFound     = "%1 contacts found";
+         msgFoundMore = "%1 contacts found.  Wyświetlam %2 do %3";
+         msgSelect    = "Click to select desired contact";
+      }
+      break;
+}
+function showLoc(value)
+{
+	var lochtml;
+	lochtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + loc_persid + "')\">" + value + "</A>" ;
+	rs.data(lochtml);
+}
+function showEmail(value)
+{
+    var emailhtml = "";
+    if (value != "") {
+        emailhtml = "<a class='record' href=\"mailto:" + value + "\">" + value + "</a>" ;
+    }
+    rs.data(emailhtml);
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="NRE" attr=zNRE startrow="no"> // 20131016 bmalz @ e-xim : added
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=combo_name exportFmt=ShowLink link=yes startrow="no">
+<PDM_IF "$args.KEEP.forNrtoCnt" != "1">
+  <PDM_MACRO name=lsWrite both=yes text="if (groupOnly) {">
+  <PDM_MACRO name=lsWrite text="var loc_persid = \"@{list.location.persistent_id:}\";">
+  
+<PDM_MACRO name=lsCol hdr="Lokalizacja" attr=location fmtfunc=showLoc startrow="no">
+<PDM_MACRO name=lsCol hdr="Numer" attr=contact_num startrow="no">
+  <PDM_MACRO name=lsWrite both=yes text="}">
+  <PDM_MACRO name=lsWrite both=yes text="else {">
+  //PDM_MACRO name=lsCol hdr="Typ kontaktu" attr=type> // 20131016 bmalz @ e-xim : removed
+  //PDM_MACRO name=lsCol hdr="Typ dostępu" attr=access_type> // 20131016 bmalz @ e-xim : removed
+  
+<PDM_IF "$env.NX_SAP_GUID" == "">
+    //PDM_MACRO name=lsCol hdr="Nr kontaktu" attr=contact_num> // 20131016 bmalz @ e-xim : removed
+  
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Stanowisko" attr=position startrow="no"> // 20131016 bmalz @ e-xim : added
+  
+<PDM_MACRO name=lsCol hdr="Organization" attr=organization startrow="no"> // 20131016 bmalz @ e-xim : added
+  
+<PDM_MACRO name=lsCol hdr="Dział" attr=organization.org_num startrow="no"> // 20131016 bmalz @ e-xim : added
+  
+<PDM_MACRO name=lsCol hdr="ID użytkownika" attr=userid startrow="no">
+<PDM_IF "$prop.MultiTenancy" != "off">
+<PDM_MACRO name=lsCol hdr="Analyst&#39;s Tenant Group" attr=tenant_group startrow="no">
+</PDM_IF>
+  <PDM_MACRO name=lsWrite both=yes text="}">
+  
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=lsCol hdr="Nr kontaktu" attr=contact_num startrow="no">
+<PDM_MACRO name=lsCol hdr="ID osoby w SAP" attr=sap_personID justify=left startrow="no">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Numer telefonu" attr=phone_number startrow="no">
+<PDM_IF "$args.KEEP.forNrtoCnt" == "1">
+<PDM_MACRO name=lsCol hdr="e-mail" attr=email_address fmtfunc=showEmail startrow="no">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag startrow="no">
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_cnt.htmpl ASPEN.14 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

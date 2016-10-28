@@ -1,0 +1,113 @@
+﻿<PDM_IF 0>
+	Created: 201305 bmalz @ e-xim
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="home.htmpl">
+<html lang="pl"><HEAD>
+<script>
+var form_title;
+var CategoryRoot; // 20130926 bmalz @ e-xim
+if ('$args.CONTRACT' == "") {
+	form_title = "Moje zgłoszenia";
+} else {
+	form_title = '$args.CONTRACT'.split('.').pop();
+	CategoryRoot = '$args.CONTRACT'.split('.')[0];
+}
+</script>
+
+<style>
+	#linkmenu.fixed {
+	  position: fixed;
+	  padding-top: 1px;
+	  top: 0px;
+	}
+	
+	#ScoreBoard.fixed {
+	  position: fixed;
+	  top: 30px;
+	  width: 200px;
+	}
+	
+	#LocalizationBar.fixed {
+	  position: fixed;
+	}
+} 
+</style>
+</style>
+<PDM_INCLUDE FILE="std_head.htmpl">
+		<script language="JavaScript" src="$CAisd/scripts/cst_fldrtree.js"></script>		
+		<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>	
+		<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>	
+		<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/GUI_favs.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/GUI_helpers.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/exim_mods.js"></script>
+
+		<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+	<script type="text/javascript">
+		//window.onresize = doResize;
+		jq(document).ready(function () {
+			jq('#linkmenu').addClass('fixed');
+		});
+		
+		function doResize() {
+			jq('.divcat').each(function () {
+				jq(this).css("height", jq(this).parent().css("height"));
+				jq(this).css("max-height", jq(this).parent().css("height"));
+			});
+		};
+	</script>
+	</head>
+	
+	<body class=emp onload="">
+	 <PDM_INCLUDE FILE=self_service_include.htmpl status=0>
+<PDM_INCLUDE FILE="std_body.htmpl">
+
+<table class="toolbar_container" id="toolbarTable" style="border-bottom: 1px solid gray; width: 100%; position: fixed; top: 15px;">
+<TBODY>
+	<TR>
+		<TD style="height: 15px; background-color: white;" colspan="4">&nbsp;</TD>
+	</TR>
+	<TR vAlign=bottom>
+		<TD style="width: 15px;">&nbsp;</TD>
+		<TD class=tab_container>
+			<TABLE class=generic_table>
+			<TBODY>
+				<TR>
+					<TD id=tableft0 class=headertab_unselected_left_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+					<TD id=tabmiddle0 class=headertab_unselected_center width="100%" noWrap><A tabIndex=1 onmouseover="window.status='Katalog usług';return true;" onmouseout=window.status=window.defaultStatus; id=tabhref0 class=headertab_text href="javascript:ShowServiceCatalog();"><SPAN><U>K</U>atalog&nbsp;usług</SPAN></A></TD>
+					<TD id=tabright0 class=headertab_unselected_right_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+				</TR>
+			</TBODY>
+			</TABLE>
+		</TD>
+		<TD class=tab_container>
+			<TABLE class=generic_table>
+			<TBODY>
+				<TR>
+					<TD id=tableft1 class=headertab_selected_left_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+					<TD id=tabmiddle1 class=headertab_selected_center width="100%" noWrap><A tabIndex=1 onmouseover="window.status='Moje zgłoszenia';return true;" onmouseout=window.status=window.defaultStatus; id=tabhref1 class=headertab_text href="javascript:ShowMyItems();"><SPAN><U>M</U>oje&nbsp;zgłoszenia</SPAN></A></TD>
+					<TD id=tabright1 class=headertab_selected_right_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+				</TR>
+			</TBODY>
+			</TABLE>
+		</TD>
+		<TD class=tab_container>
+			<TABLE class=generic_table>
+			<TBODY>
+				<TR>
+					<TD id=tableft2 class=headertab_unselected_left_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+					<TD id=tabmiddle2 class=headertab_unselected_center width="100%" noWrap><A tabIndex=3 onmouseover="window.status='Moje akceptacje';return true;" onmouseout=window.status=window.defaultStatus; id=tabhref2 class=headertab_text href="javascript:ShowMyTasks();"><SPAN><U>M</U>oje&nbsp;akceptacje</SPAN></A></TD>
+					<TD id=tabright2 class=headertab_unselected_right_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+				</TR>
+			</TBODY>
+			</TABLE>
+		</TD>
+		<TD style="width: 100%; background-color: white;">&nbsp;</TD>
+	</TR>
+</TBODY>
+</table>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+	</body>
+	
+</html>

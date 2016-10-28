@@ -1,0 +1,480 @@
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit factory=KD preview=NBTAB="kd_permissions_tab">
+<form id=frmPermission name=frmPermission>
+<script type="text/javascript" src="$CAisd/scripts/kt_permissions.js"></script>
+<script>
+var arrParentRead = new Array;
+var arrParentWrite = new Array;
+var arrSelectedRead = new Array;
+var arrSelectedWrite = new Array;
+var nCount = 0;
+var mCount = 0;
+var iCount = 0;
+var jCount = 0;
+var bParentAllRead = 0;
+var bParentAllWrite = 0;
+var bAllRead = 0;
+var bAllWrite = 0;
+var bGroupExist = 0;
+var bIsEdit = "$prop.IsEdit";
+var iType = "$prop.type";
+var iParentID = "$prop.iParentID";
+var iKcatID = "$prop.kcatID";
+var iFolderID = "$prop.folderID";
+var iInheritPermission = $prop.iInheritPermission;
+var m_lPgroupType = 1;
+var m_lParentPgroupType = 1;
+var m_iInheritPresented = 0;
+var m_bRadioChecked = 0;
+m_lCurrRadio = 0;
+
+<PDM_IF $prop.iInheritPermission != 0>
+    m_lCurrRadio = 0;
+<PDM_ELSE>
+    m_lCurrRadio = 1;
+</PDM_IF>
+
+<PDM_IF "$prop.lPrimaryPgroupType" != "" && "$prop.lPrimaryPgroupType" != "0">
+	m_lParentPgroupType = $prop.lPrimaryPgroupType;
+</PDM_IF>
+<PDM_IF "$prop.sPrimaryRead" == "0">
+    bParentAllRead = 1;
+<PDM_ELSE>
+	<PDM_IF "$prop.lPrimaryPgroupType" == "2">
+		<PDM_LIST PREFIX=list FACTORY=role WHERE="id in ($prop.sPrimaryRead)" ESC_STYLE=C>
+		    arrParentRead[nCount++] = '<PDM_FMT ESC_STYLE=C>$list.id</PDM_FMT>';
+	        arrParentRead[nCount++] = '<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>';    
+		</PDM_LIST>
+	<PDM_ELSE>
+		<PDM_LIST PREFIX=list FACTORY=grp WHERE="id in ($prop.sPrimaryRead)" ESC_STYLE=C>
+			arrParentRead[nCount++] = '<PDM_FMT ESC_STYLE=C>$list.id</PDM_FMT>';
+			arrParentRead[nCount++] = '<PDM_FMT ESC_STYLE=C>$list.last_name</PDM_FMT>';    
+		</PDM_LIST>
+	</PDM_IF>
+</PDM_IF>
+
+<PDM_IF "$prop.sPrimaryWrite" == "0">
+    bParentAllWrite = 1;
+<PDM_ELSE>
+	<PDM_IF "$prop.lPrimaryPgroupType" == "2">
+		<PDM_LIST PREFIX=list2 FACTORY=role WHERE="id in ($prop.sPrimaryWrite)" ESC_STYLE=C>
+			arrParentWrite[mCount++] = '<PDM_FMT ESC_STYLE=C>$list2.id</PDM_FMT>';
+			arrParentWrite[mCount++] = '<PDM_FMT ESC_STYLE=C>$list2.name</PDM_FMT>';    
+		</PDM_LIST>
+	<PDM_ELSE>
+		<PDM_LIST PREFIX=list2 FACTORY=grp WHERE="id in ($prop.sPrimaryWrite)" ESC_STYLE=C>
+			arrParentWrite[mCount++] = '<PDM_FMT ESC_STYLE=C>$list2.id</PDM_FMT>';
+	        arrParentWrite[mCount++] = '<PDM_FMT ESC_STYLE=C>$list2.last_name</PDM_FMT>';    
+		</PDM_LIST>
+	</PDM_IF>
+</PDM_IF>
+
+<PDM_IF "$prop.lPgroupType" != "" && "$prop.lPgroupType" != "0">
+	m_lPgroupType = $prop.lPgroupType;
+</PDM_IF>
+<PDM_IF "$prop.sRead" == "0">
+    bAllRead = 1;
+<PDM_ELSE>
+	<PDM_IF "$prop.lPgroupType" == "2">
+	    <PDM_LIST PREFIX=list3 FACTORY=role WHERE="id in ($prop.sRead)" ESC_STYLE=C>
+			arrSelectedRead[iCount++] = '<PDM_FMT ESC_STYLE=C>$list3.id</PDM_FMT>';
+			arrSelectedRead[iCount++] = '<PDM_FMT ESC_STYLE=C>$list3.name</PDM_FMT>';    
+		</PDM_LIST>
+	<PDM_ELSE>
+	    <PDM_LIST PREFIX=list3 FACTORY=grp WHERE="id in ($prop.sRead)" ESC_STYLE=C>
+		    arrSelectedRead[iCount++] = '<PDM_FMT ESC_STYLE=C>$list3.id</PDM_FMT>';
+			arrSelectedRead[iCount++] = '<PDM_FMT ESC_STYLE=C>$list3.last_name</PDM_FMT>';    
+	    </PDM_LIST>
+	</PDM_IF>
+</PDM_IF>
+
+<PDM_IF "$prop.sWrite" == "0">
+    bAllWrite = 1;
+<PDM_ELSE>
+    <PDM_IF "$prop.lPgroupType" == "2">
+		<PDM_LIST PREFIX=list4 FACTORY=role WHERE="id in ($prop.sWrite)" ESC_STYLE=C>
+			arrSelectedWrite[jCount++] = '<PDM_FMT ESC_STYLE=C>$list4.id</PDM_FMT>';
+			arrSelectedWrite[jCount++] = '<PDM_FMT ESC_STYLE=C>$list4.name</PDM_FMT>';    
+		</PDM_LIST>
+	<PDM_ELSE>
+		<PDM_LIST PREFIX=list4 FACTORY=grp WHERE="id in ($prop.sWrite)" ESC_STYLE=C>
+			arrSelectedWrite[jCount++] = '<PDM_FMT ESC_STYLE=C>$list4.id</PDM_FMT>';
+			arrSelectedWrite[jCount++] = '<PDM_FMT ESC_STYLE=C>$list4.last_name</PDM_FMT>';    
+		</PDM_LIST>
+	</PDM_IF>
+</PDM_IF>
+
+var permSource = "";
+var permSource_loc = "";
+switch (iType)
+{
+	case "0":		// Category
+		permSource = "Category Permission Source";
+		permSource_loc = "Category Permission Source";
+		break;
+	case "1":		// Knowledge Document
+		permSource = "Knowledge Document Permission Source";
+		permSource_loc = "Knowledge Document Permission Source";
+		break;
+	case "2":		// Attachment Folder
+		permSource = "Attachment Folder Permission Source";
+		permSource_loc = "Attachment Folder Permission Source";
+		break;
+}
+
+var optTitle0 = "Inherit from Parent";
+var optTitle1 = "Control by Group";
+var optTitle2 = "Control by Role";
+var optT0_loc = "Inherit from Parent";
+var optT1_loc = "Control by Group";
+var optT2_loc = "Control by Role";
+
+var optTitleGroup = "Groups";
+var optTitleRole = "Roles";
+var optTGroup_loc = "Groups";
+var optTRole_loc = "Roles";
+
+// Set up hotkeys for form navigation
+
+var grantReadTitle = "Grant Read Permissions to Everyone";
+var grantWriteTitle = "Grant Write Permissions to Everyone";
+var grantRT_loc = "Grant Read Permissions to Everyone"; 
+var grantWT_loc = "Grant Write Permissions to Everyone"; 
+var groupAvail = "Available Groups";
+var groupSel = "Selected Groups";
+var groupA_loc = "Available Groups";
+var groupS_loc = "Selected Groups";
+var roleAvail = "Available Roles";
+var roleSel = "Selected Roles";
+var roleA_loc = "Available Roles";
+var roleS_loc = "Selected Roles";
+if (!nonLatinFlag)
+{
+	permSource_loc = permSource;
+    optT0_loc = optTitle0;
+    optT1_loc = optTitle1;
+    optT2_loc = optTitle2;
+    grantRT_loc = grantReadTitle;
+    grantWT_loc = grantWriteTitle;
+    groupA_loc = groupAvail;
+    groupS_loc = groupSel;
+    var roleA_loc = roleAvail;
+    var roleS_loc = roleSel;
+}
+var actkey0 = registerActionKey("", optT0_loc, setRadioButton,
+                                "frmPermission", "optInherit", 0);
+var actkey1 = registerActionKey("", optT1_loc, setRadioButton,
+                                "frmPermission", "optInherit", 1);
+var actkey2 = registerActionKey("", optT2_loc, setRadioButton,
+                                "frmPermission", "optInherit", 2);
+var actkeyGrantRead = registerActionKey("", grantRT_loc, setCheckbox,
+                                        "frmPermission", "chkGrantReadGroup");
+var actkeyGrantWrite = registerActionKey("", grantWT_loc, setCheckbox,
+                                         "frmPermission", "chkGrantWriteGroup");
+var actkeyPermSource = registerActionKey("", permSource_loc, setFocus, "tblControl");                                         
+var actkeyGroupAvail = registerActionKey("", groupA_loc, setFocus, "lstGroups");
+var actkeyGroupSel = registerActionKey("!S", groupS_loc, setFocus, "WriteGroup");
+var grantReadText = fmtLabelWithActkey( grantReadTitle, actkeyGrantRead );
+var grantWriteText = fmtLabelWithActkey( grantWriteTitle, actkeyGrantWrite );
+if ( actkeyGroupAvail != "" )
+  groupAvail = fmtLabelWithActkey( groupAvail, actkeyGroupAvail );
+if ( actkeyGroupSel != "" )
+  groupSel = fmtLabelWithActkey( groupSel, actkeyGroupSel );
+</script>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center">
+			<span  class="page_section_header_text" id=spnPermSource><script>document.write(permSource);</script></span>
+		</td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+
+<table width=99% border=0><tr><td valign="top">
+	<table border="0" cellspacing="0" cellpadding="0" id=tblControl, name=tblControl>
+		<tr>
+			<td
+			<PDM_IF "$prop.IsEdit" == "edit">
+				width=60%
+			<PDM_ELSE>
+				width=0%
+			</PDM_IF>>
+				<div style='display:none' id='divInherit' name='divInherit'>
+					<script type="text/javascript">
+					<PDM_IF $prop.type == 0>
+						writeRadioButton(0, optTitle0, actkey0);
+						<PDM_IF $prop.iParentID != 1>
+							m_iInheritPresented = 1;
+						</PDM_IF>
+					</PDM_IF>
+	                  
+					<PDM_IF $prop.type == 1>
+						writeRadioButton(0, optTitle0, actkey0);
+						m_iInheritPresented = 1;
+					</PDM_IF>
+	                  
+					<PDM_IF $prop.type == 2>
+						<PDM_IF $prop.iParentID != 0>
+							writeRadioButton(0, optTitle0, actkey0);
+							m_iInheritPresented = 1;
+						</PDM_IF>
+					</PDM_IF>
+					</script>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td
+			<PDM_IF "$prop.IsEdit" == "edit">
+				width=60%
+			<PDM_ELSE>
+				width=0%
+			</PDM_IF>>
+				<div style='display:none' id='divByGroup' name='divByGroup'>
+				<script type="text/javascript">
+					<PDM_IF $prop.type == 0>
+							writeRadioButton(1, optTitle1, actkey1);
+					</PDM_IF>
+	            
+					<PDM_IF $prop.type == 1>
+						writeRadioButton(1, optTitle1, actkey1);
+					</PDM_IF>
+	                        
+					<PDM_IF $prop.type == 2>
+						<PDM_IF $prop.iParentID == 0>
+							document.write("&nbsp;&nbsp;<span class='label'>" + optTitle1 + "</span><br>");
+						<PDM_ELSE>
+							writeRadioButton(1, optTitle1, actkey1);
+						</PDM_IF>
+					</PDM_IF>
+				</script>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td
+			<PDM_IF "$prop.IsEdit" == "edit">
+				width=60%
+			<PDM_ELSE>
+				width=0%
+			</PDM_IF>>
+				<div style='display:none' id='divByRole' name='divByRole'>
+				<script type="text/javascript">
+					<PDM_IF $prop.type == 0>
+						writeRadioButton(2, optTitle2, actkey2);
+					</PDM_IF>
+	            
+					<PDM_IF $prop.type == 1>
+						writeRadioButton(2, optTitle2, actkey2);
+					</PDM_IF>
+				</script>
+				</div>
+			</td>
+		</tr>
+	</table>
+</td><td valign="top">
+	<table border="0" cellspacing="0" cellpadding="0">
+		<tr><td
+        <PDM_IF "$prop.IsEdit" == "edit">
+             width=40%
+         <PDM_ELSE>
+             width=100%
+         </PDM_IF>>
+            <div style='display:none' id='divGrantWriteGroup' name='divGrantWriteGroup'>
+                <script type="text/javascript">writeCheckbox("chkGrantWriteGroup", 1, grantWriteTitle, actkeyGrantWrite);</script>
+            </div>
+        </td></tr>
+		<tr><td
+        <PDM_IF "$prop.IsEdit" == "edit">
+             width=40%
+         <PDM_ELSE>
+             width=100%
+         </PDM_IF>>
+            <div style='display:none' id='divGrantReadGroup' name='divGrantReadGroup'>
+                <script type="text/javascript">writeCheckbox("chkGrantReadGroup", 0, grantReadTitle, actkeyGrantRead);</script>
+            </div>                            
+        </td>
+	</table>
+</td></tr>
+</table>
+
+<table width=99%>
+<tr>
+    <PDM_IF "$prop.IsEdit" == "edit">
+        <td colspan=2 valign="top" width=100%>
+            <table cellspacing=0 cellpadding=0 width="100%" border=0 height=455px>
+                <tr>
+                    <td>
+						<table width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+								<td class="page_section_header_center">
+									<span  class="page_section_header_text" id=spnAvailGroups><script>document.write(groupAvail);</script></span>
+									<span  class="page_section_header_text" id=spnAvailRoles style="display:none"><script>document.write(roleAvail);</script></span>
+								</td>
+								<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+							</tr>
+						</table>
+                    </td>
+                </tr>
+                <tr valign="top" align="left">
+                    <td class="page_section">
+                        <div class=content>
+                            <table width=98% border=0 align="left">
+                                <tr>
+                                    <td colspan=1 height=415px>
+										<iframe frameborder=0 tabindex=3 scrolling=no id=grpList name=grpList style="height:100%;width:100%;overflow:auto;"></iframe>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                <tr>            
+            </table>
+        </td>
+        <td colspan=1 valign="top" align="center">
+            <br><br><br><br>
+            <table>
+                <tr>
+                    <td>
+                        <script>
+                            ImgBtnSetDefaultTabIndex(120);
+                            ImgBtnRow();
+                            ImgBtnCreate("btnAddWrite", ">", "AddGroup(0)", true, 70,
+                                         "Add selected groups to groups with write permissions");
+                            ImgBtnRow();
+                            ImgBtnCreate("btnAddAllWrite", ">>", "AddGroup(0, true)", true, 70,
+                                         "Add all groups to groups with write permssions");
+                            ImgBtnRow();
+                            ImgBtnCreate("btnRemoveWrite", "<", "RemoveGroup(0)", true, 70,
+                                         "Remove selected groups from groups with write permissions");
+                            ImgBtnRow();
+                            ImgBtnCreate("btnRemoveAllWrite", "<<", "RemoveGroup(0, true)", true, 70,
+                                         "Remove all groups from groups with write permissions");
+                            ImgBtnEndRow();
+                        </script>
+                    </td>
+                </tr>
+            </table>
+            <br><br><br><br><br><br>
+            <table>
+                <tr valign="center">
+                    <td  valign="center">
+                        <script>
+                            ImgBtnSetDefaultTabIndex(130);
+                            ImgBtnRow();
+                            ImgBtnCreate("btnAddRead", ">", "AddGroup(1)", true, 70,
+                                         "Add selected groups to groups with read permissions");
+                            ImgBtnRow();
+                            ImgBtnCreate("btnAddAllRead", ">>", "AddGroup(1, true)", true, 70,
+                                         "Add all groups to groups with read permssions");
+                            ImgBtnRow();
+                            ImgBtnCreate("btnRemoveRead", "<", "RemoveGroup(1)", true, 70,
+                                         "Remove selected groups from groups with read permissions");
+                            ImgBtnRow();
+                            ImgBtnCreate("btnRemoveAllRead", "<<", "RemoveGroup(1, true)", true, 70,
+                                         "Remove all groups from groups with read permissions");
+                            ImgBtnEndRow();
+                            ImgBtnSetDefaultTabIndex("");
+                        </script>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </PDM_IF>
+    <td colspan=1 valign="top">
+        <PDM_IF "$prop.IsEdit" == "edit">
+        <table cellspacing=0 cellpadding=0 width="73%" border=0 height="455px">
+        <PDM_ELSE>
+        <table cellspacing=0 cellpadding=0 border=0 height="455px">
+        </PDM_IF>
+            <tr>
+                <td>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+							<td class="page_section_header_center">
+								<span  class="page_section_header_text" id=spnSelectedGroups><script>document.write(groupSel);</script></span>
+								<span  class="page_section_header_text" id=spnSelectedRoles style="display:none"><script>document.write(roleSel);</script></span>
+							</td>
+							<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+						</tr>
+                    </table>
+                </td>
+            </tr>
+            <tr valign="top">
+                <td class="page_section">
+                    <div class=content>
+                        <table width="95%"  border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="100%" valign="top">
+                                    <table cellspacing=0 cellpadding=0 width="99%" border=0>
+                                        <tbody>
+                                            <tr>
+                                                <td nowrap>
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td width="4" height="20" class="groupbox_header_left"><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></td>
+															<td class="groupbox_header_center">
+																<span class="groupbox_header_text" id=spnGroupsWrite><label for="readGroup">Groups with Write Permission</label></span>
+																<span class="groupbox_header_text" id=spnRolesWrite style="display:none"><label for="readGroup">Roles with Write Permission</label></span>
+															</td>
+                                                            <td width="4" height="20" class="groupbox_header_right"><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class=groupbox_content valign="top" align="left">
+                                                    <select id=writeGroup name=writeGroup tabindex=125 size=12 multiple=true onDblClick='RemoveGroup(0)' style='width:180px'>    
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>    
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td width="100%" valign="top">
+                                    <table cellspacing=0 cellpadding=0 width="99%" border=0>
+                                        <tbody>
+                                            <tr>
+                                                <td nowrap>
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td width="4" height="20" class="groupbox_header_left"><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></td>
+                                                            <td class="groupbox_header_center">
+																<span class="groupbox_header_text" id=spnGroupsRead><label for="readGroup">Groups with Read Permission</label></span>
+																<span class="groupbox_header_text" id=spnRolesRead style="display:none"><label for="readGroup" >Roles with Read Permission</label></span>
+															</td>
+                                                            <td width="4" height="20" class="groupbox_header_right"><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class=groupbox_content valign="top" align="left">
+                                                    <select id=readGroup name=readGroup tabindex=135 size=12 multiple=true onDblClick='RemoveGroup(1)' style='width:180px'>    
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>    
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+</table>
+</form>
+<PDM_IF 0>
+@(#)$Id: kt_permissions.htmpl ASPEN.1 2010/12/16 09:15:56 laivi02 Exp $
+</PDM_IF>

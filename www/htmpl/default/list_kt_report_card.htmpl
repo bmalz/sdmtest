@@ -1,0 +1,1256 @@
+<PDM_IF 0>
+list_kt_report_card.htmpl
+WHEN PRESENTED:
+    When we need to display the knowledge report card statistics screen
+INTENT:
+    Display the Knowledge report card statistics
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Knowledge Report Card";
+var hdrTitleList = "Knowledge Report Card";
+var m_reportCardXML = "";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+</script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="Javascript">
+var sReportCardMode = "My Documents";
+var m_pastDays = -1;
+if ("$args.KEEP.PAST_DAYS" != "") {
+	m_pastDays = $args.KEEP.PAST_DAYS-0;
+    if (typeof m_pastDays == "undefined" || m_pastDays == 0)
+		m_pastDays = -1;
+}
+var m_section = "MyDocs";
+if ("$args.KEEP.SECTION" != "") {
+	m_section = "$args.KEEP.SECTION";
+}
+
+var m_krcType = "$args.KEEP.KRC_TYPE";
+var m_managerFlag = "$args.KEEP.MANAGER_FLAG";
+var m_categoryOwnerFlag = "$args.KEEP.CATEGORY_OWNER_FLAG";
+var m_persid = "$args.KEEP.PERSID";
+var m_id = "$args.KEEP.ID";
+var m_name = "$args.KEEP.NAME";
+var m_orgList = "$args.KEEP.ORGLIST";
+var m_htmlOverallStats = "";
+if (typeof m_orgList == "undefined" || m_orgList == "") {
+	var last_name;
+	var first_name;
+	var name;
+	<PDM_LIST PREFIX=list WHERE="id=U'$cst.id'" FACTORY="cnt">	 
+		last_name = '$list.last_name';
+		first_name = '$list.first_name';
+		name = "";
+		if (first_name == "")
+			name = last_name;
+		else if (last_name == "")
+			name = first_name;
+		else
+			name = last_name + ", " + first_name
+		 
+		m_orgList = "$list.id;" + name;
+	</PDM_LIST>
+}
+
+function loadUI(arrValues) {
+	if (typeof arrValues == "undefined" || typeof arrValues[0] == "undefined")
+		return;
+		
+	var reportCardDiv = document.getElementById("report_card");
+	var html = "";
+
+	var myDocs = false;
+	var myCat = false;
+	var myOrg = false;
+	var displayAggOrgStats = false;
+	var index = 0;	// by default start displaying stats from index 0
+
+	if (m_krcType == "1") {
+		// Display the report card in My Documents mode
+		myDocs = true;
+		sReportCardMode = "My Documents";
+	}
+	else if (m_krcType == "2") {
+		// Display the report card in My Categories mode
+		myCat = true;
+		sReportCardMode = "My Categories";
+	}
+	else if (m_krcType == "3") {
+		// Display the report card in My Organization mode
+		myOrg = true;
+		sReportCardMode = "My Organization";
+		
+		if (typeof arrValues[0]["MY_ORG_STATS"] != "undefined")
+			displayAggOrgStats = true;
+	}
+										
+	reportCardModeSpan = document.getElementById("report_card_mode");
+	reportCardModeSpan.innerHTML = sReportCardMode;
+	// Display aggregate organization statistics
+	if (displayAggOrgStats) {
+		// Add Mouseover Preview div to this section
+		if (ahdtop.cfgUserType == "analyst" && ! ahdtop.cstDisablePreviews) {
+			mo_preview_def_obj = new mo_preview(draggable_option, resizable_option);
+			html += moPreviewHTML();
+		}
+
+		html += "<table width=\"100%\" class=\"table gn_container_no_border\" cellpadding=\"0\" cellspacing=\"1\">";
+		html += "<tr class=\"table_column_header_background table_column_header_text gn_text_small\">";
+		html += "<th width=\"20%\">&nbsp;</th>";
+		if ( m_section == "MyDocs" )
+		{
+			html += "<th>Documents Submitted</th>";
+			html += "<th>Time to Publish</th>";
+			html += "<th>Documents Published</th>";
+			html += "<th>Documents Retired</th>";
+			html += "<th>Documents Accepted by Others as Solutions</th>";
+			html += "<th>Hits</th>";
+			html += "<th>Vote Count</th>";
+			html += "<th>Average Vote</th>";
+			html += "<th>Solution Count</th>";
+		}
+		else if ( m_section == "Reuse" )
+		{
+			html += "<th>Tickets</th>";
+			html += "<th>Tickets with Knowledge, Submitted or Accepted</th>";
+			html += "<th>Solutions Submitted from Tickets</th>";
+			html += "<th>Accepted Solutions, Authored by Others</th>";
+			html += "<th>Tickets had Search Activities</th>";
+			html += "<th>Self-Service Count</th>";
+		}
+		else if ( m_section == "Comments" )
+		{
+			html += "<th>My Comments</th>";
+			html += "<th>Time to Fix</th>";
+			html += "<th>Comments on my Documents</th>";
+		}
+		html += "</tr>";				
+		
+		html += "<tr class=\"table_row data gn_content_center\">";		
+		html += "<td width=\"25%\">";
+		html += "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" class=\"gn_container_no_border\">";
+		html += "<tr>";
+		html += "<td align=\"left\"><b> My Organization Statistics</b></td>";				
+		html += "</tr>";
+		html += "</table>";
+		html += "</td>";
+		
+		if ( m_section == "MyDocs" )
+		{
+			html += "<td>" + arrValues[0]["DOCUMENTS_SUBMITTED"] + "</td>";
+			html += "<td>" + getAvgTime(arrValues[0]["TIME_TO_PUBLISH"], arrValues[0]["DOCUMENTS_PUBLISHED"]) + "</td>";
+			html += "<td>" + arrValues[0]["DOCUMENTS_PUBLISHED"] + "</td>";
+			html += "<td>" + arrValues[0]["DOCUMENTS_RETIRED"] + "</td>";											
+			html += "<td>" + arrValues[0]["LINKED_KNOWLEDGE_BY_OTHERS"] + "</td>";											
+			html += "<td>" + arrValues[0]["TOTAL_HITS"] + "</td>";
+			html += "<td>" + arrValues[0]["TOTAL_VOTES"] + "</td>";
+			html += "<td>" + getAvgRatingText(arrValues[0]["AVG_RATING"], arrValues[0]["TOTAL_VOTES"]) + "</td>";
+			html += "<td>" + arrValues[0]["TOTAL_SOLUTION_COUNT"] + "</td>";
+		}
+		else if ( m_section == "Reuse" )
+		{
+			html += "<td>" + arrValues[0]["CLOSED_TICKETS"] + "</td>";
+			html += "<td>" + arrValues[0]["TICKETS_WITH_KNOWLEDGE"] + "</td>";
+			html += "<td>" + arrValues[0]["KNOWLEDGE_SUBMIT_FROM_TICKET"] + "</td>";
+			html += "<td>" + arrValues[0]["LINKED_KNOWLEDGE_BY_ME"] + "</td>";
+			html += "<td>" + arrValues[0]["TICKETS_HAD_SEARCH_ACTIVITIES"] + "</td>";
+			html += "<td>" + arrValues[0]["USER_SLV_CNT"] + "</td>";
+		}
+		else if ( m_section == "Comments" )
+		{
+			html += "<td>" + arrValues[0]["MY_COMMENTS"] + "</td>";
+			html += "<td>" + getAvgTime(arrValues[0]["TIME_TO_FIX"], arrValues[0]["FLAGS_FIXED"]) + "</td>";
+			html += "<td>" + arrValues[0]["COMMENTS_ON_MY_DOCUMENTS"] + "</td>";
+		}
+		html += "</tr>";
+		html += m_htmlOverallStats;
+		html += "</table>";
+		html += "</br>";
+					
+		index = 1;	// Start displaying report card stats on index 1
+	}
+		
+	html += "<table width=\"100%\" class=\"table gn_container_no_border\" cellpadding=\"0\" cellspacing=\"1\" >";
+	html += "<tr class=\"table_column_header_background table_column_header_text gn_text_small\">";
+	
+	if (myCat || myOrg)
+		html += "<th width=\"20%\">Name</th>";
+	else
+		html += "<th width=\"20%\">&nbsp;</th>";	
+
+	if (myCat)
+	{
+		html += "<th>Documents</th>";
+		html += "<th>Documents Submitted</th>";
+		html += "<th>Documents Published</th>";
+		html += "<th>Hits</th>";			
+		html += "<th>Vote Count</th>";
+		html += "<th>Average Vote</th>";
+		html += "<th>Solutions Accepted</th>";
+		html += "<th>Solution Count</th>";
+		html += "<th>Self-Service Count</th>";
+	}
+	else
+	{
+		if ( m_section == "MyDocs" )
+		{
+			html += "<th>Documents Submitted</th>";
+			html += "<th>Time to Publish</th>";
+			html += "<th>Documents Published</th>";
+			html += "<th>Documents Retired</th>";
+			html += "<th>Documents Accepted by Others as Solutions</th>";
+			html += "<th>Hits</th>";
+			html += "<th>Vote Count</th>";
+			html += "<th>Average Vote</th>";
+			html += "<th>Solution Count</th>";
+		}
+		else if ( m_section == "Reuse" )
+		{
+			html += "<th>Tickets</th>";
+			html += "<th>Tickets with Knowledge, Submitted or Accepted</th>";
+			html += "<th>Solutions Submitted from Tickets</th>";
+			html += "<th>Accepted Solutions, Authored by Others</th>";
+			html += "<th>Tickets had Search Activities</th>";
+			html += "<th>Self-Service Count</th>";
+		}
+		else if ( m_section == "Comments" )
+		{
+			html += "<th>My Comments</th>";
+			html += "<th>Time to Fix</th>";
+			html += "<th>Comments on my Documents</th>";
+		}
+	}	
+	html += "</tr>";
+							
+	for(var i = index; i < arrValues.length; i++) {		
+		
+		if ((i % 2) == 0)
+		{
+		   html += "<tr class=\"table_row data gn_content_center\">";
+		}
+		else
+		{
+		   html += "<tr class=\"table_banded_row data gn_content_center\">";
+		}
+			
+		
+		if (myCat || myOrg) {
+			var name;
+			var id;
+			if (m_name == "") {
+				name = arrValues[i]["NAME"];
+				id = arrValues[i]["ID"];
+			}
+			else {
+				name = m_name;
+			}
+			
+			var krcType;				
+			if (myCat)
+				krcType = "2";
+			else
+				krcType = "3";
+				
+			html += "<td width=\"30%\">";
+			html += "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" class=\"gn_container_no_border\">";
+			html += "<tr>";
+			
+			if (m_managerFlag == "1") {
+				html += "<td width=\"80%\"  align=\"left\" class=\"ticket_summary_link\"><a href=\"javascript:reloadReportCard(undefined, '" + krcType + "', '0', '0', '" + id + "', 'cnt:" + id + "', 'id', '" + name + "')\"";
+                                html += getMOPreviewEventHtml("cnt:" + id);	// Add Mouseover Preview events.
+                                html += ">" + name + "</a></td>";
+			}
+			else
+				html += "<td width=\"80%\" class=\"data\"><b class=\"gn_text_1dot4\">" + name + "</b></td>";
+			if (m_name == "") {
+				if (myCat)
+					html += "<td class=\"global_link\"><a href=\"javascript:reloadReportCard(undefined, '" + krcType + "', '0', '0', '" + id + "', 'kcat:" + id + "', 'id', '" + name + "')\"><img src='/CAisd/img/details.png' class='gn_container_no_border'></a></td>";
+				else															
+					html += "<td class=\"global_link\"><a href=\"javascript:reloadReportCard(undefined, '" + krcType + "', '0', '0', '" + id + "', 'cnt:" + id + "', 'id', '" + name + "')\"><img src='/CAisd/img/details.png' class='gn_container_no_border'></a></td>";					
+			}						
+			html += "</tr>";
+			html += "</table>";
+			html += "</td>";
+		}
+		
+		if (!myCat &&  !myOrg)
+		{
+			html += "<tr class=\"table_row data gn_content_center\">";		
+			html += "<td width=\"25%\">";
+			html += "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" class=\"gn_container_no_border\">";
+			html += "<tr>";
+            html += "<td align=\"left\"><b> My Statistics</b></td>";				
+			html += "</tr>";
+			html += "</table>";
+			html += "</td>";
+		}
+		
+		if (myCat)
+		{
+			html += "<td>" + arrValues[i]["CLOSED_TICKETS"] + "</td>";	// Total number of docs is stored there for kcat			
+			html += "<td>" + arrValues[i]["DOCUMENTS_SUBMITTED"] + "</td>";
+			html += "<td>" + arrValues[i]["DOCUMENTS_PUBLISHED"] + "</td>";
+			html += "<td>" + arrValues[i]["TOTAL_HITS"] + "</td>";
+			html += "<td>" + arrValues[i]["TOTAL_VOTES"] + "</td>";
+			html += "<td>" + getAvgRatingText(arrValues[i]["AVG_RATING"], arrValues[i]["TOTAL_VOTES"]) + "</td>";
+			html += "<td>" + arrValues[i]["LINKED_KNOWLEDGE_BY_OTHERS"] + "</td>";							
+			html += "<td>" + arrValues[i]["TOTAL_SOLUTION_COUNT"] + "</td>";
+			html += "<td>" + arrValues[i]["USER_SLV_CNT"] + "</td>";
+		}
+		else
+		{
+			if ( m_section == "MyDocs" )
+			{
+				html += "<td>" + arrValues[i]["DOCUMENTS_SUBMITTED"] + "</td>";
+				html += "<td>" + getAvgTime(arrValues[i]["TIME_TO_PUBLISH"], arrValues[i]["DOCUMENTS_PUBLISHED"]) + "</td>";
+				html += "<td>" + arrValues[i]["DOCUMENTS_PUBLISHED"] + "</td>";
+				html += "<td>" + arrValues[i]["DOCUMENTS_RETIRED"] + "</td>";											
+				html += "<td>" + arrValues[i]["LINKED_KNOWLEDGE_BY_OTHERS"] + "</td>";											
+				html += "<td>" + arrValues[i]["TOTAL_HITS"] + "</td>";
+				html += "<td>" + arrValues[i]["TOTAL_VOTES"] + "</td>";
+				html += "<td>" + getAvgRatingText(arrValues[i]["AVG_RATING"], arrValues[i]["TOTAL_VOTES"]) + "</td>";
+				html += "<td>" + arrValues[i]["TOTAL_SOLUTION_COUNT"] + "</td>";
+			}
+			else if ( m_section == "Reuse" )
+			{
+				html += "<td>" + arrValues[i]["CLOSED_TICKETS"] + "</td>";
+				html += "<td>" + arrValues[i]["TICKETS_WITH_KNOWLEDGE"] + "</td>";
+				html += "<td>" + arrValues[i]["KNOWLEDGE_SUBMIT_FROM_TICKET"] + "</td>";
+				html += "<td>" + arrValues[i]["LINKED_KNOWLEDGE_BY_ME"] + "</td>";
+				html += "<td>" + arrValues[i]["TICKETS_HAD_SEARCH_ACTIVITIES"] + "</td>";
+				html += "<td>" + arrValues[i]["USER_SLV_CNT"] + "</td>";
+			}
+			else if ( m_section == "Comments" )
+			{
+				html += "<td>" + arrValues[i]["MY_COMMENTS"] + "</td>";
+				html += "<td>" + getAvgTime(arrValues[i]["TIME_TO_FIX"], arrValues[i]["FLAGS_FIXED"]) + "</td>";
+				html += "<td>" + arrValues[i]["COMMENTS_ON_MY_DOCUMENTS"] + "</td>";
+			}
+		}
+		html += "</tr>";
+		if (!myCat && !myOrg)
+			html += m_htmlOverallStats;		
+			
+		if (displayAggOrgStats) {			
+			var orgDocsSubmitted = "";
+			
+			if (orgDocsSubmitted != "") {
+				if ((i % 2) == 0)
+				{
+				   html += "<tr class=\"table_row data gn_content_center\">";	
+				}
+				else
+				{
+				   html += "<tr class=\"table_banded_row data gn_content_center\">";	
+				}
+				html += "<td width=\"25%\">";
+				html += "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" class=\"gn_container_no_border\">";
+				html += "<tr>";
+				html += "<td class=\"data\">Organization Statistics</td>";				
+				html += "</tr>";
+				html += "</table>";
+				html += "</td>";
+
+				if ( m_section == "MyDocs" )
+				{
+					html += "<td>" + arrValues[i]["DOCUMENTS_SUBMITTED"] + "</td>";
+					html += "<td>" + getAvgTime(arrValues[i]["TIME_TO_PUBLISH"], arrValues[i]["DOCUMENTS_PUBLISHED"]) + "</td>";
+					html += "<td>" + arrValues[i]["DOCUMENTS_PUBLISHED"] + "</td>";
+					html += "<td>" + arrValues[i]["DOCUMENTS_RETIRED"] + "</td>";											
+					html += "<td>" + arrValues[i]["LINKED_KNOWLEDGE_BY_OTHERS"] + "</td>";											
+					html += "<td>" + arrValues[i]["TOTAL_HITS"] + "</td>";
+					html += "<td>" + arrValues[i]["TOTAL_VOTES"] + "</td>";
+					html += "<td>" + getAvgRatingText(arrValues[i]["AVG_RATING"], arrValues[i]["TOTAL_VOTES"]) + "</td>";
+					html += "<td>" + arrValues[i]["TOTAL_SOLUTION_COUNT"] + "</td>";
+				}
+				else if ( m_section == "Reuse" )
+				{
+					html += "<td>" + arrValues[i]["CLOSED_TICKETS"] + "</td>";
+					html += "<td>" + arrValues[i]["TICKETS_WITH_KNOWLEDGE"] + "</td>";
+					html += "<td>" + arrValues[i]["KNOWLEDGE_SUBMIT_FROM_TICKET"] + "</td>";
+					html += "<td>" + arrValues[i]["LINKED_KNOWLEDGE_BY_ME"] + "</td>";
+					html += "<td>" + arrValues[i]["TICKETS_HAD_SEARCH_ACTIVITIES"] + "</td>";
+					html += "<td>" + arrValues[i]["USER_SLV_CNT"] + "</td>";
+				}
+				else if ( m_section == "Comments" )
+				{
+					html += "<td>" + arrValues[i]["MY_COMMENTS"] + "</td>";
+					html += "<td>" + getAvgTime(arrValues[i]["TIME_TO_FIX"], arrValues[i]["FLAGS_FIXED"]) + "</td>";
+					html += "<td>" + arrValues[i]["COMMENTS_ON_MY_DOCUMENTS"] + "</td>";
+				}
+				html += "</tr>";
+			}
+		}																	
+	}
+	html += "</table>";
+	
+	// Display notes
+	if ( m_section == "Reuse" && m_krcType != "2" )
+	{
+		html += "<br>Notes:";
+		if ( "$env.NX_KT_REPORT_CARD_REQUEST_STATUS" != "" && "$env.NX_KT_REPORT_CARD_REQUEST_STATUS" != "NoVaLue" )
+			html += "<br>&nbsp;* Request filter: $env.NX_KT_REPORT_CARD_REQUEST_STATUS"; 
+		else
+			html += "<br>&nbsp;* Request filter: All";
+		if ( "$env.NX_KT_REPORT_CARD_ISSUE_STATUS" != "" && "$env.NX_KT_REPORT_CARD_ISSUE_STATUS" != "NoVaLue" )
+			html += "<br>&nbsp;* Issue filter: $env.NX_KT_REPORT_CARD_ISSUE_STATUS"; 
+		else
+			html += "<br>&nbsp;* Issue filter: All";
+	}
+	
+	reportCardDiv.innerHTML = html;
+	adjScrollDivHeight();		
+
+
+	if (ahdtop.cfgUserType == "analyst" && ! ahdtop.cstDisablePreviews) {
+		jq(document).ready(function() {
+			// Setup draggable() and resizable() on the Mouseover Preview object.
+			if (typeof mo_preview_def_obj != "undefined")
+			{
+				jq("#mo_preview_container_div").draggable(mo_preview_def_obj.draggable_option)
+			        	                       .resizable(mo_preview_def_obj.resizable_option);
+			}
+		});
+	}
+				
+}
+
+function window_onload() {
+    //load msg array with pdm_lists instead of spl code and pass it to loadUI;
+	var arrValues = new Array;
+    var strData = "";
+	var last_name = "";
+	var first_name = "";
+	var name = "";
+    if (m_krcType == "1" || m_krcType == "3") 
+	{
+		//get tenant or overall statistics html - used by My Documents and My Organization
+		<PDM_LIST PREFIX=list WHERE="PAST_DAYS=$args.KEEP.PAST_DAYS AND SUBJECT_ID='$args.KEEP.OVERALL_ID'" FACTORY="KT_REPORT_CARD">
+			m_htmlOverallStats += "<tr><tr class=\"table_row data gn_content_center\"><td width=\"25%\">";
+			m_htmlOverallStats += "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" class=\"gn_container_no_border\">";
+			if ("$prop.MultiTenancy" != "off" && "$cst.tenant" != "")
+			{
+				m_htmlOverallStats += "<tr><td align=\"left\"><b>Tenant Statistics</b></td></tr>";
+			}
+			else
+			{
+				m_htmlOverallStats += "<tr><td align=\"left\"><b>Overall Statistics</b></td></tr>";
+			}
+			m_htmlOverallStats += "</table></td>";
+			if ( m_section == "MyDocs" )
+			{
+				m_htmlOverallStats += "<td>" + "$list.DOCUMENTS_SUBMITTED" + "</td>";
+				m_htmlOverallStats += "<td>" + getAvgTime("$list.TIME_TO_PUBLISH", "$list.DOCUMENTS_PUBLISHED") + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.DOCUMENTS_PUBLISHED" + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.DOCUMENTS_RETIRED" + "</td>";											
+				m_htmlOverallStats += "<td>" + "$list.LINKED_KNOWLEDGE_BY_OTHERS" + "</td>";											
+				m_htmlOverallStats += "<td>" + "$list.TOTAL_HITS" + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.TOTAL_VOTES" + "</td>";
+				m_htmlOverallStats += "<td>" + getAvgRatingText("$list.AVG_RATING", "$list.TOTAL_VOTES") + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.TOTAL_SOLUTION_COUNT" + "</td>";
+			}
+			else if ( m_section == "Reuse" )
+			{
+				m_htmlOverallStats += "<td>" + "$list.CLOSED_TICKETS" + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.TICKETS_WITH_KNOWLEDGE" + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.KNOWLEDGE_SUBMIT_FROM_TICKET" + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.LINKED_KNOWLEDGE_BY_ME" + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.TICKETS_HAD_SEARCH_ACTIVITIES" + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.USER_SLV_CNT" + "</td>";
+			}
+			else if ( m_section == "Comments" )
+			{
+				m_htmlOverallStats += "<td>" + "$list.MY_COMMENTS" + "</td>";
+				m_htmlOverallStats += "<td>" + getAvgTime("$list.TIME_TO_FIX", "$list.FLAGS_FIXED") + "</td>";
+				m_htmlOverallStats += "<td>" + "$list.COMMENTS_ON_MY_DOCUMENTS" + "</td>";
+			}
+			m_htmlOverallStats += "</tr>";
+		</PDM_LIST>
+	}
+	
+    if (m_krcType == "1") 
+	{
+		CreateFirstElementFillNA(arrValues);
+		<PDM_LIST PREFIX=list WHERE="PAST_DAYS=$args.KEEP.PAST_DAYS AND SUBJECT_ID='$args.KEEP.PERSID' AND ORG_STATISTICS=0" FACTORY="KT_REPORT_CARD">
+			arrValues[0]["DOCUMENTS_SUBMITTED"] = "$list.DOCUMENTS_SUBMITTED";
+			arrValues[0]["DOCUMENTS_PUBLISHED"] = "$list.DOCUMENTS_PUBLISHED";
+			arrValues[0]["TOTAL_HITS"] = "$list.TOTAL_HITS";
+			arrValues[0]["TOTAL_VOTES"] = "$list.TOTAL_VOTES";
+			arrValues[0]["AVG_RATING"] = "$list.AVG_RATING";
+			arrValues[0]["TOTAL_SOLUTION_COUNT"] = "$list.TOTAL_SOLUTION_COUNT";
+			arrValues[0]["USER_SLV_CNT"] = "$list.USER_SLV_CNT";
+			arrValues[0]["CLOSED_TICKETS"] = "$list.CLOSED_TICKETS";
+			arrValues[0]["TICKETS_WITH_KNOWLEDGE"] = "$list.TICKETS_WITH_KNOWLEDGE";
+			arrValues[0]["TICKETS_HAD_SEARCH_ACTIVITIES"] = "$list.TICKETS_HAD_SEARCH_ACTIVITIES";
+			arrValues[0]["LINKED_KNOWLEDGE_BY_OTHERS"] = "$list.LINKED_KNOWLEDGE_BY_OTHERS";
+			arrValues[0]["LINKED_KNOWLEDGE_BY_ME"] = "$list.LINKED_KNOWLEDGE_BY_ME";
+			arrValues[0]["KNOWLEDGE_SUBMIT_FROM_TICKET"] = "$list.KNOWLEDGE_SUBMIT_FROM_TICKET";
+			arrValues[0]["TIME_TO_PUBLISH"] = "$list.TIME_TO_PUBLISH";
+			arrValues[0]["MY_COMMENTS"] = "$list.MY_COMMENTS";
+			arrValues[0]["DOCUMENTS_RETIRED"] = "$list.DOCUMENTS_RETIRED";
+			arrValues[0]["TIME_TO_FIX"] = "$list.TIME_TO_FIX";
+			arrValues[0]["FLAGS_FIXED"] = "$list.FLAGS_FIXED";
+			arrValues[0]["COMMENTS_ON_MY_DOCUMENTS"] = "$list.COMMENTS_ON_MY_DOCUMENTS";
+		</PDM_LIST>	
+	}	
+	else if (m_krcType == "2") 
+	{
+		var i = 0;
+		// Display the report card in My Categories mode
+		<PDM_IF "$args.KEEP.NAME" == "">
+			<PDM_LIST PREFIX=kcat WHERE="OWNER_ID=U'$cst.id'" FACTORY="KCAT">
+				<PDM_LIST PREFIX=list WHERE="SUBJECT_ID='kcat:$kcat.id' AND PAST_DAYS=$args.KEEP.PAST_DAYS" FACTORY="KT_REPORT_CARD">	
+					arrValues[i] = new Array;
+					arrValues[i]["NAME"] = "$kcat.CAPTION";
+					arrValues[i]["ID"] = "$kcat.id";
+					arrValues[i]["DOCUMENTS_SUBMITTED"] = "$list.DOCUMENTS_SUBMITTED";
+					arrValues[i]["DOCUMENTS_PUBLISHED"] = "$list.DOCUMENTS_PUBLISHED";
+					arrValues[i]["TOTAL_HITS"] = "$list.TOTAL_HITS";
+					arrValues[i]["TOTAL_VOTES"] = "$list.TOTAL_VOTES";
+					arrValues[i]["AVG_RATING"] = "$list.AVG_RATING";
+					arrValues[i]["TOTAL_SOLUTION_COUNT"] = "$list.TOTAL_SOLUTION_COUNT";
+					arrValues[i]["USER_SLV_CNT"] = "$list.USER_SLV_CNT";
+					arrValues[i]["CLOSED_TICKETS"] = "$list.CLOSED_TICKETS";
+					arrValues[i]["TICKETS_WITH_KNOWLEDGE"] = "$list.TICKETS_WITH_KNOWLEDGE";
+					arrValues[i]["TICKETS_HAD_SEARCH_ACTIVITIES"] = "$list.TICKETS_HAD_SEARCH_ACTIVITIES";
+					arrValues[i]["LINKED_KNOWLEDGE_BY_OTHERS"] = "$list.LINKED_KNOWLEDGE_BY_OTHERS";
+					arrValues[i]["LINKED_KNOWLEDGE_BY_ME"] = "$list.LINKED_KNOWLEDGE_BY_ME";
+					arrValues[i]["KNOWLEDGE_SUBMIT_FROM_TICKET"] = "$list.KNOWLEDGE_SUBMIT_FROM_TICKET";
+					arrValues[i]["TIME_TO_PUBLISH"] = "$list.TIME_TO_PUBLISH";
+					arrValues[i]["MY_COMMENTS"] = "$list.MY_COMMENTS";
+					arrValues[i]["DOCUMENTS_RETIRED"] = "$list.DOCUMENTS_RETIRED";
+					arrValues[i]["TIME_TO_FIX"] = "$list.TIME_TO_FIX";
+					arrValues[i]["FLAGS_FIXED"] = "$list.FLAGS_FIXED";
+					arrValues[i]["COMMENTS_ON_MY_DOCUMENTS"] = "$list.COMMENTS_ON_MY_DOCUMENTS";
+					i++;
+				</PDM_LIST>
+			</PDM_LIST>
+		<PDM_ELSE>
+			CreateFirstElementFillNA(arrValues);
+			<PDM_LIST PREFIX=list WHERE="PAST_DAYS=$args.KEEP.PAST_DAYS AND SUBJECT_ID='$args.KEEP.PERSID'" FACTORY="KT_REPORT_CARD">	 
+				arrValues[0]["DOCUMENTS_SUBMITTED"] = "$list.DOCUMENTS_SUBMITTED";
+				arrValues[0]["DOCUMENTS_PUBLISHED"] = "$list.DOCUMENTS_PUBLISHED";
+				arrValues[0]["TOTAL_HITS"] = "$list.TOTAL_HITS";
+				arrValues[0]["TOTAL_VOTES"] = "$list.TOTAL_VOTES";
+				arrValues[0]["AVG_RATING"] = "$list.AVG_RATING";
+				arrValues[0]["TOTAL_SOLUTION_COUNT"] = "$list.TOTAL_SOLUTION_COUNT";
+				arrValues[0]["USER_SLV_CNT"] = "$list.USER_SLV_CNT";
+				arrValues[0]["CLOSED_TICKETS"] = "$list.CLOSED_TICKETS";
+				arrValues[0]["TICKETS_WITH_KNOWLEDGE"] = "$list.TICKETS_WITH_KNOWLEDGE";
+				arrValues[0]["TICKETS_HAD_SEARCH_ACTIVITIES"] = "$list.TICKETS_HAD_SEARCH_ACTIVITIES";
+				arrValues[0]["LINKED_KNOWLEDGE_BY_OTHERS"] = "$list.LINKED_KNOWLEDGE_BY_OTHERS";
+				arrValues[0]["LINKED_KNOWLEDGE_BY_ME"] = "$list.LINKED_KNOWLEDGE_BY_ME";
+				arrValues[0]["KNOWLEDGE_SUBMIT_FROM_TICKET"] = "$list.KNOWLEDGE_SUBMIT_FROM_TICKET";
+				arrValues[0]["TIME_TO_PUBLISH"] = "$list.TIME_TO_PUBLISH";
+				arrValues[0]["MY_COMMENTS"] = "$list.MY_COMMENTS";
+				arrValues[0]["DOCUMENTS_RETIRED"] = "$list.DOCUMENTS_RETIRED";
+				arrValues[0]["TIME_TO_FIX"] = "$list.TIME_TO_FIX";
+				arrValues[0]["FLAGS_FIXED"] = "$list.FLAGS_FIXED";
+				arrValues[0]["COMMENTS_ON_MY_DOCUMENTS"] = "$list.COMMENTS_ON_MY_DOCUMENTS";
+			</PDM_LIST>	
+		</PDM_IF>
+    }
+    else if (m_krcType == "3") 
+    {
+		var i = 1;
+		// Display the report card in My Organization mode
+		<PDM_IF "$args.KEEP.NAME" == "">
+				CreateFirstElementFillNA(arrValues);
+				<PDM_LIST PREFIX=list WHERE="PAST_DAYS=$args.KEEP.PAST_DAYS AND SUBJECT_ID='$args.KEEP.PERSID' AND ORG_STATISTICS=1" FACTORY="KT_REPORT_CARD">	 
+				arrValues[0]["MY_ORG_STATS"] = "1";
+				arrValues[0]["DOCUMENTS_SUBMITTED"] = "$list.DOCUMENTS_SUBMITTED";
+				arrValues[0]["DOCUMENTS_PUBLISHED"] = "$list.DOCUMENTS_PUBLISHED";
+				arrValues[0]["TOTAL_HITS"] = "$list.TOTAL_HITS";
+				arrValues[0]["TOTAL_VOTES"] = "$list.TOTAL_VOTES";
+				arrValues[0]["AVG_RATING"] = "$list.AVG_RATING";
+				arrValues[0]["TOTAL_SOLUTION_COUNT"] = "$list.TOTAL_SOLUTION_COUNT";
+				arrValues[0]["USER_SLV_CNT"] = "$list.USER_SLV_CNT";
+				arrValues[0]["CLOSED_TICKETS"] = "$list.CLOSED_TICKETS";
+				arrValues[0]["TICKETS_WITH_KNOWLEDGE"] = "$list.TICKETS_WITH_KNOWLEDGE";
+				arrValues[0]["TICKETS_HAD_SEARCH_ACTIVITIES"] = "$list.TICKETS_HAD_SEARCH_ACTIVITIES";
+				arrValues[0]["LINKED_KNOWLEDGE_BY_OTHERS"] = "$list.LINKED_KNOWLEDGE_BY_OTHERS";
+				arrValues[0]["LINKED_KNOWLEDGE_BY_ME"] = "$list.LINKED_KNOWLEDGE_BY_ME";
+				arrValues[0]["KNOWLEDGE_SUBMIT_FROM_TICKET"] = "$list.KNOWLEDGE_SUBMIT_FROM_TICKET";
+				arrValues[0]["TIME_TO_PUBLISH"] = "$list.TIME_TO_PUBLISH";
+				arrValues[0]["MY_COMMENTS"] = "$list.MY_COMMENTS";
+				arrValues[0]["DOCUMENTS_RETIRED"] = "$list.DOCUMENTS_RETIRED";
+				arrValues[0]["TIME_TO_FIX"] = "$list.TIME_TO_FIX";
+				arrValues[0]["FLAGS_FIXED"] = "$list.FLAGS_FIXED";
+				arrValues[0]["COMMENTS_ON_MY_DOCUMENTS"] = "$list.COMMENTS_ON_MY_DOCUMENTS";
+			</PDM_LIST>
+			<PDM_LIST FACTORY="cnt" PREFIX=user WHERE="supervisor_contact_uuid=U'$cst.id'">
+				<PDM_LIST PREFIX=list WHERE="SUBJECT_ID='cnt:$user.id' AND PAST_DAYS=$args.KEEP.PAST_DAYS AND ORG_STATISTICS=1" FACTORY="KT_REPORT_CARD">		
+					last_name = '$user.last_name';
+					first_name = '$user.first_name';
+					name = "";
+					if (first_name == "")
+						name = last_name;
+					else if (last_name == "")
+						name = first_name;
+					else
+						name = last_name + ", " + first_name;
+					arrValues[i] = new Array;
+					arrValues[i]["NAME"] = name;
+					arrValues[i]["ID"] = "$user.id";
+					arrValues[i]["DOCUMENTS_SUBMITTED"] = "$list.DOCUMENTS_SUBMITTED";
+					arrValues[i]["DOCUMENTS_PUBLISHED"] = "$list.DOCUMENTS_PUBLISHED";
+					arrValues[i]["TOTAL_HITS"] = "$list.TOTAL_HITS";
+					arrValues[i]["TOTAL_VOTES"] = "$list.TOTAL_VOTES";
+					arrValues[i]["AVG_RATING"] = "$list.AVG_RATING";
+					arrValues[i]["TOTAL_SOLUTION_COUNT"] = "$list.TOTAL_SOLUTION_COUNT";
+					arrValues[i]["USER_SLV_CNT"] = "$list.USER_SLV_CNT";
+					arrValues[i]["CLOSED_TICKETS"] = "$list.CLOSED_TICKETS";
+					arrValues[i]["TICKETS_WITH_KNOWLEDGE"] = "$list.TICKETS_WITH_KNOWLEDGE";
+					arrValues[i]["TICKETS_HAD_SEARCH_ACTIVITIES"] = "$list.TICKETS_HAD_SEARCH_ACTIVITIES";
+					arrValues[i]["LINKED_KNOWLEDGE_BY_OTHERS"] = "$list.LINKED_KNOWLEDGE_BY_OTHERS";
+					arrValues[i]["LINKED_KNOWLEDGE_BY_ME"] = "$list.LINKED_KNOWLEDGE_BY_ME";
+					arrValues[i]["KNOWLEDGE_SUBMIT_FROM_TICKET"] = "$list.KNOWLEDGE_SUBMIT_FROM_TICKET";
+					arrValues[i]["TIME_TO_PUBLISH"] = "$list.TIME_TO_PUBLISH";
+					arrValues[i]["MY_COMMENTS"] = "$list.MY_COMMENTS";
+					arrValues[i]["DOCUMENTS_RETIRED"] = "$list.DOCUMENTS_RETIRED";
+					arrValues[i]["TIME_TO_FIX"] = "$list.TIME_TO_FIX";
+					arrValues[i]["FLAGS_FIXED"] = "$list.FLAGS_FIXED";
+					arrValues[i]["COMMENTS_ON_MY_DOCUMENTS"] = "$list.COMMENTS_ON_MY_DOCUMENTS";
+					i++;
+				</PDM_LIST>
+			</PDM_LIST>
+		<PDM_ELSE>
+			CreateFirstElementFillNA(arrValues);
+			<PDM_LIST PREFIX=list WHERE="PAST_DAYS=$args.KEEP.PAST_DAYS AND SUBJECT_ID='$args.KEEP.PERSID' AND ORG_STATISTICS=1" FACTORY="KT_REPORT_CARD">	 
+				arrValues[0]["DOCUMENTS_SUBMITTED"] = "$list.DOCUMENTS_SUBMITTED";
+				arrValues[0]["DOCUMENTS_PUBLISHED"] = "$list.DOCUMENTS_PUBLISHED";
+				arrValues[0]["TOTAL_HITS"] = "$list.TOTAL_HITS";
+				arrValues[0]["TOTAL_VOTES"] = "$list.TOTAL_VOTES";
+				arrValues[0]["AVG_RATING"] = "$list.AVG_RATING";
+				arrValues[0]["TOTAL_SOLUTION_COUNT"] = "$list.TOTAL_SOLUTION_COUNT";
+				arrValues[0]["USER_SLV_CNT"] = "$list.USER_SLV_CNT";
+				arrValues[0]["CLOSED_TICKETS"] = "$list.CLOSED_TICKETS";
+				arrValues[0]["TICKETS_WITH_KNOWLEDGE"] = "$list.TICKETS_WITH_KNOWLEDGE";
+				arrValues[0]["TICKETS_HAD_SEARCH_ACTIVITIES"] = "$list.TICKETS_HAD_SEARCH_ACTIVITIES";
+				arrValues[0]["LINKED_KNOWLEDGE_BY_OTHERS"] = "$list.LINKED_KNOWLEDGE_BY_OTHERS";
+				arrValues[0]["LINKED_KNOWLEDGE_BY_ME"] = "$list.LINKED_KNOWLEDGE_BY_ME";
+				arrValues[0]["KNOWLEDGE_SUBMIT_FROM_TICKET"] = "$list.KNOWLEDGE_SUBMIT_FROM_TICKET";
+				arrValues[0]["TIME_TO_PUBLISH"] = "$list.TIME_TO_PUBLISH";
+				arrValues[0]["MY_COMMENTS"] = "$list.MY_COMMENTS";
+				arrValues[0]["DOCUMENTS_RETIRED"] = "$list.DOCUMENTS_RETIRED";
+				arrValues[0]["TIME_TO_FIX"] = "$list.TIME_TO_FIX";
+				arrValues[0]["FLAGS_FIXED"] = "$list.FLAGS_FIXED";
+				arrValues[0]["COMMENTS_ON_MY_DOCUMENTS"] = "$list.COMMENTS_ON_MY_DOCUMENTS";
+			</PDM_LIST>
+		</PDM_IF>
+	}	
+    loadUI(arrValues);
+    //
+    var past_days_option = document.getElementById("past_days_option");
+    var past_days_pref = m_pastDays;
+    past_days_option.selectedIndex = 0;
+    for (var i = 0; i < past_days_option.length; i++) {
+		var option = past_days_option[i];
+		if (option.value == past_days_pref) {
+			past_days_option.selectedIndex = i;
+			break;
+		}
+	}
+	if (m_krcType != "2")
+	{
+		var section_option = document.getElementById("section_option");
+		var section_pref = m_section;
+		section_option.selectedIndex = 0;
+		for (var i = 0; i < section_option.length; i++) {
+			var option = section_option[i];
+			if (option.value == section_pref) {
+				section_option.selectedIndex = i;
+				break;
+			}
+		}
+	}
+	if(typeof(document.getElementById("view_docs")) == "object")
+	{
+		var view_docs_value = "$args.KEEP.VIEW_DOCS";
+		var view_docs_option = document.getElementById("view_docs");
+		if(view_docs_option != null)
+		{
+			view_docs_option.selectedIndex = 0;
+			for (var i = 0; i < view_docs_option.length; i++) {
+				var option = view_docs_option[i];
+				if (option.value == view_docs_value) {
+					view_docs_option.selectedIndex = i;
+					break;
+				}
+			}
+		}
+	}
+}
+
+function CreateFirstElementFillNA(arrValues)
+{
+	arrValues[0] = new Array;
+	arrValues[0]["DOCUMENTS_SUBMITTED"] = "N/A";
+	arrValues[0]["DOCUMENTS_PUBLISHED"] = "N/A";
+	arrValues[0]["TOTAL_HITS"] = "N/A";
+	arrValues[0]["TOTAL_VOTES"] = "N/A";
+	arrValues[0]["AVG_RATING"] = "N/A";
+	arrValues[0]["TOTAL_SOLUTION_COUNT"] = "N/A";
+	arrValues[0]["USER_SLV_CNT"] = "N/A";
+	arrValues[0]["CLOSED_TICKETS"] = "N/A";
+	arrValues[0]["TICKETS_WITH_KNOWLEDGE"] = "N/A";
+	arrValues[0]["TICKETS_HAD_SEARCH_ACTIVITIES"] = "N/A";
+	arrValues[0]["LINKED_KNOWLEDGE_BY_OTHERS"] = "N/A";
+	arrValues[0]["LINKED_KNOWLEDGE_BY_ME"] = "N/A";
+	arrValues[0]["KNOWLEDGE_SUBMIT_FROM_TICKET"] = "N/A";
+	arrValues[0]["TIME_TO_PUBLISH"] = "N/A";
+	arrValues[0]["MY_COMMENTS"] = "N/A";
+	arrValues[0]["DOCUMENTS_RETIRED"] = "N/A";
+	arrValues[0]["TIME_TO_FIX"] = "N/A";
+	arrValues[0]["FLAGS_FIXED"] = "N/A";
+	arrValues[0]["COMMENTS_ON_MY_DOCUMENTS"] = "N/A";
+}
+
+function onPastDaysOptionChange(past_days_option) {
+    var option = past_days_option[past_days_option.selectedIndex];
+	if (option != null) {
+	    // First save the past days option in the user preference record
+		
+		// Need to update ahdtop if the user opened the page again. Note that even the user has no
+		// preferences record we could store this calues in ahdtop for the rest of the session.
+		ahdtop.SetUSPPreferences("KT_REPORT_CARD_PAST_DAYS", option.value);
+
+	    if (ahdtop.prefsRecID > 1)// 1 is the default setting for all users
+	    {
+			var url=cfgCgi+
+			"?SID="+cfgSID+
+			"+FID="+fid_generator().toString()+
+			"+OP=KT_REPORT_CARD_SAVE_PAST_DAYS" +	       
+			"+SET.KT_REPORT_CARD_PAST_DAYS=" + option.value +
+			"+SET.id=" + ahdtop.prefsRecID;	        
+	      
+			ahdframeset.workframe.location.href = url;    
+		}
+		reloadReportCard(option.value);		
+	}
+}
+
+function onSectionOptionChange(section_option) {
+    var option = section_option[section_option.selectedIndex];
+	if (option != null) {
+		reloadReportCard(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, option.value);		
+	}
+}
+
+function KT_REPLY(sOP,msg)
+{
+	var iRet = msg[0];
+	if(sOP == "KT_REPORT_CARD_SAVE_PAST_DAYS")
+	{
+		if(iRet != 0)
+			alert(iRet);	//error msg is in msg[0]
+	}
+	else if(sOP == "KT_REPORT_CARD_SAVE_SCREEN_DEFAULT")
+	{
+		if(iRet != 0)
+			alert(iRet);	//error msg is in msg[0]
+	}
+}
+
+function view_docs_change(doc_sort_option)	{
+	var option = doc_sort_option[doc_sort_option.selectedIndex];
+	var date_obj = new Date();
+	var today=Math.round(date_obj.getTime()/ 1000);
+	var qbe_date;
+	var strAddToURL = "";
+	if (m_pastDays == "-1")
+	{
+		// show all, set date to earliest date possible - 1/1/1970
+		qbe_date = 74400;
+	}
+	else
+	{
+		qbe_date = today - (m_pastDays * 86400);
+	}
+	qbe_date = date_to_string(qbe_date,0);
+	if (option != null) 
+	{
+		if(option.value == 0)	//submitted
+			strAddToURL = "&QBE.GT.CREATION_DATE=" + qbe_date;
+		else if(option.value == 1)	//published
+			strAddToURL = "&QBE.GT.PUBLISHED_DATE=" + qbe_date;
+		else if(option.value == 2) //hit
+			if (m_pastDays != "-1")//Do not perform bu_trans criteria for all time
+			{
+				strAddToURL = "&QBE.GT.LAST_HIT_DATE=" + qbe_date;  //LAST_HIT_DATE is for last hit
+			}
+			else 
+			{
+				strAddToURL = "&QBE.GT.HITS=0";
+			}
+		else //vote 
+			if (m_pastDays != "-1")//Do not perform bu_trans criteria for all time
+			{
+				strAddToURL = "&QBE.GT.LAST_VOTE_DATE=" + qbe_date; //LAST_VOTE_DATE is for last vote
+			}	
+			else 
+			{
+				strAddToURL = "&QBE.GT.VOTE_COUNT=0";
+			}
+		strAddToURL += "&KEEP.VIEW_DOCS="+option.value;
+				
+	}
+	reloadReportCard(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, strAddToURL); 
+	return;
+}
+
+function onScreenDefaultChange(screen_default) {
+	// First save the screen default option in the user preference record
+	
+	// Need to update ahdtop if the user opened the page again. Note that even the userr has no
+	// prefrences record we could store this calues in ahdtop for the rest of the sesstion.
+	ahdtop.SetUSPPreferences("KT_REPORT_CARD_SCREEN_DEFAULT", screen_default);
+
+	if (ahdtop.prefsRecID > 1)// 1 is the default setting for all users
+	{
+		var url=cfgCgi+
+			"?SID="+cfgSID+
+			"+FID="+fid_generator().toString()+
+			"+OP=KT_REPORT_CARD_SAVE_SCREEN_DEFAULT" +	       
+			"+SET.KT_REPORT_CARD_SCREEN_DEFAULT=" + screen_default +
+			"+SET.id=" + ahdtop.prefsRecID;	        
+	      
+		ahdframeset.workframe.location.href = url;    	
+	}
+}
+
+function reloadReportCard(pastDays, krcType, managerFlag, categoryOwnerFlag, id, persid, 
+			sortKey, name, orgList, addToOrgList, orgListName, strAddToURL, section) {
+	if (typeof pastDays == "undefined")
+		pastDays = m_pastDays;
+	
+	if (typeof section == "undefined")
+		section = m_section;
+
+	if (typeof krcType == "undefined")
+		krcType = m_krcType;
+		
+	if (typeof managerFlag == "undefined")
+		managerFlag = m_managerFlag;
+		
+	if (typeof categoryOwnerFlag == "undefined")
+		categoryOwnerFlag = m_categoryOwnerFlag;
+		
+	if (typeof persid == "undefined")
+		persid = m_persid;
+	
+	if (typeof id == "undefined")
+		id = m_id;
+		
+	if (typeof sortKey == "undefined")
+		sortKey = "id";
+		
+	if (typeof name == "undefined")
+		name = m_name;
+	
+	var kdFilter;
+	if (krcType == "2")
+		kdFilter = "QBE.EQ.DOC_LINKS.INDEX_ID=" + id;
+	else
+		kdFilter = "QBE.EQ.AUTHOR_ID=" + id;
+				  
+	kdFilter += "+QBE.NE.ACTIVE_STATE=2" +	// don't show Retired KD's
+				"+QBE.EQ.REWORK_VER=0";		// don't show Reworked KD's				  
+				  
+	if (managerFlag == 1) {
+		if (id == "$cst.id") {
+			orgList = "";
+		}
+		else {			
+			if (typeof orgList == "undefined" || orgList == "")
+				orgList = m_orgList;
+			if (typeof addToOrgList == "boolean" && addToOrgList)		
+				orgList = orgList + ";" + id + ";" + orgListName;
+		}
+	}
+	else {
+		orgList = m_orgList;
+	}
+		
+	var url = cfgCgi + 
+		"?SID="+cfgSID +
+		"+FID="+fid_generator() +
+		"+OP=SEARCH" +
+		"+FACTORY=KD" + 
+		"+DOMSET=KRC_list_web" +
+		"+KEEP.cur_sort_key=" + sortKey +
+		"+" + kdFilter +
+		"+HTMPL=list_kt_report_card.htmpl" +
+		"+KEEP.KRC_TYPE=" + krcType +
+		"+KEEP.MANAGER_FLAG=" + managerFlag +
+		"+KEEP.CATEGORY_OWNER_FLAG=" + categoryOwnerFlag +
+		"+KEEP.PAST_DAYS=" + pastDays +
+		"+KEEP.SECTION=" + section +
+		"+KEEP.ID=" + id +
+		"+KEEP.PERSID=" + persid +
+		"+KEEP.NAME=" + name +
+		"+KEEP.ORGLIST=" + orgList +
+		"+KEEP.OVERALL_ID=" + "$args.KEEP.OVERALL_ID" +
+		"+KEEP.POPUP_NAME=" + "$args.KEEP.POPUP_NAME";
+	
+	if (pastDays != "-1")
+	{
+		var date_obj = new Date();
+		var today=Math.round(date_obj.getTime()/ 1000);	
+		var qbe_date = today - (pastDays * 86400);
+		url += "+QBE.GT.CREATION_DATE=" + date_to_string(qbe_date,0);			
+	}			
+	
+	if(typeof strAddToURL != "undefined" )
+		url += strAddToURL;
+	display_new_page(url);
+}
+
+function OnAfterSearchFilter(url) {
+	url += "+DOMSET=KRC_list_web+HTMPL=list_kt_report_card.htmpl";
+	url += "+KEEP.KRC_TYPE=" + m_krcType;
+	url += "+KEEP.MANAGER_FLAG=" + m_managerFlag;
+	url += "+KEEP.CATEGORY_OWNER_FLAG=" + m_categoryOwnerFlag;
+	url += "+KEEP.PAST_DAYS=" + m_pastDays;
+	url += "+KEEP.SECTION=" + m_section;
+	url += "+KEEP.PERSID=" + m_persid;
+	url += "+KEEP.ID=" + m_id;
+	url += "+KEEP.NAME=" + m_name;
+	url += "+KEEP.POPUP_NAME=" + "$args.KEEP.POPUP_NAME";
+		
+	return url;
+}
+
+function displayEffRatingBar(effRating) {
+    var barWidth;
+	var html = "";
+	
+    if (effRating > 4.0)
+        effRating = 4.0;
+
+    barWidth = Math.round(effRating * 25);
+    
+    html += "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"tr><td align=\"center\">";
+    html += "<table width=\"60%\" cellpadding=\"0\" cellspacing=\"0\" ";
+    html += "class=\"kt_effratingbar\">";
+    html += "<tr>";
+
+	if (barWidth > 0)
+		html += "<td width=\"" + barWidth + "%\" class=\"kt_effratingbar_background_color\"><img src=\"images/shim.gif\" width=\"0\" height=\"5\"></td>";
+
+    if (barWidth < 100)
+        html += "<td width=\"" + (100-barWidth) + "%\"><img src=\"images/shim.gif\" width=\"0\" height=\"5\"></td>";
+
+    html += "</tr>";
+    html += "</table>";  
+    html += "</td></tr></table>";
+    
+    return html;
+}
+
+// Set the name of the window - This is required so that ahdtop can track this window
+window.name="kt_report_card";
+</script>
+</head>
+
+<PDM_LIST PREFIX=listProp FACTORY=USP_PROPERTIES WHERE="PROPERTY_NAME='KT_REPORT_CARD_LAST_UPDATE'" ESC_STYLE=C>
+	<PDM_IF "$listProp.PROPERTY_VALUE" == "">	<!-- Report Card statistics have not been calculated -->
+		<body>
+			<br>
+			&nbsp;Please run Report Card Calculation
+	
+	
+<PDM_ELSE>	<!-- Report Card statistics have not been calculated - all the rest of the code -->
+	
+<body class="list" onload="window_onload()">
+<script language="JavaScript">
+	// Hide the filter buttons
+    var saveCstUsingScreenReader = ahdtop.cstUsingScreenReader;
+    ahdtop.cstUsingScreenReader = false;
+	searchFilterInitialState = "hide";	
+	startSearchFilter("KD");
+	endSearchFilter();
+    ahdtop.cstUsingScreenReader = saveCstUsingScreenReader;
+	
+	var sfButtonTable = document.getElementById("sfButtonTable");
+	sfButtonTable.style.display = "none";
+</script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Knowledge Report Card" menubar="no">
+<table cellSpacing="0" cellPadding="0" width="100%" class="page_header gn_container_no_border">
+	<tr height="25">			
+		<td align="left">Knowledge Report Card</td>
+	</tr>
+</table>
+<script language="Javascript">
+	var categoryOwner = false;
+	<PDM_LIST PREFIX=list WHERE="OWNER_ID=U'$cst.id'" FACTORY="KCAT">	 
+		var id = "$list.id";   
+		categoryOwner = true;
+	</PDM_LIST>
+	
+	var manager = false;
+	<PDM_LIST PREFIX=list WHERE="supervisor_contact_uuid=U'$cst.id'" FACTORY="cnt">	 
+		var id = "$list.id";   
+		manager = true;
+	</PDM_LIST>	
+	
+	if (categoryOwner || manager) {
+		document.writeln("<table width=\"100%\" cellpadding=\"5\" cellspacing=\"0\" class=\"gn_container_no_border\">");
+		document.writeln("<tr>");
+		document.writeln("<td width=\"15%\"><a class=\"global_link\" href=\"javascript:onScreenDefaultChange('1');reloadReportCard(undefined, '1', '0', '0', '$cst.id', 'cnt:$cst.id', 'id', '')\">My Documents</a></td>");
+		if (categoryOwner)			
+			document.writeln("<td width=\"15%\"><a class=\"global_link\" href=\"javascript:onScreenDefaultChange('2');reloadReportCard(undefined, '2', '0', '1', '$cst.id', 'cnt:$cst.id', 'id', '')\">My Categories</a></td>");
+		if (manager)			
+			document.writeln("<td width=\"15%\"><a class=\"global_link\" href=\"javascript:onScreenDefaultChange('3');reloadReportCard(undefined, '3', '1', '0', '$cst.id', 'cnt:$cst.id', 'id', '')\">My Organization</a></td>");
+		document.writeln("<td>&nbsp;</td>");
+		document.writeln("</tr>");		
+		document.writeln("</table>");
+	}	
+	
+	// If the KRC_TYPE = 3 (My Organization) and there are more than 2 elements in the m_orgList
+	// string, print out each contact in the string
+	var cntArray = m_orgList.split(";");
+	var len = cntArray.length;
+	if (m_krcType == 3 && len >= 4) {
+		document.writeln("<table width=\"100%\" cellpadding=\"5\" cellspacing=\"0\" class=\"gn_container_no_border\">");
+		document.writeln("<tr><td>");
+	
+		var orgList = "";		
+		var i = 0;	
+		while (i < len) {
+			var id = cntArray[i];
+			var name = cntArray[i+1];
+			if (i > 0)
+				orgList += ";";
+			orgList += id + ";" + name;
+			
+			if ((i+2) < len) {
+				document.writeln("<a class=\"breadcrumb\" href=\"javascript:reloadReportCard(undefined, '3', '1', '0', '" + id + "', 'cnt:" + id + "', 'id', '', '" + orgList + "')\">" + name + "</a><span class=\"breadcrumb_current\">&nbsp;&gt;</span>");
+			}
+			else {
+				if (m_managerFlag == 1)
+					document.writeln("<span class=\"breadcrumb_current\">" + name + "</span>");
+				else
+					document.writeln("<a class=\"breadcrumb\" href=\"javascript:reloadReportCard(undefined, '3', '1', '0', '" + id + "', 'cnt:" + id + "', 'id', '', '" + orgList + "')\">" + name + "</a>");
+			}
+			i += 2;
+		}
+		document.writeln("</td></tr></table>");
+	}						
+</script>
+<table width="100%" cellspacing="0" cellpadding="0" class="gn_container_no_border">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left">
+			<script language="Javascript">
+				document.writeln("<img src=\"" + cfgCAISD + "/img/spacer.png\" alt=\"\" width=\"4\" height=\"22\">");
+			</script>
+		</td>
+		<td class="page_section_header_center">
+			<span class="page_section_header_text" id="report_card_mode">&nbsp;</span>				
+		</td>
+		<td width="4" height="22" class="page_section_header_right">
+			<span class="page_section_header_right">
+			<script>
+				document.writeln("<img src=\"" + cfgCAISD + "/img/spacer.png\" alt=\"\" width=\"4\" height=\"22\"></span>");
+			</script>
+		</td>
+	</tr>
+</table>
+<table width="100%" cellpadding="3" cellspacing="0" class="gn_container_no_border">
+	<tr>
+		<td class="table_view_options" id="viewoptions" align="left">
+			<span class="data">
+				Statistics for:
+			</span>
+			<select id="past_days_option" class="data" onchange="onPastDaysOptionChange(this)">
+				<option id="30" value="30">30 days</option>
+				<option id="180" value="180">180 days</option>
+				<option id="365" value="365">365 days</option>
+				<option id="-1" value="-1">All</option>
+			</select>
+			<PDM_LIST PREFIX=list FACTORY=USP_PROPERTIES WHERE="PROPERTY_NAME='KT_REPORT_CARD_LAST_UPDATE'" ESC_STYLE=C>
+				
+<PDM_IF "$list.PROPERTY_VALUE" == "">
+					<span class="data">	
+						Report Card statistics have not been calculated, or the last calculation date is unavailable.
+					</span>
+				
+<PDM_ELSE>
+					<span class="data">
+						prior to  
+						<script>
+							var last_update_date = date_to_string("$list.PROPERTY_VALUE", 1);
+						</script>.
+					</span>
+				
+</PDM_IF>
+			</PDM_LIST>
+		</td>
+	</tr>
+</table>
+<PDM_IF "$args.KEEP.KRC_TYPE" != "2">
+	<table width="100%" cellpadding="3" cellspacing="0" class="gn_container_no_border">
+		<tr>
+			<td class="table_view_options" id="sectionoptions" align="LEFT">
+				<span class="data">
+					Section:
+				</span>
+				<select id="section_option" class="data" onchange="onSectionOptionChange(this)">
+					<option id="MyDocs" value="MyDocs">Documents</option>
+					<option id="Reuse" value="Reuse">Reuse</option>
+					<option id="Comments" value="Comments">Comments</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+</PDM_IF>
+<div id="report_card">&nbsp;</div>
+<br>
+<script language="JavaScript">
+function getResultSetViewOptions()
+{
+	var html = "";
+	html += "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"5\" class=\"gn_container_no_border\">";	
+	html += "<tr>";
+	html += "<td width=\"100%\" class=\"table_view_options\" valign=\"middle\" align=\"left\"><span class=\"data\">Filter by documents&nbsp;</span>";
+	html += "<select id=\"view_docs\" class=\"data\" onchange=\"view_docs_change(this)\"><option id=\"0\" value=\"0\" >submitted</option>";
+	html += "<option id=\"1\" value=\"1\">published</option><option id=\"2\" value=\"2\">hit</option><option id=\"3\" value=\"3\">voted</option>";
+	html += "</select><span class=\"data\">";
+	
+<PDM_IF $args.KEEP.PAST_DAYS == "-1">
+<PDM_ELSE>
+		html += "&nbsp;in the last $args.KEEP.PAST_DAYS days.";
+	
+</PDM_IF>
+	html += "</span></td></tr></table>";
+	return html;
+}
+//
+function fmtFAQRating(value) 
+{
+	var buRating = 0;
+	if(!isNaN (value))
+		buRating = Math.round(value);									
+	rs.data(buRating);
+}
+//
+function getAvgRating(value)
+{
+	var strRate = getAvgRatingText(value, vote_count);
+	rs.data(strRate);
+}
+// Get average time in "n days n hours" format
+function getAvgTime(value1, value2)
+{
+	var time;
+	if (parseInt(value2) == 0 || value2 == "" || value2 == "N/A")
+	{
+		time = msgtext("N/A");
+	}
+	else
+	{
+		var value = parseInt(parseInt(value1)/parseInt(value2));
+		var days = parseInt(value/24);
+		var hours = parseInt(value - days*24);
+		if (days>0)
+		{
+			time = msgtext("%1_days_%2_hours", days, hours);
+		}
+		else
+		{
+			time = msgtext("%1_hours", hours);
+		}
+	}
+	return time;
+}
+//
+function getHitsLink(value)
+{
+	var html;
+    if ( value == '0' )
+      html = value;
+    else
+      html = "<a " + 
+             "href=\"javascript:popup_window('','SEARCH', 0, 0, 'directories=no,location=no,menubar=no,status=no', " + 
+             "'FACTORY=BU_TRANS', 'QBE.EQ.DOC_ID=" + doc_id + "', 'KEEP.DOC_ID=" + doc_id +"'"+ 
+             ",'KEEP.IsPopUp=1'" + ",'DOC_ID=" + doc_id + "')\">" + value + "</a>\n";
+    rs.data(html);
+}
+//
+function getSolutionCountLink(value)
+{
+	var html = "";
+	
+	var features = "directories=no,location=no,menubar=no,status=no,height=" + popupHeight(XSMALL_POPUP) + ",width=" + popupWidth(XSMALL_POPUP);
+	
+<PDM_IF "$cst.access_type.licensed" == "1">
+<PDM_IF 0>Allow this navigation for license users only</PDM_IF>
+	if ( value != '0' )
+	  html = "<a " + 
+	         "href=\"javascript:popup_window('','SHOW_DETAIL', 0, 0,'" + features + 
+		     "', 'HTMPL=kt_ticket_summary.htmpl' ,'KEEP.IsPopUp=1' ,'PERSID=KD:" + doc_id + "')\">" + value + "</a>\n";
+	else
+</PDM_IF>
+	  html = value;
+    rs.data(html);
+}
+//
+var managerFlag = "$args.KEEP.MANAGER_FLAG";
+var categoryOwnerFlag = "$args.KEEP.CATEGORY_OWNER_FLAG";
+var doc_id = 0;
+var vote_count = 0;
+
+if (managerFlag == "0" && categoryOwnerFlag == "0") {
+	var msgFoundNone = "No documents found";
+	var msgFound1 = "1 documents found";
+	var msgFound = "%1 documents found";
+	var msgFoundMore = "%1 documents found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired documents";
+	
+	var imgPath='$CAisd' + '/img/';
+	var img = "";
+	var doctype = "";
+	
+<PDM_MACRO name=lsStart search_type=GET_DOB>
+<PDM_MACRO name=lsWrite both=no text="doctype = \"@{list.DOC_TYPE_ID:0}\";">
+<PDM_MACRO name=lsWrite both=no text="active_state = (\"@{list.ACTIVE_STATE:0}\");">
+<PDM_MACRO name=lsWrite both=yes text="if (doctype == '2') img = imgPath + 'tree.gif'; else img = imgPath + 'doc.gif';">
+<PDM_MACRO name=lsWrite both=no text="if (active_state == '100') img = ahdtop.GetFileTypeImage(\"@{list.FILE_ID.file_type:0}\")">
+<PDM_MACRO name=lsWrite both=no text="if (active_state == '200') img = imgPath + 'qa_FileType_16.png';">
+<PDM_MACRO name=lsCol hdr="ID" attr=id justify="center">
+<PDM_MACRO name=lsCol hdr="Tytuł" attr=TITLE exportfmt=ShowLink img=img link=yes>
+<PDM_MACRO name=lsCol hdr="Ostatnie trafienie" attr=LAST_HIT_DATE justify="center">
+<PDM_MACRO name=lsWrite text="doc_id = \"@{list.id:}\";">
+<PDM_MACRO name=lsWrite text="vote_count = \"@{list.VOTE_COUNT:}\";">
+<PDM_MACRO name=lsCol hdr="Trafienia" attr=HITS export=no fmtfunc=getHitsLink justify="center" sort=no>
+<PDM_MACRO name=lsCol hdr="Liczba głosów" attr=VOTE_COUNT justify="center">
+<PDM_MACRO name=lsCol hdr="Średnia głosów" attr=AVG_RATING export=no fmtfunc=getAvgRating justify="center" sort=no>
+<PDM_MACRO name=lsCol hdr="Licznik roziwązań" attr=SD_ACCEPTED_HITS export=no fmtfunc=getSolutionCountLink justify="center" sort=no>
+<PDM_MACRO name=lsCol hdr="Licznik SelfService" attr=USER_SLV_CNT justify="center">
+<PDM_MACRO name=lsCol hdr="Ocena FAQ" attr=BU_RESULT export=no fmtfunc=fmtFAQRating justify="center" sort=no>
+<PDM_MACRO name=lsEnd factory=KD>
+}
+</script>
+</table>
+</PDM_IF>
+</PDM_LIST>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_kt_report_card.htmpl ASPEN.6 2011/02/24 10:22:16 ralje02 Exp $
+</PDM_IF>
+
+
+
+<PDM_WSP>

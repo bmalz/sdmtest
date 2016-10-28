@@ -1,0 +1,267 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// cmdb_detail.htmpl
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+PURPOSE:
+    Display the detail of a single cmdb CI
+    invoked via PDM_INCLUDE FILE=cmdb_detail.htmpl extension=xxxx
+
+VARIABLES:
+    object nr   args    The arguments from the 'last' form
+                        See $NX_ROOT/bopcfg/majic/asset.maj
+                        and /opt/CApdm/bopcfg/majic/assetx.maj
+                        and /opt/CApdm/bopcfg/majic/nr.maj
+                        definition of attributes for 'OBJECT nr'
+    string  Context     Variable contains a value of family from the
+      database.
+    string Extension    Contains the object name of the asset extension
+                        (family.extension_name), if any.  Use in
+                        preference to Context for testing extension,
+                        as the family.sym value in Context is editable.
+    Values inherited from the PDM_INCLUDE                        
+      $PROP.extension                    (There is no default value) 
+      $PROP.SHOW_MAC_ADDRESS             (Default value "YES")
+      $PROP.SHOW_DNS_NAME                (Default value "YES")
+      $PROP.SHOW_SYSTEM_NAME             (Default value "YES") (This is mapped to system_name attribute and the default Label displayed is "Host name")
+      $PROP.LABEL_SYSTEM_NAME            (Default value "Nazwa Hosta")
+      $PROP.SHOW_SERIAL_NUMBER           (Default value "YES")
+      $PROP.SHOW_SYSTEM_NAME_MULTILINE   (Default value "NO")
+      $PROP.LABEL_ALT_CI_ID              (Default value "Alt CI ID")
+      $prop.LABEL_DNS_NAME               (Default value "Nazwa DNS ")
+      $prop.LABEL_MAC_ADDRESS            (Default value "MAC Adres")
+</PDM_IF>
+
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE="YES">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły elementu konfiguracji $args.name"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowanie elementu konfiguracji $args.name"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie elementu konfiguracji $args.name "</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+//alert("Extension=$Extension");
+cfgMachineName = "$SESSION.MachineName";
+argPersistentID = "$args.persistent_id";
+argCstID = "$cst.id";
+argName = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name"</PDM_FMT>;
+cfgDateFormat = "$date_format";
+enableBtns = true;
+if (cfgUserAuth < 2) enableBtns = false;
+cfgAccessNotify = "$ACCESS.notify";
+argID = "$args.id";
+cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+argSearchSqlClause = "id = U'$args.id'";
+rptName = new Array("cmdb_ci_sum.rpt", "cmdb_ci_dtl.rpt");
+</script>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/bsiajaxscripts.js"></script>
+<script type="text/javascript">
+
+function copy_from_nr() {} // provides copying in the detail page opened from the service desk tab. 
+function copy_from_parent() {} // provides copying in the detail page opened from the admin tab.
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function check_uam_asset(server_name, unit_domain_id, unit_id, type, domain_id)
+{
+  if (server_name == "ERROR")
+  {
+    next_workframe("UPD_WORKFRAME");
+      return;
+  }
+
+  ImgBtnEnableButton("btnuam", true);
+  next_workframe("UPD_WORKFRAME");
+}
+
+function checkUAM()
+{
+  if ("$env.NX_URL_UAM" != "")
+    upd_workframe('GET_UAM_ASSET', "UAM_URL=parent.ahdframe.check_uam_asset(\"%server_name\", \"%unit_domain_id\", \"%unit_id\", \"%type\", \"%domain_id\")", 'PERSISTENT_ID=' + argPersistentID );
+}
+
+</script>
+
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd filename="Configuration Item" key="$args.name">
+<center>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=nr>
+
+if ("$env.NX_SERVLET_SERVER_URL" != "") {
+
+<PDM_MACRO name=button Caption="Asset Viewer" Disabled="yes" Func="invoke_ams_asset('$env.NX_SERVLET_SERVER_URL')" hotkey_name="Asset_Viewer" ID="btnams" Width=0>
+
+if ("$args.id" != "0")
+    ImgBtnEnableButton("btnams", true);
+}
+
+<PDM_IF "$prop.MultiTenancy" != "off" && '$ACCESS.Tenant_Restriction' != '1'>
+<PDM_MACRO name=button Caption="Affected Tenants" Disabled="yes" Func="list_impacted_tenants('$args.name', '$args.id')" hotkey_name="Affected_Tenants" ID="IMPACTED_TENANTS" Width=0>
+
+    if ("$args.id" != "0") {
+        ImgBtnEnableButton("IMPACTED_TENANTS", true);
+    }
+</PDM_IF>
+    
+</script>
+
+<PDM_INCLUDE FILE=cmdb_launch_federation_viewer.htmpl >
+
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+<pdm_include file="cmdb_launch_visualizer.htmpl" filename="">
+</PDM_IF>
+
+<script type="text/javascript">
+
+if (argID != 0)
+<PDM_MACRO name=button Caption="Event History" Disabled="no" Func="show_evt('nr', 'atev', argID)" hotkey_name="Event_History" ID="SHOW_EVT_HISTORY" Width=0>
+<PDM_MACRO name=dtlStart scroll=true>
+
+if (_dtl.edit && typeof ufam_restricted == "number" && 1 == ufam_restricted) 
+{
+  if ( typeof AlertMsg == "string" ) 
+  {
+    if ( AlertMsg.length == 0 )
+      AlertMsg = msgtext("Owned_by_Unicenter_Asset_Portf");
+    else
+      AlertMsg = msgtext("Owned_by_Unicenter_Asset_Portf") + "<br>" + AlertMsg;
+  }
+  else 
+  {
+    
+<PDM_MACRO name=dtlStartRow>
+    detailSetRowData(msgtext("Owned_by_Unicenter_Asset_Portf"));
+    detailWriteRow();
+  }
+}
+
+// get error message from the last CACF checkin of this object and place it in the "yellow" message area
+// error msg is returned in ci_errmsg
+  var xurl;
+  xurl = cfgCgi + "?SID=" + cfgSID;
+  xurl += "+FID=" + fid_generator(); 
+  xurl += "+FACTORY=nr";  // required
+  xurl += "+OP=GET_ERROR_MSG"; 
+  xurl += "+ARG0=$args.id";
+  var ci_errmsg="";
+
+  SyncAjaxJSCall( xurl );
+  if (ci_errmsg.length>0) AlertMsg = nx_unescape(ci_errmsg);
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr="name">
+<PDM_MACRO name=dtlLookup hdr="Klasa" attr="class" evt="onchange=\\\"cmdbClassOnClick();\\\""> //event is added to show warning message.
+<PDM_MACRO name=dtlReadonly hdr="Rodzina" attr="family">
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="delete_flag" lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Status CMDB" attr="status" lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Standard CI" attr=standard_ci>
+<PDM_IF "$prop.SHOW_SYSTEM_NAME_MULTILINE" != "YES">
+<PDM_IF "$prop.SHOW_SYSTEM_NAME" != "NO" || "$args.system_name" != "">
+                <PDM_SET args.system_name_displayed="true">
+        
+<PDM_IF "$prop.LABEL_SYSTEM_NAME" != "">
+<PDM_MACRO name=dtlTextbox hdr="$prop.LABEL_SYSTEM_NAME" attr="system_name">
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Host Name" attr="system_name">
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.SHOW_SERIAL_NUMBER" != "NO" || "$args.serial_number" != "">
+<PDM_MACRO name=dtlTextbox hdr="Serial Number" attr="serial_number">
+</PDM_IF>
+<PDM_IF "$prop.SHOW_MAC_ADDRESS" != "NO" || "$args.mac_address" != "">
+<PDM_IF "$prop.LABEL_MAC_ADDRESS" != "">
+<PDM_MACRO name=dtlTextbox hdr="$prop.LABEL_MAC_ADDRESS" attr="mac_address">
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="MAC Address" attr="mac_address">
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.LABEL_ALT_CI_ID" != "">
+<PDM_MACRO name=dtlTextbox hdr="$prop.LABEL_ALT_CI_ID" attr="asset_num">
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Alt CI ID" attr="asset_num">
+</PDM_IF>
+<PDM_IF "$prop.SHOW_DNS_NAME" != "NO" || "$args.dns_name" != "">
+<PDM_IF "$prop.LABEL_DNS_NAME" != "">
+<PDM_MACRO name=dtlTextbox hdr="$prop.LABEL_DNS_NAME" attr="dns_name">
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa DNS " attr="dns_name">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.system_name_displayed" != "true">
+<PDM_IF "$prop.SHOW_SYSTEM_NAME" != "NO">
+<PDM_IF "$prop.SHOW_SYSTEM_NAME_MULTILINE" == "YES" || "$args.system_name" != "">
+<PDM_IF "$prop.LABEL_SYSTEM_NAME" != "">
+<PDM_MACRO name=dtlTextbox hdr="$prop.LABEL_SYSTEM_NAME" attr=system_name colspan=2 rows=2 size=80>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa systemu" attr=system_name colspan=2 rows=2 size=80>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF $args.is_asset == 1 && "$env.NX_ALLOW_UNRESTRICTED_ASSET_UPD" != "Yes" >
+<PDM_MACRO name=dtlReadonly hdr="Asset?" attr=is_asset>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Asset?" attr=is_asset lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="CI?" attr=is_ci lookup=no>
+<PDM_MACRO name=dtlLookup hdr="Zastąpiony przez" attr=superseded_by>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=5 keeplinks=yes rows=2 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_INCLUDE FILE=cmdbNotebook.htmpl  extension="$prop.EXTENSION">
+
+<script type="text/javascript">
+<PDM_IF "$args.itg_url_name" != "">
+function launchIntegrateUrl() {
+url="$args.itg_url_name";
+system_name="$args.affected_resource.system_name";
+alarm_id="$args.affected_resource.alarm_id";
+host=system_name?system_name:alarm_id;
+  if(typeof host == "string" && host.length) {
+     url+="?"+"HOST="+host;
+  }
+  var w = window.open(url,"","width=850,height=600,location,alwaysRaised");
+  check_popup_blocker(w);
+}
+
+// necessary for focus on itg popup window
+window.setTimeout('launchIntegrateUrl()',0);
+</PDM_IF>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=cmdb_footer.htmpl>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP preview="FACTORY=$prop.EXTENSION" where="family.extension_name='$prop.EXTENSION'" factory=nr>

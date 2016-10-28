@@ -1,0 +1,48 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  load_properties.htmpl
+// Created: 09/24/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: load_properties.htmpl,v 1.2 2006/11/07 21:46:48 olsjo01 Exp $
+
+</PDM_IF>
+<html lang="pl">	<head>
+<PDM_PRAGMA RELEASE=110>
+		<script>
+		<!--
+			var cat_err_msg = '<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>';
+			var sink = void(0);
+
+			window.onload = function()
+			{
+				sink = parent.ahdframeset.ahdframe.sink;
+				if (cat_err_msg != "" && cat_err_msg != "updateOK") 
+				    sink.show_error(cat_err_msg);
+				init_properties();
+
+				sink.updateFID('$prop.FID');
+			}
+		//-->
+		</script>
+<PDM_INCLUDE FILE="dyn_properties.htmpl">
+	</head>
+	<body>
+	</body>
+</html>

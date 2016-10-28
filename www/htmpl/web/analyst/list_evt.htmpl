@@ -1,0 +1,164 @@
+<PDM_IF 0>
+list_evt.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Events.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Wyszukiwanie Zdarzeń";
+var hdrTitleList = "Lista Zdarzeń";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("evtsum.rpt", "evtdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+<PDM_IF "$args.KEEP.forAtyEvtList" == "1">
+   cfgCanCopy = false;
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Event">
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.noCreateBtn" == "1">
+<PDM_MACRO name=sfStart create=false factory=evt>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=evt>
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.cr_notifs.aty.code" != "">
+   document.write('<input type="hidden" name="QBE.EQ.cr_notifs.aty.code" value="$args.QBE.EQ.cr_notifs.aty.code">');
+<PDM_ELIF "$args.QBE.EQ.chg_notifs.aty.code" != "">
+   document.write('<input type="hidden" name="QBE.EQ.chg_notifs.aty.code" value="$args.QBE.EQ.chg_notifs.aty.code">');
+<PDM_ELIF "$args.QBE.EQ.ci_notifs.aty.code" != "">
+   document.write('<input type="hidden" name="QBE.EQ.ci_notifs.aty.code" value="$args.QBE.EQ.ci_notifs.aty.code">');
+<PDM_ELIF "$args.QBE.EQ.iss_notifs.aty.code" != "">
+   document.write('<input type="hidden" name="QBE.EQ.iss_notifs.aty.code" value="$args.QBE.EQ.iss_notifs.aty.code">');
+<PDM_ELIF "$args.QBE.EQ.mgs_notifs.aty.code" != "">
+   document.write('<input type="hidden" name="QBE.EQ.mgs_notifs.aty.code" value="$args.QBE.EQ.mgs_notifs.aty.code">');
+<PDM_ELIF "$args.QBE.EQ.cnt_notifs.aty.code" != "">
+   document.write('<input type="hidden" name="QBE.EQ.cnt_notifs.aty.code" value="$args.QBE.EQ.cnt_notifs.aty.code">');
+</PDM_IF>
+
+function display_obj_type() {
+   
+<PDM_IF "$args.KEEP.evt_obj_type" == "cr">
+      return "Request/Incident/Problem";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "chg">
+      return "Change Order";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "iss">
+      return "Issue";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "iss_wf">
+      return "Issue Workflow Task";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "mgs">
+      return "Managed Survey";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "cnt">
+      return "Contact";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "nr">
+      return "Configuration Item";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "rest_access">
+      return "Rest Access";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "wf">
+      return "Workflow Task";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "KD">
+      return "Knowledge Document";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "O_COMMENTS">
+      return "Knowledge Document Comment";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "KT_REPORT_CARD">
+      return "Knowledge Report Card";
+   
+<PDM_ELIF "$args.KEEP.evt_obj_type" == "sa_notif">
+      return "Assistance Session";	  
+   
+</PDM_IF>
+}
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+
+// If evt_obj_sym is blank, write out constraint but 'hide' the RO field.
+<PDM_IF "$args.KEEP.evt_obj_type" != "">
+<PDM_MACRO name=sfTextbox hdr="Typ obiektu" attr="obj_type" disabled="yes" display_value="javascript:display_obj_type();" qbe_condition="EQ" value="$args.KEEP.evt_obj_type">
+<PDM_ELIF "$args.KEEP.ForLrel" == "1">
+	document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_atyevt.htmpl>');
+	searchFilterTextDisabled("Object Type", "obj_type", 20, "$args.KEEP.obj_type", "$args.KEEP.obj_type_text", "EQ");
+	
+<PDM_ELSE>
+		searchFilterDropdown(
+		"Object Type","obj_type",""
+		,"Change Order","chg"
+		,"Issue","iss"
+		,"Issue Workflow Task","iss_wf"			
+		,"Knowledge Document","KD"
+		,"Knowledge Document Comment","O_COMMENTS"
+		,"Knowledge Report Card","KT_REPORT_CARD"
+		,"Assistance Session","sa_notif"
+		,"Managed Survey","mgs"
+		,"Request/Incident/Problem","cr"
+		,"Rest Access","rest_access"
+		,"Workflow Task","wf"
+        ,"Contact","cnt"
+        ,"Configuration Item","nr"
+		,"Task","ztask"
+		,1);
+</PDM_IF>
+<PDM_IF "$args.KEEP.restrict_settime" != "">
+<PDM_MACRO name=sfTextbox hdr=" " attr="user_settime" disabled="yes" display_value=" " qbe_condition="EQ" value="$args.KEEP.restrict_settime">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No events found";
+var msgFound1 = "1 event found";
+var msgFound = "%1 events found";
+var msgFoundMore = "%1 events found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired event";
+function for_itil(value)
+{	
+	if(listobjtypecode == "cr")
+	value = "Request/Incident/Problem";  
+rs.data(value);  
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text=" var listobjtypecode = '@{list.obj_type:}';">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_IF "$args.KEEP.forAtyEvtList" != "1">
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=70>
+<PDM_MACRO name=lsCol hdr="Typ obiektu" attr=obj_type fmtfunc=for_itil sort=no>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Czas opóźnienia" attr=delay_time>
+<PDM_MACRO name=lsCol hdr="Kalendarz" attr=work_shift>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+"@(#)$Id: list_evt.htmpl ASPEN.6 2012/03/26 16:05:15 upeha01 Exp $";
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,52 @@
+<PDM_IF 0>
+list_iss_tpl.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Issues templates.
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Templates Search";
+var hdrTitleList = "Templates List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanView = false;
+var cfgCanEdit = false;
+</SCRIPT>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=iss_tpl>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=template_name size=20>
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='delete_flag=0'>");
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Template found";
+var msgFound1 = "1 Template found";
+var msgFound = "%1 Templates found";
+var msgFoundMore = "%1 Templates found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Template";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=template_name exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description link=no>
+<PDM_MACRO name=lsEnd factory=iss_tpl>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: list_iss_tpl.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $";
+</PDM_IF>
+
+<PDM_WSP>

@@ -1,0 +1,49 @@
+<PDM_IF 0>
+***************************************************************************
+* DO NOT MODIFY THIS FILE!  This file is not migrated for new releases or
+* Service Packs, and your modifications can be lost.  You can use the file
+* std_footer_site.htmpl for site modifications.
+***************************************************************************
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  std_footer_nojquery.htmpl  
+// Created: 08/09/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains JavaScript and HTML that appear at the 
+//    bottom of every page.
+//
+////////////////////////////////////////////////////////////////////////////
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<!-- BEGIN customer/std_footer_nojquery.htmpl -->
+<script type="text/javascript">
+if (typeof std_footer_setup != "undefined")
+    std_footer_setup();
+var AlertMsg = '<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>';
+    
+if ( typeof ImgBtnEnableDeferred != "undefined" )
+   ImgBtnEnableDeferred();
+ 
+</SCRIPT>
+<PDM_INCLUDE FILE="std_footer_site.htmpl">
+<!-- END customer/std_footer_nojquery.htmpl -->
+<PDM_IF 0>
+@(#)$Id: std_footer_nojquery.htmpl ASPEN.0 2012/03/02 13:53:04 kumka02 Exp $
+</PDM_IF>

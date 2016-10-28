@@ -1,0 +1,65 @@
+<PDM_IF 0>
+acctyp_role_tab.htmpl
+
+INTENT:
+    Display a Role notebook page for the Access Type page.
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=acctyp_role_tab" factory=acctyp>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/role.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class=detailro onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class=detailro onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+// Default role data used by list form.
+var rdefs = new attached_defaults("$args.persistent_id");
+
+<PDM_OBJECT>
+function add_button_to_tab_banner() {
+<PDM_IF $ACCESS.FAC_acctyp \> 1>
+<PDM_MACRO name=button caption="Update Roles" func="update_lrel_role('acctyp', '$args.persistent_id', 'role', 'roles',  'Roles Available', 'Roles Assigned', '')" hotkey_name="Update Roles" id=UPDATE_LREL newrow=yes>
+
+   if (_dtl.edit) {
+      
+<PDM_MACRO name=button caption="Set Default Role" disabled=yes endrow=yes func="set_def_role('acctyp_role', rdefs)" hotkey_name="Set Default Role" id=SET_DEFAULT_ROLE>
+   }
+   else {
+      
+<PDM_MACRO name=button caption="Set Default Role" endrow=yes func="set_def_role('acctyp_role', rdefs)" hotkey_name="Set Default Role" id=SET_DEFAULT_ROLE>
+   }
+</PDM_IF>
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=tabBanner title="Role Settings" add_btns=true>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlDropdown hdr="Rola raportowa" attr="reporting_role" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Rola SOAP Web Service API" attr="web_service_role" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Rola narzędzia wiersza poleceń" attr="cmdline_role" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Rola PDA" attr="pda_role" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Rola REST Web Service API" attr="rest_web_service_role" size=20>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=tabList brbefore=yes btntitle="Load Attached Roles List." height=300 src="OP=SEARCH+FACTORY=acctyp_role+QBE.EQ.access_type.id=$dob.id+QBE.EQ.role_obj.delete_flag=0+KEEP.ACCTYP_ID=$args.id+KEEP.acctypUserAuth=$UserAuth">
+<PDM_MACRO name=dtlEndTable>
+
+</script>
+
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: acctyp_role_tab.htmpl ASPEN.6 2010/11/12 15:21:39 versa01 Exp $
+</PDM_IF>

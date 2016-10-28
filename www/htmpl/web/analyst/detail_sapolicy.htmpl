@@ -1,0 +1,100 @@
+<PDM_IF 0>
+detail_sapolicy.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single SOAP Web Services access policy
+INTENT:
+    Display the detail info for the SOAP Web Services Policy
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  sapolicy  args	The SOAP Web Services access policy object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT sapolicy'
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name SOAP Web Services Access Policy Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update SOAP Web Services Access Policy"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New SOAP Web Services Access Policy $args.name"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+// Called by the Add button on the Error Types tab.
+function AddErrorType() {
+   var add_url = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" + 
+                 "+OP=CREATE_NEW+FACTORY=saprobtyp+KEEP.saprobtyp_parent_code=$args.code" +
+                  "+KEEP.saprobtyp_parent_id=$args.id+KEEP.parent_persid=$args.persistent_id" +
+                  "+saprobtype_parent_form=$prop.form_name_2";
+  popupWithURL(add_url);
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="SOAP Web Services Access Policy" key="$args.name">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=sapolicy>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+if (_dtl.edit && "$args.id" == "0")
+{
+    
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code evt="onBlur=\\\"detailValidateFileName(this)\\\"">
+}
+else
+{
+    
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+}    
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag colspan=2 lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Kontakt Proxy" attr=proxy_contact>
+<PDM_MACRO name=dtlCheckbox hdr="Domyślnie" attr=is_default off="No" on="Yes">
+<PDM_IF "$args.public_key" == "">
+    detailTextboxReadonly( "Has Key", "", 1, "No", "" );
+<PDM_ELSE>
+    detailTextboxReadonly( "Has Key", "", 1, "Yes", "" );
+</PDM_IF>
+<PDM_MACRO name=dtlCheckbox hdr="Zezwól na impersonifikacje" attr=allow_impersonate off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=startNotebook hdr=sapolicy_nb>
+<PDM_MACRO name=TAB title="Access Control" file="sapolicy_ac_tab.htmpl">
+<PDM_MACRO name=TAB title="Error Types" height=300 id=sapolicy_pt_tab src="OP=SEARCH+FACTORY=saprobtyp+ADDITIONAL_WHERE=owning_policy.id=$dob.id OR is_internal=1+QBE.EQ.delete_flag=0+KEEP.forPolicyList=1+KEEP.POLICY_ID=$args.id+KEEP.noCreateBtn=1">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_sapolicy.htmpl ASPEN.4 2010/11/19 14:49:15 ralje02 Exp $
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,181 @@
+<PDM_IF 0>
+kt_admin_integration.htmpl
+WHEN PRESENTED:
+    When we need to display the kt_sd integration admin screen
+VARIABLES:
+    
+    object  
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+var lSDMappingOnID;
+var iSDMappingOnDefault;
+var iSDMappingOnValue = "$prop.SD_MAPPING_ON";
+var lSDMappingListID;
+var sSDMappingListDefault;
+var sSDMappingListValue = "$prop.SD_MAPPING";
+
+<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+	<PDM_IF "$ciProps.PROPERTY_NAME" == "SD_MAPPING_ON">
+		lSDMappingOnID = "$ciProps.id";
+		iSDMappingOnDefault = "$ciProps.PROPERTY_DEFAULT";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "SD_MAPPING">
+		lSDMappingListID = "$ciProps.id";
+		sSDMappingListDefault = "$ciProps.PROPERTY_DEFAULT";
+	</PDM_IF>
+</PDM_LIST>
+</script>
+</head>
+<body class=detailro onload=frmIntegrationOnLoad(); onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<form id=frmSDMapping name=frmSDMapping>
+<table cellSpacing=0 cellPadding=0 width='100%' class='page_header gn_container_no_border'>
+	<tr>
+		<td align=left width='99%'>Service Desk Integration</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmSDMapping')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmSDMapping')",true, "", msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table cellspacing=0 cellpadding=0 width="100%" class='gn_container_no_border'>
+	<tr>
+		<td>
+			<table width="100%" cellspacing="0" cellpadding="0" class='gn_container_no_border'>
+				<tr>
+					<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+					<td class="page_section_header_center"><span  class="page_section_header_text" >Field Mapping</span></td>
+					<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+<table>
+	<tr>
+		<td nowrap>
+			<input tabindex=100 type="checkbox" id="chkPopulate" name="chkPopulate" class="clsTextBlackWithHand" onclick="cbChecked('chkPopulate')" checked=true>
+			<span class="label" onclick="cbChecked('chkPopulate')">Populate Service Desk values from Knowledge Management</span>
+		</td>
+	</tr>
+</table>
+<table width="100%" align=center cellspacing="0" cellpadding="0" class='gn_container_no_border'>	
+	<tr>
+		<td>
+			<table width="100%" cellspacing="1" cellpadding="0" class="table gn_container_white_background">
+				<tr>
+					<td scope="col" width="20%" class="table_column_header_background"><span class="table_column_header_text_small">Service Desk</span></td>
+					<td scope="col" width="20%" class="table_column_header_background"><span class="table_column_header_text_small">Knowledge Management</span></td>
+					<td scope="col" width="30%" class="table_column_header_background"><span class="table_column_header_text_small">Populate empty Service Desk values</span></td>
+					<td scope="col" width="30%" class="table_column_header_background"><span class="table_column_header_text_small">Overwrite Service Desk values</span></td>
+				</tr>
+				<tr class="table_row">
+					<td scope="row" width="20%" class="data"><div align="left">Summary</div></td>
+					<td width="20%" class="table_row_action"><div align="left"><select tabindex=100 class="data width_100" id="sltSummary" name="sltSummary" title="Select the Knowledge Management field mapped to Service Desk summary" onchange="bDirty=true;" ><option value="TITLE">Title</option><option value="SUMMARY">Summary</option><option value="PROBLEM">Problem</option></select></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty summary from selected Knowledge field" onclick="cbChecked('cbEmpty1')" id="cbEmpty1" name="cbEmpty1" class="clsTextBlackWithHand" value=SUMMARY></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite summary from selected Knowledge field" id="cbOverWrite1" name="cbOverWrite1" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_banded_row">
+					<td scope="row" width="20%" class="data"><div align="left">Description</div></td>
+					<td width="20%" class="table_row_action"><div align="left"><select tabindex=100 class="data width_100" id="sltDescription" name="sltDescription" title="Select the Knowledge Management field mapped to Service Desk description" onchange="bDirty=true;"><option value="TITLE">Title</option><option value="SUMMARY">Summary</option><option value="PROBLEM">Problem</option></select></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty description from selected Knowledge field" onclick="cbChecked('cbEmpty2')" id="cbEmpty2" name="cbEmpty2" class="clsTextBlackWithHand" value="DESCRIPTION"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite description from selected Knowledge field" id="cbOverWrite2" name="cbOverWrite2" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_row">
+					<td scope="row" width="20%" class="data"><div align="left">Root Cause</div></td>
+					<td width="20%" class="data"><div align="left">Root Cause</div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty root cause from Knowledge root cause" onclick="cbChecked('cbEmpty3')" id="cbEmpty3" name="cbEmpty3" class="clsTextBlackWithHand" value="ROOTCAUSE"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite root cause from Knowledge root cause" id="cbOverWrite3" name="cbOverWrite3" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_banded_row">
+					<td scope="row" width="20%" class="data"><div align="left">Product</div></td>
+					<td width="20%" class="data"><div align="left">Product</div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty product from Knowledge product" onclick="cbChecked('cbEmpty4')" id="cbEmpty4" name="cbEmpty4" class="clsTextBlackWithHand" value="PRODUCT"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite product from Knowledge product" id="cbOverWrite4" name="cbOverWrite4" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_row">
+					<td scope="row" width="20%" class="data"><div align="left">Configuration Item</div></td>
+					<td width="20%" class="data"><div align="left">Configuration Item</div></td>
+                        <td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty configuration item from Knowledge configuration item" onclick="cbChecked('cbEmpty5')" id="cbEmpty5" name="cbEmpty5" class="clsTextBlackWithHand" value="ASSET"></div></td>
+                        <td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite configuration item from Knowledge configuration item" id="cbOverWrite5" name="cbOverWrite5" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_banded_row">
+					<td scope="row" width="20%" class="data"><div align="left">Severity</div></td>
+					<td width="20%" class="data"><div align="left">Severity</div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty severity from Knowledge severity" onclick="cbChecked('cbEmpty6')" id="cbEmpty6" name="cbEmpty6" class="clsTextBlackWithHand" value="SEVERITY"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite severity from Knowledge severity" id="cbOverWrite6" name="cbOverWrite6" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_row">
+					<td scope="row" width="20%" class="data"><div align="left">Impact</div></td>
+					<td width="20%" class="data"><div align="left">Impact</div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty impact from Knowledge impact" onclick="cbChecked('cbEmpty7')" id="cbEmpty7" name="cbEmpty7" class="clsTextBlackWithHand" value="IMPACT"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite impact from Knowledge impact" id="cbOverWrite7" name="cbOverWrite7" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_banded_row">
+					<td scope="row" width="20%" class="data"><div align="left">Urgency</div></td>
+					<td width="20%" class="data"><div align="left">Urgency</div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty urgency from Knowledge urgency" onclick="cbChecked('cbEmpty8')" id="cbEmpty8" name="cbEmpty8" class="clsTextBlackWithHand" value="URGENCY"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite urgency from Knowledge urgency" id="cbOverWrite8" name="cbOverWrite8" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_row">
+					<td scope="row" width="20%" class="data"><div align="left">Priority</div></td>
+					<td width="20%" class="data"><div align="left">Priority</div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty priority from Knowledge priority" onclick="cbChecked('cbEmpty9')" id="cbEmpty9" name="cbEmpty9" class="clsTextBlackWithHand" value="PRIORITY"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite priority from Knowledge priority" id="cbOverWrite9" name="cbOverWrite9" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_banded_row">
+				    <td scope="row" width="20%" class="data"><div align="left">Problem/Incident/Request Area</div></td>
+				    <td width="20%" class="data"><div align="left">Category</div></td>
+				    <td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty request area from Knowledge category" onclick="cbChecked('cbEmpty10')" id="cbEmpty10" name="cbEmpty10" class="clsTextBlackWithHand" value="CATEGORY"></div></td>
+				    <td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite request area from Knowledge category" id="cbOverWrite10" name="cbOverWrite10" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				<tr class="table_row">
+					<td scope="row" width="20%" class="data"><div align="left">Parent</div></td>
+					<td width="20%" class="data"><div align="left">Parent</div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty parent from Knowledge parent" onclick="cbChecked('cbEmpty11')" id="cbEmpty11" name="cbEmpty11" class="clsTextBlackWithHand" value="PARENT"></div></td>
+					<td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite parent from Knowledge parent" id="cbOverWrite11" name="cbOverWrite11" class="clsTextBlackWithHand" disabled=true></div></td>
+				</tr>
+				    <tr class="table_banded_row">
+					    <td scope="row" width="20%" class="data"><div align="left">Problem</div></td>
+					    <td width="20%" class="data"><div align="left">Problem</div></td>
+					    <td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Populate empty parent from Knowledge problem" onclick="cbChecked('cbEmpty12')" id="cbEmpty12" name="cbEmpty12" class="clsTextBlackWithHand" value="PROBLEM"></div></td>
+					    <td width="30%" class="data"><div align="center"><input tabindex=100 type="checkbox" title="Overwrite parent from Knowledge problem" id="cbOverWrite12" name="cbOverWrite12" class="clsTextBlackWithHand" disabled=true></div></td>
+				    </tr>
+			</table>		
+		</td>
+	</tr>
+</table>
+<script>
+	endScrollbar();
+</script>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

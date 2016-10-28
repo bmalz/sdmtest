@@ -1,0 +1,166 @@
+<PDM_IF 0>
+$Id: kt_architect_KCATs.htmpl,v 1.2 2006/11/08 00:52:58 olsjo01 Exp $
+kt_architect_KCATs.htmpl
+WHEN PRESENTED:
+	When we need to display the knowledge tree categories
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="kt_architect.htmpl">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl NoRClickMenu=1 busy=no>
+<script language=javascript>
+//global vars
+var m_iUserPreferences = 0;
+var m_bHasPreferences = false;
+var m_pref_id = 0;
+var m_lTreeId = 0;
+//
+var m_sArchitectListKDPage = "$args.ARCHITECT_LIST_PAGE";
+if (m_sArchitectListKDPage != "list_architect_KDs_Pref.htmpl")
+{
+	m_sArchitectListKDPage = "list_architect_KDs.htmpl";
+}
+var bIsFirstload = true;
+///////////////////////////////////////////////////////////////////////////////////////////////
+//	FUNCTION:UpdateListKDPage
+//	This function is to be called after saving new prefrences settings.
+///////////////////////////////////////////////////////////////////////////////////////////////
+function setListKDsPage(sNewPage)
+{
+	m_sArchitectListKDPage = sNewPage;
+	if (m_sArchitectListKDPage != "list_architect_KDs_Pref.htmpl")//To make sure all is OK
+	{
+		m_sArchitectListKDPage = "list_architect_KDs.htmpl";
+	}	
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+//	FUNCTION:UpdateListKDPage
+//	This function is to be called from detail_usP_PREFERENCES.htmpl 
+//	after saving new prefrences settings.
+///////////////////////////////////////////////////////////////////////////////////////////////
+function UpdateListKDsPageAfterPrefSave()
+{
+	var url=cfgCgi+"?SID="+cfgSID+
+	"+FID="+fid_generator()+
+	"+OP=GET_ARCHITECT_LIST_PAGE";
+	var oDivArcList = document.getElementById("getArchitectListPageFrame");
+	oDivArcList.location.href = url;
+}
+//
+function onUnLoad()
+{
+	try
+	{
+		ahdtop.SetArchitectTreeWindow(null);
+	}
+	catch(e)
+	{
+	}
+}
+function CatTreeOnClick(lCurrCatID,sCurrPathIDs,sCurrPathText)
+{
+	ahdframe.parent.setCurrentIndex(lCurrCatID);
+	ahdframe.parent.setCurrentIndexPath(sCurrPathText);
+	ahdframe.parent.setCurrentRelationalPath(sCurrPathIDs);
+	var bShowDetails = ahdframe.parent.getShowDetails();
+	
+	if (bIsFirstload)
+	{
+		bIsFirstload = false;
+		var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=KD+HTMPL=" + m_sArchitectListKDPage + 
+			"+sortDescState=1+KEEP.ShowDetails=" + bShowDetails + 
+			"+KEEP.ADDITIONAL_WHERE=DOC_LINKS.INDEX_ID=1 AND ACTIVE_STATE>=0";
+		url+=GetPermissionsWC();
+		
+		ahdframe.parent.frmKDs.location=url;
+		window.focus();
+		return;
+	}
+	
+	var m_arrIDs=sCurrPathIDs.split("-");	
+	//-3 == Inbox
+	//-2 == Group Inbox
+	//-1 == Unnassigned
+	LoadSkeletons(m_arrIDs[m_arrIDs.length-1], sCurrPathIDs, bShowDetails);
+	window.focus();
+}
+//
+function LoadSkeletons(nIndex, sIndexPath, bShowDetails, sWhereClause)
+{
+	if(typeof sWhereClause == "undefined")
+	{
+		sWhereClause = "";
+	}
+	sWhereClause = system_GetXMLSignIn(sWhereClause);
+	if(sIndexPath.search("QBE") != -1 || sIndexPath.search("ADDITIONAL_WHERE") != -1)
+	{
+		var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=KD+HTMPL=" + m_sArchitectListKDPage + "+KEEP.ShowDetails=" + bShowDetails + "+" + sIndexPath;
+		if(sWhereClause != "")   
+			url += "+ADDITIONAL_WHERE=" + nx_escape(sWhereClause);
+	}
+	else
+	{
+		var sIndexCriteria;
+		if (ahdtop.GetSearchInChildKCAT())
+		{
+			sIndexCriteria = nx_escape("(DOC_LINKS.INDEX_ID=" + nIndex + " or DOC_LINKS.RELATIONAL_ID like '" + sIndexPath + "-%')");
+		}
+		else
+		{
+			sIndexCriteria = "DOC_LINKS.INDEX_ID=" + nIndex;
+		}
+		var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=KD+HTMPL=" + m_sArchitectListKDPage + 
+				"+KEEP.ShowDetails=" + bShowDetails + "+ADDITIONAL_WHERE=" + sIndexCriteria + GetPermissionsWC() +" AND ACTIVE_STATE>=0";
+		if(sWhereClause != "")   
+			url += " AND " + nx_escape(sWhereClause);
+	}
+
+	var ARC_DOCS_TO_DISPLAY = ahdtop.GetUSPPreferences("ARC_DOCS_TO_DISPLAY");	
+	url += "+DOMSET=KD_list_web_id+KEEP.cur_sort_key=id+KEEP.IsPopUp=$args.KEEP.IsPopUp+KEEP.RowsPerPage=" + ARC_DOCS_TO_DISPLAY;
+	ahdframe.parent.frmKDs.location=url;
+}
+//
+function window_onload()
+{
+	m_lTreeId = InitTree();
+	ahdframe.parent.setTreeId(m_lTreeId);
+	ahdtop.SetArchitectTreeWindow(window);
+}
+//
+function GetTreeId()
+{
+	return m_lTreeId;
+}
+
+function GetPermissionsWC()
+{
+	var sPermissionsWC = "";
+	
+	if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+			sPermissionsWC = " AND NOT ACTIVE_STATE=200";
+	if (!ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH"))
+			sPermissionsWC += " AND NOT ACTIVE_STATE=100";
+	return sPermissionsWC;
+}
+//Sends a handle to the list page - used to send the Alert message when this is the opener or opener.parent
+function getAlertMsgWindow_prv()
+{
+	return ahdframe;
+}
+
+//
+</script>
+<PDM_MACRO NAME=kt_Categories_Tree menu="ARCHITECT" iframe=no>
+</HEAD>
+<frameset rows="*,0,0" onload="window_onload()" onunload="onUnLoad();"
+          frameborder=0 framespacing=0>
+<frame id=KTCatTree name=KTCatTree src="$CAisd/html/empty.html"
+       title="KT Architect Category Tree">
+<frame id=KTCatData name=KTCatData src="$CAisd/html/empty.html"
+       title="Hidden frame - do not navigate here">
+<frame id=getArchitectListPageFrame name=getArchitectListPageFrame
+       src="$CAisd/html/empty.html"
+       title="Hidden frame - do not navigate here">
+</frameset>
+</HTML>

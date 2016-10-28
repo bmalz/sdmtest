@@ -1,0 +1,149 @@
+<PDM_IF 0>
+delayed_server_response.htmpl
+WHEN PRESENTED:
+    When a server request exceeds a specified wait threshold
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<title>Delayed Server Response</TITLE>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/imgbutton.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ajax.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+
+var cfgCgi = "$cgi";
+var cfgSID = "$SESSION.SID";
+var retryInterval = $env.NX_DBMS_DELAY_RETRY - 0;
+if ( retryInterval <= 2000 )
+  retryInterval = 2000;
+var connectionId = $args.CONN_ID - 0;
+var downTime = Date();
+var parentBody = null;
+var popupDiv = null;
+
+function doThisOnload()
+{
+  var e = document.getElementById("downSince");
+  if ( e != null )
+    e.innerHTML = downTime.toLocaleString();
+  scheduleRetry();
+
+  // If this is running in a workframe, overlay the main page
+  // For attmnt_upload_popup.htmpl, the hidden frame for doing 
+  // CREATE_NEW is IFAttmnt.
+  if ( window.name.match(/workframe/) || 
+       window.name.match(/IFAttmnt/) ) {
+    var w = parent.ahdframe;
+    var body = w.document.getElementsByTagName("body");
+    var content = document.getElementById("content");
+    if ( typeof w == "object" && w != null && content != null &&
+         body.length > 0 && body[0] != null ) {
+
+      parentBody = body[0];
+
+      popupDiv = w.document.createElement("div");
+      popupDiv.style.position = "absolute";
+      popupDiv.style.left = "0px";
+      popupDiv.style.top = "0px";
+      popupDiv.style.width = "100%";
+      popupDiv.style.height = "100%";
+      popupDiv.style.backgroundColor = "white";
+      popupDiv.style.zIndex = "1000";
+      popupDiv.innerHTML = content.innerHTML;
+
+      parentBody.appendChild(popupDiv);
+    }
+  }
+}
+
+function scheduleRetry()
+{
+  var e = document.getElementById("nextCheck");
+  if ( e != null ) {
+    var retryTime = Date((new Date()).getTime()+retryInterval);
+    e.innerHTML = retryTime.toLocaleString();
+    if ( popupDiv != null ) {
+      var content = document.getElementById("content");
+      if ( content != null )
+        popupDiv.innerHTML = content.innerHTML;
+    }
+  }
+  window.setTimeout("checkZombieConnection()",retryInterval);
+}
+
+function checkZombieConnection()
+{
+  var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+            "+OP=CHECK_ZOMBIE_CONNECTION+connectionId=" + connectionId;
+  var response = SyncAjaxCall(url);
+  switch( response.substring(0,1) ) {
+    case "0": 
+      // "0" => still no response from background; wait another 2 seconds
+      scheduleRetry();
+      break;
+  
+    case "1":
+      // "1" => Background has finally responded!
+      if ( popupDiv != null )
+        parentBody.removeChild(popupDiv);
+      url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+            "+OP=REVIVE_ZOMBIE_CONNECTION+connectionId=" + connectionId;
+      window.location.replace(url);
+      break;
+  
+    default:
+      // Anything other than "0" or "1" => error
+      alert(response);
+      break;
+  }
+}
+
+function closeForm()
+{
+  var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+            "+OP=SUSPEND_ZOMBIE_CONNECTION+connectionId=" + connectionId;
+  var response = SyncAjaxCall(url);
+  std_head_setup();
+  if ( ahdframeset != ahdtop )
+    ahdframeset.close();
+  else { 
+    var w = window;
+    if ( window.name.match(/workframe/) || 
+        window.name.match(/IFAttmnt/) )
+      w = parent.ahdframe;
+    w.upd_specific_frame('sd','bin_form_np.htmpl');rena
+  }
+}
+</script>
+</head>
+<body onLoad="doThisOnload()">
+<div id=content>
+<div style="width:60%;margin-left:20%;margin-top:10%;border:1px solid blank;padding:5px">
+<center>
+<h2>Delayed Server Response</h2>
+</center>
+The server is taking an unusually long length of time to process your request.  Your transaction is executing, and should complete soon.  When it completes, this window will refresh automatically.<p>If you like, you can press the Close button below to close this window and return to working with $ProductName.</p><p>For further information, please contact your CA Service Desk administrator.</p>
+<center>
+<script type="text/javascript">
+<PDM_MACRO NAME=button ID=Close 
+           Caption="Close Form"
+           hotkey_name="Close Form"
+           Func="closeForm()"
+           Tooltip="Close original form and allow request to execute in background">
+</script>
+</center>
+<br>Session($SESSION.SID)
+<br>Connection($args.CONN_ID)
+<br>Delayed Since(<span id=downSince></span>)
+<br>Next Server Check(<span id=nextCheck></span>)
+</div>
+</div>
+
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: delayed_server_response.htmpl ASPEN.1 2011/10/24 11:35:50 visan03 Exp $
+</PDM_IF>

@@ -1,0 +1,135 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  prompt_for_knowledge.htmpl
+// Created: 08/09/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: prompt_for_knowledge.htmpl,v 1.4 2007/01/04 22:59:55 tuach01 Exp $
+</PDM_IF>
+<html lang="en">	<head>
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript">	
+var form_title = "Search Knowledge Base";
+</script>			
+<PDM_INCLUDE FILE=std_head.htmpl>
+		<script>
+			function GetKeywords()
+			{
+				var f = document.forms[0];
+				var e = f.elements["keywords"];
+
+				return e.value;
+			}
+			
+			function backfill_knowledge_search(keywords, itilinfo)
+			{
+			  if(keywords != null)
+			  {
+			   	 if(keywords.length > 0)
+			   	 {
+					if (typeof window.opener == "object" && typeof window.opener.prompt_for_knowledge != "undefined")
+							window.opener.prompt_for_knowledge_backfill(keywords, itilinfo);
+					if (typeof ahdtop.checked_knowledge == "boolean"  && ahdtop.checked_knowledge == false)
+							ahdtop.checked_knowledge = true;
+
+					window.close();
+			   	  }
+			   	  else
+			   	  {
+			   		alertmsg("Please_enter_a_keyword_to_proc");
+					return;
+			     	  }
+			   }
+			   else
+			   {
+			    	if (typeof window.opener == "object" && typeof window.opener.prompt_for_knowledge != "undefined")
+			   	 	 window.opener.prompt_for_knowledge_backfill(null, itilinfo);
+			   	 window.close();
+			   }
+			}
+			
+			function set_focus()
+			{
+				if (typeof document == "object" &&
+					typeof document.forms == "object" &&
+					typeof document.forms["search"] == "object" &&
+					typeof document.forms["search"].elements == "object" &&
+					typeof document.forms["search"].elements["keywords"] == "object")
+					{
+						document.forms["search"].elements["keywords"].focus();
+						return false;
+					}
+				else
+					return true;
+			}
+		</script>
+		<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+	</head>
+	<body  onload="return set_focus();">
+		<div>
+			<script type="text/javascript">
+				document.writeln(generate_basic_form_header_html());
+			</script>
+		</div>	
+					<table class="page_header_main">
+						<tr class="page_header_row">
+							<td class="page_header_title_container">Search Knowledge Base</td>
+							<td class="page_header_buttons_right">
+								<script type="text/javascript">
+								 <PDM_MACRO NAME=button                       
+								     id="btnOK"                              
+								     caption="OK[k]"     
+								     func="backfill_knowledge_search(GetKeywords(),'$args.KEEP.incident');"         
+								     hotkey_name="OK[k]"                      
+								     newrow=yes >                             
+								 <PDM_MACRO NAME=button                       
+								     id="btnCANCEL"                              
+								     caption="Cancel[n]" 
+								     func="backfill_knowledge_search(null,'$args.KEEP.incident');"                    
+								     hotkey_name="Cancel[n]"                  
+								     btnType=negative                         
+								     endrow=yes >                             
+								</script>
+							</td>
+						</tr>
+					</table>
+					<table cellpadding='0' cellpsacing='0' class='gn_width_100pct page_section'>
+						<tr>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
+								<script>
+								var subtext = "";
+								<PDM_IF "$prop.user_type" == "customer">
+									subtext = msgtext("an_issue");
+								<PDM_ELIF "$prop.user_type" == "employee">
+									subtext = msgtext("a_request");
+								</PDM_IF>
+								txt = msgtext("We_recommend_you_try_searching", subtext);
+								document.writeln("<p><span class='labeltext gn_text_dot8'>" + txt + "</span></p>");
+								</script>				
+								<form name="search" onsubmit="backfill_knowledge_search(GetKeywords(),'$args.KEEP.incident'); return false;">
+								<div class="gn_content_center"><input class="labeltext gn_text_dot8" type="text" name="keywords" size="80"></div><br>
+								</form
+							</td>
+						</tr>
+					</table>
+	</body>
+</html>

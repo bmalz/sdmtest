@@ -1,0 +1,27 @@
+<PDM_IF 0>
+wsperror.htmpl
+WHEN PRESENTED:
+    When a user with no WSP authorization attempts to login
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=ahdtop.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<title>Web Screen Painter Not Authorized</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="messages">
+<div style='text-align: center'>
+<h1>Web Screen Painter Not Authorized</h1>
+You are not authorized for access to WSP.
+Please contact your $ProductName administrator to arrange
+for authorization.
+</div>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: wsperror.htmpl ASPEN.3 2011/10/24 11:35:50 visan03 Exp $
+</PDM_IF>

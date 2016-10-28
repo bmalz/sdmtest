@@ -1,0 +1,58 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    Load a new level the menu tree.
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argFactory = "menu_tree";
+var argIndex = "$args.KEEP.Index" - 0;
+var MenuTreeCaller;
+var m_lArrayNumber = '$args.lArrayNumber';
+var nx_kt = "$env.NX_KT";
+
+MenuTreeCaller  = parent.ahdframeset.menuTreeWindows[m_lArrayNumber];
+if ( typeof MenuTreeCaller == "object" && MenuTreeCaller != null ) 
+{
+    var objTree = MenuTreeCaller.GetTreeFrame();
+    if ( typeof objTree.HierSetCurrFolder == "function")
+    {
+        objTree.GetDataStart();
+        var sNodeCaption;
+        <PDM_LIST PREFIX=list FACTORY=menu_tree WHERE="parent_id = $args.PRN_ID" ORDER_BY = "caption">
+        var type = "$list.resource.type" - 0;
+        if ( type == 0 ||
+             "$list.resource" == "" ||
+             ( type == 1 && nx_kt == "Yes" ) ||
+             ( type == 2 && ahdtop.cfgMultiTenancy != "off" ) || 
+             ( type == 3 && ahdtop.cfgCIA == true ) ||
+             ( type == 4 && ahdtop.m_sa_display_mrs_menu_node == true )) {
+                sNodeCaption = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$list.caption</PDM_FMT>';
+                sNodeResource = '<PDM_FMT PAD=NO ESC_STYLE=C>$list.resource.resource</PDM_FMT>';
+                objTree.GetData($list.id, sNodeCaption, $list.has_children, $list.parent_id, sNodeResource);
+        }
+        </PDM_LIST>  	
+        objTree.GetDataEnd();
+    }
+    else
+    {
+        alert ("Can't locate the tree frame");
+    }
+}
+if (!_browser.isMAC)
+    document.location.href="$CAisd/html/empty.html";
+</SCRIPT>
+</HEAD>
+<BODY>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: hierload_menu_tree.htmpl ANDERSON.1 2009/07/24 09:29:03 havja02 Exp $;
+</PDM_IF>

@@ -1,0 +1,23 @@
+<PDM_IF 0>
+$Id: kt_architect3.htmpl,v 1.3 2006/11/14 16:56:40 jenji01 Exp $
+	WHEN PRESENTED:
+	    As the Knowledge Categories popup window from the Administration tab
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<script type="text/javascript">
+var form_title="Knowledge Categories";
+</script>
+
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+<PDM_INCLUDE FILE=kt_architect_javascript.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>	
+
+<PDM_INCLUDE FILE=kt_architect_frameset.htmpl>
+
+</HTML>

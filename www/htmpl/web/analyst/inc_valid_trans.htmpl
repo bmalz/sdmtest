@@ -1,0 +1,424 @@
+<PDM_IF 0>
+inc_valid_trans.htmpl
+WHEN PRESENTED:
+	Common code for getting a list of valid status transitions
+	Input properties:
+        transStatus: initial status
+        transFactory: factory for the transition (cr_trans, in_trans, pr_trans, chg_trans or iss_trans)
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP factory=cr_trans preview="NBTAB=inc_valid_trans">
+<!-- BEGIN -->
+
+
+<!-- contains all valid transitions for $prop.transStatus on $prop.transFactory ($prop.form_name_3 and $prop.transTrigger) -->
+var default_trans_sym, default_trans_code;
+default_trans_code="$args.status";
+default_trans_sym="$args.status.sym";
+
+var lookup_status = void(0);
+var required_list = "";
+<PDM_IF "$args.MAKE_COPY" == "1" >
+var initial_trans = "1";
+<PDM_ELSE>
+var initial_trans = "$args.IS_CREATE_OPERATION";
+</PDM_IF>
+
+<PDM_IF 0>
+------------------------------------------------------------------------------
+_TCM_proxy
+---------
+This object is instantiated via a get_tcm_data() call when a form is initializing and 
+needs to load status transition rules that are relevant to the current state of the 
+ticket (starting status, tenant) from the TCM.  The purpose of the class is to allow 
+other forms to reuse the information retrieved AND allow for a centralized recording of
+certain usefull information, such as the original starting status for the ticket
+------------------------------------------------------------------------------
+</PDM_IF>
+
+function _TCM_proxy(_cfgCgi, _cfgSID, _cfgFID, _propFactory, _status)
+{
+    this.status = _status;
+    this.comment = new Object();
+    this.default_code = "";
+    this.default_sym  = "";
+    
+    this.url = _cfgCgi 
+        + "?SID=" + _cfgSID 
+        + "+FID=" + _cfgFID 
+        + "+OP=VALID_TRANSITIONS" 
+        + "+FACTORY=" + _propFactory 
+        + "+STATUS_FACTORY=$args.FACTORY_status"
+<PDM_IF $args.saved_f == 1>
+        + "+STATUS=$args.status"
+</PDM_IF>
+        + "+PERSID=$args.persistent_id"
+        + "+TENANT=$args.tenant"
+        + ((_propFactory=="cr") ? "+TYPE=$args.type" : "");
+        
+    var reply=SyncAjaxCall(this.url);
+
+    if (reply.indexOf("AHD04406") != -1) 
+    {
+        alert("ERROR calling TCM to retrieve status transition data");
+    }
+    else
+    {
+        var msg=reply.split("@");
+        
+        var idx = 3;
+        while (idx < msg.length-1)
+        {
+            this.comment[nx_unescape(msg[idx])] = msg[idx+1];
+            idx += 2;
+        }
+        
+        if (msg[0].length > 0)
+        {
+            this.default_code = alert_banner_fix_text(msg[0]);
+            this.default_sym  = alert_banner_fix_text(msg[1]);
+        }
+    }
+
+    this.comment_required = function(_status)
+    {
+        if (typeof this.comment == "object" && this.comment[nx_unescape(_status)] == "Y")
+            return true;
+        else
+            return false;
+    }
+    
+    this.has_default = function()
+    {
+        if (this.default_code == "" && this.default_sym == "")
+            return false;
+        else
+            return true;
+    }
+    
+}
+
+// we don't need the rest of this stuff if this is CAB Approval Console
+<PDM_IF "$prop.form_name" != "order_approval_console.htmpl" >    
+    
+// REVIEW(nikmi02): need to determine if this will survive during ticket
+//                  creation when the ticket tenant is changed.
+//----------------------------------------------------------------------------
+// get_tcm_data()
+// --------------
+// This retrieves the _TCM_proxy object which holds the results of a TCM query
+// to identify the characteristics of the available transitions from a given
+// status.  Because we want to avoid thrashing the TCM, we allow the Update Status
+// dialog to reuse it's parents _TCM_proxy object (when the 
+function get_tcm_data()
+{
+// We want the parent detail form to load the TCM data and have any child
+// popup windows reuse the retrieved data.  Inconveniently, one of the 
+// child popups that can include this code is detail_alg, so we must
+// exclude that form when determining whether to load the TCM data or not
+<PDM_IF "$prop.form_name_1" == "detail" && "$prop.form_name_2" != "alg" >
+    // REVIEW(nikmi02): Ideally, with a R/O form, we would be able to forgo 
+    // querying the TCM here since we don't really need any transition 
+    // information, but as the code stands currently, some of the dflt_status 
+    // handling code in detail_form.js seems to need to run in order to setup 
+    // a toggle button img?  We should fix at an opportune time
+<PDM_ELSE>
+
+    if (typeof top != "undefined" && typeof top.opener != "undefined")
+    {
+        var opnr = top.opener;
+        
+        if (typeof opnr.propFormName1 != "undefined" && opnr.propFormName1 == "detail")
+        {
+            if (typeof opnr.vtl == "object")
+            {
+                return opnr.vtl;
+            }
+        }
+    }
+</PDM_IF>
+
+    return new _TCM_proxy(cfgCgi, cfgSID, cfgFID, propFactory, "$args.status");
+}      
+
+
+
+// Create or get a reference to a _TCM_proxy object.  The instance of this
+// object that we retrieve will contain all the TCM related info relevant 
+// to the ticket and allow this form to evaluate things like the must_comment 
+// requirement (requiring comments when a particular status transition occurs)
+// and what the next default status for the ticket should be
+var vtl = get_tcm_data();
+
+// Create a dflt_status object.  This is a global object used by the 
+// detailDropdown and detailLookupEdit code and manages the behavior
+// of the default next-status button.  If the object is not present,
+// then no button will be displayed
+if (vtl.has_default())
+{
+    var dflt_status = new Object;
+    dflt_status["SET"] = vtl.default_code;
+    dflt_status["KEY"] = vtl.default_sym;
+}
+
+// REVIEW(nikmi02): need to determine what values are appopriate here
+default_trans_code = vtl.status;
+// default_trans_sym  = "Open";  
+
+ 
+
+
+
+<PDM_IF "$prop.form_name_3" == "edit" && "$prop.transTrigger" == "1" >
+
+// This talkback object is updated by the *_status_change and detail_alg 
+// forms to indicate when Update Status comments have been recorded.  It 
+// is used to determine, when saving a ticket, whether a status
+// transition's must_comment has been met or not.
+var talkback = new Object();
+
+// preSaveTrigger()
+// This method is present on a ticket detail form and is used to determine 
+// a status transition requiring comment has been made.  If so, it uses
+// the talkback object to determine whether a comment has already been
+// registered for the transition.  If not, an Update Status popup dialog
+// will be presented to the user using the DEF_CODE/DEF_SYM KEEP variables 
+// which causes the *_status_change to operate in a distinct mode.
+
+function preSaveTrigger()
+{
+    var elm = document.main_form.elements["SET.status"];
+    if (typeof elm == "object" && elm != null)
+    {
+        // For Firefox, it may not call set_required_flds() when status 
+        // is changed. Call it here. SCO30450
+        if (!_browser.isIE && 
+            (elm.value != default_trans_code))
+            set_required_flds(elm.value); 
+
+        // Check the information loaded from the VALID_TRANSITIONS call to 
+        // determine whether the transition requires a comment
+        if ( vtl.comment_required(elm.value))
+        {
+            if (typeof talkback[elm.value] == "undefined" || talkback[elm.value] == null)
+            {
+                var new_sym;
+
+                if (elm.type  == "select-one")
+                    new_sym = nx_escape(elm.options[elm.selectedIndex].text);
+                else
+                    new_sym = nx_escape(document.main_form.elements["KEY.status"].value);
+                
+                var parts = argPersistentID.split(":");
+                var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+                "+OP=UPDATE" +
+                "+ACTIVITY_LOG_TYPE=ST" +
+                "+KEEP.DEF_CODE=" + elm.value + 
+                "+KEEP.DEF_SYM=" + new_sym +
+                "+FACTORY=" + parts[0] + 
+                "+PERSID=" + argPersistentID +
+                "+HTMPL=" ;
+
+                if ( parts[0] == "cr" )       url += "request_status_change.htmpl";
+                else if ( parts[0] == "chg" ) url += "order_status_change.htmpl";
+                else if ( parts[0] == "iss" ) url += "issue_status_change.htmpl";
+
+                popupActivityWithURL(url,'status');
+
+                return false;
+            }
+        }
+    }
+    
+    // SCO27533: The detail_in form has a cross-field validation requirement that requires 
+    //           the ability to prevent a save from occuring when that validation fails
+    if (typeof preSaveTrigger2 == "function" && preSaveTrigger2 != null)
+        return preSaveTrigger2();
+        
+    return true;
+}
+</PDM_IF>
+
+
+
+
+// Note: We're dependent here on && being higher in precedence than ||, unfortunately we
+//       don't get parentheses in PDM_IF macros :(
+<PDM_IF "$prop.form_name_2" == "status_change" || "$prop.form_name_1" == "detail" && "$prop.form_name_2" == "alg">
+
+// This trigger is present on the xxxx Update Status form and the 
+// Solutions form (access from the Activities menu) and is used to signal the 
+// parent form (if it exists) that an activity log for a status change has
+// been recorded.  The attribute name on the talkback object is the key here,
+// in that it records the new status value that is being commented on.  This
+// will allow the parent form, when it is saved, to confirm that the status
+// transition it is observing is one that was commented on
+
+function preSaveTrigger()
+{
+    var new_code;
+    new_code = document.main_form.elements["SET.status"].value;
+
+    var opnr = top.opener;
+    if (opnr != null && typeof opnr.propFormName3 != "undefined" && opnr.propFormName3 == "edit") 
+    {
+        // Because the preSaveTrigger is called before validation, we need to determine
+        // whether there's a comment in the description field and set the talkback
+        // only if there is.  This prevents us from inappropriately setting the talkback
+        // when the Accept button is pressed and the required field is not present
+        var description;
+	if(typeof alg_factory=="string" && alg_factory.length > 0) {
+		switch(alg_factory) {
+			case 'alg':
+				description = document.main_form.elements["SET.alg.description"];
+				break;
+			case 'chgalg':
+				description = document.main_form.elements["SET.chgalg.description"];
+				break;
+			case 'issalg':
+				description = document.main_form.elements["SET.issalg.description"];
+				break;
+			default:
+		}
+	}
+
+        if (typeof description == "object" && typeof description.value == "string")
+        {
+            //Checking white spaces in the description text box.
+            var descLength = description.value.replace(/^\s+|\s+$/g, '').length;
+            if (descLength > 0)
+                opnr.talkback[new_code] = "$args.status";   // saving arbitrary data
+            else
+                opnr.talkback[new_code] = null;   // saving arbitrary data
+        }
+    }
+    
+    return true;
+}
+
+
+// Even though we call make_desc_required() in the update status forms after defining the
+// fields, the detailOnload() method will potentially reset the values in the dropdown.
+// Consequently, we have to rerun make_desc_required() to have the description field 
+// requirement re-evaluated based on the potentially changed status
+function detailPostOnloadAction()
+{
+
+<PDM_IF "$prop.form_name_1" == "detail" && "$prop.form_name_2" == "alg" && "$args.type" == "P">
+    // SCO 31092        
+    // The detail_alg form uses the dtlDropdown's 'initial' parameter to try to 
+    // automatically set the problem ticket's status to Known Error (KE).  This works
+    // well if the control is displayed as a dropdown, but in lookup presentation, the
+    // PDM macro doesn't work entirely, IE it sets the hidden SET.status fieldbut fails
+    // to update the visible KEY.status with the sym value.  To compensate, we use a 
+    // degenerate PDM_LIST to retrieve the sym value for the 'KE' code and stuff that
+    // into the KEY.status field manually
+    var ke_status_sym = '<PDM_LIST PREFIX=list WHERE="code=\'KE\'" FACTORY=crs_pr LOOKUP=status ESC_STYLE=JS2>$list.COMMON_NAME</PDM_LIST>';
+    if (typeof ke_status_sym == "string" && ke_status_sym.length > 0)
+    {
+        if (typeof document.main_form.elements["KEY.status"] == "object")
+        {            
+            if(typeof user_set_status != "undefined" && typeof user_set_status != null && user_set_status != "")
+			{
+				document.main_form.elements["SET.status"].value = user_set_status;
+				document.main_form.elements["KEY.status"].value = user_set_status_sym;
+			}
+			else
+			{
+				document.main_form.elements["SET.status"].value = "KE";
+				document.main_form.elements["KEY.status"].value = ke_status_sym;
+            }
+            detailSyncEditForms(document.main_form.elements["KEY.status"]);
+        }
+    }
+</PDM_IF>
+
+    var elem = document.main_form.elements["SET.status"];
+    if (typeof elem != "undefined")
+        make_desc_required(elem);
+}        
+
+
+</PDM_IF>
+
+
+
+
+// SCO29314: The specification of make_desc_required() as an onChange event handler is somewhat
+// tricky in that some scenarios (namely lookup control under Internet Explorer) the method
+// will end up being called _before_ the detailAutofill() method that is automatically 
+// spliced into the onChange event handler.  This is an inconsistency between FF and IE, but 
+// for our purposes, we avoid this issue by having the backfill_event() method do the same
+// work (redundantly, in the FF case).  It's also worth noting that the onChange event handler
+// is still important in that it supports the dropdown control scenario (where the backfill
+// event will not fire).
+function make_desc_required(e) 
+{
+    var code;
+    var statussym;
+    if (typeof e != "undefined" && e != null)
+    {
+        if (e.type  == "select-one")
+        {
+            code = nx_escape(e.value);
+            statussym = nx_escape(e.options[e.selectedIndex].text);
+        }
+        else
+            code = nx_escape(document.main_form.elements["SET.status"].value);
+    }
+    else
+    {
+<PDM_IF "$args.KEEP.DEF_CODE" == "">
+        code = default_trans_code;
+<PDM_ELSE>
+        code = def_code;
+</PDM_IF>
+    }
+
+    set_desc_required(code, statussym)
+}
+
+
+function backfill_event(form, field, value, persid, rel_attr_val, caller_type, tenantId, tenantName )
+{
+    if (field == "KEY.status")
+        set_desc_required(rel_attr_val)
+}
+
+
+function set_desc_required(status_code, status_sym)
+{
+    if (typeof vtl == "object")
+    {
+        if (vtl.comment_required(status_code)) {
+<PDM_IF "$prop.transFactory" == "chg_trans">
+            detailMakeReq("chgalg.description");
+<PDM_ELIF "$prop.transFactory" == "iss_trans">
+            detailMakeReq("issalg.description");
+<PDM_ELSE>
+            detailMakeReq("alg.description");
+</PDM_IF>
+<PDM_IF "$args.KEEP.DEF_CODE" != "">
+            if ((typeof status_sym != "undefined") && (status_sym != null) && (status_sym.length > 0))
+                show_response(msgtext("Changing_the_ticket_status_to", nx_unescape(status_sym)));
+            else       
+                show_response(msgtext("Changing_the_ticket_status_to", "$args.KEEP.DEF_SYM"));
+</PDM_IF>
+        } else {
+<PDM_IF "$prop.transFactory" == "chg_trans">
+            detailMakeReq("chgalg.description", true);
+<PDM_ELIF "$prop.transFactory" == "iss_trans">
+            detailMakeReq("issalg.description", true);
+<PDM_ELSE>
+            detailMakeReq("alg.description", true);
+</PDM_IF>
+<PDM_IF "$args.KEEP.DEF_CODE" != "">
+            clear_response();
+</PDM_IF>
+        }
+    }
+}
+</PDM_IF>
+
+
+<!-- END -->

@@ -1,0 +1,299 @@
+<PDM_IF 0>
+$Id: kd_action_unretire.htmpl,v 1.4 2007/01/04 23:11:53 tuach01 Exp $
+kd_action_unretire.htmpl
+WHEN PRESENTED:
+	When we need to display an Unretire window for the document editor
+</PDM_IF>
+<html lang="en"><head>
+<script language="JavaScript">
+	var hdrTitle = "Unretire Document ID: $args.KEEP.DOC_ID";
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="kd_action_unretire.htmpl+KEEP.DOC_ID={KD}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kd_action.js"></script>
+<script>
+  var docID = "$args.KEEP.DOC_ID";
+  var bIsAdmin = 0;
+  var bIsSelected = 0;
+  var bIsPublish = 0;
+  var iFinalActionID;
+  var iFinalStatusID;
+  var iActionOrder = 0;
+  var arrFields = new Array;
+  var arrFields2 = new Array;   //Use to store who created KD
+  var arrPublish = new Array;
+  var iDefaultID;
+  var sDefaultTask;
+  var nCount = 0;
+  var jCount = 0;
+  var strWinName = "$args.KEEP.POPUP_NAME";
+  var extraURL = "";            //extraURL is needed for MT case when need to limit the next assignee
+  var prevTaskLabel = null;
+  var doc = null;
+  var w;
+  var edit_form = 1;
+  
+  //Get the parent window reference
+  var sKDPersID = "KD:$args.KEEP.DOC_ID";
+  w = ahdtop.detailForms[sKDPersID].ahdframe;
+  
+  if (ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS")) {
+    bIsAdmin = 1;
+  }
+  
+  <PDM_LIST PREFIX=list FACTORY=CI_ACTIONS WHERE="WF_TEMPLATE_ID=$args.KEEP.TEMPLATE_ID" ESC_STYLE=C>
+    arrFields[nCount++]='$list.id';
+    arrFields[nCount++]='$list.ACTION_TITLE';
+    
+    <PDM_IF "$list.UNRETIRE " == "1">
+      iDefaultID = "$list.id";
+      sDefaultTask = "$list.ACTION_TITLE";
+      iActionOrder = "$list.ACTION_ORDER";
+      arrPublish[jCount++] = 1;
+    <PDM_ELSE>
+      arrPublish[jCount++] = 0;
+    </PDM_IF>
+    
+    arrFields[nCount++] = "$list.ACTION_ORDER";
+    arrFields[nCount++] = "$list.STATUS_CURRENT_ID";
+  </PDM_LIST>
+</script>
+</head>
+<body onLoad="frmUnretireOnLoad();" class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no >
+<script>
+function ok() {
+  if (action_in_progress()) {
+    return;
+  }
+  
+  ahdtop.saveKTAckMsgNum = 2228; // - %1 unretired
+  
+  if (!checkLength()) {
+    return;
+  }
+  
+  var sAssigneeName = doc["ASSIGNEE_ID_combo_name"].value;
+  var sAssigneeID = doc["SET.ASSIGNEE_ID"].value;
+  var sComment = doc["SET.txtComment"].value;
+  
+  var res;
+  
+  if (bIsSelected != 1) {
+    alertmsg("Please_select_a_task_before_un0"); //("Please select a task before unretiring this document.");
+    return;
+  }
+  if (bIsPublish == 1) {
+    res=confirm(msgtext("Are_you_sure_you_want_to_publi")); //"Are you sure you want to publish this document?";
+    
+    if (res) {
+      w.Publish("", "", sComment,0);
+    }
+  } else {
+    //
+    // If the assignee input box has a name but no id, then we used the 
+    // matching id corresponding to the assignee in the input box.  
+    //
+    if (sAssigneeName.length != 0 && sAssigneeID.length == 0) {
+      sAssigneeName = document.getElementById("DEFAULT_ASSIGNEE_NAME").value;
+      sAssigneeID = document.getElementById("DEFAULT_ASSIGNEE_ID").value;
+    }
+    
+    if (sAssigneeName.length == 0) {
+      alertmsg("Please_add_an_assignee_before_0"); //("Please add an assignee before unretiring this document.");
+      doc["ASSIGNEE_ID_combo_name"].focus();
+      return;
+    }
+    res=confirm(msgtext("Are_you_sure_you_want_to_unret", sAssigneeName)); //"Are you sure you want to unretire this document and assign to " + sAssigneeName + "?";
+    
+    if(res) {
+      w.Unretire(sAssigneeID, sComment, iFinalActionID, iFinalStatusID);
+    }
+  }	
+}
+function cancel() {
+  ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+
+<PDM_IF "$prop.MultiTenancy" == "on">
+  <PDM_LIST PREFIX=kdMT factory="KD" WHERE="id=$args.KEEP.DOC_ID">
+    var sTenantID = "${kdMT.tenant:}"
+    var sTenantName = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>${kdMT.tenant.name:}</PDM_FMT>';
+  </PDM_LIST>
+  
+<PDM_IF "$prop.MultiTenancy" == "on">
+    extraURL = "KEEP.backfillFactory=KD+KEEP.objectTenant=" + sTenantID + "+KEEP.objectTenantName=" + nx_escape(sTenantName);
+  
+</PDM_IF>
+</PDM_IF>
+
+function KT_REPLY(sOP, msg) { // Note this function is defined in the file "kd_action.js".
+  KT_ACTION_UNPUBLISH_ShowUnretireTask( sOP, msg, arrFields, prevTaskLabel, 
+                                        "Next Task", 
+                                        "Publish this Document", 
+                                        "Unexpected call to KT_REPLY (kd_action_unretire.htmpl) with op code of: "
+                                      ); 
+}
+function frmUnretireOnLoad() { 
+  passWinName(); //Pass the Unretire window name to document editor
+  doc = document.main_form.elements;
+  
+  var url=cfgCgi+
+		"?SID="+cfgSID+
+		"+FID="+fid_generator()+
+		"+KEEP.DOC_ID=" + $args.KEEP.DOC_ID +
+		"+OP=KT_ACTION_UNPUBLISH";
+  ahdframeset.workframe.location.href = url;
+  
+  prevTaskLabel = document.getElementById("df_2_0").innerHTML; // The initial label on the UI displaying the text "Previous Task".
+
+  // This adds the deep blue bar to the page. 
+  var divTasksPageHdr = document.createElement("div");
+  divTasksPageHdr.innerHTML = pageHeader("Previous Tasks"); 
+  document.getElementById("divTasks").appendChild(divTasksPageHdr);
+
+  // This adds 3 columns headers to the table containing the previous tasks.
+  var divTasksTableHdr = document.createElement("div");
+  divTasksTableHdr.innerHTML = tableHeader("Task Name", "Default Assignee", "Date");
+  document.getElementById("divTasks").appendChild(divTasksTableHdr);
+}
+function OnRowClick(objRow) {
+
+}
+function ShowUnretireTask(actionID, actionName, userID, userName, statusID) { 
+  bIsSelected = 1;
+  iFinalActionID = actionID;
+  iFinalStatusID = statusID;
+                                                            // This displays the original label for the "Previous Task" on the UI with a new 
+  document.getElementById("df_2_0").innerHTML = getHTMLLabel(prevTaskLabel) + actionName; // value when the user clicks on the link.
+  document.getElementById("df_2_0").style.display="";       // Previous Tasks (Label and Value)
+  document.getElementById("dflnk_3_0").style.display="";    // Assignee's link 
+  document.getElementById("df_3_0").style.display="";       // Text box for the Assignee
+  document.getElementById("req_4_0").style.display="";      // The Comment label 
+  document.getElementById("df_4_0").style.display="";       // The Comment Box to input the comment
+  document.getElementById("divTasks").style.display="none"; // The div to hold the Blue Bar, Table Columns, and the Previous Tasks 
+  
+  doc["SET.ASSIGNEE_ID"].value = userID;         
+  doc["ASSIGNEE_ID_combo_name"].value = userName; 
+}
+function btnPublish() {
+  if (action_in_progress()) {
+    return;
+  }
+  if (!checkLength()) {
+    return;
+  }
+  
+  var sAssigneeName = doc["ASSIGNEE_ID_combo_name"].value;
+  var sAssigneeID = doc["SET.ASSIGNEE_ID"].value;
+  
+  //
+  // This take care of when there is no Assignee and the Previous Tasks are being displayed, we simply used the 
+  // current user instead (the 'if)' case. In the 'else if' case we take care of when the Previous Tasks are NOT being 
+  // displayed, if there is a default assignee name with no id we then pass the default name and id to be used. 
+  //
+  if ((sAssigneeName.length == 0 || sAssigneeID.length == 0) && document.getElementById('df_3_0').style.display == "none") {
+    var sAnalystName = ahdtop.cstLastName;
+    
+    if ( ahdtop.cstFirstName != "" ) {
+      doc["ASSIGNEE_ID_combo_name"].value = sAnalystName + ", " + ahdtop.cstFirstName;
+    } else {
+      doc["ASSIGNEE_ID_combo_name"].value = sAnalystName;
+    }
+  } else if (sAssigneeName.length != 0 && sAssigneeID.length == 0 && document.getElementById('df_3_0').style.display == "") {
+    //
+    // If the assignee input box has a name but no id, then we used the 
+    // matching id corresponding to the assignee in the input box.  
+    //
+    sAssigneeName = document.getElementById("DEFAULT_ASSIGNEE_NAME").value;
+    sAssigneeID = document.getElementById("DEFAULT_ASSIGNEE_ID").value;
+  }
+
+  if (sAssigneeName.length == 0) {                  // Prompt the use for an assignee name if that field is empty.
+    alertmsg("Please_select_an_assignee_before_p"); //("Please select an assignee from the list before publishing this document.");
+    doc["ASSIGNEE_ID_combo_name"].focus();
+    return;
+  }
+
+  var sComment= doc["SET.txtComment"].value;
+  var res=confirm(msgtext("Are_you_sure_you_want_to_publi")); //"Are you sure you want to publish this document?";
+  
+  if (res) {
+    w.Publish("", "", sComment,0);
+  }
+}
+function passWinName() {
+  if ( typeof w.getWinName != "undefined" ) {
+    w.getWinName(strWinName, 4); //The getWinName() is in the detail_KD.js
+  }
+}
+function getParentWinName() {
+
+}
+function checkDefaultTask() {
+  var hasDefault = 0;
+  
+  for (var i = 0; i < arrPublish.length; i++) {
+    if (arrPublish[i] == 1) {
+      hasDefault = 1;
+      break;
+    }
+  }
+  return hasDefault;
+}
+function getHdrTitle() {
+  return nx_escape(w.hdrTitle);
+}
+function getCurrentStatus() {
+  return nx_escape("$args.KEEP.CURRENT_STATUS");
+}
+function getExtraURL() {
+  if (extraURL !="") {
+    return extraURL;
+  }
+  return "";
+}
+</script>
+<center>
+<script>
+<PDM_MACRO name=dtlForm button=false factory="USP_PROPERTIES">
+<PDM_MACRO name=button caption="OK[O]" disabled=defer func="ok()" hotkey_name="OK[O]" id=btnOK newrow="yes">
+if (ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS"))
+{
+  
+<PDM_MACRO name=button caption="Publish[P]" func="btnPublish()" hotkey_name="Publish[P]" id=btnPublish>
+}
+<PDM_MACRO name=button caption="Cancel[a]" disabled=defer endrow="yes" func="cancel()" hotkey_name="Cancel[a]" id=btnCancel>
+<PDM_IF 0>
+  Important note: the ids for the UI components using the macros are created by position starting 
+  at 0, so adding new component or interchanges the existing components will break the code. If we 
+  need to interchange or add new UI component we will need to modify the code accordingly.  
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł" attr="n/a" fmtfunc=getHdrTitle inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr="n/a" fmtfunc=getCurrentStatus inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Poprzednie zadanie" attr="n/a" inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr="ASSIGNEE_ID" common_name_attr="combo_name" extraurl="javascript:getExtraURL();" factory=agtgrp>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="txtComment" maxlength=255 rows=5 size=50>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<input type=hidden name="DEFAULT_ASSIGNEE_NAME" id="DEFAULT_ASSIGNEE_NAME" /> 
+<input type=hidden name="DEFAULT_ASSIGNEE_ID" id="DEFAULT_ASSIGNEE_ID" />
+<PDM_MACRO name=dtlEnd>
+<div name="divTasks" id="divTasks">
+</div>
+</center>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+

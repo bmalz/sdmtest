@@ -1,0 +1,170 @@
+void create_znr_user(...)
+{
+	uuid cnt_id;
+	cnt_id= argv[0];
+	uuid nr_id;
+	nr_id= argv[1];
+	string nr_name;
+	nr_name = argv[2];
+	string nr_class;
+	nr_class = argv[3];
+	
+	object gl;
+	send_wait(0, top_object(), "get_co_group");
+	if(msg_error())
+	{
+		logf(ERROR, "get_co_group: %s", msg[0]);
+		return;
+	}
+	gl = msg[0];
+	
+	send_wait(0, top_object(), "call_attr", "znr_user", "get_new_dob", NULL, NULL, gl);
+	if(msg_error()) 
+	{
+		logf(ERROR, "get_new_dob: %s", msg[0]);
+		return;
+	}
+	object new_znr_user;
+	new_znr_user = msg[0];
+	
+	new_znr_user.cnt = cnt_id;
+	new_znr_user.resource_name = nr_name;
+	new_znr_user.nr = nr_id;
+	send_wait(0, new_znr_user, "call_attr", "class", "set_val", nr_class, "INTERP");
+		if ( msg_error() ) {
+			logf(ERROR, "%s: Error on change_class: %s", method, msg[0]);
+			return;
+		}
+	
+	// save
+	send_wait(0, gl, "checkin");
+	if(msg_error())
+	{
+		logf(ERROR, "checkin: %s", msg[0]);
+	}
+}
+
+lrel_cenv_cntref::insert(...) {
+
+	string method;
+	method="lrel_cenv_cntref::insert()";
+	logf(TRACE, "%s started", method);
+	
+	// get cnt  
+	send_wait( 0, top_object(), "call_attr", "cnt", "dob_by_id", NULL, argv[3], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_id: '%s'", method, msg[0] );
+		return;
+	}
+	object cnt ;
+	cnt = msg[0] ;
+	logf(TRACE, "cnt name: %s", cnt.combo_name);
+	
+	// get nr  
+	send_wait( 0, top_object(), "call_attr", "nr", "dob_by_id", NULL, argv[6], NULL, NULL );
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on dob_by_id: '%s'", method, msg[0] );
+		return;
+	}
+	object nr ;
+	nr = msg[0] ;
+	logf(TRACE, "nr name: %s", nr.name);
+	
+	send_wait (0, nr, "get_attr_vals", 1, "class");
+	if ( msg_error() ) {
+		logf( ERROR, "%s: Error on get_attr_vals for chg: '%s'", method, msg[0] );
+		return;
+	}
+	int class_id;
+	class_id=msg[3];
+	object klasa;
+	send_wait(0, top_object(), "call_attr", "grc", "dob_by_id", 0, class_id, NULL, NULL);
+	if(msg_error())
+	{
+		logf(ERROR, "dob_by_id: %s", msg[0]);
+		return;
+	}
+	klasa = msg[0];
+	
+	logf(TRACE, "class: %s", klasa.type);
+	
+	create_znr_user(cnt.id,nr.id,nr.name,klasa.type);
+}
+
+lrel_cenv_cntref::delete(...) {
+	string method;
+	method="lrel_cenv_cntref::delete()";
+	logf(TRACE, "%s started", method);
+	
+	//string cnt_id;
+	//string nr_id;
+	//cnt_id = format("U'%s'", (string)argv[3]);
+	//nr_id = format("U'%s'", (string)argv[6]);
+	string where;
+	where = format("cnt = U'%s' AND nr = U'%s'", argv[3], argv[6]); 
+
+	logf(TRACE, "%s where clause=%s", method, where);
+
+	send_wait(0, top_object(), "call_attr", "znr_user", "sync_fetch", "MLIST_STATIC", where, -1, 0);
+	if(msg_error())
+	{
+		logf(ERROR, "%s: Error on sync_fetch", method);
+		return;
+	}
+	object list;
+	list = msg[0];
+	int count;
+	count = msg[1];
+	logf(TRACE, "Found %d znr_users", count);
+	int i;
+	object group_leader;
+	object znr_user;
+	for(i = 0; i < count; i++)
+	{
+		send_wait(0, list, "dob_by_index", "DEFAULT", i, i);
+		if(msg_error())
+		{
+			logf( ERROR, "%s: Error on dob_by_index for znr_user: '%s'", method, msg[0] );
+			return;
+		}
+		
+		znr_user = msg[0];
+		send_wait(0, top_object(), "get_co_group");
+		group_leader = msg[0];
+		send_wait(0, group_leader, "checkout", znr_user);
+		send_wait(0, znr_user, "dob_mark_delete");
+		send_wait(0, group_leader, "checkin");
+		if (msg_error()) {
+			logf(ERROR, "error deleting znr_user - %s", msg[0]);
+		} else {
+			logf(TRACE, "successfully delted znr_use");
+		}
+	}
+}
+
+test(...)
+{
+	logf(SIGNIFICANT, "test");
+	object znr_user;
+	send_wait(0, top_object(), "call_attr", "znr_user", "dob_by_id", 0, "400007", NULL, NULL);
+	if(msg_error())
+	{
+		logf(ERROR, "dob_by_sid: %s - %s", ref_num, msg[0]);
+		return;
+	}
+	znr_user = msg[0];
+	send_wait(0, top_object(), "get_co_group");
+	group_leader = msg[0];
+	send_wait(0, group_leader, "checkout", znr_user);
+	send_wait(0, znr_user, "dob_mark_delete");
+	send_wait(0, group_leader, "checkin");
+	if (msg_error()) {
+		logf(ERROR, "error deleting znr_user - %s", msg[0]);
+	} else {
+		logf(SIGNIFICANT, "successfully delted znr_use");
+	}
+	
+	//create_znr_user(cntref.cnt,cntref.nr,cntref.nr.name, "Klawiatura dedykowana");
+	//change_rels(chg.zci_old.id,chg.zci_new.id);
+	//change_replaced_status(chg);
+}

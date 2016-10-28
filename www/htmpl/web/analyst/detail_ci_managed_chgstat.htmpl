@@ -1,0 +1,86 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show the details the state of a change order managed by CACF
+//
+// History:
+//    10/05/2011 Initial Version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.code.sym} Managed Change State Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.code.sym} Update Managed Change State"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Managed Change State"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</head>
+
+<body class=detailro onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="ci_managed_chgstat">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Status zmiany" attr="code" make_required="yes">
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" make_required="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Aktywna weryfikacja zmiany" attr="verification_active">
+<PDM_MACRO name=dtlCheckbox hdr="Stan implementacji" attr="is_implementation">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Specyfikacja zmiany edytowalna" attr="can_edit_criteria">
+<PDM_MACRO name=dtlCheckbox hdr="Show Change Specification Override Buttons" attr="show_override_buttons">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Promote Change Order After Verification" attr="autopromote_chg">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_MACRO name=startNotebook hdr=ci_managed_chgstat_nb>
+<PDM_IF $args.id == 0>
+        <PDM_SET args.no_dp_option="+NO_DP=yes">
+    
+<PDM_ELSE>
+        <PDM_SET args.no_dp_option="">
+    
+</PDM_IF>
+    <PDM_SET args.prop_tab_banner="prop.tab_banner=Managed Change State History">
+    
+<PDM_MACRO name=TAB title="Managed Change State History" height=455 id=cmdb_versioning src="OP=SHOW_DETAIL+HTMPL=cmdb_versioning_tab.htmpl+FACTORY=ci_managed_chgstat+PERSID=$args.persistent_id+prop.datafilename_suffix=obj+$args.no_dp_option+$args.prop_tab_banner">
+<PDM_MACRO name=endNotebook>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_ci_managed_chgstat.htmpl ASPEN.11 2012/04/13 12:06:23 tomjo02 Exp $;
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,86 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} zCorrespondence Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Update zCorrespondence"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New zCorrespondence ${args.COMMON_NAME}"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=dtlForm factory="zCorrespondence">
+<PDM_MACRO NAME=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ korespondencji" attr=Type lookup=no>
+<PDM_MACRO name=dtlLookup hdr="Rodzaj przesyłki" attr=CorrespondenceLetter>
+<PDM_MACRO name=dtlTextbox hdr="Numer nadawczy" attr="LetterNumber">
+<PDM_MACRO name=dtlTextbox hdr="Opis przesyłki" attr="Description">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="(IN) Nadawca" attr="INSender">
+<PDM_MACRO name=dtlTextbox hdr="(IN) Nadawca Ulica" attr="INSenderStreet">
+<PDM_MACRO name=dtlTextbox hdr="(IN) Nadawca Kod pocztowy" attr="INSenderPostCode">
+<PDM_MACRO name=dtlTextbox hdr="(IN) Nadawca Miasto" attr="INSenderCity">
+<PDM_MACRO name=dtlTextbox hdr="(IN) Nadawca Państwo" attr="INSenderCountry">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="(IN) Adresat Pracownik" attr="INRecipientEmployee">
+<PDM_MACRO name=dtlLookup hdr="(IN) Adresat Organizacja" attr="INRecipientOrganization">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="(IN) Data przyjęcia" attr=INIncomeDate>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="(OUT) Adresat" attr="OUTRecipient">
+<PDM_MACRO name=dtlTextbox hdr="(OUT) Adresat Ulica" attr="OUTRecipientStreet">
+<PDM_MACRO name=dtlTextbox hdr="(OUT) Adresat Kod pocztowy" attr="OUTRecipientPostCode">
+<PDM_MACRO name=dtlTextbox hdr="(OUT) Adresat Miasto" attr="OUTRecipientCity">
+<PDM_MACRO name=dtlTextbox hdr="(OUT) Adresat Państwo" attr="OUTRecipientCountry">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="(OUT) Nadawca Pracownik" attr="OUTSenderEmployee">
+<PDM_MACRO name=dtlLookup hdr="(OUT) Nadawca Organizacja" attr="OUTSenderOrganization">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr="Note">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data modyfikacji" attr=last_mod_dt>
+<PDM_MACRO name=dtlReadonly hdr="Osoba modyfikująca" attr=last_mod_by>
+<PDM_MACRO NAME=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO NAME=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_WSP>

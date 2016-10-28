@@ -1,0 +1,11 @@
+////////////////////////////////////////////////////////////////////////
+// File:      wsp_index.sch
+// Publish Date: 07.11.2013 15:45
+// Publish User: orlen\CHMIELEWSKIMAR
+// Description:
+//   CA SD schema modifications maintained by Web Screen Painter.
+////////////////////////////////////////////////////////////////////////
+
+TABLE_INFO zCorrespondenceIncome {
+  INDEX SORT ASCENDING UNIQUE ref_num ;
+}

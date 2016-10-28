@@ -1,0 +1,90 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+ File:    cmdb_metadata_federation_viewer_site_attrs.htmpl
+
+ Purpose: Define user-defined MDR provider metadata to control how data is displayed 
+          in the CMDBf Federation Viewer. 
+          
+          Metadata needs to be defined for CMDBf data providers to: 
+             A) Equate provider attributes with CMDB attributes
+             B) Hide provider attributes from being displayed in viewer
+             C) Define provider attributes that don't equate to existing CMDB attributes
+          
+ Operands: 
+         attr             => CMDB attribute name
+         provider_attr    => MDR provider attribute name
+         provider_name    => MDR provider name
+         provider_name_regexp => Regular expression pattern to match multiple MDR provider names, 
+                                 can be specified anywhere PROVIDER_NAME can be specified.
+         hide_provider_attr ="YES" => Hides the provider attribute 
+         category         => Category name where attribute is displayed
+         attr             => MDR provider attribute name
+         heading          => Heading label for attribute
+         help             => Brief description of the attribute 
+          
+PROCEDURE          
+
+Step 1:
+   For each MDR provider attribute you want to add, add a PDM_MACRO statement to the:
+       - "COMMON ATTRIBUTES" section if the attribute applies to all families.
+       - "FAMILY ATTRIBUTES" section if the attribute applies to a specific family.
+ 
+   A) To equate provider attributes with CMDB attributes. 
+             
+      Insert a line like the one below, to either the common or family specific sections below:
+      <PDM_MACRO name=cmdbMetadata attr="***ATTR***" provider_attr="***PROVIDER_ATTR***" provider_name="***PROVIDER_NAME***" >
+
+   B) To define metadata to hide provider attributes from being displayed in the viewer.
+   
+      Insert a line like the one below, to either the common or family specific sections below:
+      <PDM_MACRO name=cmdbMetadata provider_attr="***PROVIDER_ATTR***" provider_name="***PROVIDER_NAME***" hide_provider_attr="YES" >
+      
+   C) To define metadata for provider attributes that don't equate to existing CMDB attributes.
+             
+      Insert a line like the one below, to either the common or family specific sections below:
+      <PDM_MACRO name=cmdbMetadata category="***CATEGORY***" attr="***ATTR***" heading="***HEADING***" help="***HELP***">
+       
+   Example:
+    
+       Equate the CMDB "phys_mem" attribute with the provider attribute "mdr_memory" for all providers 
+       named "myMdr" or staring with "MDR". In addition, equates "physical_memory" with "phys_mem" for all other providers.
+       
+       <PDM_MACRO name=cmdbMetadata  attr="phys_mem" provider_attr="mdr_memory" provider_name="myMdr" >
+       <PDM_MACRO name=cmdbMetadata  attr="phys_mem" provider_attr="mdr_memory" provider_name_regexp="MDR.*" >
+       <PDM_MACRO name=cmdbMetadata  attr="phys_mem" provider_attr="physical_memory" provider_name_regexp=".*" >
+       
+       Note that if "phys_mem" does not exist in the cmdb, the attribute would need to be defined, as below:
+       <PDM_MACRO name=cmdbMetadata category="Attributes" attr="phys_mem" heading="Physical Memory" help="Total memory" >
+                     
+Step 2:
+
+   Replace the *** arguments with the appropriate values.
+
+Step 3:
+
+   Save the changes to this file. 
+
+////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////
+// INSERT METADATA FOR COMMON ATTRIBUTES BELOW 
+////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////
+// INSERT METADATA FOR FAMILY ATTRIBUTES BELOW 
+////////////////////////////////////////////////////////////////////////////////////////
+// Repeat this section for each customized extension table and replace ***EXTENSION***
+// with corresponding extension table name.
+////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$prop.extension" == "***EXTENSION***">      
+   // Add family specific PDM_MACRO name=cmdbMetadata statements here 
+</PDM_IF>
+
+
+
+

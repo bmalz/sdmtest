@@ -1,0 +1,91 @@
+<PDM_IF 0>
+delayed_responses_received.htmpl
+WHEN PRESENTED:
+    When responses to delayed transactions are received
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Delayed Responses Received";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+var connIdList = ${SESSION.COMPLETED_DELAYED_CONNECTIONS:0};
+if ( connIdList == "0" )
+  window.parent.close();
+var connCount = connIdList.length / 2;
+
+function displayConn(connId)
+{
+  ahdtop.popup_window('','REVIVE_ZOMBIE_CONNECTION',0,0,"","connectionId=" + connId);
+  removeRow(connId);
+}
+
+function deleteConn(connId)
+{
+  var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+            "+OP=REMOVE_ZOMBIE_CONNECTION+connectionId=" + connId;
+  var response = SyncAjaxCall(url);
+  removeRow(connId);
+}
+
+function removeRow(connId)
+{
+  if ( connCount <= 1 ) {
+    ahdframeset.close();
+  }
+  else {
+    var tr = document.getElementById("connRow_" + connId);
+    if ( tr != null )
+      tr.parentNode.removeChild(tr);
+    connCount--;
+  }
+}
+
+</script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<p>The following delayed requests have now completed and a response is available.</p><p>Click View Response to view a response in a new window, or Delete Response to delete it.</p>
+<table>
+<tr>
+<th align="center" class="table_column_header_text">Request Id</th>
+<th align="center" class="table_column_header_text">Request Time</th>
+<th align="center" class="table_column_header_text">View Button</th>
+<th align="center" class="table_column_header_text">Delete Button</th>
+</tr>
+<script type="text/javascript">
+var i;
+for ( i = 0; i < connIdList.length; i += 2 ) {
+  var connId = connIdList[i];
+  var timeString = date_to_string( connIdList[i+1], 0 );
+  var html = "<tr id='connRow_" + connId + "'>" +
+             "<td align='center' class='table_data'>" + connId + "</td>" +
+             "<td align='center' class='table_data'>" + timeString + "</td>" +
+             "<td>";
+  document.write(html);
+  <PDM_MACRO NAME=button ID='viewResponse" + i + "'
+      Caption='View Response" + " " + connId + "'
+      hotkey_name="View Response"
+      Func='displayConn(" + connId + ")'
+      Tooltip="View the delayed response in a new window">
+  document.write("</td><td>");
+  <PDM_MACRO NAME=button ID='deleteResponse" + i + "'
+      Caption='Delete Response" + " " + connId + "'
+      hotkey_name="Delete Response"
+      Func='deleteConn(" + connId + ")'
+      btnType=negative
+      Tooltip="Permanently delete the delayed response">
+  document.write("</td></tr>");
+}
+</script>
+</table>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: delayed_responses_received.htmpl ASPEN.1 2010/11/16 16:04:37 saima01 Exp $
+</PDM_IF>

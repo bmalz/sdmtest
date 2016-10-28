@@ -1,0 +1,238 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	For displaying role_tab lrels for the role.  This htmpl is assumed to be within 
+	a deferred tab on detail_role.htmpl
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Tab Search";
+var hdrTitleList = "Tab List";
+var cfgCanView = true;
+var cfgCanEdit = true;
+
+var autoRefreshWindows = new Object();
+
+// The parent (detail_role) is different depending on if in its own window
+// or part of the main window.
+if (typeof parent.parent != "undefined" && typeof parent.parent.cai_main != "undefined") {
+   var this_parent = parent.parent.cai_main;
+}
+else {
+   var this_parent = parent;
+}
+
+// Tie into the fmtfunc to create an array of the role_tab ids and their original values.
+var seqArray = new Array();
+function buildSequenceArray(value) 
+{
+   rs.data(value);
+
+   var i = seqArray.length;
+   seqArray[i] = new Array(3);
+   seqArray[i][0] = rs.currentRecord.relAttr;
+   seqArray[i][1] = value;
+   seqArray[i][2] = "";  //this will hold changed values
+}
+
+// Called from listEditSave() with the role_tab id and its new value.
+function addChangeToSeqArray (rt_id, new_value) 
+{
+   for (var i=0; i < seqArray.length; i++) {
+      if (rt_id == seqArray[i][0]) {
+         seqArray[i][2] = ltrim(rtrim(new_value));
+         return;
+      }
+   }
+}
+
+function clearSeqChanges ()
+{
+   for (var i=0; i < seqArray.length; i++) {
+         seqArray[i][2] = "";
+   }
+}
+
+// Used in listEditSave() to call listEditShowResults() when there an error is found.
+var role_tab_msg;
+
+// Called from listEditSave() to check if the changes to the role_tab
+// sequence numbers should be saved.
+// If a problem is encountered, none of the changes will be saved.
+function evalSeqChange() 
+{
+   role_tab_msg0 = "";
+
+   // First, make sure all new sequences values are integers > 0.
+   for(var i=0; i < seqArray.length; i++) {
+      if ( seqArray[i][2] != "" ) {
+
+         if ( seqArray[i][2].match(/\D/) || parseInt(seqArray[i][2]) < 1 ) {
+            role_tab_msg = msgtext("Role_tab_Valid");
+            return false;
+         }
+         else {
+            seqArray[i][2] = parseInt(seqArray[i][2]);
+         }
+      }
+   }
+   // Now check for duplicates sequence values.
+   for(var i=0; i < seqArray.length; i++) {
+      var targetVal = "";
+      if ( seqArray[i][2] != "" )
+         targetVal = seqArray[i][2];
+      else
+         targetVal = seqArray[i][1];
+
+      for(var j=i+1; j < seqArray.length; j++) {
+         var testVal = "";
+         if ( seqArray[j][2] != "" )
+            testVal = seqArray[j][2];
+         else
+            testVal = seqArray[j][1];
+
+         if (targetVal == testVal) {
+            role_tab_msg = msgtext("Role_tab_Duplicate");
+            return false;
+         }
+      }
+   }
+   return true;
+}
+
+function updateTabs() {
+	// Do not update tabs if we're in an edit-in-list session
+	if ((!this_parent._dtl.edit) || 
+	    (this_parent._dtl.edit && !ImgBtnDisabled("btnEdit")) || 
+            (this_parent._dtl.edit && ImgBtnDisabled("btnEdit") && parent.role_tab_len == 0) ){
+		update_lrel_tab('role', '$args.KEEP.rolePersid', 'tab', 'tabs',  
+			'Tabs Available', 'Tabs Assigned', '');
+	}
+	else {
+		alert(msgtext("Please_save_your_Edit_in_List_"));
+	}
+}
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<PDM_IF "$prop.MultiTenancy" != "setup"> 
+  <PDM_IF "$UserAuth" \> "1">
+<script type="text/javascript">
+    <PDM_IF "${args.tenant:}" != "$cst.tenant" &&
+            "$cst.tenant" != "$prop.SERVICE_PROVIDER_UUID" &&
+            "$prop.SERVICE_PROVIDER_UUID" != "00">
+      cfgAccessUpdateModify = "0";
+      cfgUserAuth = 1;
+      <PDM_SET UserAuth="1">
+    <PDM_ELIF "${args.tenant:}" == "" || "${args.tenant:}" == "00">
+      <PDM_IF "$ACCESS.Update_Global" == "0" && "${args.id:}" != "0">
+        cfgUserAuth = 1;
+        <PDM_SET UserAuth="1">
+      </PDM_IF>
+    </PDM_IF>
+</script>
+  </PDM_IF>
+</PDM_IF>
+
+<script type="text/javascript">
+var enableBtns = true;
+<PDM_IF "$args.QBE.EQ.role_obj" == "0">
+   enableBtns = false;
+</PDM_IF>
+<PDM_IF $UserAuth \> 1>
+    var cfgExtraButton = new Array("Update_Tabs", "updateTabs()", enableBtns);
+</PDM_IF>
+</script>
+
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Role Tab">
+
+<script type="text/javascript">
+var saveUsingScreenReader = ahdtop.cstUsingScreenReader;
+ahdtop.cstUsingScreenReader = false;
+<PDM_MACRO name=sfStart create=false factory="role_tab">
+document.write('<input type="hidden" name="QBE.EQ.role_obj" value="$args.QBE.EQ.role_obj">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Kolejność" attr="sequence" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa zakładki" attr="tab_obj.name" size=20>
+<PDM_MACRO name=sfEnd>
+ahdtop.cstUsingScreenReader = saveUsingScreenReader;
+</script>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+<pdm_jscript file=list_edit.js>
+startListEdit(__search_filter);
+listEditStartRow();
+listEditField("sequence", "Sequence");
+listEditReadonly("tab_obj.name", "Tab Name");
+listEditEndRow();
+endListEdit();
+
+var msgFoundNone = "No Tabs found";
+var msgFound1 = "1 Tab found";
+var msgFound = "%1 Tabs found";
+var msgFoundMore = "%1 Tabs found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Tab";
+
+function create_tab_obj_link(value)
+{
+    var val_str = "<a class='record' href=\"javascript:showDetailWithPersid('" + 
+                   tab_obj_persid + "')\">" + value + "&nbsp</a>";
+    rs.data(val_str);
+}
+
+var tab_obj_persid;
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="tab_obj_persid = '@{list.tab_obj.persistent_id}';">
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence fmtfunc=buildSequenceArray>
+<PDM_MACRO name=lsCol hdr="Zakładka" attr=tab_obj.name fmtfunc=create_tab_obj_link>
+<PDM_MACRO name=lsCol hdr="Nazwa wyświetlana" attr=tab_obj.display_name>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=tab_obj.delete_flag>
+<PDM_MACRO name=lsEnd factory=role_tab>
+
+   ctxMenu = void(0);
+
+</script>
+</PDM_IF>
+
+<script type="text/javascript">
+// Search filter is not appropriate when we're displayed in a deferred tab, and use
+// of locals will give bad results if a search is performed.
+ImgBtnHide("btnShowHide");
+ImgBtnHide("btndflt");
+ImgBtnHide("btnClear");
+
+// Change all is not appropriate for these rows!
+ImgBtnHide("btnChangeAll");
+
+// Disable "Edit in List" btn if not on RO mode of the role detail screen and if new role detail screen and
+// if the number of records is less than 1
+if (!this_parent._dtl.edit || this_parent.argID.length <= 1 || cfgRecordCount < 1) {
+	ImgBtnDisableButton("btnEdit");
+}
+
+// Disable the Update Tabs button when creating a new Role. 
+if (typeof this_parent.argID == "undefined" || this_parent.argID.length <= 1) {
+	ImgBtnDisableButton("UPDATE_LREL");
+}
+
+</script>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_role_tab.htmpl ASPEN.3 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

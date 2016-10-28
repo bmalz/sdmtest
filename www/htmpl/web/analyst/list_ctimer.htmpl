@@ -1,0 +1,90 @@
+<PDM_IF 0>
+list_ctimer.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Timer Setup
+INTENT:
+    Display the list of Timer Setup
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object ctimer_list list The list object containing the Timer Setup
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT ctimer'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+        var hdrTitle = "Timer Setup Search";
+        var hdrTitleList = "Timer Setup List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+//XJZ need to load proper report templates.
+var rptName = new Array("no", "no");
+var cfgCanEdit = true;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Timer Setup">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=ctimer>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Najkrótszy czas trwania progu" attr=QBE.GE.threshold size=25>
+<PDM_MACRO name=sfTextbox hdr="Najdłuższy czas trwania progu" attr=QBE.LE.threshold size=25>
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Color","color","","Cyan","Cyan","Green","Green","Magenta","Magenta","Orange","Orange","Red","Red","Yellow","Yellow");
+searchFilterDropdown("Beep","beep","","No","0","Yes","1");
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Przypomnienie" attr=text colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Timer Setup found";
+var msgFound1 = "1 Timer Setup found";
+var msgFound = "%1 Timer Setup found";
+var msgFoundMore = "%1 Timer Setup found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Timer Setup";
+
+function display_field_value(value)
+{
+  if ( value == "1" )
+
+     value = "Yes";
+
+  else if ( value == "0" )
+
+     value = "No";
+
+  rs.data(value);     
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Czas trwania progu" attr=threshold exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kolor" attr=color>
+<PDM_MACRO name=lsCol hdr="Przypomnienie" attr=text>
+<PDM_MACRO name=lsCol hdr="Biiiiip" attr=beep exportfmt=YesNo fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_ctimer.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

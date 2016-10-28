@@ -1,0 +1,23 @@
+<PDM_IF 0>
+kt_dtview_init.htmpl
+WHEN PRESENTED:
+    When we need to display the KD Tree in view mode
+INTENT:
+    Display the KD Tree in view mode
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">			
+var m_bForceReloadKD = true;	// KD DT Viewer will be reloaded in the same page
+OpenDocumentViewer("$args.id", 2, null, undefined, undefined, "false", "false", "true", "false", "RELOAD_WIN=1", "+BUID=$args.KEEP.BUID");
+</SCRIPT>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: kt_dtview_init.htmpl FWr1.0 2008/7/9 14:31:37 gurig01 Exp $
+</PDM_IF>

@@ -1,0 +1,66 @@
+<PDM_IF 0>
+list_sa_iss_template.htmpl
+WHEN PRESENTED:
+    When we need to display a list of issue templates used by SA
+INTENT:
+    Display the list of issue templates used by SA
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Issue Template Association Search";
+			var hdrTitleList = "Issue Template Association List";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=sfStart factory="sa_iss_template">
+<PDM_MACRO name=sfStartRow>
+					document.writeln('<INPUT TYPE=hidden NAME=QBE.GT.id VALUE=0>');
+					
+<PDM_MACRO name=sfDropdown hdr="Nazwa" attr="tpl" factory="iss_tpl">
+<PDM_MACRO name=sfDropdown hdr="Domyślnie" attr="is_default">
+<PDM_MACRO name=sfDropdown hdr="Ustaw status zgłoszenia na" attr="ticket_status" factory="issstat">
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="isActive">
+<PDM_MACRO name=sfEnd>
+			var edit_field_count = 0;
+		</SCRIPT>
+		<PDM_FORM NAME="frmFID">
+		</PDM_FORM>
+		
+		
+<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+  				var msgFoundNone = "No Template Association found";
+ 	 			var msgFound1 = "1 Template Association found";
+  				var msgFound = "%1 Template Associations found";
+  				var msgFoundMore = "%1 Template Associations found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired Template Association";
+  				
+  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="tpl.template_name" exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr="tpl.description" link="no">
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr="is_default" link="no">
+<PDM_MACRO name=lsCol hdr="Ustaw status zgłoszenia na" attr="ticket_status" link="no">
+<PDM_MACRO name=lsCol hdr="Aktywne" attr="isActive" link="no">
+<PDM_MACRO name=lsEnd>
+  			</script>
+		
+</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>
+<PDM_WSP>

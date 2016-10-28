@@ -1,0 +1,45 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a tab page with details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for tab detail screens
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+In order to have WSP Preview work, the PDM_WSP tag must be edited.
+Add the new tab page to the notetbook tab of a detail page (detail_xx.htmpl). 
+Then assign the name of the detail page (detail_xx.htmpl) to the preview attribute
+of the PDM_WSP tag. 
+</SCRIPT>
+</PDM_IF>
+<html lang="en"><HEAD>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_xx.htmpl" factory=cnt>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="ID osoby w SAP" attr="sap_personID" size=32 title="SAP Person ID">
+<PDM_MACRO name=dtlEndTable>
+
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: cnt_sap_tab.htmpl ANDERSON.0 2009/10/14 12:21:44 gadab01 Exp $
+</PDM_IF>

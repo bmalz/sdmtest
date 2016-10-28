@@ -1,0 +1,144 @@
+<PDM_IF 0>
+list_ntfm.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Message Template.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie szablonów wiadomości";
+var hdrTitleList = "Lista szablonów wiadomości";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("ntfmsum.rpt", "ntfmdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+var argBHVNOTIFY_Restrict = "$args.KEEP.RESTRICT_FROM_BHVNOTIFY_MANY";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Message Template">
+<SCRIPT LANGUAGE="JavaScript">
+if (cfgIsPopup==1)
+{
+	
+<PDM_IF "$args.KEEP.RESTRICT_FROM_BHVNOTIFY_MANY" == "1">
+<PDM_MACRO name=sfStart extracreateurl="PRESET=obj_type:$args.KEEP.ob_type+KEEP.CREATE_NEW_NTFM_FROM_POPUP=1+KEEP.obj_type_sym=$args.KEEP.ob_type_sym" factory=ntfm>
+<PDM_ELSE>
+		if("$args.KEEP.obj_type" == "KD" || "$args.KEEP.obj_type" == "mgs" ||"$args.KEEP.obj_type" == "O_COMMENTS" || "$args.KEEP.obj_type" == "KT_REPORT_CARD" || "$args.KEEP.obj_type" == "sa_notif")
+			
+<PDM_MACRO name=sfStart create=false extracreateurl="PRESET=obj_type:$args.KEEP.obj_type+KEEP.CREATE_NEW_NTFM_FROM_POPUP=1+KEEP.obj_type_sym=$args.KEEP.obj_type_sym" factory=ntfm>
+		else	
+			
+<PDM_MACRO name=sfStart extracreateurl="PRESET=obj_type:$args.KEEP.obj_type+KEEP.CREATE_NEW_NTFM_FROM_POPUP=1+KEEP.obj_type_sym=$args.KEEP.obj_type_sym" factory=ntfm>
+</PDM_IF>
+}
+else
+{
+<PDM_MACRO name=sfStart factory=ntfm> 
+}
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.RESTRICT_FROM_BHVNOTIFY_MANY" != "1">
+<PDM_MACRO name=sfDropdown hdr="Poziom powiadomienia" attr=notify_level>
+</PDM_IF>
+<PDM_IF "$args.KEEP.RESTRICT_FROM_NTFR" == "1">
+<PDM_IF "$args.KEEP.obj_type" == "cr">
+		searchFilterTextDisabled("Object Type","obj_type",10, "$args.KEEP.obj_type", "Request/Incident/Problem", "EQ");
+	
+<PDM_ELSE>
+		searchFilterTextDisabled("Object Type","obj_type",10, "$args.KEEP.obj_type", "$args.KEEP.obj_type_sym", "EQ");
+	
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.RESTRICT_FROM_BHVNOTIFY_MANY" == "1">
+<PDM_IF "$args.KEEP.ob_type" == "cr">
+		searchFilterTextDisabled("Object Type","obj_type",10, "$args.KEEP.ob_type", "Request/Incident/Problem", "EQ");
+	
+<PDM_ELSE>
+		searchFilterTextDisabled("Object Type","obj_type",10, "$args.KEEP.ob_type", "$args.KEEP.ob_type_sym", "EQ");
+	
+</PDM_IF>
+<PDM_ELSE>
+	searchFilterDropdown("Object Type","obj_type",""
+	,"Change Order","chg"
+	,"Issue","iss"
+	,"Knowledge Document","KD"
+	,"Knowledge Document Comment","O_COMMENTS"
+	,"Knowledge Report Card","KT_REPORT_CARD"
+	,"Assistance Session","sa_notif"
+	,"Managed Survey","mgs"
+	,"Request/Incident/Problem","cr"
+	,"Issue Workflow Task","iss_wf"
+	,"Workflow Task","wf"
+    ,"Contact","cnt"
+    ,"Configuration Item","nr"
+	,1);
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF"$args.KEEP.RESTRICT_FROM_BHVNOTIFY_MANY" != "1">
+searchFilterDropdown("Auto Notification","notify_flag","","Yes","1","No","(notify_flag IS NULL OR notify_flag = 0)");
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Message Templates found";
+var msgFound1 = "1 Message Template found";
+var msgFound = "%1 Message Templates found";
+var msgFoundMore = "%1 Message Templates found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Message Template";
+function auto_notif(value)
+{
+  if ( value == "1" )
+
+     value = "Yes";
+
+  else if ( value == "0" || value == "")
+
+     value = "No";
+  
+  if(argBHVNOTIFY_Restrict != "1")
+  rs.data(value);     
+}
+
+function notify_level_func(value)
+{
+  if(argBHVNOTIFY_Restrict != "1")
+  rs.data(value);
+}
+
+function for_itil(value)
+{
+	if(listobjtypecode == "cr")
+	value="Request/Incident/Problem";  
+rs.data(value);  
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var listobjtypecode = '@{list.obj_type:}';">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Typ obiektu" attr=obj_type fmtfunc=for_itil sort=no>
+<PDM_IF"$args.KEEP.RESTRICT_FROM_BHVNOTIFY_MANY" != "1">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr=notify_flag exportfmt=YesNo fmtfunc=auto_notif sort=no>
+<PDM_MACRO name=lsCol hdr="Poziom powiadomienia" attr=notify_level fmtfunc=notify_level_func>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+"@(#)$Id: list_ntfm.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $";
+</PDM_IF>
+<PDM_WSP>

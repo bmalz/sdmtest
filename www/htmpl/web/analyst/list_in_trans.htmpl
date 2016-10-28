@@ -1,0 +1,30 @@
+<PDM_IF 0>
+list_in_trans.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Status Transitions for Incident
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP factory=in_trans preview="NBTAB=list_in_trans">
+<html lang="en">
+<HEAD>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Incident Transition Search";
+var hdrTitleList = "Incident Transition List";
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+
+<PDM_INCLUDE FILE=list_trans_include.htmpl transFactory=in_trans statFactory=crs_in>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

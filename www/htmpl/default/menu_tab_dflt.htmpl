@@ -1,0 +1,32 @@
+<PDM_IF 0>
+menu_tab_dflt.htmpl
+WHEN PRESENTED:
+    A possible form to show a default menu Screen
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Administration Interface";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="main_form">
+<BR><BR><BR><BR><BR><BR><BR><BR><BR><BR>
+<center>
+<SCRIPT LANGUAGE="JavaScript">
+	  document.writeln(generate_logo_product_name_html());
+</SCRIPT>
+</center>
+
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+
+</HTML>
+<PDM_IF 0>
+@(#)$Id: menu_tab_dflt.htmpl FWr1.2 2008/9/19 15:55:26 tomjo02 Exp $;
+</PDM_IF>

@@ -1,0 +1,77 @@
+<PDM_IF 0>
+list_acctyp.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Access Types.
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Access Type Search";
+var hdrTitleList = "Access Type List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("acctypesum.rpt", "acctypedtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Access Type">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=acctyp>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfDropdown hdr="Poziom dostępu" attr=access_level>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Access Types found";
+var msgFound1 = "1 Access Type found";
+var msgFound = "%1 Access Types found";
+var msgFoundMore = "%1 Access Types found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Access Type";
+
+function edit_default_flag(value)
+
+{
+  if ( value == "1" )
+
+     value = "Yes";
+
+  else if ( value == "0" )
+
+     value = "No";
+
+  rs.data(value);     
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Działanie" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Poziom dostępu" attr=access_level>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr=default_flag exportfmt=YesNo fmtfunc=edit_default_flag sort=no>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_acctyp.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+
+
+<PDM_WSP>

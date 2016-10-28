@@ -1,0 +1,175 @@
+<PDM_IF 0>
+bin_form_np.htmpl
+WHEN PRESENTED:
+    A possible form to show as a left-side menu bar when using frames
+INTENT:
+    This menu presents call and problem options together
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user
+    object ACCESS           List containing the user's access to the various
+                            function groups
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.NEW_CNOTE_NOTIF" == 1>
+var form_title = "Zaktualizowane ogłoszenia";
+<PDM_ELSE>
+var form_title = "Ogłoszenia";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script>
+var win_width = 0; 
+var win_height = 0; 
+function focusFirst()
+{
+   var links = document.getElementById("cnoteLink");
+   if ( links != null ) {
+     if ( typeof links.focus == "function" )
+       links.focus();
+     else if ( typeof links.length == "number" &&
+               links.length > 0 &&
+               typeof links[0].focus() == "function" )
+       links[0].focus();
+   }
+}
+
+function edit_cnote(id)
+{
+    var query_string = cfgCgi +
+		       "?SID=" + cfgSID +
+		       "+FID=" + fid_generator() +
+		       "+OP=UPDATE+FACTORY=cnote+KEEP.refresh_cnote=1" + 
+		       "+SET.id=" + id;
+    var features = "directories=no" +
+		   ",location=no" +
+		   ",menubar=no" +
+		   ",status=no";
+    preparePopup(query_string, "", features);
+}
+
+ahdtop = get_ahdtop();
+if ( typeof ahdtop == "object" && ahdtop != null) {
+	ahdtop.set_cnote_date();
+} else {
+	alert("no ahdtop!");
+}
+
+<PDM_IF "$prop.UpdatedAnnouncementsPopup" != "">
+function date_tracker(in_date) {
+
+	// Don't do this on the popup, otherwise a user away from the screen
+	// may miss some new cnotes.  
+	if (typeof in_date != "number") return;
+  	ahdtop.set_cnote_date(in_date);
+
+}
+</PDM_IF>
+
+</script>
+</head>
+<body class="bins" onfocus="focusFirst()" onload="focusFirst()">
+<script type="text/javascript"> 
+   mo_preview_def_obj = new mo_preview(draggable_option, resizable_option);
+   docWriteln( moPreviewHTML() );
+</script>
+
+<PDM_IF "$args.KEEP.NEW_CNOTE_NOTIF" == "1">
+	<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no menubar=no>
+<PDM_ELSE>
+	<PDM_INCLUDE FILE=std_body.htmpl filename="">
+</PDM_IF>
+<PDM_FORM NAME="main_form">
+
+
+<!-- This sets cnote_where and cnote_domset page variables -->
+<PDM_MACRO NAME=cnoteWC>
+
+<table id="tb1501" class="normalTxt">
+<tr>
+<td>
+&nbsp;
+</td>
+<td class='gn_text_dot8'>
+<PDM_IF $prop.view_internal == 1>
+<PDM_LIST prefix=list factory=cnote where="$args.cnote_where" domset="cnote_list_desc_static" length=$prop.AnnouncementLength>
+	<script type="text/javascript"> 
+	// Can't mix integer and string dates with a list - see 15333.
+	<PDM_IF "$prop.UpdatedAnnouncementsPopup" != "">
+		date_tracker($list.posted_date_INT_DATE);
+	</PDM_IF>
+	var dateStr = date_to_string($list.posted_date_INT_DATE, false);
+	var cnHtml = "";
+	<PDM_IF "$list.cnote_type" == "1" >
+		cnHtml = "<p class='advisory'>";
+	<PDM_ELIF "$list.cnote_type" == "2" >
+		cnHtml = "<p class='emergency'>";
+	<PDM_ELSE>
+		cnHtml = "<p>";
+	</PDM_IF>
+	cnHtml += "<a id='cnoteLink' href=\"javascript: edit_cnote('$list.id')\" ";
+	cnHtml += getMOPreviewEventHtml('$list.persistent_id');
+	cnHtml += "><b>";
+	<PDM_IF "$list.cnote_type" == "1" >
+		cnHtml += dateStr+ahdtop.cfgIndAdvisory;
+	<PDM_ELIF "$list.cnote_type" == "2" >
+		cnHtml += dateStr+ahdtop.cfgIndEmergency;
+	<PDM_ELSE>
+		cnHtml += dateStr;
+	</PDM_IF>
+	cnHtml += "</b></a><br>";
+	docWrite(cnHtml);
+        </script>
+        <PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>
+</PDM_LIST>	
+<PDM_ELSE>
+<PDM_LIST prefix=list factory=cnote where="$args.cnote_where" domset="cnote_list_desc_excludeinternal_static" length=$prop.AnnouncementLength>
+	<script type="text/javascript"> 
+	// Can't mix integer and string dates with a list - see 15333.
+	<PDM_IF "$prop.UpdatedAnnouncementsPopup" != "">
+		date_tracker($list.posted_date_INT_DATE);
+	</PDM_IF>
+	var dateStr = date_to_string($list.posted_date_INT_DATE, false);
+	var cnHtml = "";
+	<PDM_IF "$list.cnote_type" == "1" >
+		cnHtml = "<p class='advisory'>";
+	<PDM_ELIF "$list.cnote_type" == "2" >
+		cnHtml = "<p class='emergency'>";
+	<PDM_ELSE>
+		cnHtml = "<p>";
+	</PDM_IF>
+	cnHtml += "<a id='cnoteLink' href=\"javascript: edit_cnote('$list.id')\" ";
+	cnHtml += getMOPreviewEventHtml('$list.persistent_id');
+	cnHtml += "><b>";
+	<PDM_IF "$list.cnote_type" == "1" >
+		cnHtml += dateStr+ahdtop.cfgIndAdvisory;
+	<PDM_ELIF "$list.cnote_type" == "2" >
+		cnHtml += dateStr+ahdtop.cfgIndEmergency;
+	<PDM_ELSE>
+		cnHtml += dateStr;
+	</PDM_IF>
+	cnHtml += "</b></a><br>";
+	docWrite(cnHtml);
+        </script>
+        <PDM_FMT JUSTIFY=LINE KEEPTAGS=YES>$list.text</PDM_FMT></p>
+</PDM_LIST>	
+</PDM_IF>
+		   
+</td>
+</tr>
+</table>
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: bin_form_np.htmpl ASPEN.1 2010/12/16 10:13:45 ralje02 Exp $
+</PDM_IF>

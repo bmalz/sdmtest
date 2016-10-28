@@ -1,0 +1,3 @@
+OBJECT ztask{
+    DISPLAY_GROUP "macro event stored_query object_notify act_log tree_node notify_msg_t";
+};

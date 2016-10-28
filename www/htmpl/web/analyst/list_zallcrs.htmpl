@@ -1,0 +1,454 @@
+<PDM_IF 0>
+list_zallcrs.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Incidents.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+// When the user sets Status field to Closed (or)Closed-Unresolved (or) Problem-Closed, this function sets Active field to Inactive
+function setInactive() {	
+	var lookupObj = document.forms["fltrForm0"].elements["QBE.EQ.status"];
+	if(typeof lookupObj == "undefined") { 	// if status is a dropdown box, not a lookup
+		var statusObj = document.forms["fltrForm0"].elements["QBE.EQ.status"];
+		if(typeof statusObj == "undefined")
+			return;
+		var stat = statusObj.options[statusObj.selectedIndex].value;
+		if(stat == "CL" || stat == "CLUNRSLV" || stat == "PC") {
+			var activeDropdown = document.forms["fltrForm0"].elements["QBE.EQ.active"];
+			for(var i = 0; i < activeDropdown.length; ++i) {		
+				if(activeDropdown.options[i].value == "") {
+					activeDropdown.options[i].selected = true;
+					break;
+				}
+			}
+		}
+	}
+	else { 		// else, status is a lookup, not a dropdown box
+			var stat = lookupObj.value;
+			if( stat == "CL" || stat == "CLUNRSLV" || stat == "PC" ) {
+			var activeDropdown = document.forms["fltrForm0"].elements["QBE.EQ.active"];
+			for(var i = 0; i < activeDropdown.length; ++i) {		
+				if(activeDropdown.options[i].value == "") {
+					activeDropdown.options[i].selected = true;
+					break;
+				}
+			}
+		}			
+	}
+}
+<PDM_IF "$args.KEEP.ForChild" == "1" && "$args.KEEP.exclude_chg_ref_num" == "">
+var hdrTitle = "Lista zgłoszeń podrzędnych";
+var hdrTitleList = "Lista zgłoszeń podrzędnych";
+var hdrTitleTempl = "Wyszukiwanie szablonów zgłoszeń podrzędnych";
+<PDM_ELIF "$args.KEEP.forZallcrsChildList" == "1" >
+var hdrTitle = "Wyszukiwanie zgłoszeń podrzędnych";
+var hdrTitleList = "Lista zgłoszeń podrzędnych";
+<PDM_ELIF "$args.KEEP.forPRtoIN" == "1">
+var hdrTitle = "Wyszukiwanie zgłoszeń powiązanych";
+var hdrTitleList = "Lista zgłoszeń powiązanych";
+<PDM_ELSE>
+var hdrTitle = "Wyszukiwanie zgłoszeń";
+var hdrTitleList = "Lista zgłoszeń";
+var hdrTitleTempl = "Wyszukiwanie szablonów zgłoszeń";
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zallcrssum.rpt", "zallcrsdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+var cfgContextActivities = true;
+var cfgContextSolution = true;
+propFormName = "list_zallcrs.htmpl";
+propFormName2 = "zallcrs";
+var from_detail = "$args.KEEP.from_detail";
+var pri_cal_enabled = "$args.KEEP.auto_pri_cal";
+
+<PDM_IF "$args.KEEP.forPRtoIN" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.PR_ID" != "0" && $ACCESS.FAC_zallcrs \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Attach/Remove_Incidents[!im]", "UpdateRelatedIncidents()", enableExtraBtn);
+
+    function UpdateRelatedIncidents() {
+        update_with_lrel_style("pr", "$args.KEEP.PR_PERSID", "in", "att_incidents", 
+                               "Incidents", 
+                               "Problem $args.KEEP.PR_REFNUM<BR>-Incidents", 
+                               "", "KEEP.forPRtoIN=0+KEEP.ForQrel=1+KEEP.ForChild=1+KEEP.srel_name=problem");
+    }
+</PDM_IF>
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Incident">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=zallcrs>
+<PDM_IF "$args.KEEP.forNrtoIn" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.affected_resource" value="$args.QBE.EQ.affected_resource">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forPRtoIN" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.problem.id" value="$args.QBE.EQ.problem.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forZallcrsChildList" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.parent.id" value="$args.QBE.EQ.parent.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForChild" == "1">
+document.writeln('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_zallcrs.htmpl>');
+</PDM_IF>
+<PDM_IF "" != "$args.KEEP.exclude_ref_num">
+document.write('<INPUT TYPE=hidden NAME=QBE.NE.ref_num VALUE="$args.KEEP.exclude_ref_num">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forcmdbadmin_tree" == "1">
+document.write('<INPUT TYPE=hidden NAME=QBE.EQ.created_via VALUE="3577">');
+</PDM_IF>
+
+var argCreateAlg = "${args.CREATE_ALG:}";
+if ( argCreateAlg.length > 0 ) {
+   var argAlgPreset = "${args.ALG_PRESET:}";
+   var argAlgPresetRel = "${args.ALG_PRESET_REL:}";
+   document.write('<INPUT TYPE=hidden NAME=CREATE_ALG VALUE="' + argCreateAlg + '">');
+   if ( argAlgPreset.length > 0 )
+      document.write('<INPUT TYPE=hidden NAME=ALG_PRESET VALUE="$args.ALG_PRESET">');
+   if ( argAlgPresetRel.length > 0 )
+      document.write('<INPUT TYPE=hidden NAME=ALG_PRESET_REL VALUE="$args.ALG_PRESET_REL">');
+
+}
+
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Assignment Status","","",
+"Has assignee","(assignee IS NOT NULL)",
+"Has group","(group IS NOT NULL)",
+"Assignee or group","(assignee IS NOT NULL OR group IS NOT NULL)",
+"Assignee and group","(assignee IS NOT NULL AND group IS NOT NULL)",
+"Assignee; no group","(assignee IS NOT NULL AND group IS NULL)",
+"Group; no assignee","(assignee IS NULL AND group IS NOT NULL)",
+"No assignee","(assignee IS NULL)",
+"No group","(group IS NULL)",
+"No assignee; no group","(assignee IS NULL AND group IS NULL)",2);
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+searchFilterSetEventHandler("onChange='setInactive()'")
+<PDM_MACRO name=sfLookup hdr="Status" attr=status factory=crs_in>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+<PDM_IF "$args.use_template" == "1">
+searchFilterDropdown("Active","active","","noempty","< empty >","(active = 0 OR active = 1)","<selected>","Active","1","Inactive","0");
+<PDM_ELSE>
+searchFilterDropdown("Active","active","","Active","1","Inactive","0");
+</PDM_IF>
+<PDM_MACRO name=sfHier hdr="Klasyfikacja incydentu" attr="category.sym" factory=pcat_in>
+<PDM_MACRO name=sfLookup hdr="Element konfiguracji" attr=affected_resource.name factory=nr>
+<PDM_MACRO name=sfLookup hdr="Rejestrujący" attr=log_agent factory=cnt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nazwa użytkownika końcowego" attr=customer colspan=2 factory=cnt>
+<PDM_MACRO name=sfTextbox hdr="User ID użytkownika końcowego" attr=customer.userid size=20>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja użytkownika końcowego" attr=customer.location.name factory=loc>
+<PDM_MACRO name=sfLookup hdr="Organizacja użytkownika końcowego" attr=customer.organization.name factory=org>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Problem" attr=problem.ref_num colspan=2 factory=pr>
+<PDM_MACRO name=sfLookup hdr="Zmiana" attr=change.chg_ref_num factory=chg>
+<PDM_MACRO name=sfLookup hdr="Wywołane przez zmianę" attr=caused_by_chg.chg_ref_num factory=chg>
+<PDM_MACRO name=sfLookup hdr="Dotknięta usługa" attr="affected_service.name" extraURL="KEEP.service_only=1" factory=nr>
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Incydent SAP" attr="sap_msg" addPercent=yes colspan=2>
+<PDM_MACRO name=sfTextbox hdr="Status użytkownika SAP" attr="sap_userstatus" addPercent=yes size=20>
+<PDM_MACRO name=sfTextbox hdr="Komponent SAP" attr="sap_component" addPercent=yes size=20>
+<PDM_MACRO name=sfTextbox hdr="Klasyfikacja SAP" attr="sap_category" addPercent=yes size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Instancja SAP" attr="sap_instance" addPercent=yes colspan=2>
+<PDM_MACRO name=sfTextbox hdr="Priorytet SAP" attr="sap_priority" addPercent=yes size=20>
+<PDM_MACRO name=sfTextbox hdr="Komponent oprogramowania SAP" attr="sap_sftwcomp" addPercent=yes size=20>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Wyjątkowe traktowanie" attr="customer.cnthandling_list.special_handling.sym" factory=special_handling>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_IF "$env.NX_CLASSIC_SLA_PROCESSING" == "Yes">
+<PDM_MACRO name=sfDropdown hdr="Typ serwisowy" attr=support_lev factory=sdsc>
+<PDM_ELSE>
+<PDM_MACRO name=sfLookup hdr="Typ serwisowy" attr=attached_slas.map_sdsc.sym colspan=1 factory=sdsc>
+<PDM_MACRO name=sfDropdown hdr="Legacy Service Type" attr=support_lev factory=sdsc>
+<PDM_IF "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=sfDate hdr="Najwcześniejszy czas do naruszenia" attr=attached_slas.time_to_violation qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas do naruszenia" attr=attached_slas.time_to_violation qbe_condition=LE>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=impact factory=imp>
+<PDM_MACRO name=sfDropdown hdr="Poważniejszy incydent" attr=major_incident>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas otwarcia" attr=open_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas otwarcia" attr=open_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=urgency factory=urg>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rozwiązania" attr=resolve_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rozwiązania" attr=resolve_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Rodzic" attr=parent.ref_num factory=zallcrs>	
+searchFilterDropdown("Child Type","child_type","","Not A Child","0","Child","1");
+<PDM_MACRO name=sfDropdown hdr="Symptom" attr=symptom_code>
+<PDM_MACRO name=sfDropdown hdr="Kod rozwiązania" attr="resolution_code.sym" factory=resocode>
+<PDM_MACRO name=sfDropdown hdr="Metoda rozwiązania" attr="resolution_method.sym" factory=resomethod>
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("SLA Violation","sla_violation","",
+"Yes", "(sla_violation > 0)",
+"No",  "(sla_violation = 0 OR sla_violation IS NULL)");
+<PDM_IF "$args.use_template" == "1">
+searchFilterDropdown("Template","template_name.template_name","","noempty",
+"Yes","(template_name != ' ' AND template_name IS NOT NULL)");
+searchFilterDropdown("Template Active","template_name.delete_flag","","noempty",
+"Active","(template_name.delete_flag = 0)");
+<PDM_MACRO name=sfTextbox hdr="Nazwa szablonu" attr=template_name size=20>
+<PDM_MACRO name=sfTextbox hdr="Klasa szablonu" attr=template_name.template_class size=12>
+<PDM_ELSE>
+searchFilterDropdown("Template","template_name","",
+"Yes","(template_name != ' ' AND template_name IS NOT NULL)",
+"No","(template_name = ' ' OR template_name IS NULL)");
+<PDM_MACRO name=sfDropdown hdr="Szablon aktywny" attr=template_name.delete_flag>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas zamknięcia" attr=close_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas zamknięcia" attr=close_date qbe_condition=LE>
+<PDM_MACRO name=sfLookup hdr="Nazwa żądającego" attr="requested_by" factory=cnt>
+<PDM_MACRO name=sfTextbox hdr="Zgłoszenie w systemie zewnętrznym" attr="external_system_ticket" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data rozpoczęcia przestoju" attr=outage_start_time qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data rozpoczęcia przestoju" attr=outage_start_time qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data zakończenia przestoju" attr=outage_end_time qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data zakończenia przestoju" attr=outage_end_time qbe_condition=LE>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfTextbox hdr="Podsumowanie incydentu" attr=summary colspan=2 size=42>
+<PDM_MACRO name=sfTextbox hdr="Opis incydentu" attr=description colspan=2 size=42>
+<PDM_MACRO name=sfEnd>
+
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+<pdm_jscript file=list_edit.js>
+startListEdit(__search_filter);
+listEditStartRow();
+listEditReadonly("ref_num","Zgłoszenie #");
+listEditField("status");
+listEditField("priority");	
+listEditField("problem.ref_num");
+listEditEndRow();
+listEditField("parent.ref_num");
+listEditField("caused_by_chg.chg_ref_num");
+listEditField("assignee");
+listEditReadonly("summary",4);
+endListEdit();
+
+var attr_obj = attr_data[ "priority" ];		
+var priority_element = document.getElementById( attr_obj.id );
+
+/*If multitenancy is disabled, For edit in list feature, no need to check APC status 
+for each row (since all rows are of same tenant). the following code checks for APC
+disabled or enabled globally and makes priority field editable or not */
+if (ahdtop.cfgMultiTenancy == "off")
+{
+	var editInListButton = getButtonElement("btnEdit");	
+	if( typeof editInListButton != "undefined")
+	{
+		if(window.addEventListener) //Firefox and Mozilla
+		{	
+			editInListButton.addEventListener('click',disablePriority,false);			
+		}
+		else //IE
+		{
+			editInListButton.attachEvent('onclick',disablePriority);						
+		}
+	}
+}  
+var msgFoundNone = "No incidents found";
+var msgFound1 = "1 incident found";
+var msgFound = "%1 incidents found";
+var msgFoundMore = "%1 incidents found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired incident";
+var msgSelectAlg = "Click to select desired incident and add a %1 activity log";
+var msgSelectTempl = "Click to select desired incident template";
+
+var show_template_name = ("$args.use_template" == "1");
+if ( searchFilterValueOf("template_name").indexOf("NOT NULL") != -1 )
+   show_template_name = true;
+
+<PDM_IF "$env.NX_SAP_GUID" != "">
+var summary_colspan = 3;
+<PDM_ELSE>
+var summary_colspan = 2;
+</PDM_IF>
+var ref_num_style;
+var add_icon_to_cust;
+
+// Writes a special handling icon next to the 'customer/end user' if they have special handling
+// needs. It defaults to the 'SpecialHandlingIcon' in web.cfg, else it uses the 'announcements_16.png'.  
+function writeIcon(name)
+{
+    var htmlStr = name;
+    if (add_icon_to_cust)
+    {
+        var specialHandlingAlertIcon = "$SpecialHandlingIcon";
+        if(specialHandlingAlertIcon == "") // did they provide a icon in the config file?
+        {
+            specialHandlingAlertIcon = "$CAisd/img/announcements_16.png";
+        }
+        htmlStr = htmlStr + "&nbsp <img src='" + specialHandlingAlertIcon 
+                  +"' border=0 height=14 width=14 alt='Special Handling Alert' title='Special Handling Alert'/>";
+    }
+    rs.data(htmlStr);
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0' || \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_elif @{list.ttv_att_slas.length:0} != 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.customer.active_special_handling.length:0}' != '0'">
+<PDM_MACRO name=lsWrite text="add_icon_to_cust = 1;">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="add_icon_to_cust = 0;">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Zgłoszenie #" attr=ref_num exportFmt="ShowLink" fmtfunc=writeIcon link=yes style=ref_num_style>
+<PDM_MACRO name=lsWrite both=yes text="if (show_template_name) {">
+							summary_colspan++;
+		
+<PDM_MACRO name=lsCol hdr="Szablon" attr=template_name exportFmt="ShowLink" link=yes>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_IF "$env.NX_SAP_GUID" != "">
+<PDM_MACRO name=lsCol hdr="SAP #" attr=sap_msg>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Podsumowanie" attr=summary max_char=60 width=400>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort="DESC" width=100>
+<PDM_MACRO name=lsCol hdr="Klasyfikacja" attr=category sort="DESC" width=300>
+<PDM_MACRO name=lsCol hdr="Status" attr=status width=100>
+<PDM_MACRO name=lsCol hdr="Przypisany do" attr=assignee>
+<PDM_MACRO name=lsCol hdr="Prognozowane naruszenie" attr=mintime>
+<PDM_MACRO name=lsCol attr=open_date label="Open Date" startrow=yes>
+<PDM_MACRO name=lsCol attr=mintgt label="Service Target">
+<PDM_MACRO name=lsCol attr=group label="Group">
+<PDM_MACRO name=lsCol attr=customer colspan=3 fmtfunc=writeIcon label="Affected End User">
+<PDM_MACRO name=lsCol attr=problem.ref_num exportHdr="Problem" label="Problem">
+<PDM_MACRO name=lsCol attr=parent.ref_num exportHdr="Parent" label="Parent">
+<PDM_MACRO name=lsCol attr=caused_by_chg.chg_ref_num exportHdr="Caused by Change Order" label="Caused by Change Order">
+<PDM_IF "$env.NX_MULTI_TENANCY" == "on">
+<PDM_MACRO name=lsCol attr=tenant.in_apc_flag hidden=true>
+</PDM_IF>
+<PDM_MACRO name=lsEnd isTicketFactory=1>
+
+
+
+/*Only when Multi Tenancy is on,we need to check APC on/off for each
+row to decide 'priority' field editable or not inside edit in list section*/
+if (ahdtop.cfgMultiTenancy == "on")
+{
+	if( typeof rs != "undefined" && rs )
+	{
+		var i;
+		if(window.addEventListener) //Firefox and Mozilla
+		{
+			for( i=0; i <= rs.rowNum; i++ )
+			{	
+				var ref_num_link = document.getElementById("rslnk_" + i + "_" + "0");
+				if(typeof ref_num_link != "undefined" && ref_num_link )			
+					ref_num_link.addEventListener('focus',rsRowSelect(i),false);
+			}
+		}
+		else //IE
+		{
+			for( i=0; i <= rs.rowNum; i++ )
+			{	
+				var ref_num_link = document.getElementById("rslnk_" + i + "_" + "0");
+				if( typeof ref_num_link != "undefined" && ref_num_link )			
+					ref_num_link.attachEvent('onfocus', rsRowSelect(i));
+			}
+		}
+	}
+}
+
+/* This function returns the reference to 'Edit in List' button if it is present
+   on the search filter of the list page */
+function getButtonElement( btnName )
+{
+	if (typeof imgBtnArray != "undefined")
+	{
+		for ( var i=0; i < imgBtnArray.length;i++ ) 
+		{
+	       var btn = imgBtnArray[i];
+	       if ( btn.id == btnName ) 
+		   {
+	          if ( typeof btn.obj == "object" && typeof btn.obj != "undefined")		  
+			  {	            
+				return document.getElementById( btn.obj.id );         
+			  }
+	       }
+	   }   
+	}
+}
+
+/* If multi tenancy is off APC status need not be checked for
+   for each different row */
+function disablePriority()
+{	
+	if ( pri_cal_enabled =='true' )
+	{
+		attr_obj.readonly = true;									
+		priority_element.disabled = true;//make priority readonly			
+	}
+}
+
+/* Event handler Function executed when a row is highlighted.
+Row gets highlighted when user clicks on a row or uses up or down 
+arrow keys inside the list. It checks APC enabled or not for that particular row*/
+function rsRowSelect(row)
+{	
+	return function()
+	{
+		var apc_element = document.getElementById("rs_" + row + "_" + "tenant.in_apc_flag");
+		if( typeof apc_element != "undefined" && apc_element )
+		{	  
+		  if( typeof __list_edit=="object" && __list_edit.isVisible )
+		  {			 
+			 var apc_enabled = apc_element.innerHTML;
+			 if( apc_enabled == "1" )
+			 {
+				attr_obj.readonly = true;									
+				priority_element.disabled = true;//make priority readonly		
+			 }
+			 else
+			 {
+				attr_obj.readonly = false;									
+				priority_element.disabled = false;//make priority editable
+			 }
+		  }	  
+		}
+	}		
+}
+
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

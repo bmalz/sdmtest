@@ -1,0 +1,202 @@
+<html lang="en"><PDM_IF 0>
+profile_infocnt.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_browser.htmpl+PERSID={cnt:}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = '<PDM_FMT ESC_STYLE=C>Informacje dla kontaktu $dobref.combo_name</PDM_FMT>';
+var show_header = 0;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<TITLE>profile_infocnt</TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var persid = "$dobref.persistent_id";
+if ( typeof parent.menu_reload_required == "boolean" &&
+     parent.menu_reload_required ) {
+   parent.menu_reload_required = false;
+   var menu = parent.menu;
+   if ( typeof menu.loaded == "boolean" &&
+        typeof menu.persid == "string" &&
+        menu.persid == persid ) {
+      pb_check_for_editwin();
+   }
+   else {
+      var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+                "+FACTORY=cnt+OP=GET_DOB+PERSID=" + nx_escape(persid) +
+                "+HTMPL=profile_menu.htmpl";
+      parent.menu.document.location.href = url;
+   }
+}
+</SCRIPT>
+</HEAD>
+<BODY class=detailro onLoad="pb_focus('pbfld0')">
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no>
+<SCRIPT LANGUAGE="JavaScript">
+function showAlertMsg(txt) {
+   if(typeof txt != "undefined" && txt != null && txt.length > 0) {
+	show_response(txt);
+   } else {
+   	show_response();
+   }
+}
+alert_banner(persid);
+</SCRIPT>
+<TABLE ID="tbl001" WIDTH=100%>
+<TH ALIGN=LEFT WIDTH=28% class=detailro>Nazwisko</TH>
+<TH ALIGN=LEFT WIDTH=28% class=detailro>Imię</TH>
+<TH ALIGN=LEFT WIDTH=28% class=detailro>Drugie imię</TH>
+<TH ALIGN=LEFT WIDTH=15% class=detailro>Status</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.last_name&nbsp</TD>
+<TD VALIGN=TOP class=detailro>$dobref.first_name</TD>
+<TD VALIGN=TOP class=detailro>$dobref.zmiddle_name_alt</TD>
+<TD VALIGN=TOP class=detailro>$dobref.delete_flag.sym</TD>
+</TR>
+</TABLE>
+<TABLE ID="tbl002" WIDTH=100%>
+<PDM_IF "$dobref.type.id" != "2308">
+<TH ALIGN=LEFT WIDTH=100% class=detailro>Login</TH>
+</PDM_IF>
+<TR>
+<PDM_IF "$dobref.type.id" != "2308">
+<TD VALIGN=TOP class=detailro>$dobref.userid&nbsp    </TD>
+</PDM_IF>
+
+</TR>
+</TABLE>
+
+<TABLE ID="tbl002" WIDTH=100%>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Typ kontaktu</TH>
+<TH ALIGN=LEFT class=detailro>Typ dostępu</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.type.sym </TD>
+<TD VALIGN=TOP class=bodytext>$dobref.access_type.sym</TD>
+</TR>
+</TABLE>
+
+<TABLE ID="tbl003" WIDTH=100%>
+<TH ALIGN=LEFT class=detailro>Poziom obsługi</TH>
+<!--<TH ALIGN=LEFT class=detailro>Partycja danych</TH>-->
+<TH ALIGN=LEFT class=detailro>Strefa czasowa</TH>
+<PDM_IF $dobref.timezone.id>
+<TH ALIGN=LEFT WIDTH=30% class=detailro>Czas lokalny</TH>
+</PDM_IF>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.service_type.sym&nbsp</TD>
+<!--<TD VALIGN=TOP class=detailro>$dobref.domain.sym</TD>-->
+<TD VALIGN=TOP class=detailro>$dobref.timezone.sym</TD>
+<PDM_IF $dobref.timezone.id>
+<TD VALIGN=TOP class=detailro>$args.CNT_LOCAL_TIME</TD>
+</PDM_IF>
+
+</TR>
+</TABLE>
+<TABLE ID="tbl004" WIDTH=100%>
+<PDM_IF 0>
+<PDM_IF "$dobref.type.id" == "2310">
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Telefon domowy</TH>
+<PDM_ELSE>
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Numer telefonu</TH>
+</PDM_IF>
+</PDM_IF>
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Numer telefonu</TH>
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Numer faksu</TH>
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Numer pagera</TH>
+<PDM_IF 0>
+<PDM_IF "$dobref.type.id" == "2310">
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Business Phone #</TH>
+<PDM_ELSE>
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Alternatywny numer telefonu</TH>
+</PDM_IF>
+</PDM_IF>
+<TH ALIGN=LEFT WIDTH=25% class=detailro>Alternatywny numer telefonu</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.phone_number&nbsp    </TD>
+<TD VALIGN=TOP class=detailro>$dobref.fax_phone    </TD>
+<TD VALIGN=TOP class=detailro>$dobref.beeper_phone    </TD>
+<TD VALIGN=TOP class=detailro>$dobref.alt_phone    </TD>
+</TR>
+</TABLE>
+<TABLE ID="tbl005" WIDTH=100%>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Adres email</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>
+<PDM_FMT WIDTH=60 JUSTIFY=LINE>$dobref.email_address</PDM_FMT>
+&nbsp;
+</TD>
+</TR>
+</TABLE>
+<TABLE ID="tbl006" WIDTH=100%>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Lokalizacja</TH>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Obszar</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.location.name&nbsp</TD>
+<TD VALIGN=TOP class=detailro>$dobref.location.site.name</TD>
+</TR>
+</TABLE>
+
+
+
+
+<tr><td>
+<TABLE ID="tbl007" WIDTH=100%>
+<TH ALIGN=LEFT class=detailro>Adresy</TH>
+<PDM_IF "" != "$dobref.location.address1">
+<TR><TD VALIGN=TOP class=detailro>
+$dobref.location.address1
+</TD></TR>
+</PDM_IF>
+<PDM_IF "" != "$dobref.location.address2">
+<TR><TD VALIGN=TOP class=detailro>
+$dobref.location.address2
+</TD></TR>
+</PDM_IF>
+<PDM_IF "" != "$dobref.location.city">
+<TR><TD VALIGN=TOP class=detailro>
+$dobref.location.city
+</TD></TR>
+</PDM_IF>
+<PDM_IF "" != "$dobref.location.state.sym">
+<TR><TD VALIGN=TOP class=detailro>
+$dobref.location.state.sym
+</TD></TR>
+</PDM_IF>
+<PDM_IF "" != "$dobref.location.zip">
+<TR><TD VALIGN=TOP class=detailro>
+$dobref.location.zip
+</TD></TR>
+</PDM_IF>
+<PDM_IF "" != "$dobref.location.country.name">
+<TR><TD VALIGN=TOP class=detailro>
+$dobref.location.country.name
+</TD></TR>
+</PDM_IF>
+</TABLE>
+&nbsp;
+</TD></TR>
+</TABLE>
+<TABLE ID="tbl008" WIDTH=100%>
+<TH ALIGN=LEFT class=detailro>Notatki</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>
+<PDM_FMT WIDTH=60 JUSTIFY=LINE>$dobref.notes</PDM_FMT>
+&nbsp
+</TD>
+</TR>
+</TABLE>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

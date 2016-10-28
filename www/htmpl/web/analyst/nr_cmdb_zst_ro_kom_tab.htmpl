@@ -1,0 +1,137 @@
+<PDM_IF 0>
+DESCRIPTION:
+    Display the Attributes tab for the CI detail page, which is invoked by the detail_***EXTENSION***.htmpl form.
+    The steps below assume use of the Web Screen Painter (WSP)
+    
+PROCEDURE:
+    Step 1: To add an attribute, drag a control from the WSP Tool palette to the form area.
+    Step 2: Associate the control with a particular attribute by clicking on the attribute value and selecting an attribute name.
+            Note: All attributes must originate fron either the nr object or a single extension table.
+    Step 3: Repeat steps 1-2 for each attribute to be added to the form.
+    Step 4: Change the preview URL from "detail_xx.htmpl" to "detail_***EXTENSION***.htmpl",  where ***EXTENSION*** is the extension table name. 
+    Step 5: Save this file as nr_cmdb_***EXTENSION***_tab.htmpl,  where ***EXTENSION*** is the extension table name.
+    
+    After this file is saved, you must create cmdb_metadata_***EXTENSION***.htmpl
+    using the template file cmdb_metadata.template as a basis.
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_zst_ro_kom.htmpl" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+var smr_edititem = "";
+var smr_edititemid = ""; 
+var smr_edititem_label = "";
+var smr_ro_field = "";
+
+function toggleIpAddressBox(val) {
+	if(val) {
+		smr_edititem.show();
+		smr_edititem_label.show();
+	}
+	else {
+		smr_edititem.hide();
+		smr_edititem_label.hide();
+	}
+}
+
+jq(document).ready(function() {
+	
+	smr_ro_field = jq('td[pdmqa="assoc_zst_ro_kom.adres_ip"]');
+
+	if(_dtl.edit)
+	{
+		smr_edititem = jq('input[pdmqa="assoc_zst_ro_kom.adres_ip"]');
+		smr_edititemid = smr_edititem.attr('id');
+		smr_edititem_label = jq('label[for="' + smr_edititemid + '"]');
+
+		if($args.assoc_zst_ro_kom.karta_sieciowa == 0) {
+			toggleIpAddressBox(false);
+		}
+		else {
+			toggleIpAddressBox(true);
+		}
+	}
+	else {
+		if($args.assoc_zst_ro_kom.karta_sieciowa == 0) {
+			smr_ro_field.hide();
+			var smr_ro_itemid = smr_ro_field.attr('id');
+			jq('label[for="' + smr_ro_itemid + '"]').parent().hide();
+		}
+		
+	}
+});
+
+function custom_toggleIpAddressField(opt)
+{
+	if(opt.value == 0) // nie
+	{
+		toggleIpAddressBox(false);
+	}
+	else
+	{
+		toggleIpAddressBox(true);
+	}
+}
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+tab_banner("Attributes",true)
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Jednostka organizacyjna" attr="org_bought_for_uuid">
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr="zlokalizacja">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Numer OT" attr="znumer_ot" maxlength="255">
+<PDM_MACRO name=dtlTextbox hdr="Wartość początkowa" attr="zvalue_start">
+<PDM_MACRO name=dtlTextbox hdr="Wartość netto" attr="zvalue_net">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nr protokołu likwidacji" attr="zliquidation_protocol_nr">
+<PDM_MACRO name=dtlDropdown hdr="Typ komputera" attr="assoc_zst_ro_kom.typ" lookup="no">
+<PDM_MACRO name=dtlDropdown hdr="Rodzaj procesora" attr="assoc_zst_ro_kom.procesor" lookup="no">
+<PDM_MACRO name=dtlStartRow>
+
+detailDropdown("CD DVD", "assoc_zst_ro_kom.cd_dvd", "", 1, 20, true, "", "$args.assoc_zst_ro_kom.cd_dvd", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+{
+detailSetEventHandler("onChange=\"custom_toggleIpAddressField(this)\"  ");
+detailDropdown("Karta sieciowa", "assoc_zst_ro_kom.karta_sieciowa", "", 1, 20, true, "", "$args.assoc_zst_ro_kom.karta_sieciowa", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+}
+<PDM_MACRO name=dtlTextbox hdr="Adres IP" attr="assoc_zst_ro_kom.adres_ip" id="custom_adres_ip">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zegar CPU" attr="assoc_zst_ro_kom.zegar_cpu">
+detailDropdown("Ilość procesorów", "assoc_zst_ro_kom.ilosc_procesorow", "", 1, 20, true, "", "$args.assoc_zst_ro_kom.ilosc_procesorow", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "1", "1", "2", "2", "4", "4", "6", "6", "8", "8", "12", "12", "16", "16");
+detailDropdown("Ilość RAM (MB)", "assoc_zst_ro_kom.ilosc_ram", "", 1, 20, true, "", "$args.assoc_zst_ro_kom.ilosc_ram", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+"256 MB", "256", "512 MB", "512", "768 MB", "768", "1024 MB", "1024", "2048 MB", "2048", 
+"3072 MB", "3072", "4096 MB", "4096", "5120 MB", "5120", "6144 MB", "6144", "8192 MB", "8192", 
+"9216 MB", "9216", "10240 MB", "10240", "11264 MB", "11264", "12288 MB", "12288", "13312 MB", "13312",
+"14336 MB", "14336", "15360 MB", "15360", "16384 MB", "16384");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nr inwentarzowy" attr="znr_inwentarzowy">
+<PDM_MACRO name=dtlTextbox hdr="Nr identyfikacyjny" attr="zidentification_number">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rozmiar HDD (GB)" attr="assoc_zst_ro_kom.rozmiar_hdd">
+<PDM_MACRO name=dtlTextbox hdr="Monitor" attr="assoc_zst_ro_kom.monitor_nazwa">
+<PDM_MACRO name=dtlTextbox hdr="Rozmiar monitora" attr="assoc_zst_ro_kom.monitor_rozmiar">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr="zdescription_long" colspan="3" maxlength="1000" rows="8" size="69">
+
+<PDM_MACRO NAME=dtlEndTable>
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+

@@ -1,0 +1,32 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+</HEAD>
+
+<BODY>
+<SCRIPT>
+document.write('<div style="padding-left: 5px; float:left;">');
+ImgBtnCreate("btnMstsc", "Wirtualny pulpit", "", false, 0, "Wirtualny pulpit");
+document.write('</div>');
+document.write('<div style="padding-left: 5px; float:left;">');
+ImgBtnCreate("btnPing", "Ping", "", false, 0, "Ping");
+document.write('</div>');
+document.write('<div style="padding-left: 5px; float:left;">');
+ImgBtnCreate("btnNetstat", "Netstat", "", false, 0, "Netstat");
+document.write('</div>');
+</SCRIPT>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

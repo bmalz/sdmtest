@@ -1,0 +1,80 @@
+<PDM_IF 0>
+nr_cmdb_net_nicx_tab.htmpl
+WHEN PRESENTED:
+    Display Network.NIC family attributes of the selected CI
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl
+file, but only one PDM_FORM tag is allowed. Anything
+outside the PDM_FORM tag won't be included in the
+notebook page. All the javascript files defined in the
+notebook page HTMPL file need to be also defined in the
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+
+History:
+       24-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+       04-Feb-2008 tomjo02 - SCO 20837 Removed references to purchase_amount (INTEGER) since attribute is not defined for net_nicx families.
+</PDM_IF>
+
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_net_nicx.htmpl" where="family.extension_name='net_nicx'" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr=bm_status factory=bms lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa sieciowa" attr=assoc_net_nicx.network_name>
+<PDM_MACRO name=dtlTextbox hdr="Adres sieciowy" attr=assoc_net_nicx.network_address>
+<PDM_MACRO name=dtlTextbox hdr="Gateway ID" attr=assoc_net_nicx.gateway_id>
+<PDM_MACRO name=dtlTextbox hdr="Address Class" attr=assoc_net_nicx.addr_class>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Subnet Mask" attr=assoc_net_nicx.subnet_mask>
+<PDM_MACRO name=dtlTextbox hdr="Technologia" attr=assoc_net_nicx.technology>
+<PDM_MACRO name=dtlTextbox hdr="Number of Ports" attr=assoc_net_nicx.number_ports>
+<PDM_MACRO name=dtlTextbox hdr="Number of Ports Used" attr=assoc_net_nicx.number_ports_used>
+<PDM_MACRO name=dtlTextbox hdr="Typ połączenia sieciowego" attr=assoc_net_nicx.type_net_conn>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ilość portów sieciowych" attr=assoc_net_nicx.number_net_port>
+<PDM_MACRO name=dtlTextbox hdr="Ilość połączeń sieciowych" attr=assoc_net_nicx.number_net_port_conn>
+<PDM_MACRO name=dtlTextbox hdr="Ilość kart sieciowych" attr=assoc_net_nicx.number_net_card>
+<PDM_MACRO name=dtlTextbox hdr="Rola" attr=assoc_net_nicx.role>
+<PDM_MACRO name=dtlTextbox hdr="Management IP Address" attr=assoc_net_nicx.ip_mgmt_addr>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="OS Version" attr=assoc_net_nicx.line_type>
+<PDM_MACRO name=dtlTextbox hdr="Line Speed" attr=assoc_net_nicx.line_speed>
+<PDM_MACRO name=dtlTextbox hdr="Protocol" attr=assoc_net_nicx.protocol>
+<PDM_MACRO name=dtlDate hdr="Last Maintenance Date" attr=assoc_net_nicx.last_mtce_date>
+<PDM_MACRO name=dtlTextbox hdr="Maintenance Level" attr=assoc_net_nicx.mtce_level>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Active Date" attr=assoc_net_nicx.active_date>
+<PDM_MACRO name=dtlDate hdr="Data wycofania" attr=assoc_net_nicx.retire_date>
+<PDM_MACRO name=dtlTextbox hdr="Zakupiona ilość" attr=assoc_net_nicx.purchase_amountc>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: nr_cmdb_net_nicx_tab.htmpl ASPEN.2 2010/10/27 17:26:39 saima01 Exp $
+</PDM_IF>

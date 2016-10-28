@@ -1,0 +1,92 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Ambiguous Transaction Search";
+var hdrTitleList = "Ambiguous Transaction List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var rptName = new Array("ci_ambiguity_twacisum.rpt", "ci_ambiguity_twacidtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<script language="JavaScript">
+
+<PDM_MACRO name=sfStart create=false factory="ambiguity_twaci">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="name" size=20>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_MACRO name=sfTextbox hdr="Klasa" attr="class">
+<PDM_MACRO name=sfTextbox hdr="Rodzina" attr="family">
+<PDM_MACRO name=sfTextbox hdr="Nazwa systemowa" attr=system_name>
+<PDM_MACRO name=sfTextbox hdr="Nazwa DNS" attr=dns_name>
+<PDM_IF "ci_ci_ambiguity" : "^z.*$">
+document.writeln('<input type="hidden" id="ADDL_WHERE_HARDCODE" name="ADDL_WHERE_HARDCODE" value="id IS NOT NULL">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="MAC adres" attr=mac_address>
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny" attr=serial_number>
+<PDM_MACRO name=sfTextbox hdr="Alt Asset ID" attr=asset_num>
+<PDM_MACRO name=sfTextbox hdr="Docelowy CI" attr=tgt_id>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  
+  <pdm_jscript file=list_edit.js>
+  
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_MACRO name=elsEditField attr_name="name" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="serial_number">
+<PDM_MACRO name=elsEditField attr_name="mac_address">
+<PDM_MACRO name=elsEditField attr_name="dns_name">
+<PDM_MACRO name=elsEditField attr_name="system_name" endrow="yes">
+<PDM_MACRO name=elsEditField attr_name="asset_num" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="tgt_id" endrow="yes">
+<PDM_MACRO name=elsEndEdit>
+  </script>
+</PDM_IF>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Ambiguous CI Transactions found";
+  var msgFound1 = "1 Ambiguous CI Transaction found";
+  var msgFound = "%1 Ambiguous CI Transactions found";
+  var msgFoundMore = "%1 Ambiguous CI Transactions found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Ambiguous CI Transaction";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Dwuznaczność" attr=ambiguity>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa systemowa" attr=system_name justify=left>
+<PDM_MACRO name=lsCol hdr="Nazwa DNS" attr=dns_name justify=left>
+<PDM_MACRO name=lsCol hdr="MAC adres" attr=mac_address justify=left>
+<PDM_MACRO name=lsCol hdr="Numer seryjny" attr=serial_number justify=left>
+<PDM_MACRO name=lsCol hdr="Alt Asset ID" attr=asset_num justify=left>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsCol label="Target CI" attr=tgt_id colspan=8 startrow=yes>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

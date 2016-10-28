@@ -1,0 +1,159 @@
+
+<PDM_IF 0>
+	WHEN PRESENTED:
+	    As a related tickets summary popup from the Knowledge Report Card document list
+</PDM_IF>
+<html lang="en"><head>
+<script language=javascript>
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+	var doc_title = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+	var hdrTitle = "Related Tickets Summary: " + doc_title;
+	//
+	function window_onload()
+	{
+		var relatedTicketsHTML = "<span>&nbsp;This document has been used as a solution to <br></span>";
+		relatedTicketsHTML += "&nbsp;";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "<a class=\"ticket_summary_link\" href=\"javascript:kdlinks('REQ_SOLVED','$args.id');\">";
+		</PDM_IF>
+		relatedTicketsHTML += "$args.REQ_SOLVED.length requests";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "</a>";
+		</PDM_IF>
+		relatedTicketsHTML += ", ";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "<a class=\"ticket_summary_link\" href=\"javascript:kdlinks('IN_SOLVED','$args.id')\">";
+		</PDM_IF>
+		relatedTicketsHTML += "$args.IN_SOLVED.length incidents";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "</a>";
+		</PDM_IF>
+		relatedTicketsHTML += ", ";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "<a class=\"ticket_summary_link\" href=\"javascript:kdlinks('PR_SOLVED','$args.id')\">";
+		</PDM_IF>
+		relatedTicketsHTML += "$args.PR_SOLVED.length problems";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "</a>";
+		</PDM_IF>
+		relatedTicketsHTML += "<span> and </span>";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "<a class=\"ticket_summary_link\" href=\"javascript:kdlinks('ISS_SOLVED','$args.id')\">";
+		</PDM_IF>
+		relatedTicketsHTML += "$args.ISS_SOLVED.length issues";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "</a>";
+		</PDM_IF>
+		relatedTicketsHTML += ".<br>";
+		relatedTicketsHTML += "<span>&nbsp;This document has been used to open <br></span>";
+		relatedTicketsHTML += "&nbsp;";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "<a class=\"ticket_summary_link\" href=\"javascript:kdlinks('REQ_OPENED','$args.id')\">";
+		</PDM_IF>
+		relatedTicketsHTML += "$args.REQ_OPENED.length requests";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "</a>";
+		</PDM_IF>
+		relatedTicketsHTML += ", ";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "<a class=\"ticket_summary_link\" href=\"javascript:kdlinks('IN_OPENED','$args.id')\">";
+		</PDM_IF>
+		relatedTicketsHTML += "$args.IN_OPENED.length incidents";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "</a>";
+		</PDM_IF>
+		relatedTicketsHTML += "<span> and </span>";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "<a class=\"ticket_summary_link\" href=\"javascript:kdlinks('ISS_OPENED','$args.id')\">";
+		</PDM_IF>
+		relatedTicketsHTML += "$args.ISS_OPENED.length issues";
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+			relatedTicketsHTML += "</a>";
+		</PDM_IF>
+		relatedTicketsHTML += ".<br>";		
+		document.getElementById("spnData").innerHTML = relatedTicketsHTML;
+	}
+	//
+	function kdlinks(type,lKdID)
+	{
+		var sFactory;
+		var sWC1 = "";
+		if (type == 'REQ_SOLVED')
+		{
+			sFactory = "cr";
+			sWC1 = "ADDITIONAL_WHERE=(type = 'R' OR type = '' OR type IS NULL) AND (solved_by_kd.kd=" + lKdID + ")";
+		}
+		else if (type == 'ISS_SOLVED')
+		{
+			sFactory = "iss";
+			sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+		}
+		else if (type == 'IN_SOLVED')
+		{
+			sFactory = "in";
+			sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+		}
+		else if (type == 'PR_SOLVED')
+		{
+			sFactory = "pr";
+			sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+		}
+		else if (type == 'REQ_OPENED')
+		{
+			sFactory = 'cr';
+			sWC1 = "ADDITIONAL_WHERE=(type = 'R' OR type = '' OR type IS NULL) AND (created_from_kd.kd=" + lKdID + ")";
+		}
+		else if (type == 'ISS_OPENED')
+		{
+			sFactory = "iss";
+			sWC1 = "ADDITIONAL_WHERE=created_from_kd.kd=" + lKdID;
+		}
+		else if (type == 'IN_OPENED')
+		{
+			sFactory = "in";
+			sWC1 = "ADDITIONAL_WHERE=created_from_kd.kd=" + lKdID;
+		}
+		popup_window('','SEARCH', 0, 0, '', 'FACTORY=' + sFactory, 'KEEP.IsPopUp=1', sWC1)
+	}
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl filename="Solution Survey">
+<div id="divHead" name="divHead">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/castyles.css">
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_reply.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/toolbar.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/window_manager.js"></script>
+</div>
+<script type="text/javascript">
+	argPersistentID = "$args.persistent_id";
+</script>	
+</head>
+<body id="docBody" onload="window_onload()" >
+<PDM_INCLUDE FILE=std_body.htmpl filename="Ticket Summary" >
+<table cellspacing="0" cellpadding="0" width="100%" class="page_header gn_container_no_border">
+	<tr>
+		<td align="left" width="100%"><PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.TITLE</PDM_FMT></td>
+		<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" == "1">
+		<script type="text/javascript">
+		      var closePreviewLabel = msgtext("Close_Preview_escape_key");
+		      docWriteln("<td nowrap valign='middle' align='right'>");
+		      docWriteln("<span class='close_mo_preview_label'></span><a href=\"javascript:window.parent.closeMOPreview()\" class='close_mo_preview_link' tabindex=1><u>" + closePreviewLabel + "</u></a><span class='closepreviewlabel'></span>");
+		      docWriteln("</td>");
+		</script>
+		</PDM_IF>
+	</tr>
+</table>
+<br>
+<span id="spnData" name="spnData" class="clsTextBlackXXsmall"></span>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: kt_ticket_summary.htmpl ASPEN.3 2011/02/11 15:24:51 ralje02 Exp $;
+</PDM_IF>

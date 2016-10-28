@@ -1,0 +1,201 @@
+<PDM_IF 0>
+list_window.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Blackout and Maintenance windows.
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.ForLrel" == "1" || "$args.KEEP.forCiTab" == "1">
+var hdrTitle = "Maintenance Windows Search";
+var hdrTitleList = "Maintenance Windows List";
+<PDM_ELSE>
+var hdrTitle = "Change Windows Search";
+var hdrTitleList = "Change Windows List";
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+<PDM_IF "$args.KEEP.forCiTab" == "1">
+	var cfgExtraButton=new Array("Update_Maintenance_Windows", "update_windows()", true);
+</PDM_IF>
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/recurrence_pattern.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<PDM_IF "$args.KEEP.forCiTab" == "1">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/webtab.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/track_asset.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+</PDM_IF>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Change Windows">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.forCiTab" == "">
+<PDM_MACRO name=sfStart factory=window>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=window>
+</PDM_IF>
+var displayAllCols=1;
+<PDM_IF "$args.KEEP.forCiTab" == "1">
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.ci.nr.id" value="$args.QBE.EQ.ci.nr.id">');
+displayAllCols=0;
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="sym" size=20>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_window.htmpl>');
+<PDM_IF 0>This condition is checked as Anderson supports only association of Maintenance
+		  Windows with CIs. In later releases when Blackout windows are also associated with
+		  CIs, this condition has to be removed.
+          400 is the id of the Maintenance Windows type.</PDM_IF>
+document.write('<INPUT TYPE=hidden NAME=QBE.EQ.window_type.id VALUE=400>');
+document.write('<INPUT TYPE=hidden NAME=QBE.EQ.non_global VALUE=1>');
+<PDM_ELIF "$args.KEEP.forCiTab" != "1">
+<PDM_MACRO name=sfDropdown hdr="Typ okna" attr="window_type">
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="delete_flag">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Data rozpoczęcia" attr="start_date">
+<PDM_MACRO name=sfDate hdr="Data zakończenia" attr="end_date">
+<PDM_MACRO name=sfDate hdr="Finalna data zakończenia" attr="final_end_date">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.forCiTab" == "1">
+var msgFoundNone = "No Maintenance Windows found";
+var msgFound1 = "1 Maintenance Window found";
+var msgFound = "%1 Maintenance Windows found";
+var msgFoundMore = "%1 Maintenance Windows found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Maintenance Window";
+<PDM_ELSE>
+var msgFoundNone = "No Change Windows found";
+var msgFound1 = "1 Change Window found";
+var msgFound = "%1 Change Windows found";
+var msgFoundMore = "%1 Change Windows found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Change Window";
+</PDM_IF>
+
+var schedTzInfo = new Array();	
+
+function update_windows()
+{
+	var persidRef = "$args.KEEP.window_id";
+	update_with_lrel_style("nr", "$args.KEEP.nr_id", 'window', 'window', 'Maintenance Windows', 'Associated to CI', ''); 
+	//update_with_lrel_style("nr", "$args.KEEP.nr_id", 'window', 'window', 'Maintenance Windows', 'Associated to CI', ''); 
+}
+
+// adjustStartDate() - adjusts the startDate to corresponding date in selected timezone 
+function adjustStartDate ()
+{
+	translatedDate = adjustToTz(startDate, prevValue);
+	rs.data( translatedDate);
+}
+
+// adjustEndDate() - adjusts the startDate to corresponding date in selected timezone 
+function adjustEndDate ()
+{
+	translatedDate = adjustToTz(endDate,  prevValue);
+	rs.data( translatedDate);
+}
+
+// adjustFinalEndDate() - adjusts the startDate to corresponding date in selected timezone 
+function adjustFinalEndDate ()
+{
+	translatedDate = adjustToTz(finalEndDate,  prevValue);
+	rs.data( translatedDate);
+}
+
+// displayRecurrence() - displays recurrence of a window
+// recur - recurs attribute of the window
+function displayRecurrence( recur )
+{
+	switch ( parseInt(recur) ) { 
+		case 0 : 
+			rs.data ("None");
+			break;
+		case 1 :
+			rs.data ("Daily");
+			break;
+		case 2 :
+			rs.data ("Weekly");
+			break;
+		case 3 :
+			rs.data ("Monthly");
+			break;
+		case 4 :
+			rs.data ("Yearly");
+			break;
+		default :
+			break;
+	    }
+}
+
+function displayRecurrenceExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("None") + ",1," + msgtext("Daily") + ",2," + msgtext("Weekly") + ",3," + msgtext("Monthly") + ",4," + msgtext("Yearly");
+}
+
+function getTzInfo( tz )
+{
+	<PDM_LIST FACTORY=tz where="delete_flag = 0" PREFIX=current>
+	if ('$current.code'== tz)
+		{
+		 schedTzInfo[1] = "$current.gmt_delta";
+	     schedTzInfo[2] = "$current.dst_delta";
+	     schedTzInfo[3] = "$current.start_day";
+	     schedTzInfo[4] = "$current.start_mon";
+	     schedTzInfo[5] = "$current.start_pos";
+	     schedTzInfo[6] = "$current.start_abs_date";
+	     schedTzInfo[7] = "$current.end_day";
+	     schedTzInfo[8] = "$current.end_mon";
+	     schedTzInfo[9] = "$current.end_pos";
+	     schedTzInfo[10] = "$current.end_abs_date";
+		}
+	</PDM_LIST>
+	return (schedTzInfo);
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var prevValue = \"@{list.timezone}\";">
+<PDM_MACRO name=lsWrite text="var startDate = \"@{list.start_date_INT_DATE}\";">
+<PDM_MACRO name=lsWrite text="var endDate = \"@{list.end_date_INT_DATE}\";">
+<PDM_MACRO name=lsWrite text="var finalEndDate = \"@{list.final_end_date_INT_DATE}\";">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsWrite both=yes text="if (displayAllCols) {">
+<PDM_MACRO name=lsCol hdr="Typ" attr=window_type>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsCol hdr="Data rozpoczęcia" attr=start_date export=no fmtfunc=adjustStartDate sort=no>
+<PDM_MACRO name=lsCol hdr="Data zakończenia" attr=end_date export=no fmtfunc=adjustEndDate sort=no>
+<PDM_MACRO name=lsCol hdr="Finalna data zakończenia" attr=final_end_date export=no fmtfunc=adjustFinalEndDate sort=no>
+<PDM_MACRO name=lsCol hdr="Strefa czasowa" attr=timezone>
+<PDM_MACRO name=lsWrite both=yes text="if (displayAllCols) {">
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsCol hdr="Powtarzalność" attr=recurs exportfmt=displayRecurrenceExp fmtfunc=displayRecurrence sort=no>
+<PDM_MACRO name=lsWrite both=yes text="if (displayAllCols) {">
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_window.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+
+<PDM_WSP>

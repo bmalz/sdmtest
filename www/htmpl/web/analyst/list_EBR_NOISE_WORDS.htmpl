@@ -1,0 +1,85 @@
+<PDM_IF 0>
+$Id: list_EBR_NOISE_WORDS.htmpl,v 1.2 2006/11/08 00:54:33 olsjo01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of Noise Words.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgNX_EBR_VERSION = "$env.NX_EBR_VERSION";
+var hdrTitle = "Noise Words";
+var hdrTitleList = "Noise Words List";
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_admin.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list" onload="OnLoadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="noisewords" header=no>
+<SCRIPT LANGUAGE="JavaScript">
+if (cfgNX_EBR_VERSION != "SEARCH_ENGINE")
+{
+	
+<PDM_MACRO name=sfStart factory=EBR_NOISE_WORDS>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Noise Word" attr=NOISE_WORD size=20>
+<PDM_MACRO name=sfEnd>
+}
+else
+{
+	document.writeln("<CENTER><SPAN>This page is not supported by search engine.</SPAN></CENTER>");
+}
+
+function OnLoadActions()
+{
+	if (cfgNX_EBR_VERSION != "SEARCH_ENGINE")
+		LoadActions('lstNoiseWord');
+}
+
+function OnBeforeFilterAction(which)
+{
+	//Important: Do not remove this function
+	//because it converts the text to lower case for searching
+	if (which =="search")
+	{
+		var e = searchFilterObjectOf("NOISE_WORD");
+		e.value = e.value.toLowerCase();
+	}
+}
+</SCRIPT>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+	<SCRIPT LANGUAGE="JavaScript">
+	if (cfgNX_EBR_VERSION != "SEARCH_ENGINE")
+	{
+		var arrFields = new Array;
+		var nCount =0;
+		var msgFoundNone = "No noise words found";
+		var msgFound1 = "1 noise word found";
+		var msgFound = "%1 noise words found";
+		var msgFoundMore = "%1 noise words found.  Displaying %2 through %3";
+		
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol attr=NOISE_WORD exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsEnd>	
+	}
+	</SCRIPT>
+</PDM_IF>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

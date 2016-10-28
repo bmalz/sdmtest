@@ -1,0 +1,106 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 12/31/2007
+// Title  : cmdb_metadata_har_othx.htmpl (family specific attributes)
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 04-Jan-2008 mckpe04 added common attributes used for reconcilliation
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+///////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_har_othx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="phys_mem"               heading="Memory Installed" help="The physical amount of memory installed on a hardware device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="mem_capacity"           heading="Memory Capacity" help="The total amount of memory that can be installed and made available">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="hard_drive_capacity"    heading="Disk Capacity" help="The amount of hard drive capacity that is available for use on a Hardware CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="proc_type"              heading="Processor Type" help="The kind of CPU in a hardware device">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="proc_spd"               heading="Processor Speed" help="A measurement of the rate at which a computer performs its operations">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="disk_type"              heading="Disk Type" help="The type of disk drive that resides on a workstation or server">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="media_type"             heading="Media Type" help="The kind of storage media on a hardware device, for example, disk, CD ROM">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="media_drive_num"        heading="Media Drive Capacity" help="The capacity of the hardware device that consolidates multiple memory cards into one unit">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="total_capacity"         heading="Total Disk Capacity" help="The total amount of storage available on a hardware device">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="used_space"             heading="Total Disk Used" help="The amount of available disk storage space that is in use by a CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="array_name"             heading="Storage Array Name" help="The identifier for an enterprise storage system that contains multiple disk drives and performs functions like RAID and virtualization">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="array_serial_num"       heading="Storage Array Serial Number" help="The manufacturer's serial number for an enterprise storage system that contains multiple disk drives and performs functions like RAID and virtualization">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="cd_rom_type"            heading="CD Rom Type" help="The type of CD ROM drive that resides on a workstation or server">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="graphics_card"          heading="Graphics Card Model" help="The model designation for an expansion card that is installed in an available slot in a device for enhanced graphics capabilities">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="scsi_card"              heading="SCSI Card Model" help="The model identifier for a card that provides a standard interface and command set for transferring data between internal and external peripheral devices">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="modem_type"             heading="Modem Type" help="The classification/speed of a modem used by a workstation for a faster connection to a network or the Internet">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="modem_card"             heading="Modem Card" help="The identifier of a card in a workstation or network device that enables a faster connection to a network or the Internet">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="net_card"               heading="Network Card" help="The designation for an expansion card that is installed in an available slot in a computer or network device so that it may connect and communicate to another networked component">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="monitor"                heading="Monitor Model" help="The type of display unit connected to a hardware, network, or telecom device">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="printer"                heading="Printer" help="The type or model of printer attached to a hardware or network device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="technology"             heading="Technology" help="The technology, TCP/IP, Ethernet, FDDI, and so on, employed by a hardware or network device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="number_slot_proc"       heading="Processor Capacity" help="The total number of processor slots on a hardware device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="number_proc_inst"       heading="Number of Processors Installed" help="The total number of processors installed on a hardware or network device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="mem_cache_proc"         heading="Processor Cache" help="The identifier of the hardware device that processes the high-speed memory storage between memory and the CPU">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="slot_total_mem"         heading="Number of Memory Slots" help="The total amount of memory available on memory cards in a hardware or network device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="slot_mem_used"          heading="Number of Memory Slots Used" help="The amount of memory in use from the available memory cards in a hardware or network device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="type_net_conn"          heading="Type of Network Connection" help="An indication of the kind of network connection used by a hardware or network device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="number_net_port"        heading="Number of Network Ports" help="The total number of ports in use on a device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="number_net_port_conn"   heading="Number of Network Port Connections" help="The total number of ports on a server">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="number_net_card"        heading="Number of Network Cards" help="The number of expansion cards that have been installed in the available slots in a computer">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="bios_ver"               heading="BIOS Version" help="The version number of the BIOS - the code that's run when a personal computer starts up">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="number_mips"            heading="MIPS" help="An indication of the processing speed and capacity of a hardware or network device">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="role"                   heading="Role" help="The business function supported by a hardware or network device, for example, production, test">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="server_type"            heading="Server Type" help="The kind of server, for example, application, mail, web, proxy, FTP">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="processor_count"        heading="Processor Count" help="The number of CPU's or microprocessors available on a Hardware CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="swap_size"              heading="SWAP Size" help="The size of the disk space allocated on a hardware or network device to store the state of a process that has been swapped out">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="security_patch_level"   heading="Security Patch Level" help="An indication of the current security patch version for this CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="active_date"            heading="Activation Date" help="The date on which the CI was put into active status">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="retire_date"            heading="Retire Date" help="The date on which a CI is no longer active">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="ci_priority"            heading="CI Priority" help="The service level designation that is assigned to indicate the priority for restoration of this CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="SLA"                    heading="Service Level Agreement" help="The name or identifier of the contract between IT and the customer that governs the level of service and support options that are expected and acceptable for this IT component">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="leased_or_owned_status" heading="Leased or Owned?" help="An indication of whether a particular CI has been leased for a specific time frame or was purchased">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="proj_code"              heading="Project Code" help="The ID or other unique identifier for the project to which a CI is assigned">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="contract_number"        heading="Contract Number" help="The unique identifier for a legal contract covering the purchase, lease, warranty, maintenance, and so on, of a CI or group of CIs">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="lease_effective_date"   heading="Lease Effective Date" help="The date on which a lease becomes effective (also known as the lease start date)">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="lease_termination_date" heading="Lease Termination Date" help="The date on which a lease ends and the affected CIs must be returned to the vendor">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="lease_renewal_date"     heading="Lease Renewal Date" help="The date on which a lease must be renewed for the next time period, or the affected CIs must be returned to the vendor">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="lease_cost_per_month"   heading="Monthly Lease Cost" help="The dollar amount owed to the vendor each month for a lease">
+
+<PDM_IF "$env.NX_CMDB_PURCHASEAMT" == "INT">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="purchase_amount"        heading="Purchase Amount" help="The cost incurred to buy a CI (This field is deprecated and purchase_amountc should be used instead)">
+<PDM_ELSE>
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="purchase_amountc"       heading="Purchase Amount" help="The cost incurred to buy a CI">
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="mtce_type"              heading="Maintenance Type" help="The kind of maintenance that will be provided for this CI, for example, vendor or in-house">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="maintenance_period"     heading="Maintenance Period" help="The time frame for which a maintenance contract will be active">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="mtce_contract_number"   heading="Maintenance Contract Number" help="The number that uniquely identifies a maintenance contract">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="har_othx" attr="maintenance_fee"        heading="Maintenance Fee" help="The amount of money paid to cover the cost of maintenance services over a specified time period">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

@@ -1,0 +1,110 @@
+<PDM_IF 0>
+detail_asset.htmpl
+WHEN PRESENTED:
+    When we need to display a inital detail of a single Asset
+INTENT:
+    Display the initial detail info for the Asset
+VARIABLES:
+    object asset   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/asset.maj
+                            and /opt/CApdm/bopcfg/majic/assetx.maj
+                            and /opt/CApdm/bopcfg/majic/asset.maj
+                            definition of attributes for 'OBJECT asset'
+    string  Context     Variable containing some state information
+                        "initial" - doing an initial create of new Asset
+                        or a value of family from the database.
+    string Extension    Contains the object name of the asset extension
+                        (family.extension_name), if any.  Use in 
+                        preference to Context for testing extension,
+                        as the family.sym value in Context is editable.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły elementu konfiguracji $args.name "</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowoanie elementu konfiguracji $args.name "</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie elementu konfiguracji $args.name "</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+cfgMachineName = "$SESSION.MachineName";
+argPersistentID = "$args.persistent_id";
+argCstID = "$cst.id";
+cfgDateFormat = "$date_format";
+enableBtns = true;
+if (cfgUserAuth < 2) enableBtns = false;
+cfgAccessNotify = "$ACCESS.notify";
+argID = "$args.id";
+cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+argSearchSqlClause = "id = U'$args.id'";
+rptName = new Array("nr_itilsum.rpt", "nr_itildtl.rpt");
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+function copy_from_parent()
+{}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function pop_asset_picker()
+{
+	ahdtop.asset_picker=new Object();
+	ahdtop.asset_picker=window.document.forms["main_form"];
+	popup_window('discovered_assets', 'SEARCH', 0, 0, '', '', 'FACTORY=ca_logical_asset');
+}
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Configuration Item" key="$args.name">
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=asset>
+_dtl.backfillReq = false; // We have a Continue button - suppress automatic close and backfill on save
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Kontynuuj" Func="detailSave()" hotkey_name="Kontynuuj" ID="btn001">
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Anuluj[n]" ID="btncncl">
+<PDM_MACRO name=button Caption="Wyczyść" Func="pdm_reset()" hotkey_name="Wyczyść" ID="btn004">
+<PDM_IF 0>
+	<PDM_MACRO name=button Caption="Wykryte zasoby" Func="pop_asset_picker()" hotkey_name="Discovered Assets" ID="btn001ap">
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart center=true scroll=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=name>
+<PDM_MACRO name=dtlLookup hdr="Klasa" attr=class>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa hosta" attr=system_name>
+<PDM_MACRO name=dtlTextbox hdr="Numer seryjny" attr=serial_number>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Adres MAC" attr=mac_address>
+<PDM_IF 0>
+	<PDM_MACRO name=dtlTextbox hdr="Alt CI ID" attr=asset_num>
+	<PDM_MACRO name=dtlStartRow>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa DNS" attr=dns_name>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_asset.htmpl ASPEN.3 2010/11/17 22:18:36 saima01 Exp $
+</PDM_IF>
+<PDM_WSP>

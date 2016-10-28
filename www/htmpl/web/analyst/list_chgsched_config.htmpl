@@ -1,0 +1,140 @@
+<PDM_IF 0>
+@(#)$Id: list_chgsched_config.htmpl RESILIENCE.2 2010/03/26 12:12:01 putsr02 Exp $
+
+This file can be used to configure the Change Order Schedule form
+list_chgsched.htmpl.  It consists of two sections:
+
+* a set of PDM_MACRO statements specifying information on the appearance
+  and content of the form
+
+* a JavaScript function responsible for assigning change orders to one
+  or more events on the schedule.
+
+Change Order Schedule Configuration
+-----------------------------------
+The following lines can be modified to change the appearance and contents
+of the change order schedule calendar views.
+
+The schedConfig macro is required to define a schedule form and specify
+overall options.  Arguments are:
+    autoSearch  - Automatically reissue search when required (1=yes; 0=no)
+    defaultView - Initial view: 1=day; 7=week; 30=month; 99=nday; 0=list
+    export      - iCalendar export template code (0=no export)
+    firstday    - The first weekday from 0 (Sunday) to 6 (Saturday)
+    legend      - Position of legend (1=top, 2=bottom, 0=none)
+    maxgroups   - Maximum number of groups per cell in month view
+    ndays       - Contents of n-days dropdown (0=none)
+    round       - Event time rounding as (hr,min) (0=no rounding)
+    timefmt     - Time format as 24hr or ([am],[pm])
+             
+</PDM_IF>
+<PDM_MACRO name=schedConfig autosearch=1 defaultview=30 export=ChangeSchedule firstday=5 legend=2 maxgroups=4 ndays=(3,7,14,28) round=(0,15) timefmt=24hr>
+<PDM_IF 0>
+
+schedAttr macros specify the attributes that can be displayed on the schedule
+or tested in the setSchedEvents() function.  Arguments are:
+    attr      - The name of the attribute (required)
+    attrRef   - Referenced column of an SREL attribute (default common name)
+    label     - Label for attribute (default display name; 0=no label)
+    ident     - Include attribute before group name on n-day view (1=yes; 0=no)
+    detail    - Include attribute on detailed n-day view (1=yes; 0=no)
+    summary   - Include attribute on summary n-day view (1=yes; 0=no)
+    hoverInfo - Include attribute in monthly view's info popup (1=yes; 0=no)
+             
+</PDM_IF>
+<PDM_MACRO name=schedAttr label=0 attr=chg_ref_num hoverinfo=1 ident=1 summary=1>
+<PDM_MACRO name=schedAttr label=0 attr=summary hoverinfo=1 summary=1>
+<PDM_MACRO name=schedAttr attr=sched_start_date detail=0>
+<PDM_MACRO name=schedAttr attr=sched_end_date detail=0>
+<PDM_MACRO name=schedAttr label=CI attr=CI1 detail=0 hoverinfo=1 summary=1>
+<PDM_MACRO name=schedAttr label=CI attr=CI5>
+<PDM_MACRO name=schedAttr attr=chgtype attrref="" detail=0>
+<PDM_MACRO name=schedAttr label="Assignee" attr=assignee hoverinfo=1>
+<PDM_MACRO name=schedAttr label="Group" attr=group>
+<PDM_MACRO name=schedAttr label="# Conflicts" attr=persistent_id detail=1 fmtfunc=conflict_counts hoverinfo=1 summary=1>
+<PDM_IF 0>
+
+schedGroup macros specify names and styling of groups of change orders.
+Change orders are assigned to groups by the setSchedEvents() function below.
+Arguments are:
+    grpname  - The name of the group (required)
+    label    - Label for group (default empty string)
+    legend   - Group description for legend (0=no legend (default))
+    color    - Foreground (text) color for group (default black)
+    bgcolor  - Background color for group (default white)
+    style    - Text style as normal, bold, or italic (default normal)
+
+NOTE: the first two schedGroup definitions (maintWindow and blackoutWindow) are
+      required to show blackout and maintenance windows on the schedule.  If
+      either of these groups is removed or renamed, the corresponding window
+      will not appear on the schedule.
+             
+</PDM_IF>
+<PDM_MACRO name=schedGroup label="Maintenance" bgcolor=lightgreen grpname=maintWindow icon="confirmation_12.png" legend="Maintenance Window">
+<PDM_MACRO name=schedGroup label="Blackout" bgcolor=black color=white grpname=blackoutWindow icon="warning_12.png" legend="Blackout Window" style=italic>
+<PDM_MACRO name=schedGroup label="Emergency" bgcolor=Red color=White grpname=emer legend="Emergency change order" style=bold>
+<PDM_MACRO name=schedGroup label="Normal" bgcolor=LightCyan grpname=norm legend="Normal change order">
+<PDM_MACRO name=schedGroup label="Standard" grpname=std legend="Standard change order" style=italic>
+<PDM_IF 0>
+
+setSchedEvents() JavaScript Function
+------------------------------------
+
+The following function is called once for every change order in the list. 
+It is passed a single argument, a JavaScript SchedObject object containing
+values for all attributes named in schedAttr macros above.  The function
+should schedule one or more events for the object, each containing a group
+name, a start time, and an end time.  The syntax to schedule an event is:
+
+chg.schedEvent( grpnum, startDate, endDate )
+
+where:
+  grpnum - group number, usually in the form of schedGroup_grpname,
+           where grpname is the name assigned in the schedGroup macro.
+           Group numbers are assigned sequentially, starting from zero for
+           the first schedGroup macro.
+  startDate - start date of this event in milliseconds from January 1, 1970
+  endDate - end date of this event in milliseconds seconds from January 1, 1970
+
+Note that dates are stored in the SchedObject object in the form of milliseconds
+from January 1, 1970.  You can use the JavaScript Date object to work with
+dates in this format, or simply pass them unmodified to the schedEvent function.
+             
+</PDM_IF>
+
+<script type="text/javascript">
+// Group change orders by change type (normal, standard, emergency)
+function setSchedEvents( chg )
+{
+  var grpnum;
+  switch( chg.chgtype - 0 ) {
+    case 100: grpnum = schedGroup_std;  break;
+    case 300: grpnum = schedGroup_emer; break;
+    default:  grpnum = schedGroup_norm; break;
+  }
+  chg.schedEvent( grpnum, chg.sched_start_date, chg.sched_end_date );
+}
+
+<PDM_IF 0>
+
+The following function is called once for every maintenance or blackout
+window in the list. It is passed two arguments, a JavaScript SchedEvent
+object describing a single occurrence of a window, and a CalendarWindow
+object containing values for all attributes in the Majic window object. 
+The attribute evt.grpnum has a value of schedGroup_maintWindow for
+maintenance windows, or schedGroup_blackoutWindow for blackout windows.
+This function can change evt.grpnum to alter the formatting of the window,
+or return false to suppress the window from the display (note that
+suppressing the window from the display does not cancel the window).
+		
+</PDM_IF>
+
+function setWindowEvent( evt, w )
+{
+	return true;
+}
+
+</script>
+
+<script type="text/javascript" src="$CAisd/scripts/schedule_chg.js"></script>
+<PDM_WSP preview="OP=DISPLAY_FORM&HTMPL=list_chgsched.htmpl" factory=chg>

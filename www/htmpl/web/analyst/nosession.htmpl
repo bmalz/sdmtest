@@ -1,0 +1,39 @@
+<PDM_IF 0>
+nosession.htmpl
+WHEN PRESENTED:
+    When a user session has expired.
+INTENT:
+    To tell the user his session has expired.
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<TITLE>Session Expired</TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=messages>
+<CENTER>
+<PDM_INCLUDE FILE=splash.htmpl>
+<P>
+<IMG SRC=$CAisd/img/bar.gif WIDTH=90% HEIGHT=4 ALT="">
+<P>
+<SPAN class=messagetext>
+Session is no longer active.
+<BR>
+<BR>
+Please return to the 
+<A class=messagetext HREF=$cgi>$ProductName Login form</A>
+and login again
+</SPAN>
+<BR>
+</CENTER>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: nosession.htmpl,v 1.3 2006/11/10 18:54:59 tuach01 Exp $
+</PDM_IF>

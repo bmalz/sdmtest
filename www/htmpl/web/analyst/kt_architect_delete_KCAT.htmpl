@@ -1,0 +1,181 @@
+<PDM_IF 0>
+@(#)$Id: kt_architect_delete_KCAT.htmpl ANDERSON.2 2009/09/10 18:12:18 lilel01 Exp $
+WHEN PRESENTED:
+    when emailing a Knowledge Document
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview=no>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_LIST PREFIX=list FACTORY=KCAT WHERE="id=$args.KCAT_ID">
+	var sCaption = '<PDM_FMT ESC_STYLE=C>$list.CAPTION</PDM_FMT>';
+</PDM_LIST>	
+	var hdrTitle =  "Delete Category";
+</script>
+
+<PDM_INCLUDE FILE=std_head.htmpl header=no>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></script>
+<script type="text/javascript">
+function divToDisplay()
+{
+	<PDM_IF $args.ROLE_MASS_DELETE == '0'>
+		document.getElementById("divCategory").style.display = "";
+	<PDM_ELSE>
+	if (document.forms["frmMain"].elements["chkDocuments"].checked)
+	{
+		document.getElementById("divDeleteKDsOptions").style.visibility = "";
+	}
+	else
+	{
+		document.getElementById("divDeleteKDsOptions").style.visibility = "hidden";
+	}
+	if(document.forms["frmMain"].elements["chkSubCategories"].checked == false && document.forms["frmMain"].elements["chkDocuments"].checked == false)
+	{
+		document.getElementById("divCategory").style.display = "";
+		document.getElementById("divDocuments").style.display = "none";
+		document.getElementById("divSubCategories").style.display = "none";
+		document.getElementById("divSubCategoriesDocuments").style.display = "none";
+	}
+	else if(document.forms["frmMain"].elements["chkSubCategories"].checked == true && document.forms["frmMain"].elements["chkDocuments"].checked == false)
+	{
+		document.getElementById("divCategory").style.display = "none";
+		document.getElementById("divDocuments").style.display = "none";
+		document.getElementById("divSubCategories").style.display = "";
+		document.getElementById("divSubCategoriesDocuments").style.display = "none";
+	}
+	else if(document.forms["frmMain"].elements["chkSubCategories"].checked == false && document.forms["frmMain"].elements["chkDocuments"].checked == true)
+	{
+		document.getElementById("divCategory").style.display = "none";
+		document.getElementById("divDocuments").style.display = "";
+		document.getElementById("divSubCategories").style.display = "none";
+		document.getElementById("divSubCategoriesDocuments").style.display = "none";
+	}
+	else if(document.forms["frmMain"].elements["chkSubCategories"].checked == true && document.forms["frmMain"].elements["chkDocuments"].checked == true)
+	{
+		document.getElementById("divCategory").style.display = "none";
+		document.getElementById("divDocuments").style.display = "none";
+		document.getElementById("divSubCategories").style.display = "none";
+		document.getElementById("divSubCategoriesDocuments").style.display = "";
+	}
+	</PDM_IF>
+}	
+function Cancel()
+{
+	top.close();
+}
+var m_lKCAT = "$args.KCAT_ID";
+var m_lTreeMacroID= "$args.TreeMacroID";
+function OK()
+{	
+	var bDelInChildKCATs = 0;
+	var bDelChildKDs = 0;
+	var bDelLinkedKDs = 0;
+	var bDoDelete = 0;
+	if (ahdtop.CanUserPerformAction("ROLE_MASS_DELETE"))
+	{
+		if(document.forms["frmMain"].elements["chkSubCategories"].checked == true)
+		{
+			bDelInChildKCATs = 1;
+		} 
+		if (document.forms["frmMain"].elements["chkDocuments"].checked == true)
+		{
+			bDelChildKDs = 1;
+			if(confirm(msgtext("Please_Note:_Documents_may_be_")))
+			{
+				bDoDelete = 1;
+				if (document.forms["frmMain"].elements["radioDeleteKDsByPrimaryKcatOnly"].checked)
+				{	
+					bDelLinkedKDs = 1;
+				}
+				else
+				{
+					bDelLinkedKDs = 0;
+				}
+			}	
+			else
+			{
+				return;
+			}
+		}
+	}
+	//display confirm if no checkbox is checked or 'include categories' checkbox is checked
+	if ( !ahdtop.CanUserPerformAction("ROLE_MASS_DELETE") || document.forms["frmMain"].elements["chkDocuments"].checked != true)
+	{
+		var msg=msgtext("Are_you_sure_you_want_to_delet4");
+		msg=msg.replace(new RegExp("%1","g"), sCaption);
+		if(confirm(msg))	
+			bDoDelete = 1;
+	}	
+
+	if(bDoDelete)
+	{
+		if (ahdframeset == ahdtop)//supress popup options
+			ahdframeset.kt_catTreeWindow[m_lTreeMacroID].doDeleteKCAT(m_lKCAT,bDelInChildKCATs,bDelChildKDs,bDelLinkedKDs);
+		else
+			top.opener.ahdframeset.kt_catTreeWindow[m_lTreeMacroID].doDeleteKCAT(m_lKCAT,bDelInChildKCATs,bDelChildKDs,bDelLinkedKDs);
+	}
+}
+</script>
+</HEAD>
+<BODY border="0" topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0" onload="divToDisplay();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Delete Category" logo=no>
+<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0 class=page_header>
+	<TR height=25>			
+		<TD width="99%" align=left>'<script>document.write(sCaption);</script>' Delete Category</TD>
+		<TD align=right>
+			<script type="text/javascript">
+				ImgBtnRow(0);    
+				ImgBtnCreate("idOK","OK", "OK();", 1);
+				ImgBtnCreate("idCancel","Cancel", "Cancel();", 1); 
+				ImgBtnEndRow();
+			</script>
+		</TD>
+	</TR>
+</TABLE>
+<form id=frmMain name=frmMain onsubmit="return false">
+<PDM_IF $args.ROLE_MASS_DELETE == '1'>
+	<table width=100%>
+		<TR><TD width=50%>
+				<input type=checkbox  onclick="divToDisplay();" id=chkSubCategories name=chkSubCategories><span onclick="chkSubCategories.click();" class="clsText" style="cursor:pointer;">Include Subcategories</span><br>
+			</TD>
+			<TD width=50%>
+				<input type=checkbox onclick="divToDisplay();" id=chkDocuments name=chkDocuments><span onclick="chkDocuments.click();" class="clsText" style="cursor:pointer;">Include Documents</span><br>
+			</TD>
+		</TR>
+	</TABLE>
+
+	<div id="divDeleteKDsOptions" class="clsTextBlackXsmallAbs">
+		&nbsp;<input type='radio' name="radioDeleteKDs" value="1" checked ID="radioDeleteKDsByPrimaryKcatOnly">
+		<span style="cursor:pointer;" onclick="document.frmMain.radioDeleteKDsByPrimaryKcatOnly.click();">Delete documents linked by primary category only.</span>
+		<br>
+		&nbsp;<input type='radio' name="radioDeleteKDs" value="2" id="radioDeleteKDs2">
+		<span style="cursor:pointer;" onclick="document.frmMain.radioDeleteKDs2.click();">Delete all documents linked to the category.</span>
+	</div>
+
+</PDM_IF>
+
+</div>
+
+<BR>
+<div  class="clsTextBlackXsmallAbs" id=divCategory style="display:">
+&nbsp;Upon deletion of this category, all subcategories and documents will move up to the first available parent category.
+</div>
+<div  class="clsTextBlackXsmallAbs" id=divSubCategories style="display:none">
+&nbsp;All subcategories of this category will be permanently deleted from the Knowledge Management System.<BR>&nbsp;Documents in these categories will move up to the first available parent category.
+</div>
+<div  class="clsTextBlackXsmallAbs" id=divDocuments style="display:none">
+&nbsp;All documents in this category will be permanently deleted from the Knowledge Management System.
+</div>
+<div  class="clsTextBlackXsmallAbs" id=divSubCategoriesDocuments style="display:none">
+&nbsp;All subcategories and documents in this category will be permanently deleted from the Knowledge Management System.
+</div>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

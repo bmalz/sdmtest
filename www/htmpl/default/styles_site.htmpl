@@ -1,0 +1,37 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2008 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  default/styles_site.htmpl  
+// Created: 06/20/2008
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    Includes the styles for the contents pages.
+//    
+//
+//    You should place your customized version of styles_site.htmpl in
+//    site/mods/htmpl/www/htmpl/default/styles_site.htmpl
+////////////////////////////////////////////////////////////////////////////
+// $Id: styles_site.htmpl,v 1.1 2006/11/01 17:39:04 hugjo03 Exp $
+<!-- 
+
+-->
+<html lang="en"></html>
+</PDM_IF>
+<pdm_pragma release=110>
+<pdm_wsp preview=no>
+<!-- Start of styles_site.htmpl -->
+<!-- End of styles_site.htmpl -->

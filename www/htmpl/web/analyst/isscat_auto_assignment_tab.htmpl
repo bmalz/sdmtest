@@ -1,0 +1,65 @@
+<PDM_IF 0>
+isscat_auto_assignment_tab.htmpl
+
+INTENT:
+    Display a Auto Assignment notebook page for Issue Category page.
+
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=isscat_auto_assignment_tab" factory=isscat>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_OBJECT>
+cfgUserAuth = "$UserAuth";
+function add_button_to_tab_banner(){
+if (cfgUserAuth < 2 || ("$prop.form_name_3" == "edit" && "$args.id" == "0")) {
+	
+<PDM_MACRO name=button caption="Update Groups" disabled=yes func="update_loc_grp('isscat', '$args.persistent_id', 'cnt', 'service_grps','Groups Available','Groups Assigned','')" hotkey_name="Update Groups" id=UPDATE_GRP newrow=yes>
+<PDM_MACRO name=button caption="Update Locations" disabled=yes func="update_lrel('isscat', '$args.persistent_id', 'loc', 'service_locs',  'Locations Available', 'Locations Assigned', '')" hotkey_name="Update Locations" id=UPDATE_LOC>
+<PDM_MACRO name=button caption="Update Workshifts" disabled=yes endrow=yes func="update_lrel('isscat', '$args.persistent_id', 'wrkshft', 'service_schedules',  'Workshifts Available', 'Workshifts Assigned', '')" hotkey_name="Update Workshifts" id=UPDATE_WRKSHFT>
+}
+else {
+	
+<PDM_MACRO name=button caption="Update Groups" func="update_loc_grp('isscat', '$args.persistent_id', 'cnt', 'service_grps','Groups Available','Groups Assigned','')" hotkey_name="Update Groups" id=UPDATE_GRP newrow=yes>
+<PDM_MACRO name=button caption="Update Locations" func="update_lrel('isscat', '$args.persistent_id', 'loc', 'service_locs',  'Locations Available', 'Locations Assigned', '')" hotkey_name="Update Locations" id=UPDATE_LOC>
+<PDM_MACRO name=button caption="Update Workshifts" endrow=yes func="update_lrel('isscat', '$args.persistent_id', 'wrkshft', 'service_schedules',  'Workshifts Available', 'Workshifts Assigned', '')" hotkey_name="Update Workshifts" id=UPDATE_WRKSHFT>
+}
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=tabBanner title="Auto Assignment List" add_btns=true>
+<PDM_IF "$prop.form_name_3" == "edit" && "$args.id" == 0>
+<PDM_MACRO name=dtlShowtext dataclass="detailro gn_content_center" value="Issue Category needs to be saved first before groups, locations and workshifts can be attached to it">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow class="Center">
+<PDM_MACRO name=dtlCheckbox hdr="Włączone auto-przypisywanie" attr=auto_assign colspan='2' off=No on=Yes>
+<PDM_IF "$args.id" != 0>
+<PDM_MACRO name=dtlStartExpRow label="Auto Assignment Lists" colspan='1' exp_rows="1,2,3" form_name="detail_isscat">
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Group List." height=180 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.service_isscat.isscat.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.type.id=2308+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Location List." height=180 src="OP=SEARCH+FACTORY=loc+QBE.EQ.service_isscat.isscat.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Workshift List." height=180 src="OP=SEARCH+FACTORY=wrkshft+QBE.EQ.isscat_svc.isscat.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.noSFBtns=1">
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: isscat_auto_assignment_tab.htmpl ASPEN.5 2010/10/25 15:56:33 ralje02 Exp $;
+</PDM_IF>

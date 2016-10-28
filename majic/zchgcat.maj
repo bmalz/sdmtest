@@ -1,0 +1,16 @@
+OBJECT pcat {
+	FACTORY zchgcat {
+          RESTRICT "zchg_flag= 1 " { zchg_flag =1} ;
+
+          STANDARD_LISTS {
+                SORT_BY "sym" ;
+		WHERE "delete_flag = 0 AND zchg_flag = 1" ; 
+                MLIST OFF ;
+                RLIST OFF ;
+          };
+
+		REL_ATTR persistent_id ;
+    		COMMON_NAME sym ;
+    		FUNCTION_GROUP "call_mgr_reference" ;
+   };
+} ;

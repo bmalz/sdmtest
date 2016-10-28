@@ -1,0 +1,154 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a Web Form
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Web Form Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Web Form"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Web Form $args.name"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+var dflt_for_obj_sel = void(0);
+function show_dflt_for_obj_sel(obj)
+{
+    var opt = obj.options[obj.selectedIndex];
+    if (typeof opt != "undefined" && 
+	opt.value == "2")
+    {
+	if (typeof dflt_for_obj_sel != "undefined")
+	{
+	    for (var i = 0; i < dflt_for_obj_sel.length; i++)
+		dflt_for_obj_sel[i].show_row(); 
+	} 
+    }
+    else 
+    {
+	hide_dflt_for_obj_sel(true);
+    }
+}
+
+function hide_dflt_for_obj_sel(force)
+{
+    if (typeof dflt_for_obj_sel != "undefined" && 
+	("$args.wf_type" != "2" || 
+	 (typeof force != "undefined" && force))) 
+    {
+	for (var i = 0; i < dflt_for_obj_sel.length; i++)
+	    dflt_for_obj_sel[i].hide_row(); 
+    }
+}
+
+function set_extra_backfill_vals()
+{
+    if (typeof ahdframeset.opener == "object" &&
+	ahdframeset.opener != null &&
+	typeof ahdframeset.opener.extra_backfill_vals != "undefined")
+    {
+	var wf_type_sel = document.main_form.elements["SET.wf_type"];
+	if (typeof wf_type_sel != "undefined" &&
+	    typeof wf_type_sel.options != "undefined")
+	{ 
+	    var opt = wf_type_sel.options[wf_type_sel.selectedIndex];
+	    if (typeof opt != "undefined")
+	    { 
+		ahdframeset.opener.extra_backfill_vals[$dob.id] = opt.value; 
+	    }
+	}
+    }
+}
+
+function format_resource_fld_and_save() { 
+var res_obj = document.main_form.elements["SET.resource"];
+    if (typeof res_obj != "undefined")
+    {
+    		var res_val = res_obj.value;   		
+				res_val = res_val.replace(/\r\n/g, '');    		
+				res_val = ltrim(res_val);
+				res_val = rtrim(res_val);
+				res_obj.value = res_val;    		
+    }
+    detailSave();    
+}
+</script>
+</head>
+
+<body class="detailro" onload="hide_dflt_for_obj_sel()" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Web Form">
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory="web_form">
+   if (  _dtl.edit )   
+   {
+      
+<PDM_MACRO name=button caption="Save[S]" func="format_resource_fld_and_save()" hotkey_name="Save[S]" id=btn001 newrow=yes>
+<PDM_MACRO name=button caption="Cancel[n]" btntype=negative func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" id=btncncl width=120>
+<PDM_MACRO name=button caption="Reset[R]" endrow=yes func="pdm_reset()" hotkey_name="Reset[R]" id=btn004 width=120>
+   }
+   else if ((0 + cfgUserAuth) > 1 )
+   {
+      
+<PDM_MACRO name=button caption="Edit[d]" endrow=yes func="detailEdit()" hotkey_name="Edit[d]" id=btnEdit newrow=yes>
+   }
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa formularza webowego" attr="name" size=30>
+<PDM_IF "$args.KEEP.RestrictForTab" != "2" >
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Status rekordu" attr="delete_flag">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr="code" size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr="code">
+</PDM_IF>
+<PDM_IF "$args.KEEP.RestrictForTab" != "1" && "$args.KEEP.RestrictForTab" != "2">
+<PDM_MACRO name=dtlDropdown hdr="Typ" attr="wf_type" codename="webformtype" default="0" evt="onChange='show_dflt_for_obj_sel(this)'" make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Typ" attr="wf_type" codename="webformtype_tab" default="0" evt="onChange='show_dflt_for_obj_sel(this)'" make_required=yes>
+</PDM_IF>
+
+dflt_for_obj_sel = createExpandableRow("1");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Domyślne dla typu obiektu" attr="dflt_for_obj" codename="webformdfltforobjtype">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=2 keeplinks=yes rows=3 size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zasób" attr="resource" colspan=2 rows=4 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_web_form.htmpl ASPEN.2 2010/10/19 16:09:12 ralje02 Exp $
+</PDM_IF>
+<PDM_WSP>

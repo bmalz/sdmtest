@@ -1,0 +1,176 @@
+<PDM_IF 0>
+xx_wf_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Issue 
+INTENT:
+    Display a notebook page for iss workflow task.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag wont be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=xx_wf_tab" factory=chg>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="detailro">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Workflow">
+
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+function get_approval_console_url() {
+    var factory = "$args.FACTORY";
+	var url=cfgCgi+
+	"?SID="+cfgSID+
+	"+FID="+fid_generator()+
+	"+FACTORY="+factory+
+	"+PERSID="+"$args.persistent_id"+
+	"+OP=SHOW_DETAIL"+
+	"+KEEP.is_cab_approval=1"+
+	"+KEEP.PERSID_POINTER="+cur_persid_pointer;  
+	if(factory!=undefined&&factory=="wf"){
+		url+="+HTMPL=orderwf_approval_console.htmpl";
+	}else{
+		url+="+HTMPL=order_approval_console.htmpl";
+	}	
+	return url;
+}
+
+function delete_wf(persid)
+{
+   var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+             "+OP=DELETE_WORKFLOW+PERSID=" + persid +
+             "+NEXT_PERSID=$args.persistent_id" +
+             "+FACTORY=$prop.form_name_2";
+   window.location.href = url;
+}
+function edit_wf(persid)
+{
+   var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+             "+OP=UPDATE+PERSID=" + persid +
+             "+NEXT_PERSID=$args.persistent_id";
+   window.location.href = url;
+}
+
+<PDM_IF "$prop.form_name_2" == "iss">
+var factory = "iss";
+var edit_form_name = "insert_iss_wf.htmpl";
+var wfAccess = $ACCESS.FAC_iss;
+<PDM_ELIF "$prop.form_name_2" == "chg" || "$prop.form_name_2" == "approval_console">
+var factory = "chg";
+var edit_form_name = "insert_wf.htmpl";
+var wfAccess = $ACCESS.FAC_chg;
+<PDM_ELSE>
+var wfAccess = 0;
+</PDM_IF>
+
+<PDM_OBJECT>
+var tabButtonAuth = 1;  // Display buttons to users with readonly auth
+function add_button_to_tab_banner(){
+   
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_MACRO name=button Caption="Odświerz zadania workflow[T]" Func="do_refresh_wf_tasks()" hotkey_name="Refresh Workflow Tasks[T]" ID=btn907>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Odświerz zadania workflow[T]" Disabled=yes Func="do_refresh_wf_tasks()" hotkey_name="Refresh Workflow Tasks[T]" ID=btn907>
+</PDM_IF>
+<PDM_IF "$args.category" != "">
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_MACRO name=button Caption="Dodaj zadania[I]" Func="do_insert_tasks()" hotkey_name="Insert Tasks[I]" ID=btn909 Width=120>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Dodaj zadania[I]" Disabled=yes Func="do_insert_tasks()" hotkey_name="Insert Tasks[I]" ID=btn909 Width=120>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+}
+
+function do_refresh_wf_tasks() {
+    var refresh_tasks_url;
+	
+<PDM_IF "$prop.form_name_2" == "approval_console">
+		if(typeof cur_persid_pointer != "undefined")
+			refresh_tasks_url = get_approval_console_url();
+	
+<PDM_ELSE>
+		refresh_tasks_url = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" + 
+                           "+OP=SHOW_DETAIL+PERSID=$args.persistent_id";
+</PDM_IF>  
+   browseWithURL(refresh_tasks_url);
+}
+function do_insert_tasks() {
+   var insert_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID+OP=UPDATE" +
+                    "+PERSID=$args.persistent_id+FACTORY=" + factory +
+                    "+EDIT_HTMPL=" + edit_form_name;
+   browseWithURL(insert_str);
+}
+</PDM_OBJECT>
+
+<PDM_IF "$prop.form_name_2" == "iss" || "$prop.form_name_2" == "chg" || "$prop.form_name_2" == "approval_console">
+<PDM_MACRO name=tabBanner title="Classic Workflow Tasks" add_btns=true>
+<PDM_ELSE>
+<PDM_MACRO name=tabBanner title="Zadania workflow">
+</PDM_IF>
+
+// Place holder that will have content after a category update
+<PDM_MACRO name=dtlStartDiv class="gn_display_none" divid="T13B343">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=dtlShowtext dataclass="gn_text_big gn_content_center gn_white_smoke_background" value="Changes to Workflow Tasks will not show until the ticket is saved">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+var wfpersid = new Array();
+var wfhtml, wflnkid = -1;
+
+
+<PDM_MACRO name=dtlStartDiv divid="ShowTaskTable" style="visibility:visible">
+//Note: cannot gain focus when hidden by CA Workflow style--
+<PDM_IF "$prop.form_name_2" == "iss" || "$prop.form_name_2" == "chg" || "$prop.form_name_2" == "approval_console">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=dtlDateReadonly hdr="Workflow Start Date" attr=start_date>
+<PDM_MACRO name=dtlDate hdr="Przewiidywana data skompletowania" attr=est_comp_date>
+<PDM_MACRO name=dtlDate hdr="Rzeczywista data skompletowania" attr=actual_comp_date>
+</PDM_IF>
+<PDM_IF $args.workflow.length != 0 >
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_IF "$prop.form_name_2" == "iss">
+<PDM_MACRO name=tabList btntitle="Load Issue Workflow Task List." height=300 src="OP=SEARCH+FACTORY=iss_wf+QBE.EQ.iss=$args.persistent_id+KEEP.forTicketList=1">
+<PDM_ELIF "$prop.form_name_2" == "chg" || "$prop.form_name_2" == "approval_console">
+<PDM_MACRO name=tabList btntitle="Load Workflow Task List." height=300 src="OP=SEARCH+FACTORY=wf+QBE.EQ.chg=$args.id+KEEP.forTicketList=1">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_IF "$prop.form_name_2" == "iss" || "$prop.form_name_2" == "chg" || "$prop.form_name_2" == "approval_console">
+<PDM_MACRO name=dtlShowtext dataclass="detailro gn_content_center" value="There are no workflow tasks associated with this category">
+<PDM_ELSE>
+<PDM_MACRO name=dtlShowtext dataclass="detailro gn_content_center" value="No workflow tasks are associated with this Incident/Problem/Request Area">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+<PDM_MACRO name=dtlStartDiv divid="HideWorkflow" style="visibility:hidden">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=dtlTextbox hdr="Workflow Definition ID" attr="n/a" id=catg_cawf_defid2 value="">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: xx_wf_tab.htmpl ASPEN.7 2012/04/12 11:18:17 maide01 Exp $
+</PDM_IF>

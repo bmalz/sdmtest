@@ -1,0 +1,100 @@
+<PDM_IF 0>
+list_sapolicy.htmpl
+WHEN PRESENTED:
+    When we need to display a list of ServiceAware access policies
+INTENT:
+    Display the list of ServiceAware Policy
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object sapolicy_list list The list object containing the ServiceAware Policy
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT sapolicy'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "SOAP Web Services Access Policy Search";
+var hdrTitleList = "SOAP Web Services Access Policy List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+//XJZ need to load proper report templates.
+var rptName = new Array("no", "no");
+var cfgCanEdit = true;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=sapolicy>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code size=20>
+<PDM_MACRO name=sfLookup hdr="Kontakt Proxy" attr=proxy_contact factory=agt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+searchFilterDropdown("Default","is_default","","No","0","Yes","1");
+searchFilterDropdown("Has Key","public_key","",
+    "Yes","(public_key IS NOT NULL)",
+    "No","(public_key IS NULL)");
+searchFilterDropdown("Allow Impersonate", "allow_impersonate","","No","0","Yes","1");    
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No SOAP Web Services access policy found";
+var msgFound1 = "1 SOAP Web Services access policy found";
+var msgFound = "%1 SOAP Web Services access policies found";
+var msgFoundMore = "%1 SOAP Web Services access policies found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired SOAP Web Services access policy";
+function display_field_value(value)
+{
+  if ( value == "" )
+
+     value = "No";
+
+  else 
+
+     value = "Yes";
+
+  rs.data(value);     
+}
+
+function display_field_valueExp()
+{
+	return "LIST_LOOKUP: ," + msgtext("No") + ",OTHERWISE," + msgtext("Yes");
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Kontakt Proxy" attr=proxy_contact>
+<PDM_MACRO name=lsCol hdr="Ma klucz" attr=public_key exportfmt=display_field_valueExp fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_sapolicy.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

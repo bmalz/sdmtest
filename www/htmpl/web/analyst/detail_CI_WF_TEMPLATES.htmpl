@@ -1,0 +1,98 @@
+<PDM_IF 0>
+detail_CI_WF_TEMPLATES.htmpl
+WHEN PRESENTED:
+    When we need to edit an approval process name, its description and its tasks.
+INTENT:
+    Edit a Approval Process template
+VARIABLES:
+    
+    object  CI_WF_TEMPLATES  args	The Approval Process object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT CI_WF_TEMPLATES
+						for the definition of attributes for 'OBJECT CI_WF_TEMPLATES'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.WF_NAME Approval Process Template Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.WF_NAME Update Approval Process Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Approval Process Template $args.WF_NAME"</PDM_FMT>;
+</script>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var argTemplateName = "$args.KEEP.TEMPLNAME";
+var argDescription = "$args.KEEP.DESCRIPTION";
+var argSaveAsID = "$args.KEEP.SAVE_AS_ID"
+var sOpener = "$args.KEEP.OPENER";
+var argID = "$args.id";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+</head>
+<body onload="LoadActions('dtlWFTemplate')";>
+<PDM_INCLUDE FILE=std_body.htmpl filename="wf_templates" header=no>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<center>
+	<script>		
+		
+<PDM_MACRO name=dtlForm factory=CI_WF_TEMPLATES>
+<PDM_MACRO name=dtlStart>
+		document.write("<input type='hidden' name='SET.SAVE_AS' id='SET.SAVE_AS'>");
+		
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Szablon" attr=WF_NAME colspan=1 rows=1 size=30>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=WF_DESCRIPTION colspan=1 rows=1 size=85>
+<PDM_IF "$prop.MultiTenancy" != "off" && "$args.IS_DEFAULT" == "1" && "$args.tenant" != "">
+<PDM_MACRO name=dtlCheckbox hdr="Domyślnie" attr="IS_DEFAULT" colspan=2 off="No" on="Yes">
+<PDM_ELSE>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Domyślnie" attr="IS_DEFAULT" colspan=2 off="No" on="Yes">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.id" != 0 >
+<PDM_MACRO name=dtlDropdown hdr="When creating a new rework version set the document task to" attr="UNPUBLISHED_TASK" colspan=2 factory="CI_ACTIONS" lookup=no whereclause="WF_TEMPLATE_ID=$args.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="When unretiring set the document task to" attr="UNRETIRED_TASK" colspan=2 factory="CI_ACTIONS" lookup=no whereclause="WF_TEMPLATE_ID=$args.id">
+<PDM_MACRO name=dtlStartRow>
+</PDM_IF>		
+		document.write("<tr></tr><th align='left' valign='baseline' colspan='2'>");
+	</script>
+	
+	
+<PDM_IF "$args.id" != 0  && "$args.KEEP.MO_PREVIEW_MODE" != "1">
+		<table width=100% class='gn_container_no_border gn_margin_minus_5'>
+			<tr height=280px>
+				<td>
+					<div class='inset_border_2 gn_height_99' name=divTaskList id=divTaskList></div>
+					<script>
+						LoadTaskList();
+						function LoadTaskList()
+						{
+							var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=SEARCH+FACTORY=CI_ACTIONS+QBE.EQ.WF_TEMPLATE_ID=$args.id+KEEP.POPUP_NAME="+argPopupName+"+KEEP.templateTenant=$args.tenant";
+							var odivTaskList = document.getElementById("divTaskList");	
+							odivTaskList.innerHTML = "<iframe frameborder=0 scrolling=no id=iFrmTaskList name=iFrmTaskList " + 
+							"height='250px' width='100%' title='Task List' " + 
+							"src='" + url + "'></iframe>";
+						}
+					</script>
+				<td>
+			</tr>
+		</table>
+	
+</PDM_IF>
+	
+	<script>
+		document.write("</th>");
+	
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	
+<PDM_MACRO name=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

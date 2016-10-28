@@ -1,0 +1,1729 @@
+<PDM_IF 0>
+@(#)$Id: list_KD.htmpl ASPEN.8 2012/03/27 07:42:07 siwst01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of Knowledge Documents for customers and employees	
+</PDM_IF>
+<html lang="en">	
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript">	
+var hdrTitleList = "Knowledge Document List";
+</script>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/list_KD_common.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_relevance.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/breadcrumb.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_category_path.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<script language="JavaScript">
+<!--
+	var argBackfillField = '$args.KEEP.backfill_field';
+	var argBackfillForm = '$args.KEEP.backfill_form';
+	var argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+	var argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+	var argSaveSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.KEEP.save_sql_clause</PDM_FMT>';
+	var cfgDateFormat = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format</PDM_FMT>';
+	var cfgDateFormatNoTime = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format_no_time</PDM_FMT>';
+<PDM_IF "${current:n/a}" == "n/a">
+	var searchFilterInitialState = "show";
+<PDM_ELSE>
+	var cfgCurrent = '$current';
+	var cfgTotal = '$total';
+	var cfgRecordCount = '$record_count';
+	var cfgStart = '$start';
+	var cfgLength = '$length';
+</PDM_IF>
+	var cfgUseTemplate = '$args.use_template';
+	var cfgIsPopup = '$args.KEEP.IsPopUp';
+	var rptName = new Array("isssum.rpt", "issdtl.rpt");
+	var cfgCanEdit = true;
+	var tenantSort = "no";	//By default all tenant columns are sortable. This variable is needed to make the
+							//tenant column not sortable
+
+//-->
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<SCRIPT LANGUAGE="Javascript">		
+var _iCust_empInterface = 1;	// used to identify customer-employee interface 
+var ebrDidYouMean = "$args.KEEP.ebr_search_suggestion";
+var envShowDidYouMean = "$env.KNOWLEDGE_SHOW_DID_YOU_MEAN";
+/////////////////////////////////////////////////////////////////////
+// FUNCTION getDidYouMean 
+//  get Did you Mean html 
+//  value  
+/////////////////////////////////////////////////////////////////////
+function getDidYouMean()
+{
+	var html="";
+	if(ebrDidYouMean.length > 0 && envShowDidYouMean == "Yes")
+	{
+		html = "&nbsp;&nbsp;&nbsp;<span class=data style='color:red;'><b>" + msgtext("Did_you_mean") + ":<b>&nbsp;<a href='javascript:DidYouMean()' class=record>" + ebrDidYouMean + "</a></span>";
+	}
+	return html
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// FUNCTION DidYouMean
+//		submit a search with the 'did you mean' keywords
+//		using ebrDidYouMean ("$args.KEEP.ebr_search_suggestion")
+/////////////////////////////////////////////////////////////////////
+function DidYouMean()
+{
+	if(ahdtop.cfgNX_KT == "No" || envShowDidYouMean == "No")
+		return;
+	document.getElementById("QBE.IN.ebr_search_text").value = ebrDidYouMean;
+	doSearch();
+}
+	/////////////////////////////////////////////////////////////////////
+	// FUNCTION faqCategory
+	//		Handler for when a category is selected
+	//		id - category ID
+	//		caption - category caption
+	//		idPath - relative path to the category
+	//		fromCatPath - true if we entered this function from the category path
+	//		fromSubCats - true if click on category or subcategory in Categories section
+	/////////////////////////////////////////////////////////////////////
+	function faqCategory(id, caption, idPath, fromCatPath, fromSubCats) {
+		
+		var keywordForm = document.forms['keywordSearch'];
+		keywordForm.elements["HTMPL"].value = "list_KD.htmpl";
+		keywordForm.elements["DOMSET"].value = "KD_list_web_BU_RESULT_DESC_blc";		
+		keywordForm.elements["KEEP.categoryID"].value = id;
+		keywordForm.elements["KEEP.relationalID"].value = idPath;
+		keywordForm.elements["event_log_on"].value = "1";
+		keywordForm.elements["event_log_type"].value = "FAQ";
+		keywordForm.elements["event_log_numdata1"].value = id;
+		
+		
+		// We use a calling convention here where the caption for the category is
+		// HTML encoded (nx_escape'd) so that it can be passed in via the href
+		// coded into each link
+		caption = nx_unescape(caption);
+		
+		var categoryPath = '<PDM_FMT ESC_STYLE=C>$args.KEEP.categoryPath</PDM_FMT>';
+		var rxGt = new RegExp("&gt;","gi");
+		categoryPath = categoryPath.replace(rxGt,">");
+		
+		
+		if (fromCatPath) {		
+			var pos = categoryPath.indexOf(caption);
+			pos = categoryPath.indexOf(">", pos+1);
+			categoryPath = categoryPath.substring(0, pos);
+		}
+		else {
+			categoryPath += ">" + caption;			
+		}
+		keywordForm.elements["KEEP.categoryPath"].value = '<PDM_FMT ESC_STYLE=JS2>'+categoryPath+'</PDM_FMT>';
+		var addlWhere = keywordForm.elements["ADDITIONAL_WHERE"];
+		if (id == 1)
+		{
+			addlWhere.value = "ACTIVE_STATE = 0"
+		}
+		else
+		{
+			addlWhere.value = "ACTIVE_STATE = 0 and (DOC_LINKS.RELATIONAL_ID='" + idPath + "' OR DOC_LINKS.RELATIONAL_ID LIKE '" + idPath + "-%')";
+		}
+			
+		// Disable all ebr-related form elements
+		for (var i=0; i < keywordForm.elements.length; i++) {
+			var e = keywordForm.elements[i];
+			if (e.name.match(/ebr_/))
+				keywordForm.elements[i].disabled = true;	
+		}
+		
+		bFromSubCats = false;
+		if(typeof fromSubCats != "undefined" && fromSubCats)
+			bFromSubCats = true;
+		if(bFromSubCats || fromCatPath)
+			submit_keywordSearch_form(true);
+		else	
+			submit_keywordSearch_form();
+	}
+	
+	//This is used when open Categoy from URL
+	//JH SDT 2895 
+	function faqCategorySearch(id, caption, idPath, fromCatPath, searchText) {
+		var keywordForm = document.forms['keywordSearch'];
+		keywordForm.elements["HTMPL"].value = "list_KD.htmpl";
+		keywordForm.elements["DOMSET"].value = "KD_list_ebr_RELEVANCE";
+		keywordForm.elements["KEEP.categoryID"].value = id;
+		keywordForm.elements["KEEP.relationalID"].value = idPath;
+		keywordForm.elements["event_log_on"].value = "1";
+		keywordForm.elements["event_log_type"].value = "KD_SEARCH";
+		keywordForm.elements["event_log_numdata1"].value = searchText;
+		
+		keywordForm.elements["QBE.IN.ebr_search_text"].value = searchText;
+		caption = nx_unescape(caption);
+		
+		var categoryPath = '<PDM_FMT ESC_STYLE=C>$args.KEEP.categoryPath</PDM_FMT>';
+		categoryPath = nx_unescape(categoryPath);
+	
+	
+		// The 'caption' parameter will enter this function in 'escaped' format
+        // TODO (nikmi02): This doesn't look right to me... it's being double unescaped at this point.  Is it really supposed to be?
+		caption = nx_unescape(caption);
+		
+		if (fromCatPath) {		
+			var pos = categoryPath.indexOf(caption);
+			pos = categoryPath.indexOf(">", pos+1);
+			categoryPath = categoryPath.substring(0, pos);
+		}
+		else {
+			categoryPath += ">" + caption;			
+		}
+		keywordForm.elements["KEEP.categoryPath"].value = nx_escape(categoryPath);
+		
+		var addlWhere = keywordForm.elements["ADDITIONAL_WHERE"];
+		addlWhere.value = "(DOC_LINKS.RELATIONAL_ID='" + idPath + "' OR DOC_LINKS.RELATIONAL_ID LIKE '" + idPath + "-%')";
+			
+		submit_keywordSearch_form();
+	}
+	
+	/////////////////////////////////////////////////////////////////////
+	// FUNCTION newDocuments
+	//		Handler for when the New Documents link is selected
+	/////////////////////////////////////////////////////////////////////
+	function newDocuments() {	
+		var MINUTE = 60 * 1000;
+		var HOUR = MINUTE * 60;
+		var DAY = HOUR * 24;
+
+		// Subtract prop.BU_DAYS_NEW from today's date to get the date
+		// to compare the published date of knowledge documents
+		var today = (new Date()).getTime();
+		<PDM_IF "$prop.BU_DAYS_NEW" == "">
+			var bu_days_new = 5;
+		<PDM_ELSE>
+			var bu_days_new = $prop.BU_DAYS_NEW;
+		</PDM_IF>		
+		if (typeof bu_days_new == "number") {
+			var newDocDate = new Date(today - (bu_days_new * DAY));
+			// Set the time to 12:00 AM - So it will pick up any documents that were published
+			// any time during $prop.BU_DAYS_NEW ago.
+			newDocDate.setHours(0);
+			newDocDate.setMinutes(0);
+			newDocDate.setSeconds(0);
+			newDocDate.setMilliseconds(0);			
+			newDocDate = newDocDate/1000;	// Remove the milliseconds
+										
+			var keywordForm = document.forms['keywordSearch'];
+			keywordForm.elements["HTMPL"].value = "list_KD.htmpl";
+			keywordForm.elements["DOMSET"].value = "KD_list_web_MODIFY_DATE_DESC";		
+			keywordForm.elements["KEEP.cur_sort_key"].value = "MODIFY_DATE";		
+			keywordForm.elements["KEEP.categoryID"].value = "-3";
+			keywordForm.elements["KEEP.relationalID"].value = "1-XX";
+			keywordForm.elements["KEEP.categoryPath"].value = "All>New Documents";
+			keywordForm.elements["event_log_on"].value = "1";
+			keywordForm.elements["event_log_type"].value = "KD_NEW";
+			keywordForm.elements["event_log_numdata1"].value = 0;
+			
+			var addlWhere = keywordForm.elements["ADDITIONAL_WHERE"];
+			addlWhere.value = "PUBLISHED_DATE >= " + newDocDate + " AND ACTIVE_STATE=0";
+			
+			// Disable all ebr-related form elements
+			for (var i=0; i < keywordForm.elements.length; i++) {
+				var e = keywordForm.elements[i];
+				if (e.name.match(/ebr_/))
+					keywordForm.elements[i].disabled = true;	
+			}
+			
+			submit_keywordSearch_form();
+		}		
+	}
+	function isSearchOnlyThisCat()
+	{
+		var keywordForm = document.forms['keywordSearch'];
+		var categoryRadio = keywordForm.elements["categoryRadio"];
+		if (typeof categoryRadio == "object") 
+		{
+			for (var i=0; i < categoryRadio.length; i++) 
+			{
+				var e = categoryRadio[i];
+				if ((e.value == "current") && (e.checked)) 
+					return true;
+				else
+					return false;
+			}
+		}
+		return false;
+	}
+	function onClickCategoryRadio() {
+	
+		if (action_in_progress()) return;
+		
+		var categoryID = "$args.KEEP.categoryID";
+		var relationalID = "$args.KEEP.relationalID";
+		var categoryPath = '<PDM_FMT ESC_STYLE=C>$args.KEEP.categoryPath</PDM_FMT>';
+		var keywordForm = document.forms['keywordSearch'];
+		var categoryRadio = keywordForm.elements["categoryRadio"];
+		var radioValue = "current";
+		
+		if (typeof categoryRadio == "object") {
+			for (var i=0; i < categoryRadio.length; i++) {
+				var e = categoryRadio[i];
+				if ((e.value == "all") && (e.checked)) {
+					categoryID = "-1";
+					relationalID = "1";
+					categoryPath = "All";
+					radioValue = "all";
+					break;
+				}
+			}
+		}
+		
+		keywordForm.elements["KEEP.categoryRadio"].value = radioValue;
+		keywordForm.elements["ADDITIONAL_WHERE"].value = "(DOC_LINKS.RELATIONAL_ID='" + relationalID + "' OR DOC_LINKS.RELATIONAL_ID LIKE '" + relationalID + "-%')";
+		if(relationalID == "")
+			keywordForm.elements["ADDITIONAL_WHERE"].value = "";
+        keywordForm.elements["KEEP.categoryID"].value = categoryID;
+		keywordForm.elements["KEEP.relationalID"].value = relationalID;
+		keywordForm.elements["KEEP.categoryPath"].value = categoryPath;
+	}
+	
+	function doKeywordSearch() {		
+	
+		if (action_in_progress()) return false;
+		var bReturn = false;
+		
+		var form = document.forms["keywordSearch"];
+		form.elements["HTMPL"].value = "list_KD.htmpl";
+		
+		if (form.elements["QBE.IN.ebr_search_text"].value.length > 0) {
+			var sort_key;			
+				
+			if (form.elements["QBE.EQ.ebr_search_type"].value == "NLS")
+			{
+				form.elements["DOMSET"].value = "KD_list_ebr_RELEVANCE";
+			}
+			else
+			{
+				sort_key = form.elements["QBE.EQ.ebr_primary_order"].value;
+				
+				if (sort_key == "RELEVANCE")
+					form.elements["DOMSET"].value = "KD_list_ebr_RELEVANCE";
+				else
+					form.elements["DOMSET"].value = "KD_list_ebr_other_attributes";
+			}
+						
+			form.elements["KEEP.cur_sort_key"].value = "ebr_serial_num";	
+			//
+			//Compose the search in value, based on ebr_cbx elements
+			var search_in = 0;
+			for ( var i = form.elements.length - 1; i >= 0; i-- ) {
+				e = form.elements[i];
+				var sElementID = e.id;
+				if (sElementID.substring (0,7) == "ebr_cbx" ){
+					if (  e.checked ){
+						var SearchInFactor = e.id.substring(7);
+						var numberSearchIn = new Number(SearchInFactor);
+						search_in += numberSearchIn;
+					}
+				}
+			}
+			form.elements["QBE.EQ.ebr_search_in"].value = search_in;	
+			
+			onClickCategoryRadio();
+			
+			if ("$args.KEEP.categoryID" == "1")
+				form.elements["KEEP.categoryID"].value = "-1";	
+			
+			form.elements["KEEP.initial_ebr"].value = "1";	
+			
+			bReturn = true;
+			set_action_in_progress(ACTN_SEARCH);
+		}
+		else
+		{
+			alertmsg("Please_enter_a_keyword_to_proc");
+		}								
+		
+		return bReturn;
+	}
+		
+	
+	function submit_keywordSearch_form(bCatSelection)
+	{
+		var fid = fid_generator();
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID;
+		var form = document.forms["keywordSearch"];
+		var search_text = "";
+		var kcat_id = "";
+		for (var i=0; i < form.elements.length; i++)
+		{
+			var element = form.elements[i];
+			if (!element.disabled)
+			{
+				var name = element.name;
+				var value = element.value;
+				url += "+" + name + "=" + nx_escape(value);
+			}
+			else 
+			{
+				if (element.name == "QBE.IN.ebr_search_text")
+				{
+					element.disabled = false;
+				}
+			}
+			if(element.name == "QBE.IN.ebr_search_text")
+			{
+				search_text = element.value;	
+			}	
+		
+			if(element.name == "KEEP.categoryID")
+			{
+				kcat_id = element.value;
+			}
+		}
+		var bFromCats = false;
+		//bCatSelection is true when clicking on a category 
+		//link in the breadcrumbs or clicking on a category or
+		//subcategory link in the Categories section
+		if (typeof bCatSelection != "undefined")
+		{
+			if(typeof bCatSelection != "undefined" && bCatSelection)
+				bFromCats = true;
+			if(kcat_id != "" && kcat_id != "-1" && (!isSearchOnlyThisCat() || bFromCats ))
+				url += "+QBE.EQ.ebr_faq_query=1+QBE.EQ.ebr_kcat_id=" + kcat_id;	
+			url += "+QBE.EQ.ebr_add_blc=1";	
+		}
+		document.location.href = url;
+		if(search_text.length > 0)
+			ahdtop.UpdateMyRecentSearches(search_text);	
+	}
+	function resetDefaults()
+	{
+		var form = document.forms["keywordSearch"];
+		
+		//Search textbox
+		form.elements["QBE.IN.ebr_search_text"].value = "";
+		
+		// Search Type
+		if ("$prop.EBR_SEARCH_DEF_MODE" == "1")
+		{ 		
+			form.elements["QBE.EQ.ebr_search_type"].value = "NLS";
+			onSearchTypeChange("NLS");
+		}
+		else
+		{
+			form.elements["QBE.EQ.ebr_search_type"].value = "KEYWORDS";
+			onSearchTypeChange("KEYWORDS");
+		}
+		
+		
+		// Match Type
+		if ("$prop.EBR_SEARCH_OR_AND_EXACT" == "2")
+			form.elements["QBE.EQ.ebr_match_type"].value = "ALL";
+		else if ("$prop.EBR_SEARCH_OR_AND_EXACT" == "3")
+			form.elements["QBE.EQ.ebr_match_type"].value = "EXACT";
+		else			
+			form.elements["QBE.EQ.ebr_match_type"].value = "ANY";
+		
+		// Set the default state for the 'search in' radio buttons
+		form.elements["QBE.EQ.ebr_search_in"].value = "$prop.EBR_SEARCH_FIELDS";
+		e = form.elements["QBE.EQ.ebr_search_in"];
+		if ( typeof e == "object" )
+		{
+			var val = "$prop.EBR_SEARCH_FIELDS" - 0;
+			var flag = 16;
+			for ( ; flag >= 1; flag = flag / 2 )
+			{
+				if (typeof form.elements["ebr_cbx"+flag] == "object")
+				{
+					if ( val >= flag )
+					{					
+						form.elements["ebr_cbx"+flag].checked = true;	
+						val -= flag;
+					}
+					else
+					{
+						form.elements["ebr_cbx"+flag].checked = false;					
+					}
+				}
+			}
+		}
+		
+		//Match 
+		form.elements["QBE.EQ.ebr_fuzziness"].value = "MINI"; //MINI
+		
+		//Sort By
+		if (form.elements["QBE.EQ.ebr_primary_order"] != null)
+			form.elements["QBE.EQ.ebr_primary_order"].value = "RELEVANCE";
+			
+		//empty the search by id textbox
+		document.getElementById("btnDocID").value = "";
+	}
+	
+	function advancedSearch()
+	{
+		if (document.getElementById("divAdvancedSearch").style.display == "none")
+		{
+			document.getElementById("divAdvancedSearch").style.display="";
+			document.getElementById("divGoBtn").style.display="";			
+			ImgBtnChangeCaption("btn2", "Hide");
+		}
+		else
+		{
+			document.getElementById("divAdvancedSearch").style.display="none";
+			document.getElementById("divGoBtn").style.display="none";			
+			ImgBtnChangeCaption("btn2", "Advanced_Search");
+		}
+	}
+	
+	function onLoad()
+	{
+	    var rxGt = new RegExp("&gt;","gi");
+        var rxLt = new RegExp("&lt;","gi");
+
+		var form = document.forms["keywordSearch"];
+		loadSearchFields();
+		
+		// Set the default state for the 'search in' radio buttons
+		if (("$args.QBE.EQ.ebr_search_in" == "") || ("$args.QBE.EQ.ebr_search_in" == "0"))
+			form.elements["QBE.EQ.ebr_search_in"].value = "$prop.EBR_SEARCH_FIELDS";
+		
+		e = form.elements["QBE.EQ.ebr_search_in"];
+		if ( typeof e == "object" ) {
+			var val = e.value - 0;
+			var flag = 16;
+			for ( ; flag >= 1; flag = flag / 2 ) {
+				if (typeof form.elements["ebr_cbx"+flag] == "object") {							
+					if ( val >= flag ) {					
+						form.elements["ebr_cbx"+flag].checked = true;	
+						val -= flag;
+					}
+					else {
+						form.elements["ebr_cbx"+flag].checked = false;					
+					}
+				}
+			}
+		}
+	
+		form.elements["QBE.IN.ebr_search_text"].value = <PDM_FMT ESC_STYLE=C>"$args.QBE.IN.ebr_search_text"</PDM_FMT>.replace(rxGt,">").replace(rxLt,"<");
+		form.elements["QBE.IN.ebr_search_text"].focus();
+		//Enable DIsable the ebr_fuzziness select box option based on the search type:
+		var sSearchType = "";
+		for ( var i = 0; i < document.forms.length; i++ ) 
+		{
+			var oElement = document.forms[i].elements["QBE.EQ.ebr_search_type"];
+			if (typeof oElement != "undefined") 
+			{
+				if ( typeof oElement == "object" )
+				{
+					sSearchType = oElement.value;
+					break;
+				}
+			}
+		}
+		onSearchTypeChange(sSearchType);
+		//		
+		SetRecentDocsAndSearches();
+		HideShowMySearches();
+		HideShowMyDocs();
+		
+		if (typeof writeRecommendedResults == "function")
+		{
+			writeRecommendedResults();
+		}
+		// Use this to be able to return to list
+		ahdtop.cfgListUrl = document.location.href; 
+		if (!ahdtop.cfgListUrl.match(/pdmweb.exe\?/)) 
+		{
+			ahdtop.cfgListUrl = getSuggestDocURL();	// Calculate Suggest Knowledge the URL
+		}
+	}
+	
+	function getSuggestDocURL()
+	{
+		// Create URL for suggest doc list when returning to list from KD.
+		// The URL calculation was taken from freeaccess.spl
+		var fid = fid_generator();
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid;
+		url += "+OP=SEARCH";
+		url += "+FACTORY=$args.FACTORY";
+		url += "+HTMPL=$args.HTMPL";
+		url += "+KEEP.TICKET_FACTORY=$args.KEEP.TICKET_FACTORY";
+		url +="+QBE.IN.ebr_search_text=" + nx_escape(<PDM_FMT ESC_STYLE=C>"$args.QBE.IN.ebr_search_text"</PDM_FMT>);
+		url +="+QBE.EQ.ebr_search_in=$args.QBE.EQ.ebr_search_in";
+		url +="+QBE.EQ.ebr_fuzziness=$args.QBE.EQ.ebr_fuzziness";
+		url +="+QBE.EQ.ebr_match_type=$args.QBE.EQ.ebr_match_type";
+		url +="+QBE.EQ.ebr_primary_order=RELEVANCE";
+		url +="+QBE.EQ.ebr_order_direction=DESC";
+		url +="+KEEP.categoryID=-1";
+		url +="+KEEP.relationalID=1";
+		url +="+KEEP.categoryPath=All";
+		url +="+KEEP.initial_ebr=1";
+		url +="+KEEP.resume_ticket=0";
+		url +="+KEEP.itilinfo=0";
+		url +="+KEEP.from_bookmark=0";
+		url +="+DOMSET=KD_list_ebr_RELEVANCE";
+		url +="+KEEP.suggest_knowledge=1";
+		return url;
+	}
+
+	function onclick_myDocs()
+	{
+		ahdtop.bIsOpenMyRecentDocs = !ahdtop.bIsOpenMyRecentDocs;
+		HideShowMyDocs();
+	}
+	function onclick_mySearches()
+	{
+		ahdtop.bIsOpenMyRecentSearches = !ahdtop.bIsOpenMyRecentSearches;
+		HideShowMySearches();
+	}
+	function SetRecentDocsAndSearches()
+	{
+	if(ahdtop.bIsOpenMyRecentDocs=="")
+		ahdtop.bIsOpenMyRecentDocs = 0;
+	if(ahdtop.bIsOpenMyRecentSearches=="")
+		ahdtop.bIsOpenMyRecentSearches = 0;	
+	}
+	function HideShowMySearches()
+	{
+		<PDM_IF "$env.NX_KT" != "Yes" || "$env.KNOWLEDGE_SHOW_RECENT_SEARCHES" == 0>
+			return;
+		</PDM_IF>
+		if(document.getElementById("imgRecentSearches") == null)
+			return;
+		var img = document.getElementById("imgRecentSearches");
+		var img_txt = img.src;
+		var bExpand = false;
+		var bCollapse = false;
+		if(ahdtop.bIsOpenMyRecentSearches == 1)
+			bExpand = true;
+		else
+			bCollapse = true;
+		if (bExpand)
+		{		
+			//get searches and set innerHTML of span
+			if(document.getElementById("spnRecentSearches") != null)
+			{
+				document.getElementById("spnRecentSearches").innerHTML = GetRecentSearches();
+			}
+			//change img & alt
+			img.src = get_IMG_path("IMG_arrow_up");
+			img.alt = msgtext("Hide_this_section");
+			ahdtop.bIsOpenMyRecentSearches = 1;
+		
+		}
+		if(bCollapse)
+		{
+			//empty list
+			if(document.getElementById("spnRecentSearches") != null)
+			{
+				document.getElementById("spnRecentSearches").innerHTML = "";
+			}
+			//change img & alt
+			img.src = get_IMG_path("IMG_arrow_down");
+			img.alt = msgtext("Show_this_section");
+			ahdtop.bIsOpenMyRecentSearches = 0;
+		}		
+		
+	}
+	function GetRecentSearches()
+	{
+		var html = "<table align=top valign=top style='border-bottom:1px #8b939a solid;border-right:1px #8b939a solid;border-left:1px #8b939a solid;background:#e7e7e7;' cellspacing=1 cellpadding=5 width=100%>";
+		var mySearches = new Array();
+		mySearches = ahdtop.GetMyRecentSearches();
+		for (var i=0; i < mySearches.length; i++)
+		{
+			var search_text = mySearches[i];
+			if(search_text.length > 20)
+			{
+				search_text = search_text.slice(0,20) + "...";
+			}
+			html += "<tr><td nowrap class='table_banded_row'>";
+			html += "<a "; 
+			<PDM_IF "$prop.user_type" == "employee">
+				html += " class=emp style=font-size:.7em";
+			<PDM_ELIF "$prop.user_type" == "customer">
+				html += " class=cst style=font-size:.7em";
+			<PDM_ELSE>	
+				html += " class=table_control_link";
+			</PDM_IF>	
+			html += " href='javascript:SubmitSearch(" + i + ")';>" + search_text + "</a>";
+			html += "</td></tr>";
+		}
+		html += "</table>";
+		return html;
+	}
+	function SubmitSearch(arr_id, bDidYouMean)
+	{
+		var form = document.forms["keywordSearch"];
+		if(typeof bDidYouMean != "undefined" && bDidYouMean == 1)
+			form.elements["QBE.IN.ebr_search_text"].value = "$args.KEEP.ebr_search_suggestion";
+		else
+			form.elements["QBE.IN.ebr_search_text"].value = ahdtop.arrMyRecentSearches[arr_id];
+		//	
+		if (doKeywordSearch()) 
+			submit_keywordSearch_form();
+		
+	}
+	function HideShowMyDocs()
+	{
+		<PDM_IF "$env.NX_KT" != "Yes" || "$env.KNOWLEDGE_SHOW_RECENT_DOCS" == 0>
+			return;
+		</PDM_IF>	
+		if(document.getElementById("imgRecentDocs") == null)
+			return;
+		var img = document.getElementById("imgRecentDocs");
+		var img_txt = img.src;
+		var bExpand = false;
+		var bCollapse = false;
+		if(ahdtop.bIsOpenMyRecentDocs == 1)
+			bExpand = true;
+		else
+			bCollapse = true;
+		if (bExpand)
+		{		
+			//get docs and set innerHTML of span
+			if(document.getElementById("spnRecentDocs") != null)
+			{
+				document.getElementById("spnRecentDocs").innerHTML = GetRecentDocs();
+			}
+			//change img & alt
+			img.src = get_IMG_path("IMG_arrow_up");
+			img.alt = msgtext("Hide_this_section");
+			ahdtop.bIsOpenMyRecentDocs = 1;
+			
+		}
+		if(bCollapse)
+		{
+			//empty list
+			if(document.getElementById("spnRecentDocs") != null)
+			{
+				document.getElementById("spnRecentDocs").innerHTML = "";
+			}
+			//change img & alt
+			img.src = get_IMG_path("IMG_arrow_down");
+			img.alt = msgtext("Show_this_section");
+			ahdtop.bIsOpenMyRecentDocs = 0;
+		}		
+	}
+	
+	function GetRecentDocs()
+	{
+		var html = "<table align=top valign=top style='border-bottom:1px #8b939a solid;border-right:1px #8b939a solid;border-left:1px #8b939a solid;background:#e7e7e7;' cellspacing=1 cellpadding=5 width=100%>";
+		var myDocs = new Array();
+		myDocs = ahdtop.GetMyRecentDocs();
+		for (var i=0; i < myDocs.length; i=i+2)
+		{
+			
+			var doc_title = myDocs[i+1];
+			if(doc_title.length > 20)
+			{
+				doc_title = doc_title.slice(0,20) + "...";
+			}
+			html += "<tr><td nowrap class='table_banded_row'>";
+			html += "<a "; 
+			<PDM_IF "$prop.user_type" == "employee">
+				html += " class=emp style=font-size:.7em";
+			<PDM_ELIF "$prop.user_type" == "customer">
+				html += " class=cst style=font-size:.7em";
+			<PDM_ELSE>	
+				html += " class=table_control_link";
+			</PDM_IF>	
+			html += " href='javascript:OpenDocumentViewer(" + myDocs[i] + ");'>" + doc_title + "</a>";
+			html += "</td></tr>";
+		}
+		html += "</table>";
+		return html;
+	}
+	function OpenDocumentViewer(doc_id)
+    {
+        // Open document in the main screen
+        var fid = fid_generator();
+        var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid + "+OP=SHOW_DETAIL+PERSID=KD:" + doc_id + "+HTMPL=kt_document_view.htmpl+opener=simple+open_mode=0+KEEP.SCROLLING=1";
+        url += "+KEEP.DOMSET=KD_list_web_BU_RESULT_DESC";
+        url += "+KEEP.cur_sort_key=BU_RESULT";
+        url += "+KEEP.initial_ebr=0";
+        document.location.href = url; 
+     
+    }
+	function onSearchTypeChange(mode)
+	{
+		if (mode == "NLS")
+		{
+			//Remove Exact search option from the With dropdown
+			if (document.getElementById("QBE.EQ.ebr_match_type").options.length == 3)
+			{
+				document.getElementById("QBE.EQ.ebr_match_type").options.length--;
+			}
+			//Hide the Search in and Order by dropdown
+			document.getElementById("divOrderBy").style.display="none";
+			//Hide the Match dropdown
+			document.getElementById("divMatch").style.display="none";
+			// Make "Whole words" selected
+			document.getElementById("QBE.EQ.ebr_fuzziness").options[0].selected = true;
+		}
+		else
+		{
+			//Add Exact search option to the With dropdown
+			if (document.getElementById("QBE.EQ.ebr_match_type").options.length == 2)
+			{
+				document.getElementById("QBE.EQ.ebr_match_type").options[document.getElementById("QBE.EQ.ebr_match_type").options.length] = new Option("Exact words", "EXACT");
+			}
+			//Show the Search in and Order by dropdown
+			document.getElementById("divOrderBy").style.display="";
+			//enable the fuzziness drop-down
+			document.getElementById("QBE.EQ.ebr_fuzziness").disabled = false;
+		}
+		
+	}
+	function loadSearchFields()
+	{
+		var form = document.forms["keywordSearch"];
+		//With dropdown
+		if ("$args.QBE.EQ.ebr_match_type" == "")
+		{
+			if("$prop.EBR_SEARCH_OR_AND_EXACT" == "2")
+			{
+				form.elements["QBE.EQ.ebr_match_type"].value = "ALL";
+			}
+			else if ("$prop.EBR_SEARCH_OR_AND_EXACT" == "3")
+			{
+				form.elements["QBE.EQ.ebr_match_type"].value = "EXACT";
+			}
+			else
+			{
+				form.elements["QBE.EQ.ebr_match_type"].value = "ANY";
+			}
+		}
+		else
+		{
+			form.elements["QBE.EQ.ebr_match_type"].value = "$args.QBE.EQ.ebr_match_type";
+		}
+																
+		//Sort by dropdown
+		<PDM_IF "$env.NX_KT" == "Yes">
+		if ("$args.QBE.EQ.ebr_search_type" == "")
+		{
+			//did not do search at all, so use the default cretiria
+			if ("$prop.EBR_SEARCH_DEF_MODE" == "0")
+			{
+				//KEYWORDS search
+				form.elements["QBE.EQ.ebr_primary_order"].value = "RELEVANCE";	
+			}
+			else
+			{
+				//NLS
+				form.elements["QBE.EQ.ebr_primary_order"].value = "RELEVANCE";	
+				//hide the sort by control
+				document.getElementById("divOrderBy").style.display="none";
+			}
+		}
+		else 
+		{
+			//already did the search
+			if ("$args.QBE.EQ.ebr_search_type" == "NLS")
+			{
+				//Remove Exact search option from the With dropdown
+				document.getElementById("QBE.EQ.ebr_match_type").options.length--;
+				//Hide the Search in and Order by dropdown
+				document.getElementById("divOrderBy").style.display="none";
+			}
+			form.elements["QBE.EQ.ebr_primary_order"].value = "$args.QBE.EQ.ebr_primary_order";
+		}
+		</PDM_IF>
+	}
+	function OpenDocID()
+	{
+		if(document.getElementById("btnDocID").value == "")
+		{
+			alertmsg("Please_enter_a_document_ID.");
+			return;
+		}
+		if(isNaN(document.getElementById("btnDocID").value))
+		{
+			alertmsg("Document_ID_must_be_numeric.");
+			return;
+		}
+		
+		var kd_id = document.getElementById("btnDocID").value;
+		
+		var fid = fid_generator();
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid;
+		var form = document.forms["frmOpenDocID"];
+		for (var i=0; i < form.elements.length; i++)
+		{
+			var element = form.elements[i];
+			if (!element.disabled)
+			{
+				var name = element.name;
+				if(name == "QBE.EQ.id")
+					element.value = kd_id;
+				if (name == "KEEP.cur_sort_key")
+					element.value = "";
+				var value = element.value;
+				url += "+" + name + "=" + nx_escape(value);
+			}
+		}
+		document.location.href = url;	
+	}
+	function OpenDoc(persid)
+	{
+		//var fid = fid_generator();
+		url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=SHOW_DETAIL+PERSID=" + persid + "+HTMPL=kt_document_view.htmpl+opener=simple+open_mode=0+simple_list=1+KEEP.SCROLLING=1"; //KEEP.SCROLLING=1 is used for when opening from simple UI for kt_dtview.htmpl
+		url += "+KEEP.DOMSET=$args.DOMSET";
+		url += "+KEEP.DOMSET=$args.DOMSET";
+		url += "+KEEP.QBE.EQ.ebr_search_type=$args.QBE.EQ.ebr_search_type";
+		url += "+KEEP.QBE.EQ.ebr_match_type=$args.QBE.EQ.ebr_match_type";
+		url += "+KEEP.QBE.EQ.ebr_search_in=$args.QBE.EQ.ebr_search_in";
+		url += "+KEEP.QBE.IN.ebr_search_text=" + nx_escape(<PDM_FMT ESC_STYLE=C>"$args.QBE.IN.ebr_search_text"</PDM_FMT>);
+		url += "+KEEP.QBE.EQ.ebr_primary_order=$args.QBE.EQ.ebr_primary_order";
+		url += "+KEEP.QBE.EQ.ebr_order_direction=$args.QBE.EQ.ebr_order_direction";
+		url += "+KEEP.ADDITIONAL_WHERE=" + nx_escape("$args.ADDITIONAL_WHERE");
+		url += "+KEEP.cur_sort_key=$args.KEEP.cur_sort_key";
+		url += "+KEEP.categoryID=$args.KEEP.categoryID";
+		url += "+KEEP.relationalID=$args.KEEP.relationalID";
+		url += "+KEEP.categoryPath=" + nx_escape('<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$args.KEEP.categoryPath</PDM_FMT>');
+		url += "+KEEP.initial_ebr=$args.KEEP.initial_ebr";
+		var SearchText = '<PDM_FMT disp_entities="NO" ESC_STYLE=C>$args.KEEP.ebr_parsed_search_text</PDM_FMT>';
+		url += "+KEEP.ebr_parsed_search_text=" + nx_escape(SearchText);
+		
+		//replace_page(url);
+		document.location.href = url;
+ 
+
+	}
+	// Display the query result message in the navigation-level section section of
+	// the result set list
+	// Result set list (resultset.js) will call this function for each list page
+	function getNavLevelHtml() {
+		html = displayQueryMessage();
+		return html;
+	}
+
+	function createticket(itilinfo)
+	{
+	    if(ahdtop.ticketObj.isTicketOpened)
+	    {
+		var res = confirm(msgtext("Are_you_sure_you_want_to_navigate_away_from_the_current_ticket"));
+		if(!res)
+			return;
+	    }
+	
+	    if (typeof itilinfo != "undefined" && itilinfo == "type:I")
+	    {		
+		 //Tag along the type:I preset value with the description to switch to incident screen and populate the decription on the screen
+		 //To tag 2 preset value use the @@ symbol	to seperate them.	
+		document.forms["frmOpenNew"].elements["PRESET"].value = "description:" + document.forms["keywordSearch"].elements["QBE.IN.ebr_search_text"].value +"@@type:I";
+	    }
+	    else
+	    {
+		document.forms["frmOpenNew"].elements["PRESET"].value = "description:" + document.forms["keywordSearch"].elements["QBE.IN.ebr_search_text"].value;
+	    }	
+	    document.forms["frmOpenNew"].submit();
+	
+	    if(typeof ahdtop.ticketObj == "object") 
+	    {
+		ahdtop.ticketObj.resetTicket();
+	    }	
+	}
+	//
+	//m_bdidDisplayQueryMessage  - Boolean flag to indicate if the query message presented to the user. 
+	//Needed as when search return error (like when searching with noise words only) 
+	//the function is not called by resultset.js and needed to be invoked manually.
+	var m_bdidDisplayQueryMessage = false;	
+	function displayQueryMessage()
+	{
+		m_bdidDisplayQueryMessage = true;
+		var html;
+		var htmlCreateTicket = "";
+		var htmlCreateIncident = "";		
+		var htmlDidYouMean = "";
+		var htmlNoResults = "";
+		var ebrDidYouMean = "$args.KEEP.ebr_search_suggestion";
+		if(ebrDidYouMean.length > 0 && "$env.KNOWLEDGE_SHOW_DID_YOU_MEAN" == "Yes" && "$env.NX_KT" == "Yes")
+		{
+			htmlDidYouMean = "&nbsp;<span style='color:red;font-size:.7em;'><b>" + msgtext("Did_you_mean") + ":<b>&nbsp;</span>" + 
+					"<a style='font-size:.7em;' href='javascript:SubmitSearch(undefined, 1)' class=record>" + 
+					ebrDidYouMean + "</a>&nbsp;&nbsp;&nbsp;&nbsp;<br>";
+		}
+		<PDM_IF 0>
+			employee or customer are comming from relevant home.htmpl 
+			options for this page are employee_Interface=1, or customer Interface =2
+		</PDM_IF>
+				if (ahdtop.cfgUserType == "employee")
+				{
+				<PDM_IF ${record_count:0} == 0>
+					htmlNoResults = "&nbsp;&nbsp;&nbsp;<span class=emp style='font-size:.7em;'>" + 
+					msgtext("No_Documents_found") + "&nbsp;&nbsp;</span>";
+				</PDM_IF>				
+				<PDM_IF "$args.KEEP.from_bookmark" != "1" && "$args.KEEP.resume_ticket" != "1">
+				if(!ahdtop.ticketObj.isTicketOpened)
+				{
+				
+					<PDM_IF "$prop.guest_user" != "1">
+									<PDM_IF "$env.NX_EMPLOYEE_INTF_INCIDENT_SUPPORT" == "Request" || "$env.NX_EMPLOYEE_INTF_INCIDENT_SUPPORT" == "IncidentandRequest">
+												htmlCreateTicket = "&nbsp;&nbsp;<a href='javascript: createticket();' class=emp style='font-size:.7em;' " + 
+												"onmouseover=\"window.status = '" + 
+												msgtext("Create_a_new_Request") + "'; return true;\"" +
+												"onmouseout=\"window.status = window.defaultStatus; return true;\">" +
+												msgtext("Click_here_to_create_a_new_Request") + "</a>";									
+									</PDM_IF>				
+									
+									<PDM_IF "$env.NX_EMPLOYEE_INTF_INCIDENT_SUPPORT" == "Incident" || "$env.NX_EMPLOYEE_INTF_INCIDENT_SUPPORT" == "IncidentandRequest">										
+												htmlCreateIncident = "&nbsp;&nbsp;<a href='javascript: createticket(\"type:I\");' class=emp style='font-size:.7em;' " + 
+												"onmouseover=\"window.status = '" + 
+												msgtext("Create_a_new_Incident") + "'; return true;\"" +
+												"onmouseout=\"window.status = window.defaultStatus; return true;\">" +
+												msgtext("Click_here_to_create_a_new_Incident") + "</a>";									
+									</PDM_IF>	
+					<PDM_ELSE>
+									<PDM_IF "$env.NX_GUEST_INTF_INCIDENT_SUPPORT" == "Request" || "$env.NX_GUEST_INTF_INCIDENT_SUPPORT" == "IncidentandRequest">									
+												htmlCreateTicket = "&nbsp;&nbsp;<a href='javascript: createticket();' class=emp style='font-size:.7em;' " + 
+												"onmouseover=\"window.status = '" + 
+												msgtext("Create_a_new_Request") + "'; return true;\"" +
+												"onmouseout=\"window.status = window.defaultStatus; return true;\">" +
+												msgtext("Click_here_to_create_a_new_Request") + "</a>";									
+									</PDM_IF>		
+
+									<PDM_IF "$env.NX_GUEST_INTF_INCIDENT_SUPPORT" == "Incident" || "$env.NX_GUEST_INTF_INCIDENT_SUPPORT" == "IncidentandRequest">																											
+												htmlCreateIncident = "&nbsp;&nbsp;<a href='javascript: createticket(\"type:I\");' class=emp style='font-size:.7em;' " + 
+												"onmouseover=\"window.status = '" + 
+												msgtext("Create_a_new_Incident") + "'; return true;\"" +
+												"onmouseout=\"window.status = window.defaultStatus; return true;\">" +
+												msgtext("Click_here_to_create_a_new_Incident") + "</a>";									
+									</PDM_IF>	
+					</PDM_IF>																										
+																	
+				}
+				</PDM_IF>
+			}
+			else if (ahdtop.cfgUserType == "customer")
+			{
+				<PDM_IF $record_count == 0>
+					htmlNoResults = "&nbsp;&nbsp;&nbsp;<span class=cst style='font-size:.7em;'>" + 
+					msgtext("No_Documents_found") + "&nbsp;&nbsp;</span>";
+				</PDM_IF>
+				<PDM_IF "$args.KEEP.from_bookmark" != "1" && "$args.KEEP.resume_ticket" != "1">
+				if(!ahdtop.ticketObj.isTicketOpened)
+				{				
+					htmlCreateTicket = "&nbsp;&nbsp;<a href='javascript: createticket();' class=cst style='font-size:.7em;' " + 
+						"onmouseover=\"window.status = '" +
+						 msgtext("Create_a_new_Issue") + "'; return true;\"" +
+						"onmouseout=\"window.status = window.defaultStatus; return true;\">" +
+						msgtext("Click_here_to_create_a_new_Issue") + "</a>";
+				}
+				</PDM_IF>	
+			}	
+		
+		
+		<PDM_IF $record_count == 0>	
+			html = htmlNoResults;
+			if(htmlDidYouMean != "")
+				html +=  "<br>&nbsp;" + htmlDidYouMean;	
+			if(htmlCreateTicket != "")
+				html +=  "<br>&nbsp;" + htmlCreateTicket;
+			if(htmlCreateIncident != "")		
+				html +=  "<br>&nbsp;" + htmlCreateIncident;
+		<PDM_ELSE>
+			html = htmlDidYouMean + "&nbsp;";
+			if(htmlCreateTicket != "")
+				html +=  "<br>&nbsp;" + htmlCreateTicket;
+			if(htmlCreateIncident != "")		
+			html +=  "<br>&nbsp;" + htmlCreateIncident;				
+		</PDM_IF>
+		html+=	"<br>&nbsp;"
+		return html;	
+	}
+	
+	function onunLoad()
+	{
+		if (typeof ahdtop.checked_knowledge == "boolean"  && ahdtop.checked_knowledge == true)
+			ahdtop.checked_knowledge = false;
+	}
+	
+</SCRIPT>
+	
+<style>
+	a.results:link,a.results:visited{ color:#336699;text-decoration:underline;}
+    a.results{font-size:0.7em;}
+	.table					{ BACKGROUND: #ffffff;padding: 5px;}
+	TR.results0				{ text-align: left;color: black;background-color: white;FONT: 80% Verdana, Arial, Helvetica,  sans-serif;}
+	TR.results1				{ text-align: left;color: black;background-color: white;FONT: 80% Verdana, Arial, Helvetica,  sans-serif;}
+	TR.resultsSel			{ text-align: left;color: black;background-color: white;FONT: 80% Verdana, Arial, Helvetica,  sans-serif;}	
+	.breadcrumb_current		{ color:000000;padding: 1;FONT-FAMILY: verdana, arial, helvetica;font-size: 75%;font-weight: normal;}
+</style>
+
+</HEAD>
+<BODY  onLoad="onLoad();" onunLoad="onunLoad();">
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="Document_filename" logo=no>
+<PDM_INCLUDE FILE=self_service_include.htmpl status=20 page="KDLIST">
+
+<PDM_FORM  name="frmOpenNewTicket">
+	<PDM_IF "$prop.user_type" == "customer">
+		<input type="hidden" name="FACTORY" value="iss">
+	<PDM_ELIF "$prop.user_type" == "employee">
+				<input type="hidden" name="FACTORY" value="cr">
+		<PDM_IF "$args.KEEP.itilinfo" == "1">
+				<input type="hidden" name="PRESET" value="type:I">
+		</PDM_IF>		
+	</PDM_IF>
+	<input type="hidden" name=PRESET value="ticket_avoided:10">
+	<input type="hidden" name="OP" value="CREATE_NEW">
+	<input type="hidden" name="CREATE_ALG" value="LOG">
+	<SCRIPT>
+	if(typeof ahdtop.checked_knowledge=="boolean" && ahdtop.checked_knowledge==true)
+	docWriteln("<input type=\"hidden\" name=\"ALG_PRESET\" value=\"description:Client tried searching for a solution\">");
+	else
+	docWriteln("<input type=\"hidden\" name=\"ALG_PRESET\" value=\"description:Client did not check the knowledge base\">");
+	</SCRIPT>
+</PDM_FORM>
+
+<PDM_FORM name="keywordSearch" onsubmit="if (doKeywordSearch()) submit_keywordSearch_form(); return false;">
+	<input type="hidden" name="OP" value="SEARCH">
+	<input type="hidden" name="FACTORY" value="KD">
+	<input type="hidden" name="HTMPL" value="list_KD.htmpl">
+	<input type="hidden" name="DOMSET" value="">
+	<input type="hidden" name="QBE.EQ.ebr_search_in" value="$args.QBE.EQ.ebr_search_in">
+	<input type="hidden" name="QBE.EQ.ebr_order_direction" value="DESC">
+	<input type="hidden" name="KEEP.cur_sort_key" value="BU_RESULT">
+	<input type="hidden" name="ADDITIONAL_WHERE" value="$args.ADDITIONAL_WHERE">
+	<input type="hidden" name="KEEP.categoryRadio" value="$args.KEEP.categoryRadio">
+	<input type="hidden" name="KEEP.categoryID" value="$args.KEEP.categoryID">
+	<input type="hidden" name="KEEP.relationalID" value="$args.KEEP.relationalID">
+	<input type="hidden" name="KEEP.categoryPath" value='<PDM_FMT ESC_STYLE=C>$args.KEEP.categoryPath</PDM_FMT>'>
+	<input type="hidden" name="KEEP.initial_ebr" value="$args.KEEP.initial_ebr">
+	<input type="hidden" name="event_log_on" value="">
+	<input type="hidden" name="event_log_type" value="">
+	<input type="hidden" name="event_log_numdata1" value="">
+	<PDM_IF "$env.NX_SUPPRESS_FAQ_COUNT_CST_EMP_UI" == "0">
+		<input type="hidden" value="0" name="NO_COUNT">
+	<PDM_ELSE>
+		<input type="hidden" value="1" name="NO_COUNT">
+	</PDM_IF>										
+		
+<TABLE width="100%" cellpacing="0" cellpadding="5" border="0" summary="Here are parameters for Keyword Search">
+	<TR>
+		<TD align="center">
+			<TABLE width="100%" cellpacing="0" cellpadding="0" border="0">
+				<TR>
+					<TD align="center">
+						<TABLE cellpacing="0" cellpadding="0" summary="Search buttons: Search, Advanced Search, Reset Search">
+							<TR>
+								<TD colspan=3 class="label"><h2 style="margin:0px";>
+									<span>
+										Search for a solution using keywords
+									</span>	</h2>
+								<TD>
+							</TR>
+							<TR>
+								<TD>
+									<input type="text" size=60 id="QBE.IN.ebr_search_text" name="QBE.IN.ebr_search_text"
+									value=''>
+								</TD>
+								<TD>
+									<SCRIPT>
+										ImgBtnRow();
+										ImgBtnCreate("btn1", "Search", "javascript:if (doKeywordSearch()) submit_keywordSearch_form();",true);
+										ImgBtnCreate("btn2", "Advanced_Search", "javascript:advancedSearch();", true, 0);
+										ImgBtnCreate("btn3", "Reset_Search", "javascript:resetDefaults();", true, 0);
+										ImgBtnEndRow();
+									</SCRIPT>
+								</TD>
+							</TR>
+							<PDM_IF "$args.KEEP.resume_ticket" == "1">
+							<TR>
+								<TABLE cellpacing="0" cellpadding="0">
+									<TR>
+										<TD>
+											<SCRIPT>
+													<PDM_IF "$prop.user_type" == "customer">
+														ImgBtnCreate("btn2", "Resume_Creating_Issue", "javascript:var f = document.forms['frmOpenNewTicket'];f.submit();");
+													<PDM_ELIF "$prop.user_type" == "employee">														
+																<PDM_IF "$args.KEEP.itilinfo" == "1">
+																	ImgBtnCreate("btn2", "Resume_Creating_Incident", "javascript:var f = document.forms['frmOpenNewTicket'];f.submit();");
+																<PDM_ELSE>
+																ImgBtnCreate("btn2", "Resume_Creating_Request", "javascript:var f = document.forms['frmOpenNewTicket'];f.submit();");
+																</PDM_IF>															
+													</PDM_IF>		
+											</SCRIPT>
+										</TD>
+									</TR>
+								</TABLE>								
+							</TR>
+							</PDM_IF>
+						</TABLE>					
+					</TD>
+				</TR>
+				<PDM_IF "$args.KEEP.categoryID" != "-1" && "$args.KEEP.categoryID" != "1" && "$args.KEEP.categoryID" != "">
+				<TR class=results>
+					<TD align="center">	
+							<PDM_IF "$args.KEEP.categoryRadio" == "all">
+								<input type="radio" id="categoryRadio" name="categoryRadio" value="current" onclick="onClickCategoryRadio()"><span>Search only in this Category</span>
+								&nbsp;&nbsp;
+								<input type="radio" id="categoryRadio" name="categoryRadio" value="all" onclick="onClickCategoryRadio()" checked><span>Search all Categories</span>
+							<PDM_ELSE>
+								<input type="radio" id="categoryRadio" name="categoryRadio" value="current" onclick="onClickCategoryRadio()" checked><span>Search only in this Category</span>
+								&nbsp;&nbsp;
+								<input type="radio" id="categoryRadio" name="categoryRadio" value="all" onclick="onClickCategoryRadio()"><span>Search all Categories</span>
+							</PDM_IF>
+					</TD>
+				</TR>
+				</PDM_IF>
+				
+				<TABLE width="100%" cellpacing="0" cellpadding="0" border="0" summary="Search Options">
+					<TR>
+						<TD>
+						<div id=divAdvancedSearch name=divAdvancedSearch style="display:none">
+							<table align=center border="0" width="69%" cellpadding="0" cellspacing="0">
+								<tr>
+									<td class=section>
+										<table border=0 cellpadding="8" cellspacing="0" width="100%" bgcolor=white summary="Search Options: Keyword Search, Natural Language Search" 
+											<PDM_IF "$env.NX_KT" == "No">
+												style="display:none;"
+											</PDM_IF>>
+												<tr>
+													<PDM_IF "$env.NX_EBR_VERSION" != "SEARCH_ENGINE">
+													<td width="15%" nowrap class="label" align="left">&nbsp;&nbsp;
+														<script>document.write(msgtext("Using"))</script>:
+													</td>
+													</PDM_IF>
+													<td colspan=1 class="data" style="font-size:1.0em;" align="left">
+														<SELECT id="QBE.EQ.ebr_search_type" 
+														<PDM_IF "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+															style="display:none;"
+														</PDM_IF>
+														name="QBE.EQ.ebr_search_type" onchange="onSearchTypeChange(this.value)">
+															<PDM_IF "$args.QBE.EQ.ebr_search_type" == "">
+																	<PDM_IF "$prop.EBR_SEARCH_DEF_MODE" == "1" && "$env.NX_KT" == "Yes">		
+																	<OPTION value="KEYWORDS">Keyword Search										
+																	<OPTION value="NLS" selected>Natural Language Search
+																<PDM_ELSE>
+																	<OPTION value="KEYWORDS" selected>Keyword Search										
+																	<OPTION value="NLS">Natural Language Search
+																</PDM_IF>
+															<PDM_ELSE>
+																<PDM_IF "$args.QBE.EQ.ebr_search_type" == "NLS">
+																	<OPTION value="KEYWORDS">Keyword Search										
+																	<OPTION value="NLS" selected>Natural Language Search
+																<PDM_ELSE>
+																	<OPTION value="KEYWORDS" selected>Keyword Search										
+																	<OPTION value="NLS">Natural Language Search
+																</PDM_IF>
+															</PDM_IF>
+														</SELECT>									
+													</td>		
+												</tr>
+											</table>
+											
+											<table border=0 cellpadding="8" cellspacing="0" width="100%" bgcolor=white summary="Search Options: Any of the words (OR), All of the words (AND), Exacts match">
+												<tr>
+													<td width="15%" nowrap class="label" align="left">&nbsp;&nbsp;
+														<script>document.write(msgtext("With"))</script>:
+													</td>
+													<td nowrap colspan=1 align="left">
+														<select id="QBE.EQ.ebr_match_type" name="QBE.EQ.ebr_match_type">
+															<option value="ANY">Any of the words (OR)									
+															<option value="ALL">All of the words (AND)												
+															<PDM_IF "$env.NX_KT" == "Yes">
+																<option value="EXACT">Exact match
+															</PDM_IF>
+														</select>									
+													</td>			
+												</tr>
+											</table>
+											
+											<div id="divMatch" name="divMatch">
+											<table border=0 cellpadding="8" cellspacing="0" width="100%" bgcolor=white summary="Search options: Match Whole Words,Words Beginning with..." 
+											<PDM_IF "$env.NX_KT" == "No">
+												style="display:none;"
+											</PDM_IF>>
+												<tr>
+													<td width="15%" nowrap class="label" align="left">&nbsp;&nbsp;
+														<script>document.write(msgtext("Match"))</script>:
+													</td>
+													<td class="data" style="font-size:1.0em;" nowrap colspan=1 align="left">
+														<SELECT id="QBE.EQ.ebr_fuzziness" name="QBE.EQ.ebr_fuzziness">
+															<PDM_IF "$args.QBE.EQ.ebr_fuzziness" == "MIDI">
+																<OPTION value=MINI><script>document.write(msgtext("Whole_words"))</script>
+																<OPTION value=MIDI selected><script>document.write(msgtext("Words_beginning_with..."))</script>										
+															<PDM_ELSE>
+																<OPTION value=MINI selected><script>document.write(msgtext("Whole_words"))</script>
+																<OPTION value=MIDI><script>document.write(msgtext("Words_beginning_with..."))</script>										
+															</PDM_IF>
+														</SELECT>
+													</td>
+												</tr>
+											</table>
+											</div>
+											
+											<div id="divOrderBy" name="divOrderBy">
+												<table border=0 cellpadding="8" cellspacing="0" width="100%" bgcolor=white summary="Check boxes to search in Title, Summary, Problem, Resolution" 
+												<PDM_IF "$env.NX_KT" == "No">
+													style="display:none;"
+												</PDM_IF>>
+													<tr>								
+														<td width="15%" nowrap class="label" align="left">&nbsp;&nbsp;									
+															<script>document.write(msgtext("Search_In"))</script>:
+														</td>
+														<td nowrap class="data" align="left">									
+															<input value=1 type="checkbox" id="ebr_cbx1" name="ebr_cbx1"'>
+															<script>document.write("<label for='ebr_cbx1'>" + msgtext("Title") + "</label>")</script>&nbsp;&nbsp;
+															<input value=2 type="checkbox" id="ebr_cbx2" name="ebr_cbx2"'>
+															<script>document.write("<label for='ebr_cbx2'>" + msgtext("Summary") + "</label>")</script>&nbsp;&nbsp;
+															<input value=4 type="checkbox" id="ebr_cbx4" name="ebr_cbx4"'>
+															<script>document.write("<label for='ebr_cbx4'>" + msgtext("Problem0") + "</label>")</script>&nbsp;&nbsp;
+															<PDM_IF $prop.EBR_SEARCH_PROHIBIT_RESOLUTION == "1">		
+																<input value=8 type="checkbox" id="ebr_cbx8" name="ebr_cbx8"'>
+																<script>document.write("<label for='ebr_cbx8'>" + msgtext("Resolution") + "</label>")</script>&nbsp;&nbsp;
+																<PDM_IF "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">	
+																	<input value=16 type="checkbox" id="ebr_cbx32" name="ebr_cbx16"'>
+																	<script>document.write("<label for='ebr_cbx32'>" + msgtext("Attachments") + "</label>")</script>&nbsp;&nbsp;
+																</PDM_IF>																	
+															</PDM_IF>
+														</td>		
+													</tr>
+												</table>
+												
+												<table border=0 cellpadding="8" cellspacing="0" width="100%" bgcolor=white summary="Order By Relevance, FAQ Rating, Hits, Modify Date">		
+													<tr>
+														<td width="15%" nowrap class="label" align="left">&nbsp;&nbsp;
+															<script>document.write(msgtext("Order_by"))</script>:
+														</td>
+														<td colspan=1 align="left">
+															<select id="QBE.EQ.ebr_primary_order" name="QBE.EQ.ebr_primary_order" value="$args.QBE.EQ.ebr_primary_order">
+																	<option value="RELEVANCE">Relevance										
+																	<PDM_IF "$env.NX_KT" == "Yes">
+																		<option value="BU_RESULT">FAQ Rating																
+																	</PDM_IF>
+																	<option value="HITS">Hits										
+																	<option value="MODIFY_DATE" selected>Modify Date
+															</select>												
+														</td>			
+													</tr>
+												</table>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</TD>
+					</TR>
+				</TABLE>
+			</TABLE>
+		</TD>
+	</TR>	
+</TABLE>
+</PDM_FORM>
+<PDM_FORM class=cst name="frmOpenDocID" onsubmit="OpenDocID(); return false;">
+	<div id=divGoBtn name=divGoBtn style="display:none">
+	<table align=center border="0" width="68%" cellpadding="0" cellspacing="0" summary="Search using Document ID">
+	<tr>
+		<td class=section>
+		<table border=0 cellpadding="3" cellspacing="0" width="100%" bgcolor=white>
+			<tr>
+				<td nowrap class="label" align="left">&nbsp;&nbsp;
+					Search using Document ID:&nbsp;
+					<input type="text" size=10 id="btnDocID" name="btnDocID" value='' style="font-size:1.0em;">
+					<input type="hidden" name="OP" value="SEARCH">
+					<input type="hidden" name="FACTORY" value="KD">
+					<input type="hidden" name="QBE.EQ.id" id="QBE.EQ.id" value=""> 
+					<input type="hidden" name="KEEP.cur_sort_key" id="KEEP.cur_sort_key" value="id"> 					
+				</td>
+				<td>	
+					<SCRIPT>
+						ImgBtnRow();
+						ImgBtnCreate("btnGo", "Go", "javascript:OpenDocID();",true, 0);
+						ImgBtnEndRow();
+					</SCRIPT>					
+				</td>
+				<td width=100%>&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+	</table>	
+	<br>	
+	</div>
+</PDM_FORM>	
+<SCRIPT>
+	<PDM_IF 0>This is used when a user tries to open the FAQ from URL</PDM_IF>
+	<PDM_IF "$args.TargetKCATRelID" != "" && "$args.QBE.IN.ebr_search_text" != "">
+		faqCategorySearch("$args.TargetKCATID", "$args.TargetKCATCap", "$args.TargetKCATRelID", false, <PDM_FMT ESC_STYLE=NONE>"$args.QBE.IN.ebr_search_text"</PDM_FMT>);
+	<PDM_ELIF "$args.TargetKCATRelID" != "">
+		faqCategory("$args.TargetKCATID", "$args.TargetKCATCap", "$args.TargetKCATRelID", false);
+	</PDM_IF>
+</SCRIPT>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<PDM_IF 0>
+	Do not display the category table unless full-blown Knowledge Tools is installed
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.categoryID" != "-1" && "$env.NX_KT" == "Yes">
+<SCRIPT LANGUAGE="Javascript">
+	var rxGt = new RegExp("&gt;","gi");
+	var catPath = '<PDM_FMT ESC_STYLE=C>$args.KEEP.categoryPath</PDM_FMT>'.replace(rxGt,">");
+	var html = printCategoryPath('$args.KEEP.relationalID', catPath , -1, true /*simple UI*/);
+</SCRIPT>
+	<TABLE width='100%' border='0' cellspacing='0' cellpadding='10'>
+		<TR> 
+			<TD>
+				<SCRIPT>document.write(html)</SCRIPT>
+			</TD>
+		</TR>
+	</TABLE>
+	
+	<PDM_IF 0>
+		If the category is anything but "New documents" display the sub-categories
+	</PDM_IF>
+	<PDM_IF "$args.KEEP.categoryID" != "-3">
+		<SCRIPT LANGUAGE="Javascript">
+			
+			var subCategoryHTML = "";
+		
+			subCategoryHTML += "<TABLE width='100%' border='0' cellspacing='0' cellpadding='0' summary='The table of categories'>";
+			subCategoryHTML += "<TR>";
+		
+			<PDM_IF "$args.KEEP.categoryID" == "1">
+				subCategoryHTML += "<TD height='22' class='page_section_header_center'><span class='page_section_header_text'>Categories</span></TD>";
+			<PDM_ELSE>
+				subCategoryHTML += "<TD height='22' class='page_section_header_center'><span class='page_section_header_text'>Sub-Categories</span></TD>";
+			</PDM_IF>
+			subCategoryHTML += "</TR>";
+			subCategoryHTML += "</TABLE>";
+	   
+			subCategoryHTML += "<TABLE nowrap border=0 cellspacing=7 cellpadding=7>";
+			subCategoryHTML += "<TR>";
+			
+			var count = 0;
+			var categoryCount = 0;
+			// In the Top category, display a link to New documents
+			if ("$args.KEEP.categoryID" == "1")
+			{				
+				subCategoryHTML += "<TD>";
+				var caption = '<PDM_FMT ESC_STYLE=JS>New Documents</PDM_FMT>';
+				subCategoryHTML += "<a class='cst' style='font-size:.7em;' href=\"javascript:newDocuments()\">" + nx_unescape(caption) + "</a>";
+				subCategoryHTML += "</TD>";
+				count++;
+			}
+			<PDM_IF "$args.KEEP.categoryID" != "">
+				<PDM_LIST PREFIX=list WHERE="PARENT_ID=$args.KEEP.categoryID" FACTORY="KCAT" ORDER_BY = "CAPTION">
+					subCategoryHTML += "<TD>";
+					// Managing the category name is tricky:  We extract using 'C' ESC_STYLE to have the 
+					// escaping of the literal done so that the unescaped text is preserved in cat_name.
+					// The text embedded in the faqCategory() call must be double escaped.  The first level
+					// allows the link to be encoded as and href, while the second allows the faqCategory() 
+					// to unescape the parameter passed to it and reconstruct the original caption text
+					var cat_name = '<PDM_FMT ESC_STYLE=C>$list.CAPTION</PDM_FMT>';
+					subCategoryHTML += "<a class='cst' style='font-size:.7em;' href=\"javascript:faqCategory($list.id, '" + nx_escape(nx_escape(cat_name)) +
+					               "', '$list.RELATIONAL_ID', false, true)\" title=\"" + msgtext("Category_%1", nx_html_encode(cat_name)) + "\">" + nx_html_encode(cat_name) + "</a>";
+					subCategoryHTML += "</TD>";
+					
+					if (count == 4) { 
+						subCategoryHTML += "</TR>";
+						subCategoryHTML += "<TR>";
+						count = 0;
+					}
+					else {
+						count++;
+					}		
+					categoryCount++;
+				</PDM_LIST>
+			</PDM_IF>
+			subCategoryHTML += "</TR>";
+			subCategoryHTML += "</TABLE>";
+			
+			if (categoryCount > 0)
+				document.writeln(subCategoryHTML);
+		</SCRIPT>
+	</PDM_IF>
+</PDM_IF>
+
+<SCRIPT LANGUAGE="JavaScript">
+var categoryCaption = "";
+if (("$args.KEEP.categoryID" != "1") && ("$args.KEEP.categoryID" != "-1")) {
+	var sPath = '<PDM_FMT ESC_STYLE=JS2>$args.KEEP.categoryPath</PDM_FMT>';
+	sPath = nx_unescape(sPath);
+	var pos = sPath.lastIndexOf(">");
+	categoryCaption = sPath.substring(pos+1, sPath.length);
+}
+
+<PDM_IF 0>
+	When we are in KT-Lite mode (env.NX_KT = 'No') do not display category information
+</PDM_IF>
+var domset = "$args.DOMSET";
+var message = "";
+if (domset.indexOf("KD_list_ebr") >= 0 ) {
+	<PDM_IF "$args.QBE.EQ.id" == "">
+		<PDM_IF "$env.NX_KT" == "Yes">
+			if (("$args.KEEP.categoryID" == "1") || ("$args.KEEP.categoryID" == "-1"))
+			{
+				if (ahdtop.cfgEBRVersion == "SEARCH_ENGINE" )
+					message = msgtext("Searched_in_all_");
+				else
+					message = msgtext("Searched_for_<b>%1</b>_in_all_", <PDM_FMT ESC_STYLE=C>"'$args.QBE.IN.ebr_search_text'"</PDM_FMT>);				
+			}
+			else
+			{
+				if (ahdtop.cfgEBRVersion == "SEARCH_ENGINE" )
+					message = msgtext("Searched_in_the_", categoryCaption);		
+				else
+					message = msgtext("Searched_for_<b>%1</b>_in_the_", <PDM_FMT ESC_STYLE=C>"'$args.QBE.IN.ebr_search_text'"</PDM_FMT>, categoryCaption);		
+			}
+		<PDM_ELSE>
+			if (ahdtop.cfgEBRVersion != "SEARCH_ENGINE" )
+				message = msgtext("Searched_for_<b>%1</b>", <PDM_FMT ESC_STYLE=C>"'$args.QBE.IN.ebr_search_text'"</PDM_FMT>);
+		</PDM_IF>
+	<PDM_ELSE>
+		if($record_count != 0)
+			message = msgtext("Displaying_document_<b>%1</b>", "$args.QBE.EQ.id");	
+	</PDM_IF>	
+}
+else {
+	<PDM_IF "$env.NX_KT" == "Yes">
+		// If the ADDITIONAL_WHERE clause has the BM_LINK reference in it, this page
+		// is displaying bookmarks - use the appropriate message
+		if (document.forms["keywordSearch"].elements["ADDITIONAL_WHERE"].value.match(/BM_LINKS/)) {
+			message = msgtext("My_Bookmarks");
+		}
+		else {
+			if (("$args.KEEP.categoryID" == "1") || ("$args.KEEP.categoryID" == "-1"))
+				// Top category (all categories)
+				message = msgtext("Displaying_content_from_all_ca");	
+			else if ("$args.KEEP.categoryID" != "-3")
+				// A particular category (not Top) was selected decides New Documents
+				message = msgtext("Displaying_content_from_the_<b", categoryCaption);
+			else {
+				// Display a different message when the New Documents category is selected
+				var MINUTE = 60 * 1000;
+				var HOUR = MINUTE * 60;
+				var DAY = HOUR * 24;
+
+				// Subtract prop.BU_DAYS_NEW from today's date to get the date
+				// to compare the published date of knowledge documents
+				var today = (new Date()).getTime();
+				<PDM_IF "$prop.BU_DAYS_NEW" == "">
+					var bu_days_new = 5;
+				<PDM_ELSE>
+					var bu_days_new = $prop.BU_DAYS_NEW;
+				</PDM_IF>						
+				if (typeof bu_days_new == "number") {
+					var newDocDate = new Date(today - (bu_days_new * DAY));
+					// Set the time to 12:00 AM - So it will pick up any documents that were published
+					// any time during $prop.BU_DAYS_NEW ago.
+					newDocDate.setHours(0);
+					newDocDate.setMinutes(0);
+					newDocDate.setSeconds(0);
+					newDocDate.setMilliseconds(0);		
+					newDocDate = newDocDate/1000; // Remove the milliseconds		
+				}
+				message = msgtext("Displaying_new_documents_since", date_to_string(newDocDate, false, undefined, "no"));
+			}
+		}
+	</PDM_IF>
+	if("$args.QBE.EQ.id" != "" && $record_count != 0)
+		message = msgtext("Displaying_document_<b>%1</b>", "$args.QBE.EQ.id");	
+}
+
+if (typeof ahdtop.checked_knowledge == "boolean"  && ahdtop.checked_knowledge == false)
+	ahdtop.checked_knowledge = true;
+		
+		
+		
+		
+//-----------------------------------
+// Print list of search results
+//-----------------------------------
+function fmtRelevance(value)
+{
+	var quality = get_ebr_relevance_quality(value);
+	rs.data(quality);
+}
+
+function PrintSummaryAndAttributes(summary)
+{
+	highlightSearchTerms(summary);
+
+	rs.startRow();
+	rs.showData('', attributes, 1);
+	
+	rs.startRow();
+	rs.showData('', '', 1);	// Blank row
+}
+
+form_title = message;
+var tableHeaderText = message;
+var msgFoundNone = "";
+var msgFound1 = "1 Document found";
+var msgFound = "%1 Documents found";
+var msgFoundMore = "%1 Documents found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Document";
+var attributes = '';
+
+//-----------------------------------
+// Variables used in the highlightSearchTerms()
+// function in list_KD_common.js
+//-----------------------------------
+var highlightWords = "$args.KEEP.ebr_parsed_search_text"; 
+var fuzziness = "$args.QBE.EQ.ebr_fuzziness";
+
+var nCount = 0;
+var arrDoc_blc = new Array;
+function writeRecommendedResults()
+{
+	for ( i = 0; i < arrDoc_blc.length ; i++)
+		{
+			if(arrDoc_blc[i] > 0)
+			{
+				var currTD_Id = "rs_" + i + "_TITLE";
+				var e = document.getElementById(currTD_Id);
+				if(e)
+				{
+					var html = e.innerHTML;
+					html = html = "<span style='color:navy;font-weight:bold;'>" + msgtext("Recommended") + "</span>" + html;
+					e.innerHTML = html;
+				}
+			}	 
+		}		
+}
+</script>
+<table width=100% cellspacing=0 cellpadding=0 border=0>
+<tr>
+	<td id="data_grid" width=75% align=top valign=top>
+	<script>
+	<pdm_macro name=lsStart search_type=DISPLAY>
+    rs.setLinkName("Document");
+
+	<pdm_macro name=lsCol disp_entities=no attr=TITLE link=yes fmtfunc=highlightSearchTerms sort=no>
+	
+	<pdm_macro name=lsWrite both=no text="attributes = '';">
+	<pdm_macro name=lsWrite text="arrDoc_blc[nCount] = '@{list.ebr_doc_blc}';nCount++;">
+	<pdm_macro name=lsWrite both=no text="attributes += '<b>Document ID:</b>&nbsp;' + '@list.id' + '&nbsp;&nbsp;';">
+
+	<pdm_macro name=lsWrite both=no text="PDM_IF \"@list.MODIFY_DATE_INT_DATE\" != ''">
+		<pdm_macro name=lsWrite both=no text="dateString = date_to_string(\"@list.MODIFY_DATE_INT_DATE\",0,0,'no');">
+	<pdm_macro name=lsWrite both=no text="/PDM_IF">
+	<pdm_macro name=lsWrite both=no text="attributes += '<b>Modify Date:</b>&nbsp;' + dateString + '&nbsp;&nbsp;';">
+
+	<pdm_macro name=lsWrite both=no text="PDM_IF \"@env.NX_KT\" == 'Yes'">
+		<pdm_macro name=lsWrite both=no text="attributes += '<b>FAQ Rating:</b>&nbsp;' + Math.round(\"@list.BU_RESULT\") + '&nbsp;&nbsp;';">
+	<pdm_macro name=lsWrite both=no text="/PDM_IF">
+	<pdm_macro name=lsWrite both=no text="attributes += '<b>Hits:</b>&nbsp;' + '@list.HITS' + '&nbsp;&nbsp;';">
+
+	<pdm_macro name=lsWrite text="pdm_if '@{list.DOC_TEMPLATE_ID.HIDE_S:}' != '1'">
+	<pdm_macro name=lsCol disp_entities=no attr="SUMMARY" label="Summary" startrow=yes width=255 fmtfunc=PrintSummaryAndAttributes sort=no>
+	<pdm_macro name=lsWrite text="pdm_elif '@{list.DOC_TEMPLATE_ID.HIDE_P:}' != '1'">
+	<pdm_macro name=lsCol disp_entities=no attr="PROBLEM_SHORT" label="Problem" startrow=yes width=255 fmtfunc=PrintSummaryAndAttributes sort=no>
+	<pdm_macro name=lsWrite text="pdm_else">
+	<pdm_macro name=lsCol disp_entities=no attr="RESOLUTION_SHORT" label="Resolution" startrow=yes width=255 fmtfunc=PrintSummaryAndAttributes sort=no>
+	<pdm_macro name=lsWrite text="/pdm_if">
+rs.setLinkOnclick(function(){OpenDoc(self.activePersid)});
+<pdm_macro name=lsEnd>
+
+</script>
+</td>
+<PDM_IF "$env.NX_KT" == "Yes" && ("$env.KNOWLEDGE_SHOW_RECENT_DOCS" != 0 || "$env.KNOWLEDGE_SHOW_RECENT_SEARCHES" != 0)>
+	<td width=1%></td>
+	<td width=23% align=top valign=top>
+	<PDM_IF "$env.KNOWLEDGE_SHOW_RECENT_DOCS" != 0> 
+		<table border=0 cellspacing=0 cellpadding=0 width="100%" align=top valign=top>
+			<tr>                 
+				<td align=top valign=top>
+					<table border=0 cellspacing=0 cellpadding=0 width="100%" >
+						<tr>
+							<td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+							<td class="hdrCenter">
+							
+								<h2 class='page_section_header_text'>
+									<a class='hfocus' href='javascript:onclick_myDocs()'><img alt='' id=imgRecentDocs name=imgRecentDocs src='/CAisd/img/arrow_down.png' 
+									class='hide_show_button' alt="Show this section"></a>
+									My Recent Documents
+								</h2>
+							</td>
+							<td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+						</tr>
+					</table>	
+					<tr> 
+						<td style="background:#fdf8e2;" valign=top align=top width=100% height="100%">
+							<span id='spnRecentDocs' name='spnRecentDocs'></span>
+						</td>
+					</tr>	
+			
+				</td>
+			</tr>
+		</table><br>
+	</PDM_IF>
+	<PDM_IF "$env.KNOWLEDGE_SHOW_RECENT_SEARCHES" != 0> 	
+		<table border=0 cellspacing=0 cellpadding=0 width="100%" align=top valign=top>
+			<tr>                 
+				<td align=top valign=top>
+					<table border=0 cellspacing=0 cellpadding=0 width="100%" >
+						<tr>
+							<td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+							<td class="hdrCenter">
+								<h2 class='page_section_header_text'>
+								<a class='hfocus' href='javascript:onclick_mySearches()'><img alt='' id=imgRecentSearches name=imgRecentSearches src='/CAisd/img/arrow_down.png' 
+									class='hide_show_button' alt="Show this section"></a>
+								My Recent Searches
+								</h2>
+							</td>
+							<td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+						</tr>
+					</table>	
+					<tr> 
+						<td style="background:#fdf8e2;" valign=top align=top width=100% height="100%">
+							<span id='spnRecentSearches' name='spnRecentSearches'></span>
+						</td>
+					</tr>	
+			
+				</td>
+			</tr>
+		</table>
+		</PDM_IF>
+	</td>
+	<td width=1%></td>
+</PDM_IF>
+</tr>
+</table>
+</PDM_IF>
+
+<PDM_FORM class=cst name="frmOpenNew">
+	<input type="hidden" name="OP" value="CREATE_NEW">
+	<input type="hidden" name="CREATE_ALG" value="LOG">
+	<input type="hidden" name="KEEP.suggest_knowledge" value="$args.KEEP.suggest_knowledge">
+	<SCRIPT>
+	if(typeof ahdtop.checked_knowledge=="boolean" && ahdtop.checked_knowledge==true)
+	docWriteln("<input type=\"hidden\" name=\"ALG_PRESET\" value=\"description:Client tried searching for a solution\">");
+	else
+	docWriteln("<input type=\"hidden\" name=\"ALG_PRESET\" value=\"description:Client did not check the knowledge base\">");
+	</SCRIPT>
+	<input type="hidden" name="PRESET" value="">
+	<SCRIPT LANGUAGE="JavaScript">
+		if (ahdtop.cfgUserType == "employee")
+		{
+			docWriteln("<input type='hidden' name='FACTORY' value='cr'>");
+		}
+		else  if (ahdtop.cfgUserType == "customer")
+		{
+			docWriteln("<input type='hidden' name='FACTORY' value='iss'>");
+		}
+	</SCRIPT>
+</PDM_FORM>
+
+<PDM_IF 0>In case we did not present the create ticket link before, we need to present it now</PDM_IF>
+<table width=100% cellspacing=0 cellpadding=0 border=0>
+<tr>
+	<td width=75% align=top valign=top>
+<script>
+if ( !m_bdidDisplayQueryMessage ) {
+	document.write(displayQueryMessage());
+}
+</script>
+</td></tr></table>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

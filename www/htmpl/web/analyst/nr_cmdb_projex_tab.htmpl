@@ -1,0 +1,56 @@
+<PDM_IF 0>
+nr_cmdb_projex_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Asset 
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=nr_cmdb_projex_tab.htmpl" factory=nr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script>
+cfgDateFormat = "$date_format"
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_MACRO name=tabBanner title="Attributes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="CA Clarity PPM Project Name" attr=assoc_projex.clarity_name>
+<PDM_MACRO name=dtlTextbox hdr="CA Clarity PPM Project ID" attr=assoc_projex.clarity_id>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="CA SCM Project" attr=assoc_projex.harvest_name>
+<PDM_MACRO name=dtlTextbox hdr="CA SCM Server" attr=assoc_projex.harvest_server>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Endevor SYS-SBS-ENV-STG" attr=assoc_projex.endevor_name>
+<PDM_MACRO name=dtlTextbox hdr="Endevor Host" attr=assoc_projex.endevor_server>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Enterprise Workbench Server" attr=assoc_projex.entwb_server>
+<PDM_MACRO name=dtlLookup hdr="Organizacja" attr=assoc_projex.organization>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: nr_cmdb_projex_tab.htmpl ASPEN.2 2010/10/27 17:26:39 saima01 Exp $
+</PDM_IF>

@@ -1,0 +1,93 @@
+<PDM_IF 0>
+$Id: log_reader_fs.htmpl,v 1.3 2006/11/14 01:52:23 taoyu02 Exp $
+list_lr.htmpl
+WHEN PRESENTED:
+	When we need to display Log Reader.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview=log_reader_fs.htmpl+SINGLE_FRAME=1>
+<PDM_INCLUDE FILE=styles.htmpl>
+<title>Log Reader - $ProductName</title>
+<script language="javascript" src="$CAisd/scripts/msg_cat.js"></script>
+<script language="javascript" src="$CAisd/scripts/browser.js"></script>
+<script language="javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script language="javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="javascript" src="$CAisd/scripts/popup.js"></script>
+<script language="javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script language="javascript" src="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+var is_ahdtop = 0;
+<pdm_if "${cst.id:}" == "">
+var initial_url = "$cgi?OP=DISPLAY_FORM+SID=$prop.SID+FID=$prop.FID+HTMPL=log_reader.htmpl";
+<pdm_else>
+var initial_url = "$cgi?SID=$prop.SID+FID=$prop.FID+HTMPL=log_reader.htmpl" +
+       "+FACTORY=lr+OP=SEARCH+QBE.EQ.contact=$cst.id+ADDITIONAL_WHERE=" +
+       nx_escape("(status = 2) AND (cmth_used = 1801 OR cmth_used IS NULL)");
+</pdm_if>
+if ( window.name != "" )
+  initial_url += "+KEEP.POPUP_NAME=" + window.name;
+
+// Set the values, so the log_reader window can be a 
+// AHDtop window. 
+function check_ahdtop()
+{
+  if ( ! is_ahdtop ) {
+    var tmp_ahdtop = get_ahdtop();
+    if ( typeof tmp_ahdtop != "object" || ! tmp_ahdtop ) {
+      ahdtop = window;
+      activate_AHDtop();
+      ahdtop.isLogReader = true;
+      is_ahdtop = 1;
+      window.onfocus = null;
+    }
+  }
+}
+
+function make_ahdtop()
+{
+    if ( !is_ahdtop ) {
+      ahdtop = window;
+      activate_AHDtop();
+      ahdtop.isLogReader = true;
+      is_ahdtop = 1;
+      window.onfocus = null;
+    }
+    for ( var i = window.frames.length - 1; i >= 0; i-- )
+       if ( typeof window.frames[i].ahdtop == "object" )
+          window.frames[i].ahdtop = window;
+    return ahdtop;
+}
+
+// check to see if ahdframeset is defined...if not set it
+if (typeof ahdframeset == "undefined")
+{
+ahdframeset=window.parent;
+}
+
+function reload_initial_url()
+{
+  window.frames[2].location.href = initial_url;
+}
+
+</SCRIPT>
+<PDM_INCLUDE FILE=ahdtop.htmpl ahdtop=no>
+<SCRIPT LANGUAGE="JavaScript">
+check_ahdtop();
+</SCRIPT>
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$prop.URL_CI" != "">
+var ciSearchWindow = get_popup_window_name("ci_window");
+var propUrlCi = "$prop.URL_CI";
+</PDM_IF>
+document.writeln('<FRAMESET ROWS="40,*" FRAMEBORDER=0 FRAMESPACING=0 BORDER=0 onUnload="deregister_window()">');
+document.writeln('<FRAME NAME=log_reader_banner SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=log_reader_banner.htmpl" SCROLLING=NO NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title="C A logo - read only">');
+document.writeln('<FRAMESET ROWS="51,*" FRAMEBORDER=0 FRAMESPACING=0 BORDER=0 onUnload="deregister_window()">');
+document.writeln('<FRAME NAME=welcome_banner SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=welcome_banner.htmpl" SCROLLING=NO NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title="User name and logoff link">');
+document.writeln('<FRAME NAME=log_reader SRC="' + initial_url + '" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 FRAMESPACING=0 BORDER=0 SCROLLING=' +
+   ( _browser.isIE && "$prop.SupportR50" != "yes" ? "no" : "auto" )  + " title='Notification List'>");
+document.writeln("</FRAMESET>");
+document.writeln("</FRAMESET>");
+</SCRIPT>
+</HTML>

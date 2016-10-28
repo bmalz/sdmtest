@@ -1,0 +1,127 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a ticket's attachemnts
+    Must be a tabList within xx_attmnt_tab.htmpl
+</PDM_IF>
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+<PDM_IF "$args.KEEP.forSavedAttmnts" == "1">
+var hdrTitle = "Wyszukiwanie załączników";
+var hdrTitleList = "Lista załączników";
+<PDM_ELSE>
+var hdrTitle = "Wyszukiwanie załączników";
+var hdrTitleList = "Lista załączników";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+// View and Edit Document are added to the context menu
+// in resultSetCustomContextAddBegin().
+var cfgCanView = false;
+var cfgCanEdit = false;
+var attListData = parent.attListData;
+</script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Attachment List">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart button=false export=no factory="attmnt">
+document.write('<input type="hidden" name="QBE.EQ.requests.cr.persistent_id" value="$args.QBE.EQ.requests.cr.persistent_id">');
+document.write('<input type="hidden" name="QBE.EQ.changes.chg.persistent_id" value="$args.QBE.EQ.changes.chg.persistent_id">');
+document.write('<input type="hidden" name="QBE.EQ.issues.iss.persistent_id" value="$args.QBE.EQ.issues.iss.persistent_id">');
+// szum@e-xim 20130927
+document.write('<input type="hidden" name="QBE.EQ.nrs.nr.id" value="$args.QBE.EQ.nr_list.nr.id">');
+
+document.write('<input type="hidden" name="HTMPL" value="list_attmnt_sd.htmpl">');
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Dokument" attr="attmnt_name">
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Brak załączników";
+  var msgFound1 = "Znaleziono 1 załącznik";
+  var msgFound = "Znaleziono %1 załączników";
+  var msgFoundMore = "Znaleziono %1 załączników.  Wyświetlanie %2 z%3";
+  var msgSelect = "Kliknij, aby wybrać żądany załącznik";
+
+var attmntAccess = 0;
+switch ("$args.KEEP.ticketFac") {
+   case "cr":  attmntAccess = "${ACCESS.FAC_cr:0}" - 0; break;
+   case "iss": attmntAccess = "${ACCESS.FAC_iss:0}" - 0; break;
+   case "chg": attmntAccess = "${ACCESS.FAC_chg:0}" - 0; break;
+   case "nr": attmntAccess = "${ACCESS.FAC_nr:0}" - 0; break; // szum@e-xim 20130927
+}
+
+function resultSetCustomContextAddBegin(ctxMenu) {
+   ctxMenu.addItem(msgtext("View_Document0"),"parent.do_download_attmnt(self.activePersid)");
+   if ( attmntAccess > 1 ) {
+      ctxMenu.addItem(msgtext("Edit_Details"),"parent.do_edit_attmnt(self.activePersid)");
+      ctxMenu.addItem(msgtext("Delete2"),"parent.do_delete_attmnt(self.activePersid)");
+   }
+}
+
+function show_name_link(value) {
+    var val_str = "<a class='record' href=\"javascript:download_exec(attListData['" +
+                   attmnt_persid + "'])\">" + value + "&nbsp</a>";
+    rs.data(val_str);
+}
+function show_status(value)
+{
+   if ( value == "INSTALLED" )
+      value =  "Wgrany";
+   else if ( value == "LINK_ONLY" )
+      value =  "Podlinkowany";
+   else if ( value == "NOTINSTALLED" )
+      value =  "Nie wgrany";
+   else if ( value == "ARCHIVED" )
+      value =  "Zarchiwizowany";
+   else  // if ( value == "NOTAVAILABLE" )
+      value =  "Niedostępny";
+   rs.data(value);
+}
+var attmnt_persid;
+<PDM_MACRO name=lsStart search_type=GET_DOB>
+<PDM_MACRO name=lsWrite text="attmnt_persid = '@{list.persistent_id}';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'] = new Object();">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].id = '@{list.id}';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].attmnt_name = '<PDM_FMT ESC_STYLE=C>@{list.attmnt_name}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].orig_file_name = '<PDM_FMT ESC_STYLE=C>@{list.orig_file_name}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].status = '@{list.status}';">
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.link_only:0}\" != '1'">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].protocol = 'servlet';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].server = '@{list.repository.server}';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].retrieve_path = '@{list.repository.retrieve_path}';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].file_name = '@{list.file_name}';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].rep_id = '@{list.repository}';">
+<PDM_MACRO name=lsWrite text="attListData['@{list.persistent_id}'].cgi_path = '@{list.repository.servlet_path}';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Repozytorium" attr="repository">
+<PDM_MACRO name=lsCol hdr="Dokument" attr="attmnt_name" fmtfunc=show_name_link>
+<PDM_MACRO name=lsCol hdr="Opis" attr="description">
+<PDM_MACRO name=lsCol hdr="Załączono" attr="file_date">
+<PDM_MACRO name=lsCol hdr="Status" attr="status" fmtfunc=show_status>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_attmnt_sd.htmpl ASPEN.2 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,67 @@
+<PDM_IF 0>
+list_ical_event_template.htmpl
+WHEN PRESENTED:
+	When we need to display a list of iCalendar Event Templates.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "iCalendar Event Template Search";
+var hdrTitleList = "iCalendar Event Template List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+</SCRIPT>	
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="iCalendar Event Template">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=ical_event_template>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code>
+searchFilterDropdown("Object Type","obj_type",""
+			,"Change Order","chg"
+			,"Knowledge Document","KD");
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Data rozpoczęcia" attr=start_date>
+<PDM_MACRO name=sfTextbox hdr="Data zakończenia" attr=end_date>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=60>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No iCalendar Event Templates found";
+var msgFound1 = "1 iCalendar Event Template found";
+var msgFound = "%1 iCalendar Event Templates found";
+var msgFoundMore = "%1 iCalendar Event Templates found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired iCalendar Event Template";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Typ obiektu" attr=obj_type sort=no>
+<PDM_MACRO name=lsCol hdr="Data rozpoczęcia" attr=start_date>
+<PDM_MACRO name=lsCol hdr="Data zakończenia" attr=end_date>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsCol label="Description" attr=description colspan=6 startrow=yes>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: list_ical_event_template.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $";
+</PDM_IF>
+<PDM_WSP>

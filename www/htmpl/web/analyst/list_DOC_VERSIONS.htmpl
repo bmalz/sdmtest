@@ -1,0 +1,58 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    On the Versionins tab in the KD Editor page
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Versions Search";
+var hdrTitleList = "Versions List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("DOC_VERSIONSsum.rpt", "DOC_VERSIONSdtl.rpt");
+var cfgCanEdit = false;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Document Versions">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create="false" factory="DOC_VERSIONS">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=STATUS_ID colspan=2 factory=CI_STATUSES>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Rozpoczęte przez" attr=STARTED_BY>
+<PDM_MACRO name=sfLookup hdr="Opublikowane przez" attr=PUBLISHED_BY>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Versions found";
+  var msgFound1 = "1 Version found";
+  var msgFound = "%1 Versions found";
+  var msgFoundMore = "%1 Versions found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Version";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Numer wesji" attr="VER_COUNT" link="yes">
+<PDM_MACRO name=lsCol hdr="Data rozpoczęcia" attr="START_DATE">
+<PDM_MACRO name=lsCol hdr="Data zakończenia" attr="END_DATE">
+<PDM_MACRO name=lsCol hdr="Były status" attr="STATUS_ID">
+<PDM_MACRO name=lsCol hdr="Rozpoczęte przez" attr="STARTED_BY">
+<PDM_MACRO name=lsCol hdr="Opublikowane przez" attr="PUBLISHED_BY">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

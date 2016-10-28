@@ -1,0 +1,850 @@
+﻿<PDM_IF 0>
+	Created: 201305 bmalz @ e-xim
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="home.htmpl">
+<html lang="pl"><HEAD>
+<script>
+var form_title;
+var CategoryRoot; // 20130926 bmalz @ e-xim
+if ('$args.CONTRACT' == "") {
+	form_title = "Strona główna";
+} else {
+	form_title = '$args.CONTRACT'.split('.').pop();
+	CategoryRoot = '$args.CONTRACT'.split('.')[0];
+}
+</script>
+
+<style>
+	#linkmenu.fixed {
+	  position: fixed;
+	  padding-top: 1px;
+	  top: 0px;
+	}
+	
+	#ScoreBoard.fixed {
+	  position: fixed;
+	  top: 30px;
+	  width: 200px;
+	}
+	
+	#LocalizationBar.fixed {
+	  position: fixed;
+	}
+	
+	.AnnouncementClose {
+		display: block;
+		width: 22px;
+		height: 22px;
+		background: url('$CAisd/sitemods/img/Announcements/close_0.png') bottom;
+		text-indent: -99999px;
+	}
+	.AnnouncementClose:hover {
+		background-position: 0 0;
+		background: url('$CAisd/sitemods/img/Announcements/close_1.png') bottom;
+	}
+} 
+</style>
+</style>
+<PDM_INCLUDE FILE="std_head.htmpl">
+		<script language="JavaScript" src="$CAisd/scripts/cst_fldrtree.js"></script>		
+		<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>	
+		<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>	
+		<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/GUI_favs.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/GUI_helpers.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/exim_mods.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+		<script language="JavaScript">
+		//alert('$args.FROM_EMP_DETAIL_IN');
+			function CheckPcatObject() {
+				if ('$args.CONTRACT' != "") {
+					var i = 0;
+					var temp = "";
+					var flag;
+					<PDM_LIST PREFIX=list FACTORY=pcat WHERE="ss_sym = '$args.CONTRACT'">
+						i++;
+						if ('$list.in_flag' == 0 && '$list.cr_flag' == 0)
+							flag = true;
+						temp = '$list.sym';
+					</PDM_LIST>
+	
+					if (i > 0) {
+						if (flag)
+							return 'Area';
+						else
+							return 'Exist';
+					} else {
+						return 'NotExist';
+					}
+				} else {
+					return 'Exist'
+				}
+			}
+			
+			function SetTopBar() {
+				parent.frames[0].window.document.getElementById('titleText').innerHTML = "$args.CONTRACT".split('.')[0].toUpperCase();
+				parent.frames[0].window.document.getElementById('UserInfoDiv').innerHTML = '<p class="UserInfoItem" style="font-size: 12px; font-weight: bold;">$cst.last_name $cst.first_name</p><p class="UserInfoItem">$cst.organization.name</p><p class="UserInfoItem">$cst.location.address1</p><p class="UserInfoItemHighlighted">$cst.phone_number</p><p class="UserInfoItemHighlighted">$cst.email_address</p>';
+				parent.frames[0].window.document.getElementById('UserInfoDiv').style.visibility = "visible";
+			}
+
+			function GetFavs() {
+				var myFavs = new Array();
+				var i = 0;
+				<PDM_LIST PREFIX=list FACTORY=zfav_pcat WHERE="cnt.id = U'$cst.id' AND pcat.sym like '$args.CONTRACT%' AND delete_flag = 0">
+					myFavs[i] = '$list.pcat.ss_sym';
+					i++;
+				</PDM_LIST>
+
+				return myFavs;
+			}
+		</script>
+
+<script type="text/javascript">
+	// 20130919 bmalz @ e-xim - get Announcements
+	function Cnote(date, text, type, id, hdtype) { this.date = date; this.text = text; this.type = type; this.id = id, this.hdtype = hdtype}
+	var arr_cnote = new Array();
+	var arr_cnote_bottom = new Array();
+	<PDM_IF "$prop.guest_user" != 1>
+		<PDM_IF $cst.location == "" && $cst.organization == "" >
+				<PDM_IF $prop.view_internal == 1> 
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" = "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>
+			<PDM_ELSE>
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" = "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>
+			</PDM_IF>
+		<PDM_ELIF $cst.location == "" && $cst.organization != "" >
+			<PDM_IF $prop.view_internal == 1>	
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" = "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>		
+			<PDM_ELSE>
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" == "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>
+			</PDM_IF>
+		<PDM_ELIF $cst.location != "" && $cst.organization == "" >
+			<PDM_IF $prop.view_internal == 1>	
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" = "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>		
+			<PDM_ELSE>
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" = "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>
+			</PDM_IF>
+		<PDM_ELSE>
+	  
+			<PDM_IF $prop.view_internal == 1>	
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" = "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>		
+			<PDM_ELSE>
+				<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+					<PDM_IF "$list.zBottom" = "1">
+						arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+					<PDM_ELSE>
+						arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+					</PDM_IF>
+				</PDM_LIST>
+			</PDM_IF>
+		</PDM_IF>
+	<PDM_ELSE>
+	// Guest User
+		<PDM_LIST PREFIX=list FACTORY=cnote LENGTH=5 WHERE="active=1 AND (organization IS NULL AND location IS NULL)" DOMSET=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+			<PDM_IF "$list.zBottom" = "1">
+				arr_cnote_bottom.push(new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym"));
+			<PDM_ELSE>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type","$list.id","$list.zHelpDeskType.sym");
+			</PDM_IF>
+		</PDM_LIST>
+	</PDM_IF>  
+
+	var cols = 2;
+	jq(window).resize(function() {
+		<PDM_IF "$args.CONTRACT" == "">
+			cols = 2;
+		<PDM_ELSE>
+			if(jq(window).width() <= 1024 && cols != 2) {
+				cols = 2;
+			} else if ((jq(window).width() > 1024 && jq(window).width() <= 1600) && cols != 3) {
+				cols = 3;
+			} else if (jq(window).width() > 1600 && cols != 4) {
+				cols = 4;
+			}
+		</PDM_IF>
+
+		if(typeof(tabAreas) != "undefined" && typeof(tabCategories) != "undefined") {
+			buildBoxes();
+		}
+	}).trigger("resize");
+	
+	//window.onresize = doResize;
+	jq(document).ready(function () {
+		jq('#linkmenu').addClass('fixed');
+	
+		var Contracts = new Array();
+		<PDM_LIST PREFIX=list FACTORY=zlrel_org_kontr WHERE="org.id = U'$cst.organization.id'">
+			Contracts.push("$list.kontr.id");
+		</PDM_LIST>
+
+		if (Contracts.length == 0)
+			Contracts.push("0");
+
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+			"+OP=DISPLAY_FORM+HTMPL=get_pcat_list.htmpl"+
+			"+CATEGORY=" + encodeURIComponent("$args.CONTRACT") +
+			"+UserOwningContracts=" + encodeURIComponent(Contracts.join());
+
+		if (ahdframeset.name != "mainFrameSet") {
+		   display_new_page(url,ahdframeset.workframe_2);
+		}
+		
+		<PDM_IF "${args.ref_num:}" != "">
+			jq("#HomeMessage").fadeIn(100);
+		</PDM_IF>
+		
+	});
+	
+	function FavoriteFunc(EntityID) {
+		jq('[entity_id="' + EntityID + '"]').attr("src", "$CAisd/sitemods/img/favourite_loading.gif");
+
+		if	(jq('[entity_id="' + EntityID + '"]').attr("favService") == "false") {
+			AddAsFavourite('$cst.id', EntityID);
+		} else {
+			RemoveFromFavourite('$cst.id', EntityID);
+		}	
+	}
+	
+	function doResize() {
+		jq('.divcat').each(function () {
+        	jq(this).css("height", jq(this).parent().css("height"));
+			jq(this).css("max-height", jq(this).parent().css("height"));
+        });
+	};
+	
+	function endSaveProduct(xmlHttpRequest, status)
+	{
+		alert(xmlHttpRequest + '\r\n' + status);
+	}
+	
+	// 20130919 bmalz @ e-xim
+	function CloseCnote(position) {
+		if(position == "top") {
+			cnote_array = arr_cnote;
+		}
+		else
+		{
+			cnote_array = arr_cnote_bottom;
+		}
+
+		setCookie('Cnote_' + position + '_date', cnote_array[0].date, 365);
+		jq('#Main_Cnote_' + position).hide();
+	}
+	
+	// 20130919 bmalz @ e-xim
+	var selectedCnoteTop;
+	var selectedCnoteBottom;
+
+	function buildAnnouncements(position) {
+		var out = "";
+		var isFirst = true;
+		var hasElements = false;
+		var CnotesDots = "";
+		var Content = "";
+		var cnote_array = new Array();
+
+		if(position == "top") {
+			cnote_array = arr_cnote;
+		}
+		else
+		{
+			cnote_array = arr_cnote_bottom;
+		}
+
+		if(cnote_array.length > 0) {
+			if(parseInt(cnote_array[0].date) > checkCnoteCookie(position) || '$args.ShowAnnouncments' == 'true') {			
+				if(cnote_array.length > 0) {	
+					for (var i = 0; i < cnote_array.length; i++)
+					{
+						var hdtype = cnote_array[i].hdtype;
+						var hdtype_desc = "";
+						
+						switch(hdtype) {
+							case "ADM":
+								hdtype_desc = "Administracja";
+								break;
+							case "HR":
+								hdtype_desc = "HR - Sprawy Pracownicze";
+								break;
+							case "IT":
+								hdtype_desc = "Informatyka";
+								break;
+							case "POZ":
+								hdtype_desc = "Pozostałe usługi";
+								break;
+							default:
+								break;
+						}
+
+						if('$args.CONTRACT' == '' || '$args.CONTRACT'.split('.')[0].toLowerCase() == hdtype_desc.toLowerCase()) {
+							if (isFirst) {
+								Content += GetCnote(i, position);
+								if(position == "top") {
+									selectedCnoteTop = i;
+								} else {
+									selectedCnoteBottom = i;
+								}
+								isFirst = false;
+							}
+
+							CnotesDots += '<div class="CnoteDot" onClick="ShowCnote(' + i + ', \'' + position + '\')"></div>';
+							hasElements = true;
+						}
+					}
+
+					if(hasElements) {
+						out += '<div id="Main_Cnote_' + position + '" style="width: 100%;">';
+						out += '<table border="0" cellpadding="0" cellspacing="0">';
+						out += '<tr>';
+						out += '<td><img src="$CAisd/sitemods/img/Announcements/y_box_01.gif" width="26" height="23" alt=""></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Announcements/y_box_02.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Announcements/y_box_03.gif" width="23" height="23" alt=""></td>';
+						out += '</tr><tr>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Announcements/y_box_04.gif); width:26px;"></td>';
+						out += '<td valign="top" style="width: 100%; background: #FFF9E0;">';
+						out += '<div style="position: relative; float: right; top: -5px;"><a class="AnnouncementClose" href="javascript:CloseCnote(\'' + position + '\');"></a></div>';	
+						out += Content;			
+						out += '<table style="float: right;"><tr><td style="text-align:right;">';
+						out += CnotesDots;
+						out += '</td></tr></table>';
+						out += '</td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Announcements/y_box_06.gif); max-width: 26px; width: 26px;"></td>';
+						out += '</tr>';
+						out += '<tr>';
+						out += '<td><img src="$CAisd/sitemods/img/Announcements/y_box_07.gif" width="26" height="22" alt="" /></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Announcements/y_box_08.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Announcements/y_box_09.gif" width="23" height="22" alt="" /></td>';			
+						out += '</tr>';
+						out += '</table>';
+						out += '</div>';
+					}
+				}
+			}
+		}
+		return out;
+	}
+	
+	function GetCnote(node, position) {
+		var cnote_array = new Array();
+
+		if(position == "top") 
+		{
+			cnote_array = arr_cnote;
+		}
+		else
+		{
+			cnote_array = arr_cnote_bottom;
+		}
+
+		var hdtype = cnote_array[node].hdtype;
+		var hdtype_desc = "";
+		
+		switch(hdtype) {
+			case "ADM":
+				hdtype_desc = "Administracja";
+				break;
+			case "HR":
+				hdtype_desc = "HR - Sprawy Pracownicze";
+				break;
+			case "IT":
+				hdtype_desc = "Informatyka";
+				break;
+			case "POZ":
+				hdtype_desc = "Pozostałe usługi";
+				break;
+			default:
+				break;
+		}
+		
+		var id = cnote_array[node].id;
+		var dateText = date_to_string(cnote_array[node].date, false);
+		var result = cnote_array[node].text;
+		
+		var out = '<table id="cnote_' + position + '_' + node + '" class="contractContent" style="width: 100%; padding-top: 0px; padding-bottom: 5px;">';
+		out += '<tr>';
+		
+		var AnnonIcon = "announcement";
+		if (cnote_array[node].type == '0') {
+			AnnonIcon = "Announcement_Porada";
+		} else if (cnote_array[node].type == '1') {
+			AnnonIcon = "Announcement_Bierzace";
+		} else if (cnote_array[node].type == '2') {
+			AnnonIcon = "Announcement_Awaria";
+		}
+		
+		out += '<td valign="top" style="padding-right: 5px;"><img border="0" src="$CAisd/sitemods/img/Announcements/' + AnnonIcon + '.png"></td>';
+		out += '<td width="100%" valign="top">';
+		out += '<p class="contractContentTitle">(' + hdtype_desc + ') ' + dateText + '</p>';
+		out += '<p style="text-align:justify;">' + result + '</p>';
+		out += '</td>';
+		out += '</tr>';
+		out += '</table>';
+		
+		return out;
+	}
+	
+	function ShowCnote(Cnote, position) {
+		if(position == "top") {
+			jq('#cnote_' + position + '_' + selectedCnoteTop).replaceWith(GetCnote(Cnote, position));
+			selectedCnoteTop = Cnote;
+		} else {
+			jq('#cnote_' + position + '_' + selectedCnoteBottom).replaceWith(GetCnote(Cnote, position));
+			selectedCnoteBottom = Cnote;
+		}
+	}
+
+	var tabAreas = [];
+	var tabCategories = [];
+	var hasCR = 0;
+	var hasIN = 0;
+	function SetCategoriesVariables(tabAreas, tabCategories, hasCR, hasIN) {
+		this.tabAreas = tabAreas;
+		this.tabCategories = tabCategories;
+		this.hasCR = hasCR;
+		this.hasIN = hasIN;
+		
+		buildBoxes();
+	}
+	
+	function buildBoxes() {
+		var PcatObj = CheckPcatObject();
+		if (PcatObj == 'Exist' || PcatObj == 'Area') {
+			var out = "";
+			var ContractName = '$args.CONTRACT';
+			var UserDetails = "&exim_FirstName=$cst.first_name&exim_MiddleName=$cst.middle_name&exim_LastName=$cst.last_name&exim_persistent_id=$cst.persistent_id";
+
+			var i = 0;
+			var zimage;
+			var zfavs = GetFavs();
+			var zfavimg;
+			var zfav;
+			var zfavdesc;
+			
+			// Opis wartości tab[]
+			// 0 - nazwa analityka
+			// 1 - opis
+			// 2 - ikona
+			// 3 - nazwa dla użytkownika (końcowa)
+			// 4 - identyfikator
+			// 5 - nazwa dla użytkownika
+			// 6 - flaga Request
+			// 7 - flaga Incident
+			// 8 - service catalog url
+
+			var windowwidth = Math.floor(jq(window).width() * 0.8);
+			var boxwidth = Math.floor((windowwidth - 3*26 - 3*23) / cols);
+			var cat_filled_width = Math.floor((windowwidth - 3*26 - 3*23) / 2);
+			var cat_empty_width = Math.floor((windowwidth - 2*26 - 2*23) / 2);
+
+			out += '<div style="width: 100%;"><table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;overflow-x:auto;width:' + windowwidth + 'px;">';
+			// Create boxes of Areas
+			for (i = 0; i < tabAreas.length; i++) {			
+				//Set image
+				if (tabAreas[i][2] == '') {
+					zimage = 'noimage.png';
+				} else {
+					zimage = tabAreas[i][2];
+				}
+
+				//Set fav icon and state
+				if (jq.inArray(tabAreas[i][0], zfavs) > -1) {
+					zfavimg = "favourite_enable.png";
+					zfav = "true";
+					zfavdesc = "Usuń z ulubionych";
+				} else {
+					zfavimg = "favourite_disable.png";
+					zfav = "false";
+					zfavdesc = "Dodaj do ulubionych";
+				}
+				
+				var col_num = (i+1) - Math.floor((i+1)/cols)*cols;
+
+				if (col_num == 0)
+					col_num = cols;
+
+				var gencol;
+				var widthprecent = (1/cols) * 100;
+
+				// Top row
+				if(col_num == 1) {
+					if ((tabAreas.length - i) > cols) {
+						gencol = cols;
+					} else {
+						gencol = tabAreas.length - i;
+					}
+					
+					for (var j=0; j<gencol; j++) {
+						out += '<td style="width:23px;"><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);width:' + boxwidth + 'px;"></td>';
+						out += '<td style="width:23px;"><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+					}
+
+					for (var j=0; j<(cols-gencol); j++) {
+						out += '<td style="width:23px;"><div style="width: 26px;" /></td><td style="width:' + boxwidth + 'px;"></td><td style="width:26px;"><div style="width: 23px;" /></td>';
+					}
+					
+					out += '</tr>';
+					out += '<tr>';
+				}
+				
+				// Middle row
+				if (i <= tabAreas.length - 1) {
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>';
+					out += '<td valign="middle" style="overflow:auto; width: ' + widthprecent + '%;">';
+					out += '<table class="contractContent" style="width: 100%;">';
+					out += '<tr>';
+					out += '<td valign="middle"><a href="javascript:OpenContract(\'' + tabAreas[i][5] + '\')"><img border="0" src="$CAisd/sitemods/img/Employee/Icons/' + zimage + '"></a></td>';
+					out += '<td width="100%" valign="middle">';
+					out += '<p class="contractContentTitle"><a href="javascript:FavoriteFunc(' + tabAreas[i][4] + ')"><img entity_id="' + tabAreas[i][4] + '" favService="' + zfav + '" class="contractContentFav" src="$CAisd/sitemods/img/' + zfavimg + '" alt="' + zfavdesc + '"></a><a href="javascript:OpenContract(\'' + tabAreas[i][5] + '\')">' + tabAreas[i][3] + '</a></p>';
+					out += tabAreas[i][1] + '<br />';
+					out += '</td>';
+					out += '</tr>';
+					out += '</table>';
+					out += '</td>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+				}
+				
+				if(i == tabAreas.length - 1) {
+					for (var j=0; j<(cols-gencol); j++) {
+						out += '<td></td><td style="width: 50%;"></td><td></td>';
+					}
+				}
+				
+				// Bottom row
+				if(col_num == gencol) {
+					out += '</tr>';
+					out += '<tr>';
+
+					for (var j=0; j<gencol; j++) {
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+					}
+
+					for (var j=0; j<(cols-col_num); j++) {
+						out += '<td></td><td></td><td></td>';
+					}
+
+					out += '</tr>';
+				}
+			}
+
+			out += '</table>'
+			out += '</div>';
+
+			// Create boxes of Categories
+			if (tabCategories.length > 0) {
+				out += '<div style="table-layout:fixed;overflow-x:auto;width:' + windowwidth + 'px;">';
+				out += '<table border="0" cellpadding="0" cellspacing="0">';
+				
+				if(hasCR == 1) {
+					out += '<tr>';
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);width:' + cat_filled_width + 'px;"></td>';
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+				} else {
+					out += '<tr>';
+					out += '<td style="width: 26px; height:23px;"><div style="width: 26px;" /></td>';
+					out += '<td style="width:' + cat_empty_width + 'px;"></td>';
+					out += '<td style="width: 23px; height: 23px;"><div style="width: 23px;" /></td>';
+				}
+				
+				if(hasIN == 1) {
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);width:' + cat_filled_width + 'px;"></td>';
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+				} else {
+					out += '<td style="width: 26px; height: 23px;"><div style="width: 26px;" /></td>';
+					out += '<td style="width:' + cat_empty_width + 'px;"></td>';
+					out += '<td style="width: 23px; height: 23px;"><div style="width: 23px;" /></td>';
+				}
+				
+				out += '</tr>';
+				
+				if(hasCR == 1) {
+					out += '<tr>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); width:26px;"></td>';
+					out += '<td valign="top" style="overflow:auto; width: 50%;">';
+					out += '<table class="contractContent" style="width: 100%;">';
+					out += '<tr>';
+					out += '<td valign="top"><img border="0" src="$CAisd/sitemods/img/Employee/Icons/shop.gif"></td>';
+					out += '<td width="100%" valign="top">';
+					out += '<p class="contractContentTitle">Rejestracja wniosku</p>';
+					out += 'W tym miejscu można zarejestrować wniosek.<br />';
+					out += '<ul class="contractContentCategory">';
+					for (i = 0; i < tabCategories.length; i++) {
+						if (tabCategories[i][6] == 1) {
+							if (tabCategories[i][8] != "") {
+								var target = "";
+								if (tabCategories[i][8].indexOf("javascript:") == -1) {
+									target = 'target="_blank"';
+								}
+
+								out += '<li><a href="' + tabCategories[i][8].replace("__eximuser", UserDetails) + '" ' + target + '>' + tabCategories[i][3] + '</a></li>';
+							} else {
+								out += '<li><a href="javascript:NewRequest(\'' + tabCategories[i][5] + '\')">' + tabCategories[i][3] + '</a></li>';
+							}
+						}
+					}
+					out += '</ul>';
+					out += '</td>';
+					out += '</tr>';
+					out += '</table>';
+					out += '</td>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+				} else {
+					out += '<tr>';
+					out += '<td></td>';
+					out += '<td style="width: 50%;"></td>';
+					out += '<td></td>';
+				}
+				
+				if(hasIN == 1) {
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>';
+					out += '<td valign="top" style="overflow:auto; width: 50%;">';
+					out += '<table class="contractContent">';
+					out += '<tr>';
+					out += '<td valign="middle"><img border="0" src="$CAisd/sitemods/img/Employee/Icons/HELP.gif"></td>';
+					out += '<td width="100%" valign="top">';
+					out += '<p class="contractContentTitle">Rejestracja problemu</p>';
+					out += 'W tym miejscu można zgłosić niepoprawne dziłanie usługi/systemu lub awarię.<br />';
+					out += '<ul class="contractContentCategory">';
+					for (i = 0; i < tabCategories.length; i++) {
+						if (tabCategories[i][7] == 1) {
+							if (tabCategories[i][8] != "") {
+								var target = "";
+								if (tabCategories[i][8].indexOf("javascript:") == -1) {
+									target = 'target="_blank"';
+								}
+
+								out += '<li><a href="' + tabCategories[i][8].replace("__eximuser", UserDetails) + '" ' + target + '>' + tabCategories[i][3] + '</a></li>';
+							} else {
+								out += '<li><a class="contractContentCategory" href="javascript:NewIncident(\'' + tabCategories[i][5] + '\')">' + tabCategories[i][3] + '</a></li>';
+							}
+						}
+					}
+					out += '</ul>';
+					out += '</td>';
+					out += '</tr>';
+					out += '</table>';
+					out += '</td>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+					out += '</tr>';
+				} else {
+					out += '<td></td>';
+					out += '<td style="width: 50%;"></td>';
+					out += '<td></td>';
+					out += '</tr>';
+				}
+				
+				if(hasCR == 1) {
+					out += '<tr>';
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+				} else {
+					out += '<tr>';
+					out += '<td></td>';
+					out += '<td></td>';
+					out += '<td></td>';
+				}
+				
+				if(hasIN == 1) {
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+					out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+					out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+				} else {
+					out += '<td></td>';
+					out += '<td></td>';
+					out += '<td></td>';
+				}
+				
+				out += '</tr>';
+				out += '</table>'
+				out += '</div>';
+			}
+		} else {
+			out += 'Obiekt nie istnieje';
+		}
+
+		jq("#CategoriesArea").html(out);
+		jq("#LoadingContent").hide();
+	}
+    </script>
+	</head>
+	
+	<body class=emp onload="SetTopBar();">
+	 <PDM_INCLUDE FILE=self_service_include.htmpl status=0>
+<PDM_INCLUDE FILE="std_body.htmpl">
+
+<table class="toolbar_container" id="toolbarTable" style="border-bottom: 1px solid gray; width: 100%; position: fixed; top: 15px; z-index: 1000;">
+<TBODY>
+	<TR>
+		<TD style="height: 15px; background-color: white;" colspan="5">&nbsp;</TD>
+	</TR>
+	<TR vAlign=bottom>
+		<TD style="width: 15px;">&nbsp;</TD>
+		<TD class=tab_container>
+			<TABLE class=generic_table>
+			<TBODY>
+				<TR>
+					<TD id=tableft0 class=headertab_selected_left_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+					<TD id=tabmiddle0 class=headertab_selected_center width="100%" noWrap><A tabIndex=1 onmouseover="window.status='Katalog usług';return true;" onmouseout=window.status=window.defaultStatus; id=tabhref0 class=headertab_text href="javascript:ShowServiceCatalog();"><SPAN><U>K</U>atalog&nbsp;usług</SPAN></A></TD>
+					<TD id=tabright0 class=headertab_selected_right_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+				</TR>
+			</TBODY>
+			</TABLE>
+		</TD>
+		<TD class=tab_container>
+			<TABLE class=generic_table>
+			<TBODY>
+				<TR>
+					<TD id=tableft1 class=headertab_unselected_left_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+					<TD id=tabmiddle1 class=headertab_unselected_center width="100%" noWrap><A tabIndex=2 onmouseover="window.status='Moje zgłoszenia';return true;" onmouseout=window.status=window.defaultStatus; id=tabhref1 class=headertab_text href="javascript:ShowMyItems();"><SPAN><U>M</U>oje&nbsp;zgłoszenia</SPAN></A></TD>
+					<TD id=tabright1 class=headertab_unselected_right_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+				</TR>
+			</TBODY>
+			</TABLE>
+		</TD>
+		<TD class=tab_container>
+			<TABLE class=generic_table>
+			<TBODY>
+				<TR>
+					<TD id=tableft2 class=headertab_unselected_left_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+					<TD id=tabmiddle2 class=headertab_unselected_center width="100%" noWrap><A tabIndex=3 onmouseover="window.status='Moje akceptacje';return true;" onmouseout=window.status=window.defaultStatus; id=tabhref2 class=headertab_text href="javascript:ShowMyTasks();"><SPAN><U>M</U>oje&nbsp;akceptacje</SPAN></A></TD>
+					<TD id=tabright2 class=headertab_unselected_right_top noWrap><IMG class=tab_unselected_edge_space_img alt="" src="/CAisd/img/space1x1.gif"></TD>
+				</TR>
+			</TBODY>
+			</TABLE>
+		</TD>
+		<TD style="width: 100%; background-color: white;">&nbsp;</TD>
+	</TR>
+</TBODY>
+</table>
+
+<center>
+	<table width="100%" cellpadding=0 cellspacing=0 style="margin-top:15px;">
+		<tr>
+			<td valign="top" align="left">
+				<table style="width: 80%; margin-top: 45px;" align="center">
+					<PDM_IF "$args.CONTRACT" != "">
+					<tr>
+						<td style="padding-bottom: 10px; font-size: 11px;">
+							<div id="LocalizationBar" style="background-color: white; width: 100%; padding-left: 20px; position: fixed; top: 61px; height: 45px; z-index: 1000;">
+								<div style="position: relative; margin: 0 auto; bottom: -15px;">
+									<script>
+										var ContractPath = '$args.CONTRACT'.split('.');
+										var tempContractPath = ContractPath[0]; 
+										
+										var fid = fid_generator();
+										var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid + "+OP=DISPLAY_FORM+HTMPL=home.htmpl";
+										document.write('Jesteś w: <a href=' + url + '>Strona główna</a>');
+										
+										for (i=0; i<ContractPath.length; i++) {
+											if (i == ContractPath.length - 1) {
+												document.write(' > ' + ContractPath[i]);
+											} else {
+												if (i == 0) {
+													document.write(' > ' + '<a href="javascript:OpenContract(\'' + ContractPath[i] + '\')">' + ContractPath[i] + '</a>');
+												} else {
+													tempContractPath = tempContractPath + '.' + ContractPath[i];
+													document.write(' > ' + '<a href="javascript:OpenContract(\'' + tempContractPath + '\')">' + ContractPath[i] + '</a>');
+												}
+											}
+										}
+									</script>
+								<div>
+							</div>
+						</td>
+						<td align="right" style="padding-bottom: 10px; padding-right: 20px; font-size: 11px;">
+							
+						</td>
+					</tr>
+					</PDM_IF>
+					<tr>
+						<td colspan="2" style="padding-top: 20px;">
+							<script>document.write(buildAnnouncements("top"));</script>
+							<div id="LoadingContent" style="width: 100%; text-align:center; padding: 20px; font-size: 10px; color: gray;"><img src="$CAisd/sitemods/img/favourite_loading.gif"><br />Ładuje kategorie...</div>
+							<div id="CategoriesArea"></div>
+							<script>document.write(buildAnnouncements("bottom"));</script>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</center>
+
+<PDM_IF "${args.ref_num:}" != "">
+	<div id="HomeMessage" align="middle" class="HomeMessage"><table><tr>
+				<td valign="center"><img src="$CAisd/sitemods/img/info.png"></td>
+				<td valign="center">
+
+	<PDM_IF "$args.FROM_EMP_DETAIL_IN" == "1">
+		Dodano nowe zgłoszenie
+			<PDM_LINK OP="SHOW_DETAIL"
+					  PERSID="$args.persistent_id"
+					  onmouseover="window.status = &quot;View Incident #$args.ref_num&quot;; return true;"
+					  onmouseout="window.status = window.defaultStatus; return true;">#$args.ref_num</PDM_LINK>				  
+	<PDM_ELSE>
+		Dodano nowy wniosek
+			<PDM_LINK OP="SHOW_DETAIL"
+					  PERSID="$args.persistent_id"
+					  onmouseover="window.status = &quot;View Request #$args.ref_num&quot;; return true;"
+					  onmouseout="window.status = window.defaultStatus; return true;">#$args.ref_num</PDM_LINK>				  
+	</PDM_IF>
+	</td></tr></table></div>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+<SCRIPT>
+//Reset suggest knowledge when getting to home.htmpl for any reason
+if ( typeof ahdtop.ticketObj != "undefined" )
+	ahdtop.ticketObj.resetTicket();
+</SCRIPT>
+	</body>
+	
+</html>

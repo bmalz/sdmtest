@@ -1,0 +1,121 @@
+<html lang="en"><PDM_IF 0>
+menu_frames.htmpl
+WHEN PRESENTED:
+    As the main menu
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object      SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="OP=menu">
+	<head>
+<PDM_INCLUDE FILE=styles.htmpl>
+		<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/fid_gen.js"></script>
+<PDM_IF "$prop.initial_load:}" != "">
+		<script>
+			/* If the opener of this window has a get_ahdtop function, we use it to see if this window is the result
+			 * of that window... this implies that we're using a self-service interface.
+			 */
+			var initial_load = "$prop.initial_load";
+			if ((initial_load.indexOf("OP=SHOW_DETAIL") != -1 && initial_load.indexOf("KEEP.IsPopUp") != -1) &&
+				(typeof window.opener == "object") &&
+				(window.opener != window.self) &&
+				((typeof window.opener.get_ahdtop == "object") || (typeof window.opener.get_ahdtop == "function")) &&
+				(typeof window.opener.get_ahdtop() == "object") &&
+				(window.name == "ci_search"))
+			{
+				// Since we're here, it means that we got here because the user decided to create an issue
+				// via KT.
+				// That also implies that we're in a new window. That's bad!
+				var orig_ahdtop = window.opener.get_ahdtop();
+
+				initial_load = String("$prop.initial_load").replace(/\+KEEP\.IsPopUp=[0-9]+/, "");
+				var url = orig_ahdtop.cfgCgi +
+						  "?SID=" + orig_ahdtop.cfgSID +
+						  "+FID=" + String(fid_generator());
+				if (initial_load[0] != "+")
+					url += "+";
+				url += initial_load;
+				orig_ahdtop.cai_main.location.href = url;
+				window.close();
+			}
+			
+			function frameset_loaded()
+			{		
+				// This property is required to be set for the knowledge document viewer						
+				ahdtop.ahdframe = window.cai_main;
+<PDM_IF "$prop.guest_user" == 1>
+			    var init_load = "$prop.initial_load";
+			    var init_load_up = init_load.toUpperCase();
+			    if (init_load_up.match(/OP=SEARCH.*FACTORY=KD/) ||
+				init_load_up.match(/OP=SHOW_DETAIL.*PERSID=KD:/))
+				window.cai_main.location = "$cgi?SID=$SESSION.SID+FID=5+" + init_load;
+			    else  
+				window.cai_main.location = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=5+HTMPL=home.htmpl";
+</PDM_IF>
+			}
+		</script>
+</PDM_IF>
+<PDM_INCLUDE FILE=ahdtop.htmpl>
+		<SCRIPT LANGUAGE="Javascript">
+			var ahdframeset = ahdtop;
+		</SCRIPT>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<PDM_IF "$prop.FormTitle" != "">
+		<title>$prop.FormTitle</title>
+<PDM_ELSE>
+		<title>$ProductName</title>
+</PDM_IF>
+		<script language="JavaScript" src="$CAisd/scripts/antiecho.js"></script>
+		<script language="JavaScript">redirect_if_echo('menu_frames.htmpl');</script>
+		<SCRIPT language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+		<SCRIPT>
+		// All available hidden frames that could be used for 
+		// issuing the url in the background.
+		// For employee web, there are only two frame.
+		var work_frames = new Array("workframe","workframe1");
+		var work_frame_mgr = void(0);
+		var cfgWorkFrameTimeout = "$prop.WorkFrameTimeout";
+		<PDM_IF "$prop.URL_CI" != "">
+		var ciSearchWindow = get_popup_window_name("ci_window");
+		var propUrlCi = "$prop.URL_CI";
+		</PDM_IF>
+        setTimeoutWarning();
+		</SCRIPT>
+	</head>
+	<frameset rows="50,*,1,1" frameborder=0 framespacing=0 border=0 onLoad="frameset_loaded()" onUnload="closing_main_window()">
+		<FRAME SRC="$CAisd/html/gobtn.html" NAME=gobtn NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title="C A logo - read only">
+
+	<PDM_IF "$prop.initial_load" == "">
+		<frame src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=5+HTMPL=home.htmpl" name=cai_main marginheight=0 marginwidth=0 frameborder=1 title="Main">
+	<PDM_ELIF "$prop.guest_user" == 1>
+		<frame src="$CAisd/html/empty.html" name=cai_main marginheight=0 marginwidth=0 frameborder=1 title="Main">
+	<PDM_IF 0><!--initial_load will be menu_frames if we use portal - avoid!! --></PDM_IF>
+	<PDM_ELIF "$prop.initial_load" : "[pP][oO][rR][tT][aA][lL][sS][eE][sS][sS][iI][oO][nN].*">
+		<frame src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=5+HTMPL=home.htmpl" name=cai_main marginheight=0 marginwidth=0 frameborder=NO border=0 title="Main">
+	<PDM_ELSE>
+		<frame src="$cgi?SID=$SESSION.SID+FID=5+$prop.initial_load_last_use" name=cai_main marginheight=0 marginwidth=0 frameborder=NO border=0 title="Main">
+	</PDM_IF>
+		
+         <frame src="$CAisd/html/empty.html" noresize name=workframe frameborder=0 marginheight=0 marginwidth=0 scrolling=no title="Hidden frame - do not navigate here">
+         <frame src="$CAisd/html/empty.html" noresize name=workframe1 frameborder=0 marginheight=0 marginwidth=0 scrolling=no title="Hidden frame - do not navigate here">
+	</frameset>
+	<noframes>
+         <H2>Frames-Compatible Browser Required</H2>
+         The web interface to $ProductName requires a browser that
+         supports frames, such as the latest version of
+         <A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A>,
+         <A ID=lnk004 href=http://www.mozilla.org>Mozilla</A>, or
+         <A ID=lnk005 href=http://www.netscape.com>Netscape</A>.
+	</noframes>
+<!--Here is the type of the user, USERTYPE=$cst.type, end. -->
+</html>
+<PDM_IF 0>
+$Id: menu_frames.htmpl,v 1.3 2006/11/13 17:32:14 belpe05 Exp $
+</PDM_IF>

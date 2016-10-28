@@ -1,0 +1,13 @@
+<PDM_IF 0>
+detail_net_frox.htmpl
+Purpose:
+    Display the detail of a Network.Frontend CI.
+    See cmdb_detail.htmpl for  more details.
+
+History:
+       22-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<PDM_INCLUDE FILE="cmdb_detail.htmpl"   extension="net_frox">
+
+<PDM_WSP where="family.extension_name='net_frox'" factory=nr design=no>

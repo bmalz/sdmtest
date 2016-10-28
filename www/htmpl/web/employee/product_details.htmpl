@@ -1,0 +1,116 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  about.htmpl
+// Created: 09/20/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This form should contain information on how to contact the help desk
+//    outside of this web application.
+//    You can put whatever you want in here.
+////////////////////////////////////////////////////////////////////////////
+// $Id: about.htmpl,v 1.3 2006/11/11 00:37:43 SAIMA01 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<html lang="en">	<HEAD>
+<script>var form_title = "About";</script>
+<PDM_INCLUDE FILE="std_head.htmpl">
+		<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>		
+	</head>
+	<body class=emp>
+<PDM_INCLUDE FILE="std_body.htmpl">
+<!-- Put your content after this -->
+<center>
+<BR><BR><BR>
+			<table width="75%" cellpadding=0 cellspacing=0>
+							<tr>
+								<td>
+									<table width='100%' cellspacing='0' cellpadding='0'>
+								        	<tr>
+                                                 <td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+												 
+                                                 <td class="hdrCenter"><h2 class='page_section_header_text'> $args.TTITLE : Hello111!</h2></td>
+												 
+                                                   <td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								        	</tr>
+								       </table>
+								</td>
+							</tr>
+							<tr>
+								<td class="page_section">
+									<table cellpadding=5>
+									<tr>
+									<th align=left>Hours of operation</th>
+									<th align=left>Telephone</th>
+									</tr>
+									<tr>
+									<td class="gn_text_small"><b>Sydney, Australia</b>: 8am - 7pm</td>
+									<td class="gn_text_small">+12 3 4567 8901, or ext 9876 from most Australian offices.</td>
+									</tr>
+									<tr>
+									<td class="gn_text_small"><b>Ditton Park, UK</b>: 7am - 7pm</td>
+									<td class="gn_text_small">+98 7 6543 210987 or ext 65432 within Ditton Park.</td>
+									</tr>
+									<tr>
+									<td class="gn_text_small"><b>New York, NY</b>: 8am - 8pm</td>
+									<td class="gn_text_small">+1 357 924 6802 or ext 0000 within the USA.</td>
+								    </tr>
+							</table>
+								</td>
+							</tr>
+			</table>
+			
+			<BR><BR><BR>
+			<table width="75%" cellpadding=0 cellspacing=0 >
+							<tr>
+								<td>
+									<table width='100%' cellspacing='0' cellpadding='0'>
+								        	<tr>
+                                                <td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+                                                 <td class="hdrCenter"><h2 class='page_section_header_text'>This is a sample page!</h2></td>
+                                                   <td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								        	</tr>
+								       </table>
+								</td>
+							</tr>
+							<tr>
+								<td class="page_section">
+									<span style="font-family:verdana,Arial,Helvetica,sans-serif;color:#000000;font-weight:normal;">
+									<table cellpadding=5>
+									<tr>
+									<td class="gn_text_small">
+									<b>This is $$NX_ROOT/bopcfg/www/htmpl/web/employee/about.htmpl.</b><br>
+									If you intend to edit this file (i.e. to add details specific to you),
+									please copy it to $$NX_ROOT/site/mods/www/htmpl/web/employee/about.htmpl
+									and then make your changes.<br />
+				  PERSID="$args.persistent_id"
+				  onmouseover="window.status = &quot;View Incident #$args.ref_num&quot;; return true;"
+				  onmouseout="window.status = window.defaultStatus; return true;">
+									</td>
+								    </tr>
+							</table>
+								</td>
+							</tr>
+			</table>
+
+
+<!-- Put your content before this -->
+<PDM_INCLUDE FILE="std_footer.htmpl">
+	</body>
+</html>

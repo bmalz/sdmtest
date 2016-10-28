@@ -1,0 +1,73 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Comment Type";
+var hdrTitleList = "Comment Type List";
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script>
+function ShowYesNo(value)
+{
+	if (value == 1 || value.toLowerCase() == "yes" )
+	{
+		rs.data("<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=HTML KEEPTAGS=YES><CENTER>x</CENTER></PDM_FMT>");
+	}
+	else
+	{
+		rs.data("<PDM_FMT JUSTIFY=TRUNCATE WIDTH=10 ESC_STYLE=C></PDM_FMT>");
+	}
+}
+
+function ShowYesNoExp()
+{
+	return "LIST_LOOKUP: 1,x,yes,x,OTHERWISE, ";
+}
+</script>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="KT_FLG_TYPE">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="SYM" size=40>
+searchFilterDropdown("Show in User View","SHOW_AS_COMMENT","","yesno","noempty");
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Follow-up Required","FOLLOW_UP","","yesno","noempty");
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No comment types found";
+  var msgFound1 = "1 comment type found";
+  var msgFound = "%1 comment types found";
+  var msgFoundMore = "%1 comment types found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired comment types";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="SYM" exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Pokaż w widoku użytkownika" attr="SHOW_AS_COMMENT" exportfmt=ShowYesNoExp fmtfunc=ShowYesNo sort=no>
+<PDM_MACRO name=lsCol hdr="Wymagany Follow-up" attr="FOLLOW_UP" exportfmt=ShowYesNoExp fmtfunc=ShowYesNo sort=no>
+<PDM_MACRO name=lsCol hdr="Czas do wykoniania (dni)" attr="TIME_TO_COMPLETE">
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

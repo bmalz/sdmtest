@@ -1,0 +1,120 @@
+<PDM_IF 0>
+role_web_form.htmpl
+WHEN PRESENTED:
+    When we need to display a list of selectable reports for a role 
+INTENT:
+    Display a different report in a multiframe form 
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+var hdrTitle = "Report List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script>
+var curr_report_name = "$args.report_name";
+var role_id = "$args.role_id";
+var tab_id = "$args.tab_id";
+var frame_name = "$args.frame_name";
+
+function save_callback(req)
+{
+    var response = rtrim_nonchar(req.responseText);
+    if (response != "OK")
+	alertmsg("Unable_to_display_the_selected_report");
+    reload_and_close();
+}
+
+function delete_callback(req)
+{
+    var response = rtrim_nonchar(req.responseText);
+    if (response != "OK")
+	alertmsg("Unable_to_display_the_default_report");
+    reload_and_close();
+}
+
+function reload_and_close()
+{
+    if (ahdtop.cstReducePopups == true) 
+    {
+	if (frame_name == "Frame1_admin")
+        {      	
+	    window.location.href = parent.save_prev_Frame1_admin_url;
+            parent.save_prev_Frame1_admin_url= "";
+	}
+	else
+	{      	
+            window.location.href = parent.save_prev_Frame2_admin_url;
+            parent.save_prev_Frame2_admin_url= "";
+	}
+    }
+    else
+    {
+    	window.parent.ahdframeset.opener.location.reload();
+    	window.parent.ahdframeset.close(); 
+    }
+
+}
+
+function save_web_form_pref(web_form_id)
+{
+    var url = "$cgi?SID=$SESSION.SID+FID=$prop.FID+OP=ADD_WEB_FORM_PREF" + 
+	      "+role_id=" + role_id + "+tab_id=" + tab_id +
+	      "+frame_name=" + frame_name + "+web_form_id=" + web_form_id;
+    var ret = AsyncAjaxCall(url, save_callback); 
+}
+function delete_web_form_pref()
+{
+    var url = "$cgi?SID=$SESSION.SID+FID=$prop.FID+OP=DELETE_WEB_FORM_PREF" + 
+	      "+role_id=" + role_id + "+tab_id=" + tab_id +
+	      "+frame_name=" + frame_name;
+    var ret = AsyncAjaxCall(url, delete_callback); 
+}
+
+</script>
+</head>
+<body class="detailro">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=role_web_form>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Restore Default" func="delete_web_form_pref()" hotkey_name="Restore Default" id="btn001" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart scroll=true>
+docWriteln("<table style='width: 100%;' summary='Report List'>");
+docWriteln("<tr>");
+docWriteln("<th scope='col' style='text-align: left;' class='results'>Name</th>");
+docWriteln("<th scope='col' style='text-align: left;' class='results'>Description</th>");
+docWriteln("</tr>");
+var counter=0;
+<PDM_LIST PREFIX=list FACTORY=role_web_form WHERE="role_obj = $args.role_id">
+var sClass;
+if(counter%2)
+    sClass = "results1";
+else
+    sClass = "results0";
+counter++;
+var strHTML="<tr class=" + sClass +  ">";
+docWriteln(strHTML); 
+docWriteln("<td valign='top' class='detailroTab'>");
+docWriteln("<a href=\"javascript:save_web_form_pref('$list.web_form_obj');\">" + '<PDM_FMT ESC_STYLE=C PAD=NO>$list.web_form_obj.name</PDM_FMT>' + "&nbsp</a>");
+docWriteln("</td>");
+docWriteln("<td valign='top' class='detailroTab'>");
+docWriteln("$list.web_form_obj.description");
+docWriteln("</td>");
+docWriteln("</tr>");
+</PDM_LIST>
+docWriteln("</table>");
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: role_web_form.htmpl ASPEN.4 2011/05/09 18:12:28 jenji01 Exp $
+</PDM_IF>
+<PDM_WSP>

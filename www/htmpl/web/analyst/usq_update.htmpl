@@ -1,0 +1,127 @@
+<PDM_IF 0>
+usq_update.htmpl
+WHEN PRESENTED:
+    A frameset used to perform maintenance on a scoreboard tree
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user
+    object ACCESS           List containing the user's access to the various
+                            function groups
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="usq_update.htmpl+COPY_FROM=role%3a2402+USQ_OP=COPY_USQ">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Dostosowywanie Tablicy wyników";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/tree_edit.js"></SCRIPT>
+<SCRIPT>
+// Used by inner frames to determine if they are inside a popup or not
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+var role_sym_opts = new Array();
+var role_persid_opts = new Array();
+var suppressGoButton = true;
+var curr_scbd_type = -1;
+var curr_role = -1;
+<PDM_LIST PREFIX=list FACTORY=role WHERE=" ">
+role_sym_opts[role_sym_opts.length] = '<PDM_FMT PAD=NO ESC_STYLE=C>$list.name</PDM_FMT>';
+role_persid_opts[role_persid_opts.length] = 'role:$list.id';
+</PDM_LIST>
+function focus_on_firstfld(e)
+{
+    var doc = window.frames["select_target"].document;
+    if (typeof doc == "undefined") return;
+    var firstfld = doc.getElementById('Radio1');
+    if (typeof firstfld == "undefined") return;
+    if (!_browser.isIE && _browser.supportsDOM >= 2)
+    {
+	var tg = e.target;
+	if (typeof tg.body == "undefined") return;
+    }
+    firstfld.focus();
+}
+
+var keep_usq_owner = "";
+
+<PDM_IF "$args.KEEP.USQ_CHANGED" != "">
+ahdtop.usq_changed="$args.KEEP.USQ_CHANGED";
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.USQ_COPY_MADE" != "">
+ahdtop.usq_copy_made="$args.KEEP.USQ_COPY_MADE";
+</PDM_IF>
+
+
+
+// Add this so we can launch from PC client
+var keep_usq_sym = "$args.KEEP.USQ_OWNER_SYM";  
+<PDM_IF "$args.KEEP.USQ_OWNER" != "">
+<PDM_IF "$args.KEEP.USQ_OWNER" != "$cst.persistent_id">
+keep_usq_owner = "$args.KEEP.USQ_OWNER";
+</PDM_IF>
+</PDM_IF>
+
+function load_page()
+{
+<PDM_IF $ACCESS.FAC_crsq \>= 1>
+    var selectFrame = window.frames["select_target"];
+    var src = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=2+HTMPL=usq_update_select.htmpl+" +
+				"KEEP.USQ_OWNER=$args.KEEP.USQ_OWNER+KEEP.USQ_OWNER_SYM=" + nx_escape(keep_usq_sym);
+	selectFrame.location = src;
+</PDM_IF>
+    
+    // SDT 22264 - usq_sym stuff
+    var treeFrame = window.frames["usq_update_tree"];
+    var src = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=3+HTMPL=load_wait.htmpl+KEEP.new_htmpl=usq_update_tree.htmpl+" +
+				"KEEP.wait_msg=553+KEEP.USQ_OWNER=$args.KEEP.USQ_OWNER+KEEP.USQ_OWNER_SYM=" + nx_escape(keep_usq_sym);
+	treeFrame.location = src;
+    
+    var doc = window.frames["page_header"].document;
+    doc.open();
+    var html = '<html lang="en">\n' +
+               '<head>\n' +
+               '<link rel="stylesheet" type="text/css" href="$CAisd/css/styles_ahd.css">\n' +
+               '</' + 'head>' +
+               '<body class=editform>\n' +
+               '<table cellSpacing=0 cellPadding=0 width="100%" class=page_header>\n' +
+               '<tr height=25>\n' +
+               '<td align=left>Dostosowywanie Tablicy wyników</' + 'td>\n' +
+               '</' + 'tr></' + 'table></' + 'body></' + 'html>\n';
+    //alert(html);
+    doc.write(html);
+    doc.close();
+}
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+
+<FRAMESET ROWS="80,26,30,*,1" FRAMEBORDER=0>
+<FRAME SRC="$CAisd/html/gobtn.html" NAME=gobtn NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=0 class=gn_container_no_border title="Go button navigation">
+<FRAME NAME=welcome_banner SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=welcome_banner.htmpl" SCROLLING=NO NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO class=gn_container_no_border title="User name and logoff link">
+<FRAME NAME=page_header SRC="$CAisd/html/empty.html" SCROLLING=NO NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO class=gn_container_no_border title="Page title - read only">
+<PDM_IF $ACCESS.FAC_crsq \>= 1>
+<FRAMESET COLS="250,*" FRAMEBORDER=0>
+<FRAMESET ROWS="140,*" FRAMEBORDER=0 onLoad="load_page();">
+<FRAME SRC="$CAisd/html/empty.html" NAME="select_target" marginwidth=2 title="Select target scoreboard">
+<!-- Show a 'loading' message before processing tree -->
+<FRAME SRC="$CAisd/html/empty.html" NAME="usq_update_tree" marginwidth=2 title="Scoreboard">
+</FRAMESET>
+<PDM_ELSE>
+<FRAMESET COLS="250,*" FRAMEBORDER=0 onLoad="load_page()">
+<!-- Show a 'loading' message before processing tree -->
+<FRAME SRC="$CAisd/html/empty.html" NAME="usq_update_tree" marginwidth=2 title="Scoreboard">
+</PDM_IF>
+<FRAME SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=2+HTMPL=usq_update_control.htmpl" NAME="usq_update_control" marginwidth=2 title="Update Control">
+</FRAMESET>
+<FRAME SRC="$CAisd/html/empty.html" NAME=workframe NORESIZE="NORESIZE" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 class=gn_container_no_border title="Hidden frame - do not navigate here">
+</FRAMESET>
+
+</HTML>
+<PDM_IF 0>
+@(#)$Id: usq_update.htmpl ASPEN.2 2010/11/24 19:26:38 pstso01 Exp $
+</PDM_IF>

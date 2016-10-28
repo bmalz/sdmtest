@@ -1,0 +1,114 @@
+<PDM_IF 0>
+@(#)$Id: list_KEIT_IMPORT_PACKAGES.htmpl ASPEN.1 2011/10/19 11:41:44 visan03 Exp $
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+
+<HEAD>
+	<PDM_PRAGMA RELEASE=110>
+	<PDM_INCLUDE FILE=styles.htmpl>
+	<SCRIPT LANGUAGE="JavaScript">
+		var hdrTitle = "Knowledge Import Packages Search";
+		var hdrTitleList = "Knowledge Import Packages List";
+		var cfgCanView = false;
+	</SCRIPT>
+	<PDM_INCLUDE FILE=std_head.htmpl >
+	<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_admin.js"></SCRIPT>
+	<PDM_INCLUDE FILE=std_list_include.htmpl>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_keit.js"></SCRIPT>
+</HEAD>
+
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+	var strPackagePath = "";//"$env.NX_SITE" + "/keit/import/";
+	//var argPackageName;
+	
+<PDM_MACRO name=sfStart create=false factory="KEIT_IMPORT_PACKAGES">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Pakiet" attr="PACKAGE_NAME">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT language="JavaScript">
+	var msgFoundNone = "No package found";
+	var msgFound1 = "1 package found";
+	var msgFound = "%1 package found";
+	var msgFoundMore = "%1 package found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired package";
+
+	var arrIDs = new Array();
+	var arrPackages = new Array();
+	var ID_counter = 0;
+	
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="arrIDs[ID_counter]='@{list.id}'">
+<PDM_MACRO name=lsWrite text="arrPackages[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=100 ESC_STYLE=C>@{list.PACKAGE_NAME}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="ID_counter++;">
+<PDM_MACRO name=lsCol hdr="Pakiet" attr="PACKAGE_NAME" exportfmt=ShowLink link=yes width=100>
+<PDM_MACRO name=lsEnd factory=KEIT_IMPORT_PACKAGES>
+	rs.setLinkOnclick(function(){SelectPackageByRow(self.activeRow)});
+
+	var bImportAllowed = ahdtop.CanUserPerformAction("ROLE_KNOWLEDGE_IMPORT");
+	if (bImportAllowed)
+	{
+		var ctxMenu=new ContextMenu("id_KEIT_IMPORT_PACKAGES");
+		ctxMenu.addItem(msgtext("Import"), "RunKeitImport(self.activeRow);");
+		ctxMenu.addItem(msgtext("Print_Form%1...", " " + window.propFormName),"CAisdPrint();");  // Print this window
+		ctxMenu.addItem(msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')"); // Help on this window
+		ctxMenu.finish();
+	}
+</SCRIPT>
+</PDM_IF>
+
+
+<SCRIPT language="JavaScript">
+//////////////////////////////////////////////////////////////////
+// FUNCTION SelectPackageByPersID()
+//	Description: selects the package, 
+//	in:
+//		lPersID - package persid
+//////////////////////////////////////////////////////////////////
+function SelectPackageByPersID(lPersID)
+{
+	var lID = lPersID.substr(lPersID.indexOf(":") + 1);
+	for ( i = 0; i < arrIDs.length ; i++)
+	{
+		if (arrIDs[i] == lID)
+		{
+			argPackageName = arrPackages[i];
+			break;
+		}
+	}
+	argPackageName = strPackagePath + argPackageName;
+}
+//////////////////////////////////////////////////////////////////
+// FUNCTION SelectPackageByRow()
+//	Description: selects the package, 
+//	in:
+//		active_row - array index
+//////////////////////////////////////////////////////////////////
+function SelectPackageByRow(active_row)
+{
+	argPackageName = arrPackages[active_row];
+	argPackageName = strPackagePath + argPackageName;
+}
+</SCRIPT>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

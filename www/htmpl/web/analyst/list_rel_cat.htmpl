@@ -1,0 +1,107 @@
+<PDM_IF 0>
+@(#)$Id: list_rel_cat.htmpl ANDERSON.1 2009/09/29 16:35:59 hu$ho01 Exp $
+WHEN PRESENTED:
+	When we need to display related categories.
+</PDM_IF>	
+<html lang="en"><HEAD>
+<pdm_pragma release=110> 
+<pdm_wsp mode=list factory=KCAT>
+<PDM_INCLUDE FILE=styles.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var m_TreeID = '$args.TreeId';
+
+function win_onload()
+{
+	var url=cfgCgi+
+	"?SID="+cfgSID+
+	"+FID="+ "$args.FIDSrc" +
+	"+OP=REL_CAT";
+	ahdframeset.workframe.location.href = url;
+}
+function UpdateRelCatList(arrPaths,arrRelIDs)
+{
+	var strHTML;
+	if(arrPaths == null || arrPaths.length == 0)
+	{
+		strHTML = "<SPAN><b>No categories found.</b></SPAN>"
+	}
+	else
+	{
+		strHTML="<TABLE CELLSPACING=0 CELLPADDING=3 width=100%>";
+		for(i = 0; i < arrPaths.length; i++)
+		{
+			var sClass;
+			if(i%2)
+				sClass = "results0";
+			else
+				sClass = "results1";
+			strHTML+="<TR class=" + sClass +  "><TD>" + GetCategoryPath(arrPaths[i],arrRelIDs[i]) + "</TD></TR>";
+		}
+	}
+	document.getElementById('DivCats').innerHTML=strHTML;
+}
+
+function GetCategoryPath(strPath, strPathIDs)
+{
+	var arrRelationalIDs = strPathIDs.split("-");
+	var arrIndexPath = strPath.split(">");
+	var strPathHTML = "";
+
+	var i=0;
+	for (i=0; i<arrRelationalIDs.length; i++)
+	{
+		//create relational id for specific category
+		var nodeRelationalID = "";
+		var nodePath = "";
+		var max = i;
+		for (var j=0; j<max+1; j++)
+		{
+			nodeRelationalID += arrRelationalIDs[j];
+			nodePath += arrIndexPath[j];
+			if(j != max)	
+			{			 
+				nodeRelationalID += "-";
+				nodePath += ">";
+			}	
+		}
+		strPathHTML += "<A class=record href=javascript:void(0) onclick=GoToCategory('" + nx_escape(nodeRelationalID) + "','" + nx_escape(nodePath) + "')>" + 
+					   arrIndexPath[i];
+					  	strPathHTML +=	"</A>";	
+		if(i != arrRelationalIDs.length-1)				 
+			strPathHTML += " > ";
+		   
+	}
+	return strPathHTML;
+}
+function GoToCategory(sRelationalID, sPath)
+{
+	if ((typeof ahdtop.kt_catTreeWindow == "object") && 
+	(ahdtop.kt_catTreeWindow != null)) 
+	{
+		if ((typeof ahdtop.kt_catTreeWindow[m_TreeID] == "object") && 
+		(ahdtop.kt_catTreeWindow[m_TreeID] != null))
+		{
+			ahdtop.kt_catTreeWindow[m_TreeID].GoToKTCatTreePathId(sRelationalID, sPath);
+			if (ahdtop.cstReducePopups != 1)
+				top.close();
+		}
+	}
+}
+
+</SCRIPT>
+</HEAD>
+<BODY onload="win_onload()" CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="relcat">
+<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0  class=page_header>
+    <TR>
+       <TD align=left width='99%'>Related Categories</TD>
+       <TD align=right width='1%'>&nbsp;</TD>
+    </TR>
+</TABLE>
+<DIV id=DivCats name=DivCats></DIV>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

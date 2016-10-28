@@ -1,0 +1,117 @@
+<PDM_IF 0>
+request_status_change.htmpl
+WHEN PRESENTED:
+    when the app needs to update the status of a call request. When the user
+    clicks the 'Close Request' button from the 'Update call request' screen.
+INTENT:
+    change the status of a call request.
+VARIABLES:
+    string	image	    The location of the image directory as 
+			    specified in the config file.
+    object tt   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/cm.maj for the
+                            definition of attributes for 'OBJECT cr'
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="request_status_change.htmpl+OP=UPDATE+ACTIVITY_LOG_TYPE=ST+PERSID={cr:}" factory=cr>
+<html lang="pl"><HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.fromIncident" == "1">
+		<PDM_IF "$args.status" != "CLREQ" &&  "$args.status" != "CL" && "$args.status" != "CLUNRSLV" && "$args.active" != 0 >
+		form_title = "Zamknij Incydent $args.ref_num";		  
+		<PDM_ELSE>
+		form_title = "Otwórz ponownie Incydent $args.ref_num";
+		</PDM_IF>	
+<PDM_ELSE>
+		<PDM_IF "$args.status" != "CLREQ" &&  "$args.status" != "CL" && "$args.status" != "CLUNRSLV" && "$args.active" != 0 >
+		form_title = "Zamknij Wniosek $args.ref_num";		  
+		<PDM_ELSE>
+		form_title = "Otwórz ponownie Wniosek $args.ref_num";
+		</PDM_IF>	
+</PDM_IF>			
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cst_update_status.js"></script>
+<PDM_IF "$args.KEEP.fromIncident" == "1">
+	<TITLE>$ProductName - Incident Status Change</TITLE>
+<PDM_ELSE>
+	<TITLE>$ProductName - Request Status Change</TITLE>
+</PDM_IF>		
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+edit_form = 1;
+argPersistentID = "$args.persistent_id";
+if ( ! _browser.supportsLayers )
+   document.writeln('<scr' + 'ipt language="JavaScript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+</SCRIPT>
+</HEAD>
+<BODY onUnload="unload_check()" class=emp>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=cr>
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$args.KEEP.fromIncident" == "1">
+<PDM_IF "$args.status" != "CLREQ" &&  "$args.status" != "CL" && "$args.status" != "CLUNRSLV" && "$args.active" != 0 >
+<PDM_MACRO name=button Caption="Anuluj Incydent" Disabled="defer" Func="check_before_save()" hotkey_name="Close Incident" ID="btn001" Width=0>
+<PDM_MACRO name=button Caption="Pozostaw Incydent Otwarty" Disabled="defer" Func="detailCancel()" hotkey_name="Leave Incident Open" ID="btn002" Width=0>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Ponownie otwórz Incydent" Disabled="defer" Func="check_before_save()" hotkey_name="Reopen Incident" ID="btn001" Width=0>
+<PDM_MACRO name=button Caption="Pozostaw Incydent Zamknięty" Disabled="defer" Func="detailCancel()" hotkey_name="Leave Incident Closed" ID="btn002" Width=0>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$args.status" != "CLREQ" &&  "$args.status" != "CL" && "$args.status" != "CLUNRSLV" && "$args.active" != 0 >
+<PDM_MACRO name=button Caption="Anuluj Wniosek" Disabled="defer" Func="check_before_save()" hotkey_name="Close Request" ID="btn001" Width=0>
+<PDM_MACRO name=button Caption="Pozostaw Wniosek Otwarty" Disabled="defer" Func="detailCancel()" hotkey_name="Leave Request Open" ID="btn002" Width=0>
+<PDM_ELSE>
+<PDM_MACRO name=button Caption="Otwórz ponownie Wniosek" Disabled="defer" Func="check_before_save()" hotkey_name="Reopen Request" ID="btn001" Width=0>
+<PDM_MACRO name=button Caption="Pozostaw Wniosek Zamknięty" Disabled="defer" Func="detailCancel()" hotkey_name="Leave Request Closed" ID="btn002" Width=0>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=button Caption="Usuń uwagi" Disabled="defer" Func="document.main_form.reset()" hotkey_name="Clear Remarks" ID="btn003" Width=0>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+</script>
+
+<PDM_IF "$args.status" != "CLREQ" &&  "$args.status" != "CL" && "$args.status" != "CLUNRSLV" && "$args.active" != 0 >
+<PDM_IF "$args.KEEP.useClose" == "1">
+        <input type=hidden name=SET.status value="CL">
+    
+<PDM_ELSE>
+        <input type=hidden name=SET.status value="CLREQ">
+    
+</PDM_IF>
+<PDM_ELSE>
+    <input type=hidden name=SET.status value="OP">
+</PDM_IF>			
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr=status>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.status" != "CLREQ" &&  "$args.status" != "CL" && "$args.status" != "CLUNRSLV" && "$args.active" != 0 >
+<PDM_MACRO name=dtlTextbox hdr="Opis zamknięcia" attr=alg.description colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Opis otwarcia" attr=alg.description colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<!-- If Cancel Link brings up the form other than main menu, we do not want to
+     set the TARGET to _top because it will cause the next form to show without
+     main menu on the side.
+-->
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: request_status_change.htmpl ASPEN.4 2011/10/19 23:33:38 chapr06 Exp $
+</PDM_IF>

@@ -1,0 +1,29 @@
+
+
+
+ztel_te_ko::create_extension_copy( object in_gl, uuid new_asset_id, int debug_flag )
+{
+    string method;
+    method = "ztel_te_ko::create_extension_copy";
+    object group_leader;
+    if (is_null(in_gl)) {
+        send_wait(0, top_object(), "get_co_group");
+        group_leader = msg[0];
+    }
+    else {
+        group_leader = in_gl;
+    }
+    object new_extension;
+    new_extension = bop::create_extension_copy ( group_leader,"ztel_te_ko", new_asset_id, debug_flag );
+
+    if ( msg_error() ) {
+        set_error( 1 );
+        logf( ERROR, format( "%s: make copy error '%s'", method,msg[0]));
+        return;
+    }
+
+    if (is_null(in_gl)) {
+        send_wait(0, group_leader, "checkin");
+    }
+    set_return_data( new_extension );
+}

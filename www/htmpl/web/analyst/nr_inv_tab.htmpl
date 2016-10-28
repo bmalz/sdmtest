@@ -1,0 +1,63 @@
+<PDM_IF 0>
+nr_inv_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Asset 
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=nr_inv_tab" factory=nr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script>
+cfgDateFormat = "$date_format"
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_MACRO name=tabBanner title="Inventory">
+var currModel = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.model.sym"</PDM_FMT>;
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Adres IP" attr=alarm_id>
+<PDM_MACRO name=dtlDropdown hdr="Model" attr=model evt="onBlur=\\\"modelChanged(this)\\\"">
+<PDM_MACRO name=dtlReadonly hdr="Producent" attr=manufacturer id=manuf>
+<PDM_MACRO name=dtlTextbox hdr="Numer licencji" attr=license_number>
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data nabycia" attr=acquire_date>
+<PDM_MACRO name=dtlDate hdr="Data instalacji" attr=install_date>
+<PDM_MACRO name=dtlDate hdr="Data wygaśnięcia" attr=expiration_date>
+<PDM_MACRO name=dtlDate hdr="Data rozpoczęcia gwarancji" attr=warranty_start>
+<PDM_MACRO name=dtlDate hdr="Data końca gwarancji" attr=warranty_end>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Wersja produktu" attr=product_version>
+<PDM_MACRO name=dtlTextbox hdr="Adnotacja finansowa" attr=financial_num>
+<PDM_MACRO name=dtlTextbox hdr="Ilość" attr=asset_count>
+<PDM_MACRO name=dtlReadonly hdr="Asset lifecycle status" attr="asset_lifecycle_status">
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: nr_inv_tab.htmpl ASPEN.2 2010/10/27 17:27:47 saima01 Exp $
+</PDM_IF>

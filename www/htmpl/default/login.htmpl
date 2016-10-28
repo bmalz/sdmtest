@@ -1,0 +1,393 @@
+<PDM_IF 0>
+@(#)\$Id: login.htmpl,v 1.4 2007/01/04 23:00:15 tuach01 Exp $
+WHEN PRESENTED:
+    When a user login is needed.  
+INTENT:
+    Gather the user id and user pin numbers.
+VARIABLES:
+    string  LoginErrMsg - Error msg to display (or blank)
+HISTORY:
+    Changed to set focus in USERNAME field to make login process better
+    IPSKU01. January 2001
+</PDM_IF>
+<html lang="pl">
+<head>
+<style type="text/css">
+table
+{
+	table-layout: fixed;
+}
+</style>
+<PDM_PRAGMA RELEASE=110>
+<PDM_IF "$prop.WSPHOST" != "" && "$prop.WSPROOT" != "NO">
+<script type="text/javascript">
+var form_submitted = false;
+function endWspLogin()
+{
+  if ( ! form_submitted )
+    workframe.location.href =
+          "$cgi?SID=$prop.SID+FID=0+ENDWSPLOGIN=$prop.WSPHOST";
+}
+
+</script>
+</head>
+<frameset cols="*,0" frameborder="0" framespacing="0" border="0">
+<frame src="$cgi?SID=$prop.SID+FID=$prop.FID+WSPHOST=$prop.WSPHOST+WSPROOT=NO" noresize="noresize" scrolling=no marginheight=0 marginwidth=0 frameborder=0 border=0 title="Login form">
+<frame src="$CAisd/html/empty.html" name=workframe noresize="noresize" marginheight=0 marginwidth=0 frameborder=0 border=0 title="Hidden frame - do not navigate here">
+</frameset>
+<PDM_ELSE>
+<PDM_IF "$prop.DebugScript" != "1">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/analyst_styles.css">
+<PDM_ELSE>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/castyles.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/styles_ahd.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/menu.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/menubar.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/imgbutton.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/searchfilter.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/button.css">
+</PDM_IF>
+
+<script type="text/javascript" src="/CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+		<script type="text/javascript">
+		<!--
+            var ahdframeset = window;
+            if ( typeof _browser != "object" )
+              _browser = new Browser();
+			if (_browser.isUnix == true)
+				document.writeln("<link rel='stylesheet' type='text/css' href='$CAisd/css/unix.css'>");
+		
+<PDM_IF "$prop.UseDirector" == "BeforeLogin">
+			// If UseDirector is BeforeLogin, it shouldn't show the login page.
+			// Issue an URL by setting window.location, so it can be redirected.
+			window.location = "$cgi";
+</PDM_IF>
+		//-->
+		</script>
+<script type="text/javascript">
+<PDM_IF "$prop.FormTitle" != "">
+    var title_str = "$prop.FormTitle - Login";
+<PDM_ELSE>
+    var title_str = "$ProductName - Login";
+</PDM_IF>
+document.writeln("<title>" + title_str + "<\/title>");
+</script>
+		<script type="text/javascript" src="$CAisd/scripts/msg_cat.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+		<script type="text/javascript">
+		<!--
+			var cfgCAISD = "$CAisd"
+			var cfgCgi = "$cgi"
+			var cfgProductName = "$ProductName";
+			var cfgFormTitle = "$prop.FormTitle";
+			var propFormName = "$prop.form_name";
+			var force_pda = 0;
+			var msg = "";
+			var msg2 = "";
+
+			function NS4_OnKeyDown(e)
+			{
+				if (e.which == 13) 
+				{
+					var obj = e.target;
+					if (typeof obj == "object")
+					{
+						if ((obj.name == "USERNAME") ||
+							(obj.name == "PIN"))
+						{
+							obj.blur();
+							document.forms["login"].submit();
+							return false;
+						}
+					}
+				} 
+				else 
+					document.routeEvent(e); 
+                                return true;
+			}
+
+
+
+function check_for_timeout()
+{
+  var ahdtop = get_ahdtop();
+  if (typeof window.location.href ==  "string" && window.location.href.length > 0 && window.location.href.indexOf("help_about.htmpl") != -1 &&
+      _browser.isIE55) 
+  {
+      window.returnValue = "session_timeout";
+      window.close();
+  }
+  else
+  {
+      window.returnValue = "";
+      // Don't display message and call the session_timeout
+      // function when this page is in the welcomebanner
+      // window. Wait until the main page in the popup gets 
+      // loaded, so we can avoid some errors given in the 
+      // process of loading the main page. 
+      if ( "${SESSION.SESSION_TIMEOUT:}" != "" &&
+                        "${SESSION.SESSION_TIMEOUT:}" != "restart")
+      {
+      if ( typeof ahdtop != "object" || ahdtop == null )
+          return;
+      else
+      if (window.name != "welcomebanner" &&
+          window.name != "welcome_banner" )
+      {
+	  // Set the ahdtop.name to empty string, so the message
+	  // doesn't show again
+	  ahdtop.name = "";
+          alertmsg("Sorry,_your_session_has_timed_", msgtext("Press_OK_to_close_all_%1_windo", cfgProductName) );
+          // Sorry, your session has timed out.
+          ahdtop.session_timeout("$prop.SID", window);
+      }
+      }   
+      else if ( typeof ahdtop == "object" &&
+            ahdtop != null  &&
+            window.name != "welcomebanner")
+      {
+	if ( window.name != "AHDtop" && window.name != "" )
+	{
+	    // Set the ahdtop.name to empty string, so the message
+	    // doesn't show again
+	    ahdtop.name = "";
+	    alertmsg("Sorry,_the_server_has_been_res", msgtext("Press_OK_to_close_all_%1_windo", cfgProductName) );
+	}
+        // Sorry, the server has been restarted.
+    if ( typeof ahdtop.session_timeout != "undefined" )
+      ahdtop.session_timeout("$prop.SID", window);
+      }
+  }
+}
+
+function reset_login_form()
+{
+    var f = document.forms["login"];
+    f.reset();
+    // Windows Mobile 6.0 supports Javascript
+    // Force to use PDA if unsupported browser.
+		if (_browser.name == "unknown" )
+		{
+    			f.elements["PDA"].value = "Yes";
+  	}
+  	else
+  	{
+  		    f.elements["PDA"].value = "No";
+  	}
+}
+
+// IE5.1.6 on Macintosh doesn't like window.onload=...
+// SDT 27423
+function login_onload_func()
+{
+<PDM_IF "$prop.WSPHOST" != "">
+    parent.form_submitted = false;
+</PDM_IF>
+    reset_login_form();
+<PDM_IF "$LoginErrMsg" != "">
+    var LoginErrMsg = '<pdm_fmt esc_style=c>$LoginErrMsg</pdm_fmt>';
+    LoginErrMsg = LoginErrMsg.replace(/\\[\\ ]*/g,"\n");
+    alert(LoginErrMsg);
+</PDM_IF>
+    try {
+      document.forms["login"].USERNAME.focus();
+    }
+    catch(e) {}
+}	
+function loginAndSetScreenReaderPreferences()
+{
+    var f = document.forms["login"];
+    if ( f.USERNAME.value.length == 0 ) {
+      alert("Please specify user name");
+      f.USERNAME.focus();
+      return;
+    }
+	f.screenReader.value = "yes";
+    pdm_submit('login','');
+    return true;
+}
+
+if (_browser.name != "unknown")
+{
+		document.writeln('<script type="text/javascript" src="$CAisd/scripts/imgbutton.js"></script'+'>');
+}
+			if ( "$prop.DebugSource" != "1" )
+				disable_right_click();
+// -->
+</script>
+		<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+	</head>
+	<body class=login_page marginwidth=0 marginheight=0 onload="login_onload_func()"<PDM_IF "$prop.WSPHOST" != ""> onunload="try {parent.endWspLogin();} catch(e){}"</PDM_IF>>
+	<center>
+	<table HEIGHT="700">
+	<tr><td>
+	<table width="460" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+		  <td width="73" height="53" ><img src="$CAisd/sitemods/img/login_logo.png" border="0" alt="Orlen CA Service Desk Mamanger"></td>
+          <td width="367" height="53" class="login_productname">Centrum Wsparcia Użytkownika</td>
+        </tr>
+		<tr>
+          <td colspan="2">
+			<table height="250" cellpadding="0" cellspacing="0" class="login_table">
+              <tr height="5">
+                <td align="left" valign="top" width="5" style="background: none; background-image:none;"><img src="$CAisd/sitemods/img/login_bg_left-top.png" width="5" height="5"></td>
+                <td></td>
+                <td align="right" valign="top" width="5" style="background: none; background-image:none;"><img src="$CAisd/sitemods/img/login_bg_right-top.png" width="5" height="5"></td>
+              </tr>
+			  <tr>
+                <td width="5"></td>
+				 <td align="right" valign="top">
+					<table width="420"  border="0" cellpadding="0" cellspacing="0">
+						 <tr>
+	                      <td width="26%" align="left" class="login_inputs">Login</td>
+	                      <td>&nbsp;</td>
+	                    </tr>
+						<tr>
+	                      <td>&nbsp;</td>
+	                      <td>&nbsp;</td>
+	                    </tr>
+						<tr>
+							<form method="post" action="$cgi" name="login"<PDM_IF "$prop.WSPHOST" != ""> target=_parent</PDM_IF>>
+							<pdm_if "$prop.WSPHOST" != "">
+							<input type=hidden name=WSPHOST value="$prop.WSPHOST">
+							<input type=hidden name=WSPROOT value="$prop.WSPROOT">
+							</pdm_if>
+							<input type=hidden name="PortalSession" value="$prop.portal_session">
+						</tr>
+						<PDM_IF 0>
+	                        <!-- SCO40646 - The size attribute is removed from username and password
+	                        as both the input field was exceeding the table area.
+	                        The size is handled by width attribute in castyles.css -->
+                        </PDM_IF>
+						<tr class="login_header">
+	                      <td>Login </td>
+	                      <td ><input type="text" id="USERNAME" name="USERNAME"></td>
+	                    </tr>
+						 <tr>
+	                      <td>&nbsp;</td>
+	                      <td>&nbsp;</td>
+						</tr>
+	                    <tr class="login_header">
+	                      <td>Hasło </td>
+	                      <td ><input type="password" id="PIN" name="PIN"></td>
+	                    </tr>
+	                    <tr>
+	                      <td>&nbsp;</td>
+	                      <td>&nbsp;</td>
+						</tr>
+						<tr>
+                                                        <td align="left" valign="top"><img src="$CAisd/img/RSA_logo_41x55.png"></td>
+							
+							<td align="left">
+								<table width="290"  border="0" cellpadding="0" cellspacing="0">
+                                                                        <tr><td>&nbsp</td></tr>
+									<tr>
+									<td align="right">
+										<div align="right">
+															<!-- Assume for now browser can only display PDA... -->
+												<input type="hidden" name="PDA" value="Yes">
+												<input type="hidden" name="OP"  value=LOGIN>
+								                <PDM_IF "$prop.initial_load" != "">
+												<input type="hidden" name="INITIAL_LOAD"  value="$prop.initial_load">
+								                </PDM_IF>
+								                <PDM_IF "$prop.WSPROOT" == "NO">
+								                <input type="hidden" name="WSPROOT" value="YES">
+								                </PDM_IF>
+												<script type="text/javascript">
+												<!--
+												if (_browser.name != "unknown")
+												{
+													// .. but if JavaScript is available, give the option
+													//	and disable the hardcoded input field above.
+													document.forms["login"].elements["PDA"].value = "No";
+													if ( _browser.isIE )
+														document.forms["login"].elements["OP"].value = "MENU";
+												}
+												//-->
+												</script>
+
+												<!-- Create a hardcoded button if scripting is turned off -->
+								            <!--	<input type=submit name="HardcodedSub" value=" Log In ">&nbsp;-->
+								                
+												<input type=submit name="HardcodedSub" value=" Zaloguj ">&nbsp;
+								                
+
+												<script type="text/javascript">
+												<!--
+													if (!_browser.supportsLayers && 
+													    _browser.name != "unknown")
+													{
+														// Explicitly hide hardcoded button (in case browser doesn't understand noscript)
+														var e = document.forms["login"].elements["HardcodedSub"];
+								                        if ( typeof e == "object" && e != null )
+														  e.style.visibility = "hidden";
+													<PDM_IF "$prop.WSPHOST" != "">	
+														<PDM_MACRO NAME=button caption="Log In[!Log In]" 
+														hotkey_name="Log In[!Log In]" id="btndflt" width=0
+														func="parent.form_submitted=true;pdm_submit('login','')">
+													<PDM_ELSE>
+														<PDM_MACRO NAME=button caption="Zaloguj[!Log In]" 
+														hotkey_name="Zaloguj[!Log In]" id="btndflt" width=0
+														func="pdm_submit('login','')">
+													</PDM_IF>
+								                        <!-- Write hidden link to allow screen reader users to set preference -->
+								                        document.write('<a href="javascript:loginAndSetScreenReaderPreferences()" tabindex=-1' +
+								                                      ' title="Login and set screen reader preference"><\/a>');
+													}
+												//-->
+												</script>
+										</div>
+									</td></tr>
+									<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+									<PDM_IF "$prop.SecurityType" != "CLASSIC" || "$prop.AllowAnonymousAccess" != "">
+									<PDM_IF "$env.NX_GUEST_USER_NAME" != "" && "$prop.WSPHOST" == "">
+									<script type="text/javascript">
+										<!--
+										if (_browser.name != "unknown")
+										{
+										    document.writeln("<tr height=30>");
+										    <PDM_IF 0>document.writeln("<td align='right' nowrap><a href='javascript:pdm_submit(\"login\", \"LogAsGuest\")' class='datalink'><span>" + msgtext("Guest_Login,_Click_here.") + "</span><\/a><\/td>");</PDM_IF>
+										    document.writeln("<\/tr>");
+										}
+										//-->
+									</script>
+									</PDM_IF>
+									</PDM_IF>
+									</PDM_IF>
+				
+									</PDM_FORM>
+									<script type="text/javascript">
+										<!--
+										if (_browser.name != "unknown")
+										{
+										    check_for_timeout();
+										}
+										//-->
+									</script>
+								</table>
+						  </td>
+	                    </tr>
+					</table>	
+				</td>
+				<td width="5"></td>
+               </tr>
+			   <tr height="5">
+	                <td align="left" valign="bottom" width="5"><img src="$CAisd/sitemods/img/login_bg_left-bottom.png" width="5" height="5"></td>
+	                <td></td>
+	                <td align="right" valign="bottom" width="5"><img src="$CAisd/sitemods/img/login_bg_right-bottom.png" width="5" height="5"></td>
+                </tr>
+			</table>
+		  </td>
+        </tr>
+      </table></td>
+	
+    </tr>
+  </table>
+  </center>
+</body>
+</PDM_IF>
+</html>

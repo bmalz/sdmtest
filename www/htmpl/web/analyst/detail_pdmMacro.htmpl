@@ -1,0 +1,70 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<html lang="en">
+<PDM_PRAGMA RELEASE=126>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Web Macro Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Web Macro"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Web Macro $args.name"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory="pdmMacro">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa PDM_MACRO" attr="name" colspan=2 size=30>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="delete_flag" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ" attr="type" lookup=no size=20>
+<PDM_MACRO name=dtlDropdown hdr="Typ kontrolki" attr="control_type" lookup=no>
+<PDM_MACRO name=dtlTextbox hdr="Ikonka etykiety" attr="label_icon" size=30>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=2 rows=6 size=150>
+<PDM_MACRO name=dtlStartExpRow label="Macro Text" colspan=2 exp_rows="1" form_name="detail_pdmMacro">
+<PDM_MACRO name=dtlTextbox hdr="Tekst makra" attr="text" colspan=2 rows=17 size=150>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=startNotebook hdr=tabID>
+<PDM_MACRO name=TAB title="Macro Parameters" height=310 src="OP=SEARCH+FACTORY=pdmMacroParam+QBE.EQ.macro=$dob.id+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_WSP>

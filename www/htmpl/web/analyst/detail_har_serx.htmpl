@@ -1,0 +1,14 @@
+<PDM_IF 0>
+detail_har_serx.htmpl
+Purpose:
+    Display the detail of a Hardware.Server CI.
+    See cmdb_detail.htmpl for  more details.
+
+History:
+       22-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+       2008/01/01  mckpe04 added Standard CI and versioning tab
+</PDM_IF>
+
+<PDM_INCLUDE FILE="cmdb_detail.htmpl"   extension="har_serx">
+
+<PDM_WSP where="family.extension_name='har_serx'" factory=nr design=no>

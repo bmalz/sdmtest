@@ -1,0 +1,44 @@
+<PDM_IF 0>
+generic.htmpl
+WHEN PRESENTED:
+    For generic and miscelaneous messages.
+INTENT:
+    Provides a way to return error type messages to the user.
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    string	html	The text to be displayed.
+    string	title   The title of the page
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_WSP preview=no>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_IF "${args.ALERTONERROR:}" == "1">
+<script type="text/javascript">
+  if ( typeof window.parent.opener == "object" &&
+       typeof window.parent.opener.showAlertMsg != "undefined" ) {
+    window.parent.opener.showAlertMsg("Can't show requested record");
+    window.parent.close();
+  }
+</script>
+</PDM_IF>
+<title>$title</title>
+<script type="text/javascript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class=messages>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<br><br>
+<center>
+$html
+</center>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+<br>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: generic.htmpl ASPEN.1 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>

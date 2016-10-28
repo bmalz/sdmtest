@@ -1,0 +1,185 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.RESP_TYPE" == "3">
+	var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Status Update"</PDM_FMT>;
+	var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Status Update"</PDM_FMT>;
+	var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Status Update"</PDM_FMT>;
+<PDM_ELSE>
+	var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Reply"</PDM_FMT>;
+	var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Reply Update"</PDM_FMT>;
+	var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Reply"</PDM_FMT>;
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/cst_cat.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/spellcheck.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+_bHideTenantSelection = true;//Inherit the tenant from the Forum - SCO 6350
+ahdframeset.top_splash.next_persid = "$args.REF_PERSID";
+var m_strRespType = "$args.RESP_TYPE";
+var m_strOldStatus = "$args.THREAD_STATUS.SYM";
+var m_bRunSave = false;	//save started?
+
+function loadActions()
+{
+	// Currect status should be chosen by default in the selection
+	if (m_strRespType == "3")
+	{
+		var slctStatus = document.getElementsByName("SET.THREAD_STATUS")[0];
+		slctStatus.value = $args.THREAD_STATUS;
+	}
+
+	if("$args.id" == "0")	// don't set focus as it will be set when LoadUploadActions will be done
+	{
+		doc = document.forms["main_form"].elements;
+		LoadUploadActions();
+	}
+	else	// set focus
+	{
+		setInitialFocus();
+	}
+}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function preSaveTrigger()
+{
+	var firstBadField = detailValidate();
+	if (typeof firstBadField == "object")	// validation failed
+	{
+		return false;	// continue saving to get alert messages on fields where validation failed
+	}
+
+	if ( m_strRespType == "3")
+	{
+		var slctStatus = document.getElementsByName("SET.THREAD_STATUS")[0];
+		var strNewStatus = slctStatus.options[slctStatus.selectedIndex].text;
+		var strStatusHTML = msgtext("from_%1_to_%2_.", m_strOldStatus, strNewStatus) + "<BR>";
+		document.getElementsByName("SET.ACTION_INFO")[0].innerText = strStatusHTML;
+	}
+	m_bRunSave = true;
+	<PDM_IF "$args.id" == "0">
+		if (isAttmntToSubmit())
+		{
+			Submit();
+			return false;	// Stop saving. Will be saved when attachment will be saved
+		}
+		else
+		{
+			return true;
+		}
+	<PDM_ELSE>
+		return true;	// Continue saving
+	</PDM_IF>
+}
+
+function preCancelTrigger()
+{
+	if ( m_bRunSave )
+		return false;
+	else
+		return true;
+}
+
+function getAttmntId(lAttmntId)
+{
+	doc["SET.ATTMNT_ID"].value = lAttmntId;
+	save_requested('main_form','UPDATE');
+}
+
+function LoadUploadActions_done()
+{
+	setInitialFocus();
+}
+
+function setInitialFocus()
+{
+	window.setTimeout("try{document.getElementsByName('SET.RESP_TYPE')[0].focus();}catch(e){}", 100);	// set focus to the reply type dropdown list
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onload="loadActions()" onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory="LONG_TEXTS">
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Temat" attr="QA_KD.TITLE">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Pytanie" attr="QA_KD.PROBLEM">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.RESP_TYPE" == "3">
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr="THREAD_STATUS" make_required="yes">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Typ odpowiedzi" attr="RESP_TYPE" lookup=no make_required="yes" whereclause="id<3">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.RESP_TYPE" == "3">
+<PDM_MACRO name=dtlHTMLEditBox hdr="Opis użytkownika" attr=ACTUAL_TEXT colspan=2 rows=10 size=90>
+<PDM_ELSE>
+<PDM_MACRO name=dtlHTMLEditBox hdr="Odpowiedź" attr=ACTUAL_TEXT colspan=2 make_required="yes" rows=10 size=90>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_IF "$args.id" == "0">
+	<INPUT TYPE=HIDDEN NAME="SET.SUBMIT_ATTMNT">
+</PDM_IF>
+<INPUT TYPE=hidden NAME="SET.ACTION_INFO" value="">
+<INPUT TYPE=hidden NAME="SET.AUTHOR_ID" value="$cst.id">
+<INPUT TYPE=hidden NAME="SET.ATTMNT_ID">
+<INPUT TYPE=hidden NAME="HTMPL" VALUE="show_main_detail.htmpl">
+<INPUT TYPE=hidden NAME=KEEP.ADDL_URL value="+open_mode=2+KEEP.BUID=$args.KEEP.BUID">
+
+<PDM_MACRO name=dtlEnd>
+<PDM_IF "$args.id" == "0">
+<table width=90% cellspacing=5 cellpadding=1>
+  <tr><td align=left>
+	
+<PDM_IF "$prop.browser" == "IE">			
+		<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=80 ShowImgStatus="Yes" SubmitKnowledge="Yes" View="Attachment" FolderId="KnowledgeFiles" ShowRepList="No" RepType="2">
+	
+<PDM_ELSE>
+		<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=104 ShowImgStatus="Yes" SubmitKnowledge="Yes" View="Attachment" FolderId="KnowledgeFiles" ShowRepList="No" RepType="2">
+	
+</PDM_IF>
+  </td></tr>
+</table>
+</PDM_IF>
+
+</CENTER>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

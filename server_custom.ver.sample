@@ -1,0 +1,395 @@
+
+; IMPORTANT: If you are upgrading a system that already version controls
+; custom files you should uncontrol any default files you were replacing.
+; This is because your old clients may connect to your new server and 
+; version control files according to the version control instructions
+; from your new server.
+;
+; Default files are files that the we need to operate.  If you don't 
+; uncontrol them, then version control will delete these files from your 
+; older clients when the old client connects to your new server.  And 
+; the client will fail.  
+; 
+; Also, if you created new files for your customizations, you must decide 
+; whether they will be required for this next release.  If not then don't 
+; control them and the files will be deleted from the older clients client.  
+; If the files are required for the next release then you must put them 
+; on your new server and add them to the server version control file.  
+; There is also the posibility that you will want to version control 
+; a file for a specific release.  If this is the case, then apply the 
+; min_release or max_release as required.
+;
+; For example.  If you were version controling main.wnd as MAIN_WND and 
+; no longer need to control this file in the next release you must 
+; uncontrol it before upgrading your system.  If you don't, then clients 
+; that connected to your old server will detect that this file is no 
+; longer controlled and they will delete the component from their version 
+; control file AND delele their main.wnd file.  Since this is a required 
+; file these clients will fail to start.  Add the following line (without 
+; the ; sign) to your (old and/or new) server version control file and 
+; give some time for all your clients to connect at least once.  This 
+; will tell each client that this file is no longer controlled.  After 
+; all the clients have received this information you may upgrade the server 
+; and the clients won't delete the main.wnd file when they connect.
+;
+; ! uncontrol MAIN_WND
+; 
+; Custom files that are obsolete and were controlled will be deleted from the
+; clients because they do not appear in the server version control files 
+; on the new server.   
+; 
+; NOTE: This works if you use file_ctl.  If you use dir_ctl, then version
+; control may not be able to backout customizations.  It will delete all
+; files in the directory.  This may remove other files in addition to the
+; files you customized.  We do not recommend using dir_ctl.
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; This file is one of four pairs of files used to configure the version
+; control.  Version control synchronizes files and directories on clients 
+; with master copies on the server.  Although it is not a software
+; distribution tool, some upgrade facilities are provided.
+; You should refrain from distributing large packages to clients,
+; as this may cause your system to become sluggish.
+;
+; There are three version control configuration file pairs:
+;
+; <install dir>/site/server_default.ver - is supplied by
+;            Computer Associates, and should not be modified.
+;            It is used to control clients.
+; <install dir>/site/mods/server_custom.ver - is available
+;            for customer modification of clients.
+;
+; <install dir>/site/server_secondary.ver - is supplied by
+;            Computer Associates, and should not be modified.
+;            It is used to control secondary servers.
+; <install dir>/site/mods/server_secondary_custom.ver - is available
+;            for customer modification of secondary servers.
+;
+; The client version files are default.ver and 
+; custom.ver respectively.
+
+; The seconary server version files are secondary.ver and 
+; secondary_custom.ver
+;
+; The file pairs are processed independently at client startup.
+; Each defines a set of components.  A component describes a
+; file, directory, or environment variable group that should be
+; present on the client.  When a client starts up, it sends a
+; list of its components to the server.  The server compares
+; them to the master list in the server version files.  
+; If it finds any differences it takes action depending on  
+; the setting of the NX_VER_CTL variable in <install dir>/NX.env:
+;
+; NOTIFY  - notify the client and ask whether to continue
+; FAIL    - notify the client and prevent the startup
+; UPGRADE - upgrade the client to the correct version
+; DISABLE - ignore the discrepancy and allow the client to start
+;
+; The NX.env variables are required for most installations.
+; This component will be validated and variables upgraded when 
+; the NX_VER_CTL variable is set to NOTIFY or UPGRADE.
+; 
+; The ddict.sch is required by all UNIX clients.  
+; This component will be sent to the UNIX clients when this variable
+; is set to NOTIFY.  The component id for this component must be 
+; _DDICT_SCH
+;
+; Refrain from modifying or adding components that have component 
+; names beginning with an underscore "_".  These should be reserved
+; for the system to add and modify.
+;
+; Defining Components
+; -------------------
+; Each component is defined in an entry of the form:
+;
+;   [<name>]                                  (required)
+;   version = "v.v.x, yyyymmdd"                 (required)
+;   <ver-ctl-type>
+;   filename = "<file-name>"
+;   directory = "<dir-name>"
+;   source="<dir-name>"
+;   component_type = <file-type>
+;   effectivity = "<effect-spec>"
+;   o_mode = <owner-mode>
+;   g_mode = <group-mode>
+;   w_mode = <world-mode>
+;   min_release=<release name>
+;   max_release=<release name>
+;   checksum
+;
+; where:
+;   <name>         - is an identifier for the component.
+;                    The name can not contain any special 
+;                    characters ie. -.:+=
+;   v.v.x, yyyymmdd  - is the version number and date of the
+;                    component.  This is compared with the
+;                    corresponding string on the client.
+;                    The v's are user defined strings but the x
+;                    is reserved for version control to increment.
+;                    Collectively the v.v.x is the version.
+;              
+;   NOTE: if the version attribute is missing, the component will be
+;   version controlled every time the client connnects.  Use checksum
+;   to restrict the file downloading.
+;
+;   <ver-ctl-type> - is the type of version control:
+;                    ver_ctl   - This is the default control type.
+;                                No upgrade will be attempted.
+;                                Validations will fail if the 
+;                                associated versions do not match.
+;                    file_ctl  - component is a file
+;                                This component must contain a 
+;                                directory and a filename property.
+;                    dir_ctl   - component is a directory
+;                                This component must contain a 
+;                                directory.  It does not down
+;                                load sub-directories.
+;                    ver_ctl is default if none is provided.
+;                    nxenv_ctl - component is an environment var
+;               DO NOT ADD OR MODIFY the nxenv_ctl component.
+;               See the notes next to the component in this file
+;               if you insist on using this feature.
+;   <file-name>    - the name of a file.
+;                    This property acts like a file mask if applied
+;                    to a directory control.
+;   <dir-name>     - full path to the directory containing the
+;                    file can contain references to environment
+;                    variables in the form $NAME
+;   <effect-spec>  - This specifies which clients will get a
+;                    component.  This property is optional.
+;                    If it is omitted all clients may get the 
+;                    component.  The format uses "+" to indicate add 
+;                    and "-" to indicate not.  The line is space 
+;                    delimited.  Two groups are recognized,
+;                    WINDOWS_CLIENTS - all Windows clients.
+;                    UNIX_CLIENTS - all UNIX clients( aix,Sun, Hp, Linux, Linux390).  
+;                    For specific OS's use
+;                    WINNT, LINUX, LINUX390, SUN4SOL, HP and AIX.  
+;                    Use WINNT for all Windows clients.
+;   <file-type>    - is the type of file:
+;                    file     - normal file
+;                    exe_file - executable file.  If the OS type of the
+;                               client is different than the server then
+;                               Version control automatically extends the 
+;                               directory path depending on the
+;                               client operating system:
+;                               for example a UNIX server will get a 
+;                               Windows NT file from the directory/windows
+;                               directory on a UNIX server.
+;
+;                               The exe file extension may be omitted in
+;                               the filename as long as the actual file on
+;                               the server has the extension.  Version Control
+;                               will make the adjustment.
+;
+;                                 windows  - All Windows clients
+;                                 sun4Sol  - Solaris
+;                                 hp       - HP-UX
+;                                 aix      - AIX
+;                                 linux    - Linux
+;                                 linux390 - Linux 390
+;
+;                    platform_dependent - is treated the same as exe_file.
+;
+;   <owner-mode>   - specifies access permissions for the file's
+;                    owner, as follows:
+;                      R   - read only
+;                      RW  - updatable
+;                      RX  - read-only executable (UNIX only)
+;                      RWX - updatable executable (UNIX only)
+;   <group-mode>   - specifies access permissions for users in
+;                    the file owner's group (see owner-mode)
+;   <world-mode>   - specifies access permissions for users not
+;                    in the file owner's group (see owner-mode)
+;   < release name > These indicate the range of release that this component
+;                    may be applied.  The release name must correspond to
+;                    a release defined by a release statement.
+;   filename       - The filename is required for file components.
+;                    Do not include the path.
+;   directory      - This is where the file will be placed on the
+;                    client.  If source is not specified (the recommended
+;                    case) the file will be retrieved from this directory.  
+;                    If the file is platform specific then the file will
+;                    be retrieved from a sub-directory of this directory.
+;                    See file-type above.
+;   source         - If this is specified then the server will use it to
+;                    retrieve the file to be transferred.  The destination 
+;                    on the client will be the directory property.
+;   checksum       - This property is optional.  If defined version control
+;                    will perform a checksum on the server and client files.
+;                    The file will be updated only if the checksums do not match.
+;                    If this property is applied to a directory then a checksum
+;                    test will be done on each file and only the files that 
+;                    have differing checksums will be upgraded.
+;                    
+;
+; The only required fields is the <name>.  
+; unless you want something downloaded like a directory or file
+; In this case you must provide the appropriate file and directory 
+; specification.
+;
+; CREATING a server_custom.ver file
+;
+; Copy this file to the site/mods directory.
+; Remove all the component definitions from the new file BEFORE
+; renaming it to server_custom.ver.
+; Then add your components.  DO NOT use the same component names
+; that are in other version file and DO NOT control any
+; of the components that are controlled by another version file. 
+; file.  
+; Do not add an nxenv_ctl component to the server_custom.ver file.
+;
+; TROUBLESHOOTING TIPS
+; 
+; dir_ctl is NOT recommended because there is no record of what
+; is actually under control.  We do not keep track of what is
+; actually in this directory.
+; 
+; If you want to upgrade then change the VER_CTRL option to UPGRADE
+; and cycle the daemons.
+;
+; The server_custom.ver file must be in the site/mods directory.
+; 
+; The client will upgrade itself if the version property for
+; this component is different from the one on the server.  If the
+; checksum property is applied to the component then a checksum
+; test will be performed.  File dates are ignored.
+;
+; nxenv_ctl does not download all NX.env variables.  It only updates
+; the client's NX.env for the variables that are under control.
+; If you do not have an NX.env file on the client then re-configure
+; the client before running version control.
+
+; If a control type is not provided the component is under ver_ctl.
+; This type of control will NOT upgrade anything.  It just complains.
+;
+; If you delete a component on the server the same stuff will be
+; deleted on the client.  Unless the component has been uncontrolled.
+
+; UNCONTROLLING 
+; Components that no longer need to be under control may be uncontrolled
+; by defining an uncontrol statement for each component.  This will 
+; allow the system administrator to remove the component from his version
+; control files and the file will not be deleted on the clients.  The version 
+; control server does not remove files or modify the version control 
+; files on the server.  
+;
+; NOTE: Version Control will not remove the component from the server
+; version control file or remove the file that was controlled from the server.  
+; The administrator must do this.
+
+; There may be several uncontrol statements.  The statements must appear 
+; near the beginning of the server_default.ver file.  These statements apply
+; to default and custom components.  The syntax for the uncontrol statement is:
+
+; ! uncontrol <name>
+
+; name      component name.  
+
+
+; DEFINING RELEASES
+; Components may be flagged for a minimum or maximum release to prevent them 
+; from being distributed to clients that can not interpret them.  In the 
+; component definition you may add one or both of the min_release or max_release 
+; properties: 
+
+; min_release=<release name>
+; < release name > is a name defined by a release statement.  We only define
+;                  releases by GENLEVEL.
+
+; max_release=<release name>
+; < release name > is a name defined by a release statement.  We only define
+;                  releases by GENLEVEL.
+
+; The releases are defined by release statements defined in the server_default.ver 
+; file.  There may be one or more genlevels indicated for each release
+
+; ! release <release name> <genlevel> < genlevel>
+
+
+; R11.2 AHD 1106033G900
+; R11.1 AHD 1106013G900
+; R11 AHD 1105103G900
+; GA60 AHD 603G9030400
+; GA60 AHDBETA 603G9030200
+
+! release R11 1105103G900 1106013G900 1106033G900
+! release GA60 603G9030400 603G9030200
+
+
+
+; Examples:
+; File control for a platform neutral file.
+
+[ MY_FILENAME_WAND ]
+directory="$NX_ROOT/site/mods/wand"
+filename="MyFilename.wnd"
+version="4.0 , 19980417"
+o_mode="RW"
+g_mode="RW"
+w_mode="RW"
+file_ctl
+
+; File control for a platform specific file like
+; an executable.
+
+; This is useful if your PC client is pointing to a
+; UNIX server.  In this case create a winNT subdirectory
+; off the $NX_ROOT/bin directory and put the PC version of
+; MyFilename.exe in this directory.
+; If your client is a win95 then you must do the same for win95
+; folks etc, etc.
+
+[ MY_EXE_FILE ]
+directory="$NX_ROOT/bin"
+filename="MyFilename.exe"
+version="4.0 , 19980417"
+effectivity="+ PC_CLIENTS"
+o_mode="RW"
+g_mode="RW"
+w_mode="RW"
+component_type="exe_file"
+file_ctl
+
+; Directory Control
+; WARNING WARNING WARNING 
+; I discourage this type of version control because
+; there is no trace of what will be downloaded to the
+; client.  Later when someone deletes this component  
+; Version Control will delete everything in the directory
+; 
+; But if you insist, then we have this feature.  We do not
+; transfer the subdirectories yet.
+; Notice that we do support file masks.  
+
+[ MY_DIRECTORY ]
+directory="$NX_ROOT/bin"
+filename="*.exe"
+version="4.0 , 19980417"
+effectivity="+ PC_CLIENTS"
+o_mode="RW"
+g_mode="RW"
+w_mode="RW"
+component_type="exe_file"
+dir_ctl
+
+; Pure version control
+
+; If you want to control a concept and not provide a way to
+; upgrade use this type.  If the client is out of configuration
+; he will fail upgrade every time and request the Administrator
+; to correct the problem.
+; This is also the default if a control type is not provided.
+;
+; Users have not found this very useful: 
+; From experience users delete their default.ver files and when
+; this happens the client will complain every time it starts 
+; because Version Control has no way of knowing how to correct
+; the problem.
+
+[ MY_PURE_VERSION_CONTOL ]
+version="4.0 , 19980417"
+ver_ctl
+

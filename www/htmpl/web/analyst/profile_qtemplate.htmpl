@@ -1,0 +1,39 @@
+<html lang="en"><PDM_IF 0>
+profile_qtemplate.htmpl
+WHEN PRESENTED:
+    When a profile browser user requests a quick template
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_browser.htmpl+PERSID={cnt:}">
+<SCRIPT LANGUAGE="JavaScript">
+function load_and_submit()
+{
+   var my_top = window;
+   while ( my_top != my_top.parent && typeof my_top.parent.name == "string" )
+      my_top = my_top.parent;
+   if ( typeof my_top.opener == "object" &&
+	!my_top.opener.closed &&
+        my_top.opener.name == "scratchpad" ) {
+      var input_form = my_top.opener.document.qtemplate_form;
+      document.qtemplate_form.FACTORY.value = input_form.factory.value;
+      document.qtemplate_form.spad_desc.value = input_form.description.value;
+      document.qtemplate_form.PERSID.value = input_form.qtemplate_persid.value;
+      document.qtemplate_form.spad_cust.value = input_form.customer_id.value;
+      my_top.opener.ImgBtnEnableButton( "btn009" );
+      document.qtemplate_form.submit();
+   }
+}
+</SCRIPT>
+</HEAD>
+<BODY onload="load_and_submit()">
+<PDM_FORM METHOD=POST ACTION=$cgi NAME=qtemplate_form>
+<INPUT TYPE=hidden NAME=FACTORY>
+<INPUT TYPE=hidden NAME=OP VALUE=CREATE_NEW>
+<INPUT TYPE=hidden NAME=spad_desc>
+<INPUT TYPE=hidden NAME=PERSID>
+<INPUT TYPE=hidden NAME=spad_cust>
+<INPUT TYPE=hidden NAME=use_template VALUE=quick>
+</PDM_FORM>
+</BODY>
+</HTML>

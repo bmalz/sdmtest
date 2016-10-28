@@ -1,0 +1,48 @@
+<PDM_IF 0>
+aty_chg_svy_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=aty_chg_svy_tab+KEEP.obj_type=Change%20Orders" factory=aty>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_MACRO name=tabBanner title="Survey">
+<PDM_MACRO name=dtlStartRow>
+if("$args.chg_flag.sym" == "YES")
+{
+<PDM_MACRO name=dtlCheckbox hdr="Wysyłać ankietę?" attr=chg_send_survey off=No on=Yes>
+<PDM_MACRO name=dtlLookup hdr="Domyślna ankieta" attr=chg_default_survey>
+<PDM_MACRO name=dtlDropdown hdr="Metoda notyfikacji" attr=chg_survey_method lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł wiadomości ankiety" attr=chg_survey_msgtitle colspan=4 size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Treść wiadomości ankiety" attr=chg_survey_msgbody colspan=4 keeplinks=yes rows=4 size=60>
+}
+else
+{ 
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Wysyłać ankietę?" attr="chg_send_survey" off=No on=Yes>
+<PDM_MACRO name=dtlReadonly hdr="Domyślna ankieta" attr="chg_default_survey">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł wiadomości ankiety" attr=chg_survey_msgtitle colspan=4>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Treść wiadomości ankiety" attr=chg_survey_msgbody colspan=4>
+}
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: aty_chg_svy_tab.htmpl ASPEN.4 2012/06/05 10:51:49 kumka02 Exp $;
+</PDM_IF>

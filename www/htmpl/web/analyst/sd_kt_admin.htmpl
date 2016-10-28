@@ -1,0 +1,91 @@
+<PDM_IF 0>
+sd_kt_admin.htmpl
+	WHEN PRESENTED:
+	   As the ticketing tab of the admin main page
+</PDM_IF>
+<html lang="en"><PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="OP=MENU+NBTAB=adm">
+<HEAD>
+<script language=javascript>
+//global vars
+//should these be empty or set to top?
+var m_CurrentIndex = 100;
+var m_CurrentIndexPath = "Administration";
+
+var test_cache = new Array();
+
+
+function testobj(nid,nname)
+{
+this.nid=nid;
+this.nname=nname;
+}
+//
+function setCurrentIndex(IndexId)
+{
+	m_CurrentIndex = IndexId;
+}
+//
+function getCurrentIndex()
+{
+	return m_CurrentIndex;
+}
+//
+function setCurrentIndexPath(sIndexPath)
+{
+	m_CurrentIndexPath = sIndexPath;
+}
+//
+function getCurrentIndexPath()
+{
+	return m_CurrentIndexPath;
+}
+// 
+
+
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+
+var ahdframeset = ( window.name == "cai_main" ? window : ahdtop );
+var ahdframe;
+function frameset_loaded()
+{
+	if (ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].id=="adm")
+	{
+		ahdframe = window.frmAdmin;
+		ahdframeset.ahdframe = ahdframe;	
+	}
+}
+
+<pdm_include file=menubar_admin.htmpl>
+</script>
+</HEAD>
+<PDM_IF "$prop.browser" != "IE">
+	<FRAMESET ROWS='<PDM_IF "$SESSION.usingScreenReader" == "1">28<PDM_ELSE>23</PDM_IF>,*' onLoad="frameset_loaded()">
+<PDM_ELSE>
+	<FRAMESET ROWS='<PDM_IF "$SESSION.usingScreenReader" == "1">28<PDM_ELSE>23</PDM_IF>,*' FRAMESPACING="0" SCROLLING=no onLoad="frameset_loaded()">
+</PDM_IF>
+	<FRAME SRC="$CAisd/html/menubar.html" NAME=menubar NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title="Menu bar">
+	
+	<PDM_IF "$prop.browser" != "IE">	
+		<FRAMESET COLS="240,*" FRAMEBORDER="3">
+	<PDM_ELSE>
+		<FRAMESET Cols="240,*" FRAMESPACING="2">
+	</PDM_IF>
+		<PDM_IF "$prop.browser" != "IE">
+			<FRAME id=frmAdmTree name=frmAdmTree  src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=admin_tree.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" style="border:1px #8B939A solid;padding-left:5px;padding-top:5px" SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 BORDER=0 title="Hidden frame - do not navigate here">
+			<FRAME id=frmAdmin name=frmAdmin style="border: 1px #8B939A solid;" src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=admin_tab_dflt.htmpl"  SCROLLING=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 BORDER=0 title="Main administration frame">
+		<PDM_ELSE>
+			<FRAME id=frmAdmTree name=frmAdmTree  src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=admin_tree.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" style="border:1px #8B939A solid;padding-left:5px;padding-top:5px" SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 BORDER=0 title="Hidden frame - do not navigate here">
+			<FRAME id=frmAdmin name=frmAdmin style="border: 1px #8B939A solid;" src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=admin_tab_dflt.htmpl"  SCROLLING=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 BORDER=0 title="Main administration frame">
+		</PDM_IF>		
+	</FRAMESET>
+</FRAMESET>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: sd_kt_admin.htmpl ASPEN.1 2010/11/24 19:26:38 pstso01 Exp $;
+</PDM_IF>

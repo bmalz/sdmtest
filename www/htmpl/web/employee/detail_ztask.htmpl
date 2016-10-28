@@ -1,0 +1,246 @@
+<PDM_IF 0>
+detail_ztask.htmpl
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Szczegóły zadania";
+var hdrTitleUpd = "Aktualizowanie zadania";
+var hdrTitleNew = "Tworzenie zadania";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script>
+cfgDateFormat = "$date_format"
+</script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function approveTask() {
+	var query_str = cfgCgi +
+	                "?SID=" + cfgSID +
+	                "+FID=" + fid_generator() +
+	                "+FACTORY=ztask" +
+	                "+PERSID=$args.persistent_id" +
+	                "+OP=UPDATE" +
+	                "+KEEP.StatusCode=APP" +
+	                "+KEEP.POPUP_NAME=1" +
+	                "+KEEP.autoApproved=1";
+	parent.frames["workframe_2"].window.document.location.href = query_str;
+
+	// document.location.href = query_str;
+}
+
+var exim_interval;
+
+function rejectTask(msg) {
+
+	// console.log(msg);
+
+	var query_str = cfgCgi +
+	                "?SID=" + cfgSID +
+	                "+FID=" + fid_generator() +
+	                "+FACTORY=ztask" +
+	                "+PERSID=$args.persistent_id" +
+	                "+OP=UPDATE" +
+	                "+KEEP.StatusCode=REJ" +
+	                "+KEEP.POPUP_NAME=1" +
+	                "+KEEP.RMSG=" + encodeURIComponent(msg) + 
+	                "+KEEP.autoApproved=1";
+
+	parent.frames["workframe_2"].window.document.location.href = query_str;
+	// document.location.href = query_str;
+	// console.log('done');
+}
+
+jq(document).ready(function() {
+	<PDM_IF "$args.KEEP.autoApproved" == "1">
+		<PDM_IF "$args.KEEP.StatusCode" != "">
+			
+			if(_dtl.edit) {
+				var f = parent.frames["workframe_2"].document;
+
+				var p_jq = jq(f);
+				p_jq.find("select[name='SET.status']").val("$args.KEEP.StatusCode");
+				p_jq.find("textarea[pdmqa='description']").text("$args.KEEP.RMSG");
+
+				window.setTimeout(function() {
+					var btntext = p_jq.find('#imgBtn0').children('span').first().text();
+					// console.log(btntext);
+					if(btntext == "Zapisz") {
+						p_jq.find('#imgBtn0').click();
+					}
+				}, 1000);
+			}
+			else if(!_dtl.edit) {
+				parent.frames["product"].window.location.reload(true);
+			}
+		</PDM_IF>
+	</PDM_IF>
+
+	jq('#eximDesc_Save').click(function() {
+		var msg = jq('#exim_desc').val();
+		if(msg.length > 0) {
+			toggleDescription(false);
+			rejectTask(msg);
+		}
+		else {
+			alert('Proszę podać powód odrzucenia.');
+		}
+	});
+
+	jq('#eximDesc_Close').click(function() {
+		toggleDescription(false);
+	});
+
+});
+
+// function updateStatus() {
+// 	var x = jq('#exim_status').val();
+// 	console.log('found exim_status: ' + x);
+
+// 	rejectTask(x);
+// }
+
+function getDescription() {
+	popup_window('RejectionDescription', 'UPDATE', 0, 0, 'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes', 'FACTORY=ztask', 'HTMPL=detail_ztask_desc.htmpl', 'SET.id=' + "$args.id" + '');
+}
+
+function toggleDescription(val) {
+	var exim_eBO = jq('#eximBackgroundOverlay');
+	var exim_eDD = jq('#eximDescDialog');
+	if(val) {
+		exim_eBO.show();
+		exim_eDD.show();
+		var exim_dialogmargin = (jq(window).width() / 2) - 215;
+		exim_eDD.css('left', exim_dialogmargin);
+	}
+	else {
+		exim_eBO.hide();
+		exim_eDD.hide();
+	}
+}
+
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+
+<div id="eximBackgroundOverlay" style="top: 0; left: 0;background-color: #000; opacity: 0.5; filter: alpha(opacity=50); zoom: 1; z-index: 12000; position: absolute; width: 100%; height: 100%; display: none;">
+</div>
+<div id="eximDescDialog" style="background-color: #fff; opacity: 1.0; filter: alpha(opacity=100); zoom: 1; height: 160px; width: 380px; z-index: 12001; position: absolute; top: 200px; display: none; border: 1px solid #353535;">
+	<span style="margin-left: 8px; width: 400px; height: 70px; position: absolute; white-space: pre-wrap; font: 0.7em Verdana, Arial, Helvetica, sans-serif; ">
+		Podaj uzasadnienie odrzucenia:
+		<ul style="list-style-type: none;">
+			<li><textarea id="exim_desc" style="width: 300px; height: 40px; font: 11px Verdana, Arial, Helvetica, sans-serif"></textarea></li>
+		</ul>
+	</span>
+	<div style="width:100%; height:35px; margin-top: 120px; position: absolute;">
+		<div style="float: right; margin-right: 5px; margin-top: 12px;">
+			<a href="#" id="eximDesc_Save" class="button enabledattr buttonEnabled"><span>Zapisz</span></a>
+			<a href="#" id="eximDesc_Close" class="button enabledattr buttonEnabled"><span>Anuluj</span></a>
+		</div>
+	</div>
+</div>
+
+</script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Zadania">
+<center>
+
+
+<input type="hidden" name=FACTORY value=ztask>
+<PDM_IF "$prop.form_name_3" == "edit">
+<input type="hidden" name=OP value="UPDATE">
+
+<PDM_IF 0 == $args.id>
+<span class="labeltext">You are not allowed to create a new Workflow</span>
+<PDM_ELSE>
+<PDM_IF $args.id>
+<input type="hidden" name=SET.id  value="$args.id">
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=ztask>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Zapisz[s]" Func="detailSave()" hotkey_name="Zapisz[s]" ID="btn001" Width=120>
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Anuluj[n]" ID="btncncl" Width=120>
+<PDM_MACRO name=button Caption="Resetuj[r]" Func="pdm_reset()" hotkey_name="Resetuj[r]" ID="btn003" Width=120>
+
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+</script>
+<PDM_IF "$prop.form_name_3" == "ro">
+<script type="text/javascript">
+<PDM_MACRO name=btnStartRow>
+</script>
+<PDM_IF $UserAuth \> 1>
+<PDM_FORM NAME="frmDTLRO">
+<input type="hidden" name=FACTORY value=ztask>
+<input type="hidden" name=SET.id  value="$args.id">
+<input type="hidden" name=OP>
+<script type="text/javascript">
+
+
+
+</script>
+</PDM_FORM>
+</PDM_IF>
+<script type="text/javascript">
+
+<PDM_IF "$cst.id" == "$args.assignee_agt">
+	<PDM_IF "$args.status.task_complete" == 0>  
+		<PDM_MACRO name=button Caption="Akceptacja[A]" Func="approveTask()" hotkey_name="Akceptacja[A]" ID="btn015" Width=120>
+		<PDM_MACRO name=button Caption="Odmowa realizacji[O]" Func="toggleDescription(true)" hotkey_name="Odmowa realizacji[O]" ID="btn016" Width=120>
+	</PDM_IF>
+</PDM_IF>
+
+<PDM_MACRO name=button Caption="Historia" Func="show_evt('ztask', 'atev', $args.id)" hotkey_name="Historia" ID="SHOW_EVT_HISTORY" Width=0>
+<PDM_MACRO name=btnEndRow>
+</script>
+</PDM_IF>
+<script>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Informacja" attr=comments rows=4 size=70 spellchk=no>
+if (window.name == "workframe_2") {
+	<PDM_MACRO name=dtlDropdown hdr="Status" attr=status lookup="no" size=30>
+}
+else {
+	<PDM_MACRO name=dtlReadonly hdr="Status" attr=status>
+}
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Uzasadnienie" attr=description>
+<PDM_IF "$args.task.zparent_type" == "cr">
+	<PDM_MACRO name=dtlLookup hdr="Powiązany wniosek" attr=cr>
+<PDM_ELSE>
+	<PDM_MACRO name=dtlLookup hdr="Powiązana zmiana" attr=chg>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data utworzenia" attr=date_created>
+<PDM_MACRO name=dtlDateReadonly hdr="Data akceptacji/odrzucenia" attr=completion_date>
+
+<PDM_MACRO name=dtlEndTable>
+</script>
+<input type="hidden" name="SET.description" value="$args.KEEP.RMSG">
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

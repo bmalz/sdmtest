@@ -1,0 +1,71 @@
+<PDM_IF 0>
+$Id: list_auto_close.htmpl,v 1.2 2009/19/11 00:14:16 sahra04 Exp $
+list_auto_close.htmpl
+
+WHEN PRESENTED:
+	When we need to display a list of Auto Close settings for all tenants.
+	
+In untenanted mode, make sure there is only 1 active row.
+
+In tenanted, there can be 1 active, Public row and 1 active row for each tenant.
+Will need to look for tenanted row.  If not found, look for tenanted row.
+
+If more than one found, log an error that auto-closure will not be done.
+
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie Ustawień Auto zamykania";
+var hdrTitleList = "Lista Ustawień Auto zamykania";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Auto Close">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF $ACCESS.FAC_auto_close \> 1>
+<PDM_MACRO name=sfStart factory=auto_close>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=auto_close>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Znak" attr="sym">
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="description" colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono ustawień auto zamykania";
+var msgFound1 = "Znaleziono 1 ustawienie auto zamykania";
+var msgFound = "Znaleziono %1 ustawień auto zamykania";
+var msgFoundMore = "Znaleziono %1 ustawień auto zamykania. Wyświetlanie %2 z %3";
+var msgSelect = "Kliknij aby wybrać ustawienie auto zamykania";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Wniosek" attr=cr_ach>
+<PDM_MACRO name=lsCol hdr="Incydent" attr=in_ach>
+<PDM_MACRO name=lsCol hdr="Problem" attr=pr_ach>
+<PDM_MACRO name=lsCol hdr="Zmiana" attr=chg_ach>
+<PDM_MACRO name=lsCol hdr="Issue" attr=iss_ach>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

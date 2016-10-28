@@ -1,0 +1,109 @@
+<PDM_IF 0>
+@(#)$Id: kt_admin_attachments.htmpl ASPEN.1 2010/12/21 09:42:10 ralje02 Exp $;
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+<PDM_IF "$args.Library" != 'Images'>
+	var hdrTitle = "Biblioteka załączników";
+<PDM_ELSE>
+	var hdrTitle = "Biblioteka obrazów";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_lib.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+ahdframeset.AttachmentsLibraryWin = window;
+ahdframeset.RepIdClicked = "";
+ahdframeset.FolderIdClicked = 0;
+var m_library = '$args.Library';
+var attmnt_lib_menu = true;
+</SCRIPT>
+
+</HEAD>
+<BODY onLoad="loadActionsAdminAttmnt()" topmargin=0>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Attachments Library">
+<script type="text/javascript"> 
+   mo_preview_def_obj = new mo_preview(draggable_option, resizable_option);
+   docWriteln( moPreviewHTML() );
+</script>
+<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0  class=page_header>
+   <TR>
+   <PDM_IF "$args.Library" == 'Images'>
+		<TD align=left width='99%'><h2 style="margin:0px;">Biblioteka obrazów</h2></TD>
+   <PDM_ELIF '$args.Library' == 'ATTMNT_TAB'>	
+		<TD align=left width='99%'><h2 style="margin:0px;">Biblioteka załączników</h2></TD>	
+   <PDM_ELSE>
+		<TD align=left width='99%'><h2 style="margin:0px;">Repozytorium</h2></TD>
+   </PDM_IF>
+	<PDM_IF "$args.Library" != 'Images'>
+		<TD align=right width='1%'>
+			<script>
+			if ("$args.KEEP.FOR_SD_ONLY" != "1")
+			{
+				ImgBtnRow(10);
+				ImgBtnCreate("btnAddRepository", "Create_New", "CreateRepository();", true,"",msgtext("Create_New"));
+				ImgBtnEndRow();
+			}
+			</script>
+		</TD>
+	</PDM_IF>
+   </TR>
+</TABLE>
+
+<SCRIPT>
+var titleRepos = "Repozytoria:";
+var titleFiles = "Pliki:";
+var titleR_loc = "Repozytoria:";
+var titleF_loc = "Pliki:";
+if (!nonLatinFlag)
+{
+    titleR_loc = titleRepos;
+    titleF_loc = titleFiles;
+}
+var actkeyRepos = registerActionKey("", titleR_loc,
+                                        setIframeFocus, "KTCatTree" );
+var actkeyFiles = registerActionKey("", titleF_loc,
+                                        setIframeFocus, "KTFiles" );
+if ( actkeyRepos != "" )
+  titleRepos = fmtLabelWithActkey( titleRepos, actkeyRepos );
+if ( actkeyFiles != "" )
+  titleFiles = fmtLabelWithActkey( titleFiles, actkeyFiles );
+function setIframeFocus(id)
+{
+  var f = document.getElementById(id);
+  if ( f != null ) {
+    var e = f.contentWindow.document.getElementById("rslnk_0_0");
+    if ( e == null )
+      e = f.contentWindow.document.getElementById("s2ds");
+    if ( e != null )
+      e.focus();
+  }
+}
+</SCRIPT>
+<TABLE CELLPADDING=0>
+<tr>
+<th align=left class=labeltext><label for="reposTree"><script>document.write(titleRepos);</script></label></th>
+<th align=left class=labeltext><label for="fileList"><script>document.write(titleFiles);</script></label></th>
+</tr>
+<TR>
+<TD id="reposTree">
+<PDM_IF '$args.Library' == 'Images'>
+	<PDM_MACRO NAME=kt_Categories_Tree menu="ATTACHMENTS_IMAGES" UseTenant ="1" ParentTenant="$args.ParentTenant" height="350px" width="350px" frameborder="1">
+<PDM_ELIF '$args.Library' == 'ATTMNT_TAB'>
+	<PDM_MACRO NAME=kt_Categories_Tree menu="ATTACHMENTS_TAB" UseTenant ="1" ParentTenant="$args.ParentTenant" height="350px" width="350px" frameborder="1" tabindex=1>
+<PDM_ELSE>
+	<PDM_MACRO NAME=kt_Categories_Tree menu="ATTACHMENTS_ADMIN" ParentTenant="$args.ParentTenant" height="350px" width="350px" frameborder="1">
+</PDM_IF>
+</TD>
+<TD id="fileList">
+	<iframe src="$CAisd/html/empty.html" scrolling=no id=KTFiles name=KTFiles style="height:350px;width:350px" Title="Files in selected repository">
+	</iframe>
+</TD>
+</TR>	
+</TABLE>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

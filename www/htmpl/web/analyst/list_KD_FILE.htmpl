@@ -1,0 +1,80 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+  var msgFoundNone = "No Files found";
+  var msgFound1 = "1 File found";
+  var msgFound = "%1 Files found";
+  var msgFoundMore = "%1 Files found. Displaying %2 through %3";
+  var msgSelect = "Click to select desired File";
+  var arrIDs = new Array();
+  var arrFILE_IDs = new Array();
+  var arrTitles = new Array();
+  var arrKSTypes = new Array;
+  var arrGatewayPaths = new Array();
+  var arrServers = new Array();
+  var ID_counter = 0;
+  var FileType = "";
+  <pdm_macro name=lsStart>
+  <pdm_macro name=lsWrite text="arrIDs[ID_counter]='@{list.id}'">
+  <pdm_macro name=lsWrite text="arrFILE_IDs[ID_counter]='@{list.FILE_ID}'">
+  <pdm_macro name=lsWrite text="arrGatewayPaths[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.FILE_ID.repository.servlet_path}</PDM_FMT>'">
+  <pdm_macro name=lsWrite text="arrTitles[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.TITLE}</PDM_FMT>'">
+  <pdm_macro name=lsWrite text="arrKSTypes[ID_counter]=@{list.KS_TYPE}-0;">
+  <pdm_macro name=lsWrite text="arrServers[ID_counter]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.FILE_ID.repository.server}</PDM_FMT>'">
+  <pdm_macro name=lsWrite text="ID_counter++;">
+  <pdm_macro name=lsWrite text="FileType = \"@{list.FILE_ID.file_type:0}\";" both=no>
+  <pdm_macro name=lsWrite text="var img = ahdtop.GetFileTypeImage(FileType);" both=yes>
+  <pdm_macro name=lsCol hdr="Tytuł" attr=TITLE link=yes  img=img fmtfunc=highlightSearchTerms sort=no >
+  <pdm_macro name=lsCol hdr="Modyfikowano" attr=MODIFY_DATE sort=no >
+  <pdm_macro name=lsCol hdr="Rozmiar po spakowaniu" attr=FILE_ID.file_size fmtfunc=fmt_file_size sort=no >
+  <pdm_macro name=lsWrite text="pdm_if '@{args.QBE.IN.ebr_search_text}' == '' || '$env.NX_EBR_VERSION' != 'SEARCH_ENGINE' ">
+  <pdm_macro name=lsCol attr=SUMMARY disp_entities=no startrow=yes width=255 colspan=4 fmtfunc=highlightSearchTerms sort=no>
+  <pdm_macro name=lsWrite text="pdm_else">
+  <pdm_macro name=lsCol attr=ebr_ks_teaser keeptags=yes keeplinks=yes startrow=yes width=255 colspan=4 fmtfunc=highlightSearchTerms sort=no >  
+  <pdm_macro name=lsWrite text="/pdm_if">
+  <pdm_macro name=lsEnd>
+  //
+  rs.setLinkOnclick(function(){DownloadFile(self.activeRow);});
+  var ctxMenu=new ContextMenu("idKD_FILE");
+  ctxMenu.addItem(msgtext("View"), "DownloadFile(self.activeRow);");
+  if (ahdtop.CanUserPerformAction("ROLE_FILE_EDIT"))
+  {
+	ctxMenu.addItem(msgtext("Edit"), "OpenFile(self.activePersid);");
+  }
+	<PDM_IF "$env.NX_KT" == "Yes">
+		if (argSearchType == "ticket" && m_sArgsSD_LAUNCHEDTopassOn != "")
+		{
+			ctxMenu.addItem("Accept as Solution", "AcceptFromList(self.activePersid);");
+		}
+	</PDM_IF>
+  //ctxMenu.addItem(msgtext("Replace_File"), "ReplaceFile(self.activeRow);");
+  //ctxMenu.addItem(msgtext("Convert_to_KD"), "ConvertToDocument(self.activeRow);");
+  //ctxMenu.addItem("Rate & Comment", "EnterFeedback(self.activeRow);");
+  if (ahdtop.CanUserPerformAction("ROLE_DOCUMENT_DELETE"))
+  {
+	ctxMenu.addItem(msgtext("Delete"), "DeleteSelectedObject(self.activeRow);");
+  }
+  ctxMenu.addItem(msgtext("Print_Form%1...", " " + window.propFormName),"CAisdPrint();");  // Print this window
+  ctxMenu.addItem(msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')"); // Help on this window
+  ctxMenu.finish(); 
+//Format the zipped file size field to locale view with no decimals and show by "KB"  
+function fmt_file_size(value)
+{
+  if ( value >= 1000 )
+  {
+     value = value/1000
+     value = Math.round(value);
+     value = parseFloat(value.toLocaleString());
+     value = value.toFixed(0);
+  }
+  else if ( value == "0" )
+     value = 0;
+  else 
+	value = 1;
+	
+  value += " KB"; 
+  rs.data(value);     
+}

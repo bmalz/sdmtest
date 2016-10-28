@@ -1,0 +1,311 @@
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview=kt_dtbuilder.htmpl>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css" />
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script>
+function window_onload()
+{
+	parent.frmDTBuilderTree.location.href = "$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=kt_dtbuilder_tree.htmpl";
+}
+</script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_dtbuilder_node.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/toolbar.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onload="window_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no menubar=no>
+
+
+<table class=alertmsg id=alertmsg style="display:none" width="100%">
+<tbody><tr><td id=alertmsgText></td></tr></tbody></table>
+
+<script language=javascript>
+	var imgPath='$CAisd' + '/img/';
+	ToolbarStartRow();
+	ToolbarCreateButton("SaveAndClose", msgtext("Save_and_Close"), imgPath + "ExBuildersavetree_closetree.gif", "parent.frmDTBuilderTree.DoSaveAndClose", msgtext("Save_and_Close"));
+	ToolbarCreateButton("Save", "", imgPath + "ExBuildersavetree.gif", "parent.frmDTBuilderTree.DoSave", msgtext("Save"));
+	ToolbarCreateButton("Copy", "", imgPath + "ExBuildercopynode.gif", "parent.frmDTBuilderTree.DoCopy", msgtext("Copy"));
+	ToolbarCreateButton("Cut", "", imgPath + "ExBuildercutnode.gif", "parent.frmDTBuilderTree.DoCut", msgtext("Cut"));
+	ToolbarCreateButton("Paste", "", imgPath + "ExBuilderpastenode.gif", "parent.frmDTBuilderTree.DoPaste", msgtext("Paste"));
+	ToolbarCreateButton("AddQuery", "", imgPath + "ExBuilderaddquerynode.gif", "parent.frmDTBuilderTree.DoAddQuery", msgtext("Add_Query"));
+	ToolbarCreateButton("AddConclusion", "", imgPath + "ExBuilderaddconclusionnode.gif", "parent.frmDTBuilderTree.DoAddConclusion", msgtext("Add_Conclusion"));
+	ToolbarCreateButton("AddJump", "", imgPath + "ExBuilderaddjumpnode.gif", "parent.frmDTBuilderTree.DoAddJump", msgtext("Add_Jump"));
+	ToolbarCreateButton("Delete", "", imgPath + "ExBuilderdeletenode.gif", "parent.frmDTBuilderTree.DoDelete", msgtext("Delete1"));
+	ToolbarEndRow();
+</script>
+
+<div id="DIVRightPane" class="clsDivResults">
+	<table width="100%">
+		<tr>
+			<td id="tdRoot" valign="Top" style="display:none">
+				<div id="divRoot">
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td class="gn_td_font_size" colspan="3">
+								&nbsp;
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+							<script>
+								<PDM_MACRO NAME=dtlHTMLEditBox hdr="Opis drzewa" size=84 rows=10 attr=txtRoot spellchk=no bound=no toolbar=kd persid="KD:$args.DTDocID" tenant=$args.Tenant>
+							</script>
+							</td>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td id="tdQuery" valign="Top" style="display:none">
+				<div id="divQuery">
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">			
+						<tr>
+							<td class="gn_td_font_size">
+								&nbsp;
+							</td>
+						</tr>
+						<tr id="TRQueryTitle">
+							<td></td>
+							<td>
+							<script>
+								<PDM_MACRO NAME=dtlHTMLEditBox hdr="Tekst zapytania" size=84 rows=10 attr=txtQuery spellchk=no bound=no toolbar=kd persid="KD:$args.DTDocID" tenant=$args.Tenant>
+							</script>
+							</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" width="98%" height="20px" bgcolor="#9CC2E4" class="clsBtnOffDisabled" nowrap>
+								<table class="clsSummerizeDocList" width="100%">
+									<tr>
+										<td width="100%">	
+											<h3 class="clsCaption gn_dtbuilder_caption gn_container_no_margin">
+												&nbsp;<PDM_IF 0>LOCALIZATION</PDM_IF>Responses
+											</h3>
+										</td>
+										<td nowrap="true" style="display:none">
+											<p>&nbsp;&nbsp;</p>
+										</td>					
+										<td nowrap="true" style="display:none">
+											<u class="clsAnchor" id="uTop" language="javascript" onclick="return uTop_onclick()" onmousemove="return ForceChangeOrder(true)" onmouseout="return ForceChangeOrder(false)"></u>
+										</td>
+										<td nowrap="true" style="display:none">
+											<p id="pDividerTop"></p>
+										</td>
+										<td nowrap style="display:none">
+											<u class="clsAnchor" id="uPrevious" language="javascript" onclick="return uPrevious_onclick()" onmousemove="return ForceChangeOrder(true)" onmouseout="return ForceChangeOrder(false)"></u>
+										</td>
+										<td nowrap="true" style="display:none">
+											<p id="pDivider"></p>
+										</td>
+										<td nowrap="true" style="display:none">
+											<u class="clsAnchor" id="uNext" language="javascript" onclick="return uNext_onclick()" onmousemove="return ForceChangeOrder(true)" onmouseout="return ForceChangeOrder(false)"></u>
+										</td>
+										<td nowrap="true" style="display:none">
+											<p id="pDividerBottom"></p>
+										</td>
+											<td nowrap="true" style="display:none">
+											<u class="clsAnchor" id="uBottom" language="javascript" onclick="return uBottom_onclick()" onmousemove="return ForceChangeOrder(true)" onmouseout="return ForceChangeOrder(false)"></u>
+										</td>
+										<td nowrap="true" style="display:none">
+											<p>&nbsp;&nbsp;</p>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" align="CENTER" width="98%">
+								<div id="divResponse1" style="display:none;overflow-x : hidden;">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+										<tr>													
+											<td>
+												<img id="imgResponse1" class="Handcls" value="1" />
+											</td>
+											<td width="100%">
+												<input id="txtResponse1" name="txtResponse1" onFocus="this.className='clsTextFocus'" onBlur="this.className='clsText'" maxlength="100" class="clsText" style="width:100%;overflow-x : hidden" language="javascript" onchange="return parent.frmDTBuilderTree.txtResponse_onchange(1)" onpropertychange="return parent.frmDTBuilderTree.txtResponse_onpropertychange(1)" onkeyup="return parent.frmDTBuilderTree.txtResponse_onkeyup(1)">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+							<td width="1%">&nbsp;</td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" align="CENTER" width="98%">
+								<div id="divResponse2" style="display:none;overflow-x : hidden;">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td>
+												<img id="imgResponse2" class="Handcls" value="2" />
+											</td>
+											<td width="100%">
+												<input id="txtResponse2" name="txtResponse2" onFocus="this.className='clsTextFocus'" onBlur="this.className='clsText'" maxlength="100" class="clsText" style="width:100%;overflow-x : hidden;" language="javascript" onchange="return parent.frmDTBuilderTree.txtResponse_onchange(2)" onpropertychange="return parent.frmDTBuilderTree.txtResponse_onpropertychange(2)" onkeyup="return parent.frmDTBuilderTree.txtResponse_onkeyup(2)">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+							<td width="1%">&nbsp;</td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" align="CENTER" width="98%">
+								<div id="divResponse3" style="display:none;overflow-x : hidden;">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td>
+												<img id="imgResponse3" class="Handcls" value="3" />
+											</td>
+											<td width="100%">
+												<input id="txtResponse3" name="txtResponse3" onFocus="this.className='clsTextFocus'" onBlur="this.className='clsText'" maxlength="100" class="clsText" style="width:100%;overflow-x : hidden;" language="javascript" onchange="return parent.frmDTBuilderTree.txtResponse_onchange(3)" onpropertychange="return parent.frmDTBuilderTree.txtResponse_onpropertychange(3)" onkeyup="return parent.frmDTBuilderTree.txtResponse_onkeyup(3)">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+							<td width="1%">&nbsp;</td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" align="CENTER" width="98%">
+								<div id="divResponse4" style="display:none;overflow-x : hidden;">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td>
+												<img id="imgResponse4" class="Handcls" value="4" />
+											</td>
+											<td width="100%">
+												<input id="txtResponse4" name="txtResponse4" onFocus="this.className='clsTextFocus'" onBlur="this.className='clsText'" maxlength="100" class="clsText" style="width:100%;overflow-x : hidden;" language="javascript" onchange="return parent.frmDTBuilderTree.txtResponse_onchange(4)" onpropertychange="return parent.frmDTBuilderTree.txtResponse_onpropertychange(4)" onkeyup="return parent.frmDTBuilderTree.txtResponse_onkeyup(4)">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+							<td width="1%">&nbsp;</td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" align="CENTER" width="98%">
+								<div id="divResponse5" style="display:none;overflow-x : hidden;">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td>
+												<img id="imgResponse5" class="Handcls" value="5" />
+											</td>
+											<td width="100%">
+												<input id="txtResponse5" name="txtResponse5" onFocus="this.className='clsTextFocus'" onBlur="this.className='clsText'" maxlength="100" class="clsText" style="width:100%;overflow-x : hidden;" language="javascript" onchange="return parent.frmDTBuilderTree.txtResponse_onchange(5)" onpropertychange="return parent.frmDTBuilderTree.txtResponse_onpropertychange(5)" onkeyup="return parent.frmDTBuilderTree.txtResponse_onkeyup(5)">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+							<td width="1%">&nbsp;</td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" align="CENTER" width="98%">
+								<div id="divResponse6" style="display:none;overflow-x : hidden;">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td>
+												<img id="imgResponse6" class="Handcls" value="6" />
+											</td>
+											<td width="100%">
+												<input id="txtResponse6" name="txtResponse6" onFocus="this.className='clsTextFocus'" onBlur="this.className='clsText'" maxlength="100" class="clsText" style="width:100%;overflow-x : hidden;" language="javascript" onchange="return parent.frmDTBuilderTree.txtResponse_onchange(6)" onpropertychange="return parent.frmDTBuilderTree.txtResponse_onpropertychange(6)" onkeyup="return parent.frmDTBuilderTree.txtResponse_onkeyup(6)">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+							<td width="1%">&nbsp;</td>
+						</tr>
+						<tr>
+							<td width="1%">&nbsp;</td>
+							<td colspan="1" align="CENTER" width="98%">
+								<div id="divResponse7" style="display:none;overflow-x : hidden;">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td>
+												<img id="imgResponse7" class="Handcls" value="7" />
+											</td>
+											<td width="100%">
+												<input id="txtResponse7" name="txtResponse7" onFocus="this.className='clsTextFocus'" onBlur="this.className='clsText'" maxlength="100" class="clsText" style="width:100%;overflow-x : hidden;" language="javascript" onchange="return parent.frmDTBuilderTree.txtResponse_onchange(7)" onpropertychange="return parent.frmDTBuilderTree.txtResponse_onpropertychange(7)" onkeyup="return parent.frmDTBuilderTree.txtResponse_onkeyup(7)">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+							<td width="1%">&nbsp;</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td id="tdConclusion" valign="Top" style="display:none">
+				<div id="divConclusion" language="javascript">
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td class="gn_td_font_size">
+								&nbsp;
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+								<script>
+									<PDM_MACRO NAME=dtlHTMLEditBox hdr="Tekst wniosku" size=84 rows=10 attr=txtConclusion spellchk=no bound=no toolbar=kd persid="KD:$args.DTDocID" tenant=$args.Tenant>
+								</script>
+							</td>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td id="tdJump" style="display:none" valign="middle">
+				<div id="divJump">
+					<table width="100%" class="clsCaption">
+						<tr valign="middle">
+							<td valign="middle" align="CENTER">
+								<PDM_IF 0>LOCALIZATION</PDM_IF>There is no visible user interface
+							</td> 
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>	
+	</table>
+</div>
+
+
+<div id="DIVErrors" style="display:none">
+	<table border="0" bordercolor="#336633" width="100%" style="overflow:auto" cellspacing="0" cellpadding="0">
+		<tr style="width:100%;background-color:#9CC2E4;">
+			<td id="tdErrorsLine" valign="top">
+              <h3 class="gn_container_no_margin">
+                <span class="clsCaption gn_dtbuilder_caption">&nbsp;<PDM_IF 0>LOCALIZATION</PDM_IF>Results of error check -</span>
+                <span id="spanErrors" class="clsCaption gn_dtbuilder_caption">
+                </span>
+              </h3>
+			</td>
+			<td CLASS="clsHorizontalBar" VALIGN="middle" align="right">
+				<img src="/CAisd/img/ExBuilderClose.gif" class="Handcls" onclick="parent.frmDTBuilderTree.DoShowHideErrors()" WIDTH="13" HEIGHT="13" alt="Close Window" />&nbsp;
+			</td>
+		</tr>
+	</table>
+	<div id="DIVErrorsTable" class="clsDivResults" border="0" cellspacing="0" cellpadding="0">
+		<table class="Handcls" id="tblErrors" width="100%" border="0" cellspacing="0" cellpadding="0">
+		</table>
+	</div>
+</div>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

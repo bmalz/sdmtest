@@ -1,0 +1,193 @@
+<PDM_IF 0>
+@(#)$Id: detail_attmnt_folder.htmpl ASPEN.3 2010/10/29 14:51:51 saima01 Exp $;
+WHEN PRESENTED:
+    When we need to display Knowledge Document Editor
+INTENT:
+    Display the dKnowledge Document Editor
+VARIABLES:
+    
+    object  KD  args	The Skeleton object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT KD
+						for the definition of attributes for 'OBJECT KD'
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.folder_name</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.folder_name</PDM_FMT>';
+var hdrTitleNew = "Utwórz folder";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/timer.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attevts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+
+<SCRIPT>
+_bHideTenantSelection = true;//Inherit the tenant from the containing repository - SCO 6350
+
+var bLoadPermission_tab = 0;
+var iframePerm = null;
+function checkBeforeSave()
+{
+	if(checkPermissions())
+		pdm_submit('main_form','UPDATE');
+}
+function checkPermissions()
+{
+	if (bLoadPermission_tab == 0)
+	{
+		return true;
+	}	
+	if (iframePerm.bInheritPermission())
+	{	
+		document.forms["main_form"].elements["SET.inherit_permission_id"].value = iframePerm.bInheritPermission();
+		document.forms["main_form"].elements["SET.PGROUP_TYPE"].value = iframePerm.PgroupType();
+        document.forms["main_form"].elements["SET.READ_GROUP_LIST"].value = iframePerm.ReadList();
+        document.forms["main_form"].elements["SET.WRITE_GROUP_LIST"].value = iframePerm.WriteList();
+	}
+	else
+	{
+		document.forms["main_form"].elements["SET.inherit_permission_id"].value = 0;
+		document.forms["main_form"].elements["SET.PGROUP_TYPE"].value = iframePerm.PgroupType();
+		document.forms["main_form"].elements["SET.READ_GROUP_LIST"].value = iframePerm.ReadList();
+		var sWritePerm = iframePerm.WriteList();
+		if (sWritePerm == 1 || sWritePerm == "11111111111111111111111111111111")
+		{
+			alert("Please make sure at least one group has the write permission.");
+			return false;
+		}
+		else if(sWritePerm == -999)
+		{
+			alert("Please make sure the grant write permission is selected.");
+			return false;
+		}
+		document.forms["main_form"].elements["SET.WRITE_GROUP_LIST"].value = iframePerm.WriteList();
+	}
+	return true;
+}
+
+function permissionTabLoaded()
+{
+	bLoadPermission_tab = 1;
+}
+
+function LoadActions()
+{
+	iframePerm = window.frames["tabPermissions_iframe"];
+	if(propFormName3 == "edit")
+	{
+		var bEdit = "$args.id";
+		if (bEdit == "0")
+		{
+			parent.is_attmnt_folder_new = true;		
+		}
+		else
+		{
+			parent.is_attmnt_folder_new = false;
+		}
+	}
+	else if(propFormName3 == "ro")
+	{
+		
+		var oTreeFrame;
+		if (ahdframeset == ahdtop)//supress popup options
+			oTreeFrame = null; //ahdframeset.kt_catTreeWindow[lTreeNumber];		
+		else
+		{
+			if(typeof top.opener.ahdframeset == "undefined" || 
+				top.opener.ahdframeset.AttachmentLibraryTreeNumber == null)
+				return;
+			var lTreeNumber = top.opener.ahdframeset.AttachmentLibraryTreeNumber;
+			oTreeFrame = top.opener.ahdframeset.kt_catTreeWindow[lTreeNumber].GetTreeFrame();
+			if ( typeof oTreeFrame == "object" && oTreeFrame != null ) 
+			{
+				oTreeFrame.UpdateTree($args.id,parent.is_attmnt_folder_new,'<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$args.folder_name</PDM_FMT>',$args.parent_id-0,
+					'$args.folder_path_ids',$args.has_children,'$args.repository');
+			}			
+		}
+	}	
+}
+function preCancelTrigger()
+{
+	if ( !ahdtop.cstReducePopups )	// continue cancel
+		return true;
+		
+	BackToRep();	// Return to repository list
+	return false;	// don't continue cancel
+}
+function BackToRep()
+{
+	var url = url=cfgCgi+
+	"?SID="+cfgSID+
+	"+FID="+fid_generator()+
+	"+OP=DISPLAY_FORM+HTMPL=kt_admin_attachments.htmpl";
+	document.location.href = url;
+}
+
+function permissionTabReset()
+{	
+	// get_tab_id from web_tab.js	
+       var tabID = get_tab_id("Permissions");
+	// reload permissions tab	
+	tabReload(tabID);
+}
+
+
+</SCRIPT>
+
+</HEAD>
+<BODY class=detailro onLoad="LoadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="attmnt_folder" header=no>
+<SCRIPT>
+<PDM_MACRO name=dtlForm button=false factory=attmnt_folder>
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button Caption="Zapisz[s]" Disabled="defer" Func="checkBeforeSave()" hotkey_name="Save[s]" ID="btnSave">
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="detailCancel()" hotkey_name="Cancel[n]" ID="btncncl">
+<PDM_MACRO name=button Caption="Resetuj[r]" Func="check_reset();detailReset();permissionTabReset()" hotkey_name="Reset[r]" ID="btn003">
+<PDM_ELIF "$args.id" != "1" >
+		if (cfgUserAuth > 1)
+<PDM_MACRO name=button Caption="Edytuj" Func="detailEdit()" hotkey_name="Edit" ID="btnEdit">
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+</SCRIPT>
+
+<PDM_IF "$prop.form_name_3" == "edit">
+	<INPUT TYPE=HIDDEN NAME="SET.inherit_permission_id" value='$args.inherit_permission_id'>
+	<INPUT TYPE=HIDDEN NAME="SET.PGROUP_TYPE" value="$args.READ_PGROUP.TYPE">
+	<INPUT TYPE=HIDDEN NAME="SET.READ_GROUP_LIST" value="$args.READ_GROUP_LIST">
+	<INPUT TYPE=HIDDEN NAME="SET.WRITE_GROUP_LIST" value="$args.WRITE_GROUP_LIST">
+</PDM_IF>
+
+<CENTER>
+<br>
+<PDM_MACRO name=startNotebook hdr="attmnt_folder_nb">
+<PDM_MACRO name=tab title="Zawartość" file="attmnt_content_tab.htmpl">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=tab title="Uprawnienia" height=600 id=tabPermissions src="OP=DISPLAY_FORM+HTMPL=attmnt_permissions_tab.htmpl+READ_PGROUP=$args.read_pgroup+WRITE_PGROUP=$args.write_pgroup+inherit_permission_id=$args.inherit_permission_id+PARENT_READ_PGROUP=$args.parent_id.read_pgroup+PARENT_WRITE_PGROUP=$args.parent_id.write_pgroup+parent_id=$args.parent_id+id=$args.id+KEEP.IS_EDIT=$prop.form_name_3">
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

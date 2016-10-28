@@ -1,0 +1,52 @@
+<PDM_IF 0>
+list_pcat_in_ss.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Incident Area Search";
+var hdrTitleList = "Incident Area List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Incident Area">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+var AlertMsg = '<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>';
+<PDM_MACRO name=sfStart factory=pcat_in_ss>
+docWriteln('<INPUT TYPE=HIDDEN NAME="QBE.EQ.delete_flag" VALUE="0">');
+docWriteln('<INPUT TYPE=hidden NAME=SERVICE_CST VALUE=${args.KEEP.SERVICE_CST:}>');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Znak" attr=ss_sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No incident areas found";
+var msgFound1 = "1 incident area found";
+var msgFound = "%1 incident areas found";
+var msgFoundMore = "%1 incident areas found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired incident area";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Znak" attr=ss_sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: list_pcat_in_ss.htmpl ANDERSON.2 2009/09/29 13:38:16 hu$ho01 Exp $"
+</PDM_IF>
+<PDM_WSP>

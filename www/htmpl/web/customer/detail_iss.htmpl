@@ -1,0 +1,979 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2005 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  detail_iss.htmpl
+// Created: 12/14/05
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////
+//$@(#)$Id: detail_iss.htmpl ASPEN.7 2012/02/28 12:09:40 siwst01 Exp $
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.ref_num Issue Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.ref_num Update Issue"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Issue $args.ref_num"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/cst_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/cst_catitem.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/change_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/resultset.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+        
+
+<script type="text/javascript">
+<PDM_IF "$prop.form_name_3" == "ro">
+        var lnkid = -1;
+        var attdata = new Array();
+        var cfgAllowPopupResize = true;
+        var useClose = 1;
+<PDM_IF $args.workflow.length != 0 >
+<PDM_LIST prefix=list factory=iss_wf where="(object_type = 'iss') AND (status.task_complete = 0) AND (iss = '$args.persistent_id')">
+var isswf_id ="$list.id";
+        useClose = 0;
+</PDM_LIST>
+</PDM_IF>
+<PDM_IF "$args.rootcause" == "">
+
+</PDM_IF>
+</PDM_IF>
+
+var default_trans_code="$args.status";   
+var default_trans_sym="$args.status.sym";
+var prop_ref = "${prop_ref:}";           
+argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+if ( ! _browser.supportsLayers )
+   document.writeln('<scr' + 'ipt type="text/javascript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+function loadActions()
+{
+<PDM_IF "$prop.form_name_3" == "edit">
+    init_properties('iss', document.main_form);
+    
+	onLoadTicket();  
+    
+    if ('$args.KEEP.use_kd_values_fromahdtop' == '1' && "0" == "$args.id")
+    {
+        //This code used when creating a request from a link that was created by the HTML Editor. SDT 32942
+        ahdframe.detailExtUpdate (ahdtop.KDValuesToUse);
+        ahdtop.KDValuesToUse = null;
+    }    
+<PDM_ELSE>
+	if ("0" != "$args.id")	// ticket exists
+	{
+		for (var lTicket = 0; lTicket < ahdtop.m_arrViewedTickets.length; lTicket++)
+		{
+			if ("$args.id" == ahdtop.m_arrViewedTickets[lTicket])
+				return;		// ticket have already been viewed in this session and a log record have been already added
+		}
+		
+		// ticket have not been viewed yet in this session
+		ahdtop.m_arrViewedTickets[ahdtop.m_arrViewedTickets.length] = "$args.id";
+
+		var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + 
+			"+OP=TICKET_VIEW+TICKET_PERSID=$args.persistent_id";
+			
+		SyncAjaxCall(sURL);
+	}
+</PDM_IF>        
+}     
+
+
+</script>
+<PDM_INCLUDE FILE="dyn_properties.htmpl">
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="detailro" onload="loadActions();">
+<PDM_INCLUDE FILE="std_body.htmpl">
+<script type="text/javascript">
+<!--
+    var maxSize=new Array("SET.description","Issue Description", $args.LENGTH_description);
+//-->
+
+if (typeof ahdtop.checked_knowledge == "boolean"  && ahdtop.checked_knowledge == true)
+ahdtop.checked_knowledge = false;
+
+function check_and_save() { 
+  if ( window.document.forms["main_form"].elements["SET.SET.OPHONE"].value.length > 0 ||
+       window.document.forms["main_form"].elements["SET.SET.OEMAIL"].value.length > 0 )
+   call_save();
+  else {
+    var e = document.getElementById(ophoneID);
+    if ( e != null )
+      e.focus();
+    window.setTimeout("alertmsg('You_must_provide_either_a_phon')",1); // You must provide either a phone number or an email address
+  }
+}
+
+
+function call_save()
+{
+	window.setTimeout("detailSave()", 500);
+}
+
+</script>
+        
+
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=iss>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_IF  "$env.NX_KT" == "Yes" && "$prop.SUGGEST_KNOWLEDGE_FOR_ISSUE_CATS" != '-1' && "$args.id" == "0">
+	//It's important to omit the button width in this case as the Mozilla, Firefox and saffari does not expand the button when the caption is too long
+	
+<PDM_MACRO name=button caption="View Knowledge before Save[K]" disabled="yes" func="SuggestKnowledge()" hotkey_name="View Knowledge before Save[K]" id="btnCont">
+</PDM_IF>
+<PDM_IF  "$prop.guest_user" == 1 && "$args.id" == "0">
+<PDM_MACRO name=button caption="Save[s]" disabled="defer" func="cacheTicket();check_and_save()" hotkey_name="Save[s]" id="btnSave" width=120>
+<PDM_ELSE>
+<PDM_MACRO name=button caption="Save[s]" disabled="defer" func="cacheTicket();call_save()" hotkey_name="Save[s]" id="btnSave" width=120>
+</PDM_IF>
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" disabled="defer" func="ahdtop.ticketObj.resetTicket();cancel_update('$prop.form_name_2','$args.id','', 'home.htmpl', true)" hotkey_name="Cancel[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Reset[r]" disabled="defer" func="check_reset()" hotkey_name="Reset[r]" id="btn003" width=120>
+<PDM_MACRO name=button caption="Attach Document[!d]" disabled="defer" func="do_popup_url()" hotkey_name="Attach Document[!d]" id="btn004" width=0>
+function do_popup_url() {
+    var query_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" + 
+                    "+OP=CREATE_NEW+FACTORY=attmnt+KEEP.attmnt_for_edit=1+attmnt_parent=iss";
+    popupWithURL(query_str, 1);	
+}
+<PDM_MACRO name=btnEndRow>
+<PDM_ELSE>
+<PDM_IF "$ACCESS.FAC_iss" \> 1>
+<PDM_IF "$args.active" == "1" && "$args.status" != "CLREQ" &&  "$args.status" != "CL" >
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$prop.guest_user" != 1>
+<PDM_MACRO name=button caption="Edit Issue" disabled="defer" func="pdm_submit('main_form','UPDATE')" hotkey_name="Edit Issue" id="btn001" width=0>
+</PDM_IF>
+<PDM_MACRO name=button caption="Add Comment" disabled="defer" func="add_activity_log('$args.persistent_id', true)" hotkey_name="Add Comment" id="btn002" width=0>
+<PDM_MACRO name=button caption="Attach Document[!d]" disabled="defer" func="do_browse_url()" hotkey_name="Attach Document[!d]" id="btn004" width=0>
+                    function do_browse_url() {
+                        var query_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" +
+                            "+OP=CREATE_NEW+FACTORY=attmnt+NEXT_PERSID=$args.persistent_id" +
+                            "+attmnt_parent=iss";
+                        browseWithURL(query_str);	
+                    }
+    
+<PDM_IF "$prop.guest_user" != 1>
+                    function close_issue()
+                    {
+                        var query_str = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+                                "+FACTORY=iss+PERSID=$args.persistent_id" +
+                                "+OP=UPDATE+AUTO_OVERRIDE_LOCK=true+EDIT_HTMPL=issue_status_change.htmpl+ACTIVITY_LOG_TYPE=CL" +
+                                "+KEEP.useClose=" + useClose;
+<PDM_IF "1" == "${args.KEEP.IsPopUp:0}">
+                        query_str += "+KEEP.IsPopUp=1";
+</PDM_IF>
+                            document.location.href=query_str;
+                    }
+
+<PDM_MACRO name=button caption="Close Issue" disabled="defer" func="close_issue()" hotkey_name="Close Issue" id="btn003" width=0>
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_ELSE>
+<PDM_IF "$prop.guest_user" != 1>
+        function reopen_issue()
+        {
+            var query_str = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+                        "+FACTORY=iss+PERSID=$args.persistent_id" +
+                            "+OP=UPDATE+AUTO_OVERRIDE_LOCK=true+EDIT_HTMPL=issue_status_change.htmpl+ACTIVITY_LOG_TYPE=RO";
+<PDM_IF "1" == "${args.KEEP.IsPopUp:0}">
+                        query_str += "+KEEP.IsPopUp=1";
+</PDM_IF>
+            document.location.href=query_str;
+        }
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Reopen Issue" disabled="defer" func="reopen_issue()" hotkey_name="Reopen Issue" id="btn003" width=0>
+<PDM_MACRO name=button caption="Refresh" disabled="defer" func="do_url()" hotkey_name="Refresh" id="btn005" width=0>
+<PDM_MACRO name=btnEndRow>
+        function do_url()
+        {
+	    var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+                "+OP=SHOW_DETAIL+PERSID=" + nx_escape("$args.persistent_id");
+            window.location.replace(url);
+	}
+    
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+</script>
+<PDM_IF "$prop.form_name_3" == "ro">
+    <input type="hidden" name=AUTO_OVERRIDE_LOCK value=true>
+<PDM_ELSE>
+<PDM_IF  "$prop.SUGGEST_KNOWLEDGE_FOR_ISSUE_CATS" != '-1' && "$args.id" == "0">
+	<input type="hidden" name=KEEP.suggest_knowledge value=2>
+</PDM_IF>
+	<input type="hidden" name="SET.ticket_avoided" value="$args.ticket_avoided">
+	<input type="hidden" name=change_category value=0>
+    <input type="hidden" name="SET.call_back_flag" value="$args.call_back_flag" id="SET.call_back_flag">
+    <input type="hidden" name=SET.requestor value="$cst.id">
+    <input type="hidden" name="NEW_ATTMNTS" id="NEW_ATTMNTS">    
+    <input type="hidden" name="INPUT_FIELDS_TO_PARSE">
+    <input type="hidden" name=SELF_SERVICE value=1>
+    
+<PDM_IF $args.id>
+<PDM_ELSE>
+    <input type="hidden" name=AppendCustInfo value="Yes">
+    
+</PDM_IF>
+<PDM_IF 0>
+    <!-- The following PDM_IF block forces the web interface
+             to send the customer back to the home page rather than
+             the request read-only form.
+             If you want to revert back to pre-6.0 behaviour:
+             1. Copy this file to $NX_ROOT/site/mods/www/htmpl/web/customer,
+             2. Remove the PDM_IF block. -->
+    
+</PDM_IF>
+<PDM_IF "$args.id" == "">
+                <input type="hidden" name="HTMPL" value="home.htmpl">
+    
+</PDM_IF>
+</PDM_IF>
+
+
+<script type="text/javascript">
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data/Czas otwarcia" attr=open_date>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=status>
+<PDM_MACRO name=dtlReadonly hdr="Priorytet" attr=priority>
+<PDM_IF "$args.category.ss_include" == "1" && "$args.category.ss_sym" != "">
+<PDM_MACRO name=dtlReadonly hdr="Issue Category" attr="category.ss_sym">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Issue Category" attr="category">
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+    detailRowHdr("Reported by");
+    
+<PDM_IF "$prop.guest_user" == 1>
+    detailSetRowData("Guest");
+    
+<PDM_ELSE>
+    detailSetRowData("$cst.combo_name");
+    detailWriteRow();
+    
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit" && "$args.id" == "0">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.SET.OPHONE" == "">
+            <PDM_SET args.SET.OPHONE="$cst.phone_number">
+        
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Telefon" attr=SET.OPHONE size=30>    
+        var ophoneID = _dtl.currID;
+
+        
+<PDM_IF "$args.SET.OEMAIL" == "">
+            <PDM_SET args.SET.OEMAIL="$cst.email_address">        
+        
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="e-mail" attr=SET.OEMAIL size=30>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF 0>
+		Use prepare_self_serve_priority_dropdown() to determine the sym and enum of the
+		user's default priority based on the web.cfg, a data partition Defaults setting
+		or the priority of a saved ticket.
+		Also build the prio_string, a list of priorities base on the web.cfg.
+		Feed these values into a detailDropdown().
+	
+</PDM_IF>
+<PDM_IF "$prop.guest_user" == 1>
+		prepare_self_serve_priority_dropdown ("$prop.AnonymousPrio", "$args.priority", "$args.id", "$args.priority.sym");
+	
+<PDM_ELSE>
+		prepare_self_serve_priority_dropdown ("$prop.CstPrio", "$args.priority", "$args.id", "$args.priority.sym");
+	
+</PDM_IF>
+	var def_prio_sym = "";
+	var def_prio_enum = "";
+	var prio_string = "";
+	if ( typeof ahdtop != "object" || typeof ahdtop.default_webcfg_prio_sym != "string" || 
+	     typeof ahdtop.default_webcfg_prio_enum != "string" || typeof ahdtop.self_serve_priority_string != "string" ) 
+	{
+		// Should only get in here if there was a problem with prepare_self_serve_priority_dropdown().
+		// In that case, just go with the default priority.
+		def_prio_sym  = "$args.priority.sym";
+		def_prio_enum = "$args.priority";
+		prio_string   = def_prio_sym + "@,@" + "$args.priority";
+	}
+	else 
+	{
+		// These values calculated by prepare_self_serve_priority_dropdown().
+		def_prio_sym  = ahdtop.default_webcfg_prio_sym;
+		def_prio_enum = ahdtop.default_webcfg_prio_enum;
+		prio_string   = ahdtop.self_serve_priority_string;
+	}
+
+	detailDropdown("Priority", "priority","pri", 1, 20,
+		true, "$args.priority.persistent_id", def_prio_enum,
+		"no", "$args.priority.COMMON_NAME_ATTR", def_prio_sym,
+		"", "", "no", "", "", "",
+		prio_string );
+
+	
+<PDM_IF "$args.category.ss_include" != "1" && "$args.id" != "0" && "$args.category" != "">
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr="category">
+<PDM_ELSE>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja" attr="category" autofill=yes common_name="ss_sym" evt="onChange=\\\"emp_change_category_func('iss')\\\"" factory=isscat_ss size=30>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Issue Description" attr=description colspan=4 keeplinks=yes make_required=yes rows=6 size=100 spellchk=yes>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_IF 0><!-- SDT 21249: Show properties in r/o form --></PDM_IF>
+            <p>
+                <table width="90%">
+                    <tr><th align="left" valign="baseline" class="detailro" colspan=3>Properties</th></tr>
+                </table>
+                <table width="90%" summary="$args.ref_num Issue Detail row 3 - Properties">
+                    <tr>
+                        <th align="left" valign="baseline" class="detailro" scope="col">Name</th>
+                        <th align="left" valign="baseline" class="detailro" scope="col">Value</th>
+                        <th align="left" valign="baseline" class="detailro" scope="col">Example</th>
+                    </tr>
+<PDM_LIST SOURCE=args.property_list>
+                    <tr>
+                        <td class="detailro" align="left" valign="top">$args.property_list.label</td>
+                        <td class="detailro" align="left" valign="top"><PDM_FMT ESC_STYLE=NONE>$args.property_list.value</PDM_FMT></td>
+                        <td class="detailro" align="left" valign="top">$args.property_list.sample</td>
+                    </tr>
+</PDM_LIST>
+                </table>
+            </p>
+            <p>
+                <table id="tbl003" width="90%">
+                    <tr><th align="left" valign="baseline" class="detailro" colspan=4>History</th></tr>
+                 </table>
+                <table width=90% summary="$args.ref_num Issue Detail row 4 - History">
+                    <tr>
+                        <th align="left" valign="baseline" class="detailro" scope="col">Contact</th>
+                        <th align="left" valign="baseline" class="detailro" scope="col">Date</th>
+                        <th align="left" valign="baseline" class="detailro" scope="col">Type</th>
+                        <th align="left" valign="baseline" class="detailro" scope="col">Summary</th>
+                    </tr>    
+<PDM_IF 0><!-- SDT 8275 Different list source depending if login user can see internal logs --></PDM_IF>
+<PDM_IF $prop.view_internal == 0>
+    <PDM_LIST SOURCE=args.act_log>
+                    <tr>
+                        <td class="detailro" align="left" valign="top">
+        <PDM_FMT WIDTH=20>$args.act_log.analyst.combo_name</PDM_FMT>
+                        </td>
+                        <td class="detailro" align="left" valign="top">
+                            <script type="text/javascript">
+                            <!--
+                                date_to_string('$args.act_log.time_stamp_INT_DATE', 1);
+                            //-->
+                            </script>
+                        </td>
+<script>
+if ( "$args.act_log.type.code" == "SBLIVELOG")
+{
+    var alghtml = "<td nowrap='nowrap' valign='top' class='detailro'>";
+    alghtml += "$args.act_log.type.sym</td>\n";
+    document.writeln(alghtml);
+}
+else if (("$args.act_log.type.code" == "KTSOLN" || "$args.act_log.type.code" == "KTREJECT") &&
+    "$args.act_log.session" != "")
+{
+    var alghtml = "<td nowrap='nowrap' valign='top' class='detailro'>";
+    alghtml += "<a title=\"Click to display Knowledge document ${args.act_log.session:}\" href=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, 'directories=no,location=no,menubar=no,status=no,topsplash=no,menubar=no','PERSID=KD:$args.act_log.session', 'HTMPL=kt_document_view.htmpl', 'opener=simple', 'open_mode=2', 'reload=1', 'SOLUTION_OF=" + nx_escape('$args.persistent_id') + "', 'disable_solution_survey=true', 'TICKET_FACTORY=iss', 'SOLUTION_OF_ID=$args.id')\">\n";
+    alghtml += "$args.act_log.type.sym</a></td>\n";
+    document.writeln(alghtml);
+}
+else
+{
+    document.writeln("<td class='detailro' align='left' valign='top'>$args.act_log.type.sym</td>");
+}
+document.write("<td class='detailro' align='left' valign='top'>");
+document.write(nx_unescape('<PDM_FMT JUSTIFY=LINE ESC_STYLE=JS2>$args.act_log.description</PDM_FMT>'));
+document.writeln("</td>");
+</script>
+                    </tr>
+    </PDM_LIST>
+<PDM_ELSE> <!-- See all logs -->
+    <PDM_LIST SOURCE=args.act_log_all>
+                    <tr>
+                        <td class="detailro" align="left" valign="top">
+        <PDM_FMT WIDTH=20>$args.act_log_all.analyst.combo_name</PDM_FMT>
+                        </td>
+                        <td class="detailro">
+                            <script type="text/javascript">
+                            <!--
+                                date_to_string('$args.act_log_all.time_stamp_INT_DATE', 1);
+                            //-->
+                            </script>
+                        </td>
+<script>
+if ( "$args.act_log_all.type.code" == "SBLIVELOG")
+{
+    var alghtml = "<td nowrap='nowrap' valign='top' class='detailro'>";
+    alghtml += "$args.act_log_all.type.sym</td>\n";   
+    document.writeln(alghtml);
+}
+else if (("$args.act_log_all.type.code" == "KTSOLN" || "$args.act_log_all.type.code" == "KTREJECT") &&
+    "$args.act_log_all.session" != "")
+{
+    var alghtml = "<td nowrap='nowrap' valign='top' class='detailro'>";
+    alghtml += "<a title=\"Click to display Knowledge document ${args.act_log_all.session:}\" href=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, 'directories=no,location=no,menubar=no,status=no,topsplash=no,menubar=no','PERSID=KD:$args.act_log_all.session', 'HTMPL=kt_document_view.htmpl', 'opener=search_tools', 'open_mode=2', 'reload=1', 'SOLUTION_OF=" + nx_escape('$args.persistent_id') + "', 'disable_solution_survey=true', 'TICKET_FACTORY=iss', 'SOLUTION_OF_ID=$args.id')\">\n";
+    alghtml += "$args.act_log_all.type.sym</a></td>\n";
+    document.writeln(alghtml);
+}
+else
+{
+    document.writeln("<td class='detailro'>$args.act_log_all.type.sym</td>");
+}
+document.write("<td class='detailro' align='left' valign='top'>");
+document.write(nx_unescape('<PDM_FMT JUSTIFY=LINE ESC_STYLE=JS2>$args.act_log_all.description</PDM_FMT>'));
+document.writeln("</td>");
+</script>
+                    </tr>
+    </PDM_LIST>
+</PDM_IF>
+                </table>
+            </p>
+<PDM_IF $args.attachments.length != 0 >
+            <p>
+            <table id=tbl004 width=90%>
+            <tr>
+                <th align="left" colspan=4 class="detailro">Attachments</td>
+            </tr>
+            </table>
+            <table width=90% summary="$args.ref_num Issue Detail row 5 - Attachments">
+            <tr>
+                <th align="left" class="detailro" scope="col">Document</td>
+                <th align="left" class="detailro" scope="col">Description</td>
+                <th align="left" class="detailro" scope="col">Attached On</td>
+                <th align="left" class="detailro" scope="col">Status</td>
+            </tr>
+            <script>
+            <PDM_LIST SOURCE=args.attachments>
+                attdata[++lnkid] = new Object();
+                attdata[lnkid].id = "$args.attachments.id";
+                attdata[lnkid].attmnt_name = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$args.attachments.attmnt_name</PDM_FMT>');
+                attdata[lnkid].orig_file_name = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$args.attachments.orig_file_name</PDM_FMT>');
+                attdata[lnkid].status = "$args.attachments.status";
+            
+<PDM_IF "$args.attachments.link_only" != "1">
+                attdata[lnkid].cgi_path ="$args.attachments.repository.servlet_path";
+                attdata[lnkid].protocol = "servlet";
+                attdata[lnkid].server = "$args.attachments.repository.server";
+                attdata[lnkid].retrieve_path = "$args.attachments.repository.retrieve_path";
+                attdata[lnkid].file_name = "$args.attachments.file_name";
+            
+</PDM_IF>
+            document.writeln("<tr>");
+            document.write("<td class='detailro' align='left' valign='top'>");
+
+                var link = "<a href=\"javascript:download_exec(attdata[" + lnkid + "])\">";
+                document.write(link + '<PDM_FMT esc_style=c><PDM_FMT JUSTIFY=TRUNCATE WIDTH=40>$args.attachments.attmnt_name</PDM_FMT></PDM_FMT></a>');
+
+                document.writeln("</td>");
+            document.write("<td class='detailro' align='left' valign='top'>");
+            document.write(nx_unescape('<PDM_FMT JUSTIFY=TRUNCATE WIDTH=40 ESC_STYLE=JS2>$args.attachments.description</PDM_FMT>'));
+            document.writeln("</td>");
+            document.write("<td class='detailro' align='left' valign='top'>");
+            document.write(date_to_string('$args.attachments.created_dt_INT_DATE', 0));
+            document.writeln("</td>");
+            document.write("<td class='detailro' align='left' valign='top'>");
+            if ( "$args.attachments.status" == "INSTALLED" )
+                document.write("Installed");
+            else if ( "$args.attachments.status" == "LINK_ONLY" )
+                document.write("Link Only");
+            else if ( "$args.attachments.status" == "NOTINSTALLED" )
+                document.write("Not Installed");
+            document.writeln("</td>");
+            document.writeln("</tr>");
+            </PDM_LIST>
+            </script>
+            </table>
+            </p>
+</PDM_IF>
+<PDM_ELSE>
+<!-- The properties for the EDIt form begins here  -->
+
+<PDM_IF "" != "$args.prop0.id">
+                <table id="tblProperties">
+<PDM_ELSE>
+                <table id="tblProperties" style="display: none;">
+</PDM_IF>
+                    <tr>
+                        <th id="CatLabel">
+                        </th>
+                    </tr>
+                </table>
+                
+<script>
+if ( _browser.supportsLayers ) {
+    document.writeln("<layer " +
+                    "id='prop_layer' " +
+                    "left='" + String(document.anchors["prop_anchor"].x) + "' " +
+                    "top='" + String(document.anchors["prop_anchor"].y) + "' " +
+                    "height='1400'>");
+
+        document.writeln('<form name="prop_form">');
+            document.writeln('<table>');
+/* Has to cover 22 properties. */
+<PDM_IF "" != "$args.prop0.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop0.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop0.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop0.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop0.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop0.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop0.value' id='SET.prop0.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop0.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+
+<PDM_IF "" != "$args.prop1.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop1.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop1.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop1.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop1.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop1.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop1.value' id='SET.prop1.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop1.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop2.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop2.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop2.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop2.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop2.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop2.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                document.writeln("<input name='SET.prop2.value' id='SET.prop2.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop2.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop3.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop3.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop3.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop3.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop3.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop3.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop3.value' id='SET.prop3.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop3.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop4.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop4.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop4.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop4.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop4.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop4.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop4.value' id='SET.prop4.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop4.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop5.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop5.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop5.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop5.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop5.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop5.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop5.value' id='SET.prop5.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop5.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop6.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop6.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop6.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop6.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop6.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop6.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop6.value' id='SET.prop6.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop6.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop7.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop7.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop7.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop7.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop7.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop7.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop7.value' id='SET.prop7.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop7.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop8.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop8.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop8.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop8.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop8.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop8.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop8.value' id='SET.prop8.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop8.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop9.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop9.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop9.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop9.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop9.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop9.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop9.value' id='SET.prop9.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop9.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop10.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop10.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop10.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop10.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop10.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop10.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop10.value' id='SET.prop10.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop10.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+<PDM_IF "" != "$args.prop11.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop11.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop11.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop11.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop11.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop11.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop11.value' id='SET.prop11.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop11.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop12.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop12.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop12.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop12.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop12.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop12.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop12.value' id='SET.prop12.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop12.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+<PDM_IF "" != "$args.prop13.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop13.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop13.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop13.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop13.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop13.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop13.value' id='SET.prop13.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop13.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop14.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop14.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop14.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop14.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop14.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop14.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop14.value' id='SET.prop14.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop14.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop15.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop15.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop15.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop15.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop15.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop15.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop15.value' id='SET.prop15.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop15.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+<PDM_IF "" != "$args.prop16.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop16.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop16.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop16.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop16.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop16.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop16.value' id='SET.prop16.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop16.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop17.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop17.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop17.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop17.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop17.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop17.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop17.value' id='SET.prop17.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop17.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop18.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop18.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop18.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop18.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop18.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop18.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop18.value' id='SET.prop18.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop18.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+<PDM_IF "" != "$args.prop19.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop19.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop19.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop19.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop19.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop19.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop19.value' id='SET.prop19.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop19.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop20.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop20.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop20.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop20.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop20.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop20.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop20.value' id='SET.prop20.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop20.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF "" != "$args.prop21.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop21.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop21.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop21.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop21.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop21.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop21.value' id='SET.prop21.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop21.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+<PDM_IF "" != "$args.prop22.id">
+                document.writeln('<tr>');
+                    document.writeln('<td valign="top">');
+    
+<PDM_IF 0 != $args.prop22.required>
+                        document.writeln('<span class="requiredlabeltext"><label for="SET.prop22.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop22.label"</PDM_FMT> + cfgIndRequired + '</label></span>');
+    
+<PDM_ELSE>
+                        document.writeln('<span class="labeltext"><label for="SET.prop22.value">' + <PDM_FMT ESC_STYLE=C>"$args.prop22.label"</PDM_FMT> + '</label></span>');
+    
+</PDM_IF>    
+                    document.writeln('</td>');
+                    document.writeln('<td valign="top">');
+                    document.writeln("<input name='SET.prop22.value' id='SET.prop22.value' tabindex=" + _dtl.tabIndex + " value='" + <PDM_FMT ESC_STYLE=C>'$args.prop22.value'</PDM_FMT> + "'>");
+                    document.writeln('</td>');
+                document.writeln('</tr>');
+<PDM_IF 0><!-- Prop22 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop21 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop20 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop19 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop18 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop17 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop16 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop15 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop14 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop13 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop12 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop11 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop10 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop9 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop8 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop7 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop6 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop5 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop4 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop3 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop2 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop1 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop0 --></PDM_IF>
+</PDM_IF>
+            document.writeln('</table>');
+        document.writeln('</form>');
+    document.writeln('</layer>');
+<PDM_IF 0><!-- Properties for NS4 --></PDM_IF>
+}
+</script>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>
+<center>
+<br />
+<PDM_INCLUDE FILE=self_service_include.htmpl status=0 ticket_factory="iss">
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

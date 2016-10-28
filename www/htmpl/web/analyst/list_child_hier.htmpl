@@ -1,0 +1,91 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Configuration Item Search";
+var hdrTitleList = "";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("hiersum.rpt", "hierdtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/webtab.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script type="text/javascript">
+
+function add_button_to_tab_banner() {
+    <PDM_IF $UserAuth \> 1>
+        <PDM_SET args.disable_btns="no">
+    <PDM_ELSE>
+        <PDM_SET args.disable_btns="yes">
+    </PDM_IF>
+    var btnFunc = 'add_hier(this.form, "$args.KEEP.NR_PERSID", <PDM_FMT PAD=NO ESC_STYLE=JS2>"$cst.combo_name"</PDM_FMT>, <PDM_FMT PAD=NO ESC_STYLE=JS2>"$args.KEEP.NR_name"</PDM_FMT>, 1)';
+    <PDM_MACRO NAME=button                     
+        id="btn204"                            
+        caption="Add Child"  
+        func="\" + btnFunc + \""
+        hotkey_name="Add Child"
+        disabled=$args.disable_btns 
+        newrow=yes
+        endrow=yes >
+}        
+      
+function showCIDetail(value)
+{
+	var alghtml;
+	alghtml = "<a class='record' href=\"javascript:showDetailWithPersid('nr:" + child_id + "')\">" + value + "</a>" ;
+	rs.data(alghtml);
+}
+
+function showUser(value)
+{
+	var alghtml;
+	alghtml = "<a class='record' href=\"javascript:showDetailWithPersid('cnt:" + analyst_persid + "')\">" + value + "</a>" ;
+	rs.data(alghtml);
+}
+  var msgFoundNone = "No Child Relations found";
+  var msgFound1 = "1 Child Relation found";
+  var msgFound = "%1 Child Relations found";
+  var msgFoundMore = "%1 Child Relations found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Child Relation";
+<PDM_MACRO NAME=tabBanner title="Related Child Configuration Items List" add_btns=true>
+<PDM_MACRO NAME=lsStart>
+<pdm_macro name=lsWrite text="var analyst_persid = \"@{list.child.resource_contact:}\";">
+<pdm_macro name=lsWrite text="var child_id = \"@{list.child.id:}\";">
+<pdm_macro name=lsWrite text="var parent_id = \"@{list.parent.id:}\";">
+	<PDM_MACRO NAME=lsCol hdr="Podrzędne CI" attr=child.name justify=left fmtfunc=showCIDetail sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Kontakt" attr=child.resource_contact justify=left fmtfunc=showUser sort=no > 
+	<PDM_MACRO NAME=lsCol hdr="Data wpisu" attr=log_date justify=left sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Identyfikator" attr=license_num justify=left sort=no>
+<PDM_MACRO NAME=lsEnd>
+
+var ctxMenu=new ContextMenu("idMenuTasks");
+ctxMenu.addItem("View Relation", "showDetailWithPersidKeep(self.activePersid,'ForHier','$args.persistent_id')");
+ctxMenu.addItem("Delete Relation", "delete_hier(self.parent_id,self.activePersid)");
+ctxMenu.finish();
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

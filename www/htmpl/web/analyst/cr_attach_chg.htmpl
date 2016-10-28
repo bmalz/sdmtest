@@ -1,0 +1,75 @@
+<PDM_IF 0>
+cr_attach_chg.htmpl
+WHEN PRESENTED:
+    when the app needs to attach a Change Order to a Request.
+INTENT:
+    attach changes to requests
+VARIABLES:
+    object cr   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/cm.maj for the
+                            definition of attributes for 'OBJECT cr'
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script language="JavaScript">
+<PDM_IF "$args.type" == "I">
+	var form_title = "Attach Change Order to Incident $args.ref_num";
+<PDM_ELIF "$args.type" == "P">
+	var form_title = "Attach Change Order to Problem $args.ref_num";
+<PDM_ELSE>
+	var form_title = "Attach Change Order to Request $args.ref_num";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl wm=no wm=no>
+<script language="JavaScript">
+edit_form = 1;
+var alg_factory = "alg";
+var cfgMachineName = "$SESSION.MachineName";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var cfgDateFormat = "$date_format";
+var argRefNum = "$args.ref_num";
+var cfgAccessNotify = "$ACCESS.notify";
+var argID = "$args.id";
+</script>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onload="load_from_scratchpad('0')" onunload="unload_check()" class="editform">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<center>
+<script language="JavaScript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+<PDM_MACRO name=dtlForm button=false factory=cr>
+<PDM_MACRO name=button Caption="Załącz" Func="detailSave('ATTACH_CHANGE')" hotkey_name="Attach" ID=btn001 NewRow=yes Width=120>
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="cancel_update('$prop.factory',${args.id:0},'show_main_detail.htmpl')" hotkey_name="Cancel[n]" ID=btncncl Width=120>
+<PDM_MACRO name=button Caption="Reset[R]" EndRow=yes Func="window.document.main_form.reset()" hotkey_name="Reset[R]" ID=btn003 Width=120>
+<PDM_MACRO name=dtlStart>
+docWrite('<input type="hidden" name="HTMPL" value="show_main_detail.htmpl">');
+docWrite('<input type="hidden" name="KEEP.IsModified" value="1">');
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="$args.type.sym numer" attr=ref_num>
+<PDM_MACRO name=dtlReadonly hdr="$args.type.sym streszczenia" attr=summary colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Zmiana" attr=change make_required="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr=remark colspan=4 rows=8 size=80 spellchk=no>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</center>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: cr_attach_chg.htmpl ASPEN.6 2011/02/09 18:34:10 pstso01 Exp $
+</PDM_IF>
+<PDM_WSP>

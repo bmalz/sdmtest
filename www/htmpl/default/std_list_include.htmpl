@@ -1,0 +1,18 @@
+<PDM_IF 0>
+$Id: std_list_include.htmpl,v 1.1 2006/11/01 18:01:07 olsjo01 Exp $
+
+Note: The list of JavaScript files included here MUST be identical to the
+      contents of std_list.js, including file sequence.
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_IF "$prop.DebugScript" != "1">
+<script type="text/javascript" src="$CAisd/scripts/std_list.js"></script>
+<PDM_ELSE>
+<script type="text/javascript" src="$CAisd/scripts/search_filter.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/resultset.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/list_navigate.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/backfill.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/report.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+</PDM_IF>

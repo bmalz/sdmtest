@@ -1,0 +1,45 @@
+<PDM_IF 0>
+20130909 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	var frm = "";
+	if ( !parent.product )
+	{
+		frm = parent.ahdframe;
+	}
+	else { frm = parent.product; }
+    if (typeof frm.GetChgFlag == "function")
+    {
+		var flag;
+		<PDM_LIST PREFIX=list FACTORY=pcat WHERE="ss_sym='$args.categorysym'">
+			flag = '$list.zchg_flag';
+		</PDM_LIST>
+        frm.GetChgFlag(flag);
+    }
+	
+	if (typeof frm.GetOwningContracts == "function" && '$args.organizationid' != '')
+    {
+	alert('$args.organizationid');
+		var Contracts = new Array();
+		<PDM_LIST PREFIX=list FACTORY=zlrel_org_kontr WHERE="org.id=U'$args.organizationid'">
+			Contracts.push("$list.kontr.id");
+		</PDM_LIST>
+        frm.GetOwningContracts(Contracts);
+    }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

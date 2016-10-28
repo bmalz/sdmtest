@@ -1,0 +1,63 @@
+<PDM_IF 0>
+iss_expedite.htmpl
+WHEN PRESENTED:
+    when the app needs to expedite a Issue's workflow tasks.
+INTENT:
+    expedites workflow tasks for a issue 
+VARIABLES:
+    object iss   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/issue.maj for the
+                            definition of attributes for 'OBJECT iss'
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+var obj_id = "${args.ref_num:}";
+var form_title = "Expedite Issue" + " " + obj_id;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script>
+edit_form=1;
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+var cawf_procid = "$args.cawf_procid";
+</script>
+</head>
+<body onunload="unload_check()" class="editform" >
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<script type="text/javascript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+<PDM_MACRO NAME=dtlForm button=false>
+if (cawf_procid == "" ){
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Ok[k]" hotkey_name="Ok[k]" id="btn001" width=120
+    func="pdm_submit('main_form','EXPEDITE')">
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" id="btncncl" btnType="negative" width=120
+    func="cancel_update('$prop.form_name_2','$args.id','show_main_detail.htmpl')">
+<PDM_MACRO NAME=button caption="Reset[r]" hotkey_name="Reset[r]" id="btn003" width=120
+    func="pdm_reset()">
+<PDM_MACRO NAME=btnEndRow>
+<PDM_MACRO NAME=dtlStart center=true>
+docWriteln("<input type='hidden' name=HTMPL value=show_main_detail.htmpl>");
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlTextbox  hdr="Uwagi"  attr=remark
+           size=80 rows=8 spellchk=no>    
+}
+else{
+	alertmsg("Expedite_action_is_not_availab0");  
+}                  
+</script>
+<PDM_MACRO NAME=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</center>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: iss_expedite.htmpl ASPEN.3 2012/06/18 15:01:17 debbi01 Exp $
+</PDM_IF>

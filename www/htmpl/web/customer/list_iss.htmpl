@@ -1,0 +1,90 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  list_iss.htmpl
+// Created: 08/12/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This form lists issues.  The list criteria is passed via the query
+//    string and is interpreted by the web engine.
+////////////////////////////////////////////////////////////////////////////
+// $Id: list_iss.htmpl,v 1.3 2006/11/09 23:07:03 ralje02 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<html lang="en">	<HEAD>
+	<script>
+var hdrTitleList = "Issue List";
+
+function loadActions()
+{
+	var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + 
+		"+OP=TICKET_SEARCH+TICKET_TYPE=Issues+SEARCH_COUNT=$record_count";
+	
+	SyncAjaxCall(sURL);
+}
+</script>	
+<PDM_INCLUDE FILE="std_head.htmpl">
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+	</head>
+	<body class=cst onload="loadActions();">
+<PDM_INCLUDE FILE="std_body.htmpl">
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+		<script language="JavaScript">
+var msgFoundNone = "No issues found";
+var msgFound1 = "1 issue found";
+var msgFound = "%1 issues found";
+var msgFoundMore = "%1 issues found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired issue";
+var msgSelectAlg = "Click to select desired issue and add a %1 activity log";
+var ref_num_style;
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_if @{list.ttv_act_slas.length:0} == 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_ELSE>
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Issue #" attr=ref_num exportfmt=ShowLink link=yes style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=DESC>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority label="Prio" sort=DESC>
+<PDM_MACRO name=lsCol hdr="Grupa" attr=group>
+<PDM_MACRO name=lsCol hdr="Kontakty" attr=assignee label="Assignee">
+<PDM_MACRO name=lsCol label="Summary" attr=summary colspan=6 startrow=yes width=50>
+<PDM_MACRO name=lsEnd factory=iss>
+</script>
+</PDM_IF>
+<pdm_include file="std_footer.htmpl">
+</body>
+</html>
+<PDM_WSP>

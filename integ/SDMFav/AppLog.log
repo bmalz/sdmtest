@@ -1,0 +1,17 @@
+
+
+B2013-09-23 17:45:09
+System.IO.FileNotFoundException: Could not find file 'c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\App_Data\template_eksperyza.docx'.
+File name: 'c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\App_Data\template_eksperyza.docx'
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+   at SDMFavService.GenDocs.GenExpertise(HttpContext context) in c:\Users\Bartosz\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\GenDocs.ashx.cs:line 57
+
+B2013-09-23 17:45:52
+System.IO.FileNotFoundException: Could not find file 'c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\App_Data\template_eksperyza.docx'.
+File name: 'c:\users\bartosz\documents\visual studio 2012\Projects\SDMFavService\SDMFavService\App_Data\template_eksperyza.docx'
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+   at SDMFavService.GenDocs.GenExpertise(HttpContext context) in c:\Users\Bartosz\Documents\Visual Studio 2012\Projects\SDMFavService\SDMFavService\GenDocs.ashx.cs:line 57

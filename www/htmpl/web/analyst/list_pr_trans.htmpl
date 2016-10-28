@@ -1,0 +1,31 @@
+<PDM_IF 0>
+list_pr_trans.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Status Transitions for Problem
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP factory=pr_trans preview="NBTAB=list_pr_trans">
+<html lang="en">
+<HEAD>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Problem Transition Search";
+var hdrTitleList = "Problem Transition List";
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+
+<PDM_INCLUDE FILE=list_trans_include.htmpl transFactory=pr_trans statFactory=crs_pr>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+

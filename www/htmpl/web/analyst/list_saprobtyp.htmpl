@@ -1,0 +1,244 @@
+<PDM_IF 0>
+list_saprobtyp.htmpl
+WHEN PRESENTED:
+    When we need to display a list of ServiceAware Error Types
+INTENT:
+    Display the list of ServiceAware Error Types
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object saprobtyp_list list The list object containing the ServiceAware Error Types
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT saprobtyp'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "SOAP Web Services Error Type Search";
+var hdrTitleList = "SOAP Web Services Error Type List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+//XJZ need to load proper report templates.
+var rptName = new Array("no", "no");
+var cfgCanEdit = true;
+function tmpl_onload()
+{
+    var tmpl_obj_hidden = document.getElementById("saprobtyp_tmpl_sym");
+    if (tmpl_obj_hidden && tmpl_obj_hidden.value != null && tmpl_obj_hidden.value.length != 0)
+    {
+        //var tmpl_obj = document.getElementById("template_factory_link");
+		var tmpl_obj = document.getElementById(tmpl_lookup_id);
+		
+        if (tmpl_obj)
+            tmpl_obj.value = tmpl_obj_hidden.value;        
+    }
+}
+function template_factory_change(){
+    //reset value in the lookup
+	var tmpl_obj = document.getElementById(tmpl_lookup_id);
+    tmpl_obj.value = "";
+	
+	//reset value in the hidden field
+	tmpl_obj = document.getElementById("saprobtyp_tmpl_sym");
+    tmpl_obj.value = "";
+	
+}
+function getFormName(obj)
+{
+	for(var i = 0; i < document.forms.length; i++)
+	{
+		if(typeof document.forms[i].elements[obj.name] != "undefined")
+			return document.forms[i].name;
+	}
+	return null;
+}
+
+var policyDefaultId = "";
+<PDM_IF "$args.KEEP.forPolicyList" == "1">
+<PDM_LIST PREFIX=list LENGTH=1 WHERE="owning_policy = $args.KEEP.POLICY_ID AND is_default = 1" FACTORY=saprobtyp>
+   policyDefaultId = "$list.id";
+</PDM_LIST>
+    var cfgCanEdit = false;
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.POLICY_ID" != "0" && $ACCESS.FAC_saprobtyp \> 1 && $ACCESS.FAC_sapolicy \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Add_An_Error_Type", "parent.AddErrorType()", enableExtraBtn);
+</PDM_IF>
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onload="tmpl_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.noCreateBtn" != "1" && $ACCESS.FAC_saprobtyp \> 1>
+<PDM_MACRO name=sfStart factory=saprobtyp>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=saprobtyp>
+</PDM_IF>
+<PDM_IF "$args.KEEP.forPolicyList" == "1">
+   document.write('<input type="hidden" id="ADDL_WHERE_HARDCODE" name="ADDL_WHERE_HARDCODE" value="(owning_policy.id=$args.KEEP.POLICY_ID OR is_internal=1)">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code size=20>
+<PDM_IF "$args.KEEP.forPolicyList" != "1">
+<PDM_MACRO name=sfLookup hdr="Posiadana polisa" attr=owning_policy>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_IF "$args.KEEP.forPolicyList" != "1">
+	searchFilterDropdown("Default","is_default","","No","0","Yes","1");
+</PDM_IF>
+searchFilterDropdown("Internal","is_internal","","No","0","Yes","1");
+<PDM_MACRO name=sfStartRow>
+searchFilterSetEventHandler("onChange='template_factory_change(this)'");
+var tmpl_type_id = searchFilterDropdown("Ticket Type","template_factory","", "Incident", "in_tpl", "Problem", "pr_tpl", "Call Request","cr_tpl","Change Order","chg_tpl","Issue","iss_tpl");
+var form_name;
+function saprobtyp_select_template_type()
+{
+    var tmpl_obj = document.getElementById(tmpl_type_id);
+    var tmpl_val = tmpl_obj.options[tmpl_obj.selectedIndex].value;
+    tmpl_val = tmpl_val.replace(/ /g, "");
+    if (tmpl_val.length == 0)
+    {
+        alert("Must select a non-empty ticket template type from the Ticket Type field on the left first.");
+        return;
+    }
+    var extra = "use_template=1+QBE.EQ.template_name.delete_flag=0";
+    tmpl_val = tmpl_val.replace(/_([a-zA-Z]*)/g, "");
+    if (tmpl_val == "cr")
+	extra += "+ADDITIONAL_WHERE=" + nx_escape("type != 'I' AND type != 'P'");
+    //form_name = document.forms[1].name;
+	form_name = getFormName(tmpl_obj);
+
+    popup_search(tmpl_val, "dummy_template_name", form_name, extra, "0","template_name", "");
+}
+
+function saprobtyp_change_template_name(new_val)
+{
+    if ( __search_filter.lastKeycode == TAB && ahdframe.currentAction == ACTN_COMPLETE)
+        saprobtyp_select_template_type();
+    var tmpl_obj = document.getElementById("saprobtyp_tmpl_sym");
+    tmpl_obj.value = new_val;
+}
+
+function backfill_event( form_name, field_name, value,
+                         persid, rel_attr_val, caller_type ) 
+{
+    if (field_name == "dummy_template_name")
+    {    
+        var tmpl_obj = document.getElementById("saprobtyp_tmpl_sym");
+        tmpl_obj.value = value;
+    }
+}
+
+var caption, tmpl_link;
+var titletext;
+if ( ahdtop.cstUsingScreenReader )
+{
+  caption = "Ticket Template Name Lookup";
+  titletext = msgtext("%1_-_autofill;_up_arrow_for_lo", "Ticket Template Name");
+  tmpl_link = '';
+}
+else {
+  caption = "Ticket Template Name";
+  titletext = caption;
+  tmpl_link = '<IMG WIDTH=12 HEIGHT=12 BORDER=0 STYLE="vertical-align:middle" SRC="' + 
+            cfgCAISD + '/img/lookup.gif" alt="Pop up lookup form">' + ' ';
+}
+tmpl_link += '<A class=sfLookup ID=' + __search_filter.nextLinkName() +
+        " onFocus=\"this.className='focusField'\"" +
+        " onBlur=\"this.className=''\"" +
+	' TITLE="Ticket Template Name Lookup"' + 
+        ' HREF="javascript:void(0)" TABINDEX=-1 onclick="saprobtyp_select_template_type()"><SPAN CLASS=lookup>' + caption + '</SPAN></A>';
+docWriteln('<TH VALIGN=baseline ALIGN=left>'+tmpl_link+'</TH>');
+
+var GetNextID = searchFilterNextID(null, caption);
+
+var str1=GetNextID.indexOf("id=");
+var strlen= GetNextID.length;
+getstr1 = GetNextID.substr(str1,strlen);
+//getstr1 will now have for example id=sf_0_0 tabindex=1.....
+// Now search for the second black space which comes just after the id and strip it
+//and everything which comes after it
+var secondwhitespaceval=getstr1.search("\\s");
+var getstr2 = getstr1.substr(0,secondwhitespaceval);
+//getstr2 will now have for example id=sf_0_0
+var getstr2len = getstr2.length;
+var str2=getstr2.indexOf("id=");
+//strip off id=
+var  tmpl_lookup_id = getstr2.substr(str2+3,getstr2len);
+	 
+var tmpl_text = '<INPUT NAME="dummy_template_name" SIZE=30 ' +
+                 GetNextID + 
+		' TITLE="' + titletext + '"' + 
+                ' onChange="saprobtyp_change_template_name(this.value)">';
+tmpl_text += "<INPUT TYPE=hidden ID=saprobtyp_tmpl_sym NAME='QBE.IN.template_sym'>";
+__search_filter.setRowData(tmpl_text);
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No SOAP Web Services error type found";
+var msgFound1 = "1 SOAP Web Services error type found";
+var msgFound = "%1 SOAP Web Services error types found";
+var msgFoundMore = "%1 SOAP Web Services error types found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired SOAP Web Services error type";
+
+// Display Yes if this is the default specifically set up for this policy.
+// If this policy has no specific default, display yes for the default internal policy.
+function display_policy_default(value) {
+   var yes_no = "No";
+   if (value == 1) {
+      if (policyDefaultId != "") {
+         if (policyDefaultId == saprobtyp_id) {
+            yes_no = "Yes";
+         }
+      }
+      else {
+         yes_no = "Yes";
+      }
+   }
+   rs.data(yes_no);
+   return;
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var saprobtyp_id = '@{list.id}';">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_IF "$args.KEEP.forPolicyList" != "1">
+<PDM_MACRO name=lsCol hdr="Posiadana polisa" attr=owning_policy>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr=is_default export=no fmtfunc=display_policy_default sort=no>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_saprobtyp.htmpl ASPEN.6 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

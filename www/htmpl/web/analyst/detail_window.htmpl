@@ -1,0 +1,241 @@
+<PDM_IF 0>
+detail_window.htmpl
+WHEN PRESENTED:
+    When we need to display an inital detail of Blackout or Maintenance window
+INTENT:
+    Display the initial detail info for the Blackout or Maintenance window
+
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Window Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Window"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Change Window $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+cfgMachineName = "$SESSION.MachineName";
+argPersistentID = "$args.persistent_id";
+argCstID = "$cst.id";
+cfgDateFormat = "$date_format";
+var prevValue = "$args.timezone";
+var gmt_delta = "$args.timezone.gmt_delta";
+var id = "$args.id";
+</script>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_chooser.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/schedule.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/recurrence_pattern.js"></SCRIPT>
+<script type="text/javascript">
+
+var schedTzInfo = new Array();
+
+function pdm_reset()
+{
+	for(var i=0;i<window.document.forms.length;i++)
+	{
+		window.document.forms[i].reset();
+		<PDM_IF "$args.id" != "0">
+			<PDM_LIST FACTORY=window where="id =$args.id" PREFIX=current>
+				recurs = '$current.recurs';
+				recurrence_interval = '$current.recurrence_interval';
+				occurence = '$current.occurrence';
+				weekDayArray[0] = '$current.sunday';
+				weekDayArray[1] = '$current.monday';
+				weekDayArray[2] = '$current.tuesday';
+				weekDayArray[3] = '$current.wednesday';
+				weekDayArray[4] = '$current.thursday';
+				weekDayArray[5] = '$current.friday';
+				weekDayArray[6] = '$current.saturday'; 
+			</PDM_LIST>
+		</PDM_IF>
+		<PDM_IF "$args.id" != "0">
+			switch ( recurs ) 
+			{ 
+				case "0" : 
+					setNone(0);
+					selection = document.getElementById("none");
+					selection.checked = true;
+					break;
+				case "1" : 
+					setDailyForm(1);
+					selection = document.getElementById("daily");
+					selection.checked = true;
+					break;
+				case "2" : 
+					setWeeklyForm(2);
+					selection = document.getElementById("weekly");
+					selection.checked = true;
+					break;
+				case "3" : 
+					setMonthlyForm(3);
+					selection = document.getElementById("monthly");
+					selection.checked = true;
+					break;
+				case "4" : 
+					setYearlyForm(4);
+					selection = document.getElementById("yearly");
+					selection.checked = true;
+					break;
+				default :
+					break;
+			}
+			flag = true;
+		<PDM_ELSE>
+			setNone(0);
+		</PDM_IF>
+	}
+	<PDM_IF $args.id != "0">
+		document.main_form.elements["SET.start_date"].value = setToTimezone(string_to_date("",document.main_form.elements["SET.start_date"].value,""));
+		document.main_form.elements["SET.end_date"].value = setToTimezone(string_to_date("",document.main_form.elements["SET.end_date"].value,""));
+		prevValue = '$args.timezone';
+	</PDM_IF>
+	clear_response();
+}
+
+function setToTimezone( value )
+{	
+	translatedDate = adjustToTz( value, "$args.timezone");
+	return (translatedDate );
+}
+
+function getTzInfo( tz )
+{
+	<PDM_LIST FACTORY=tz where="delete_flag = 0" PREFIX=current>
+	if ('$current.code'== tz)
+		{
+		 schedTzInfo[1] = "$current.gmt_delta";
+	     schedTzInfo[2] = "$current.dst_delta";
+	     schedTzInfo[3] = "$current.start_day";
+	     schedTzInfo[4] = "$current.start_mon";
+	     schedTzInfo[5] = "$current.start_pos";
+	     schedTzInfo[6] = "$current.start_abs_date";
+	     schedTzInfo[7] = "$current.end_day";
+	     schedTzInfo[8] = "$current.end_mon";
+	     schedTzInfo[9] = "$current.end_pos";
+	     schedTzInfo[10] = "$current.end_abs_date";
+		}
+	</PDM_LIST>
+	return (schedTzInfo);
+}
+
+//setIsGlobal() - Disables/Enables the global checkbox based on window type
+// Disables and checks global checkbox if window_type is Blackout 
+// Enables global checkbox if window_type is Maintenance
+// value - window_type (400 - Maintenance , 401 - Blackout)
+function setIsGlobal( value ) 
+{
+	var child_nodes;
+	var non_global;
+	var parent_node;
+	non_global = document.getElementsByName("SET.non_global");
+	parent_node = non_global[0].parentNode;
+	child_nodes = parent_node.getElementsByTagName("input");	
+	for ( var i = 0; i < child_nodes.length; i++) 
+	{
+		if (child_nodes[i].getAttribute('type') == 'checkbox') {
+			//If window_type is blackout then disable global checkbox and check it
+			if ( value == 401 )
+			{ // Blackout Window, so disable and check global checkbox
+				child_nodes[i].disabled = true;
+				child_nodes[i].checked = true;
+				document.main_form.elements["SET.non_global"].value = "0";
+			}
+			else
+			{ // Maintenance Window, so enable global checkbox
+				child_nodes[i].disabled = false;
+				if (document.main_form.elements["SET.non_global"].value == "1" || $args.id == "0")  
+				{
+					child_nodes[i].checked = false;
+					document.main_form.elements["SET.non_global"].value = "1";	
+				}	
+				else
+				{
+					child_nodes[i].checked = true;
+					document.main_form.elements["SET.non_global"].value = "0";
+				}
+			}
+		break;
+		}
+	}	
+}
+
+// flipIsGlobal() - sets the attr non_global to appropriate value
+// value - state of global checkbox
+// Set the attr non_global to '1' if global checkbox is unchecked
+// Set the attr non_global to '0' if global checkbox is checked
+function flipIsGlobal( value )
+{
+	if(value)
+		document.main_form.elements["SET.non_global"].value = "0";
+	else
+		document.main_form.elements["SET.non_global"].value = "1";
+}
+
+</script>
+</HEAD>
+
+<BODY class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl>
+
+<CENTER>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=window onsubmit="return (validateForm() && checkCIassociation() && setValues() && setOriginalTime());">
+ImgBtnHideButton("btn003");
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button caption="Reset[R]" func="pdm_reset()" hotkey_name="Reset[R]" id=btn003 width=70>
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa okna" attr="sym">
+<PDM_MACRO name=dtlDropdown hdr="Typ" attr="window_type" evt="onChange=setIsGlobal(this.value);disableButtons()" lookup=no>
+<PDM_MACRO name=dtlCheckbox hdr="Globalne" attr="non_global" evt="onClick=flipIsGlobal(this.checked);disableButtons()" off="Yes" on="No">
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="delete_flag" evt="onChange=disableButtons()">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlDate hdr="Data rozpoczęcia" attr="start_date">
+<PDM_MACRO name=dtlDate hdr="Data zakończenia" attr="end_date">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Data rozpoczęcia" attr="start_date" fmtfunc=setToTimezone>
+<PDM_MACRO name=dtlReadonly hdr="Data zakończenia" attr="end_date" fmtfunc=setToTimezone>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Strefa czasowa" attr="timezone" lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 keeplinks=yes rows=8 size=120 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id != "0">
+	document.main_form.elements["SET.start_date"].value = setToTimezone(string_to_date("",document.main_form.elements["SET.start_date"].value,""));
+	document.main_form.elements["SET.end_date"].value = setToTimezone(string_to_date("",document.main_form.elements["SET.end_date"].value,""));
+	setIsGlobal(document.main_form.elements["SET.window_type"].value);
+</PDM_IF>
+</script>
+
+<PDM_MACRO name=startNotebook hdr=window_nb>
+<PDM_MACRO name=TAB title="Recurrence Pattern" file="recurrence_pattern.htmpl" id=RecurrencePattern>
+<PDM_IF 0>
+	Do not change the id of this tab as it is used as a referrence to get access to the iframe created by this tab
+	by the function displayButtons() in recurrence_pattren.js file.
+	
+</PDM_IF>
+<PDM_MACRO name=TAB title="Associated CIs" height=300 id=Associated_CIs src="OP=SEARCH+FACTORY=nr+QBE.EQ.window.window.id=$dob.id+KEEP.forCiTab=1+KEEP.parentFac=window+KEEP.window_id=$args.persistent_id+KEEP.window_type=$args.window_type+KEEP.delete_flag=$args.delete_flag+KEEP.non_global=$args.non_global">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

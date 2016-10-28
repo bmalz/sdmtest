@@ -1,0 +1,25 @@
+<PDM_IF 0>
+ci_ebr_status.htmpl
+WHEN PRESENTED:
+    When doing CIEBR.
+INTENT:
+    Use a string passed from webengine to construct
+    htmpl page and show the status.
+VARIABLES:
+    string      image       The location of the image directory as
+                            specified in the config file.
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<html lang="en"><PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no logo=no menubar=no>
+<body class="detailro">
+<div style='text-align: center'>
+<form name="frm001">
+<span class="messagetext">$args.ciebr_status_str</span>
+</form>
+</div>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: ci_ebr_status.htmpl ASPEN.2 2010/11/16 13:07:57 saima01 Exp $
+</PDM_IF>

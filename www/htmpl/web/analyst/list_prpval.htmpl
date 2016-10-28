@@ -1,0 +1,183 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of property validation value
+INTENT:
+    Display the list of property validation value
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Property Value Search";
+var hdrTitleList = "Property Value List";
+if (( parent.edit_form ) && (!parent.editing))
+   var autoRefreshWindows = void(0);
+else
+   var autoRefreshWindows = new Object();
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("prpvalsum.rpt", "prpvaldtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+</head>
+<body class="list" onload="check_prpval_count()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Property Value">
+<script type="text/javascript">
+<PDM_MACRO name=sfStart export=no factory="prpval">
+document.write('<input type="hidden" name="KEEP.id_from_prpval_rule" value="$args.KEEP.id_from_prpval_rule">');
+document.write('<input type="hidden" name="QBE.EQ.owning_rule" value="$args.KEEP.id_from_prpval_rule">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr=Value attr="value" size=20>
+<PDM_MACRO name=sfDropdown hdr=Active attr="delete_flag">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+docWriteln("<table id=tbl8888 class='tab' summary='Property Value List'>");
+var new_prpval_id = "";
+var cur_prpval_id = "";
+var rule_id = "";
+
+function check_prpval_count()
+{
+   if (counter == 0)
+      parent.prpval_dropdown_flag = 1;
+   else
+      parent.prpval_dropdown_flag = 0;
+}
+
+function set_def_prpval()
+{
+   if (new_prpval_id == cur_prpval_id) {
+      return;
+   }
+   var query_string = cfgCgi +
+   "?SID="+cfgSID+
+   "+FID="+fid_generator()+
+   "+OP=SET_DEFAULT_PRPVAL"+
+   "+FACTORY=prpval"+
+   "+id="+new_prpval_id+
+   "+owning_rule="+rule_id;
+   query_string+="+callback_func=parent.ahdframe";
+   if (window.name != ahdframe.name)
+	query_string += "." + window.name;
+   query_string += ".refreshForm";
+   
+   ahdframeset.workframe.location.href=query_string;
+}
+
+function clear_def_prpval()
+{
+   new_prpval_id = 0;
+   
+   var query_string = cfgCgi +
+   "?SID="+cfgSID+
+   "+FID="+fid_generator()+
+   "+OP=SET_DEFAULT_PRPVAL"+
+   "+FACTORY=prpval"+
+   "+id="+new_prpval_id+
+   "+owning_rule="+rule_id;
+   query_string+="+callback_func=parent.ahdframe";
+   if (window.name != ahdframe.name)
+	query_string += "." + window.name;
+   query_string += ".refreshForm";
+   
+   ahdframeset.workframe.location.href=query_string;   
+}
+
+if ($args.KEEP.id_from_prpval_rule != 0)
+{
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Add Property Value" func="add_prpval_prpval_rule('$args.KEEP.id_from_prpval_rule')" hotkey_name="Add Property Value" id="btn203">
+<PDM_MACRO name=button caption="Set Default" func="set_def_prpval()" hotkey_name="Set Default" id="btn204">
+<PDM_MACRO name=button caption="Clear Default" func="clear_def_prpval()" hotkey_name="Clear Default" id="btn205">
+<PDM_MACRO name=btnEndRow>
+}
+else 
+{
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Add Property Value" func="do_add_prpval_prpval_rule()" hotkey_name="Add Property Value" id="btn203">
+<PDM_MACRO name=button caption="Set Default" func="set_def_prpval()" hotkey_name="Set Default" id="btn204">
+<PDM_MACRO name=button caption="Clear Default" func="clear_def_prpval()" hotkey_name="Clear Default" id="btn205">
+<PDM_MACRO name=btnEndRow>
+}
+
+function do_add_prpval_prpval_rule() {
+    add_prpval_prpval_rule("$args.KEEP.id_from_prpval_rule", parent.prop_ref);
+}
+
+docWriteln("<tr><td>");
+docWriteln("<table id=tbl8800 class='tab' summary='Property Value List'>");
+docWriteln("<tr>");
+docWriteln("<th scope-col class='results'>Default</th>");
+docWriteln("<th scope='col' class='results'>Value</th>");
+docWriteln("<th scope='col' class='results'>Description</th>");
+docWriteln("<th scope='col' class='results'>Status</th>");
+docWriteln("</tr>");
+var counter=0;
+<PDM_LIST SOURCE=list>
+var sClass;
+if(counter % 2)
+    sClass = "results1";
+else
+    sClass = "results0";
+counter++;
+var strHTML="<tr class=" + sClass +  ">";
+docWriteln(strHTML); 
+docWriteln("<td valign='top' class='detailroTab'>");
+docWrite("<input type='radio' name='default' ");
+if ("$list.is_default" == "1")
+{
+   cur_prpval_id = "$list.id";
+   new_prpval_id = cur_prpval_id;
+   docWrite("CHECKED ");
+}
+var web_form_name = '<PDM_FMT ESC_STYLE=C PAD=NO>$list.value</PDM_FMT>';
+rule_id = "$list.owning_rule";
+docWrite("onClick=\"new_prpval_id='$list.id';\"");
+docWriteln(" title=\"Set Property Value default to " + web_form_name + "\">");
+docWriteln("</td>");
+docWriteln("<td valign='top' class='detailroTab'>");
+docWriteln("<a" + " id=\"lnk1000\"" +
+           " href=\"javascript:rsShowDetailPopup('$list.persistent_id')\" ");
+docWriteln(getMOPreviewEventHtml( '$list.persistent_id' ));
+docWriteln("title=\"Show Property Value Detail\">" + 
+	   '<PDM_FMT ESC_STYLE=C PAD=NO>$list.value</PDM_FMT>' + "&nbsp</a>");
+docWriteln("</td>");
+docWriteln("<td valign='top' class='detailroTab'>");
+docWriteln('<PDM_FMT ESC_STYLE=C>$list.description</PDM_FMT>');
+docWriteln("</td>");
+docWriteln("<td valign='top' class='detailroTab'>");
+if ("$list.delete_flag" == "0")
+{
+docWriteln("Active");
+}
+else
+{
+docWriteln("Inactive");
+}
+docWriteln("</td>");
+docWriteln("</tr>");
+</PDM_LIST>
+docWriteln("</table>");
+docWriteln("</td></tr>");
+docWriteln("</table>");
+  </script>
+</PDM_IF>
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

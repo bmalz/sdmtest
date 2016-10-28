@@ -1,0 +1,647 @@
+<!-- list_nr.htmpl -->
+<PDM_IF 0>
+$Id: list_nr.htmpl,v 1.4 2007/01/04 22:57:49 tuach01 Exp $
+list_nr.htmpl
+WHEN PRESENTED:
+        When we need to display a list of Network Resources.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+<PDM_IF "$args.KEEP.cis_in_cnt_envs" != "" >	
+var hdrTitle = "CIs In Contact Environments Search";
+var hdrTitleList = "CIs In Contact Environments List";
+<PDM_ELIF "$args.KEEP.cis_in_org_envs" != "">	
+var hdrTitle = "CIs In Organization Environments Search";
+var hdrTitleList = "CIs In Organization Environments List";
+<PDM_ELIF "$args.KEEP.forOrgtoNr" == "1">	
+var hdrTitle = "Environment Search";
+var hdrTitleList = "Environment List";
+<PDM_ELIF "$args.KEEP.forCntQP" == "1">
+   var qp_combo_name = "Contact";
+   if (typeof parent.frames["menu"] == "object" && 
+       typeof parent.frames["menu"].combo_name == "string" && parent.frames["menu"].combo_name != "") {
+      qp_combo_name = parent.frames["menu"].combo_name;
+   }
+   var hdrTitle = <PDM_FMT ESC_STYLE=C PAD=NO>"Environment Search for " + qp_combo_name</PDM_FMT>;
+   var hdrTitleList = <PDM_FMT ESC_STYLE=C PAD=NO>"Environment List for " + qp_combo_name</PDM_FMT>;
+<PDM_ELIF "$args.KEEP.forOrgQP" == "1">
+   var qp_org_name = "Organization";
+   if (typeof parent.frames["menu"] == "object" && 
+       typeof parent.frames["menu"].organization == "string" && parent.frames["menu"].organization != "") {
+      qp_org_name = parent.frames["menu"].organization;
+   }
+   var hdrTitle = <PDM_FMT ESC_STYLE=C PAD=NO>"Organization Environment Search for " + qp_org_name</PDM_FMT>;
+   var hdrTitleList = <PDM_FMT ESC_STYLE=C PAD=NO>"Organization Environment List for " + qp_org_name</PDM_FMT>;
+<PDM_ELSE>
+var hdrTitle = "Wyszukiwanie elementów konfiguracji";
+var hdrTitleList = "List elementów konfiguracji";
+</PDM_IF>
+var CMDBVisualizerURL = "";
+<PDM_IF "$env.NX_CMDB" != "">
+   //SCO 21151 - retain special characters in userid.
+   var userId = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.userid</PDM_FMT>';
+   var sessionId = "$SESSION.SID";
+   <PDM_IF $env.NX_CMDB_VISUALIZER != "">
+      CMDBVisualizerURL = "$env.NX_CMDB_VISUALIZER";
+   <PDM_ELSE>
+      <PDM_LIST PREFIX="car" FACTORY=ca_application_registration WHERE="id=2018">
+         if ($car.id) {
+            CMDBVisualizerURL = "$car.product_data";
+         }
+      </PDM_LIST>
+   </PDM_IF>
+   <PDM_IF 0>
+        Initialize CI search filter if NX_CI_FILTER is installed.
+        However, if the search value is changed by the user, 
+        do not reset it when the results are displayed.
+        KEEP.ci_filter variable is only to track if the user has click the search button,
+	         The variable name has no mapping to any of the search filter arguments.
+   </PDM_IF>
+   var ci_filter_default = "$args.KEEP.ci_filter";
+   if(ci_filter_default == "")
+   {
+	<PDM_IF "$env.NX_CI_FILTER" == "Yes">
+		ci_filter_default = "Yes";
+	</PDM_IF>
+   }
+</PDM_IF>
+   
+   function OnAfterFilterAction( action )
+   {
+        //When the user clicks over the Clear Filter; The is_ci dropdown should be default select to YES.
+	var nForm;
+        var curForm;
+        if ( action == "clear" )
+        {
+            for ( nForm = 0; nForm < __search_filter.form.length; nForm++ )
+            {
+                curForm = __search_filter.form[nForm];
+		<PDM_IF "$env.NX_CI_FILTER" == "Yes">
+		    if(typeof curForm.elements["QBE.EQ.is_ci"] == "object" )
+		    {
+		        curForm.elements["QBE.EQ.is_ci"].value = 1;
+                    }
+		</PDM_IF>
+            }
+        }
+    }
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+if ("$env.NX_CMDB" != ""){
+	rptName = new Array("cmdb_ci_sum.rpt", "cmdb_ci_dtl.rpt");
+} else {
+	rptName = new Array("nr_itilsum.rpt", "nr_itildtl.rpt");
+};
+var cfgCanEdit = false;
+var cfgCanCopy = false;
+if ("$env.NX_CMDB" != "" && "$ACCESS.FAC_nr" == "2")
+{
+   cfgCanEdit = true;
+   cfgCanCopy = true;
+}
+
+function resultSetCustomContextAddMiddle(ctxMenu){
+
+    <PDM_IF "$args.KEEP.CHG_ID" != "" && "$args.KEEP.ALLOW_CREATE_CHG_SPEC" != "false" >
+         ctxMenu.addItem( msgtext("Add_Change_Specification"),"addChangeSpecification( self.activePersid.slice(3))");   
+    </PDM_IF>
+        
+    if ("$env.NX_SERVLET_SERVER_URL" != "") {
+        ctxMenu.addItem(msgtext("Asset_Viewer"),"invoke_ams_asset('$env.NX_SERVLET_SERVER_URL',self.activePersid.slice(3))");
+    }
+    <PDM_IF "$env.NX_CMDB" != "">
+        if (CMDBVisualizerURL != "") {
+            ctxMenu.addItem(msgtext("CMDB_Visualizer"),"openCmdbViz(self.activePersid.slice(3))");
+        }
+        ctxMenu.addItem( msgtext("CMDBf_Viewer"),"openCmdbfViewer(self.activePersid)");
+        
+    </PDM_IF>
+}
+
+<PDM_IF "$args.KEEP.forCiTab" != "1">
+	var cfgExtraButton=new Array("Discovered_Assets", "pop_asset_picker()");
+</PDM_IF>	
+<PDM_IF "$args.KEEP.parentFac" == "window">
+	var cfgExtraButton=new Array("Update_Configuration_Items", "update_cis()", true);
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forOrgtoNr" == "1" || "$args.KEEP.forOrgQP" == "1">
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.ORG_ID" != "0" && $ACCESS.FAC_org \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Environment", "UpdateOrgEnv()", enableExtraBtn);
+    var argName = "";
+
+    <PDM_IF "$args.KEEP.forOrgQP" == "1">
+        var cfgCanEdit = false;
+        var refreshFormWindow = new Object();
+        argName = qp_org_name;
+    <PDM_ELSE>
+        if (typeof parent != "undefined" && typeof parent.argName == "string") {
+           argName = parent.argName;
+        }
+    </PDM_IF>
+    function UpdateOrgEnv() {
+        update_lrel("org", "org:$args.KEEP.ORG_ID", "nr", "oenv",  "Configuration Items", msgtext("%1_Environment", argName), "");
+    }
+</PDM_IF>
+
+
+var imp_dir="$args.KEEP.imp_dir";
+var imp_lvl="$args.KEEP.imp_lvl";
+
+function OnAfterSearchFilter(url)
+{
+    <PDM_IF "$env.NX_CMDB" != "">
+        url+="&KEEP.ci_filter=No";
+    </PDM_IF>
+	return url;
+}
+
+function pop_asset_picker()
+{
+  if(typeof ahdtop.asset_picker != "undefined")
+  {
+    ahdtop.asset_picker=void(0);
+  }
+
+  popup_window('discovered_assets', 'SEARCH', 0, 0, '', '', 'FACTORY=ca_logical_asset');
+}
+
+<PDM_IF "$env.NX_CMDB" != "">
+function openCmdbViz( uuidCI )
+{
+	var e_userId = nx_escape( userId );
+	var cmdbviz_url = CMDBVisualizerURL + "/externallaunch.do?sid=NULL&uuid=" + uuidCI + "&loginusername=" + e_userId
+				+ "&bopsid=%bopsid";
+	popup_window( '', 'LINK_WITH_BOPSID', 0, 0,
+		      'ahdmenu=no,register=no,resizable=yes,menubar=yes,toolbar=yes,location=no,scrollbars=yes,status=yes','SHARE_SESSION=1',
+		      'URL='+ cmdbviz_url);
+}
+var nr_extension_names = new Array;
+// Routine to launch the CMDBf Viewer using the persid and extension table name saved when generating asset list. 
+function openCmdbfViewer( persistent_id )
+{
+    var extension_name = "";
+    if ( typeof nr_extension_names[persistent_id] != "undefined" )
+    {
+        extension_name = nr_extension_names[persistent_id];
+    }
+    popup_window( 'Federation_Viewer_'+ persistent_id,'SHOW_DETAIL', 0, 0, '', 'PERSID=' + persistent_id, 
+                  'FACTORY=nr', 'prop.extension=' + extension_name, 'HTMPL=cmdb_federation_viewer.htmpl');
+}
+
+// Routine to create change specification (ci_planned_change) given a change order and CI
+function addChangeSpecification( uuidCI )
+{
+    popup_window( '', 'CREATE_NEW', 0, 0, '', 'FACTORY=ci_planned_change', 
+    
+    <PDM_IF "$args.KEEP.CHG_ID" != "">
+        'PRESET=chg:$args.KEEP.CHG_ID', 
+        'KEEP.CHG_WAS_PRESET=1', 
+        
+        <PDM_IF "$args.KEEP.TENANT_ID" != "">
+             'PRESET=tenant:$args.KEEP.TENANT_ID', 
+        </PDM_IF>
+    </PDM_IF>
+    
+     'PRESET=ci:'+ uuidCI, '' );
+}
+
+
+</PDM_IF>
+</script>
+<PDM_IF "$args.KEEP.forCiTab" == "1" || "$args.KEEP.forCntToNr" == "1" || "$args.KEEP.forOrgtoNr" == "1">
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/track_asset.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+</PDM_IF>
+<PDM_IF "$args.KEEP.forCntQP" == "1" || "$args.KEEP.forOrgQP" == "1">
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="javascript" src="$CAisd/scripts/profile_browser.js"></script>
+</PDM_IF>
+<script>
+<PDM_IF "$args.KEEP.forCiTab" == "1" && "$args.KEEP.parentFac" != "window">
+function launch_impact_explorer()
+{
+	var w_name_str = "impact_explorer_$args.KEEP.chgnr_chg_id";
+	var w_name = get_popup_window_name(w_name_str);
+
+	var str_impact_explorer = cfgCgi +
+		"?SID=" + cfgSID + 
+		"+FID=" + cfgFID +
+		"+OP=DISPLAY_FORM" +
+                "+HTMPL=impact_explorer.htmpl" +
+		"+ticket_persid=$args.KEEP.TKT_PERSID" +
+		"+KEEP.IsPopUp=$args.KEEP.IsPopUp" +
+                "+KEEP.POPUP_NAME=" + w_name +
+		"+RELOAD_WIN=0";
+
+	var i_e_features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",gobutton=no"+
+		",status=no";
+
+	// Use negative size to force popup
+	var width = 0 -  popupWidth(LARGE_POPUP);
+	var height = 0 - popupHeight(MEDIUM_POPUP);
+	preparePopup(str_impact_explorer, w_name_str, i_e_features, width, height, "MENUBAR=no");
+}
+
+	var tabButtonAuth = 1;
+	function add_button_to_tab_banner(){
+		<PDM_IF $UserAuth \> 0>
+			<PDM_MACRO NAME=btnStartRow>                     
+			<PDM_IF $args.KEEP.is_cab_approval != 1> // do not display the button in CAB approval screen.
+				<PDM_MACRO NAME=button                     
+				    id="UPDATE_LREL"                            
+				    caption="Aktualizowanie CI"  
+				    func="update_lrel('$args.KEEP.parentFac', '$args.KEEP.TKT_PERSID', 'nr', 'asset',  'Available Configuration Items', 'Affected Configuration Items', '')"     
+				    hotkey_name="Aktualizowanie CI" >                           
+			</PDM_IF>
+			if("$args.KEEP.parentFac" == "chg" && 
+			   (typeof ahdframe.copy_from_persid != "string" || 
+			    ahdframe.copy_from_persid == ""))
+			{
+				<PDM_IF "$args.KEEP.assetCount" != "0" >
+					<PDM_MACRO NAME=button                     
+					    id="IMPACT_EXPLORER"                            
+					    caption="Impact Explorer"  
+					    func="launch_impact_explorer()"     
+					    hotkey_name="Impact Explorer" >                           
+				<PDM_ELSE>
+					<PDM_MACRO NAME=button                     
+					    id="IMPACT_EXPLORER"                            
+					    caption="Impact Explorer"  
+					    func="launch_impact_explorer()"     
+					    hotkey_name="Impact Explorer" 
+					    disabled=yes >                           
+				</PDM_IF>
+			}
+			<PDM_MACRO NAME=btnEndRow>                     
+		</PDM_IF>
+		}
+<PDM_MACRO NAME=tabBanner add_btns=true show_bar=false btns_in_two_rows=true >
+
+<PDM_ELIF "$args.KEEP.forCntToNr" == "1" || "$args.KEEP.forCntQP" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.QBE.EQ.cntref.cnt.id" != "0" && $ACCESS.FAC_nr \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Environment", "UpdateCnt_Cis()", enableExtraBtn);
+
+    var cnt_combo_name = "";
+    <PDM_IF "$args.KEEP.forCntQP" == "1">
+        var refreshFormWindow = new Object();
+        cnt_combo_name = qp_combo_name;
+    <PDM_ELSE>
+        if ( typeof parent.combo_name == "string" && parent.combo_name != "") {
+           cnt_combo_name = parent.combo_name;
+        }
+    </PDM_IF>
+
+    function UpdateCnt_Cis() {
+        update_with_lrel_style("cnt", "cnt:$args.QBE.EQ.cntref.cnt.id", "nr", "cenv",  msgtext("Configuration_Items"), 
+                              msgtext("%1_Environment", cnt_combo_name), "", "KEEP.forCntToNr=0");
+    }
+
+<PDM_ELSE>
+function update_cis()
+{
+	var persidRef = "$args.KEEP.window_id";
+	update_with_lrel_style("window", persidRef, 'nr', 'ci', 'Configuration Items', 'Associated to window', ''); 
+}
+</PDM_IF>
+
+// When the Quick Profile is opened by an Incident, Problem or Request, allow the
+// user to select a CI from the list to be the ticket's Configuraiton Item.
+var backfillActive = false;
+var m_envSelectItem = null;
+var sel_ci_msg = "Click to select desired configuration item";
+<PDM_IF "$args.KEEP.forCntQP" == "1" || "$args.KEEP.forOrgQP" == "1">
+if ( typeof ahdtop == "object" &&
+     typeof ahdtop.edit_profile_browser_opener == "object" &&
+     ! ahdtop.edit_profile_browser_opener.closed && 
+     typeof ahdtop.edit_profile_browser_opener.propFactory == "string" &&
+     ahdtop.edit_profile_browser_opener.propFactory == "cr")
+{
+   pb_env_set_select(true);
+}
+
+function resultSetCustomContextAddBegin(ctxMenu) 
+{
+      m_envSelectItem = ctxMenu.addItem(msgtext("Select"),"pb_env_backfill(self.activeKey)");
+}
+
+// The linkOnclick function.
+function qpenvLinkClick()
+{
+	if ( backfillActive ) {
+		pb_env_backfill(self.activeKey);
+	}
+	else {
+		rsShowDetailPopup(self.activePersid);
+	}
+}
+
+</PDM_IF>
+</script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+   <PDM_INCLUDE FILE=std_body.htmpl filename="Configuration Item">
+<script language="JavaScript">
+
+<PDM_IF $ACCESS.FAC_nr \> 1 && "$args.KEEP.parentFac" == "" && "$args.KEEP.forCntToNr" != "1" && "$args.KEEP.noCreateBtn" != "1">
+<PDM_MACRO name=sfStart factory=nr>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=nr>
+</PDM_IF>
+<PDM_IF "$args.KEEP.forCntToNr" == "1" || "$args.KEEP.forCntQP" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.cntref.cnt.id" value="$args.QBE.EQ.cntref.cnt.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forOrgtoNr" == "1" || "$args.KEEP.forOrgQP" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.orgref.org.id" value="$args.QBE.EQ.orgref.org.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.cis_in_cnt_envs" != "" || "$args.KEEP.cis_in_org_envs" != "" >
+<PDM_IF 0>
+    // Listing "CIs in Contact Environments" or "CIs in Organization Environments" forms from detail_tenant.htmpl. 
+    // 1) Override getParentDetailPage_prv() so CIs listed are not not restricted to a single tenant.
+    // 2) Set ADDL_WHERE_HARDCODE to preserve condition if user clears search filter.
+    
+</PDM_IF>
+    function getParentDetailPage_prv()
+    {
+    	return null;
+    }
+    var addl_where = "";
+    
+<PDM_IF "$args.KEEP.cis_in_cnt_envs" != "" >	
+        addl_where = "cntref.cnt.tenant=U'$args.KEEP.cis_in_cnt_envs'";
+    
+<PDM_ELIF "$args.KEEP.cis_in_org_envs" != "">	
+        addl_where = "orgref.org.tenant=U'$args.KEEP.cis_in_org_envs'"; 
+    
+</PDM_IF>
+    document.write('<input type="hidden" id="ADDL_WHERE_HARDCODE" name="ADDL_WHERE_HARDCODE" value="' + addl_where + '">');
+</PDM_IF>
+
+var displayAllCols=1;
+<PDM_IF "$args.KEEP.forCiTab" == "1">
+<PDM_IF "$args.KEEP.parentFac" == "chg">
+		document.write('<input type="hidden" name="QBE.EQ.chgnr.chg.id" value="$args.KEEP.chgnr_chg_id">');
+	
+<PDM_ELIF "$args.KEEP.parentFac" == "iss">
+		document.write('<input type="hidden" name="QBE.EQ.issnr.iss.id" value="$args.KEEP.issnr_iss_id">');
+	
+<PDM_ELIF "$args.KEEP.parentFac" == "window">
+		document.write('<input type="hidden" name="QBE.EQ.window.window.id" value="$args.QBE.EQ.window.window.id">');
+	
+</PDM_IF>
+	displayAllCols=0;
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<input type="hidden" name="HTMPL" value="update_lrel_nr.htmpl">');
+<PDM_ELIF "$args.KEEP.ForCia" == "1">
+document.write('<input type="hidden" name="HTMPL" value="update_lrel_nr.htmpl">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="name" size=20>
+<PDM_MACRO name=sfLookup hdr="Klasa" attr="class.type" extraURL="KEEP.service_only=1" factory=grc>
+<PDM_IF "$args.KEEP.service_only" == "1">
+    <PDM_LIST FACTORY=nrf PREFIX=list WHERE="extension_name='entservx'">
+    searchFilterTextDisabled("Family", "family.extension_name", 10, "entservx", "$list.sym", "EQ");
+    </PDM_LIST> 
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Rodzina" attr="family" factory=nrf>
+</PDM_IF>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=sfLookup hdr="Standard CI" attr="standard_ci" factory=nr>
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Nazwa Hosta" attr="system_name" size=20>
+<PDM_IF "$env.NX_CMDB" == "">
+   var parentStr   = "Parents";
+   var childrenStr = "Children";
+<PDM_ELSE>
+   var parentStr   = "Providers";
+   var childrenStr = "Dependents";
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Adres MAC" attr="mac_address" size=20>
+<PDM_IF 0>
+<PDM_MACRO name=sfTextbox hdr="Alt CI ID" attr="asset_num" size=20>
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Nazwa DNS " attr="dns_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny" attr="serial_number" size=20>
+<PDM_MACRO name=sfDropdown hdr="Status CMDB" attr="delete_flag">
+<PDM_MACRO name=sfTextbox hdr="Adres IP" attr="alarm_id" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja" attr="location.name" factory=loc>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="status" factory=rss>
+<PDM_IF 0>
+<PDM_MACRO name=sfDropdown hdr="Service Type" attr="service_type" factory=sdsc>
+</PDM_IF>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_IF 0>
+<PDM_MACRO name=sfStartRow>
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Asset" attr="is_asset">
+      if (ci_filter_default == "Yes")
+       {
+          
+<PDM_MACRO name=sfDropdown hdr="CI" attr="is_ci" default="YES">
+       }
+       else
+       {
+          
+<PDM_MACRO name=sfDropdown hdr="CI" attr="is_ci">
+       }
+
+</PDM_IF>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfLookup hdr="Kontakt" attr="resource_contact" factory=cnt>
+<PDM_MACRO name=sfLookup hdr="Producent" attr="manufacturer.sym" factory=ca_cmpny>
+<PDM_MACRO name=sfLookup hdr="Model" attr="model.sym" factory=mfrmod>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr="priority" factory=pri>
+<PDM_IF 0>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Product Version" attr="product_version" size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer licencji" attr="license_number" size=20>
+<PDM_MACRO name=sfTextbox hdr="Financial Reference" attr="financial_num" size=20>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfLookup hdr="Supply Vendor" attr="supplier" factory=ca_cmpny>
+<PDM_MACRO name=sfLookup hdr="Responsible Vendor" attr="vendor_restore" factory=ca_cmpny>
+<PDM_MACRO name=sfLookup hdr="Maintenance Vendor" attr="vendor_repair" factory=ca_cmpny>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Cost Center" attr="expense_code" factory=cost_cntr>
+<PDM_MACRO name=sfLookup hdr="Responsible Organization" attr="service_org.name" factory=org>
+<PDM_MACRO name=sfLookup hdr="Maintenance Organization" attr="repair_org.name" factory=org>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_MACRO name=sfDate hdr="Earliest Acquire Date" attr="acquire_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Latest Acquire Date" attr="acquire_date" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Earliest Installation Date" attr="install_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Latest Installation Date" attr="install_date" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Earliest Warranty Start Date" attr="warranty_start" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Latest Warranty Start Date" attr="warranty_start" qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Earliest Warranty End Date" attr="warranty_end" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Latest Warranty End Date" attr="warranty_end" qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Earliest Expiration Date" attr="expiration_date" qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Latest Expiration Date" attr="expiration_date" qbe_condition=LE>
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+
+// make impact analyzer search fields stickey
+var imp_dir_obj = searchFilterObjectOf("QBE.EQ.IMP_DIR");
+var imp_lvl_obj = searchFilterObjectOf("QBE.EQ.IMP_LVL");
+
+if(typeof imp_dir != "undefined" && imp_dir != "") {
+	imp_dir_obj.value=imp_dir;
+}
+
+if(typeof imp_lvl != "undefined" && imp_lvl != "") {
+	imp_lvl_obj.value=imp_lvl;
+}
+
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<PDM_IF "$env.NX_CMDB" != "">
+   <script language="JavaScript">
+		
+<PDM_IF "$args.KEEP.forCiTab" != 1 >
+			 <pdm_jscript file=list_edit.js>
+                         
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_MACRO name=elsEditField attr_name="resource_contact" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="class.type">
+<PDM_MACRO name=elsEditField attr_name="product_version">
+<PDM_MACRO name=elsEditField attr_name="standard_ci">
+<PDM_MACRO name=elsEditField attr_name="is_asset">
+<PDM_MACRO name=elsEditField attr_name="is_ci" endrow="yes">
+<PDM_MACRO name=elsEndEdit>
+
+			 if ( typeof parent.propFactory == "string" &&
+			      parent.propFactory == "tenant" )
+			 	ImgBtnHideButton("btnEdit");
+		
+<PDM_ELSE>
+			ImgBtnHideButton("btnEdit");
+		
+</PDM_IF>
+   </script>
+</PDM_IF>
+<script language="JavaScript">
+if ("$args.OP" == "IMPACT_ANALYSIS_UP")
+{
+    var msgFoundNone = "No impacted parent configuration items found";
+    var msgFound1 = "1 impacted parent configuration item found";
+    var msgFound = "%1 impacted parent configuration items found";
+    var msgFoundMore = "%1 impacted parent configuration items found. Displaying %2 through %3";
+} else if ("$args.OP" == "IMPACT_ANALYSIS_DOWN")
+{
+    var msgFoundNone = "No impacted dependent configuration items found";
+    var msgFound1 = "1 impacted dependent CI configuration item found";
+    var msgFound = "%1 impacted dependent CI configuration items found";
+    var msgFoundMore = "%1 impacted dependent configuration items found. Displaying %2 through %3";
+}
+else
+{
+    var msgFoundNone = "Nie znaleziono elementów konfiguracji";
+    var msgFound1 = "Znaleziono 1 element konfiguracji";
+    var msgFound = "Znaleziono %1 elementów konfiguracji ";
+    var msgFoundMore = "Znaleziono %1 elementów konfiguracji. Wyświetlane %2 z %3";
+}
+var msgSelect = "Kliknij aby wybrać element konfiguracji.";
+
+<PDM_MACRO name=lsStart>
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Klasa" attr=class.type startrow="no" width=30>
+<PDM_MACRO name=lsCol hdr="Rodzina" attr=family startrow="no" width=30>
+<PDM_MACRO name=lsCol hdr="Numer seryjny" attr=serial_number startrow="no">
+<PDM_MACRO name=lsWrite both=yes text="if (displayAllCols) {">
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=resource_contact startrow="no">
+<PDM_MACRO name=lsCol hdr="Ostatnia Zmiana" attr=last_mod startrow="no">
+<PDM_MACRO name=lsCol hdr="Asset" attr=is_asset startrow="no">
+<PDM_MACRO name=lsCol hdr="CI" attr=is_ci startrow="no">
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Nazwa Host" attr=system_name startrow="no">
+<PDM_MACRO name=lsCol hdr="Nazwa DNS" attr=dns_name startrow="no" width=30>
+<PDM_MACRO name=lsCol hdr="Serial Number" attr=serial_number startrow="no">
+<PDM_MACRO name=lsWrite both=yes text="if (displayAllCols) {">
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=resource_contact startrow="no">
+<PDM_MACRO name=lsCol hdr="Active" attr=delete_flag startrow="no">
+<PDM_MACRO name=lsWrite both=yes text="}">
+</PDM_IF>
+<PDM_MACRO name=lsWrite both=yes text="if (displayAllCols) {">
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+<PDM_MACRO name=lsCol attr=assoc_reqs display_attr=length export=no justify="right" label="#Wniosek" sort=no startrow=yes>
+<PDM_MACRO name=lsCol attr=assoc_in display_attr=length export=no justify="right" label="#Incydent" sort=no>
+<PDM_MACRO name=lsCol attr=assoc_pr display_attr=length export=no justify="right" label="#Problem" sort=no>
+<PDM_MACRO name=lsCol attr=chgnr display_attr=length export=no justify="right" label="#Zmiana" sort=no>
+<PDM_MACRO name=lsCol attr=issnr display_attr=length export=no justify="right" label="#Iss" sort=no>
+</PDM_IF>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_IF "$env.NX_CMDB" != "">
+<PDM_MACRO name=lsWrite text="nr_extension_names['@{list.persistent_id:0}'] = '@{list.family.extension_name:}'">
+</PDM_IF>
+<PDM_MACRO name=lsEnd>
+<PDM_IF "$args.KEEP.forCntQP" == "1" || "$args.KEEP.forOrgQP" == "1">
+rs.setLinkOnclick(function(){qpenvLinkClick();});
+function updateCtxMenuItems(row)
+{
+
+	if (backfillActive) {
+		ctxMenu.showItem(m_envSelectItem);
+	}
+	else {
+		ctxMenu.hideItem(m_envSelectItem);
+	}
+}
+</PDM_IF>
+</script>
+</PDM_IF>
+
+<script>
+<PDM_IF 0>
+Call the function loadButtons() to either enable or disable the buttons on this form.
+window_type, delete_flag and non_global attributes of the window object are passed to
+this function to decide to either enable or disable the buttons.
+</PDM_IF>
+
+if(parent.propFormName3 == "edit" && "$args.KEEP.parentFac" == "window")
+{
+	loadButtons(parent.document.main_form.elements["SET.non_global"].value, parent.document.main_form.elements["SET.delete_flag"].value, parent.document.main_form.elements["SET.window_type"].value);
+}
+else if("$args.KEEP.parentFac" == "window")
+{
+	loadButtons("$args.KEEP.non_global", "$args.KEEP.delete_flag", "$args.KEEP.window_type");
+}
+</script>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

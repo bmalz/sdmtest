@@ -1,0 +1,193 @@
+<PDM_IF 0>
+list_iss_wf.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Workflow Task
+INTENT:
+    Display the list of Workflow Task
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object iss_wf_list list The list object containing the Workflow Task
+                        See $NX_ROOT/bopcfg/majic/issue.maj for the
+                        definition of attributes for 'OBJECT iss_wf'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Issue Workflow Search";
+var hdrTitleList = "Issue Workflow List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript">
+var argBackfillField = '$args.KEEP.backfill_field';
+var argBackfillForm = '$args.KEEP.backfill_form';
+var argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+var argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+var argSaveSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.KEEP.save_sql_clause</PDM_FMT>';
+
+var cfgCanEdit = false;
+<PDM_IF "${current:n/a}" == "n/a">
+var searchFilterInitialState = "show";
+<PDM_ELSE>
+var cfgCurrent = '$current';
+var cfgTotal = '$total';
+var cfgRecordCount = '$record_count';
+var cfgStart = '$start';
+var cfgLength = '$length';
+</PDM_IF>
+var cfgUseTemplate = '';
+var cfgIsPopup = '$args.KEEP.IsPopUp';
+var rptName = new Array("no", "no");
+var cfgCanEdit = true;
+</script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Issue Workflow">
+<script type="text/javascript">
+<PDM_MACRO name=sfStart create=false factory=iss_wf>
+<PDM_IF "$args.KEEP.forTicketList" == "1">
+   document.write('<input type="hidden" name="QBE.EQ.iss" value="$args.QBE.EQ.iss">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Przypisany?" attr="n/a" codename="assigneeYesNo">
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status colspan=2 factory=tskstat>
+<PDM_MACRO name=sfDropdown hdr="Typ zadania" attr=task factory=tskty>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=cnt>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas szacunkowego skompletowania" attr=est_completion_date colspan=2 qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas szacunkowego skompletowania" attr=est_completion_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_IF "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=sfDate hdr="Najwcześniejszy czas do naruszenia" attr=attached_slas.time_to_violation colspan=2 qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas do naruszenia" attr=attached_slas.time_to_violation qbe_condition=LE>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=35>
+<PDM_IF "$env.NX_CLASSIC_SLA_PROCESSING" != "Yes">
+<PDM_MACRO name=sfLookup hdr="Typ serwisowy" attr=attached_slas.map_sdsc.sym factory=sdsc>
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+<pdm_jscript file=list_edit.js>
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_IF "$args.KEEP.forTicketList" != "1">
+<PDM_MACRO name=elsEditReadonly attr_name="iss" header="Issue #" startrow="yes">
+<PDM_MACRO name=elsEditReadonly attr_name="task">
+<PDM_ELSE>
+<PDM_MACRO name=elsEditReadonly attr_name="task" startrow="yes">
+</PDM_IF>
+<PDM_MACRO name=elsEditField attr_name="assignee">
+<PDM_MACRO name=elsEditField attr_name="group">
+<PDM_MACRO name=elsEditField attr_name="status">
+<PDM_MACRO name=elsEditField attr_name="est_completion_date" endrow="yes">
+<PDM_MACRO name=elsEndEdit>
+
+var msgFoundNone = "No workflow tasks found";
+var msgFound1 = "1 workflow task found";
+var msgFound = "%1 workflow tasks found";
+var msgFoundMore = "%1 workflow tasks found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired workflow task";
+
+var m_deleteItem = "";
+<PDM_IF "$args.KEEP.forTicketList" == "1">
+function resultSetCustomContextAddMiddle(ctxMenu) {
+	m_deleteItem = ctxMenu.addItem(msgtext("Delete"),"parent.delete_wf(self.activePersid)");
+}
+</PDM_IF>
+
+var wfInfo = new Array();
+var ID_counter=0;
+
+// Need search_type=GET_DOB to get the pdm_list of behavior_templates.
+<PDM_MACRO name=lsStart search_type=GET_DOB>
+<PDM_MACRO name=lsWrite text="wfInfo[ID_counter] = new Object();">
+<PDM_MACRO name=lsWrite text="wfInfo[ID_counter].status_allow_task_update=\"@{list.status.allow_task_update}\";">
+<PDM_MACRO name=lsWrite text="wfInfo[ID_counter].status_task_complete=\"@{list.status.task_complete}\";">
+<PDM_MACRO name=lsWrite text="wfInfo[ID_counter].deletable=\"@{list.wf_template.deleteable}\";">
+<PDM_MACRO name=lsWrite text="var has_reopen=false">
+<PDM_MACRO name=lsWrite text="if (wfInfo[ID_counter].status_task_complete==\"1\" && reopen_id!=0) {">
+<PDM_MACRO name=lsWrite text="<PDM_LIST SOURCE=list.behavior_templates PREFIX=bhvlist FACTORY=bhvtpl WHERE=\" \">">
+<PDM_MACRO name=lsWrite text="if(@{bhvlist.context_attrval}==reopen_id){ has_reopen=true; }">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsWrite text="}">
+<PDM_MACRO name=lsWrite text="wfInfo[ID_counter].has_reopen=has_reopen;">
+<PDM_MACRO name=lsWrite text="ID_counter++;">
+<PDM_IF '$env.NX_TTV_HIGHLIGHT' == 'Yes' && '$env.NX_TTV_ENABLED' != ''>
+<PDM_MACRO name=lsWrite text="pdm_if @{list.ttv_att_slas.length:0} == 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_ELSE>
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+</PDM_IF>
+<PDM_IF "$args.KEEP.forTicketList" != "1">
+<PDM_MACRO name=lsCol hdr="Issue #" attr=iss exportfmt=ShowLink link=yes style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence link=yes>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Zadanie" attr=task>
+<PDM_MACRO name=lsCol hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=lsCol hdr="Grupa" attr=group>
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_IF "$args.KEEP.forTicketList" != "1">
+<PDM_MACRO name=lsCol hdr="Estymowany czas kompletacji" attr=est_completion_date>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description keeplinks=yes width=50>
+<PDM_IF "$args.KEEP.forTicketList" == "1">
+<PDM_MACRO name=lsCol hdr="Data rozpoczęcia" attr=start_date>
+<PDM_MACRO name=lsCol hdr="Data kompletacji" attr=completion_date>
+</PDM_IF>
+<PDM_MACRO name=lsEnd>
+
+function updateCtxMenuItems(row)
+{
+   // Show / Hide the Edit context menu item.
+   if (typeof m_ctxMenuEditItem == "string" && m_ctxMenuEditItem != "") {
+      if (wfInfo[row].status_allow_task_update == "1" ||
+          (wfInfo[row].status_task_complete == "1" && wfInfo[row].has_reopen) ) {
+         ctxMenu.showItem(m_ctxMenuEditItem);
+      }
+      else {
+         ctxMenu.hideItem(m_ctxMenuEditItem);
+      }
+   }
+
+   
+<PDM_IF "$args.KEEP.forTicketList" == "1">
+      // Show / Hide the Delete context menu item.
+      if (wfInfo[row].deletable == "1") {
+         ctxMenu.showItem(m_deleteItem);
+      }
+      else {
+         ctxMenu.hideItem(m_deleteItem);
+      }
+   
+</PDM_IF>
+}
+
+</script>
+</PDM_IF>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_iss_wf.htmpl ASPEN.4 2011/08/12 15:44:37 valre03 Exp $
+</PDM_IF>
+<PDM_WSP>

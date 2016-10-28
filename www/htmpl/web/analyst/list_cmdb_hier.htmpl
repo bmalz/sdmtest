@@ -1,0 +1,98 @@
+<PDM_IF 0>
+$Id: list_bmhier.htmpl,v 1.10 2005/05/16 18:59:30 siwst01 Exp $
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "CMDB Relationship Search";
+var hdrTitleList = "CMDB Relationship List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var rptName = new Array("bmhiersum.rpt", "bmhierdtl.rpt");
+var cfgCanEdit = true;
+var argSearchSqlClause="id>0";
+function bmhier_delete(persid)
+{
+  
+  if(confirm(msgtext("This_will_delete_all_Impact_An", rs.records[activeRow].key)))
+  {
+    set_action_in_progress(ACTN_CIA_MAINT);
+
+    get_ahdtop();
+    ahdtop.bmhier_delete=new Object();
+    ahdtop.bmhier_delete=this;
+    upd_workframe("CIA_BMHIER_DELETE", "PERSID=" + persid, 
+      "FUNC=parent.ahdframeset.ahdframe.bmhier_delete_callback");
+  }
+}
+
+</script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>   
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="bmhier">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart factory="bmhier">
+docWriteln('<input type="hidden" name="QBE.GE.id" value="0">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Znak" attr="sym" size=20>
+if(propIsITIL) 
+{
+  
+<PDM_MACRO name=sfLookup hdr="CI Dostawca" attr="parent">
+<PDM_MACRO name=sfLookup hdr="CI Odbiorca" attr="child">
+} else {
+  
+<PDM_MACRO name=sfLookup hdr="Nadrzędny asset" attr="parent">
+<PDM_MACRO name=sfLookup hdr="Podrzędny asset" attr="child">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Typ relacji" attr="ci_rel_type.parenttochild" size=20>
+<PDM_MACRO name=sfTextbox hdr="Klasa nadawcy" attr="parent.class" size=20>
+<PDM_MACRO name=sfTextbox hdr="Klasa odbiorcy" attr="child.class" size=20>
+}
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<script language="JavaScript">
+var msgFoundNone = "No Relationships found";
+var msgFound1 = "1 Relationship found";
+var msgFound = "%1 Relationships found";
+var msgFoundMore = "%1 Relationships found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Relationship";
+<PDM_MACRO name=lsStart>
+<PDM_IF "$env.NX_OTB_MARKET" == "itil">
+<PDM_MACRO name=lsCol hdr="CI Dostawca" attr=parent exportfmt=ShowLink justify=left link=yes>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Asset nadawcy" attr=parent justify=left>
+</PDM_IF>
+<PDM_IF "$env.NX_OTB_MARKET" == "itil">
+<PDM_MACRO name=lsCol hdr="Rodzina nadawcy" attr=parent.family exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Klasa nadawcy" attr=parent.class exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Relacja" attr=ci_rel_type.parenttochild justify=left>
+<PDM_MACRO name=lsCol hdr="CI Odbiorca" attr=child exportfmt=ShowLink justify=left link=yes>
+<PDM_ELSE>
+<PDM_MACRO name=lsCol hdr="Asset odbiorcy" attr=child justify=left>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Rodzina odbiorcy" attr=child.family exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Klasa odbiorcy" attr=child.class exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsEnd>
+</script>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_cmdb_hier.htmpl ASPEN.2 2011/10/18 15:10:15 visan03 Exp $;
+</PDM_IF>
+
+<PDM_WSP>

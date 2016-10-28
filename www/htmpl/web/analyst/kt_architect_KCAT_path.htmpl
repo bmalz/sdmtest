@@ -1,0 +1,69 @@
+<PDM_IF 0>
+$Id: kt_architect_KCAT_path.htmpl,v 1.2 2006/11/08 00:52:55 olsjo01 Exp $
+kt_architect_KDs.htmpl
+WHEN PRESENTED:
+	When we need to display a placeholder for the knowledge document list
+</PDM_IF>
+<html lang="en"><HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+	var hdrTitle = "Architect";
+</SCRIPT>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" HREF="$CAisd/css/castyles.css">
+<script language=javascript>
+//member vars
+var m_lTreeId;
+var m_arrPaths = new Array;
+//
+function SetCategoryPath(strPath, strPathIDs, lTreeId)
+
+{
+	m_lTreeId = lTreeId;
+	if(strPathIDs.search("QBE") != -1 || strPathIDs.search("ADDITIONAL_WHERE") != -1) //is inbox, group inbox or unnassigned
+		{
+		document.getElementById("spnPath").innerHTML= "&nbsp;" + strPath;
+		return;
+		}
+	var arrRelationalIDs = strPathIDs.split("-");
+	var arrIndexPath = strPath.split(">");
+	var strPathHTML = "";
+	for (var i=0; i<arrRelationalIDs.length; i++)
+	{
+		//create relational id for specific category
+		var nodeRelationalID = "";
+		var nodePath = "";
+		var max = i;
+		for (var j=0; j<max+1; j++)
+		{
+			nodeRelationalID += arrRelationalIDs[j];
+			nodePath += arrIndexPath[j];
+			if(j != max)	
+			{			 
+				nodeRelationalID += "-";
+				nodePath += ">";
+			}	
+		}
+		m_arrPaths[i]=nodePath;
+		strPathHTML += "<span class=clsTextBlack style='cursor:pointer;' onclick=GoToCategory('" + nodeRelationalID + "'," + i + ")>" + 
+					   arrIndexPath[i] + "</span>";
+		if(i != arrRelationalIDs.length-1)				 
+			strPathHTML += "> ";
+	}
+	document.getElementById("spnPath").innerHTML= "&nbsp;" + strPathHTML;
+}
+function GoToCategory(sRelationalID, i)
+{
+	var sPath = m_arrPaths[i];
+	ahdframeset.kt_catTreeWindow[m_lTreeId].GoToKTCatTreePathId(sRelationalID, sPath);
+}
+</script>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no>
+<span id=spnPath name=spnPath class=clsTextBlack></span>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

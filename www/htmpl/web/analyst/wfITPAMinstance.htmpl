@@ -1,0 +1,632 @@
+<PDM_IF 0>
+wfITPAMinstance.htmpl
+WHEN PRESENTED:
+	When we need to display ITPAM instance info and process logs from ITPAM Workflow
+INTENT:
+	Display the info of the ITPAM instance
+VARIABLES:
+	Array    instanceArr     string array    contains info of a list of workflow process
+	Array    workitemsArr    string array    contains info of a list of workitems of the process
+</PDM_IF>
+<html lang="en" style="overflow-x:hidden; overflow-y:auto"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<pdm_wsp preview=no>
+
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Logi procesu"</PDM_FMT>;
+var hdrTitleList = "Logi procesu";
+</script>
+
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript">
+
+var ahdtop = get_ahdtop(true);
+
+var wl_url = "$env.NX_CAEXTWF_WORKLIST_URL";
+var proc_url = "$env.NX_CAEXTWF_PROCESSDISPLAY_URL";
+
+function window_open(url)
+{
+	var w = window.open(url);
+	check_popup_blocker(w);
+}
+
+
+var colHeading = new Array;
+
+colHeading [0] = "Kategoria";
+colHeading [1] = "Poziom";
+colHeading [2] = "Czas";
+colHeading [3] = "Wiadomość";
+
+for (var i = 0; i < colHeading.length; i++)
+{
+	colHeading[i] = colHeading[i].replace(/&#39;/g, "'");
+}
+
+var msgFound1 = "1 znalezionych";
+var msgFoundNone = "niee znaleziono";
+var propFormName = "wfITPAMinstance.htmpl"
+
+</script>
+</head>
+
+<body class="list" scroll="yes">
+
+<PDM_INCLUDE FILE=std_body.htmpl >
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<!-- 'msg_error' is a response from INVOKE_SOAP op -->
+<PDM_IF "$args.msg_error" == "0">
+<script type="text/javascript">
+//web service results returned from PDM_RPC
+$args.MSG_0
+$args.MSG_1
+
+var i, j, instObj, instName, instDate, instEndDate, instStatus;
+j = instanceArr.length;
+
+// we are expecting only 1 item in the array
+for (i = 0; i < j; i++)
+{
+	instObj = instanceArr[i];
+	instName = instObj.name;
+	instDate = instObj.started;
+	instEndDate = instObj.completed;
+	instStatus = instObj.status;
+}
+
+// set process logs array
+j = workitemsArr.length;
+var myitemsArr = new Array;
+
+for (i = 0; i < workitemsArr.length; i++)
+{
+	var itemObj = workitemsArr[i];
+	var myitemObj = itemObj['workitem'];
+	var itemCat = myitemObj['category'];
+	var itemLevel = myitemObj['level'];
+	var logdate = date_to_string(myitemObj['datestamp']);
+	var message = myitemObj['message'];
+
+	myitemsArr[i] = new Array(itemCat, itemLevel, logdate, message);
+}
+
+//Button bar
+docWriteln('<iframe name=welcomebanner style="width:0px;height:0px;" class="gn_container_no_border" src="$env.NX_SERVLET_SERVER_URL"></iframe>');
+docWriteln('<div style="overflow: auto;width: 100%; overflow-y: hidden;">');
+docWriteln("<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>");
+docWriteln("<tr>");
+docWriteln("<td align='left' width='99%' NOWRAP><h2 style='margin:0px;'>Dane procesu IT PAM</h2></td>");
+docWriteln("<td align='right' width='1%'>");
+ImgBtnSetDefaultTabIndex(this.edit ? 30000 : this.tabIndex);
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Wyświetl proces[*v]" hotkey_name="Wyświetl proces[*v]" id="BtnView"
+    func="itpamViewProcess()">
+<PDM_MACRO NAME=btnEndRow>
+docWriteln("</td></tr></table>");
+//Button bar
+
+var fmtName;
+docWriteln("<table id=table01 class='tab'>");
+docWriteln("<th align='left' class='detailro'>");
+docWriteln("Nawa procesu");
+docWriteln("</th>");
+docWriteln("<th align='left' class='detailro'>Data startu");
+docWriteln("</th>");
+docWriteln("<th align='left' class='detailro'>Data końca");
+docWriteln("</th>");
+docWriteln("<th align='left' class='detailro'>Status");
+docWriteln("</th>");
+docWriteln("<tr>");
+fmtName = instName;
+docWriteln("<td valign='top' class='detailro'>" + fmtName);
+docWriteln("</td>");
+fmtName = date_to_string(instDate);
+docWriteln("<td valign='top' class='detailro'>" + fmtName);
+docWriteln("</td>");
+fmtName = date_to_string(instEndDate);
+docWriteln("<td valign='top' class='detailro'>" + fmtName);
+docWriteln("</td>");
+fmtName = instStatus;
+docWriteln("<td valign='top' class='detailro'>" + fmtName);
+docWriteln("</td>");
+docWriteln("</tr>");
+docWriteln("</table>");
+
+// CA UI standard table header
+var out  = "<table width='100%' cellspacing='0' cellpadding='0'>";
+out += "<tr>";
+out += "<td width='4' height='22' class='page_section_header_left'><img src='" + cfgCAISD + "/img/spacer.png' width='4' height='22' alt=''></td>";
+out += "<td class='page_section_header_center'><span class='page_section_header_text'>" + form_title + "</span></td>";
+out += "<td width='4' height='22' class='page_section_header_right'><span class='page_section_header_right'><img src='" + cfgCAISD + "/img/spacer.png' width='4' height='22' alt=''></span></td>";
+out += "</tr>";
+out += "</table>";
+docWriteln(out );
+
+
+recordCount = myitemsArr.length;
+cfgRecordCount = recordCount ;
+
+var _id;
+var _ff = 0;
+var _rawId = null;
+var _pages = 0;
+var _chgFlag = null;
+var _cellZero = null;
+var _tableStyle = "align:center;width:100%";
+var pagelength = 10;  
+var colLength = colHeading.length;
+var selectedRow;
+var highlightedRow;
+var first_row;
+var last_row;
+var current_page = 0;
+var _current_table;
+var last_page = parseInt(recordCount/pagelength, 10) - 1;
+var remainder = recordCount%pagelength;
+if (remainder > 0) last_page += 1;
+
+cfgRecordCount = recordCount;
+cfgLength = pagelength;
+cfgTotal = last_page;
+cfgStart = 0;
+cfgCurrent = 1;
+
+
+function build_W3C_body() {
+	docBody = document.getElementsByTagName("body").item(0);
+	buildDataTable(docBody, myitemsArr, _tableStyle, colHeading, 0);
+	buildEndTable(docBody, _tableStyle);
+	
+	// Save start date and end date to Service Desk database
+	// Done only once; when end date on itpam side has a value and SD doesn't
+	if ("$args.END_DATE" == "" && instEndDate != "") {
+		var url2 = cfgCgi +
+		           "?SID=" + cfgSID +
+		           //"+FID=" + cfgFID +
+		           "+FID=" + fid_generator() +
+		           "+OP=SAVE_ITPAM" +
+		           "+FACTORY=caextwf_inst" +
+		           "+OBJ_ID=$args.OBJID" +
+		           "+OBJ_START=" + nx_escape(instDate) +
+		           "+OBJ_END=" + nx_escape(instEndDate);
+
+		AsyncAjaxCall(url2, ajax_callback);
+	}
+}
+
+
+// Callback method for showing error messages to user
+function ajax_callback(req) {
+	var resp = window.parent.rtrim_nonchar(req.responseText);
+	if (resp != "ITPAM_NO_ERRORS")
+		show_response(resp);
+}
+
+
+// Launches ITPAM View Process page
+function itpamViewProcess() {
+	var url = proc_url + "$args.ARG2";
+<PDM_IF "$env.NX_USE_EIAM_AUTHENTICATION" == "Yes" && "$env.NX_EIAM_HOSTNAME" != "">
+	fetch_artifact();
+	// global var "artifact" contains the EEM token
+	// empty value could mean an error; don't use token
+	if (artifact != "")
+		url += "&itpam_tokenID=" + nx_escape(artifact);
+	window_open(url);
+<PDM_ELSE>
+	window_open(url);
+</PDM_IF>
+}
+
+
+// Launches ITPAM Task List page
+function itpamTaskList() {
+	var url = wl_url;
+<PDM_IF "$env.NX_USE_EIAM_AUTHENTICATION" == "Yes" && "$env.NX_EIAM_HOSTNAME" != "">
+	fetch_artifact();
+	// global var "artifact" contains the EEM token
+	// empty value could mean an error; don't use token
+	if (artifact != "")
+		url += "&itpam_tokenID=" + nx_escape(artifact);
+	window_open(url);
+<PDM_ELSE>
+	window_open(url);
+</PDM_IF>
+}
+
+
+var _z = 0;
+var _twoCnt = 0;
+var _butFlg = 0;
+var tmp = "";
+document.onmousedown = buttonDown;
+
+
+function highlightRow(event) {
+	if (typeof event == "undefined") return;
+
+	tmp = (ahdtop._browser.isNS) ? event.target.getAttribute("id") : event.srcElement.id;
+	var oldHighlightRow = highlightedRow;
+	
+	if (tmp.substring(0, 1) == "_" || ! tmp) return;
+
+
+	for (j = 0; j < colLength ; j++) {
+		i = parseInt(highlightedRow, 10);
+		if (i % 2 == 1){
+			document.getElementById(i+''+j).className = "results";
+		}
+		else{
+			var elem=document.getElementById(i+''+j);
+			if (elem != undefined){
+				document.getElementById(i+''+j).className = "results";
+			}
+		}
+	}
+
+	if (tmp == "up")
+		buttonColor(tmp, "cdfff6", "blue", "wf_sel_button");
+	if (tmp == "down")
+		buttonColor(tmp, "cdfff6", "blue", "wf_sel_button");
+	if (parseInt(tmp, 10) >= 0) {
+		buttonColor(tmp, "#DDDDDD", "black", "wf_sel_cell");
+		//table.style.backgroundColor="black";
+		getRowNumber(tmp);
+		for (j = 0; j < colLength ; j++) {
+			i = parseInt(highlightedRow, 10);
+			document.getElementById(i+''+j).className = "resultsSel results";
+		}
+	}
+
+}
+
+
+function buttonDown(e) {
+	if ( ((ahdtop._browser.isNS) ? e.which : event.button) != 1)
+	if (! tmp){
+		disable_right_click_handler(e);
+		return true;
+	}
+	tmp = (ahdtop._browser.isNS) ? e.target.getAttribute("id") : event.srcElement.id;
+
+	if (! tmp)
+		return true
+
+	if (parseInt(tmp, 10) || tmp == "00") {
+		if (ahdtop._browser.isNS) {
+			highlightRow(e);
+		} else {
+			highlightRow(event);
+		}
+	}
+}
+
+
+function buttonColor(id, backColor, fontColor, className) {
+	document.getElementById(id).className = className;
+}
+
+
+function scrollDown() {
+
+	if ( (pagelength * (current_page + 1)) > recordCount ) {
+		return;
+	}
+
+	current_page++;
+	var countText = buildCountHeading();
+	document.getElementById("_count01").innerHTML = countText;
+	document.getElementById("_count02").innerHTML = countText;
+
+	var docBody = document.getElementsByTagName("body").item(0);
+	buildDataTable(docBody, myitemsArr, _tableStyle, colHeading, current_page);
+	return;
+
+}
+
+
+function scrollUp() {
+
+	if (current_page > 0) {
+		current_page--;
+		var docBody = document.getElementsByTagName("body").item(0);
+		buildDataTable(docBody, myitemsArr, _tableStyle, colHeading, current_page);
+		var countText = buildCountHeading();
+		document.getElementById("_count01").innerHTML = countText;
+		document.getElementById("_count02").innerHTML = countText;
+	}
+
+	return;
+}
+
+
+function listAll() {
+
+	current_page = 0;
+	pagelength = recordCount + 1;
+	var docBody = document.getElementsByTagName("body").item(0);
+	buildDataTable(docBody, myitemsArr, _tableStyle, colHeading, current_page);
+	var countText = buildCountHeading();
+	document.getElementById("_count01").innerHTML = countText;
+	document.getElementById("_count02").innerHTML = countText;
+
+}
+
+
+function scrollBottom() {
+
+	if (current_page != last_page) {
+		current_page = last_page;
+		var docBody = document.getElementsByTagName("body").item(0);
+		buildDataTable(docBody, myitemsArr, _tableStyle, colHeading, current_page);
+		var countText = buildCountHeading();
+		document.getElementById("_count01").innerHTML = countText;
+		document.getElementById("_count02").innerHTML = countText;
+	}
+}
+
+
+function scrollTop() {
+
+	if (current_page > 0) {
+		current_page = 0;
+		var docBody = document.getElementsByTagName("body").item(0);
+		buildDataTable(docBody, myitemsArr, _tableStyle, colHeading, current_page);
+		var countText = buildCountHeading();
+		document.getElementById("_count01").innerHTML = countText;
+		document.getElementById("_count02").innerHTML = countText;
+	}
+
+}
+
+
+function buildDataTable(appendToId, myitemsArr, style, header, pageNum) {
+
+	// To get scrollbars in Mozilla:
+	if (ahdtop._browser.isFirefox) {
+		var myframe = parent.document.getElementById(window.name);
+		if (typeof myframe == "object" && myframe != null) {
+		     myframe.style.overflow = "auto";
+		}
+	}
+       // To get scrollbars in Chrome/Safari:
+	if (ahdtop._browser.isSafari) {
+		var myframe = parent.document.getElementById(window.name);
+		if (typeof myframe == "object" && myframe != null) {
+		     myframe.scrolling = "yes";
+		}
+	}
+
+	table = document.createElement("TABLE");
+	table.className = "table";
+	table.setAttribute("WIDTH", "100%");
+
+	t = style.split(";");
+	for (i = 0; i < t.length;) {
+		f = t[i++].split(":");
+		x = "table." + f[0] + "='" + f[1] + "'";
+		eval(x);
+	}
+	var row_count = 0
+	tablebody = document.createElement("TBODY");
+	row = document.createElement("TR");
+
+	for (var i = 0; i < header.length; i++) {
+		cell = document.createElement("TH");
+		cell.className = "results";
+		//set header row properties
+		if (i == 3)
+		{
+			cell.setAttribute("width", "46%");
+		}
+		else
+		{
+			cell.setAttribute("width", "18%");
+		}
+		cell.appendChild(document.createTextNode(header[i]));
+		row.appendChild(cell);
+	}
+	tablebody.appendChild(row);
+	c = 0;
+
+	var startIdx = pagelength * pageNum;
+	var end;
+	if ((startIdx + pagelength) > recordCount) {
+		end = recordCount;
+	} else {
+		end = startIdx + pagelength;
+	}
+
+	for (var i = startIdx; i < end; i++) {
+		row = document.createElement("TR");
+        row.className = "results" + (i % 2);
+		for(j = 0; j < header.length; j++) {
+			cell = document.createElement("TD");
+			cell.setAttribute("id", c+''+j);
+			cell.setAttribute("VALIGN", "TOP");
+			cell.className = "results";
+
+			var aChild;
+			// Hyperlink the first one
+			if (0 == j) {
+				aChild = document.createElement("A");
+				aChild.setAttribute("href", "javascript:itpamTaskList();void 0;");
+				aChild.appendChild(document.createTextNode(myitemsArr[i][j]));
+			} else {
+				aChild = document.createTextNode(myitemsArr[i][j]);
+			}
+
+			cell.appendChild(aChild);
+			row.appendChild(cell);
+		}
+		c++;
+		tablebody.appendChild(row);
+	}
+
+	table.appendChild(tablebody);
+	
+	if (typeof _current_table != "undefined" && _current_table != null) {
+		appendToId.replaceChild(table, _current_table);
+	} else {
+		appendToId.appendChild(table);
+	}
+
+	_current_table = table;
+
+	_chgFlag = null;
+}
+
+
+function getRowNumber(x) {
+	_rawId = x;
+	_id = x.substring(0, x.length - 1);
+	highlightedRow = _id;
+}
+
+
+function getCount()
+{
+	// These two variables refer to the # of records
+	var count = Number(cfgRecordCount);
+	var first = Number(cfgStart) + 1;
+	var last;
+	var length = Number(cfgLength);
+	
+	// These two variables refer to the # of pages
+	var current = Number(cfgCurrent);
+	var total = Number(cfgTotal);
+
+	if (current < total)
+		last = first + length - 1;
+	else
+		last = count;
+
+	var strOut;
+	var msgFoundMore = "%2-%3 of %1"; // CA UI standard - table navigation text
+
+	if (count == 0) {
+		if ( typeof msgFoundNone == "string" )
+			strOut = msgFoundNone;
+		else
+			strOut = " error - msgFoundNone not defined";
+	}
+	else if (count == 1) {
+		if ( typeof msgFound1 == "string" )
+			strOut = msgFound1;
+		else
+			strOut = " error - msgFound1 not defined";
+	}
+	else {
+		if ( typeof msgFoundMore == "string" ) {
+			strOut = msgFoundMore;
+			strOut = strOut.replace("%1", count.toString());
+			strOut = strOut.replace("%2", first.toString());
+			strOut = strOut.replace("%3", last.toString());
+		}
+		else
+			strOut = " error - msgFoundMore not defined";
+	}
+
+	return strOut;
+}
+
+
+function updatecount() {
+	cfgCurrent = current_page;
+}
+
+
+function buildCountHeading(){
+
+	var msg = '<span class="table_navigation_text">';
+	if (recordCount <= pagelength) {
+		msg += msgtext("%1_Records_Found", '' + recordCount);
+	} else {
+
+		var begin = pagelength * current_page + 1;
+		var end = pagelength * (current_page + 1);
+
+		if (end >= recordCount) {
+			end = recordCount;
+		}
+
+		msg += msgtext("%1-%2_of_%3", '' + begin, '' + end, '' + recordCount);
+	}
+	msg += '</span>';
+
+	if (end <= recordCount && recordCount > pagelength) {
+		if (1 == begin) {
+			msg += "<a class='table_navigation_arrows' href=\"JavaScript:scrollDown();\"> &#155; </a>";
+			msg += "<a class='table_navigation_arrows' href=\"JavaScript:scrollBottom();\"> &raquo; </a>";
+		} else if (end == recordCount) {
+			var nav = "<a class='table_navigation_arrows' href=\"JavaScript:scrollTop();\"> &laquo; </a>";
+			nav += "<a class='table_navigation_arrows' href=\"JavaScript:scrollUp();\"> &#139; </a>";
+			msg = nav + msg;
+		} else {
+			var nav = "<a class='table_navigation_arrows' href=\"JavaScript:scrollTop();\"> &laquo; </a>";
+			nav += "<a class='table_navigation_arrows' href=\"JavaScript:scrollUp();\"> &#139; </a>";
+			msg = nav + msg;
+			msg += "<a class='table_navigation_arrows' href=\"JavaScript:scrollDown();\"> &#155; </a>";
+			msg += "<a class='table_navigation_arrows' href=\"JavaScript:scrollBottom();\"> &raquo; </a>";
+		}
+		msg += "<a class='table_navigation_listall' href=\"JavaScript:listAll();\"> List All</a>";
+	}
+
+	return msg;
+}
+
+
+function buildEndTable(appendToId, style) {
+
+	table = document.createElement("TABLE");
+	table.setAttribute("WIDTH", "100%");
+
+	t = style.split(";");
+	for (i = 0; i < t.length;) {
+		f = t[i++].split(":");
+		x = "table."+f[0]+"='"+f[1]+"'";
+		eval(x);
+	}
+	var tablebody = document.createElement("TBODY");
+	row = document.createElement("TR");
+	cell = document.createElement("TD");
+	cell.setAttribute("id", "_count02");
+	cell.setAttribute("align", "right");
+	cell.setAttribute("class", "table_navigation");
+	cell.innerHTML = buildCountHeading();
+	row.appendChild(cell);
+	tablebody.appendChild(row);
+	table.appendChild(tablebody);
+	appendToId.appendChild(table);
+}
+
+
+window.onload = build_W3C_body;
+
+//display table headings
+docWriteln("<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>");
+docWriteln("<tr><td class='table_navigation' id=_count01 align='right'>");
+docWriteln(buildCountHeading());
+docWriteln("</td>");
+docWriteln("</tr>");
+docWriteln("</table>");
+</script>
+<pdm_else>
+	<script>show_response(msgtext("Problem z dostępem do IT PAM", '<PDM_FMT PAD=NO ESC_STYLE=C>$args.ERROR_MSG</pdm_fmt>'));</script>
+</pdm_if>
+
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+"@(#)$Id: wfITPAMinstance.htmpl ASPEN.4 2012/02/17 16:49:40 kumka02 Exp $"
+</PDM_IF>

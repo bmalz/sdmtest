@@ -1,0 +1,112 @@
+<PDM_IF 0>
+$Id: list_associated_ci.htmpl ANDERSON.0 2009/06/10 08:36:05 pstso01 Exp $
+list_associated_ci.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Associated Configuration Items.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Configuration Items Search";
+var hdrTitleList = "Configuration Items List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+var cfgExtraButton;
+cfgExtraButton=new Array("Update_Configuration_Items", "update_cis()", true);
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/recurrence_pattern.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="../scripts/std_head.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../scripts/msg_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../scripts/sitemods.js"></SCRIPT>
+</HEAD>
+
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Configuration Items List">
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=ci_window>
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=list_associated_ci.htmpl>');
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.window" VALUE="$args.KEEP.id">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="nr.name" size=20>
+<PDM_MACRO name=sfLookup hdr="Klasa" attr="nr.class.type" factory=grc>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="nr.delete_flag">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Rodzina" attr="nr.family" factory=nrf>
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny" attr="nr.serial_number" size=20>
+<PDM_MACRO name=sfEnd>
+var persidRef = "$args.KEEP.id";
+var nr_uuid = "";
+
+function update_cis()
+{
+	update_with_lrel_style("window", persidRef, 'nr', 'ci', 'Configuration Items', 'Associated to window', ''); 
+}
+
+function displayCI( value )
+{
+	var reshtml;
+	reshtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('nr:' + '" + nr_uuid + "')\">" + value + "</A>" ; 
+	rs.data(reshtml);
+}
+
+</SCRIPT>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Configuration Items found";
+var msgFound1 = "1 Configuration Item found";
+var msgFound = "%1 Configuration Items found";
+var msgFoundMore = "%1 Configuration Items found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Configuration Item";
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="nr_uuid = \"@{list.nr}\"">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=nr.name fmtfunc=displayCI link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Klasa" attr=nr.class.type width=30>
+<PDM_MACRO name=lsCol hdr="Rodzina" attr=nr.family.sym width=30>
+<PDM_MACRO name=lsCol hdr="Numer seryjny" attr=nr.serial_number>
+<PDM_MACRO name=lsEnd>
+ctxMenu = new ContextMenu("ciWindowMenu");
+ctxMenu.addItem( "View", "rsShowDetailPopup('nr:' + '" + nr_uuid + "')" );
+ctxMenu.addItem( "Edit", "showEdit('nr:' + '" + nr_uuid + "')" );
+ctxMenu.addItem( msgtext("Print_Form%1...", " " + window.propFormName), "CAisdPrint();"); 
+ctxMenu.addItem( msgtext("Help_on_This_Window..."), "help_on_form('"+window.propFormName+"')");
+ctxMenu.finish();
+</SCRIPT>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<script>
+<PDM_IF 0>
+Call the function loadButtons() to either enable or disable the buttons on this form.
+window_type, delete_flag and non_global attributes of the window object are passed to
+this function to decide to either enable or disable the buttons.
+</PDM_IF>
+if(parent.propFormName3 == "edit")
+{
+	// The following code assumes that "main_form" is always at index 0. Do not change that
+	loadButtons(parent.document.main_form.elements["SET.non_global"].value, parent.document.main_form.elements["SET.delete_flag"].value, parent.document.main_form.elements["SET.window_type"].value);
+}
+else
+{
+	loadButtons("$args.KEEP.non_global", "$args.KEEP.delete_flag", "$args.KEEP.window_type");
+}
+</script>
+<PDM_WSP>

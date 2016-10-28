@@ -1,0 +1,105 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    list_ci_twa_ci.htmpl
+//
+// Purpose: Transaction Work Area (twa) list form for ci_twa_ci objects.
+//
+//
+// 12-Jun-2009 tomjo02 SCO 23495 CMDB r12.1 Reconciliation PES 05629 - Initial version
+// 13-Aug-2009 tomjo02 SCO 26513 Added Superseded By for Reconciliation Management Support  
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "CI Transaction Search";
+var hdrTitleList = "CI Transaction List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ci_twa_ci">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart factory="ci_twa_ci">
+<PDM_IF "ci_twa_ci" : "^z.*$">
+document.writeln('<input type="hidden" id="ADDL_WHERE_HARDCODE" name="ADDL_WHERE_HARDCODE" value="id IS NOT NULL">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status transakcji" attr="tran_status" lookup="no">
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_MACRO name=sfTextbox hdr="Wiadomość" attr="tran_message" size=20>
+<PDM_MACRO name=sfTextbox hdr="Zmiana" attr="tran_chg_ref_num" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny" attr="serial_number" size=20>
+<PDM_MACRO name=sfTextbox hdr="MAC adres" attr="mac_address" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa DNS" attr="dns_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa hosta" attr="system_name" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Numer assetu" attr="asset_num" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa MDR" attr="mdr_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Klasa MDR" attr="mdr_class" size=20>
+<PDM_MACRO name=sfTextbox hdr="Federated Asset ID" attr="federated_asset_id" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Docelowy CI" attr="tgt_id">
+<PDM_MACRO name=sfLookup hdr="Zastąpiony przez" attr="superseded_by">
+<PDM_MACRO name=sfTextbox hdr="Klasa" attr="class" size=20>
+<PDM_MACRO name=sfTextbox hdr="Rodzina" attr="family" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  
+  <pdm_jscript file=list_edit.js>
+  
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_MACRO name=elsEditField attr_name="name" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="serial_number">
+<PDM_MACRO name=elsEditField attr_name="mac_address">
+<PDM_MACRO name=elsEditField attr_name="dns_name">
+<PDM_MACRO name=elsEditField attr_name="system_name" endrow="yes">
+<PDM_MACRO name=elsEditField attr_name="asset_num" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="tran_status">
+<PDM_MACRO name=elsEditField attr_name="delete_flag">
+<PDM_MACRO name=elsEditField attr_name="tran_message">
+<PDM_MACRO name=elsEditField attr_name="tran_chg_ref_num" endrow="yes">
+<PDM_MACRO name=elsEndEdit>
+
+  var msgFoundNone = "No CI Transaction's found";
+  var msgFound1 = "1 CI Transaction found";
+  var msgFound = "%1 CI Transaction's found";
+  var msgFoundMore = "%1 CI Transaction's found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired CI Transaction";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Ostatnio zmodyfikowano" attr="last_mod_dt" exportfmt=ShowLink justify=left link=yes nowrap=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="name" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Numer seryjny" attr="serial_number" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="MAC adres" attr="mac_address" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Nazwa DNS" attr="dns_name" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Nazwa hosta" attr="system_name" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Numer assetu" attr="asset_num" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Status" attr="tran_status" justify=left link=no>
+<PDM_MACRO name=lsCol label="Active" attr="delete_flag" colspan=1 justify=left link=no startrow=yes>
+<PDM_MACRO name=lsCol label="Target CI" attr="tgt_id" colspan=6 justify=left link=no>
+<PDM_MACRO name=lsCol label="Change Order" attr="tran_chg_ref_num" colspan=1 justify=left link=no>
+<PDM_MACRO name=lsCol label="Message" attr="tran_message" colspan=8 justify=left link=no startrow=yes>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

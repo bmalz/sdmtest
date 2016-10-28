@@ -1,0 +1,128 @@
+<PDM_IF 0>
+evt_action_info.htmpl
+WHEN PRESENTED:
+    When we need the action infromation tab on the Event Detail screen 
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+<PDM_WSP mode=edit factory=evt>
+function add_button_to_tab_banner(){
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Update Actions On True" Func="update_lrel_macro('evt', '$args.persistent_id', 'macro', 'true_action',  'Possible Actions', 'Actions on True', '',holdtext)" hotkey_name="Update Actions On True" ID="ACT_ON_TRUE" Width=0>
+<PDM_MACRO name=button Caption="Update Actions On False" Func="update_lrel_macro('evt', '$args.persistent_id', 'macro', 'false_action',  'Possible Actions', 'Actions on False', '',holdtext)" hotkey_name="Update Actions On False" ID="ACT_ON_FALSE" Width=0>
+<PDM_MACRO name=btnEndRow>
+}
+<PDM_MACRO name=tabBanner title="Action Information" add_btns=true>
+var holdtext = '$args.obj_type';
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr="zpriority">
+<PDM_MACRO name=dtlCheckbox hdr="Makro ustaw przekroczenie SLA dla akcji na PRAWDA" attr=violate_on_true colspan=1 off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Makro ustaw przekroczenie SLA dla akcji na FAŁSZ" attr=violate_on_false off=No on=Yes>
+<PDM_MACRO name=dtlEndTable>
+<PDM_IF "$args.id" == 0>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_IF "$args.id" == 0>
+detailStartRow("Center");
+detailRowHdr("Events need to be saved before Macros can be attached to it");
+<PDM_MACRO name=dtlEndTable>
+</PDM_IF>
+</PDM_IF>
+docWriteln("<table id=tbl502 class='tab'>");
+docWriteln("<tr>");
+docWriteln("<th class='results' align='middle'>Actions on True Macro List</th>");
+docWriteln("</tr>");
+var counter=0;
+<PDM_LIST FACTORY=macro PREFIX=list WHERE="act_t.evt.id=$args.wc_dob_id" ESC_STYLE=C>
+			var sClass;
+			if(counter%2)
+				sClass = "results1";
+			else
+				sClass = "results0";
+			counter++;
+			var strHTML="<tr class=" + sClass +  ">";
+			
+docWriteln(strHTML); 
+docWriteln("<td valign='top' align='middle' class='detailroTab'>");
+docWriteln("<a" + detailNextID(true) +
+                 " href=\"javascript:showDetailWithPersid('macro:$list.id')\" " +
+                   getMOPreviewEventHtml( '$list.persistent_id' ) + ">" +
+                   <PDM_FMT PAD=NO ESC_STYLE=C>"$list.sym"</PDM_FMT> + "</a>");
+
+docWriteln("</td>");
+docWriteln("</tr>");
+</PDM_LIST>
+if (!counter)
+{
+    
+<PDM_MACRO name=dtlStartRow> 
+    docWriteln("<td align='middle' class='detailro'>");  
+    docWriteln("No Actions on True Macro Attached"); 
+    docWriteln("</td>");
+    
+<PDM_MACRO name=dtlEndTable>
+}
+docWriteln("</table>");
+
+docWriteln("<br>");
+docWriteln("<table id=tbl502 class='tab'>");
+docWriteln("<tr>");
+docWriteln("<th class='results' align='middle'>Actions on False Macro List</th>");
+docWriteln("</tr>");
+var counter=0;
+<PDM_LIST FACTORY=macro PREFIX=list WHERE="act_f.evt.id=$args.wc_dob_id" ESC_STYLE=C>
+			var sClass;
+			if(counter%2)
+				sClass = "results1";
+			else
+				sClass = "results0";
+			counter++;
+			var strHTML="<tr class=" + sClass +  ">";
+			
+docWriteln(strHTML); 
+docWriteln("<td valign='top' align='middle' class='detailroTab'>");
+docWriteln("<a" + detailNextID(true) +
+           " href=\"javascript:showDetailWithPersid('macro:$list.id')\" " + 
+             getMOPreviewEventHtml( '$list.persistent_id' ) + ">" +
+             <PDM_FMT PAD=NO ESC_STYLE=C>"$list.sym"</PDM_FMT> + "</a>");
+           
+docWriteln("</td>");
+docWriteln("</tr>");
+</PDM_LIST>
+if (!counter)
+{
+    
+<PDM_MACRO name=dtlStartRow> 
+    docWriteln("<td align='middle' class='detailro'>");  
+    docWriteln("No Actions on False Macro Attached"); 
+    docWriteln("</td>");
+    
+<PDM_MACRO name=dtlEndTable>
+}
+docWriteln("</table>");
+<PDM_IF "$args.id" == 0>
+ImgBtnDisableButton("ACT_ON_TRUE");
+ImgBtnDisableButton("ACT_ON_FALSE");
+</PDM_IF>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: evt_action_info.htmpl ASPEN.4 2012/06/12 14:46:17 debbi01 Exp $;
+</PDM_IF>
+

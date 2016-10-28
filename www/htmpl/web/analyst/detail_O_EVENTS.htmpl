@@ -1,0 +1,67 @@
+<PDM_IF 0>
+detail_O_EVENTS.htmpl
+WHEN PRESENTED:
+    When we need to display a list of event in Knowledge Document Editor
+INTENT:
+    Display the list of event in Knowledge Document Editor
+VARIABLES:
+    
+    object  O_EVENTS  args	The Comments object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT O_EVENTS
+						for the definition of attributes for 'OBJECT o_events'
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Event for Document $args.DOC_ID";
+var hdrTitleUpd = "";
+var hdrTitleNew = "";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/timer.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attevts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="o_events" header=no>
+<script>
+	
+<PDM_MACRO name=dtlForm button=false factory=O_EVENTS>
+<PDM_MACRO name=dtlStart>
+</script>
+<CENTER>
+
+<script>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zdarzenie" attr=EVENT_NAME colspan=1 rows=1 size=40>
+<PDM_MACRO name=dtlDate hdr="Znacznik czasu" attr=EVENT_TIMESTAMP colspan=1>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Szczegóły zdarzenia" attr=ACTION colspan=2 rows=10 size=80>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+
+
+<PDM_WSP>

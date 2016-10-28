@@ -1,0 +1,32 @@
+<PDM_IF 0>
+iss_lr.htmpl
+WHEN PRESENTED:
+    When we need to display the Notification History for a single Activity Log (e.g. Manual Notify)
+INTENT:
+    Display error message due to the fact that Employees/Customers should not have access to view
+    this information
+VARIABLES:
+    object  iss  args	The Issue object we are displaying
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_WSP preview=no>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<TITLE>AHD04483: Security Access Violation</TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</HEAD>
+<BODY class=messages>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+<H1>Error</H1>
+<P>
+<IMG SRC=$CAisd/img/bar.gif WIDTH=90% HEIGHT=4 ALT=Bar>
+<P>
+<B>AHD04482: Security setting prevents this operation. See Administrator for detail.</B>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: iss_lr.htmpl ANDERSON.1 2009/06/10 15:40:38 valre03 Exp $"
+</PDM_IF>

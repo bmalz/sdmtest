@@ -1,0 +1,228 @@
+<PDM_IF 0>
+detail_saprobtyp.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a error type for SOAP Web Services
+INTENT:
+    Display the detail info for a error type
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  saprobtyp  args	The SOAP Web Services error type object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT saprobtyp'
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name SOAP Web Services Error Type Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update SOAP Web Services Error Type"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New SOAP Web Services Error Type $args.name"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+<PDM_IF "$args.id" == "0" >
+	var tmpl_type_val = "in_tpl";
+<PDM_ELIF"$args.id" == "0">
+	var tmpl_type_val = "cr_tpl";
+<PDM_ELSE>
+	var tmpl_type_val = "$args.template_factory";
+</PDM_IF>
+var extra_cr_url = "+QBE.NE.type=I+QBE.NE.type=P";
+
+<PDM_IF "$args.id" == "0">
+	var the_parent_persid='$args.KEEP.parent_persid';
+	if (the_parent_persid != "")
+		ahdframeset.top_splash.next_persid = the_parent_persid;
+</PDM_IF>
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function backfill_event( form_name, field_name, value,
+                         persid, rel_attr_val, caller_type ) 
+{
+   if (field_name == "KEY.template_sym") {
+      var tmpl_obj = document.main_form.elements["SET.template_sym"];
+      tmpl_obj.value = value;
+   }
+}
+
+function get_obj_type()
+{
+	var tmpl_type_arr = tmpl_type_val.split("_");
+	return tmpl_type_arr[0];
+}
+
+function pt_select_template()
+{
+	// Not sending in factory to popup_search() as sending 
+	// factories as: chg, in, iss, pr, cr will lead to
+	// appending <factory>_list_web_active_only domset_name to
+	// the url in the function popup_search_text(). But this domset
+	// will display only active tickets and so, none of the templates are
+	// displayed. To avoid that, do not pass in any factory.
+	// Facotry will get appeneded to the url as part of extra from the 
+	// function modify_search_extra() defined below.
+	popup_search( "", "KEY.template_sym", "main_form", "",
+		"0", "template_name");
+}
+
+function pt_tmpl_type_set (tmpl_type)
+{
+	tmpl_type_val = tmpl_type.value;
+
+	// Clear the Template Name
+	var tmpl_obj = document.main_form.elements["SET.template_sym"];
+	tmpl_obj.value = "";
+	tmpl_obj = document.main_form.elements["KEY.template_sym"];
+	tmpl_obj.value = "";
+}
+
+// Calling modify_search_extra() to dynamically change the where clause
+// Adding the factory to the where clause as detailLookup() for the template_sym
+// attribute is "".
+// So, appending FACTORY to the url and other clauses used to lauch only templates
+function modify_search_extra(factory, backfill_field, backfill_form, is_3_field_contact, backfill_attr)
+{
+	// Executing this piece of code only for "Ticket Template Name" lookup
+	// If this is called for "Ticket Template Name" lookup
+	// then set the FACTORY and change extra
+	if(backfill_field == "KEY.template_sym")
+	{
+		var factory_name = get_obj_type();
+		var extra = "FACTORY="+factory_name+"+QBE.NE.template_name=null+use_template=1" + 
+			"+QBE.EQ.template_name.delete_flag=0";
+		// if factory is cr, then append the clause that type is 
+		// not I or P
+		if(factory_name == "cr")
+			extra += extra_cr_url;
+		return extra;
+	}
+	else
+		return "";
+}
+
+function set_tmpl_type(value)
+{
+   var tmpl_return = "";
+   if ( value == "in_tpl" )
+      tmpl_return = "Incident";
+   else if ( value == "pr_tpl" )
+      tmpl_return = "Problem";
+   else if ( value == "cr_tpl" )
+      tmpl_return = "Call Request";
+   else if ( value == "chg_tpl" )
+      tmpl_return = "Change Order";
+   else if ( value == "iss_tpl" )
+      tmpl_return = "Issue";
+
+   return(tmpl_return);     
+}
+
+// An onChange event executed only when a value is changed using
+// Search as you Type
+function set_template_sym(sym)
+{
+	var tmpl_obj = document.main_form.elements["SET.template_sym"];
+	tmpl_obj.value = sym.value;
+}
+
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="SOAP Web Services Error Type" key="$args.name">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=saprobtyp>
+<PDM_MACRO name=dtlStart>
+
+// close this form and give focus on the main form
+<PDM_IF "$args.id" == "0" && "$args.KEEP.parent_persid" != "" >
+	docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_IF _dtl.edit && "$args.id" == "0">
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KEEP.saprobtyp_parent_code" != "">
+    detailTextboxReadonly( "Owning Policy", "", 1, "$args.KEEP.saprobtyp_parent_code", "" );
+    document.write('<INPUT TYPE=hidden NAME=SET.owning_policy VALUE="$args.KEEP.saprobtyp_parent_id">');
+<PDM_ELIF "$args.is_internal" == "" || "$args.is_internal" == "0">
+<PDM_MACRO name=dtlLookup hdr="Posiadana polisa" attr=owning_policy>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Posiadana polisa" attr=owning_policy>
+</PDM_IF>
+<PDM_MACRO name=dtlCheckbox hdr="Domyślnie" attr=is_default off="No" on="Yes">
+<PDM_IF "$args.is_internal" == "" || "$args.is_internal" == "0">
+    detailTextboxReadonly( "Internal", "", 1, "No", "" );
+<PDM_ELSE>
+    detailTextboxReadonly( "Internal", "", 1, "Yes", "" );
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit" >
+	detailSetEventHandler("onChange='pt_tmpl_type_set(this)'");
+	detailDropdown("Ticket Template Type", "template_factory", "saprobtyp", 1, 20, 
+		"1","","$args.template_factory",
+		"no","","$args.template_factory",
+		"","","no","","0",
+		"Incident",
+		"Incident", "in_tpl", "Problem", "pr_tpl",
+		"Call Request", "cr_tpl", 
+		"Change Order", "chg_tpl", 
+		"Issue", "iss_tpl" );
+
+	// Setting an onChange event to set the value to SET.template_sym when a 
+	// value is selected using search as you type
+	detailSetEventHandler("onChange='set_template_sym(this)'");	
+	
+	detailLookup("Ticket Template Name", "template_sym", "", 1, 30,
+		"1", "", "$args.template_sym",
+		"no", "template_name", "$args.template_sym",
+		"", "", "pt_select_template()", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ szablonu zgłsozenia" attr=template_factory fmtfunc=set_tmpl_type>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa szablonu zgłoszenia" attr=template_sym colspan=2>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=startNotebook hdr=saprobtyp_nb>
+<PDM_MACRO name=TAB title="Duplicate Handling" file="saprobtyp_dh_tab.htmpl">
+<PDM_MACRO name=TAB title="Return Data" file="saprobtyp_rd_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_saprobtyp.htmpl ASPEN.9 2012/02/24 17:03:47 valre03 Exp $
+</PDM_IF>
+<PDM_WSP>

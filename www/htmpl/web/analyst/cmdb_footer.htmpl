@@ -1,0 +1,52 @@
+<PDM_IF 0>
+
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2003 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  analyst/cmdb_footer.htmpl 
+// Created:
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains JavaScript and HTML that appear at the 
+//    bottom of every CI detail page.
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: cmdb_footer.htmpl, 2008/03/31 11:58:17 gadka01 $
+//
+
+</PDM_IF>
+
+<script type="text/javascript">
+
+var original_backfill_function;
+var new_backfill_function;
+if ( typeof backfill_event == "function" )
+{ 
+            original_backfill_function = backfill_event;
+            new_backfill_function  = cmdb_backfill_event;
+	    backfill_event = new_backfill_function;
+}
+
+function cmdb_backfill_event( momform, field_name, what2fill, persid, rel_attr_val )
+{	
+ 	if ( field_name == "KEY.class" )
+	{
+		cmdbClassOnClick();
+	}
+	original_backfill_function( momform, field_name, what2fill, persid, rel_attr_val );
+}
+
+</script>

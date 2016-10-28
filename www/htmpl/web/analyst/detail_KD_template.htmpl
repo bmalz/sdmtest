@@ -1,0 +1,150 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    KD object
+INTENT:
+    for default values on knowledge document creation
+</PDM_IF>
+
+<HTML lang="en">
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Default Values Template"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Default Values Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Default Values Template"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_KD.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+factoryDisplayName = "Default Values Template";//Need to be here so all alert msg will use it
+_bHideTenantSelection = true;//Template default values inherit the tenant from the containing template - SCO 6350
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+var doc;
+function onSave()
+{
+	doc = document.forms["main_form"].elements;
+	if (checkPermissions() == 0)
+	{
+		return;
+	}
+	msg = msgtext("Saving_default_values_will_save");
+	var res = confirm(msg);
+	if(res)
+	{
+		detailSave();
+	}
+}
+function onLoad()
+{
+	if("$args.id" != "0" && "$prop.form_name_3" != "edit")
+	{
+		top.opener.SaveTemplate("$args.id");
+	}
+	doc = document.forms["main_form"].elements;
+}
+
+function Edit()
+{
+	url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+		"+OP=UPDATE+FACTORY=KD" + 
+		"+HTMPL=detail_KD_template.htmpl" + 
+		"+SET.id=$args.id" + 
+		"+RO_HTMPL=detail_KD_template.htmpl" +
+		"+HIDE_EDIT=0";
+		
+		replace_page(url);
+}
+
+var bLoadPermission_tab = 0;
+function checkPermissions()
+{
+	var iframe = window.frames["tabPermissions_iframe"];
+
+	if (bLoadPermission_tab == 0)
+	{
+		return;
+	}
+
+	if (iframe.bInheritPermission())
+	{
+		doc["SET.INHERIT_PERMISSION"].value = iframe.bInheritPermission();
+		doc["SET.PGROUP_TYPE"].value = iframe.PgroupType();
+		doc["SET.READ_GROUP_LIST"].value = iframe.ReadList();
+		doc["SET.WRITE_GROUP_LIST"].value = iframe.WriteList();
+	}
+	else
+	{
+		doc["SET.INHERIT_PERMISSION"].value = 0;
+		doc["SET.PGROUP_TYPE"].value = iframe.PgroupType();
+		doc["SET.READ_GROUP_LIST"].value = iframe.ReadList();
+		//alert("Read = " + iframe.ReadList());
+		//alert("Write = " + iframe.WriteList());
+		/* We don't need this check anymore as we support empty write selection from now
+		if (iframe.WriteList() == -1)
+		{
+			alertmsg("Please_make_sure_at_least_one_");//("Please make sure at least one group has the write permission.");
+			return 0;
+		}
+		*/
+		if(iframe.WriteList() == -999)
+		{
+			alertmsg("Please_make_sure_the_grant_wri");//("Please make sure the grant write permission is selected.");
+			return 0;
+		}
+		else
+		{
+			doc["SET.WRITE_GROUP_LIST"].value = iframe.WriteList();
+		}
+	}
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onload="onLoad()" onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_MACRO name=dtlForm button=false factory="KD">
+<PDM_MACRO name=btnStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=button caption="Save[s]" func="onSave();" hotkey_name="Save[s]" id="btnSave">
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="detailCancel();" hotkey_name="Cancel[n]" id="btncncl">
+<PDM_MACRO name=button caption="Reset[r]" func="check_reset();detailReset();permissionTabReset()" hotkey_name="Reset[r]" id="btnReset">
+<PDM_ELIF "$args.HIDE_EDIT" != "1">
+<PDM_MACRO name=button caption="Edit" func="Edit()" hotkey_name="Edit" id="btnEdit">
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>	
+    detailCloseForm();  // Nothings on the form before the notebook
+</SCRIPT>
+<PDM_MACRO name=startNotebook hdr="kd_template_nb">
+<PDM_MACRO name=TAB title="Content" file="kd_content_tab.htmpl" id=tabContent>
+<PDM_MACRO name=TAB title="Attributes" file="kd_attributes_tab.htmpl" id=tabAttributes>
+<PDM_MACRO name=TAB title="Permissions" height=600 id=tabPermissions src="OP=DISPLAY_FORM+HTMPL=kd_permissions_tab.htmpl+SkeletonId=$args.id+KEEP.INHERIT_PERMISSION=$args.INHERIT_PERMISSION+READ_PGROUP=$args.READ_PGROUP+WRITE_PGROUP=$args.WRITE_PGROUP+PARENT_READ_PGROUP=$args.PRIMARY_INDEX.READ_PGROUP+PARENT_WRITE_PGROUP=$args.PRIMARY_INDEX.WRITE_PGROUP+KEEP.IS_EDIT=$prop.form_name_3">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

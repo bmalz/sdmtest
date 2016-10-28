@@ -1,0 +1,89 @@
+<PDM_IF 0>
+detail_dmn.htmpl
+WHEN PRESENTED:
+    When we need to display a details of a single Macro Type
+INTENT:
+    Display the detail and edit info for the Macro Type
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  dmn  args	The Macro Type object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/D:CA_SDAHDbase.maj for the
+                        definition of attributes for 'OBJECT dmn'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=readonly>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Macro Type Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Macro Type"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Macro Type $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Macro Type" key="$args.sym">
+<CENTER>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=macro_type>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlCheckbox hdr="Lock Object Flag" attr=lock_object_flag off=No on=Yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym colspan=2>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa wyświetlana" attr=display_name colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tech. Desc" attr=tech_desc colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="modified_date">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=startNotebook hdr="mac_nb">
+<PDM_MACRO name=TAB title="Execute Script" file="mactyp_exescript_tab.htmpl">
+<PDM_MACRO name=TAB title="Validate Script" file="mactyp_valscript_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_macro_type.htmpl ASPEN.2 2010/10/13 16:21:32 manmu01 Exp $;
+</PDM_IF>

@@ -1,0 +1,108 @@
+<PDM_IF 0>
+detail_attr_control.htmpl
+WHEN PRESENTED:
+    When we need to display details of a dependent attribute control
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="NBTAB=detail_attr_control" factory=attr_control>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_IF "$args.control.objname" == "cr" || "$args.KEEP.l_objname" == "cr">
+var hdrTitle = "Dependent Attribute Control Detail for Request status code '$args.control.value_string'";
+var hdrTitleUpd = "Update Dependent Attribute Control for Request status code '$args.control.value_string'";
+var hdrTitleNew = "Create New Dependent Attribute Control for Request status code '$args.KEEP.l_valstr'";
+<PDM_ELIF "$args.control.objname" == "in" || "$args.KEEP.l_objname" == "in">
+var hdrTitle = "Dependent Attribute Control Detail for Incident status code '$args.control.value_string'";
+var hdrTitleUpd = "Update Dependent Attribute Control for Incident status code '$args.control.value_string'";
+var hdrTitleNew = "Create New Dependent Attribute Control for Incident status code '$args.KEEP.l_valstr'";
+<PDM_ELIF "$args.control.objname" == "pr" || "$args.KEEP.l_objname" == "pr">
+var hdrTitle = "Dependent Attribute Control Detail for Problem status code '$args.control.value_string'";
+var hdrTitleUpd = "Update Dependent Attribute Control for Problem status code '$args.control.value_string'";
+var hdrTitleNew = "Create New Dependent Attribute Control for Problem status code '$args.KEEP.l_valstr'";
+<PDM_ELIF "$args.control.objname" == "iss" || "$args.KEEP.l_objname" == "iss">
+var hdrTitle = "Dependent Attribute Control Detail for Issue status code '$args.control.value_string'";
+var hdrTitleUpd = "Update Dependent Attribute Control for Issue status code '$args.control.value_string'";
+var hdrTitleNew = "Create New Dependent Attribute Control for Issue status code '$args.KEEP.l_valstr'";
+<PDM_ELIF "$args.control.objname" == "chg" || "$args.KEEP.l_objname" == "chg">
+var hdrTitle = "Dependent Attribute Control Detail for Change Order status code '$args.control.value_string'";
+var hdrTitleUpd = "Update Dependent Attribute Control for Change Order status code '$args.control.value_string'";
+var hdrTitleNew = "Create New Dependent Attribute Control for Change Order status code '$args.KEEP.l_valstr'";
+<PDM_ELSE>
+var hdrTitle = "Dependent Attribute Control Detail for status code '$args.control.value_string'";
+var hdrTitleUpd = "Update Dependent Attribute Control for status code '$args.control.value_string'";
+var hdrTitleNew = "Create New Dependent Attribute Control for status code '$args.KEEP.l_valstr'";
+</PDM_IF>
+argPersistentID = "$args.persistent_id";
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+<PDM_IF "$prop.form_name_3" == "ro">
+function detailExtraROButtons(){
+<PDM_MACRO NAME=button caption="Delete" hotkey_name="Delete" id="btnDelete" btnType="negative"
+    func="doDelete()">
+}
+function doDelete()
+{
+    var query_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID+FACTORY=$prop.FACTORY+NEXT_PERSID=$args.persistent_id" +
+        "+OP=DELETE+DEL_FAC=$prop.FACTORY+DEL_IDS=$args.id";
+
+    var doc = GetResponseViaUrl(query_str);
+
+    try {
+        if ( typeof top.opener.autoRefreshWindows == "object" )
+        top.opener.autoRefreshWindows[parent.window.name] = true;
+    }
+    catch(e) {}
+    clear_response();
+    window.parent.close();
+}
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script type="text/javascript">
+
+<PDM_MACRO name=dtlForm factory=attr_control>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" == "initial">
+</script>
+<input type="hidden" name="SET.l_objname" value="$args.KEEP.l_objname">
+<input type="hidden" name="SET.l_attrname" value="$args.KEEP.l_attrname">
+<input type="hidden" name="SET.l_valstr" value="$args.KEEP.l_valstr">
+<script type="text/javascript">
+   detailLookupEdit("Attribute", "attrname", "OA_COLUMNS", 1, 20,
+   "1", "", "", 
+   "yes", "COLUMN_NAME", "${args.attrname:}", 
+   "${args.SEARCH_STATUS_attrname:}", "${args.SEARCH_RESULTS_attrname:}", "yes", "ADDITIONAL_WHERE=(TABLE_NAME like '$args.KEEP.l_objname') AND IS_ATTR_ALIAS=0", 0);
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Atrybut" attr=attrname>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zablokowany" attr=locked off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Wymagany" attr=required off="No" on="Yes">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

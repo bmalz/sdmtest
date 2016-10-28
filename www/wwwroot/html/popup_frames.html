@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN"
+        "http://www.w3.org/TR/html4/frameset.dtd">
+<!--  static const char* const POPUP_FRAMES_RCSID = "@(#)$Id: popup_frames.html ASPEN.10 2012/03/06 09:48:29 kumka02 Exp $";-->
+<!--  popup_frames.htmpl was changed to popup_frames.html -->
+
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+<script type="text/javascript">
+var ahdframeset = window;
+
+// Variables determining the frames that appear on the popup screen.
+// When a frame is suppressed, we blank out its title so it's not listed
+// by a screen reader.
+
+var g_displayTopSplash = true;	   // By default, display the USP top splash screen
+
+var g_displayMenubar = true;	   // By default, display the menu bar
+var menubarTitle = "Menu bar";
+
+var g_displayWelcomeBanner = true; // By default, display the welcome banner
+var welcomeBannerTitle = "User name and logoff link";
+
+ahdframeset.suppressGoButton = false;	// By default, display the Go button interface
+var goButtonTitle = "Go button navigation";
+
+var g_forceScroll = false;			// Force SCROLLABLE on cai_main frame
+
+// Check for the TOP_SPLASH parameter in the URL - if the value is 'no'
+// then do not display the top splash screen
+if (window.location.search.match(/TOP_SPLASH=([^&+]+)/)) {
+	if (RegExp.$1 == 'no') {		
+		g_displayTopSplash = false;
+	}
+}
+
+// Check for the MENUBAR parameter in the URL - if the value is 'no'
+// then do not display the menubar
+if (window.location.search.match(/MENUBAR=([^&+]+)/)) {
+	if (RegExp.$1 == 'no') {		
+		g_displayMenubar = false;
+        menubarTitle = " ";
+	}
+}  
+
+if (window.location.search.match(/FORCESCROLL=([^&+]+)/)) {
+	if (RegExp.$1 == 'yes') {		
+		g_forceScroll = true;
+	}
+}  
+
+// Check for the GOBUTTON parameter in the URL - if the value is 'no'
+// then do not display the go button interface
+if (window.location.search.match(/GOBUTTON=([^&+]+)/)) {
+	if (RegExp.$1 == 'no') {		
+		ahdframeset.suppressGoButton = true;
+        goButtonTitle = " ";
+	}
+}  
+
+// Check for the WELCOMEBANNER parameter in the URL - if the value is 'no'
+// then do not display the welcome bannner
+if (window.location.search.match(/WELCOMEBANNER=([^&+]+)/)) {
+	if (RegExp.$1 == 'no') {		
+		g_displayWelcomeBanner = false;
+        welcomeBannerTitle = " ";
+	}
+}  
+      
+function get_ahdtop()
+{
+    if ( typeof parent.ahdtop == "object" && 
+         parent.ahdtop != null &&
+        ! parent.ahdtop.closed ) {
+       window.ahdtop = parent.ahdtop;
+       return window.ahdtop;
+    }
+    else {
+       for ( var win = window; typeof win == "object"; win = win.opener ) {
+           if ( win == null ||
+                win.closed ||
+                typeof win.name != "string" )
+              // we may not have a good object here, so get out
+              break;
+           if ( typeof win.ahdtop == "object" &&
+                win.ahdtop != null &&
+                ! win.ahdtop.closed ) {
+              window.ahdtop = win.ahdtop;
+              return window.ahdtop;
+           }
+           while ( win != win.parent &&
+                   win.name != "AHDtop" &&
+                   ! win.parent.closed &&
+                   typeof win.parent.name == "string" ) {
+              win = win.parent;
+           }
+           if ( win.name == "AHDtop" ) {
+              window.ahdtop = win;
+              return window.ahdtop;
+           }
+       }
+    }
+    window.ahdtop = void(0);
+    return window.ahdtop;
+}
+var cfgInitialURL;
+var ahdtop = get_ahdtop();
+var menubar_ahdframe = void(0);
+if ( typeof ahdtop != "object" )
+   alert("Can't find ahdtop in popup_frames.html");
+else {
+   menubar_ahdframe = ahdtop.ahdframe;       
+   var title_str = "New CA Service Desk Manager window loading...";      
+   document.writeln("<title>" + title_str + "</title>");
+
+   var cfgCAISD = ahdtop.cfgCAISD;
+   var propSupportR50 = ahdtop.propSupportR50;
+   var styleTag = "<"+"LINK REL='stylesheet' TYPE='text/css' HREF='";
+   var endStyle = "'>\n";
+   var scriptTag = "<"+"script type=\"text/javascript\" SRC='";
+   var endScript = "'><"+"/SCRIPT>\n";
+   var html = styleTag + ahdtop.usdStyles["styles_ahd"] + endStyle +
+              styleTag + ahdtop.usdStyles["imgbutton"] + endStyle +
+              scriptTag + ahdtop.usdScripts["browser"] + endScript +
+              scriptTag + ahdtop.usdScripts["window_manager"] + endScript +
+              scriptTag + ahdtop.usdScripts["imgbutton"] + endScript +
+              scriptTag + ahdtop.usdScripts["sitemods"] + endScript;
+   document.write(html);
+}
+
+var init_done = false; 
+var popup_type = "1"; // default to LARGE_POPUP
+function popup_resize()
+{
+  if ( typeof ahdtop == "object" &&
+       typeof _browser == "object"  &&
+       typeof ahdtop.preservePopup == "boolean" &&
+       ahdtop.preservePopup &&
+       init_done ) 
+  {
+      var h, w;
+      if ( _browser.isIE ) 
+      {
+         h = document.body.offsetHeight;
+         w = document.body.offsetWidth;
+      }
+      else 
+      {
+         h = window.innerHeight;
+         w = window.innerWidth;
+      }
+      var size_obj = eval("ahdtop.cstPopup" + popup_type); 		 
+      if (typeof size_obj == "object")
+      {      
+	 size_obj[0] = h;
+         size_obj[1] = w;
+	 ahdtop.popupResized = true;
+      }
+  }
+}
+
+function load_initial_url()
+{
+      init_done = true;
+      if ( window.cai_main.document.URL.indexOf("empty.html") == -1 )
+         return;
+      window.cai_main.ahdframeset = window;
+      var popunder = false;
+      if ( typeof ahdtop == "object" &&
+           typeof ahdtop.popup_frames_info == "object" &&
+	   window.location.search.match(/POPUP_URLIX=(\d+)/) ) {
+         var ix = RegExp.$1 - 0;
+         var info = ahdtop.popup_frames_info[ix];
+         if  ( typeof info == "object" ) {
+            cfgInitialURL = info.url;
+            ahdtop.lastClosedURL = info.url;
+			if(typeof info.callbackfunc != "undifined")
+				ahdframeset.popunder_callback = info.callbackfunc;
+            popunder = info.popunder;
+            if ( info.name != "" )
+               window.name = get_popup_window_name(info.name);
+            else {
+               var w_name = get_next_window_name();
+               if ( popunder ) {
+                  w_name = "popunder" + w_name;
+                  w_name = w_name.replace(/USD/,"");
+               }
+               window.name = w_name;
+            }
+         }
+         ahdtop.popup_frames_info[ix] = void(0);
+         if ( ( typeof cfgInitialURL != "string" ||
+                cfgInitialURL.length == 0 ) &&
+              typeof ahdtop.lastClosedURL == "string" )
+            cfgInitialURL = ahdtop.lastClosedURL;
+	}
+	// load the welcomebanner page
+	if (g_displayWelcomeBanner) 
+	{
+	    var url = ahdtop.cfgCgi + "?OP=DISPLAY_FORM+SID=" + ahdtop.cfgSID + 
+		      "+FID=123+HTMPL=welcome_banner.htmpl+KEEP.POPUP_NAME=" + window.name;
+	    window.welcomebanner.location.href = url;
+	}
+      register_window(window);
+      if ( ! popunder )
+         window.focus();
+      if ( typeof cfgInitialURL == "string" &&
+           cfgInitialURL.length > 0 ) {
+         if ( cfgInitialURL.match(/^(.*)\+actWinName=(\w*)(.*)$/) ) {
+            actWinName = RegExp.$2;
+            cfgInitialURL = RegExp.$1 + RegExp.$3;
+         }
+         if ( cfgInitialURL.match(/^(.*)\+popupType=(\w*)(.*)$/i) ) {
+            popup_type = RegExp.$2;
+            cfgInitialURL = RegExp.$1 + RegExp.$3;
+	 }
+         replace_page(cfgInitialURL,window.cai_main);        
+
+	 if (g_displayTopSplash)
+	 {
+	     var gobtn_url = ahdtop.usdHTML["gobtn"];
+	     if ((typeof ahdtop.use_role != "undefined") &&
+		 ahdtop.use_role)
+		 gobtn_url = ahdtop.cfgCgi + "?OP=DISPLAY_FORM+SID=" + 
+		 ahdtop.cfgSID + 
+		 "+FID=456+HTMPL=gobtn_role.htmpl+KEEP.POPUP_NAME=" + 
+		 window.name;
+	    window.gobtn.document.location.replace(gobtn_url);
+	} 
+      }
+      else {
+	  alert("Internal error in popup_frames.html determining which page to load - please retry");
+         window.close();
+      }                             
+}
+
+
+function doClose()
+{
+   self.close();
+}
+
+var is_form_loaded = false;
+</script>
+</HEAD>
+
+<script type="text/javascript">
+var topSplashSize = 80;
+var menuBarSize = (ahdtop.cstUsingScreenReader ? 28 : 23);
+var welcomeBannerSize = 26;
+if (!_browser.isIE && ahdtop.cstUsingScreenReader)
+{
+    if(_browser.isSafari)
+	   menuBarSize = 30;
+	else
+	   menuBarSize = 25;
+}
+if (!g_displayTopSplash)
+	topSplashSize = 0;
+if (!g_displayMenubar)
+	menuBarSize = 0;
+if (!g_displayWelcomeBanner)
+	welcomeBannerSize = 0;
+
+document.writeln("<FRAMESET id=\"popupframeset\" ROWS='" + topSplashSize + "," + welcomeBannerSize + "," + menuBarSize + ",*,1,1,1,1' FRAMEBORDER='0' FRAMESPACING='0' BORDER='0' onLoad='load_initial_url()' onUnload='cancel_window()' onResize='popup_resize()'>");
+
+document.writeln("<FRAME SRC='" + cfgCAISD +
+    "/html/empty.html' NAME=gobtn NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title=\"" + goButtonTitle + "\">");
+
+document.writeln("<FRAME SRC='" + cfgCAISD +
+    "/html/empty.html' NAME=welcomebanner NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title=\"" + welcomeBannerTitle + "\">");
+
+if (g_displayMenubar) {
+	document.writeln("<FRAME id='menubar' SRC='" + ahdtop.usdHTML["menubar"] +
+		"' NAME=menubar NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title=\"" + menubarTitle + "\">");
+}
+else {
+	document.writeln("<FRAME SRC='" + cfgCAISD +
+        "/html/empty.html' id='menubar' NAME=menubar NORESIZE SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=NO BORDER=0 title=\"Hidden frame - do not navigate here\">");
+}
+
+document.writeln("<FRAME SRC='" + cfgCAISD +
+   "/html/empty.html' NAME=cai_main SCROLLING=" + 
+   ((!g_forceScroll && propSupportR50 != "yes" && ! ahdtop.cstUsingScreenReader ) ? "no" : "auto") + 
+   " MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\"Main\">");
+
+document.writeln("<FRAME SRC='" + ahdtop.usdHTML["top_splash"] +
+    "' NAME=top_splash NORESIZE SCROLLING=NO MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\"Hidden frame - do not navigate here\">");
+
+document.writeln("<FRAME SRC='" + cfgCAISD +
+    "/html/empty.html' NAME=workframe NORESIZE=NORESIZE MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\"Hidden frame - do not navigate here\">"); // Do not modify!!!
+	
+document.writeln("<FRAME SRC='" + cfgCAISD +
+    "/html/empty.html' NAME=workframe2 NORESIZE=NORESIZE MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\"Hidden frame - do not navigate here\">"); // Do not modify!!!
+
+document.writeln("<FRAME SRC='" + cfgCAISD +
+    "/html/empty.html' NAME=workframe3 NORESIZE=NORESIZE MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\"Hidden frame - do not navigate here\">"); // Do not modify!!!
+
+document.writeln("<" + "/FRAMESET>");
+</script>
+</HTML>
+

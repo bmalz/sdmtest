@@ -1,0 +1,225 @@
+<PDM_IF 0>
+$Id: list_arcpur_rule.htmpl,v 1.4 2007/01/04 22:54:01 tuach01 Exp $
+list_arcpur_rule.htmpl
+WHEN PRESENTED:
+	When we need to display a list of archive and purge rules.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Archive and Purge Rule Search";
+var hdrTitleList = "Archive and Purge Rule List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("no", "no");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+var rec_array = new Array();
+var rule_names = new Array();
+
+var currRuleName;
+function set_run_arcpur(idx) 
+{
+    var rule_name = rec_array[idx];  
+    check_box = document.getElementById(rule_name);
+    if (typeof check_box == "undefined")
+    {
+	alertmsg("Unable_to_find_the_checkbox_fo", rule_name);
+    }
+    if (check_box.checked)
+    {
+	rule_names[idx] = rule_name;
+    }
+    else 
+    {
+	rule_names[idx] = void(0);
+    }
+}
+
+function run_now()
+{
+    var sel_fld = document.getElementById("hours");
+    var rule_name_list = "";
+    var check_box;
+    var rule_name;
+    while (rule_names.length)
+    {
+	var rule_name = rule_names.shift();
+	if (typeof rule_name != "undefined")
+	{
+	    if (rule_name_list != "") 
+		rule_name_list += ",";
+	    rule_name_list += rule_name;
+	    check_box = document.getElementById(rule_name);
+	    if (typeof check_box == "undefined")
+	    {
+		alertmsg("Unable_to_find_the_checkbox_fo", rule_name);
+	    }
+	    else 
+	    {
+		check_box.checked = false;
+	    }
+	}
+    }
+
+    if (typeof sel_fld == "undefined")
+    {
+	alertmsg("Unable_to_find_the_rule_name_o");
+	return;
+    }
+    if (rule_name_list == "")
+    {
+	alertmsg("Click_to_select_desired_rule(s");
+	return;
+    }
+    var hours = sel_fld.options[sel_fld.selectedIndex].value;
+
+    set_action_in_progress(ACTN_RUN_ARCPUR);
+    upd_workframe("RUN_ARCPUR_NOW", "rule_name=" + rule_name_list,
+		  "hours=" + hours, "FACTORY=arcpur_rule",
+		  "func=parent.ahdframeset.ahdframe.run_arcpur_callback");
+}
+
+function run_arcpur_callback(ret)
+{
+    if (ret == "1")
+    {
+	alertmsg("The_archive_and_purge_process(");
+    }
+    else 
+    {
+	alertmsg("The_archive_and_purge_process(0");
+    }
+    set_action_in_progress(ACTN_COMPLETE);
+    next_workframe("UPD_WORKFRAME");
+}
+
+var conf_obj_list = "$args.CONF_OBJ_NAME_LIST";
+
+function get_disp_name(key)
+{
+    var arr = conf_obj_list.split("@,@");
+    var ret = "";
+    for (var i = 1; i < arr.length; i += 2) 
+    {
+	var sym = arr[i-1];
+	var code = arr[i];
+	if (code == key)
+	{
+	    ret = sym;
+	    break;
+	}
+    }
+	rs.data(ret);
+}
+
+function showCheckbox(value)
+{
+	var rec_cnt = rec_array.length; 
+    var str = '<input type="checkbox" title="Select '+ currRuleName +'" id="'+ currRuleName +'" name="'+ currRuleName +'" value="" onClick="set_run_arcpur(' + rec_cnt + ')">';
+
+	rec_array[rec_cnt] = currRuleName;
+    rs.data( str );
+}
+
+function showType(value)
+{
+	if (value == "0")
+		rs.data("Archive and Purge");
+	else if (value == "1")
+		rs.data("Purge Only");
+	else if (value == "2")
+		rs.data("Archive Only (Test Run)");
+	else 
+		rs.data("error");
+}
+
+// holdHTMLText();
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Archive and Purge">
+<script type="text/javascript">
+<PDM_MACRO name=sfStart export=no factory=arcpur_rule>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa reguły" attr=name size=20>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+
+searchFilterDropdown("Schedule","sched",""
+<PDM_LIST PREFIX=list WHERE=" " FACTORY=wrkshft>
+<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);
+
+<PDM_MACRO name=sfTextbox hdr="Archiwalna nazwa pliku" attr=arc_file_name size=20>
+<PDM_MACRO name=sfStartRow>
+
+searchFilterDropdown("Operation Type","oper_type","","Archive and Purge","0","Purge Only","1","Archive Only (Test Run)","2");
+var con_list = conf_obj_list.split("@,@");
+var func_str = 'searchFilterDropdown("Config. Object Name","conf_obj_name",""';
+for (var i = 0; i < con_list.length; i++)
+{
+    func_str += ',"' + con_list[i] + '"';
+}
+func_str += ");";
+eval(func_str);
+
+<PDM_MACRO name=sfTextbox hdr="Dni braku aktywności" attr=QBE.EQ.days_inactive size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Dodatkowe zapytanie" attr=add_query colspan=4 size=60>
+
+endSearchFilter();
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No archive and purge rule found";
+var msgFound1 = "1 archive and purge rule found";
+var msgFound = "%1 archive and purge rules found";
+var msgFoundMore = "%1 archive and purge rules found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired archive and purge rule";
+//var rs = new ResultSet("");
+//rs.startList();
+docWriteln('<td class="results" colspan=3><table><tr>');
+imgBtnRowActive = true;
+<PDM_MACRO name=button caption="Run Now" func="run_now()" hotkey_name="Run Now" id="" width=0>
+imgBtnRowActive = false;
+</script>
+<td class="labeltext" nowrap="nowrap"><label for="hours" >Stop after</label>:</td>
+<td class="results"><select id=hours name=hours>
+<option selected="selected" value=1>1</option>
+<script type="text/javascript">
+for (var i = 2; i < 25; i++)
+{
+    docWriteln('<option value=' + i +'>' + i + '</option>');
+}
+</script>
+</select></td>
+<td class="bodytext" nowrap="nowrap">hour(s)</td></tr></table></td>
+<table><tr>
+<td class="bodytext" nowrap="nowrap"><span class=gn_bold_text>Default Schedule:</span> $env.NX_DEFAULT_SCHEDULE</td>
+</tr></table>
+<script type="text/javascript">
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="currRuleName=\"@{list.name}\";">
+<PDM_MACRO name=lsCol hdr="Sel" attr=id fmtfunc=showCheckbox sort="no">
+<PDM_MACRO name=lsCol hdr="Nazwa reguły" attr=name link=yes sort="no">
+<PDM_MACRO name=lsCol hdr="Harmonogram" attr=sched.sym sort="no">
+<PDM_MACRO name=lsCol hdr="Typ operacji" attr=oper_type fmtfunc=showType sort="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag.sym sort="no">
+<PDM_MACRO name=lsCol hdr="Nazwa obiektu konfiguracji" attr=conf_obj_name fmtfunc=get_disp_name startrow=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa obiektu" attr=object_name>
+<PDM_MACRO name=lsCol hdr="Dodatkowe zapytanie" attr=add_query justify=truncate>
+<PDM_MACRO name=lsEnd>
+
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_WSP>

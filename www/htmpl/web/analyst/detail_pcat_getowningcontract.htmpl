@@ -1,0 +1,43 @@
+<PDM_IF 0>
+20130823 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	// alert('in');
+	var frm = "";
+	if ( !parent.cai_main )
+	{
+		frm = parent.ahdframe;
+	}
+	else { frm = parent.cai_main; }
+
+    if (typeof frm.GetOwningContractId == "function")
+    {
+        frm.GetOwningContractId("$args.owning_contract.id");
+    }
+
+	if (typeof frm.GetChgFlag == "function")
+	{
+		frm.GetChgFlag("$args.zchg_flag");
+	}
+
+	// if (typeof frm.GetZsdsc == "function")
+	// {
+	// 	frm.GetZsdsc("$args.service_type.sym", "$args.service_type.code");
+	// }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

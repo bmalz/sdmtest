@@ -1,0 +1,896 @@
+<PDM_IF 0>
+detail_ci_mdr_provider.htmpl
+WHEN PRESENTED:
+    When we need to display details for a MDR Provider Definition
+INTENT:
+    Display the details for a MDR Provider Definition
+HISTORY:
+05/07/2008 mckpe04/tomjo02 Version shipped with CMDB 11.2
+07/25/2008 tomjo02 PES P05544 - CMDB-UAPM integration phase 1 - added UAPM launch-in-context support
+10/24/2008 tomjo02 SCO 17990 - added dynamic id support for multi-tenancy dropdown
+02/24/2009 tomjo02 SCO 17187 - Add support for APM CA Asset Portfolio Managment product name change
+05/14/2009 tomjo02 SCO 16454 - QC 2102 - Incorporated R11.2 localization changes - Add colon separator between mdr provider name and title
+07/22/2009 tomjo02 SCO 26226 - CMDBf Federation Viewer - Added CMDBf timeout and endpoint fields
+12/18/2009 tomjo02 SCO 31405 - Add ITAM 12.5 MDR launch in context support.
+</PDM_IF>
+
+<html>
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} : MDR Provider Definition"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} : Update MDR Definition"</PDM_FMT>;
+<PDM_IF "${args.COMMON_NAME}" != "">
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New MDR Definition : ${args.COMMON_NAME}"</PDM_FMT>;
+<PDM_ELSE>
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New MDR Definition"</PDM_FMT>;
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+// Default Cohesion values for Path and Parameters.
+var cmdbCohesionMDRPath  = "CAisd/html/cmdb_cohesion.html";
+var cmdbCohesionMDRParms = "hostname={hostname}+port={port}+family={family}+name={name}+secret={password}+federated_asset_id={federated_asset_id}";
+
+// Use NX.env Cohesion value overrides if specified.
+var cmdbNXTemp = '<PDM_FMT ESC_STYLE=C>$env.NX_CMDB_COHESION_PATH</PDM_FMT>';
+if ( cmdbNXTemp != "" )
+{
+    cmdbCohesionMDRPath = cmdbNXTemp;
+}
+cmdbNXTemp = '<PDM_FMT ESC_STYLE=C>$env.NX_CMDB_COHESION_PARMS</PDM_FMT>';
+if ( cmdbNXTemp != "" )
+{
+    cmdbCohesionMDRParms = cmdbNXTemp;
+}
+
+// Set the MDR Class name used when the user saves an Cohesion MDR.
+// Note that GRLoader relies on the case sensitive name (uppercase "C" and lowercase "ohesion" ).
+// to be set. This form will allow the user to enter "Cohesion" (case insensitive) but
+// will always save the case-sensitive value below.
+var cmdbCohesionMDRClass = "Cohesion";
+
+// Build the URL in the form "http://cmdbserver:cmdbport/{path}?{parameters}".
+// Use the current protocol, server and port as basis of the URL.
+var cmdbDefaultCohesionMDRUrl = location.protocol + "//" + location.hostname + ":"  + location.port + "/" + "{path}?{parameters}";
+// Use the default Cohesion URL when editing a Cohesion MDR for first time.
+var cmdbPrevCohesionMdrUrl = cmdbDefaultCohesionMDRUrl;
+
+// Set the default MDR URL used when an MDR is first created.
+var cmdbDefaultMDRUrl = "http://{hostname}:{port}/{path}?{parameters}";
+
+// Variables holding form element ID's for get/set of edit control values and focus handling. 
+// Attribute names will be replaced with actual IDs in cmdbSetupEditMDRProvider(). 
+var cmdbMdrNameId  = "mdr_name";  // MDR Name
+var cmdbMdrClassId = "mdr_class"; // MDR Class
+var cmdbMdrPathId  = "path";      // Path
+var cmdbMdrParmsId = "parameters";// Parameters
+var cmdbMdrUrlId   = "launchurl"; // URL to launch in Context
+
+// The following preserve values last specified by the user.
+var cmdbPrevMdrPath = "";
+var cmdbPrevMdrParms = "";
+var cmdbPrevMdrUrl = "";
+
+// Flag indicating if MDR Class was last set "Cohesion".
+var cmdbPreviousClassWasCohesion = false;
+
+// Default global UAPM MDR values for Path and Parameters.
+var cmdbUAPMMdrPath  = "apm/frmObject.aspx";
+var cmdbUAPMMdrParms = "ObjectID={cmdb_asset_id}&obj=11&FUNCTION=1&WinID=OBFRASSET{cmdb_asset_id}&WinContainerID=";
+
+// Use the default MDR URL when editing a UAPM MDR for first time.
+var cmdbPrevUAPMMdrUrl = cmdbDefaultMDRUrl;
+
+// Flag indicating if MDR was last set "APM" or "UAPM" global MDR
+var cmdbPreviousClassWasUAPM = false;
+
+// Default global ITAM MDR values for Path and Parameters.
+var cmdbITAMMdrPath  = "ITAM/Pages/Asset.aspx";
+var cmdbITAMMdrParms = "ParentClass=Asset&assetid={cmdb_asset_id}&TicketID={itam_ticketid}";
+
+<PDM_IF 0>
+// SCO 31405 - tomjo02 18-Dec-2009 - Dynamic ITAM TicketID substitution support. 
+// Enable the following line of code and corresponding code in cmdb_mdr_buttons.htmpl that
+// will not hard code the TicketID parameter and will be dynamically added when the MDR button is created.
+var cmdbITAMMdrParms = "ParentClass=Asset&assetid={cmdb_asset_id}";
+</PDM_IF>
+
+// Use the default MDR URL when editing a ITAM MDR for first time.
+var cmdbPrevITAMMdrUrl = cmdbDefaultMDRUrl;
+
+// Flag indicating if MDR was last set "ITAM" global MDR
+var cmdbPreviousClassWasITAM = false;
+
+
+// Routine that gets the form element associated for a particular BOP attribute.
+// tomjo02 - This routine is generic for all detail forms and should be added to detail_form.js
+function detailGetElementByAttrName( attrName )
+{
+    var resultElement = null;
+    
+    // Get the current detail form.
+    var form = window.document.main_form;
+    if ( typeof form != "undefined" && 
+         typeof attrName == "string" )
+    {
+        // Get the SET element if defined.
+        resultElement = form.elements["SET."+attrName];
+        if (typeof resultElement == "undefined")
+        {
+            // Try the KEY element if defined.
+            resultElement = form.elements["KEY."+attrName];
+            if (typeof resultElement == "undefined")
+            {
+                resultElement = null;
+            }
+        }
+    }
+    
+    return resultElement;
+}
+
+// Routine that gets the form element ID associated for a particular BOP attribute.
+function detailGetElementIdByAttrName( attrName )
+{
+    var resultId = "";
+    
+    var element = detailGetElementByAttrName( attrName );
+    if ( element != null )
+    {
+        resultId = element.id;
+    }
+    
+    return resultId;
+}
+
+
+// Routine responsible for setting up handlers and state variables to
+// handle edit of an MDR provider and special handling for "Cohesion" and "APM/UAPM"
+// MDR definitions.
+function cmdbSetupEditMDRProvider()
+{
+    // Edit mode - Setup handlers and state variables to properly set the
+    // Path, Parameters and URL fields based on whether or not "Cohesion" or "APM/UAPM"
+    // is/is not specified for MDR Class.
+    
+    // Get element IDs corresponding to form controls. ID values can change if 
+    // multi-tenancy is enable or form is customized.
+    cmdbMdrNameId  = detailGetElementIdByAttrName( cmdbMdrNameId );
+    cmdbMdrClassId = detailGetElementIdByAttrName( cmdbMdrClassId );
+    cmdbMdrPathId  = detailGetElementIdByAttrName( cmdbMdrPathId );
+    cmdbMdrParmsId = detailGetElementIdByAttrName( cmdbMdrParmsId );
+    cmdbMdrUrlId   = detailGetElementIdByAttrName( cmdbMdrUrlId );
+
+    // Register focus onblur handlers with the form controls.
+    cmdbRegisterOnBlurListener( document.getElementById( cmdbMdrNameId ) );
+    cmdbRegisterOnBlurListener( document.getElementById( cmdbMdrClassId ) );
+    cmdbRegisterOnBlurListener( document.getElementById( cmdbMdrPathId ) );
+    cmdbRegisterOnBlurListener( document.getElementById( cmdbMdrParmsId ) );
+    cmdbRegisterOnBlurListener( document.getElementById( cmdbMdrUrlId ) );
+
+    // Save initial values.
+    cmdbMdrPreserveValues();
+
+    if ( cmdbIsCohesionMDRClass() )
+    {
+        // Initial setup for edit of a Cohesion MDR.
+        if ( cmdbPrevMdrUrl == cmdbDefaultMDRUrl || cmdbPrevMdrUrl.length == 0 )
+        {
+            // Use the default Cohesion URL if either of following are true.
+            // 1) Creating a new MDR definition (default non-Cohesion MDR URL will be set)
+            // 2) Starting with a blank URL from previous edit.
+            cmdbPrevCohesionMdrUrl = cmdbDefaultCohesionMDRUrl;
+        }
+        else
+        {
+            // MDR URL was customized by the user (does not match the default),
+            // use the URL that was previously saved/specified by the user.
+            cmdbPrevCohesionMdrUrl = cmdbPrevMdrUrl;
+        }
+
+        // Set the Cohesion Path, Parameters and URL values and
+        // disable the Path and Parmaters controls.
+        cmdbMdrSetCohesionValues();
+
+        // Set flag indicating the current MDR Class is set to "Cohesion".
+        cmdbPreviousClassWasCohesion = true;
+    }
+    else if ( cmdbIsUAPMMdr() )
+    {
+        // Initial setup for edit of a UAPM MDR.
+        if ( cmdbPrevMdrUrl.length == 0 )
+        {
+            // Use the default URL if starting with a blank URL from previous edit.
+            cmdbPrevUAPMMdrUrl = cmdbDefaultMDRUrl;
+        }
+        else
+        {
+            // MDR URL was customized by the user (does not match the default),
+            // use the URL that was previously saved/specified by the user.
+            cmdbPrevUAPMMdrUrl = cmdbPrevMdrUrl;
+        }
+
+        // Set the UAPM Path, Parameters and URL values and
+        // disable the Path and Parameters controls.
+        cmdbMdrSetUAPMValues();
+
+        // Set flag indicating the current MDR to the "APM" or "UAPM" global MDR.
+        cmdbPreviousClassWasUAPM = true;
+    }
+    else if ( cmdbIsITAMMdr() )
+    {
+        // Initial setup for edit of a ITAM MDR.
+        if ( cmdbPrevMdrUrl.length == 0 )
+        {
+            // Use the default URL if starting with a blank URL from previous edit.
+            cmdbPrevITAMMdrUrl = cmdbDefaultMDRUrl;
+        }
+        else
+        {
+            // MDR URL was customized by the user (does not match the default),
+            // use the URL that was previously saved/specified by the user.
+            cmdbPrevITAMMdrUrl = cmdbPrevMdrUrl;
+        }
+
+        // Set the ITAM Path, Parameters and URL values and
+        // disable the Path and Parameters controls.
+        cmdbMdrSetITAMValues();
+
+        // Set flag indicating the current MDR to the "ITAM" global MDR.
+        cmdbPreviousClassWasITAM = true;
+    }
+}
+
+
+// Routine that responds to onblur events and sets/preserves the Path,
+// Parameters and URL controls based on whether Cohesion is specified or not.
+function cmdbMdrOnBlurHandler( evt )
+{
+    var targetElement;
+
+    if ( evt == undefined )
+    {
+        // IE event model, get the event from window object.
+        evt = window.event;
+    }
+
+    if ( evt.currentTarget )
+    {
+        // DOM Level 2 (Firefox) - Get the element associated with the event.
+        targetElement = evt.currentTarget;
+    }
+    else if ( evt.srcElement )
+    {
+        // IE 5+ - Get the element associated with the event.
+        targetElement = evt.srcElement;
+    }
+
+    if ( targetElement != undefined  )
+    {
+        // Determine what control lost focus and perform the required
+        // action (get/set or preserve) values based on user action.
+
+        if ( targetElement.id == cmdbMdrClassId )
+        {
+            // MDR Class edit control lost focus.
+
+            if ( cmdbIsCohesionMDRClass() )
+            {
+                // "Cohesion" is specified in the control.
+
+                if ( cmdbPreviousClassWasCohesion == false )
+                {
+                    // Non-Cohesion to Cohesion change occured.
+
+                    // Set Cohesion override values and disable the controls.
+                    cmdbMdrSetCohesionValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasCohesion = true;
+
+                    // Set UAPM flag to disregard focus/value changes.
+                    cmdbPreviousClassWasUAPM = false;
+                }
+            }
+            else if ( cmdbIsUAPMMdr() )
+            {
+                // Global "APM/UAPM" MDR and MDR Class == "GLOBAL" is specified in the controls.
+
+                if ( cmdbPreviousClassWasUAPM == false )
+                {
+                    // Non-UAPM to UAPM change occured.
+
+                    // Set UAPM override values and disable the controls.
+                    cmdbMdrSetUAPMValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasUAPM = true;
+
+                    // Set Cohesion flag to disregard focus/value changes.
+                    cmdbPreviousClassWasCohesion = false;
+                }
+            }
+            else if ( cmdbIsITAMMdr() )
+            {
+                // Global "APM/ITAM" MDR and MDR Class == "GLOBAL" is specified in the controls.
+
+                if ( cmdbPreviousClassWasITAM == false )
+                {
+                    // Non-ITAM to ITAM change occured.
+
+                    // Set ITAM override values and disable the controls.
+                    cmdbMdrSetITAMValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasITAM = true;
+
+                    // Set Cohesion flag to disregard focus/value changes.
+                    cmdbPreviousClassWasCohesion = false;
+                }
+            }
+            else
+            {
+                // "Cohesion" or "GLOBAL" (UAPM/ITAM) is NOT specified in the control.
+
+                if ( cmdbPreviousClassWasCohesion == true || cmdbPreviousClassWasUAPM == true  || cmdbPreviousClassWasITAM == true )
+                {
+                    // Cohesion/UAPM/ITAM to non-Cohesion/UAPM/ITAM change occured.
+
+                    // Restore previous values and enable the controls.
+                    cmdbMdrRestorePreviousValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasCohesion = false;
+                    cmdbPreviousClassWasUAPM = false;
+                    cmdbPreviousClassWasITAM = false;
+                }
+            }
+        }
+        else if ( targetElement.id == cmdbMdrNameId )
+        {
+            // MDR Name edit control lost focus.
+            if ( cmdbIsUAPMMdr() )
+            {
+                // Global "APM/UAPM" MDR and MDR Class == "GLOBAL" is specified in the controls.
+
+                if ( cmdbPreviousClassWasUAPM == false )
+                {
+                    // Non-UAPM to UAPM change occured.
+
+                    // Set UAPM override values and disable the controls.
+                    cmdbMdrSetUAPMValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasUAPM = true;
+                }
+            }
+            else if ( cmdbIsITAMMdr() )
+            {
+                // Global "ITAM" MDR and MDR Class == "GLOBAL" is specified in the controls.
+
+                if ( cmdbPreviousClassWasITAM == false )
+                {
+                    // Non-ITAM to ITAM change occured.
+
+                    // Set ITAM override values and disable the controls.
+                    cmdbMdrSetITAMValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasITAM = true;
+                }
+            }
+            else
+            {
+                // Global "APM/UAPM" MDR is not specified in the controls.
+
+                if ( cmdbPreviousClassWasUAPM == true )
+                {
+                    // UAPM to non-UAPM change occured.
+
+                    // Restore previous values and enable the controls.
+                    cmdbMdrRestorePreviousValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasUAPM = false;
+                }
+                else if ( cmdbPreviousClassWasITAM == true )
+                {
+                    // ITAM to non-ITAM change occured.
+
+                    // Restore previous values and enable the controls.
+                    cmdbMdrRestorePreviousValues();
+
+                    // Set flag to handle focus/value change correctly.
+                    cmdbPreviousClassWasITAM = false;
+                }
+            }
+        }
+        else if (  targetElement.id == cmdbMdrPathId  ||
+                   targetElement.id == cmdbMdrParmsId ||
+                   targetElement.id == cmdbMdrUrlId
+                )
+        {
+            // Path, Parameter or URL edit controls lost focus, preserve the
+            // values entered by user depending on if they are editing a
+            // non-Cohesion/UAPM, Cohesion, UAPM or ITAM MDR definition.
+            if ( cmdbPreviousClassWasCohesion )
+            {
+                // Preserve the Cohesion values.
+                cmdbMdrPreserveCohesionValues();
+            }
+            else if ( cmdbPreviousClassWasUAPM )
+            {
+                // Preserve the UAPM values.
+                cmdbMdrPreserveUAPMValues();
+            }
+            else if ( cmdbPreviousClassWasITAM )
+            {
+                // Preserve the ITAM values.
+                cmdbMdrPreserveITAMValues();
+            }
+            else
+            {
+                // Preserve the non-Cohesion/UAPM/ITAM values.
+                cmdbMdrPreserveValues();
+            }
+        }
+    }
+}
+
+// Routine that registers an onblur event listenter handler for a form element.
+function cmdbRegisterOnBlurListener( element )
+{
+    if ( element != undefined )
+    {
+        // Element exists, register the onblur event handler with the element.
+        if ( element.addEventListener )
+        {
+            // DOM Level 2 event model - Firefox
+            element.addEventListener( "blur", cmdbMdrOnBlurHandler, true );
+        }
+        else if ( element.attachEvent )
+        {
+            // IE 5+ event model
+            element.attachEvent( "onblur", cmdbMdrOnBlurHandler );
+        }
+    }
+}
+
+// Routine that determines if MDR Class is currently set to "Cohesion" (case insensitive)
+// and will update the MDR class name with the case sensitive name if needed.
+function cmdbIsCohesionMDRClass()
+{
+    var bResult = false;
+    var cmdbMdrClassElt = document.getElementById( cmdbMdrClassId );
+
+    if ( cmdbMdrClassElt != undefined &&
+         cmdbMdrClassElt.value != undefined &&
+         cmdbMdrClassElt.value.length > 0
+       )
+
+    {
+        // Remove any leading/trailing whitespace from the MDR Class value
+        // and save cleansed value back in the edit control.
+        var mdrClass = cmdbMdrClassElt.value;
+        mdrClass = cmdbTrimWhitespace( mdrClass );
+        cmdbMdrClassElt.value = mdrClass;
+
+        // Is "Cohesion" specified? (case insensitive test)
+        if ( mdrClass.toUpperCase() == cmdbCohesionMDRClass.toUpperCase() )
+        {
+            // "Cohesion" is specified by the user.
+            bResult = true;
+
+            // Override value specified by user with case sensitive name so value
+            // saved in the database is in the correct format for GRLoader.
+            cmdbMdrClassElt.value = cmdbCohesionMDRClass;
+        }
+        else
+        {
+            // Class not set or not set to type "Cohesion".
+            bResult = false;
+        }
+    }
+
+    return bResult;
+}
+
+// Routine that sets the Cohesion override values in the form controls
+// and sets the Path and Parameter controls read-only.
+function cmdbMdrSetCohesionValues()
+{
+    var cmdbMdrPathElt  = document.getElementById( cmdbMdrPathId );
+    var cmdbMdrParmsElt = document.getElementById( cmdbMdrParmsId );
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Set the Path and Parameter overrides and make them read-only.
+    if ( cmdbMdrPathElt != undefined )
+    {
+         cmdbMdrPathElt.value = cmdbCohesionMDRPath;
+         cmdbMdrPathElt.readOnly = true;
+    }
+    if ( cmdbMdrParmsElt != undefined )
+    {
+         cmdbMdrParmsElt.value = cmdbCohesionMDRParms;
+         cmdbMdrParmsElt.readOnly = true;
+    }
+
+    // Set the URL but leave it read-write.
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbMdrUrlElt.value = cmdbPrevCohesionMdrUrl;
+    }
+}
+
+// Routine that preserves the current non-Cohesion Path, Parameters
+// and URL values in the form controls.
+function cmdbMdrPreserveValues()
+{
+    var cmdbMdrPathElt  = document.getElementById( cmdbMdrPathId );
+    var cmdbMdrParmsElt = document.getElementById( cmdbMdrParmsId );
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Preserve the current values in the controls specified by the user.
+    if ( cmdbMdrPathElt != undefined )
+    {
+         cmdbPrevMdrPath = cmdbMdrPathElt.value;
+    }
+    if ( cmdbMdrParmsElt != undefined )
+    {
+         cmdbPrevMdrParms = cmdbMdrParmsElt.value;
+    }
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbPrevMdrUrl = cmdbMdrUrlElt.value;
+    }
+}
+
+// Routine that restores the previous non-Cohesion Path, Parameters
+// and URL values last specified by the user and enables the form controls.
+function cmdbMdrRestorePreviousValues()
+{
+    var cmdbMdrPathElt  = document.getElementById( cmdbMdrPathId );
+    var cmdbMdrParmsElt = document.getElementById( cmdbMdrParmsId );
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Restore the previous values entered by user and enable the controls.
+    if ( cmdbMdrPathElt != undefined )
+    {
+         cmdbMdrPathElt.readOnly = false;
+         cmdbMdrPathElt.value = cmdbPrevMdrPath;
+    }
+    if ( cmdbMdrParmsElt != undefined )
+    {
+         cmdbMdrParmsElt.readOnly = false;
+         cmdbMdrParmsElt.value = cmdbPrevMdrParms;
+    }
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbMdrUrlElt.value = cmdbPrevMdrUrl;
+    }
+}
+
+// Routine that preserves the current Cohesion URL value specified by the user.
+function cmdbMdrPreserveCohesionValues()
+{
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Preserve the current URL value specified by the user.
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbPrevCohesionMdrUrl = cmdbMdrUrlElt.value;
+    }
+}
+
+// Routine that restores the previous Cohesion URL value specified by the user.
+function cmdbMdrRestorePreviousCohesionValues()
+{
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Restore the previous Cohesion URL value entered by user.
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbMdrUrlElt.value = cmdbPrevCohesionMdrUrl;
+    }
+}
+
+// Routine that determines if MDR Name and Class="GLOBAL" identify the "APM" or "UAPM" global MDR definition.
+function cmdbIsUAPMMdr()
+{
+    var bResult = false;
+    var cmdbMdrNameElt = document.getElementById( cmdbMdrNameId );
+
+    if ( cmdbMdrNameElt != undefined &&
+         cmdbMdrNameElt.value != undefined &&
+         cmdbMdrNameElt.value.length > 0
+       )
+    {
+        // Remove any leading/trailing whitespace from the MDR Name value
+        // and save cleansed value back in the edit control.
+        var mdrName = cmdbMdrNameElt.value;
+        mdrName = cmdbTrimWhitespace( mdrName );
+        cmdbMdrNameElt.value = mdrName;
+
+        // Is "APM" or "UAPM" name and Class="GLOBAL" specified? (case insensitive test)
+        if ( ( mdrName.toUpperCase() == "APM" || mdrName.toUpperCase() == "UAPM" ) && cmdbMdrIsGlobalClass() )
+        {
+            // "UAPM" is specified by the user.
+            bResult = true;
+        }
+        else
+        {
+            // Class not set or not set to type "UAPM".
+            bResult = false;
+        }
+    }
+
+    return bResult;
+}
+
+// Routine that determines if MDR Class is currently set to "GLOBAL" (case insensitive)
+function cmdbMdrIsGlobalClass()
+{
+    var bResult = false;
+    var cmdbMdrClassElt = document.getElementById( cmdbMdrClassId );
+
+    if ( cmdbMdrClassElt != undefined &&
+         cmdbMdrClassElt.value != undefined &&
+         cmdbMdrClassElt.value.length > 0
+       )
+    {
+        // Remove any leading/trailing whitespace from the MDR Class value
+        // and save cleansed value back in the edit control.
+        var mdrClass = cmdbMdrClassElt.value;
+        mdrClass = cmdbTrimWhitespace( mdrClass );
+        cmdbMdrClassElt.value = mdrClass;
+
+        // Is "GLOBAL" specified? (case insensitive test)
+        if ( mdrClass.toUpperCase() == "GLOBAL" )
+        {
+            // "GLOBAL" is specified by the user.
+            bResult = true;
+        }
+        else
+        {
+            // Class not set or not set to type "GLOBAL".
+            bResult = false;
+        }
+    }
+
+    return bResult;
+}
+
+// Routine that sets the UAPM override values in the form controls
+// and sets the Path and Parameter controls read-only.
+function cmdbMdrSetUAPMValues()
+{
+    var cmdbMdrPathElt  = document.getElementById( cmdbMdrPathId );
+    var cmdbMdrParmsElt = document.getElementById( cmdbMdrParmsId );
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Set the Path and Parameter overrides and make them read-only.
+    if ( cmdbMdrPathElt != undefined )
+    {
+         cmdbMdrPathElt.value = cmdbUAPMMdrPath;
+         cmdbMdrPathElt.readOnly = true;
+    }
+    if ( cmdbMdrParmsElt != undefined )
+    {
+         cmdbMdrParmsElt.value = cmdbUAPMMdrParms;
+         cmdbMdrParmsElt.readOnly = true;
+    }
+
+    // Set the URL but leave it read-write.
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbMdrUrlElt.value = cmdbPrevUAPMMdrUrl;
+    }
+}
+
+// Routine that preserves the current UAPM URL value specified by the user.
+function cmdbMdrPreserveUAPMValues()
+{
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Preserve the current URL value specified by the user.
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbPrevUAPMMdrUrl = cmdbMdrUrlElt.value;
+    }
+}
+
+// Routine that determines if MDR Name and Class="GLOBAL" identify the "ITAM" global MDR definition.
+function cmdbIsITAMMdr()
+{
+    var bResult = false;
+    var cmdbMdrNameElt = document.getElementById( cmdbMdrNameId );
+
+    if ( cmdbMdrNameElt != undefined &&
+         cmdbMdrNameElt.value != undefined &&
+         cmdbMdrNameElt.value.length > 0
+       )
+    {
+        // Remove any leading/trailing whitespace from the MDR Name value
+        // and save cleansed value back in the edit control.
+        var mdrName = cmdbMdrNameElt.value;
+        mdrName = cmdbTrimWhitespace( mdrName );
+        cmdbMdrNameElt.value = mdrName;
+
+        // Is "ITAM" name and Class="GLOBAL" specified? (case insensitive test)
+        if ( mdrName.toUpperCase() == "ITAM" && cmdbMdrIsGlobalClass() )
+        {
+            // "ITAM" is specified by the user.
+            bResult = true;
+        }
+        else
+        {
+            // Class not set or not set to type "ITAM".
+            bResult = false;
+        }
+    }
+
+    return bResult;
+}
+
+// Routine that sets the ITAM override values in the form controls
+// and sets the Path and Parameter controls read-only.
+function cmdbMdrSetITAMValues()
+{
+    var cmdbMdrPathElt  = document.getElementById( cmdbMdrPathId );
+    var cmdbMdrParmsElt = document.getElementById( cmdbMdrParmsId );
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Set the Path and Parameter overrides and make them read-only.
+    if ( cmdbMdrPathElt != undefined )
+    {
+         cmdbMdrPathElt.value = cmdbITAMMdrPath;
+         cmdbMdrPathElt.readOnly = true;
+    }
+    if ( cmdbMdrParmsElt != undefined )
+    {
+         cmdbMdrParmsElt.value = cmdbITAMMdrParms;
+         cmdbMdrParmsElt.readOnly = true;
+    }
+
+    // Set the URL but leave it read-write.
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbMdrUrlElt.value = cmdbPrevITAMMdrUrl;
+    }
+}
+
+// Routine that preserves the current ITAM URL value specified by the user.
+function cmdbMdrPreserveITAMValues()
+{
+    var cmdbMdrUrlElt   = document.getElementById( cmdbMdrUrlId );
+
+    // Preserve the current URL value specified by the user.
+    if ( cmdbMdrUrlElt != undefined )
+    {
+         cmdbPrevITAMMdrUrl = cmdbMdrUrlElt.value;
+    }
+}
+
+// Trim whitespace from left and right sides of s using ltrim() and rtrim()
+// functions defined in detail_form.js.
+function cmdbTrimWhitespace( str )
+{
+    if ( str.length > 0 )
+    {
+        // Trim leading spaces.
+        str = ltrim( str );
+
+        // Trim trailing spaces.
+        str = rtrim( str );
+    }
+
+    return str;
+}
+
+// Routine that masks the value displayed in the password field.
+function cmdbMaskMDRPassword()
+{
+    // Get the password field, the ID is always "df_3_1" regardless of mode (Display or Edit)
+    var passwordElt = this.document.getElementById("df_3_1");
+    if ( passwordElt != null && passwordElt != undefined )
+    {
+        if ( passwordElt.type != null && passwordElt.type != undefined )
+        {
+            // Edit mode (input field) - use a masked "password" input field.
+            // Clone the existing text element and convert/replace it with a "password" field.
+            var maskedPasswordElt = passwordElt.cloneNode( passwordElt );
+            maskedPasswordElt.type = "password";
+            // Replace the existing element with the masked clone.
+            passwordElt.parentNode.replaceChild( maskedPasswordElt, passwordElt );
+        }
+        else
+        {
+            // Display mode (table data) - mask the password using asterisks.
+            var maskedPassword = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.password}"</PDM_FMT>;
+            if ( maskedPassword.length > 0 )
+            {
+                // Replace all char's with asterisks.
+                maskedPassword = maskedPassword.replace(/./g,'*');
+                // Set the masked value.
+                passwordElt.innerHTML = maskedPassword;
+            }
+        }
+    }
+}
+
+</script>
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="ci_mdr_provider">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa przycisku" attr="name" make_required="yes" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa MDR" attr="mdr_name" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Klasa MDR" attr="mdr_class" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" size=20>
+<PDM_MACRO name=dtlLookup hdr="Właściciel" attr="owner" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=5 rows=1 size=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa hosta" attr="hostname" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Port" attr="port" size=10>
+<PDM_MACRO name=dtlTextbox hdr="Ścieżka" attr="path" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Parametry" attr="parameters" colspan="2" size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Login" attr="userid" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Shared Secret" attr="password" size=20>
+<PDM_MACRO name=dtlTextbox hdr="CMDBf Timeout" attr="timeout_sec" size=20>
+<PDM_MACRO name=dtlTextbox hdr="CMDBf Namespace" attr="namespace" colspan=2 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="URL to launch in Context" attr="launchurl" colspan=5 rows=1 size=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="CMDBf Endpoint" attr="endpoint" colspan=5 rows=1 size=100>
+<PDM_MACRO name=dtlEndTable>
+
+if ( _dtl.edit )
+{
+    // Edit mode - Setup handlers and state variables to properly set the
+    // Path, Parameters and URL fields based on whether or not "Cohesion" or "UAPM"
+    // is/is not specified for MDR Class.
+    cmdbSetupEditMDRProvider();
+}
+
+// Don't mask the value displayed in the Shared Secret field.
+// cmdbMaskMDRPassword();
+
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+
+</body>
+</html>
+
+
+
+<PDM_WSP>

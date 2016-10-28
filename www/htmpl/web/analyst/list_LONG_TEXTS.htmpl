@@ -1,0 +1,86 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Replies";
+var hdrTitleList = "Replies";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT>
+function fmtImage(value, p1)
+{
+	var sHTML = value;
+	if (p1 != '')
+	{
+		sHTML += "&nbsp;<img src=" + p1 + " onclick='do_download(" + m_sAttmntId + ")'></img>";
+	}
+	rs.data(sHTML);
+}
+
+function do_download(nAttmntId)
+{
+	Download(nAttmntId, m_arrGatewayPath[nAttmntId], m_arrServer[nAttmntId] , 0);
+	return;
+}
+
+function Resize()
+{
+	oDiv = parent.document.getElementById("divReplyList");
+	oDiv.style.height = document.body.scrollHeight + 4;
+	oDiv.style.width = document.body.scrollWidth + 4;
+}
+</SCRIPT>
+</HEAD>
+<BODY CLASS="list" onload=Resize()>
+<PDM_INCLUDE FILE=std_body.htmpl filename="query_actions" header=no menubar=no>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Replies found";
+  var msgFound1 = "1 Reply found";
+  var msgFound = "%1 Replies found";
+  var msgFoundMore = "%1 Replies found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Reply";
+
+  var imgPath='$CAisd' + '/img/';
+  var img;
+  var m_sAttmntId;
+  var m_arrGatewayPath = new Array;
+  var m_arrServer = new Array;
+  
+  document.write("<TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>");
+  document.write("<TR>");
+  document.write("<TD align=left>Replies</TD>");
+  document.write("</TR>");
+  document.write("</TABLE>");
+
+  <pdm_macro name=lsStart>
+  <pdm_macro name=lsWrite text="m_sAttmntId = '@{list.ATTMNT_ID}';">
+  <pdm_macro name=lsWrite text="img='';">
+  <pdm_macro name=lsWrite text="pdm_if '@{list.ATTMNT_ID}' != ''">
+  <pdm_macro name=lsWrite text="img = imgPath + 'attmnt.gif';">
+  <pdm_macro name=lsWrite text="m_arrGatewayPath[m_sAttmntId] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.ATTMNT_ID.repository.servlet_path}</PDM_FMT>';">
+  <pdm_macro name=lsWrite text="m_arrServer[m_sAttmntId] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.ATTMNT_ID.repository.server}</PDM_FMT>';">
+  <pdm_macro name=lsWrite text="/pdm_if">
+  <pdm_macro name=lsCol label="Type:" attr="RESP_TYPE" startrow=yes disp_entities=yes img=img fmtfunc=fmtImage export=no sort=no>
+  <pdm_macro name=lsCol hdr="" attr="RESP_DATE">
+  <pdm_macro name=lsCol hdr="Odpowiedź" attr="RESP_SHORT" startrow=yes  exportfmt=ShowLink link=yes>
+  <pdm_macro name=lsCol hdr="Właściwości" attr="AUTHOR_ID"  exportfmt=ShowLink link=yes>
+  <pdm_macro name=lsCol hdr="" attr="QA_KD.SUMMARY" startrow=yes sort=no>
+  <pdm_macro name=lsCol hdr="" attr="QA_KD.SUMMARY" sort=no>
+  <pdm_macro name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

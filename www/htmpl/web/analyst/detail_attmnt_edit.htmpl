@@ -1,0 +1,323 @@
+<PDM_IF 0>
+detail_attmnt_edit.htmpl
+WHEN PRESENTED:
+    When the app needs input to create a new Attachment or update an
+    existing one.
+INTENT:
+    Capture user input for a new Attachment, create/update a Attachment
+    when submitted.
+VARIABLES:
+    string	image	    The location of the image directory as
+			    specified in the config file.
+    object attmnt   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/.maj for the
+                            definition of attributes for 'OBJECT attmnt'
+    int   	logged_in   A flag to say we have a user login object.
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_attmnt_edit.htmpl+PERSID={attmnt:}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Szczegóły załącznika";
+var hdrTitleUpd = "Edytuj załącnzik";
+var hdrTitleNew = "Utwórz załącznik";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script>
+var argPersistentID = "$args.persistent_id";
+var argHumantouchLog = "$args.KEEP.humantouch_log"
+var propTimeout = "$prop.Timeout";
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script>
+function iframe_onload()
+{
+	if (typeof parent.LoadUploadActions_done == "function")
+	{
+		parent.LoadUploadActions_done();
+	}
+}
+</script>
+</head>
+<PDM_IF "$args.NEXT_PERSID" != "">
+	<body class="editform" onunload="unload_check();stop_timer()" onload="iframe_onload()">
+	<PDM_INCLUDE FILE=std_body.htmpl filename="Attachment">
+	<center>
+
+	<!-- <form name="upload_form"  enctype="multipart/form-data" method=POST
+		ACTION="$CAisd/scripts/web_upload.pl"> -->
+	
+<PDM_IF $args.id>
+	<PDM_FORM  ONSUBMIT="return check_submit()"  NAME="main_form">
+	
+<PDM_ELSE>
+	<PDM_FORM  ONSUBMIT="return check_submit() && submit_attmnt()"  NAME="main_form">
+	
+</PDM_IF>
+	<input type="hidden" name=FACTORY value=attmnt>
+	<input type="hidden" id=rel_file_path name="SET.rel_file_path" value="${args.rel_file_path:}" >
+	<input type="hidden" id=file_name name="SET.file_name" value="${args.file_name:}">
+	<input type="hidden" id=file_type name="SET.file_type" value="${args.file_type:}">
+	<input type="hidden" id=file_size name="SET.file_size" value="${args.file_size:}">
+	<input type="hidden" id=zip_flag name="SET.zip_flag" value="${args.zip_flag:}">
+	<input type="hidden" name=KEEP.PARENT_DIV  value="${args.KEEP.PARENT_DIV:}">
+	<input type="hidden" name=KEEP.PARENT_POPUP  value="${args.KEEP.PARENT_POPUP:}">
+	
+<PDM_IF $args.id>
+	<input type="hidden" name=SET.id  value="$args.id">
+	
+<PDM_ELSE>
+	<input type="hidden" name=SET.link_only value="${args.link_only:0}">
+	<input type="hidden" name=KEEP.parent_persid value="${args.KEEP.parent_persid:}" >
+	<input type="hidden" name=KEEP.lrel_name value="attachments">
+	
+</PDM_IF>
+	<script type="text/javascript">
+	
+<PDM_MACRO name=dtlForm button=false factory=attmnt>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Zapisz[s]" Func="detailSave()" hotkey_name="Zapisz[s]" ID="btn001" Width=120>
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$prop.parent_persid')" hotkey_name="Anuluj[n]" ID="btncncl" Width=120>
+<PDM_MACRO name=button Caption="Resetuj[r]" Func="pdm_reset()" hotkey_name="Resetuj[r]" ID="btn003" Width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "${args.link_only:0}" == "0" >
+<PDM_MACRO name=dtlStartRow>
+	docWriteln("<tr>");
+	docWriteln("<td align='left' valign='top'>");
+	
+		
+<PDM_IF 0 != $args.REQUIRED_repository>
+	docWriteln("<span class='requiredlabeltext'>Nazwa repozytorium</span>");
+	
+		
+<PDM_ELSE>
+	docWriteln("<span class='title3text'>Nazwa repozytorium</span>");
+	
+		
+</PDM_IF>
+	docWriteln("</td>");
+	docWriteln("</tr>");
+	docWriteln("<tr>");
+	docWriteln("<td>");
+	
+		
+<PDM_IF $args.id>
+	docWriteln("<span class='bodytext'>$args.repository.sym</span>");
+	
+		
+<PDM_ELSE>
+	docWriteln("<select" + detailNextID(true)+ "NAME=SET.repository  onchange='got_focus(this)'>");
+			document.write('<option value="">' + msgtext("None"));
+			var selected = 0;
+	<PDM_LIST PREFIX=list WHERE="repository_type < 2" FACTORY=doc_rep esc_style=c>
+			doc_rep_serv[selectedIndex] = "$list.server";
+			doc_rep_cgi[selectedIndex] = "$list.servlet_path";
+			doc_rep_upload[selectedIndex] = "$list.upload_path";
+			doc_rep_protocol[selectedIndex] = "servlet";	// use servlet for uploading files
+			doc_rep_filesz[selectedIndex] = "$list.file_limit_size";
+			selectedIndex++;
+			if ($list.default_rep)
+			{
+				document.write('<option value="$list.persistent_id" selected="selected">$list.sym');
+				selected = 1;
+			}
+			else
+			{
+				document.write('<option value="$list.persistent_id">$list.sym');
+			}
+	</PDM_LIST>
+	docWriteln("</select>");
+			if (!selected)
+			{
+				var eles = window.document.forms["main_form"].elements;
+				eles["SET.repository"].options[0].selected = true;
+			}
+	
+		
+</PDM_IF>
+	docWriteln("</td>");
+	docWriteln("</tr>");
+
+	
+<PDM_ELSE>
+	docWriteln('<' + 'input type="hidden" id=doc_res name="SET.repository" value=""' + '>' );
+	
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+	</script>
+	
+<PDM_IF $args.id>
+	<tr>
+	<td align="left" valign="top">
+	<span class="title3text">URL</span>
+	<br>
+	<span class="bodytext"><PDM_FMT JUSTIFY=WRAP WIDTH=40>$args.orig_file_name</PDM_FMT></span>
+	
+<PDM_ELSE>
+	<script>
+	
+		
+<PDM_MACRO name=dtlTextbox hdr="URL" attr="n/a" evt="onBlur='URL_on_blur(this.value)' onFocus='URL_got_focus(this)' " size=60>
+	</script>
+	
+</PDM_IF>
+	<script>
+
+	
+<PDM_MACRO name=dtlStartRow>
+	docWriteln("<tr>");
+	docWriteln("<td align='left' valign='top'>");
+	
+<PDM_IF 0 != $args.REQUIRED_attmnt_name>
+	docWriteln("<span class='requiredlabeltext'>Name</span>");
+	
+<PDM_ELSE>
+	docWriteln("<span class='title3text'>Name</span>");
+	
+</PDM_IF>
+	docWriteln("</td>");
+	docWriteln("</tr>");
+	docWriteln("<tr>");
+	docWriteln("<td>");
+	var attmnt_name = <PDM_FMT ESC_STYLE=C>'$args.attmnt_name'</PDM_FMT>;
+	docWriteln("<INPUT TEXT" + detailNextID(true)+ " name='SET.attmnt_name' size=50 value='" + attmnt_name + "'>");
+	docWriteln("</td>");
+	docWriteln("</tr>");
+
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" rows=4 size=70 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+	</script>
+
+	<table id="tbl005">
+	<tr>
+	<td align="left" valign="top">
+	<span class="title3text">Nazwa pliku</span>
+	<br>
+	
+<PDM_IF $args.id>
+	<span class="bodytext"><PDM_FMT JUSTIFY=WRAP WIDTH=40>$args.orig_file_name</PDM_FMT></span>
+	
+<PDM_ELSE>
+	<input text name="SET.orig_file_name" value=<PDM_FMT ESC_STYLE=C>'$args.orig_file_name'</PDM_FMT> onfocus="this.blur()">
+	
+</PDM_IF>
+	</td>
+
+
+	<table id="tbl006">
+	<tr>
+	<td class="editinfo" align="left" valign="top">
+	
+<PDM_IF 0 != $args.REQUIRED_created_dt>
+	<span class="requiredlabeltext">Załączony dnia</span>
+	
+<PDM_ELSE>
+	<span class="title3text">Załączony dnia</span>
+	
+</PDM_IF>
+	<br>
+	<span class="bodytext">
+	<script>
+	date_to_string('$args.created_dt_INT_DATE', 1)
+	</script>
+	</span>
+	</td>
+	<td class="editinfo" align="left" valign="top">
+	
+<PDM_IF 0 != $args.REQUIRED_created_by>
+	<span class="requiredlabeltext">Załączony przez</span>
+	
+<PDM_ELSE>
+	<span class="title3text">Załączony przez</span>
+	
+</PDM_IF>
+	<br>
+	<span class="bodytext">$args.created_by.combo_name</span>
+	</td>
+	<td class="editinfo" align="left" valign="top">
+	
+<PDM_IF 0 != $args.REQUIRED_status>
+	<span class="requiredlabeltext">Status</span>
+	
+<PDM_ELSE>
+	<span class="title3text">Status</span>
+	
+</PDM_IF>
+	<br>
+	
+<PDM_IF $args.id>
+	<span class="bodytext">
+	
+		
+<PDM_IF "$args.status" == "INSTALLED">
+	Installed
+	
+		
+</PDM_IF>
+<PDM_IF "$args.status" == "LINK_ONLY">
+	Link Only
+	
+		
+</PDM_IF>
+<PDM_IF "$args.status" == "NOTINSTALLED">
+	Not Installed
+	
+		
+</PDM_IF>
+<PDM_IF "$args.status" == "ARCHIVED">
+	Archived
+	
+		
+</PDM_IF>
+<PDM_IF "$args.status" == "NOTAVAILABLE">
+	Not Available
+	
+		
+</PDM_IF>
+	</span>
+	
+<PDM_ELSE>
+	<input text name=SET.status value="Not Installed" onfocus="this.blur()">
+	
+</PDM_IF>
+	</td>
+	</tr>
+	</table>
+	</th>
+	</table>
+	<br>
+	<script>
+	
+<PDM_MACRO name=dtlEndTable>
+	</script>
+
+	
+<PDM_MACRO name=dtlEnd>
+	</PDM_FORM>
+	<PDM_INCLUDE FILE=std_footer.htmpl>
+	</center>
+	</body>
+<PDM_ELSE>
+	<body onload="iframe_onload()">
+	<PDM_INCLUDE FILE=std_body.htmpl filename="attmnt_ro" header=no>
+	<PDM_INCLUDE FILE=attmnt_fields.htmpl>
+	<PDM_INCLUDE FILE=std_footer.htmpl>
+	</body>
+</PDM_IF>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_attmnt_edit.htmpl ASPEN.3 2010/11/17 22:18:36 saima01 Exp $
+</PDM_IF>

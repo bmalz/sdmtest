@@ -1,0 +1,146 @@
+<TABLE class=generic_table>
+	<TR>
+		<TD style='width: 100%; height: 22px; padding: 0px;' class=portlet_header_center><h3 class=portlet_title style="margin:0px"><span id=spnNodeContent></span></h3></TD>
+	</TR>
+</TABLE>
+
+<PDM_IF "$prop.NODE_ID" == "">
+	<script>
+		alert("You cannot view this Knowledge Tree Document because there is no Knowledge Tree associated with it.");
+		top.close();
+	</script>
+<PDM_ELSE>
+	<FONT SIZE=2 FACE=<PDM_IF 0>LOCALIZATION</PDM_IF>"Verdana,Arial,Helvetica,Sans-serif">
+	<SCRIPT>
+		var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			   "+OP=KT_DT_NAVIGATE+DOC_ID=$prop.KD_ID+NODE_ID=$prop.NODE_ID+PATH=$args.event_log_textdata1";
+
+		AsyncAjaxCall(sURL);
+
+		var m_lKDID = $prop.KD_ID;
+		var m_bFirstLoad = false;
+		
+		// figure out which knowledge tree we have in this breadcrumb-like trail
+		// trees that were viewed should be separated by _
+		// tree nodes that were viewed should be separated by ~
+		var rootNode_ID = '$args.event_log_textdata1';
+		rootNode_ID = rootNode_ID.split("_")[1];
+
+		// if this is the first time through or the user selected a different Knowledge Tree, initialized the array holding the tree
+		if (typeof ahdframeset.arrDTHistory == 'undefined' || ahdframeset.arrDTHistory==null || ahdframeset.rootNode_ID != rootNode_ID)
+		{
+			m_bFirstLoad = true;
+			
+			var strPathIDs = "~" + '$args.event_log_textdata1';
+			strPathIDs = strPathIDs.split("_")[0];
+			var arrPathIDs = strPathIDs.split("~");
+			
+			ahdframeset.rootNode_ID = rootNode_ID;
+			ahdframeset.arrDTHistory = new Array();
+			ahdframeset.NodeCounter = arrPathIDs.length-1;
+			ahdframeset.NodePos = ahdframeset.NodeCounter;
+			ahdframeset.Reload = 0;
+		}
+	</SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_dtview_node.js"></SCRIPT>
+	<SCRIPT>
+		var lNode;
+		for (lNode=0; lNode < ahdframeset.lNodesCount; lNode++)
+		{
+			if (m_bFirstLoad)
+			{
+				for (var lCurrNode=1; lCurrNode<=arrPathIDs.length-1; lCurrNode++)
+				{
+					if ( ahdframeset.arrNodes[lNode][NODE_ID] == arrPathIDs[lCurrNode] )
+					{
+						if (typeof ahdframeset.arrDTHistory[lCurrNode] == 'undefined')
+						{
+							ahdframeset.arrDTHistory[lCurrNode] = new Array();
+						}
+				
+						ahdframeset.arrDTHistory[lCurrNode][NODE_ID] = ahdframeset.arrNodes[lNode][NODE_ID];
+						ahdframeset.arrDTHistory[lCurrNode][NODE_NAME] = ahdframeset.arrNodes[lNode][NODE_SHORT_DESC];
+						ahdframeset.arrDTHistory[lCurrNode][NODE_TYPE] = ahdframeset.arrNodes[lNode][NODE_TYPE];
+						ahdframeset.LinkId = ahdframeset.arrNodes[lNode][LINK_ID];
+					}
+				}
+			}
+			if (ahdframeset.arrNodes[lNode][NODE_ID] == $prop.NODE_ID)
+			{
+				if (typeof ahdframeset.arrDTHistory[ahdframeset.NodePos] == 'undefined')
+				{
+					ahdframeset.arrDTHistory[ahdframeset.NodePos] = new Array();
+				}
+				ahdframeset.arrDTHistory[ahdframeset.NodePos][NODE_ID] = ahdframeset.arrNodes[lNode][NODE_ID];
+				ahdframeset.arrDTHistory[ahdframeset.NodePos][NODE_NAME] = ahdframeset.arrNodes[lNode][NODE_SHORT_DESC];
+				ahdframeset.arrDTHistory[ahdframeset.NodePos][NODE_TYPE] = ahdframeset.arrNodes[lNode][NODE_TYPE];
+				ahdframeset.LinkId = ahdframeset.arrNodes[lNode][LINK_ID];
+			
+				if (ahdframeset.arrNodes[lNode][DISPLAYED_TEXT] != "")
+				{
+					var displayed_text = ahdframeset.arrNodes[lNode][DISPLAYED_TEXT];
+					displayed_text = ReplaceRepIdToImgPath(displayed_text);
+					document.write(displayed_text);
+				}
+				else
+				{
+					document.write("&nbsp;");
+				}
+				document.write("<BR>");
+				document.write("<B>");
+				var strLink;
+				if (ahdframeset.arrNodes[lNode][RESPLINKID1] != 0 && ahdframeset.arrNodes[lNode][RESPLINKID1] != "")
+				{
+					strLink = "GoToNode(" + ahdframeset.arrNodes[lNode][RESPLINKID1] + ")";
+					document.write("<br><a id=aRespLink1 style='cursor:pointer' href='javascript:" + strLink + "'>");
+					document.write(ahdframeset.arrNodes[lNode][RESPONSE1]);
+					document.write("</a>");
+				}
+				if (ahdframeset.arrNodes[lNode][RESPLINKID2] != 0 && ahdframeset.arrNodes[lNode][RESPLINKID2] != "")
+				{
+					strLink = "GoToNode(" + ahdframeset.arrNodes[lNode][RESPLINKID2] + ")";
+					document.write("<br><a id=aRespLink2 style='cursor:pointer' href='javascript:" + strLink + "'>");
+					document.write(ahdframeset.arrNodes[lNode][RESPONSE2]);
+					document.write("</a>");
+				}
+				if (ahdframeset.arrNodes[lNode][RESPLINKID3] != 0 && ahdframeset.arrNodes[lNode][RESPLINKID3] != "")
+				{
+					strLink = "GoToNode(" + ahdframeset.arrNodes[lNode][RESPLINKID3] + ")";
+					document.write("<br><a id=aRespLink3 style='cursor:pointer' href='javascript:" + strLink + "'>");
+					document.write(ahdframeset.arrNodes[lNode][RESPONSE3]);
+					document.write("</a>");
+				}
+				if (ahdframeset.arrNodes[lNode][RESPLINKID4] != 0 && ahdframeset.arrNodes[lNode][RESPLINKID4] != "")
+				{
+					strLink = "GoToNode(" + ahdframeset.arrNodes[lNode][RESPLINKID4] + ")";
+					document.write("<br><a id=aRespLink4 style='cursor:pointer' href='javascript:" + strLink + "'>");
+					document.write(ahdframeset.arrNodes[lNode][RESPONSE4]);
+					document.write("</a>");
+				}
+				if (ahdframeset.arrNodes[lNode][RESPLINKID5] != 0 && ahdframeset.arrNodes[lNode][RESPLINKID5] != "")
+				{
+					strLink = "GoToNode(" + ahdframeset.arrNodes[lNode][RESPLINKID5] + ")";
+					document.write("<br><a id=aRespLink5 style='cursor:pointer' href='javascript:" + strLink + "'>");
+					document.write(ahdframeset.arrNodes[lNode][RESPONSE5]);
+					document.write("</a>");
+				}
+				if (ahdframeset.arrNodes[lNode][RESPLINKID6] != 0 && ahdframeset.arrNodes[lNode][RESPLINKID6] != "")
+				{
+					strLink = "GoToNode(" + ahdframeset.arrNodes[lNode][RESPLINKID6] + ")";
+					document.write("<br><a id=aRespLink6 style='cursor:pointer' href='javascript:" + strLink + "'>");
+					document.write(ahdframeset.arrNodes[lNode][RESPONSE6]);
+					document.write("</a>");
+				}
+				if (ahdframeset.arrNodes[lNode][RESPLINKID7] != 0 && ahdframeset.arrNodes[lNode][RESPLINKID7] != "")
+				{
+					strLink = "GoToNode(" + ahdframeset.arrNodes[lNode][RESPLINKID7] + ")";
+					document.write("<br><a id=aRespLink7 style='cursor:pointer' href='javascript:" + strLink + "'>");
+					document.write(ahdframeset.arrNodes[lNode][RESPONSE7]);
+					document.write("</a>");
+				}
+				document.write("</B>");
+			}
+		}
+	</SCRIPT>
+	</FONT>
+</PDM_IF>

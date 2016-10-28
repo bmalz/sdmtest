@@ -1,0 +1,211 @@
+<PDM_IF 0>
+	WHEN PRESENTED:
+	When we need to display Change Scheduling Dialog
+	INTENT:
+	Change Scheduling Dialog Template file for Change Scheduler screen
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_INCLUDE FILE="styles.htmpl">
+<SCRIPT LANGUAGE="JavaScript">
+	var hdrTitle = "Scheduling Dialog";
+</SCRIPT>
+
+<PDM_INCLUDE FILE="std_head.htmpl">
+			
+	
+		<SCRIPT LANGUAGE="JavaScript">
+			function load_and_submit()
+			{
+			//Following code checks to find whether the user has tried to update the
+			//configuration items. Once the user clicks the update CI link the array
+			//new_list gets populated.
+
+			var w;
+			if (typeof window.parent.opener.ahdframeset.opener == "object" &&
+                            window.parent.opener.ahdframeset.opener != null &&
+                            typeof window.parent.opener.ahdframeset.opener.new_list == "object" &&
+			    			window.parent.opener.ahdframeset.opener.new_list != null &&
+                            typeof window.parent.opener.ahdframeset.opener.tracked_asset_id == "object" &&
+							window.parent.opener.ahdframeset.opener.tracked_asset_id != null) 
+                        {
+				w = window.parent.opener;
+			}
+			else 
+			{
+				w = window;
+			}
+
+			var isUpdateCIClicked;
+			isUpdateCIClicked = w.ahdframeset.opener.new_list.length;
+			var assetArray;
+
+			var assetsForQuery =  "";
+			var totalAssetCount;
+			var count = 0;
+			var maxCICount = 0 ;
+			if($args.maxCICount != null)
+			maxCICount = $args.maxCICount;
+			
+			
+			
+			if(isUpdateCIClicked == 0)
+			{
+				
+			//Take the tracked_asset_id approach
+			assetArray = w.ahdframeset.opener.tracked_asset_id;
+			totalAssetCount = w.ahdframeset.opener.tracked_asset.length;
+
+			if(maxCICount > totalAssetCount )
+			{
+
+			for(var assetId in assetArray)
+			{
+
+			if(assetsForQuery == "")
+			{
+			assetsForQuery = "'nr:" +assetArray[assetId] + "'";
+			}
+			else
+			{
+			assetsForQuery =  assetsForQuery + "," + "'nr:" + assetArray[assetId] + "'";
+			}
+
+			}
+			}
+			else
+			{
+				
+				
+			for(var assetId in assetArray)
+			{
+				count = count+1;
+				
+			
+			if(assetsForQuery == "")
+			{
+			assetsForQuery = "'nr:" +assetArray[assetId] + "'";
+			}
+			else
+			{
+				if(count <= maxCICount)
+					assetsForQuery =  assetsForQuery + "," + "'nr:" + assetArray[assetId] + "'";
+				
+
+			}
+
+			}
+			}
+			}
+			else
+			{
+			//Take the tracked_asset_id approach
+			assetArray = w.ahdframeset.opener.new_list;
+
+			totalAssetCount = w.ahdframeset.opener.new_list.length;
+
+			if(maxCICount > totalAssetCount )
+			{
+			for(var assetId in assetArray)
+			{
+			w.ahdframeset.opener.scheduler_tracked_asset[assetArray[assetId].obj_persid.substring(3)]= assetArray[assetId].common_name;
+			if(assetsForQuery == "")
+			{
+			assetsForQuery = "'" + assetArray[assetId].obj_persid + "'" ;
+			}
+			else
+			{
+			assetsForQuery =  assetsForQuery + "," + "'" + assetArray[assetId].obj_persid+"'";
+			}
+			}
+			}
+			else
+			{
+			for(var assetId in assetArray)
+			{
+			w.ahdframeset.opener.scheduler_tracked_asset[assetArray[assetId].obj_persid.substring(3)]= assetArray[assetId].common_name;
+			count = count+1;
+			if(assetsForQuery == "")
+			{
+			assetsForQuery = "'"  + assetArray[assetId].obj_persid + "'"   ;
+			}
+			else
+			{
+				if(count < maxCICount)
+					assetsForQuery =  assetsForQuery + "," + "'" + assetArray[assetId].obj_persid + "'" ;
+
+			}
+			}
+			}
+
+			}
+
+			//alert("CI LIST is  " + assetsForQuery );
+
+
+			var displayDate ;
+			displayDate = '$args.displayDate';
+
+			var persId ;
+			persId = '$args.persId';
+
+			var chgRefNum ;
+			chgRefNum = '$args.chgRefNum';
+
+			var chgDuration ;
+			chgDuration = '$args.chgDuration';
+
+			var viewType ;
+			viewType = '$args.viewType';
+
+			var userInputDate = "";
+			userInputDate = '$args.userInputDate';
+
+			var cellClick = "";
+			cellClick = '$args.cellClick';
+
+
+
+
+
+			document.schedule_dialog_form.displayDate.value = displayDate;
+			document.schedule_dialog_form.persId.value = persId;
+			document.schedule_dialog_form.chgRefNum.value = chgRefNum;
+			document.schedule_dialog_form.chgDuration.value = chgDuration;
+			document.schedule_dialog_form.viewType.value = viewType;
+			document.schedule_dialog_form.cellClick.value = cellClick;
+			document.schedule_dialog_form.userInputDate.value = userInputDate;
+			document.schedule_dialog_form.assetQuery.value = assetsForQuery;
+			document.schedule_dialog_form.totalAssetCount.value = totalAssetCount;
+
+			document.schedule_dialog_form.submit();
+
+			}
+		</SCRIPT>
+
+
+	</HEAD>
+<BODY onload="load_and_submit()">
+
+	<TABLE WIDTH="100%">
+		<TR>
+			<TD ALIGN="MIDDLE">
+				Loading
+			</TD>
+		</TR>
+	</TABLE>
+	
+<PDM_FORM METHOD=POST ACTION=$cgi NAME=schedule_dialog_form>
+<INPUT TYPE=hidden NAME=OP VALUE=SCHEDULE_DIALOG_POPUP>
+<INPUT TYPE=hidden NAME=displayDate>
+<INPUT TYPE=hidden NAME=persId>
+<INPUT TYPE=hidden NAME=chgRefNum>
+<INPUT TYPE=hidden NAME=chgDuration>
+<INPUT TYPE=hidden NAME=viewType>
+<INPUT TYPE=hidden NAME=cellClick>
+<INPUT TYPE=hidden NAME=userInputDate>
+<INPUT TYPE=hidden NAME=assetQuery>
+<INPUT TYPE=hidden NAME=totalAssetCount>
+</PDM_FORM>
+</BODY>
+</HTML>

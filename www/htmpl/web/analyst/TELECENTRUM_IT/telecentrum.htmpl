@@ -1,0 +1,223 @@
+<html lang="pl"><PDM_IF 0>
+201307 bmalz @ e-xim
+	
+	Address with parameter:
+		http://pkn-sdm1/CAisd/pdmweb.exe?OP=JUST_GRONK_IT+HTMPL=telecentrum.htmpl+PHONENUMBER=600600600
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+
+function OpenTelecentrum(UserId)
+{
+	var url = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_frameset.htmpl+PHONENUMBER=$args.PHONENUMBER+KEEP.CALLID=$args.CALLID+UID=" + encodeURIComponent(UserId);
+	document.location.href = url;	
+}
+
+function OpenTelecentrumUser() 
+{
+	if (typeof(document.getElementById("SET.ASSIGNEE_ID") != "undefined")) {
+		var url = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_frameset.htmpl+PHONENUMBER=$args.PHONENUMBER+KEEP.CALLID=$args.CALLID+UID=" + encodeURIComponent(document.getElementById("SET.ASSIGNEE_ID").value);
+		document.location.href = url;
+	}
+}
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/toolbar.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_reply.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kd_viewer_sd_integ.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/html_editor.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/comboname.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_document_view.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msg_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/std_head.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/search_filter.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+
+var FromGoBtn = "${args.KEEP.FromGoBtn:}";
+in_persid = "$args.PERSID";
+var globalsd="$args.GLOBALSD";
+var propRoleMenubar = "$prop.role_menubar";
+
+var phone_number = '$args.PHONENUMBER';
+
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type, tenant, tenantName )
+{
+	var url = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_frameset.htmpl+PHONENUMBER=$args.PHONENUMBER+KEEP.CALLID=$args.CALLID+UID=" + encodeURIComponent(cntID);
+	document.location.href = url;
+}
+
+function CheckSubmit(obj) {
+	cleanUser('ASSIGNEE_ID');
+	lookForUser('ASSIGNEE_ID', 'frm_comment', 'cnt','');
+
+	if (obj != undefined) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+</script>
+
+</HEAD>
+<BODY> 
+<div class="TelecentrumHead">Numer telefonu: <span style="color: #DD3126; border-bottom: 1px dotted gray;"><SCRIPT>document.write('$args.PHONENUMBER');</SCRIPT></span></div>
+<div style="position: fixed; top: 20px; right: 20px; width: 240px; text-align: right;">
+<form name=frm_comment style="font-size: 0.7em;" onsubmit="return CheckSubmit(this.value);">
+<table style="border: 0px; text-align: left;"><tr><td>
+<SCRIPT>contactLookup( "Pracownik", "frm_comment", "cnt", "ASSIGNEE_ID" );</SCRIPT>
+</td><td valign="bottom">
+<a id="imgBtnGo" name="imgBtnGo" class="button enabledattr buttonEnabled" ondragstart="return false" onclick="OpenTelecentrumUser();" href="#"><span>Przejdź</span></a>
+</td></tr></table>
+</form>
+</div>
+<SCRIPT>
+var out;
+<PDM_IF "$args.PHONENUMBER" != "">
+	var listuserid = "";
+	var outList = "";
+	var outFNcount = 0;
+
+	var TableHead = '<tr><td class="TelecentrumTableHead" style="width:20px;"></td><td class="TelecentrumTableHead" style="text-align: left; padding-left: 5px;">Imię nazwisko</td><td style="width: 100px" class="TelecentrumTableHead">NRE</td><td style="width: 100px" class="TelecentrumTableHead">Identyfikator</td><td style="width: 120px" class="TelecentrumTableHead">Organizacja</td><td style="width: 100px" class="TelecentrumTableHead">Dział</td><td style="width: 200px" class="TelecentrumTableHead">Stanowisko</td><td style="width: 100px" class="TelecentrumTableHead">Email</td><td class="TelecentrumTableHead" style="width: 120px"></td>';
+
+	out = '<div style="padding-top: 15px; padding-bottom: 5px; margin-left: 10px; font-weight: bold;">Podstawowy numer telefonu:</div>';
+	outList += '<table class="ResultTable">';
+	outList += TableHead;
+	<PDM_LIST PREFIX=list FACTORY=cnt WHERE="phone_number like '%$args.PHONENUMBER'">
+		listuserid = '<PDM_FMT ESC_STYLE=C PAD=NO>$list.id</PDM_FMT>';
+		outList += '<tr onclick="javascript:OpenTelecentrum(\'' + listuserid + '\');"><td class="TelecentrumColumn" style="padding-left: 10px; text-align: left;">' + (outFNcount + 1) + '.</td>';
+		outList += '<td class="TelecentrumColumn" style="text-align: left; padding-left: 5px;">';
+		outList += '$list.first_name $list.middle_name $list.last_name';
+		outList += '</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.zNRE</td>';
+		outList += '<td align="right" class="TelecentrumColumn"><PDM_FMT ESC_STYLE=C PAD=NO>$list.userid</PDM_FMT></td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.organization.name</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.organization.org_num</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.position</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.email_address</td>';
+		outList += '<td align="right" style="padding-right: 5px; padding-left: 5px;" class="TelecentrumEditLink">';
+		outList += '<a href="javascript:popup_window(\'UserDetail\',\'UPDATE\', 0, 0, \'ahdmenu=no,register=yes,resizable=yes,scrollbars=yes\',\'FACTORY=cnt\', \'HTMPL=detail_cnt.htmpl\', \'PERSID=cnt:' + listuserid + '\')">Edytuj</a>';
+		outList += '</td>';
+		outList += '</tr>';
+		outFNcount++;
+	</PDM_LIST>
+	outList += "</table>";
+
+	if (outFNcount == 0) {
+		out += '<div style="margin: 10px; color: gray;">Brak wyników</div>';
+	} else {
+		out += outList;
+	}
+	
+	var outAPcount = 0;
+	out += '<div style="padding-top: 15px; margin-left: 10px; font-weight: bold;">Alternatywny numer telefonu:</div>';
+	outList = '<table class="ResultTable">';
+	outList += TableHead;
+	<PDM_LIST PREFIX=list FACTORY=cnt WHERE="alt_phone like '%$args.PHONENUMBER'">
+		listuserid = '<PDM_FMT ESC_STYLE=C PAD=NO>$list.id</PDM_FMT>';
+		outList += '<tr onclick="javascript:OpenTelecentrum(\'' + listuserid + '\');"><td class="TelecentrumColumn" style="padding-left: 10px; text-align: left;">' + (outAPcount + 1) + '.</td>';
+		outList += '<td class="TelecentrumColumn" style="text-align: left; padding-left: 5px;">';
+		outList += '$list.first_name $list.middle_name $list.last_name';
+		outList += '</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.zNRE</td>';
+		outList += '<td align="right" class="TelecentrumColumn"><PDM_FMT ESC_STYLE=C PAD=NO>$list.userid</PDM_FMT></td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.organization.name</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.organization.org_num</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.position</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.email_address</td>';
+		outList += '<td align="right" style="padding-right: 10px; width: 120px;" class="TelecentrumEditLink">';
+		outList += '<a href="javascript:popup_window(\'UserDetail\',\'UPDATE\', 0, 0, \'ahdmenu=no,register=yes,resizable=yes,scrollbars=yes\',\'FACTORY=cnt\', \'HTMPL=detail_cnt.htmpl\', \'PERSID=cnt:userid:' + listuserid + '\')">Edytuj</a>';
+		outList += '</td>';
+		outList += '</tr>';
+		outAPcount++;
+	</PDM_LIST>
+	outList += "</table>";
+
+	if (outAPcount == 0) {
+		out += '<div style="margin: 10px; color: gray;">Brak wyników</div>';
+	} else {
+		out += outList;
+	}
+
+	var outMPcount = 0;
+	out += '<div style="padding-top: 15px; margin-left: 10px; font-weight: bold;">Komórkowy numer telefonu:</div>';
+	outList = '<table class="ResultTable">';
+	outList += TableHead;
+	<PDM_LIST PREFIX=list FACTORY=cnt WHERE="mobile_phone like '%$args.PHONENUMBER'">
+		listuserid = '<PDM_FMT ESC_STYLE=C PAD=NO>$list.id</PDM_FMT>';
+		outList += '<tr onclick="javascript:OpenTelecentrum(\'' + listuserid + '\');"><td class="TelecentrumColumn" style="padding-left: 10px; text-align: left;">' + (outAPcount + 1) + '.</td>';
+		outList += '<td class="TelecentrumColumn" style="text-align: left; padding-left: 5px;">';
+		outList += '$list.first_name $list.middle_name $list.last_name';
+		outList += '</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.zNRE</td>';
+		outList += '<td align="right" class="TelecentrumColumn"><PDM_FMT ESC_STYLE=C PAD=NO>$list.userid</PDM_FMT></td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.organization.name</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.organization.org_num</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.position</td>';
+		outList += '<td align="right" class="TelecentrumColumn">$list.email_address</td>';
+		outList += '<td align="right" style="padding-right: 10px; width: 120px;" class="TelecentrumEditLink">';
+		outList += '<a href="javascript:popup_window(\'UserDetail\',\'UPDATE\', 0, 0, \'ahdmenu=no,register=yes,resizable=yes,scrollbars=yes\',\'FACTORY=cnt\', \'HTMPL=detail_cnt.htmpl\', \'PERSID=cnt:userid:' + listuserid + '\')">Edytuj</a>';
+		outList += '</td>';
+		outList += '</tr>';
+		outMPcount++;
+	</PDM_LIST>
+	outList += "</table>";
+
+	if (outMPcount == 0) {
+		out += '<div style="margin: 10px; color: gray;">Brak wyników</div>';
+	} else {
+		out += outList;
+	}
+	
+	<PDM_IF "$args.ShowList" != "1">
+		if (outFNcount == 0 && outAPcount == 0 && outMPcount == 0) 
+			out = '<div style="padding:50px; width: 100%; text-align: center;">Nie znaleziono użytkownika o numerze telefony <b>"$args.PHONENUMBER"</b></div>';
+		
+		if ((outFNcount == 1 && outAPcount == 0 && outMPcount == 0) ||
+			(outFNcount == 0 && outAPcount == 1 && outMPcount == 0) ||
+			(outFNcount == 0 && outAPcount == 0 && outMPcount == 1)) 
+		{
+			OpenTelecentrum(listuserid);
+		}
+	</PDM_IF>
+<PDM_ELSE>
+	if(!phone_number) {
+		out = '<div style="padding:50px; width: 100%; text-align: center;">Wybierz użytkownika.</div>';
+	}
+</PDM_IF>
+	document.writeln(out);
+</SCRIPT>
+<SCRIPT>
+	if (typeof(ahdtop.product.frames[0].frames[0]) == "undefined") {
+		ahdtop.product.frames[0].location.href = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=menubar_tele.htmpl+PHONENUMBER=$args.PHONENUMBER";
+	} else {
+		ahdtop.product.frames[0].frames[0].location.href = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=menubar_tele.htmpl+PHONENUMBER=$args.PHONENUMBER";
+	}
+</SCRIPT>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

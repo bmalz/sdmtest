@@ -1,0 +1,69 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a menu_bar.
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Menu Bar Search";
+var hdrTitleList = "Menu Bar List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("menu_barsum.rpt", "menu_bardtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Menu Bar">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF $ACCESS.security \> 1>
+<PDM_IF "$args.KEEP.RestrictInactive" == "1">
+<PDM_MACRO name=sfStart extracreateurl=PRESET=delete_flag:0+KEEP.RestrictInactive=1 factory=menu_bar>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=menu_bar>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=menu_bar>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa paska menu" attr="name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa HTMPL" attr="htmpl_name" size=20>
+<PDM_IF "$args.KEEP.RestrictInactive" != "1">
+<PDM_MACRO name=sfDropdown hdr="Status rekordu" attr="delete_flag">
+<PDM_ELSE>
+<PDM_MACRO name=sfTextbox hdr="Status rekordu" attr="delete_flag" disabled=yes display_value="Active" qbe_condition="EQ" value="0">
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Menu Bars found";
+  var msgFound1 = "1 Menu Bar found";
+  var msgFound = "%1 Menu Bars found";
+  var msgFoundMore = "%1 Menu Bars found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Menu Bar";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Pasek menu" attr=name exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description justify=left>
+<PDM_MACRO name=lsCol hdr="Nazwa HTMPL" attr=htmpl_name justify=left>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_menu_bar.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

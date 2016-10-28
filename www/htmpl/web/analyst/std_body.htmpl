@@ -1,0 +1,193 @@
+<PDM_IF 0>
+***************************************************************************
+* DO NOT MODIFY THIS FILE!  This file is not migrated for new releases or
+* Service Packs, and your modifications can be lost.  You can use the file
+* std_body_site.htmpl for site modifications.
+***************************************************************************
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2003 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  analyst/std_body.htmpl
+// Created:
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains the definition for the menu bar and form title
+//    of the analyst interface.
+//    Every analyst HTMPL page should include this file:
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: std_body.htmpl,v 1.3 2007/01/04 22:56:48 tuach01 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<!-- BEGIN analyst/std_body.htmpl -->
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/std_body.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/factory_size.js"></SCRIPT>
+<PDM_IF "$env.NX_CMDB" != "">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/cmdb.js"></SCRIPT>
+</PDM_IF>
+<SCRIPT LANGUAGE="JavaScript">
+activateActionKeys();
+<PDM_IF "$prop.logo" != "no">
+if ( ! propIframe )
+{
+if ( window != ahdframe ) {
+   document.write(generate_logo_product_name_html())
+}
+}
+</PDM_IF>
+var find_menubar_from_popup="${args.KEEP.find_menubar_from_popup:0}"
+var propRoleMenubar = "$prop.role_menubar";
+// For R12, if it's using role, we use the menubar 
+// defined in the main form for the tab page. 
+<PDM_IF "${args.KEEP.use_role}" == "" || "$prop.menubar" != ""> 
+    // For supporting pre-R12 HTMPL files, we still 
+    // include a hard-coded menubar file. 
+    <pdm_include file=menubar_${prop.menubar}.htmpl>
+<PDM_ELSE>
+    // When prop.role_menubar is defined, e.g. for GO
+    // button, we use it to load the menubar. 
+    // Default it to an empty form (menubar_.htmpl).
+    <pdm_include file=${prop.role_menubar:menubar_.htmpl}>
+</PDM_IF>
+// If menubar is set to no, don't show menubar for either 
+// using role or not using role.
+<PDM_IF "$prop.menubar" != "no">
+    setup_for_menubar();
+</PDM_IF>
+
+</SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+var AlertMsg = '<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>';
+AlertMsg = gsub(AlertMsg, "%2B","+");
+AlertMsg = gsub(AlertMsg, "%2b","+");
+<PDM_IF "${args.KEEP.backfillMessage:}" != "">
+var argBackfillMessage = '<PDM_FMT ESC_STYLE=C PAD=NO>${args.KEEP.backfillMessage:}</PDM_FMT>';
+if ( argBackfillMessage.length > 0 ) {
+  argBackfillMessage = decodeURIComponent(argBackfillMessage);
+  AlertMsg = ( AlertMsg.length == 0 ? argBackfillMessage
+                                    : "<br>" + argBackfillMessage );
+}
+</PDM_IF>
+formatAlertMsg();
+
+// Check if there are any secondary updates pending
+// and display them by calling alertSecUpd()
+var pat = new RegExp("^" + msgtext("Save_Successful"));
+if(AlertMsg.match(pat) != null && propGLType == "secondary")	
+	alertSecUpd();	
+
+var ShowLockCancel = '<PDM_FMT ESC_STYLE=C PAD=NO>${ShowLockCancel:}</PDM_FMT>';
+if ( typeof DetailForm == "undefined" ||
+     "$prop.alertmsg" == "yes" ||
+     //_bBuildAlertMsg is reuired to trigger alret MSG yellow bar for when using non-standard form that has a ref to detail_form.js
+     (typeof _bBuildAlertMsg != "undefined" && _bBuildAlertMsg) )
+   build_alertmsg();
+
+// Need to set the CLASS for the form title, so it can be displayed in 
+// different color  
+if (propFormName=="detail_cnote.htmpl")
+{
+    switch ( "$args.cnote_type" ) 
+    { 
+	case "1" : 
+	    form_title = "<SPAN CLASS='AdvisoryTitle'>" + form_title +
+                     ahdtop.cfgIndAdvisory + "<\/SPAN>";	 		 
+	break;
+	case "2" :
+	    form_title = "<SPAN CLASS='EmergencyTitle'>" + form_title +
+                     ahdtop.cfgIndEmergency + "<\/SPAN>";	 		 
+	break;
+    }
+}
+else
+{
+    if ( "$args.sla_violation" != "0" && "$args.sla_violation" != "" )
+    {
+	form_title = "<SPAN CLASS='HiliteTitle'>" + form_title +
+                 ahdtop.cfgIndSLAViol + "<\/SPAN>";	 		 
+    }
+    else
+    if (("$args.macro_predicted_violation" != "0" && "$args.macro_predicted_violation" != "") ||
+        ("$args.predicted_sla_violation" != "0" && "$args.predicted_sla_violation" != "")		
+        <PDM_IF "$env.NX_TTV_HIGHLIGHT" == "Yes" && "$env.NX_TTV_ENABLED" != "">
+                || ("$args.ttv_att_slas.length" != "0" && "$args.ttv_att_slas.length" != "")
+        </PDM_IF>
+        )
+    { 
+	form_title = "<SPAN CLASS='WarningTitle'>" + form_title +
+                 ahdtop.cfgIndSLAWarn + "<\/SPAN>";	 		 
+    }
+}
+    
+// Do not display the form title for when DetailForm object is declared
+// because it is done in the constructor of that object    
+if ( typeof DetailForm == "undefined" ) {
+  if ( typeof show_header != "undefined" && 
+       show_header == 1 &&
+       ! propIframe &&
+       "$prop.header" != "no" )
+    document.write("<h2 class=page_header style='margin-bottom:2'>" + form_title + "<\/h2>");
+}
+//SCO 42906: To have a scroll bar outside the DetailFrom condition.
+startScrollbar();
+
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+if(window.name!="scratchpad" && window.name!="g_scratchpag" && window.name!="log_reader") {
+   if ( parent != window &&
+       typeof parent.argPopupName == "string" )
+     argPopupName = parent.argPopupName;
+if ( argPopupName.length > 0 ) {
+    if ( typeof propFormName != "string" )
+      propFormName = "";
+	if ( ahdframeset == ahdtop ) // Main window
+		alertmsg("KEEP.POPUP_NAME=%1_was_specifi","$args.KEEP.POPUP_NAME", propFormName, document.URL);
+}
+<PDM_IF "$prop.form_name" != "generic.htmpl"  && "$prop.form_name" != "attmnt_download_done.htmpl">
+else {
+	if ( ahdframeset != ahdtop ) { // Popup window
+        if ( typeof propFormName != "string" )
+          propFormName = "";
+		alertmsg("KEEP.POPUP_NAME_not_specified_", propFormName, document.URL);
+    }
+}
+</PDM_IF>
+}
+
+if (propFormName.match(/^update_lrel/i))
+{
+    insertTabToFrameLink("gobtn");
+}
+
+// When copying from a record, the new record can't 
+// display its BLREL records because the BLREL 
+// records are not checked in yet. The solution is 
+// to display the BLREL records on the original 
+// record. 
+// Use the following variables to save the id and 
+// persid of the original record. 
+<PDM_IF "$args.KEEP.MAKE_COPY" == "1" && "$prop.form_name_1" == "detail" && "$prop.form_name_3" == "edit">
+var copy_from_persid = propFactory + ":$args.KEEP.copy_from_id";
+<PDM_SET args.wc_dob_id="$args.KEEP.copy_from_id">
+<PDM_ELSE>
+<PDM_SET args.wc_dob_id="${dob.id:}">
+</PDM_IF>
+
+</SCRIPT>
+<PDM_INCLUDE FILE="std_body_site.htmpl">
+<!-- END analyst/std_body.htmpl -->

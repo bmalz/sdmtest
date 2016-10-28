@@ -1,0 +1,26 @@
+<PDM_IF 0>
+post_menu.htmpl
+WHEN PRESENTED:
+    After replacing the login request with replace_login.htmpl, we 
+    use this form to set the URL back to:
+	 http://<machine name>/CAisd/pdmweb.exe
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript">
+function start_post()
+{
+    window.document.post_menu.submit();
+}
+</script>
+</head>
+<body onload="start_post()">
+<PDM_FORM NAME=post_menu>
+<input type="hidden" name=OP value="MENU"> 
+<input type="hidden" name=POST_MENU value="1"> 
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: post_menu.htmpl ASPEN.1 2010/11/16 22:18:05 saima01 Exp $;
+</PDM_IF>

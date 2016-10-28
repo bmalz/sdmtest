@@ -1,0 +1,129 @@
+<PDM_IF 0>
+@(#)$Id: list_kdsched_config.htmpl ANDERSON.3 2009/10/14 18:38:38 bhach02 Exp $
+
+
+This file can be used to configure the Knowledge Management Schedule form
+list_kdsched.htmpl.  It consists of two sections:
+
+* a set of PDM_MACRO statements specifying information on the appearance
+  and content of the form
+
+* a JavaScript function responsible for assigning Knowledge Documents to one
+  or more events on the schedule.
+
+Knowledge Manager Schedule Configuration
+-----------------------------------
+The following lines can be modified to change the appearance and contents
+of the Knowledge Management schedule calendar views.
+
+The schedConfig macro is required to define a schedule form and specify
+overall options.  Arguments are:
+    autoSearch  - Automatically reissue search when required (1=yes; 0=no)
+    defaultView - Initial view: 1=day; 7=week; 30=month; 99=nday; 0=list
+    export      - iCalendar export template code (0=no export)
+    firstday    - The first weekday from 0 (Sunday) to 6 (Saturday)
+    legend      - Position of legend (1=top, 2=bottom, 0=none)
+    maxgroups   - Maximum number of groups per cell in month view
+    ndays       - Contents of n-days dropdown (0=none)
+    round       - Event time rounding as (hr,min) (0=no rounding)
+    timefmt     - Time format as 24hr or ([am],[pm])
+             
+             
+</PDM_IF>
+<PDM_MACRO name=schedConfig defaultview=30 export="$args.EXPORT_TEMPLATES" firstday=0 legend=2 maxgroups=8 ndays=(3,7,14,28) round=(24,0) timefmt=24hr>
+<PDM_IF 0>
+
+schedAttr macros specify the attributes that can be displayed on the schedule
+or tested in the setSchedEvents() function.  Arguments are:
+    attr      - The name of the attribute (required)
+    attrRef   - Referenced column of an SREL attribute (default common name)
+    label     - Label for attribute (default display name; 0=no label)
+    ident     - Include attribute before group name on n-day view (1=yes; 0=no)
+    detail    - Include attribute on detailed n-day view (1=yes; 0=no)
+    summary   - Include attribute on summary n-day view (1=yes; 0=no)
+    hoverInfo - Include attribute in monthly view's info popup (1=yes; 0=no)
+             
+</PDM_IF>
+<PDM_MACRO name=schedAttr label=0 attr=id hoverinfo=1 ident=1 summary=1>
+<PDM_MACRO name=schedAttr label=0 attr=TITLE hoverinfo=1 summary=1>
+<PDM_MACRO name=schedAttr attr=CREATION_DATE detail=0>
+<PDM_MACRO name=schedAttr attr=PUBLISHED_DATE detail=0>
+<PDM_MACRO name=schedAttr attr=START_DATE detail=0>
+<PDM_MACRO name=schedAttr attr=REVIEW_DATE detail=0>
+<PDM_MACRO name=schedAttr attr=EXPIRATION_DATE detail=0>
+<PDM_IF 0>
+ 
+schedGroup macros specify names and styling of groups of change orders.
+Change orders are assigned to groups by the setSchedEvents() function below.
+Arguments are:
+    grpname  - The name of the group (required)
+    label    - Label for group (default empty string)
+    legend   - Group description for legend (0=no legend (default))
+    color    - Foreground (text) color for group (default black)
+    bgcolor  - Background color for group (default white)
+    style    - Text style as normal, bold, or italic (default normal)
+             
+</PDM_IF>
+<PDM_MACRO name=schedGroup label="Submission" grpname=subm legend="Knowledge Document Submission">
+<PDM_MACRO name=schedGroup label="Review" color=green grpname=rev legend="Knowledge Document Review">
+<PDM_MACRO name=schedGroup label="Publication" color=blue grpname=pub legend="Knowledge Document Publication">
+<PDM_MACRO name=schedGroup label="Retirement" color=red grpname=exp legend="Knowledge Document Retirement">
+<PDM_MACRO name=schedGroup label="Maintenance" bgcolor=lightgreen grpname=maintWindow icon="confirmation_12.png" legend="Maintenance Window">
+<PDM_MACRO name=schedGroup label="Blackout" bgcolor=black color=white grpname=blackoutWindow icon="warning_12.png" legend="Blackout Window" style=italic>
+<PDM_IF 0> 
+
+setSchedEvents() JavaScript Function
+------------------------------------
+
+The following function is called once for every Knowledge Document in the list. 
+It is passed a single argument, a JavaScript SchedObject object containing
+values for all attributes named in schedAttr macros above.  The function
+should schedule one or more events for the object, each containing a group
+name, a start time, and an end time.  The syntax to schedule an event is:
+
+kd.schedEvent( grpnum, startDate, endDate )
+
+where:
+  grpnum - group number, usually in the form of schedGroup_grpname,
+           where grpname is the name assigned in the schedGroup macro.
+           Group numbers are assigned sequentially, starting from zero for
+           the first schedGroup macro.
+  startDate - start date of this event in milliseconds from January 1, 1970
+  endDate - end date of this event in milliseconds seconds from January 1, 1970
+
+Note that dates are stored in the SchedObject object in the form of milliseconds
+from January 1, 1970.  You can use the JavaScript Date object to work with
+dates in this format, or simply pass them unmodified to the schedEvent function.
+             
+</PDM_IF>
+
+<script type="text/javascript">
+// Group Knowledge Documents by Status
+function setSchedEvents( kd )
+{
+  if ( document.getElementById("cbSubmission").checked &&
+      kd.CREATION_DATE !=0 ) 
+    kd.schedEvent( schedGroup_subm, kd.CREATION_DATE, kd.CREATION_DATE );
+
+  if ( document.getElementById("cbReview").checked &&
+       kd.REVIEW_DATE != 0 ) 
+    kd.schedEvent( schedGroup_rev, kd.REVIEW_DATE, kd.REVIEW_DATE );
+
+  if ( document.getElementById("cbPublication").checked )
+  {
+    if ( kd.START_DATE >> kd.PUBLISHED_DATE && 
+         kd.PUBLISHED_DATE != 0 && 
+         kd.START_DATE != 0 )
+      kd.schedEvent( schedGroup_pub, kd.START_DATE, kd.START_DATE );
+    else if ( kd.PUBLISHED_DATE != 0 ) 
+      kd.schedEvent( schedGroup_pub, kd.PUBLISHED_DATE, kd.PUBLISHED_DATE );
+  }
+
+  if ( document.getElementById("cbRetirement").checked &&
+       kd.EXPIRATION_DATE != 0 )  
+    kd.schedEvent( schedGroup_exp, kd.EXPIRATION_DATE, kd.EXPIRATION_DATE );
+}
+</script>
+
+<script type="text/javascript" src="$CAisd/scripts/schedule_KD.js"></script>
+<PDM_WSP preview="OP=DISPLAY_FORM&HTMPL=list_kdsched.htmpl" factory=KD>

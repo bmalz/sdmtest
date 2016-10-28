@@ -1,0 +1,179 @@
+﻿<PDM_IF 0>
+	Created: 201305 bmalz @ e-xim
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="home.htmpl">
+<html lang="pl"><HEAD>
+<script>
+var form_title;
+var CategoryRoot; // 20130926 bmalz @ e-xim
+if ('$args.CONTRACT' == "") {
+	form_title = "Moje zgłoszenia";
+} else {
+	form_title = '$args.CONTRACT'.split('.').pop();
+	CategoryRoot = '$args.CONTRACT'.split('.')[0];
+}
+</script>
+</style>
+</style>
+<PDM_INCLUDE FILE="std_head.htmpl">		
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>	
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>	
+<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script>
+	jq(document).ready(function () {
+		jq('#linkmenu').hide();
+	});
+</script>
+</head>
+<body>
+<PDM_INCLUDE FILE=self_service_include.htmpl status=0>
+<PDM_INCLUDE FILE="std_body.htmpl">
+<center>
+	<table width="100%" cellpadding=0 cellspacing=0 style="margin-top: -15px;">
+		<tr>
+			<td valign="top" style="width: 350px; text-align: left; padding: 10px;">
+				<div id="InformatykaDiv" style="width: 100%;">
+					<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>
+						</tr>
+						<tr>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>
+							<td valign="middle" style="width: 100%;">
+								<table class="contractContent" style="width: 100%;">
+									<tr>
+										<td valign="middle">
+											<img border="0" width="40" height="40" src="$CAisd/sitemods/img/Employee/Icons/IT.gif">
+										</td>
+										<td width="100%" valign="middle" class="MyItemsMenu">
+											<p class="contractContentTitle" style="font-size: 11px;">Informatyka</p>
+											<a href="javascript:OpenMyCategory('R', 'Informatyka');">Wnioski</a><br />
+											<a href="javascript:OpenMyCategory('I', 'Informatyka');">Awarie</a>
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>
+						</tr>
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>
+						</tr>
+					</table>
+				</div>
+				<div id="AdministracjaDiv" style="width: 100%;">
+					<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>
+						</tr>
+						<tr>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>
+							<td valign="middle" style="width: 100%;">
+								<table class="contractContent" style="width: 100%;">
+									<tr>
+										<td valign="middle">
+											<img border="0" width="40" height="40" src="$CAisd/sitemods/img/Employee/Icons/ADM.gif">
+										</td>
+										<td width="100%" valign="middle" class="MyItemsMenu">
+											<p class="contractContentTitle" style="font-size: 11px;">Administracja</p>
+											<a href="javascript:OpenMyCategory('R', 'Administracja');">Wnioski</a>
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>
+						</tr>
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>
+						</tr>
+					</table>
+				</div>
+				<div id="HRDiv" style="width: 100%;">
+					<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>
+						</tr>
+						<tr>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>
+							<td valign="middle" style="width: 100%;">
+								<table class="contractContent" style="width: 100%;">
+									<tr>
+										<td valign="middle">
+											<img border="0" width="40" height="40" src="$CAisd/sitemods/img/Employee/Icons/HR.gif">
+										</td>
+										<td width="100%" valign="middle" class="MyItemsMenu">
+											<p class="contractContentTitle" style="font-size: 11px;">HR - Sprawy Pracownicze</p>
+											<a href="javascript:OpenMyCategory('R', 'HR');">Wnioski</a>
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>
+						</tr>
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>
+						</tr>
+					</table>
+				</div>
+				<div id="PozostaleDiv" style="width: 100%;">
+					<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>
+						</tr>
+						<tr>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>
+							<td valign="middle" style="width: 100%;">
+								<table class="contractContent" style="width: 100%;">
+									<tr>
+										<td valign="middle">
+											<img border="0" width="40" height="40" src="$CAisd/sitemods/img/Employee/Icons/other.gif">
+										</td>
+										<td width="100%" valign="middle" class="MyItemsMenu">
+											<p class="contractContentTitle" style="font-size: 11px;">Pozostałe usługi</p>
+											<a href="javascript:OpenMyCategory('R', 'Pozostałe usługi');">Wnioski</a>
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>
+						</tr>
+						<tr>
+							<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>
+							<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>
+							<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td valign="top" align="left">
+				<table style="width: 100%;" align="center">
+					<tr>
+						<td colspan="2" style="padding-top: 10px;">
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</center>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+	</body>
+	
+</html>

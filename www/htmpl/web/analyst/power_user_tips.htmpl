@@ -1,0 +1,118 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<script language="JavaScript">
+var form_title = "Power User Tips";
+</script>
+<pdm_include file=styles.htmpl>
+<pdm_include file=std_head.htmpl>
+<script language="JavaScript" src=$CAisd/scripts/sitemods.js></script>
+<style type="text/css">
+th {vertical-align: top; align: left;}
+td class=editinfo {vertical-align: top; align: left;}
+</style>
+</head>
+<body class=editform>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<script language="JavaScript">
+startScrollbar();
+</script>
+<ul class="power_user_tips">
+<li>When the focus is on the <b>Go button</b> input field (reached either by clicking it or pressing Alt+g), you can use the up and down arrow keys to alter the record type dropdown and press Enter to initiate the selection.
+<br><br><li>When the focus is on the <b>scoreboard</b> (reached either by clicking it or pressing Alt+x), you can use the up and down arrow keys to navigate through the selections.  For folders, focus goes to the plus or minus sign to the left of the folder name.  You can press Enter to open or close the folder, or press right arrow twice to display the graph context menu.
+<br><br><li>You can specify a <b>contact</b> by userid by inputting "\userid" into any contact field.
+<br><br><li>You can display the <b>standard browser right-click menu</b> by pressing and holding the Ctrl key when you right click.
+<br><br><li>You can specify a <b>search criteria in an edit field</b> when popping up a selection list.  The following characters work as wildcards:  <br></br><b>%</b> - Matches on any string composed of zero or more characters.  <br></br><b>_</b> - Matches on any single character.  <br></br><b>?</b> - Matches on any single character.
+<PDM_IF "$env.NX_DB_TYPE" == "SQL">
+<br></br><b>[]</b> - Matches on any single character contained in the specified set or range.  <br></br><b>[^]</b> - Matches on any single character that is not in the specified set or range.
+</PDM_IF>
+<br><br><li>You can navigate the analyst interface <b>without using the mouse</b>.  The following keys have special significance:
+</ul>
+<br>
+<br>
+
+<table summary="Mouseless Navigation" class=table>
+	<tr>
+		<th class=table_sortable_column_header_background width="137" scope="col">Keystroke</td>
+		<th class=table_sortable_column_header_background scope="col">Significance</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Tab</td>
+		<td class=help_content_list>Focuses on the next field.  Initiates autofill for a lookup field.  When pressed in the last field on a form, wraps back to the first.  The Tab key bypasses hyperlinks and buttons (except on the login form).</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Shift+Tab</td>
+		<td class=help_content_list>Focuses on the previous field.  Initiates autofill for a lookup field.  When pressed in the first field on a form, wraps back to the last.  Shift+Tab bypasses hyperlinks and buttons (except on the login form).</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+Up Arrow</td>
+		<td class=help_content_list>On a detail form or search filter, focuses on the header of the current field if it is a hyperlink.  If not, it focuses on the field above the current field.  The Alt key is optional if the focus is on a text field.<BR><B>Note:</B> Alt+Up Arrow does not change focus if used in a dropdown select field.  In Internet Explorer (but not Firefox), you can use Shift+Up Arrow to change focus to the field above a dropdown field.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+Down Arrow</td>
+		<td class=help_content_list>On a detail form or search filter, focuses on the field below the current field. The Alt key is optional if the focus is on a text field.<BR><B>Note:</B> Alt+Down Arrow does not change focus if used in a dropdown select field.  In Internet Explorer (but not Firefox), you can use Shift+Down Arrow to change focus to the field below a dropdown field.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+RightArrow</td>
+		<td class=help_content_list>In Internet Explorer, focuses on the field to the right of the current field.  In Firefox, presses the browser Forward button (default system action, which cannot be suppressed in these browsers).</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+Left Arrow</td>
+		<td class=help_content_list>In Internet Explorer, focuses on the field to the left of the current field.  In Firefox, presses the browser Back button (default system action, which cannot be suppressed in these browsers).</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Right Arrow</td>
+		<td class=help_content_list>On a hyperlink with a context menu, displays the context menu.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Left Arrow</td>
+		<td class=help_content_list>In a context menu, closes the menu.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Shift+PageUp</td>
+		<td class=help_content_list>Focuses on the first field of a form.  When used in the scoreboard, shifts the focus to the main form.  If the focus is on the first item in a list form and the filter or edit in list form is visible, shifts focus to the filter or edit form.  If the focus is on the first item in a filter or edit in list form and a list is displayed, shifts the focus to the first item in the list.<BR><B>Note:</B> When using JAWS, with Virtual PC Cursor mode active, pressing Ctrl+Shift+PageUp (instead of Shift+PageUp) shifts focus from filter or edit form to list and vice versa.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Shift+Home</td>
+		<td class=help_content_list>Works the same as Shift+PageUp except in a text entry box, where it has its standard meaning of selecting all text from the cursor to the beginning of the line.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Shift+PageDown</td>
+		<td class=help_content_list>Focuses on the last field of a form.<BR><B>Note:</B> When using JAWS, with Virtual PC Cursor mode active, pressing Ctrl+Shift+PageDown (instead of Shift+PageDown) shifts focus to the last field of a form.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Shift+End</td>
+		<td class=help_content_list>Works the same as Shift+PageDown except in a text entry box, where it has its standard meaning of selecting all text from the cursor to the end of the line.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+<i>letter</i></td>
+		<td class=help_content_list>Activates the button or menu with the underlined letter <i>letter</i>.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Shift+Alt+<i>letter</i></td>
+		<td class=help_content_list>On the main window, switches to the product tab with the underlined letter <i>letter</i> or activates the button or link with the underlined letter <i>letter</i> above the product tab.  On any other window, or if <i>letter</i> is not associated with a product tab, activates the button or menu with the underlined letter <i>letter</i>.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+<i>number</i></td>
+		<td class=help_content_list>Shows the notebook tab group with the underlined number <i>number</i>.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+<i>number1</i>+<i>number2</i></td>
+		<td class=help_content_list>Shows the notebook tab with the underlined number <i>number2</i> inside the notebook tab group with the underlined number <i>number1</i> and <F7>focuses on its first field.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+g</td>
+		<td class=help_content_list>Focuses on the Go button input field.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+x</td>
+		<td class=help_content_list>Focuses on the scoreboard.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+&#36;</td>
+		<td class=help_content_list>Focuses on the next button or link with a hotkey of an &#36;-sign.  This hotkey is assigned by $ProductName when no other hotkey is available, and may be shared by several buttons or links.  Pressing Alt+&#36; repeatedly cycles through all links sharing the hotkey.  Press Enter when the focus is on the desired link to activate it.</td>
+	</tr>
+</table>
+<br>
+<pdm_include file=std_footer.htmpl>
+</body>
+</html>

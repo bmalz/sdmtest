@@ -1,0 +1,102 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    list_ci_twa_relation.htmpl
+//
+// Purpose: Transaction Work Area (twa) list form for ci_twa_relation objects.
+//
+//
+// 12-Jun-2009 tomjo02 SCO 23956 CMDB r12.1 Reconciliation PES 05629 - Initial version
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Relationship Transaction Search";
+var hdrTitleList = "Relationship Transaction List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ci_twa_relation">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart factory="ci_twa_relation">
+<PDM_IF "ci_twa_relation" : "^z.*$">
+document.writeln('<input type="hidden" id="ADDL_WHERE_HARDCODE" name="ADDL_WHERE_HARDCODE" value="id IS NOT NULL">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Typ relacji" attr="type" size=20>
+<PDM_MACRO name=sfDropdown hdr="Status transakcji" attr="tran_status" lookup="no">
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_MACRO name=sfTextbox hdr="Wiadomość" attr="tran_message" size=20>
+<PDM_MACRO name=sfTextbox hdr="Zmiana" attr="tran_chg_ref_num" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="CI Dostawca" attr="provider_id">
+<PDM_MACRO name=sfTextbox hdr="Nazwa dostawcy" attr="provider_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny dostawcy" attr="provider_serial_number" size=20>
+<PDM_MACRO name=sfTextbox hdr="MAC adres dostawcy" attr="provider_mac_address" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Numer asseta dostawcy" attr="provider_asset_num" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa DNS dostawcy" attr="provider_dns_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa hosta dostawcy" attr="provider_system_name" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="CI Odbiorca" attr="dependent_id">
+<PDM_MACRO name=sfTextbox hdr="Nazwa odbiorcy" attr="dependent_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer seryjny odbiorcy" attr="dependent_serial_number" size=20>
+<PDM_MACRO name=sfTextbox hdr="MAC adres odbiorcy" attr="dependent_mac_address" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Numer asseta odbiorcy" attr="dependent_asset_num" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa DNS odbiorcy" attr="dependent_dns_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa hosta odbiorcy" attr="dependent_system_name" size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  
+  <pdm_jscript file=list_edit.js>
+  
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_MACRO name=elsEditField attr_name="provider_name" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="type">
+<PDM_MACRO name=elsEditField attr_name="dependent_name" endrow="yes">
+<PDM_MACRO name=elsEditField attr_name="tran_status" startrow="yes">
+<PDM_MACRO name=elsEditField attr_name="delete_flag">
+<PDM_MACRO name=elsEditField attr_name="tran_message">
+<PDM_MACRO name=elsEditField attr_name="tran_chg_ref_num" endrow="yes">
+<PDM_MACRO name=elsEndEdit>
+
+  var msgFoundNone = "No Relationship Transaction's found";
+  var msgFound1 = "1 Relationship Transaction found";
+  var msgFound = "%1 Relationship Transaction's found";
+  var msgFoundMore = "%1 Relationship Transaction's found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Transaction Relationship";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Ostatnio zmodyfikowano" attr="last_mod_dt" exportfmt=ShowLink justify=left link=yes nowrap=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa dostawcy" attr="provider_name" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Typ relacji" attr="type" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Nazwa odbiorcy" attr="dependent_name" justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Status" attr="tran_status" justify=left link=no>
+<PDM_MACRO name=lsCol label="Active" attr="delete_flag" colspan=1 justify=left link=no startrow=yes>
+<PDM_MACRO name=lsCol label="Provider CI" attr="provider_id" colspan=2 justify=left link=no>
+<PDM_MACRO name=lsCol label="Dependent CI" attr="dependent_id" colspan=1 justify=left link=no>
+<PDM_MACRO name=lsCol label="Change Order" attr="tran_chg_ref_num" colspan=1 justify=left link=no>
+<PDM_MACRO name=lsCol label="Message" attr="tran_message" colspan=5 justify=left link=no startrow=yes>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

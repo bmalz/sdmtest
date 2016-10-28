@@ -1,0 +1,33 @@
+<PDM_IF 0>
+acctyp_wsp_tab.htmpl
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=acctyp_wsp_tab" factory=acctyp>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+<PDM_MACRO name=tabBanner title="Web Screen Painter">
+<PDM_MACRO name=dtlStartRow>
+</script>
+<input type=hidden name=SET.wsp value="$args.wsp">
+<script type="text/javascript">
+<PDM_MACRO name=dtlCheckbox hdr="Modyfikacja formularzy" attr=wsp_editForm off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Publikacja formularzy" attr=wsp_publishForm off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Sesja podglądu może aktualizować bazę danych" attr=wsp_updPreview off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Modyfikacja schematu" attr=wsp_modifySchema off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Publikacja schematu" attr=wsp_publishSchema off="No" on="Yes">
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: acctyp_wsp_tab.htmpl ASPEN.1 2010/11/05 15:36:02 saima01 Exp $;
+</PDM_IF>

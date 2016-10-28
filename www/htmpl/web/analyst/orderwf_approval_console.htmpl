@@ -1,0 +1,189 @@
+<PDM_IF 0>
+orderwf_approval_console.htmpl
+WHEN PRESENTED:
+    when the app needs to update the status of a change workflow task. When the user
+    clicks the 'Cab console' button from the 'Change Workflow List' screen.
+INTENT:
+    change the status of a change workflow task and save the comments
+VARIABLES:
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_WSP mode=general preview="orderwf_approval_console.htmpl+OP=SHOW_DETAIL+PERSID={wf:}" factory=wf>
+<script type="text/javascript">
+var form_title = "Approval Console Change Workflow Task: $args.task.sym";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/track_asset.js"></script>
+<title>Approval Console Change workflow task $args.persistent_id </title>
+
+<script type="text/javascript">
+var edit_form = 1;
+var persid_arr_len  = ahdtop.cab_persid_array.length;
+var persid_array = ahdtop.cab_persid_array;
+var cur_persid_pointer = parseInt('$args.KEEP.PERSID_POINTER');
+var cur_persid = "$args.persistent_id";
+
+function navigate_to(direction) {
+	var frm = document.forms["frmDTLRO"];
+	if(direction!='' && direction!=undefined) {
+		if(direction=='next' && cur_persid_pointer<persid_arr_len-1) {
+			cur_persid_pointer = cur_persid_pointer + 1;
+			cur_persid = persid_array[cur_persid_pointer];
+			frm.elements["KEEP.PERSID_POINTER"].value = cur_persid_pointer;
+			frm.elements["PERSID"].value = cur_persid;
+			pdm_submit('frmDTLRO','SHOW_DETAIL');
+		} else if(direction=='previous' && cur_persid_pointer>0) {
+			cur_persid_pointer = cur_persid_pointer - 1;
+			cur_persid = persid_array[cur_persid_pointer];
+			frm.elements["KEEP.PERSID_POINTER"].value = cur_persid_pointer;
+			frm.elements["PERSID"].value = cur_persid;
+			pdm_submit('frmDTLRO','SHOW_DETAIL');
+		}
+	}
+}
+
+function approve_reject(status) {
+	//check if status change for the task is possible.
+	if("$args.status.allow_task_update" == "1" || "$args.status.code" == "COMP")
+	{
+		var temp_persid = "0";
+		var frm = document.forms["frmDTLRO"];
+		var prev_persid_pointer = cur_persid_pointer;
+		var comments = document.getElementsByName("SET.comments")[0].value;
+		temp_persid = persid_array[cur_persid_pointer];
+		if(cur_persid_pointer<persid_arr_len-1) {
+			cur_persid_pointer = cur_persid_pointer + 1;
+		}
+		cur_persid = persid_array[cur_persid_pointer];
+		if(cur_persid!='' && temp_persid!='0') {
+			if(status!='' && status!=undefined){	
+				frm.elements["NEXT_PERSID"].value = cur_persid;
+				frm.elements["PERSID"].value = temp_persid;
+				frm.elements["NEW_STATUS"].value = status;
+				frm.elements["COMMENTS"].value = comments;
+				frm.elements["PREV_POINTER"].value = prev_persid_pointer;
+				frm.elements["KEEP.PERSID_POINTER"].value = cur_persid_pointer;
+				pdm_submit('frmDTLRO','CAB_APPROVE_DENY');
+			}
+		}
+	}
+	else
+	{
+		AlertMsg = "";
+		disableButtons();	
+		showAlertMsg("Not allowed to update status for task: $args.task.sym.");
+		return;
+	}
+}
+
+function disableButtons() {
+	var i;
+	var buttonArray = new Array();
+	//disable previous and next buttons
+	if(cur_persid_pointer == persid_arr_len-1) {
+		showAlertMsg("Reached last Change Workflow Task in the List.");
+		ImgBtnEnableButton("NEXT",false)
+	}
+	if(cur_persid_pointer == 0) 
+	ImgBtnEnableButton("PREVIOUS",false)
+	//disable remaining buttons depending on task status
+	buttonArray = get_button_array();
+	for(i=0;i<buttonArray.length;i++)
+	{
+		var splitArray = new Array();
+		splitArray = buttonArray[i].split(':');
+		if(splitArray.length > 1 && (splitArray[1]=="$args.status" || "$args.status.allow_task_update" != "1"))
+		ImgBtnEnableButton(splitArray[0],false);
+	}
+	//clear comments textbox
+	if(document.getElementsByName('SET.comments')[0]) 
+	{
+		document.getElementsByName('SET.comments')[0].value = "";
+	}	
+}
+
+//get the button ids and button functions of buttons located in the header section.
+function get_button_array() {
+	var i;
+	var j = parseInt(0);
+	var buttonInnerHTML;
+	var divInnerHTML = "";
+	var btnArray = new Array();
+	var returnArray = new Array();
+	var buttonInfo = document.getElementById('button_div');
+	//get button id and function if the function name is 'approve_reject()'
+	if(buttonInfo != null)
+	divInnerHTML = buttonInfo.innerHTML;
+	if(divInnerHTML.indexOf("ImgBtnRow()") != -1 && divInnerHTML.indexOf("ImgBtnEndRow()") != -1)
+	{
+		buttonInnerHTML = divInnerHTML.substring(divInnerHTML.indexOf("ImgBtnRow()"),divInnerHTML.indexOf("ImgBtnEndRow()"));
+		btnArray = buttonInnerHTML.split("ImgBtnCreate");
+		for(i=1;i<btnArray.length;i++)
+		{
+			var temp = new Array();
+			temp = btnArray[i].split(",");
+			if(temp.length > 2 && temp[2].indexOf("approve_reject") != -1) {
+				temp[0] = temp[0].substring(temp[0].indexOf("\"")+1,temp[0].length-1);
+				temp[2] = temp[2].substring(temp[2].indexOf("'")+1,temp[2].lastIndexOf("'"));
+				returnArray[j] = temp[0] + ":" + temp[2];
+				if(i<btnArray.length)
+				j++;
+			}
+		}
+	}
+	return returnArray;
+}
+
+</script>
+</head>
+
+<body class="detailro" onload="disableButtons()" >
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<center>
+<PDM_FORM NAME="frmDTLRO">
+<input type="hidden" name=OP>
+<input type="hidden" name=COMMENTS>
+<input type="hidden" name=NEW_STATUS>
+<input type="hidden" name=NEXT_PERSID>
+<input type="hidden" name=PREV_POINTER>
+<input type="hidden" name=FACTORY value=wf>
+<input type="hidden" name=KEEP.PERSID_POINTER>
+<input type="hidden" name=KEEP.FROM_LIST value="0">
+<input type="hidden" name=KEEP.POPUP_NAME value="approval_console">
+<input type="hidden" name=HTMPL value=orderwf_approval_console.htmpl>
+<script type="text/javascript">
+document.write('<input type="hidden" name=PERSID value="' + cur_persid + '">');
+</script>
+</PDM_FORM>
+
+<div name=button_div id=button_div>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=wf>
+<PDM_MACRO name=button caption="Previous" func="navigate_to('previous')" hotkey_name="Previous" id=PREVIOUS newrow=yes>
+<PDM_MACRO name=button caption="Approve Task" func="approve_reject('APP')" hotkey_name="Approve Task" id=APPROVE>
+<PDM_MACRO name=button caption="Reject Task" func="approve_reject('REJ')" hotkey_name="Reject Task" id=REJECT>
+<PDM_MACRO name=button caption="Next" endrow=yes func="navigate_to('next')" hotkey_name="Next" id=NEXT>
+</script>
+</div>
+<script type="text/javascript">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarze zadań" attr="comments" rows=8 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr=chg_nb>
+<PDM_MACRO name=TAB title="Change Order details" file="xx_chgappr_tab.htmpl">
+<PDM_MACRO name=TAB title="Change Workflow Task Details" file="xx_chgwfappr_tab.htmpl">
+<PDM_MACRO name=TAB title="Config. Items" height=350 id=chgnr src="OP=SEARCH+FACTORY=nr+QBE.EQ.chgnr.chg.id=$args.chg.id+KEEP.chgnr_chg_id=$args.chg.id+KEEP.forCiTab=1+KEEP.TKT_PERSID=$args.chg.persistent_id+KEEP.parentFac=chg+KEEP.assetCount=$args.chg.asset.length+KEEP.chgRefNum=$args.chg.chg_ref_num+KEEP.is_cab_approval=1">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+</center>
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

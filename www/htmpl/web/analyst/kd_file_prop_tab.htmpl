@@ -1,0 +1,55 @@
+<PDM_IF 0>
+@(#)$Id: kd_file_prop_tab.htmpl RESILIENCE.1 2010/03/11 09:55:06 ralje02 Exp $
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=kd_file_prop_tab" factory=KD>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Properties Tab">
+<PDM_FORM NAME="frmDTLRO">
+<INPUT TYPE=HIDDEN NAME="STAY_EDIT" VALUE="0">
+<INPUT TYPE=hidden NAME="SET.ACTIVE_STATE" value="100">
+
+<SCRIPT>
+	tab_banner("Properties");
+</SCRIPT>
+<SCRIPT>
+	ImgBtnSetDefaultTabIndex(_dtl.tabIndex+10);
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł" attr="TITLE" colspan=2 size=90>
+<PDM_MACRO name=dtlReadonly hdr="Typ pliku" attr="FILE_ID.file_type">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Podsumowanie" attr="SUMMARY" colspan=3 rows=3 size=90>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa repozytorium" attr="FILE_ID.repository">
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Spakowane" attr="FILE_ID.zip_flag" off="No" on="Yes">
+<PDM_MACRO name=dtlReadonly hdr="Rozmiar po spakowaniu" attr="FILE_ID.file_size">
+<PDM_MACRO name=dtlStartRow>
+	var file_path = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.FILE_ID.repository.upload_path</PDM_FMT>'; 
+	file_path = file_path.replace(/\\/ig,"/");
+	if(file_path.charAt(file_path.length-1) != "/")
+				file_path += "/" ;
+	file_path += "$args.FILE_ID.rel_file_path";
+	if(file_path.charAt(file_path.length-1) != "/")
+			file_path += "/"; 
+	file_path += "$args.FILE_ID.file_name";
+	detailTextboxReadonly("Physical Path","file_path",3,file_path);	
+	
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: kd_content_tab.htmpl,v 1.3 2006/11/11 00:18:50 taoyu02 Exp $
+</PDM_IF>

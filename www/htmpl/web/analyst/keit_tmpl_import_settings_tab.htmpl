@@ -1,0 +1,64 @@
+<PDM_IF 0>
+@(#)$Id: keit_tmpl_import_settings_tab.htmpl ASPEN.1 2010/10/26 14:37:59 saima01 Exp $
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+	<PDM_PRAGMA RELEASE=110>
+	<PDM_WSP mode=edit preview="NBTAB=keit_tmpl_import_settings_tab" factory=KEIT_TEMPLATES>
+	<PDM_INCLUDE FILE=styles.htmpl>
+	<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+	<SCRIPT LANGUAGE="JavaScript">
+		var argPersistentID = "$args.persistent_id";
+	</SCRIPT>
+</HEAD>
+
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Import Settings Tab">
+<PDM_FORM NAME="frmDTLRO">
+
+<SCRIPT>
+<PDM_MACRO name=tabBanner title="Import Settings">
+</SCRIPT>
+
+<SCRIPT>
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Próg błędu (%):" attr="ERR_THRESHOLD" colspan=3 rows=1 size=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Nadpisz opublikowane dokumenty" attr="OVERRIDE_PUB" colspan=3 off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Nadpisz dokumenty we wszystkich nieopublikowanych statusach" attr="OVERRIDE_UNPUB" colspan=3 off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Użyj domyślnych wartości podczas nadpisywania dokumentów" attr="OVERRIDE_DEFAULTS" off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Natychmiast indexuj dokumenty" attr="EXP_INDEX_DOC" colspan=3 off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Domyślne wartości:" attr="n/a" colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="STATUS_ID" lookup=no size=20>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr="PRIORITY_ID" lookup=no size=20>
+<PDM_MACRO name=dtlDropdown hdr="Szablon" attr="DOC_TEMPLATE_ID" lookup=no size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Właściciel" attr="OWNER_ID" size=20>
+<PDM_MACRO name=dtlLookup hdr="Autor" attr="AUTHOR_ID" size=20>
+<PDM_MACRO name=dtlLookup hdr="Znawca tematu" attr="SUBJECT_EXPERT_ID" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr="ASSIGNEE_ID" size=20>
+<PDM_MACRO name=dtlDate hdr="Data wygaśnięcia" attr="EXPIRATION_DATE" size=20>
+<PDM_MACRO name=dtlDate hdr="Data przeglądu" attr="REVIEW_DATE" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="ID produktu" attr="SD_PRODUCT_ID" size=20>
+<PDM_MACRO name=dtlLookup hdr="Asset" attr="SD_ASSET_ID" size=20>
+<PDM_MACRO name=dtlLookup hdr="Przyczyna źródłowa" attr="SD_ROOTCAUSE_ID" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Priorytet Service Deska" attr="SD_PRIORITY_ID" lookup=no size=20>
+<PDM_MACRO name=dtlDropdown hdr="Surowość" attr="SD_SEVERITY_ID" lookup=no size=20>
+<PDM_MACRO name=dtlDropdown hdr="Wpływ" attr="SD_IMPACT_ID" lookup=no size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Pilność" attr="SD_URGENCY_ID" lookup=no size=20>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+
+</BODY>
+</HTML>

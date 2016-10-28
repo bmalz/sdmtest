@@ -1,0 +1,78 @@
+<PDM_IF 0>
+$Id: list_KCAT.htmpl,v 1.2 2006/11/08 01:10:13 olsjo01 Exp $
+list_KCAT.htmpl
+WHEN PRESENTED:
+	When we need to display a list of knowledge categories
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Knowledge Category Search";
+var hdrTitleList = "Knowledge Category List";
+
+function lstKCATOnLoad()
+{
+<PDM_IF "$args.KEEP.cst" != "1">
+	if ("$args.ADDITIONAL_WHERE" != "")
+	{	
+		//This helps to preserve the miminum search criteria after a user hits the Clear Filter
+		document.getElementById("ADDITIONAL_WHERE").value = "$args.ADDITIONAL_WHERE";
+	}
+</PDM_IF>
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("KCATsum.rpt", "KCAT.rpt");
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+</HEAD>
+<BODY CLASS="list" OnLoad='lstKCATOnLoad()'>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Knowledge Category">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.cst" != "1">
+<PDM_IF 0>Sfstart is not fully supported by cust/emp interface with Multi Tenancy on</PDM_IF>
+<PDM_MACRO name=sfStart create=false factory=KCAT>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Podpis" attr=CAPTION>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=DESCRIPTION colspan=2 size=40>
+<PDM_IF "$args.KEEP.cst" != "1">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Autor" attr=AUTHOR_ID>
+<PDM_MACRO name=sfLookup hdr="Właściciel" attr=OWNER_ID>
+<PDM_MACRO name=sfLookup hdr="Znawca tematu" attr=SUBJECT_EXPERT_ID>
+</PDM_IF>
+<PDM_IF "$args.ADDITIONAL_WHERE" != "">
+		document.write('<input type="hidden" name="ADDITIONAL_WHERE" id="ADDITIONAL_WHERE" value=>');
+	
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</PDM_IF>
+
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No knowledge categories found";
+var msgFound1 = "1 knowledge category found";
+var msgFound = "%1 knowledge categories found";
+var msgFoundMore = "%1 knowledge categories found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired knowledge category";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Podpis" attr=CAPTION exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=DESCRIPTION>
+<PDM_MACRO name=lsWrite both=yes text="if ('@args.KEEP.cst' != '1') {">
+<PDM_MACRO name=lsCol hdr="Autor" attr=AUTHOR_ID.combo_name>
+<PDM_MACRO name=lsCol hdr="Właściciel" attr=OWNER_ID.combo_name>
+<PDM_MACRO name=lsCol hdr="Znawca tematu" attr=SUBJECT_EXPERT_ID.combo_name>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd factory=KCAT>	
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

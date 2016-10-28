@@ -1,0 +1,57 @@
+<PDM_IF 0>
+
+  cmdb_empty_tab.htmpl
+
+  Displays an empty tab using the tab title and message 
+  provide in the following KEEP arguments:
+  TAB_BANNER - Title to show in the tab banner 
+  TAB_MSG  -  Message to display in tab content 
+  
+  See the cmdbNotebook.htmpl CMDB Relationships tab for example.
+  
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=cmdb_empty_tab" factory=nr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+var _dtl;
+if ( window.parent != window &&
+	typeof window.parent._dtl == "object" &&   window.parent._dtl != null)
+{
+    _dtl = parent._dtl;
+}
+else
+{
+    _dtl = new DetailForm("$prop.factory","${args.id:0}","",false);
+}
+
+var tabBanner = " ";
+<PDM_IF "$args.KEEP.TAB_BANNER" != "">
+    tabBanner = "$args.KEEP.TAB_BANNER";
+</PDM_IF>
+<PDM_MACRO name=tabBanner title="\" + tabBanner + \"">
+
+var html = '<table class="tab"><tr><td align="center" class="detailro">\n';
+<PDM_IF "$args.KEEP.TAB_MSG" != "">
+    html += "$args.KEEP.TAB_MSG";
+<PDM_ELSE>
+    html += "Zakłada jest nieedytowalne do czasu zapisu elementu konfiguracji\n";
+</PDM_IF>
+html += "</td></tr></table>\n";
+docWrite(html);
+
+</script>
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+

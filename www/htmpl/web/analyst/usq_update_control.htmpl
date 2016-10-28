@@ -1,0 +1,485 @@
+<PDM_IF 0>
+scoreboard.htmpl
+WHEN PRESENTED:
+   During scoreboard maintenance
+INTENT:
+    Provide controls and script to update a scoreboard tree
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user
+    object ACCESS           List containing the user's access to the various
+                            function groups
+</PDM_IF>
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="usq_update.htmpl+COPY_FROM=role%3a2402+USQ_OP=COPY_USQ">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Dostosowywanie Tablicy wyników";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script>
+ahdframe = window;
+parent.ahdframe = window;
+cfgDateFormat = "$date_format";
+</script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/tree_edit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script>
+var scbd = top.frames["usq_update_tree"];
+var crsq_input_prev = "";
+var edit_crsq_display_prev = "";
+
+<PDM_IF 0>
+// Called after a crsq selection is made - set the crsq's code and label
+// depending if we're selecting a crsq for a new node or an existing one
+</pdm_if>
+function backfill_event(affected_form_obj, affected_field, fillin, persid, code) {
+	
+	if ( affected_field == "crsq_input" ) {
+		document.main_form.crsq_code.value = code;
+		document.main_form.crsq_input.value = fillin;
+		crsq_input_prev = fillin;
+		if ( typeof document.main_form.NEW_LABEL.value != "string" ||
+             document.main_form.NEW_LABEL.value.length <= 0 ) 
+		   document.main_form.NEW_LABEL.value = fillin;
+	} else {
+		document.main_form.edit_crsq_code.value = code;
+		document.main_form.edit_crsq_display.value = fillin;
+		edit_crsq_display_prev = fillin;
+		if ( typeof document.main_form.EDIT_LABEL.value != "string" ||
+             document.main_form.EDIT_LABEL.value.length <= 0 ) 
+		  document.main_form.EDIT_LABEL.value = code;
+	}
+}
+
+// Part of a relay from the tree frame - a tree node's been clicked.
+function tree_clicked() {
+	var selNode = scbd.selected_item;
+
+	if (typeof selNode.children != "undefined") {
+		// It's a folder
+		document.main_form.EDIT_LABEL.value = selNode.rawDesc;
+		document.main_form.edit_crsq_display.value = "<folder>";
+		document.main_form.edit_crsq_display.readOnly = true;
+		edit_crsq_display_prev = "<folder>";
+	} else {
+		var idx = find_crsq(selNode.crsq_id);
+		if(crsq_deleteflag[idx] == 1)
+			alert("The node's stored query is inactive.");
+		if (idx >= 0) {
+			document.main_form.EDIT_LABEL.value = selNode.rawDesc;
+			document.main_form.edit_crsq_display.value = crsq_labels[idx];
+			document.main_form.edit_crsq_display.readOnly = false;
+			edit_crsq_display_prev = crsq_labels[idx];
+		} else
+			alert("Internal Error!");
+
+	}
+}
+
+// Click handler for edit node's link
+function edit_crsq_click( ) {
+    if (typeof scbd.selected_item == "undefined" || scbd.selected_item == null || typeof scbd.selected_item.children != "undefined") {
+	alertmsg("Please_select_a_non-folder_nod");
+	return false; 
+    }
+    if ( document.main_form.edit_crsq_display.value == edit_crsq_display_prev )
+      document.main_form.edit_crsq_display.value = "";
+    popup_search('crsq','edit_crsq_display', 'main_form', 'KEEP.CrsqType=Scoreboard', 0, 'label');
+    return false;
+}
+
+// Click handler for new node line
+function new_crsq_click() {
+    if ( document.main_form.crsq_input.value == crsq_input_prev )
+      document.main_form.crsq_input.value = "";
+    popup_search('crsq','crsq_input', 'main_form', 'KEEP.CrsqType=Scoreboard', 0, 'label');
+	return false;
+}
+
+// These hold all the system's stored query labels and codes
+var crsq_codes = new Array();
+var crsq_labels = new Array();
+var crsq_deleteflag = new Array();
+var crsq_i = 0;
+
+// Given a stored query code, returns the index it's stored in for the
+// arrays defined above.
+function find_crsq(inCode) {
+	var i;
+	for (i = 0; i < crsq_codes.length; i++) {
+		if (crsq_codes[i] == inCode) return i;
+	}
+	return -1;
+}
+
+function FocusOnField(e)
+{
+  if(document.main_form.elements["NEW_LABEL"].disabled)
+      window.setTimeout("document.main_form.elements['EDIT_LABEL'].focus()",0);
+  else
+      window.setTimeout("document.main_form.elements['NEW_LABEL'].focus()",0);
+}
+
+function finish_this(f)
+{
+	//alert("changed="+ahdtop.usq_changed+"\ncopied="+ahdtop.usq_copy_made);
+	if(ahdtop.usq_changed==0 && ahdtop.usq_copy_made==1)
+	{
+		upd_workframe("USQ_UPDATE", "USQ_OP=RESET_USQ",
+			"KEEP.USQ_OWNER=" + ahdtop.cstPERSID,
+			"HTMPL=empty.htmpl", "NOCOPY=1",
+			"CALLBACK=parent.ahdframeset.ahdframe.finish_this_callback");
+		return;
+	}
+
+	finish(this.form);
+}
+
+function finish_this_callback(e)
+{
+	next_workframe("UPD_WORKFRAME");
+
+	finish(this.form);
+}
+
+function disable_options(disable)
+{
+    // Get the object of the input field for setting the node name
+    var inp1=document.main_form.elements["NEW_LABEL"];
+    
+    // disable it and change its backgroud color to greyish
+    if ( typeof inp1 == "object" && inp1 != null)
+    {
+        inp1.disabled=disable;
+        if(disable)
+            inp1.className = "gn_disabled_text";
+        else
+            inp1.style.backgroundColor="";
+    }
+
+    // Get the object of the input field for stored query
+    var inp2=document.main_form.elements["crsq_input"];
+
+    // disable it and change its backgroud color to greyish
+    if ( typeof inp2 == "object" && inp2 != null)
+    {
+        inp2.disabled=disable;
+        if(disable)
+            inp2.className = "gn_disabled_text";
+        else
+            inp2.style.backgroundColor="";
+    }
+
+    // Get the object of the input field for stored query
+    var inp3=document.main_form.elements["NEW_FLDR_LABEL"];
+    
+    // disable it and change its backgroud color to greyish
+    if ( typeof inp3 == "object" && inp3 != null)
+    {
+        inp3.disabled=disable;
+        if(disable)
+            inp3.className = "gn_disabled_text";
+        else
+            inp3.style.backgroundColor="";
+    }
+
+    // Disable two buttons
+    if(disable)
+    {
+       ImgBtnDisableButton("btn001");
+       ImgBtnDisableButton("btn002");
+    }
+    else
+    {
+       ImgBtnEnableButton("btn001");
+       ImgBtnEnableButton("btn002");
+    }
+
+    // clear the previous message
+    clearAlertMsg(window.parent);
+    
+    AlertMsg=""; // reset the AlertMsg
+
+    if(disable)
+          showAlertMsg("The scoreboard has reached the maximum number of nodes and folders; additional items are not permitted.");
+}
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="editform" onload="FocusOnField()">
+<PDM_INCLUDE FILE=std_body.htmpl logo="no" header="no">
+<script type="text/javascript">
+activateActionKeys();
+<PDM_MACRO name=dtlForm factory=crsq skiphdr="yes">
+<PDM_MACRO name=dtlStart>
+<PDM_IF 0>
+   Use curly-braces within PDM_LIST so this will load in IE 7
+   when the system has a large number of Stored Queries.
+</PDM_IF>
+<PDM_LIST PREFIX=list WHERE=" " FACTORY=crsq ESC_STYLE=C DOMSET="MLIST_STATIC">
+{
+crsq_codes[crsq_i] = "$list.code";
+crsq_labels[crsq_i] = "$list.label";
+crsq_deleteflag[crsq_i] = "$list.delete_flag";
+crsq_i++;
+}
+</PDM_LIST>
+</script>
+
+<h2>Wybierz operację</h2>
+
+<!------------ ADD NODE ---------------->
+<input type="hidden" name=crsq_code value="">
+<p>
+<span class='labeltext font_normal'>
+Wybierz element z Tablicy Wyników po lewej stronie przed naciśnięciem przycisku do żądanej operacji.
+Nowe węzły lub foldery są dodawane <u>po</u> wybranym elemencie.
+Jeśli wybrany jest <u>otwarty</u> folder  jest zaznaczony, nowy węzeł jest dodawany jako dziecko.
+            
+</span>
+<p>
+
+<!-- Outer table -->
+<table class=gn_container_border_1 rules="cols">
+<tr align="center">
+<td valign="top">
+
+<table id="tbl201" cellspacing=5 cellpadding=0 rules=none>
+<tr><th><h3 style="margin:0px;">Dodaj nowy węzeł</h3></th></tr>
+<tr>
+<td>
+<table>
+<th align="left">
+<script>
+ var caption = "Etykieta węzła";
+ var caption_loc = "Etykieta węzła";
+if (!nonLatinFlag)
+    caption_loc = caption;
+ var actKey = registerActionKey("b", caption_loc, FocusOnField,"");
+ var text = fmtLabelWithActkey( caption, actKey );
+ docWriteln("<span class='labeltext'>" + text + "</" + "span>");
+</script>
+</th>
+<tr>
+<td>
+<script>
+ docWriteln("<input" + detailNextID(true)+ " type=text name=NEW_LABEL title=\"New Node Label\" size=25 value=''>");
+</script>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<table>
+<th>
+<script>
+var html = "<a" + detailNextLinkID() + " href=\"javascript:void(0)\" onClick=\"return new_crsq_click();\"" +
+           " title=\"Look up new node's stored query\" tabindex=-1";
+if ( ahdtop.cstUsingScreenReader ) {
+  html += "><span class='lookup'>New Node Stored Query Lookup</" + "span>";
+}
+else {
+  html += " onMouseOver=\"self.status=&quot;Look up new node\\\'s stored query&quot;;return true\"" +
+          " onfocus=\"this.className='focusField'\"" +
+          " onblur=\"this.className=''\"" +
+          " onMouseOut=\"self.status='';return true\">" +
+          "<span class='lookup'>Node's Stored Query&nbsp;</" + "span>" +
+          "<img src=\"$CAisd/img/lookup.gif\" class=\"dtl_img_attr\" ALT=\"Pop up stored query lookup form\">";
+}
+docWriteln(html);
+</script>
+</a>
+</th>
+<tr>
+<td>
+<script>
+var titletext = "New Node Stored Query";
+if ( ahdtop.cstUsingScreenReader )
+{
+    titletext = msgtext("%1_-_autofill;_up_arrow_for_lo", titletext);
+}
+var btnTabIndex1 = _dtl.tabIndex + 1;
+document.writeln("<input" + detailNextID(true) + " type=text size=25 name=crsq_input title=\"" + titletext + "\" onchange=\"popup_search('crsq', 'crsq_input', 'main_form', 'KEEP.CrsqType=Scoreboard', 0, 'label');\">");
+_dtl.tabIndex += 2;
+</script>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
+<td valign="top">
+<table id="tbl101" cellspacing=5 cellpadding=0  rules=none>
+<th><h3 style="margin:0px;">Dodaj folder</h3></th>
+<tr>
+<td>
+<table>
+<th align="left">
+<script>
+ var btnTabIndex2 = _dtl.tabIndex + 1;
+ docWriteln("<span class='labeltext'>Etykieta folderu</span>");
+</script>
+</th>
+<tr>
+<td>
+<script>
+ docWriteln("<input" + detailNextID(true) + " type=text title=\"New Folder Label\" size=25 name=NEW_FLDR_LABEL>");
+ _dtl.tabIndex += 2;
+</script>
+</td>
+</tr>
+</table>
+</td></tr>
+</table>
+</td>
+</tr>
+
+<tr align="center">
+<td>
+<script type="text/javascript">
+<PDM_MACRO name=button Caption="Dodaj nowy węzeł[n]" Func="add_node(this.form, scbd, document.main_form.NEW_LABEL.value, document.main_form.crsq_code.value)" hotkey_name="Dodaj nowy węzeł[n]" ID="btn001" tabIndex="do_tabIndex(1)" Width=0>
+function do_tabIndex(value)
+{
+ if (value == 1) {
+  return btnTabIndex1;
+ }
+ else if (value == 2) {
+  return btnTabIndex2;
+ }
+ else {
+  return _dtl.tabIndex;
+ }
+}
+</script>
+</td>
+
+<td>
+<script type="text/javascript">
+<PDM_MACRO name=button Caption="Dodaj nowy folder[f]" Func="add_folder(this.form, scbd, document.main_form.NEW_FLDR_LABEL.value)" hotkey_name="Dodaj nowy folder[f]" ID="btn002" tabIndex="do_tabIndex(2)" Width=0>
+</script>
+</td>
+</tr>
+
+<tr><th><hr><h3 style="margin:0px;">Aktualizuj wybrany element</h3></th>
+<th><hr><h3 style="margin:0px;">Usuń wybrany element</h3></th></tr>
+<tr align="center"><!-- Edit -->
+<td>
+<table id="tbl401" cellspacing=5 cellpadding=0  rules=none>
+<tr>
+<td>
+<table>
+<th align="left">
+<script>
+ ImgBtnSetDefaultTabIndex(_dtl.tabIndex+1);
+ docWriteln("<span class='labeltext'>Etykieta wybranego węzła</span>");
+</script>
+</th>
+<tr>
+<td>
+<script>
+ docWriteln("<input" + detailNextID(true) + " type=text title=\"Selected Node's Label\" size=25 name=EDIT_LABEL>");
+</script>
+</td></tr>
+</table>
+</td></tr>
+<tr>
+<td>
+<table>
+<th>
+<script>
+html = "<a" + detailNextLinkID() + " href=\"javascript:void(0)\" onClick=\"return edit_crsq_click();\"" +
+       " title=\"Look up selected node's stored query\" tabindex=-1";
+if ( ahdtop.cstUsingScreenReader ) {
+  html += "><span class='lookup'>Selected Node Stored Query Lookup</" + "span>";
+}
+else {
+  html += " onMouseOver=\"self.status=&quot;Look up selected node\\\'s stored query&quot;;return true\"" +
+          " onfocus=\"this.className='focusField'\"" +
+          " onblur=\"this.className=''\"" +
+          " onMouseOut=\"self.status='';return true\">" +
+          "<span class='lookup'>Node's Stored Query&nbsp;</" + "span>" +
+          "<img src=\"$CAisd/img/lookup.gif\" class=\"dtl_img_attr\" ALT=\"Pop up stored query lookup form\">";
+}
+docWriteln(html);
+</script>
+</a>
+</th>
+<tr>
+<td>
+<script>
+var titletext = "Selected node stored query";
+if ( ahdtop.cstUsingScreenReader )
+{
+    titletext = msgtext("%1_-_autofill;_up_arrow_for_lo", titletext);
+}
+document.writeln("<input" + detailNextID(true) + " type=text size=25 name=edit_crsq_display title=\"" + titletext + "\" onchange=\"popup_search('crsq', 'edit_crsq_display', 'main_form', 'KEEP.CrsqType=Scoreboard', 0, 'label');\">");
+_dtl.tabIndex += 2;
+</script>
+<input type="hidden" name=edit_crsq_code value="">
+</td></tr></table>
+</td>
+</tr>
+</table>
+</td>
+
+<td>
+<script type="text/javascript">
+ImgBtnSetDefaultTabIndex(_dtl.tabIndex+1);
+<PDM_MACRO name=button Caption="Usuń wybrany element" btnType="negative" Func="delete_node(this.form, scbd)" hotkey_name="Delete Selected Item" ID="btn003" Width=0>
+</script>
+</td>
+</tr>
+
+<tr align="center">
+<td>
+<script type="text/javascript">
+<PDM_MACRO name=button Caption="Aktualizuj element" Func="edit_node(this.form, scbd, document.main_form.EDIT_LABEL.value, document.main_form.edit_crsq_code.value)" hotkey_name="Update Item" ID="btn004" tabIndex="do_tabIndex(3)" Width=0>
+</script>
+</td>
+<td><!--Dummy--></td>
+</tr>
+
+</table> <!-- outer -->
+
+<PDM_IF 0>
+<!-----------
+Used to have a NOTEBOOK of tabs for each operation,
+but it proved cumbersome for some scripting ops
+--------------------->
+</PDM_IF>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<p>
+<table><tr align="left"><td>
+<script type="text/javascript">
+<PDM_MACRO name=btnStartRow padding="2">
+<PDM_MACRO name=button Caption="Zakończ" Func="finish_this(this.form)" hotkey_name="Finished" ID="CLOSE" Width=120>
+var enable_btn = true;
+if ((typeof parent.keep_usq_owner == "string") &&
+    (parent.keep_usq_owner != ""))
+    enable_btn = false;
+<PDM_MACRO name=button Caption="Resetowanie" Func="reset_tree()" hotkey_name="Reset Tree" ID="btn005" Width=120>
+<PDM_MACRO name=button Caption="Pomoc" Func="help_on_form(propFormName)" hotkey_name="Help" ID="btn_help01" Width=120>
+<PDM_MACRO name=btnEndRow>
+_dtl.maxCol = 2; // Makes Shift+HOME work
+</script>
+</td></tr></table>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: usq_update_control.htmpl ASPEN.6 2011/03/16 14:20:25 ralje02 Exp $
+</PDM_IF>

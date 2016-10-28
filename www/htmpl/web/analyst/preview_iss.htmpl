@@ -1,0 +1,59 @@
+<PDM_IF 0>
+preview_iss.htmpl
+WHEN PRESENTED:
+   Mouseover Preview form for issues.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "$args.ref_num Issue Detail";
+var hdrTitleTempl = '$args.ref_num Issue Template <PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT> Detail';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</script>
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=iss>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Dotknięty użytkownik" attr=requestor>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr=category>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=status>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=dtlReadonly hdr="Grupa" attr=group>
+<PDM_MACRO name=dtlReadonly hdr="Priorytet" attr=priority>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Rodzic" attr=parent>
+<PDM_MACRO name=dtlReadonly hdr="Przyczyna źródłowa" attr=rootcause>
+<PDM_MACRO name=dtlReadonly hdr="Produkt" attr=product>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Issue Summary" attr=summary colspan=4 keeplinks=yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data otwarcia" attr=open_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rozwiązania" attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zamknięcia" attr=close_date>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: preview_iss.htmpl ASPEN.0 2010/10/04 11:31:08 ralje02 Exp $
+</PDM_IF>
+
+<PDM_WSP>

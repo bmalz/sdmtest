@@ -1,0 +1,223 @@
+<PDM_IF 0>
+kt_admin_faq_options.htmpl
+WHEN PRESENTED:
+    When we need to display the Report Card admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES table
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>form_title = "Knowledge Report Card Settings";</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/html_editor.js"></script>
+<script language="JavaScript">
+	var iDefValue = new Array(0,0,0,0,0,0,0,0);  //Database Defult Value
+	var iRealValue = new Array(0,0,0,0,0,0,0,0); //Database Value display on the page
+	var strDBID = new Array("","","","","","","",""); //Database ID
+	var dtCalcTimer = 0, dtEmailTimer = 0;
+
+	<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_LAST_UPDATE">
+			iRealValue[0] = "$ciProps.PROPERTY_VALUE";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_NOTIFICATION_INTERVAL">
+			strDBID[1] = "$ciProps.id";
+			iRealValue[1] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[1] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_NOTIFICATION_PAST_DAYS">
+			strDBID[2] = "$ciProps.id";
+			iRealValue[2] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[2] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_NOTIFICATION_TEMPLATE">
+			strDBID[3] = "$ciProps.id";
+			iRealValue[3] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[3] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_NOTIFICATION_TITLE">
+			strDBID[4] = "$ciProps.id";
+			iRealValue[4] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[4] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_CALCULATION_INTERVAL">
+			strDBID[5] = "$ciProps.id";
+			iRealValue[5] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[5] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_CALCULATION_START_DATE">
+			strDBID[6] = "$ciProps.id";
+			iRealValue[6]= "$ciProps.PROPERTY_VALUE";
+			iDefValue[6] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "KT_REPORT_CARD_NOTIFICATION_START_DATE">
+			strDBID[7] = "$ciProps.id";
+			iRealValue[7]= "$ciProps.PROPERTY_VALUE";
+			iDefValue[7] = "$ciProps.PROPERTY_DEFAULT";
+		</PDM_IF>	
+	</PDM_LIST>
+
+	<PDM_LIST PREFIX=rptAni FACTORY=ANI WHERE="name='KT_REPORT_CARD_LOAD_TABLE' or name='KT_REPORT_CARD_SEND_NOTIF'" ESC_STYLE=C>
+		<PDM_IF "$rptAni.name" == "KT_REPORT_CARD_LOAD_TABLE">
+			dtCalcTimer = "$rptAni.timer";
+		<PDM_ELSE>
+			dtEmailTimer = "$rptAni.timer";		
+		</PDM_IF>		
+	</PDM_LIST>
+</script>
+</head>
+
+<body class=detailro onload="frmReportCardOnLoad();" onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<table class="alertmsg gn_display_none" id=alertmsg width="100%">
+<tbody><tr><td id=alertmsgText></td></tr></tbody></table>
+<form name=main_form id=main_form>
+<table cellSpacing=0 cellPadding=0 width='100%' class="page_header gn_container_no_border">
+	<tr>
+		<td align=left width='99%'>Knowledge
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmReportCard')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmReportCard')",true, "", msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table width="100%" cellspacing="0" cellpadding="0" class="gn_container_no_border">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center"><span  class="page_section_header_text" >Knowledge Report Card</span></td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class=page_section>
+<table cellspacing=0 cellpadding=0 class="gn_container_no_border" width="99%">	
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Last Updated:</span>
+		</td>
+	</tr>
+</table>
+<table cellspacing=0 cellpadding=0 class="gn_container_no_border" width="99%" summary="Knowledge Report Card Settings">	
+	<tr>
+		<td>
+			&nbsp;
+			<input tabindex=100 type="checkbox" id="cbRunRPTService" name="cbRunRTPService" class="" onclick="cbRunRPTService_click()" onfocus="this.className='focusField';" onblur="this.className='';" DBID= iDisplay=>
+			<span class=data><label for="cbRunRPTService">Run the Report Card calculation</label></span>
+			<br>
+			&nbsp;&nbsp;
+			<script language="JavaScript">
+				var dtLastUpdate = date_to_string(iRealValue[0], 0);
+				if(typeof dtLastUpdate != "undefined" && dtLastUpdate != "") {
+					document.write("<span class='data'>" + msgtext("The_Report_Card_calculation_was_last_updated_on", dtLastUpdate) + "</span>");
+				} else {
+					document.write("<span class='data'>" + msgtext("The_Report_Card_calculation_has_not_been_updated_on") + "</span>");
+				}
+			</script>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Schedule:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap >&nbsp;&nbsp;
+			<span class="data"><label for="nextRunDate">Report Card calculation will next run on </label></span>
+			<script>document.write(date_input_text("main_form", "", "SET.CAL_DATE", "", 20, " id=nextRunDate tabindex=100", "yes"));</script>
+			<a tabindex=-1 href='javascript:void(0)' title='Pop up calendar helper for next run date' onclick='krcadmin_date_helper("main_form", "SET.CAL_DATE", "yes")'>
+            <img id=dateImg1 name=dateImg1 width=12 height=12 class="border_0_margin_minus_5" src='$CAisd/img/lookup_cal.gif' alt='Pop up calendar helper for next run date' onfocus="this.border=1" onblur="this.border=0;"></a>
+	
+			<span class="data"><label for="slctServiceInterval">and will run every </label></span>
+			<select tabindex=100 id='slctServiceInterval' name='slctServiceInterval' onchange='frmReportCard_comboBox_onChange(this);'>
+				<option value=1>1 day</option>
+				<option value=2>2 days</option>
+				<option value=3>3 days</option>
+				<option value=4>4 days</option>
+				<option value=5>5 days</option>
+				<option value=6>6 days</option>
+				<option value=7>1 week</option>
+				<option value=14>2 weeks</option>
+				<option value=28>4 weeks</option>
+				<option value=84>12 weeks</option>
+			</select
+		</td>
+	</tr>	
+	<tr>
+		<td nowrap >&nbsp;&nbsp;
+			<span class="data"><label for="nextNotifDate">Report Card email notifications will next be sent on </label></span>
+			<script>document.write(date_input_text("main_form", "", "SET.NOTI_DATE", "", 20, " id=nextNotifDate tabindex=100", "yes"));</script>
+			<a tabindex=-1 href='javascript:void(0)' title='Pop up calendar helper for next notification date' onclick='krcadmin_date_helper("main_form", "SET.NOTI_DATE", "yes")'>
+            <img id=dateImg2 name=dateImg2 width=12 height=12 class="border_0_margin_minus_5" src='$CAisd/img/lookup_cal.gif' alt='Pop up calendar helper for next notification date' onfocus="this.border=1" onblur="this.border=0;"></a>
+			<span class="data"><label for="slctNotificationInterval">and will be sent every </label></span>
+			  <select tabindex=100 id='slctNotificationInterval' name='slctNotificationInterval' onchange='frmReportCard_comboBox_onChange(this);'>
+				<option value=7>1 week</option>
+				<option value=14>2 weeks</option>
+				<option value=28>4 weeks</option>
+				<option value=84>12 weeks</option>
+				<option value=-1>Never</option>
+			  </select>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>&nbsp;&nbsp;
+			<span class="data"><label for="slctEmailPassDay">Report Card email should display statistics for the past </label></span><JH>
+				<select tabindex=100 id='slctEmailPassDay' name='slctEmailPassDay' onchange='bDirty=true;'>
+				<option value=30>30 days</option>
+				<option value=180>180 days</option>
+				<option value=365>365 days</option>
+				<option value=-1>All</option>
+				</select>
+		</td>
+        <td>&nbsp;</td>
+	</tr>
+</table>
+</div>
+<script>
+	
+	endScrollbar();
+</script>
+</form>
+<form id=frmPost name=frmPost method=POST>
+	<input type=hidden id=SID name=SID>
+	<input type=hidden id=FID name=FID>
+	<input type=hidden id=OP name=OP>
+	<input type=hidden id=SERVICE_INTERVAL_ID name=SERVICE_INTERVAL_ID>
+	<input type=hidden id=SERVICE_INTERVAL name=SERVICE_INTERVAL>
+	<input type=hidden id=NOTIFICATION_INTERVAL_ID name=NOTIFICATION_INTERVAL_ID>
+	<input type=hidden id=NOTIFICATION_INTERVAL name=NOTIFICATION_INTERVAL>
+	<input type=hidden id=EMAIL_PASS_DAY_ID name=EMAIL_PASS_DAY_ID>
+	<input type=hidden id=EMAIL_PASS_DAY name=EMAIL_PASS_DAY>
+	<input type=hidden id=START_RUNNING_ID name=START_RUNNING_ID>
+	<input type=hidden id=START_RUNNING name=START_RUNNING>
+	<input type=hidden id=START_CALC_ID name=START_CALC_ID>
+	<input type=hidden id=START_CALC_VALUE name=START_CALC_VALUE>
+	<input type=hidden id=START_NOTI_ID name=START_NOTI_ID>
+	<input type=hidden id=START_NOTI_VALUE name=START_NOTI_VALUE>
+	<input type=hidden id=SUBJECT_TEXT_ID name=SUBJECT_TEXT_ID>
+	<input type=hidden id=SUBJECT_TEXT name=SUBJECT_TEXT>
+	<input type=hidden id=BODY_TEXT_ID name=BODY_TEXT_ID>
+	<input type=hidden id=BODY_TEXT name=BODY_TEXT>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

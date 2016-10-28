@@ -1,0 +1,829 @@
+<PDM_IF 0>
+@(#)$Id: list_architect_KDs_Pref.htmpl ASPEN.2 2011/10/19 11:41:44 visan03 Exp $
+WHEN PRESENTED:
+	When we need to display a list of Knowledge Documents when architect prefrences (columns to show) are differ than the deafult.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="kt_architect.htmpl" factory=KD>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+	var hdrTitle = "Knowledge Categories";
+	var hdrTitleList = "Knowledge Document List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("KDsum.rpt", "KDdtl.rpt");
+var rxGt = new RegExp("&gt;","gi");
+var rxLt = new RegExp("&lt;","gi");
+var argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+//if LIST_ALL then the value is saved in KEEP.save_sql_clause
+if(argSearchSqlClause == "")
+	argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.KEEP.save_sql_clause</PDM_FMT>';
+argSearchSqlClause = argSearchSqlClause.replace(rxGt,">").replace(rxLt,"<");
+var argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>'; 	
+//if LIST_ALL then the value is saved in KEEP.save_where_clause
+if(argSearchWhereClause == "")
+	argSearchWhereClause = "$args.KEEP.save_where_clause";
+argSearchWhereClause = argSearchWhereClause.replace(rxGt,">").replace(rxLt,"<");
+var cfgCanEdit = true;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/architect_filter.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/breadcrumb.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_category_path.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_relevance.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/list_architect_KDs.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<script language=javascript>
+	// If the Advanced Search interface is visible, g_advancedSearchMode is True
+	var g_advancedSearchMode = false;
+	var m_RecordCount = "${record_count:0}";
+	var m_propWF = "$prop.WORKFLOW_EDIT_AFTER_PUBLISH"; 
+	var m_showDetails = "$args.KEEP.ShowDetails";
+</script>
+</HEAD>
+<BODY onload="window_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Document_filename" logo=no menubar=architect>
+<SCRIPT LANGUAGE="JavaScript">
+	document.writeln("<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0 class=page_header>");
+	document.writeln("<TR>");
+	document.writeln("<TD align=left width='99%'>" + form_title);
+	document.writeln("</TD>");
+	document.writeln("<TD>");
+	
+	document.writeln("</TD>");
+	document.writeln("</TR></TABLE>");
+	
+	displaySimpleEBRSearch();		
+	
+	searchFilterInitialState = "hide";	
+	
+	
+<PDM_MACRO name=sfStart factory=KD>
+	
+	// Hide the filter buttons
+	var sfButtonTable = document.getElementById("sfButtonTable");
+	sfButtonTable.style.display = "none";
+</SCRIPT>
+
+<INPUT ID=KEEP.RowsPerPage NAME=KEEP.RowsPerPage type=hidden value='$args.KEEP.RowsPerPage'>
+<INPUT TYPE=HIDDEN NAME=KEEP.ShowDetails VALUE='$args.KEEP.ShowDetails'>
+<INPUT TYPE=HIDDEN NAME=HTMPL VALUE='list_architect_KDs_Pref.htmpl'>
+<INPUT TYPE=hidden ID=QBE.EQ.ebr_add_blc NAME=QBE.EQ.ebr_add_blc VALUE='0'>
+<PDM_IF '$args.KEEP.ADDITIONAL_WHERE' != "">
+	<INPUT TYPE=HIDDEN NAME=KEEP.ADDITIONAL_WHERE VALUE='$args.KEEP.ADDITIONAL_WHERE'>
+</PDM_IF>
+<SCRIPT>
+	if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH") && !ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH"))
+	{	
+		document.write("<INPUT TYPE=hidden id=QBE.LT.ACTIVE_STATE NAME=QBE.LT.ACTIVE_STATE VALUE='100'>");	
+	}
+	else
+	{ 
+		if (!ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+		{
+			document.write("<INPUT TYPE=hidden id=QBE.NE.ACTIVE_STATE NAME=QBE.NE.ACTIVE_STATE VALUE='200'>");
+		}
+		if (!ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH"))
+		{
+			document.write("<INPUT TYPE=hidden id=QBE.NE.ACTIVE_STATE NAME=QBE.NE.ACTIVE_STATE VALUE='100'>");
+		}
+	}
+	
+</SCRIPT>
+
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_INCLUDE FILE=search_child_KCATs_filter.htmpl>
+<PDM_MACRO name=ebr_search_filter order_by="true" view="Architect">
+<PDM_IF 0>
+	Only display the Document Type and the KS type
+</PDM_IF>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=sfStartRow>
+	if (ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH") && ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+	{
+		searchFilterDropdown("Knowledge Source","","","Knowledge Documents","(ACTIVE_STATE < 100)",
+		
+<PDM_IF "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+			"Knowledge Files","(ACTIVE_STATE = 100)",
+		
+</PDM_IF>
+	"Forums","(ACTIVE_STATE = 200)",2);
+	}
+	else if (ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH")&& !ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+	{
+		
+<PDM_IF "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+			searchFilterDropdown("Knowledge Source","","","Knowledge Documents","(ACTIVE_STATE < 100)",
+			"Knowledge Files","(ACTIVE_STATE = 100)",2);
+		
+</PDM_IF>	
+	}
+	else if (!ahdtop.CanUserPerformAction("ROLE_FILE_BROWSE_SEARCH") && ahdtop.CanUserPerformAction("ROLE_FORUM_BROWSE_SEARCH"))
+	{
+			searchFilterDropdown("Knowledge Source","","","Knowledge Documents","(ACTIVE_STATE < 100)",
+			"Forums","(ACTIVE_STATE = 200)",2);
+	}
+	
+	
+	
+    
+<PDM_MACRO name=sfDropdown hdr="Typ dokumetu" attr=DOC_TYPE_ID factory=CI_DOC_TYPES>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=STATUS_ID factory=CI_STATUSES>
+<PDM_MACRO name=sfTextbox hdr="ID zdefiniowane przez użytkownika" attr=USER_DEF_ID size=15>
+<PDM_MACRO name=sfDropdown hdr="Priorytet procesu akceptacji" attr=PRIORITY_ID factory=CI_PRIORITIES>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Właściciel" attr=OWNER_ID>
+<PDM_MACRO name=sfLookup hdr="Autor" attr=AUTHOR_ID>
+<PDM_MACRO name=sfLookup hdr="Znawca tematu" attr=SUBJECT_EXPERT_ID>
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=ASSIGNEE_ID>
+<PDM_IF 0>
+	Use the NX_SD environment variable to see if Service Desk is installed.
+	If it is Yes, then display Service Desk related filters
+</PDM_IF>
+<PDM_IF $env.NX_SD == "Yes">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Produkt" attr=SD_PRODUCT_ID>
+<PDM_MACRO name=sfLookup hdr="Element konfiguracji" attr=SD_ASSET_ID>
+<PDM_MACRO name=sfHier hdr="Przyczyna źródłowa" attr=SD_ROOTCAUSE_ID>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=SD_PRIORITY_ID>
+<PDM_MACRO name=sfDropdown hdr="Surowość" attr=SD_SEVERITY_ID>
+<PDM_MACRO name=sfDropdown hdr="Wpływ" attr=SD_IMPACT_ID>
+<PDM_MACRO name=sfDropdown hdr="Pilność" attr=SD_URGENCY_ID>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+searchFilterQBEDropdown("Solution Count","Solution Count Value","SD_ACCEPTED_HITS",undefined,12,1);
+
+<PDM_IF 0>
+	Only display the 'All Categories' and 'Primary Category' input fields if we have full-blown KT installed
+</PDM_IF>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Główna klasyfikacja" attr=PRIMARY_INDEX>
+<PDM_MACRO name=sfMultiLookup hdr="Cała klasyfikacja (lista rozdzielona przecinkami)" attr=DOC_LINKS.INDEX_ID.CAPTION colspan=4 factory=KCAT size=60>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow type=Set>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=sfDropdown hdr="Szablon dokumentu" attr=DOC_TEMPLATE_ID factory=CI_DOC_TEMPLATES>
+<PDM_MACRO name=sfDropdown hdr="Szablon procesu akceptacji" attr=WF_TEMPLATE factory=CI_WF_TEMPLATES>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>	
+	searchFilterDate("Earliest Creation Date","CREATION_DATE","QBE.GE");
+	searchFilterDate("Latest Creation Date","CREATION_DATE","QBE.LE");
+	searchFilterDate("Earliest Modify Date","MODIFY_DATE","QBE.GE");
+	searchFilterDate("Latest Modify Date","MODIFY_DATE","QBE.LE");
+<PDM_MACRO name=sfStartRow>
+	searchFilterDate("Earliest Start Date","START_DATE","QBE.GE");
+	searchFilterDate("Latest Start Date","START_DATE","QBE.LE");
+	searchFilterDate("Earliest Expiration Date","EXPIRATION_DATE","QBE.GE");
+	searchFilterDate("Latest Expiration Date","EXPIRATION_DATE","QBE.LE");
+
+<PDM_MACRO name=sfEnd>
+var edit_field_count = 0;
+<pdm_jscript file=list_edit.js>
+<PDM_IF "$args.KEEP.ShowDetails" == true>
+	startListEdit(__search_filter);
+	listEditStartRow();
+	if(ahdtop.GetUSPPreferences("AUTHOR") == 1)
+	{
+		listEditField("AUTHOR_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("OWNER") == 1)
+	{
+		listEditField("OWNER_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("SUBJECT_EXPERT") == 1)
+	{
+		listEditField("SUBJECT_EXPERT_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("ASSIGNEE") == 1) 
+	{
+		listEditField("ASSIGNEE_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("USER_DEF_ID") == 1) 
+	{
+		listEditField("USER_DEF_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("START_DATE") == 1) 
+	{
+		listEditField("START_DATE", "Start Date");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("EXPIRATION_DATE") == 1) 
+	{
+		listEditField("EXPIRATION_DATE", "Expiration Date");
+		calcEditFieldCount();
+	}
+	saveAttrObj("date", "REVIEW_DATE", "Review Date");
+	if(ahdtop.GetUSPPreferences("REVIEW_DATE") == 1) 
+	{
+		listEditField("REVIEW_DATE");
+		calcEditFieldCount();
+	}
+	
+<PDM_IF "$env.NX_KT" == "Yes">
+		if(ahdtop.GetUSPPreferences("DOC_TEMPLATE") == 1) 
+		{
+			listEditField("DOC_TEMPLATE_ID");
+			calcEditFieldCount();
+		}
+		if(ahdtop.GetUSPPreferences("WF_TEMPLATE") == 1) 	
+		{
+			listEditField("WF_TEMPLATE");
+			calcEditFieldCount();
+		}
+	
+</PDM_IF>	
+	if(ahdtop.GetUSPPreferences("PRIORITY") == 1) 
+	{
+		listEditField("PRIORITY_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("SD_PRIORITY") == 1) 
+	{
+		listEditField("SD_PRIORITY_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("SD_SEVERITY") == 1) 
+	{
+		listEditField("SD_SEVERITY_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("SD_IMPACT") == 1)
+	{
+		listEditField("SD_IMPACT_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("SD_URGENCY") == 1) 
+	{
+		listEditField("SD_URGENCY_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("PRODUCT") == 1) 
+	{
+		listEditField("SD_PRODUCT_ID");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("ITEM") == 1)  
+	{
+		listEditField("SD_ASSET_ID", "Configuration Item");
+		calcEditFieldCount();
+	}
+	if(ahdtop.GetUSPPreferences("SD_ROOTCAUSE") == 1)
+	{
+		listEditField("SD_ROOTCAUSE_ID");
+		calcEditFieldCount();
+	}
+	listEditEndRow();
+	endListEdit();
+</PDM_IF>
+
+// Set the ebr search text box to the previous search
+var search_text = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.QBE.IN.ebr_search_text</PDM_FMT>';
+search_text = replaceGT_LT(search_text);
+document.getElementById("ebr_search_text").value = search_text;
+
+// Clean the additional where clause by removing from it attributes 
+// that we do not want to the additional search arguments
+listKDInit();		
+
+// Set the default sort order
+for (var i=0; i < __search_filter.form.length; i++) {	
+	var form = __search_filter.form[i];
+	var element = form.elements["KEEP.cur_sort_key"];
+	if ( typeof element == "object" ) {
+		var sort_key = "$args.KEEP.cur_sort_key";			
+		if (sort_key.length == 0) {
+		    // Get the user's preference
+			var sort_pref = ahdtop.GetUSPPreferences("ONE_B_SEARCH_ORDER");
+			if (sort_pref == "RELEVANCE")
+				sort_key = "RELEVANCE";
+			else if (sort_pref == "HITS")
+				sort_key = "HITS";
+			else if (sort_pref == "BU_RESULT")
+				sort_key = "BU_RESULT";
+			else if (sort_pref == "SD_ACCEPTED_HITS")
+				sort_key = "SD_ACCEPTED_HITS";
+			else
+				sort_key = "MODIFY_DATE"
+		}
+		
+		for ( var k = 0; k < element.options.length; k++ ) {
+			if ((element.options[k].value == sort_key) ||
+				((element.options[k].value == "RELEVANCE") && (sort_key == "RELEVANCE"))) {
+				element.selectedIndex = k;
+				break;
+			}
+		}
+		break;			
+	}
+}							
+//
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Documents found";
+var msgFound1 = "1 Document found";
+var msgFound = "%1 Documents found";
+var msgFoundMore = "%1 Documents found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Document";
+
+var arrDocTypes = new Array;
+var arrStatuses = new Array;
+var arrTitles = new Array;
+var arrKSTypes = new Array;
+var arrIDs = new Array;
+var arrActiveStates = new Array();
+var ID_counter = 0;
+
+var imgPath='$CAisd' + '/img/';
+var img = "";
+var doctype = "";
+var active_state = "0";
+
+// The following Javascript variables help control how the knowledge document attributes are displayed
+// in the list
+var field_count = 0;	// The current number of cells that have been displayed in the row
+var first_field = 1;	// 1 if the first field in the row has not been displayed yet; 0 otherwise
+var max_columns = getMax_columns();	// The maximum number of knowledge document attributes to display per row
+var domset = "$args.DOMSET";
+var showDetails = "$args.KEEP.ShowDetails";
+var highlightWords = "$args.ebr_parsed_search_text"; 
+var fuzziness = searchFilterValueOf("ebr_fuzziness");
+function fmtBuResult(value) {
+	
+<PDM_IF "$args.KEEP.ShowDetails" == true>			
+		var buResult = 0;
+		//in case the regional settings is ,(comma) instead of .(decimal)
+		value = value.replace("," , ".");
+		if(!isNaN (value))
+			buResult = Math.round(value);
+		rs.data(buResult);
+	
+<PDM_ELSE>	
+		// Do not display any data		
+	
+</PDM_IF>
+}
+
+function fmtRelevance(value) {
+	
+<PDM_IF "$args.KEEP.ShowDetails" == true>			
+		var quality = get_ebr_relevance_quality(value);
+		rs.data(quality);
+	
+<PDM_ELSE>	
+		// Do not display any data		
+	
+</PDM_IF>
+}
+
+function fmtCreatedVia(value) {
+	
+<PDM_IF "$args.KEEP.ShowDetails" == true>
+		var sCreatedVia = "";
+		if (value == "1")
+			sCreatedVia = "Submit Knowledge"
+		else if (value == "2")
+			sCreatedVia = "Anonymous Submit Knowledge"			
+		rs.data(sCreatedVia);
+	
+<PDM_ELSE>	
+		// Do not display any data		
+	
+</PDM_IF>
+}
+function highlightSearchTerms(value, p1, p2)
+{
+	// p1 and p2 are possible values of the style and img if they specify in the macro
+	//highlightWords are the words that user type in and filter out those insignificant words
+	var searchText = highlightWords ;
+	// textIn is the return data (each attribute, like TITLE, SUMMARY etc)
+	var textIn = value;
+	
+	if (!searchText || typeof(searchText) == "undefined" || searchText == "")
+	{
+		if (typeof p1 != "undefined" && typeof p2 != "undefined")
+		{
+			rs.data(value, p1, p2)
+		}
+		else if (typeof p1 != "undefined")
+		{
+			rs.data(value, p1)
+		}
+		else
+		{
+			rs.data(value);
+		}
+		return false; 
+	}		
+	else
+	{
+		searchArray = searchText.split(" ");
+	}
+	
+	if (!textIn || typeof(textIn) == "undefined")
+	{
+		if (typeof p1 != "undefined" && typeof p2 != "undefined")
+		{
+			rs.data(value, p1, p2)
+		}
+		else if (typeof p1 != "undefined")
+		{
+			rs.data(value, p1)
+		}
+		else
+		{
+			rs.data(value);
+		}
+		return false;
+	}
+
+	var matchBeginning = true;  //need to keep it = true
+   
+	if ( fuzziness.indexOf("beginning") > 0 )
+	{
+		matchBeginning = true;
+	}  
+	
+	var bodyText = textIn;
+	var highlightStartTag = "";
+	var highlightEndTag = "";
+	//Uncomment this can make words in blue and backgroud yellow.
+	//highlightStartTag = "<font style='color:blue; background-color:yellow;'>";
+	//highlightEndTag = "</font>";
+	
+	for (var i = 0; i < searchArray.length; i++)
+	{
+		if (searchArray[i] != "")
+		bodyText = doHighlight(bodyText, searchArray[i], highlightStartTag, highlightEndTag, matchBeginning);
+	}
+	if (typeof p1 != "undefined" && typeof p2 != "undefined")
+	{
+		rs.data(bodyText, p1, p2)
+	}
+	else if (typeof p1 != "undefined")
+	{
+		rs.data(bodyText, p1)
+	}
+	else
+	{
+		rs.data(bodyText);
+	}
+}
+var bRework = false;
+function fmtStatus(value)
+{
+	if (bRework)
+	{
+		var sStatus = "<I>Rework </I>" + value;
+		rs.data(sStatus);
+	}
+	else
+	{
+		rs.data(value);
+	}
+} 
+<PDM_MACRO name=lsStart search_type=DISPLAY>
+<PDM_MACRO name=lsWrite both=no text="doctype = \"@{list.DOC_TYPE_ID:0}\";">
+<PDM_MACRO name=lsWrite both=no text="active_state = (\"@{list.ACTIVE_STATE:0}\");">
+<PDM_MACRO name=lsWrite both=yes text="if (doctype == '2') img = imgPath + 'tree.gif'; else img = imgPath + 'doc.gif';">
+<PDM_MACRO name=lsWrite both=no text="if (active_state == '100') img = ahdtop.GetFileTypeImage(\"@{list.FILE_ID.file_type:0}\")">
+<PDM_MACRO name=lsWrite both=no text="if (active_state == '200') img = imgPath + 'qa_FileType_16.png';">
+<PDM_MACRO name=lsCol hdr="Dokumenty" attr=TITLE colspan=max_columns fmtfunc=highlightSearchTerms img=img link=yes sort=no>
+<PDM_MACRO name=lsWrite text="var id = @{list.id:0}-0;">
+<PDM_MACRO name=lsWrite text="ID_counter++;">
+<PDM_MACRO name=lsWrite text="arrIDs[ID_counter] = @{list.id:0}-0;">
+<PDM_MACRO name=lsWrite text="arrDocTypes[id]=@{list.DOC_TYPE_ID:0}-0;">
+<PDM_MACRO name=lsWrite text="arrStatuses[id]=@{list.STATUS_ID:0}-0;">
+<PDM_MACRO name=lsWrite text="arrTitles[id]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 KEEPTAGS=YES ESC_STYLE=C>@{list.TITLE:0}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="arrKSTypes[id]=@{list.KS_TYPE:0}-0;">
+<PDM_MACRO name=lsWrite text="arrActiveStates[ID_counter] = '@{list.ACTIVE_STATE}';">
+<PDM_MACRO name=lsWrite both=yes text="if (showDetails == \"true\") {">
+<PDM_MACRO name=lsCol label="Summary" attr="SUMMARY" colspan=max_columns export=no fmtfunc=highlightSearchTerms sort=no startrow=yes width=255>
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"DOC_ID\") == 1) {">
+<PDM_MACRO name=lsCol label="Document ID" attr=id>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"USER_DEF_ID\") == 1) {">
+<PDM_MACRO name=lsCol label="User Defined ID" attr=USER_DEF_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"AUTHOR\") == 1) {">
+<PDM_MACRO name=lsCol label="Author" attr=AUTHOR_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"OWNER\") == 1) {">
+<PDM_MACRO name=lsCol label="Owner" attr=OWNER_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"SUBJECT_EXPERT\") == 1) {">
+<PDM_MACRO name=lsCol label="Subject Expert" attr=SUBJECT_EXPERT_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"INITIATOR\") == 1) {">
+<PDM_MACRO name=lsCol label="Initiator" attr=INITIATOR_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"ASSIGNEE\") == 1) {">
+<PDM_MACRO name=lsCol label="Assignee" attr=ASSIGNEE_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CREATION_DATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Creation Date" attr=CREATION_DATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"MODIFY_DATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Modify Date" attr=MODIFY_DATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"START_DATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Start Date" attr=START_DATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"EXPIRATION_DATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Expiration Date" attr=EXPIRATION_DATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"LAST_ACCEPTED_DATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Last Accepted Date" attr=LAST_ACCEPTED_DATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"PUBLISHED_DATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Published Date" attr=PUBLISHED_DATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"REVIEW_DATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Review Date" attr=REVIEW_DATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"PRIORITY\") == 1) {">
+<PDM_MACRO name=lsCol label="Document Approval Process Priority" attr=PRIORITY_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"STATUS\") == 1) {">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.REWORK_VER:}' == '1'">
+<PDM_MACRO name=lsWrite text="bRework = true;">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="bRework = false;">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol label="Status" attr=STATUS_ID.STATUS export=no fmtfunc=fmtStatus sort=no>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"PRODUCT\") == 1) {">
+<PDM_MACRO name=lsCol label="Product" attr=SD_PRODUCT_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"ITEM\") == 1) {">
+<PDM_MACRO name=lsCol label="Configuration Item" attr=SD_ASSET_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"SD_PRIORITY\") == 1) {">
+<PDM_MACRO name=lsCol label="Priority" attr=SD_PRIORITY_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"SD_SEVERITY\") == 1) {">
+<PDM_MACRO name=lsCol label="Severity" attr=SD_SEVERITY_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"SD_IMPACT\") == 1) {">
+<PDM_MACRO name=lsCol label="Impact" attr=SD_IMPACT_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"SD_URGENCY\") == 1) {">
+<PDM_MACRO name=lsCol label="Urgency" attr=SD_URGENCY_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"SD_ROOTCAUSE\") == 1) {">
+<PDM_MACRO name=lsCol label="Root Cause" attr=SD_ROOTCAUSE_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"SD_ACCEPTED_HITS\") == 1) {">
+<PDM_MACRO name=lsCol label="Solution Count" attr=SD_ACCEPTED_HITS>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"DOC_TYPE\") == 1) {">
+<PDM_MACRO name=lsCol label="Document Type" attr=DOC_TYPE_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"BU_RESULT\") == 1) {">
+<PDM_MACRO name=lsCol label="FAQ Rating" attr=BU_RESULT export=no fmtfunc=fmtFAQRating sort=no>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"HITS\") == 1) {">
+<PDM_MACRO name=lsCol label="Hits" attr=HITS>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CREATED_VIA\") == 1) {">
+<PDM_MACRO name=lsCol label="Created Via" attr=CREATED_VIA>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"PRIMARY_INDEX\") == 1) {">
+<PDM_MACRO name=lsCol label="Primary Category" attr=PRIMARY_INDEX>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CURRENT_ACTION\") == 1) {">
+<PDM_MACRO name=lsCol label="Current Task" attr=CURRENT_ACTION_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"DOC_TEMPLATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Document Template" attr=DOC_TEMPLATE_ID>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"WF_TEMPLATE\") == 1) {">
+<PDM_MACRO name=lsCol label="Workflow Template" attr=WF_TEMPLATE>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CUSTOM1\") == 1) {">
+<PDM_MACRO name=lsCol label="Custom1" attr=CUSTOM1>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CUSTOM2\") == 1) {">
+<PDM_MACRO name=lsCol label="Custom2" attr=CUSTOM2>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CUSTOM3\") == 1) {">
+<PDM_MACRO name=lsCol label="Custom3" attr=CUSTOM3>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CUSTOM4\") == 1) {">
+<PDM_MACRO name=lsCol label="Custom4" attr=CUSTOM4>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CUSTOM5\") == 1) {">
+<PDM_MACRO name=lsCol label="Custom5" attr=CUSTOM5>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CUSTOM_NUM1\") == 1) {">
+<PDM_MACRO name=lsCol label="Custom Num1" attr=CUSTOM_NUM1>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"CUSTOM_NUM2\") == 1) {">
+<PDM_MACRO name=lsCol label="Custom Num2" attr=CUSTOM_NUM2>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.GetUSPPreferences(\"ebr\") == 1) {">
+<PDM_MACRO name=lsCol label="Relevance" attr=ebr_relevance export=no sort=no>
+	calcFieldCount();
+	
+<PDM_MACRO name=lsWrite both=yes text="}">			
+	
+
+	// Fill in the remaining cells with blanks
+	
+<PDM_MACRO name=lsWrite text="for ( var i = field_count;i < max_columns; i++)">
+<PDM_MACRO name=lsWrite text="{rs.data(\"\");}">
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd>
+
+var m_itmEdit;
+var m_itmEditView;
+var ctxMenu=new ContextMenu("idViewEditKD");
+AddMenuItems(ctxMenu);
+ctxMenu.finish();
+rs.setLinkOnclick(issueLinkEvent);
+if(m_RecordCount > 0)
+	selectRow(0);
+	
+function AddMenuItems(objMenu)
+{
+	m_itmEditView = ctxMenu.addItem(msgtext("View1"), "OpenDocumentEditorView(self.activePersid);");
+	m_itmEdit = ctxMenu.addItem(msgtext("Edit0"), "OpenDocumentEditor(self.activePersid)");
+	objMenu.addItem(msgtext("User_View"), "OpenDocView(self.activePersid);");
+	if (ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE") || ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS"))
+	{
+		objMenu.addItem(msgtext("New_Knowledge_Document"), "CreateDocument();");
+		if(ahdtop.cfgNX_KT == "Yes")
+		{
+			objMenu.addItem(msgtext("New_Knowledge_Tree_Document"), "CreateTree();");
+		}
+	}	
+	var lCurrCatID = ahdframe.parent.getCurrentIndex();	
+	if (ahdtop.ISFullKT() && ahdtop.cfgNX_KT_DISALLOW_FORUMS != "Yes" && ahdtop.CanUserPerformAction("ROLE_FORUM_SUBMIT") && ahdtop.m_arrIsForumEnabled[lCurrCatID])
+	{
+		objMenu.addItem(msgtext("New_Forum"), "CreateQA();");
+	}
+	if(ahdtop.CanUserPerformAction("ROLE_DOCUMENT_DELETE"))
+		objMenu.addItem(msgtext("Delete_Selected_Document"), "DeleteSelectedDocument(self.activePersid);");
+	if(ahdtop.CanUserPerformAction("ROLE_MASS_DELETE"))
+		objMenu.addItem(msgtext("Delete_all_Documents_Retrieved"), "DeleteDocumentList();");
+
+	// Add standard menu items to context menu if our user preference
+	// is to activate the resultset context menu using a right-click
+	if (ahdtop.GetUSPPreferences("CLASSIC_RESULTSET_CONTEXT") == "0") {
+		objMenu.addItem( msgtext("Refresh"), // refresh
+				"refreshForm()");
+		objMenu.addItem( msgtext("Print_Form%1...", " " + window.propFormName), // Print this window
+				"CAisdPrint();"); 
+		objMenu.addItem( msgtext("Help_on_This_Window..."),	// Help on this window
+							"help_on_form('"+window.propFormName+"')");
+	}
+}
+
+function issueLinkEvent()
+{
+	var id = arrIDs[Number(activeRow) + 1];
+	var AST = arrActiveStates[Number(activeRow)+1];
+	if (AST==200 && "$env.NX_KT_DISALLOW_FORUMS" == "Yes")
+	{
+		OpenDocView(self.activePersid);
+	}
+	else
+	{
+		if(arrStatuses[id] == 80 ||
+			arrStatuses[id] == 70 && m_propWF == "0")
+		{
+			OpenDocumentEditorView(self.activePersid);
+		}
+		else
+		{
+			OpenDocumentEditor(self.activePersid);
+		}
+	}
+}
+
+function updateCtxMenuItems(row)
+{
+	var id = arrIDs[Number(row) + 1];
+	var AST = arrActiveStates[Number(row)+1];
+	
+	if((arrStatuses[id] == 80 ||
+		arrStatuses[id] == 70 && m_propWF == "0")||(AST==200 && (!ahdtop.CanUserPerformAction("ROLE_FORUM_CLOSE") || "$env.NX_KT_DISALLOW_FORUMS" == "Yes")||(AST==100 && !ahdtop.CanUserPerformAction("ROLE_FILE_EDIT"))))
+	{
+		ctxMenu.hideItem(m_itmEdit);	
+		ctxMenu.hideItem(m_itmEditView);
+	}
+	else
+	{
+		ctxMenu.showItem(m_itmEdit);	
+		ctxMenu.showItem(m_itmEditView);
+	}
+}
+</script>
+
+</PDM_IF>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

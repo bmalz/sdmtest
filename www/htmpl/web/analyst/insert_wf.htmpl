@@ -1,0 +1,461 @@
+<PDM_IF 0>
+insert_wf.htmpl
+WHEN PRESENTED:
+    Getting user's input on the addition of a new wf object
+	for a parent chg.
+INTENT:
+    Capture user input for a wf.  The parent chg is checked out
+	for locking purposes.  We must set certain form elements for
+	this special operation - see insert_wf.js for details.
+VARIABLES:
+    string	image	    The location of the image directory as 
+			    specified in the config file.
+    object chg   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/change.maj and 
+                                $NX_ROOT/bopcfg/majic/chgwf.maj for the
+                            definition of attributes for 'OBJECT chg'
+    int   	logged_in   A flag to say we have a user login object.
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+edit_form = 1;
+cfgDateFormat = "$date_format";
+form_title = "Insert New Workflow Task Into Change Order $args.chg_ref_num";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/change_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/insert_wf.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+
+<script type="text/javascript">
+<!--
+	// <PDM_IF 0>
+	//	These handlers simply set some of our hidden values
+	//	which the wf_insert operation expects - see wf_insert.js for details
+	//	</PDM_IF>
+	function pos_click(new_val) {
+		document.main_form.elements["wf_ins.seq"].value = new_val;
+	}
+	var using_tskty = 0;
+	function meth_click(new_val) {
+		if (new_val == "tskty_meth") {
+			using_tskty = 1;			
+			var sel_i = document.main_form.elements["SET.tskty_sel"].selectedIndex;
+			//commenting out code below as <empty> not part of the task type dropd-down list anymore
+			//if (sel_i > 0) {
+			document.main_form.elements["wf_ins.tsk_proto"].value = document.main_form.elements["SET.tskty_sel"].options[sel_i].value;
+			/* } else {
+				document.main_form.elements["wf_ins.tsk_proto"].value = "";
+			} */
+		} else {
+			document.main_form.elements["wf_ins.tsk_proto"].value = new_val;
+			using_tskty = 0;
+		}
+	}
+
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type )
+{
+   if (_dtl.edit && !_dtl.skip_agt_check)
+   {
+	var f = void(0);
+	var r = form_name.match(/main_form([0-9]*)/);
+	if ( r != null ) {
+	    if ( r[1].length == 0 )
+		f = _dtl.form[0];
+	    else
+		f = _dtl.form[r[1]-0];
+	}
+	detailAgtCheck(f, base_name, cntID, "");
+   }
+   detailCntBackfill( form_name, base_name, lname, fname, mname,
+                      cntID, caller_type );
+
+}
+	
+	function tskty_click(select_obj) {
+		if (using_tskty) {
+			var sel_i = select_obj.selectedIndex;
+						// '0' is the empty selection...
+			//commenting out code below as <empty> not part of the task type dropd-down list anymore						
+			//if (sel_i > 0) {
+				document.main_form.elements["wf_ins.tsk_proto"].value = select_obj.options[sel_i].value;
+			//}
+		}
+	}
+function set_tskty_sel()
+{
+    var proto = "$args.wf_ins.tsk_proto";
+    if ((proto != "") && (proto.indexOf("wftpl:") < 0))
+    {
+	var sel_obj = document.forms["main_form"].elements["SET.tskty_sel"];
+	var eles = document.forms["main_form"].elements; 
+	if (typeof sel_obj == "undefined") return;
+	var options = sel_obj.options;
+	for (var i = 0; i < options.length; i++)
+	{
+	    if (options[i].value == proto)
+	    {
+		sel_obj.selectedIndex = i;
+		for (var i = 0; i < eles.length; i++)
+		{
+		    if (eles[i].value == "tskty_meth")
+		    {
+			eles[i].checked = true;
+			meth_click("tskty_meth");
+		    }
+		}
+		break;
+	    }
+	}
+    }
+}
+// -->
+function unloadActions()
+{
+unload_check();
+}
+
+function loadAction()
+{
+set_tskty_sel();
+}
+
+
+var argPersistentID = "$args.persistent_id";
+
+// To fool DetailForm - we need to be 'editable'
+edit_form = 1; 
+</script>
+<title>
+$ProductName - 
+Insert New Task
+</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onunload="unloadActions()" onload="loadAction()" class="editform" >
+<PDM_INCLUDE FILE=std_body.htmpl filename="Workflow">
+<center>
+
+<script type="text/javascript">
+var htmltext;
+<PDM_MACRO name=dtlForm button=false factory=chg>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Add" func="validate_task(document.forms['main_form'])" hotkey_name="Add" id="btn001" width=120>
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="document.main_form.reset()" hotkey_name="Reset[r]" id="btn002" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+</script>
+<input type="hidden" name=change_category value=0>
+<input type="hidden" name=INSERT_WF value="1">
+<input type="hidden" name=wf_ins.seq value="">
+<input type="hidden" name=wf_ins.tsk_proto value="">
+<input type="hidden" name=wf_asset_val value="">
+<input type="hidden" name=obj_id value="$args.id">
+<br>
+<br>
+<table id="tbl000" width=90%>
+<tr>
+<td valign="top">
+<span class="labeltext">
+1. Select where to insert the new Workflow Task:
+</span>
+<script type="text/javascript">
+<PDM_IF 0>
+	//	These embedded scripts help us select
+	//	the sequence value the new task should follow.
+	//	A task cannot be inserted before a task with a 
+	//  status other than "WAIT" or "PEND".
+</PDM_IF>
+		var last_seq = 0;
+		var last_sym = "";
+		var last_st_code = "";
+</script>
+<br>
+<table id="tbl001" width=90% summary="1. Select where to insert the new Workflow Task">
+<tr>
+<th>
+</th>
+<th align="center" colspan=3 class="detailro">Workflow Tasks</th>
+</tr>
+<tr>
+<th align="left">
+</th>
+<th align="left" scope="col" class="detailro">Sequence</th>
+<th align="left" scope="col" class="detailro">Workflow Task</th>
+<th align="left" scope="col" class="detailro">Status</th>
+</tr>
+<PDM_LIST PREFIX=list FACTORY=wf WHERE="chg = $args.id" ORDER_BY="sequence ASC">
+<tr>
+<td valign="top">&nbsp;&nbsp;</td>
+<td>
+<script type="text/javascript">
+if (last_st_code == "WAIT" || last_st_code == "PEND") {
+    htmltext = "<input type='radio'" + detailNextID() +
+               " name='insert_pos' onClick='pos_click(this.value)' value=" + last_seq +
+               " title=\"Insert new task after task " + last_seq + " " + last_sym + "\"";
+    if ("$args.wf_ins.seq" == last_seq)
+    {
+	htmltext += " checked='checked'>\n";
+	pos_click(last_seq);
+    }
+    else 
+    {
+	htmltext += " >\n";
+    }
+    htmltext += "<td colspan=3><img src=$CAisd/img/bar.gif width=90% HEIGHT=2 alt=''>\n";
+    docWrite(htmltext);
+}
+</script>
+</td>
+<tr>
+<td valign="top">&nbsp;&nbsp;</td>
+<td valign="top" class="labeltext">$list.sequence</td>
+<td valign="top" class="detailro"> 
+<script type="text/javascript">
+docWriteln("<a" + detailNextLinkID() +
+ " href=\"javascript:showDetailWithPersid('$list.task.persistent_id','main_form')\">" + '<PDM_FMT ESC_STYLE=C PAD=NO>$list.task.sym</PDM_FMT>' + "<\/a>");
+</script>
+</td>
+<td valign="top" class="labeltext">$list.status.sym</td>
+<script type="text/javascript">
+last_seq = $list.sequence; 
+last_sym = "$list.task.sym";
+last_st_code = '$list.status.code';
+</script>
+</PDM_LIST>
+<script type="text/javascript">
+    htmltext = "<tr><td valign='top'>&nbsp;&nbsp;<\/td><td>\n<input type='radio'" + detailNextID() +
+               " name='insert_pos' onClick='pos_click(this.value)' value=" + last_seq +
+               " title=\"Insert new task after task " + last_seq + " " + last_sym + "\"";
+    if ("$args.wf_ins.seq" == last_seq)
+    {
+	htmltext += " checked='checked'>\n";
+	pos_click(last_seq);
+    }
+    else 
+    {
+	htmltext += ">\n";
+    } 
+	htmltext += "<td colspan=3><img src=$CAisd/img/bar.gif width=90% HEIGHT=2 alt=''><\/td>\n";
+    docWrite(htmltext);
+</script>
+</table>
+<br>
+<table>
+<tr>
+<td>
+<!-- Now select a Task.  Can create a new one as a copy
+of the change's category tasks (to include behavior) or create one
+from one of the Task Types...-->
+<span class="labeltext">
+2. Choose how to create the new Workflow Task:
+</span>
+<br>
+<table id="tbl003" class=gn_container_border_3 summary="2. Choose how to create the new Workflow Task">
+<tr>
+<th align="center" colspan=1 class='labeltext gn_container_border_1'>
+Templates from category $args.category.sym
+</th>
+<th align="center" colspan=1 class='labeltext gn_container_border_1'>
+From all Workflow Task Types
+</th>
+<tr>
+<td>
+<table id="tbl004" cellspacing=10 class=gn_container_border_1 width=100% height=100%>
+<tr>
+<th align="left" class="labeltext">&nbsp;</th>
+<th align="left" scope="col" class="labeltext">Type</th>
+<th align="left" scope="col" class="labeltext">Description</th>
+</tr>
+<PDM_LIST PREFIX=list FACTORY=wftpl_chgcat WHERE="object_attrval = $args.category.id">
+<tr>
+<td>
+<script type="text/javascript">
+htmltext = "<input type='radio'" + detailNextID() + " name='chgcat_task_sel' onClick='meth_click(this.value)' value=$list.persistent_id title=\"Select task $list.task.sym" + " - " + unescape(('<PDM_FMT ESC_STYLE=JS2 PAD=NO>$list.description</PDM_FMT>'.replace(/%0A/g," ")).replace(/%22/g,"&quot;")) + " \"";
+if ("$args.wf_ins.tsk_proto" == "$list.persistent_id")
+{
+   htmltext += " checked='checked'>\n";
+   meth_click("$list.persistent_id");
+}
+else 
+{
+   htmltext += ">\n";
+}
+docWrite(htmltext);
+</script>
+</td>
+<td class="labeltext">$list.task.sym</td>
+<td class="labeltext">$list.description</td>
+</tr>
+</PDM_LIST>
+</table>
+<!-- end left inner table -->
+<td valign="top">
+<table id="tbl005" class=gn_container_border_1 width=100% height=100%>
+<!-- begin right inner table -->
+<tr>
+<th align="left" class="labeltext">Type</th>
+<td>
+<script>
+docWriteln("<input type='radio'" + detailNextID() + " name='chgcat_task_sel' onClick='meth_click(this.value)' value='tskty_meth' title=\"Use selected task type\">");
+</script>
+</td>
+<tr>
+<td valign="baseline" colspan=2>
+<script type="text/javascript">
+docWriteln("<select name='SET.tskty_sel'" + detailNextID(2) +
+           " onClick='tskty_click(this)' title=\"Task Type\">");
+</script>
+<PDM_LIST PREFIX=list WHERE=" " FACTORY=tskty>
+<option value="$list.REL_ATTR">$list.COMMON_NAME
+</PDM_LIST>
+</select>
+</td>
+</tr>
+</table>
+<!-- end right inner table -->
+</td>
+</table>
+
+<br>
+<span class="labeltext">4. Set any default values:</span>
+<br>
+<script>
+<PDM_MACRO name=dtlStartRow>
+detailLookup("Assignee","wf_ins_agt","agt",
+	     1,20, "0","$args.wf_ins_agt.persistent_id","$args.wf_ins_agt",
+	     "yes","combo_name",
+	     '<PDM_FMT ESC_STYLE=JS2 PAD=NO>$args.wf_ins_agt_combo_name</PDM_FMT>',
+	     "$args.SEARCH_STATUS_wf_ins_agt","$args.SEARCH_RESULTS_wf_ins_agt","yes","");
+detailLookup("Group","wf_ins_grp","grp",
+	     1,20, "0","$args.wf_ins_grp.persistent_id","$args.wf_ins_grp",
+	     "yes","combo_name",
+	     '<PDM_FMT ESC_STYLE=JS2 PAD=NO>$args.wf_ins_grp_combo_name</PDM_FMT>',
+	     "$args.SEARCH_STATUS_wf_ins_grp","$args.SEARCH_RESULTS_wf_ins_grp","yes","");
+detailEndRow();
+</script>
+<tr>
+<th align="left" valign="bottom" class="labeltext">Actual Start Date</th>
+<th align="left">
+<PDM_IF "$SESSION.usingScreenReader" != "1">
+<img style='vertical-align:middle' src='/CAisd/img/lookup_cal.gif' alt="Pop up calendar helper">
+</PDM_IF>
+<script>
+htmltext = "<a " + detailNextLinkID() + " href='javascript:void(0)' onClick=\"popup_date_helper('main_form', 'wf_ins.est_comp_date');return false;\"";
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+var datelabel = "Estimated Completion Date Lookup";
+<PDM_ELSE>
+var datelabel = "Estimated Completion Date";
+htmltext +=  " onMouseOver='self.status=\"Select a date\";return true' onMouseOut=\"self.status='';return true\"";
+</PDM_IF>
+htmltext += "><span class='lookup'>" + datelabel + "<\/span><\/a>"; 
+docWriteln(htmltext);
+</script>
+</th>
+<tr>
+<td valign="top">
+<script type="text/javascript">
+document.writeln("<input type=text disabled size=20 title=\"Actual Start Date\" value=\"" + date_to_string('$args.start_date_INT_DATE', 0) + "\">");
+</script>
+</td>
+<td valign="top">
+<script type="text/javascript">
+	var titletext = "Estimated Completion Date";
+	if ( ahdtop.cstUsingScreenReader )
+	{
+	    titletext = msgtext("%1_-_autofill;_up_arrow_for_lo", titletext);
+	}
+	titletext = detailNextID() + "title='" + titletext + "' ";
+        edit_form = 0; // Kludge our way around font size problem
+        date_input('main_form', '', 'wf_ins.est_comp_date', '$args.wf_ins.est_comp_date', 20, titletext);
+        edit_form = 1;
+</script>
+<br>
+<span class="hinttext">
+Required to be later than parent's
+<br>
+</span>
+</td>
+</tr>
+<tr>
+<th align="left">
+<span class="labeltext">Estimated Cost</span>
+</th>
+<th align="left">
+<span class="labeltext">Estimated Duration</span>
+</th>
+<tr>
+<td valign="top">
+<script type="text/javascript">
+docWriteln("<input type='text'" + detailNextID() +
+           " name=wf_ins.est_cost title=\"Estimated Cost\" value='$args.wf_ins.est_cost'>");
+</script>
+</td>
+<td valign="top">
+<script type="text/javascript">
+docWriteln("<input type='text'" + detailNextID() +
+	       " name=wf_ins.est_duration title=\"Estimated Duration\" value='$args.wf_ins.est_duration'" + 
+	       " onchange='validate_duration_ts(this)'>"); 		
+</script>
+</td>
+</tr>
+</table>
+</td>
+<td valign="top">
+<!-- <PDM_IF 0>'tsk_proto' is the id of a wftpl or the code of a tskty</PDM_IF> -->
+<span class="labeltext">
+3. Select Configuration Items:
+</span>
+<br>
+<div style="OVERFLOW:AUTO;HEIGHT:250px;" class="gn_control_list">
+<table width=100% summary="3. Select Configuration Items">
+<PDM_LIST SOURCE=args.asset ESC_STYLE=C>
+<tr>
+<td valign="top"><input type="checkbox" name="checkallcbxs" value="$args.asset.id"
+    title="Select configuration item $args.asset.name"></td>
+<td valign="top" class="labeltext">$args.asset.name</td>
+</tr>
+</PDM_LIST>
+</table>
+</div>
+<br>
+<table>
+<tr>
+<td>
+<script type="text/javascript">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Select All" func="checkoruncheckAllcbxs(true)" hotkey_name="Select All" id="btnSelAll" tooltip="Select all configuration items" width=120>
+<PDM_MACRO name=button caption="Clear Selected" func="checkoruncheckAllcbxs(false)" hotkey_name="Clear Selected" id="btnClrAll" tooltip="Clear selected configuration items" width=125>
+<PDM_MACRO name=btnEndRow>
+</script>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<script type="text/javascript">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: insert_wf.htmpl ASPEN.8 2011/08/04 13:53:31 valre03 Exp $
+</PDM_IF>
+<PDM_WSP>

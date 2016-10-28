@@ -1,0 +1,212 @@
+<PDM_IF 0>
+$Id: log_reader.htmpl,v 1.4 2007/01/04 22:55:37 tuach01 Exp $
+list_lr.htmpl
+WHEN PRESENTED:
+	When we need to display Log Reader.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="log_reader_fs.htmpl+SINGLE_FRAME=1">
+<title>Log Reader $ProductName</title>
+<script type="text/javascript">
+// The window name needs to be set before loading std_head.htmpl.
+window.name = "log_reader";
+form_title = "Log Reader";
+</script>
+<script type="text/javascript" src="$CAisd/scripts/msg_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msg_cat_site.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/log_reader.js"></script>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+ahdframe = window;
+form_title = "Notification Log Reader";
+cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+argBackfillField = '$args.KEEP.backfill_field';
+argBackfillForm = '$args.KEEP.backfill_form';
+argSearchSqlClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_sql_clause</PDM_FMT>';
+argSearchWhereClause = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.search_where_clause</PDM_FMT>';
+cfgUserid = '$cst.userid';
+cfgDateFormat = '<PDM_FMT PAD=NO ESC_STYLE=C>$date_format</PDM_FMT>';
+var argSortKeys = '${args.sort_keys:}';
+var argCurSortKey = '${args.KEEP.cur_sort_key:}';
+var argListSortCol = '${args.KEEP.prev_sort_col_value:}';	
+var argListOrderBy = '${args.KEEP.prev_order_by_value:}';
+var servletURL = "${env.NX_SERVLET_SERVER_URL}";	
+<PDM_IF "${current:n/a}" == "n/a">
+searchFilterInitialState = "show";
+cfgTotal = 0;
+<PDM_ELSE>
+cfgCurrent = '$current';
+cfgTotal = parseInt('$total',10);
+cfgRecordCount = '$record_count';
+cfgStart = '$start';
+cfgLength = '$length';
+</PDM_IF>
+cfgUseTemplate = '$args.use_template';
+cfgIsPopup = '$args.KEEP.IsPopUp';
+rptName = new Array("no", "no");
+cfgCanEdit = false;
+cfgCanView = true;
+var propLrRefresh = "$prop.Lr_Refresh";  // Given in seconds.  
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<meta http-equiv="pragma" content="no-cache">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/searchfilter.css">
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+
+//
+// We moved the function 'new_lr' to the 'htmpl' file from the 'jsdir' directory
+// so we can override it here with some additions. This was done to fix SCO5918.
+// Specificaly, so we can use the 'window.opener' js properity as a container
+// to hold the a new 'new_lr.htmpl' window when it is created and write some
+// logic around it.
+//
+function new_lr() {
+	var query_string=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+	"+OP=DISPLAY_FORM+HTMPL=new_lr.htmpl";
+	var props="width=200,height=200,resizable";
+	
+	if(navigator.appName.indexOf("Netscape4")<0) {
+		props+=",left=1,top=1";
+	} else {
+		props+=",screenX=1,screenY=1";
+	}
+	
+	var w_name=get_popup_window_name("new_lr");
+	query_string+="+KEEP.POPUP_NAME="+w_name;
+
+	if(ahdtop.propDebugOptions!="") {
+		props=modifyWindowFeaturesForDebug(props);
+	}
+	
+	window.opener = window.open(query_string, "", props);
+	if (check_popup_blocker(window.opener))
+	    window.opener.name = w_name;
+	return;
+}
+
+function selectInitial() {
+	reset_refresh();
+
+	// Take action if we detected a new log object
+	var old_len = "$args.OLD_LENGTH";
+	
+	if (typeof old_len == "string" && old_len.length > 0) {
+		if (Number(old_len) < Number(cfgRecordCount)) {
+			//
+			// Put some logic around 'window.opener' which is
+			// really the 'new_lr.htmpl' window. To prevent it
+			// from poping up mulitple time when the 'log_reader.htmpl' 
+			// is open. See SCO5918 for details.
+			//
+			if(window.opener == null) {
+				new_lr();
+				return;
+			}
+			else if(!window.opener.closed) {
+				window.opener.focus();
+				return;
+			}
+			else if(window.opener.closed) {
+				window.opener = null;
+				return;
+			}
+		}
+	}
+}
+
+</script>
+</head>
+<body class="list" onfocus="parent.check_ahdtop()" onload="selectInitial();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no>
+
+<center>
+<script type="text/javascript">
+
+if (!isNaN(cfgTotal) && cfgTotal > 0) {
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Select All" func="SelectAll(true)" hotkey_name="Select All" id="btn100" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="SelectAll(false)" hotkey_name="Reset[r]" id="btn101" width=120>
+<PDM_MACRO name=button caption="Clear Selected" func="OpAll(1)" hotkey_name="Clear Selected" id="btn102" width=0>
+<PDM_IF $ACCESS.FAC_lr \> 1>
+<PDM_MACRO name=button caption="Delete Selected" btntype="negative" func="OpAll(2)" hotkey_name="Delete Selected" id="btn103" width=0>
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+}
+
+</script>
+<p>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<script type="text/javascript">
+<PDM_MACRO name=sfStart create=false factory=lr>
+
+// <PDM_IF 0> Force some where clause stuff: Only show Notification-type lrs for login contact SEE LOG_READER.JS 
+//			Force 'log_reader.htmpl' as return form for search.  </PDM_IF>
+document.writeln('<input type="hidden" name=HTMPL value=log_reader.htmpl>');
+document.writeln('<input type="hidden" name=QBE.EQ.contact value="$cst.id">');
+document.writeln('<input type="hidden" name="SUBOP" value="LR_SUBOP">');
+// These are set in log_reader.js.
+document.writeln('<input type="hidden" name="OP_REPLACE2" value="">');
+document.writeln('<input type="hidden" name="OP_REPLACE3" value="">');
+document.writeln('<input type="hidden" name="OLD_LENGTH" value="">');
+
+//	Used in log_reader.js
+document.writeln('<input type="hidden" name="KEEP.SkipInitialFocus" value="">');
+
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Status","status","",
+"Unsent","(status = 0)",
+"Sending Error","(status = 1)",
+"Incoming FYI","(status = 2)","<selected>",
+"Cleared","(status = 7 OR status = 8 OR status = 9)", 1);
+<PDM_MACRO name=sfTextbox hdr="Nagłówek wiadomości" attr=msg_hdr size=20>
+<PDM_MACRO name=sfTextbox hdr="Wiadomość Tekst" attr=msg_text size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data wysłania" attr=start_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data wysłania" attr=start_date qbe_condition=LE>
+<PDM_IF 0> A small hack to restrict lr object where clause </PDM_IF>
+searchFilterDropdown("Method", "cmth_used", "", "noempty",
+	"Notification", "(cmth_used = 1801 OR cmth_used IS NULL)");
+<PDM_MACRO name=sfEnd>
+</script>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No notifications found";
+var msgFound1 = "1 notification found";
+var msgFound = "%1 notifications found";
+var msgFoundMore = "%1 notifications found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired notification";
+
+function fmtType(value)
+{
+var persid = 'lr:'+ value;
+rs.data('<input type=checkbox name="mass_sel" title="Select ' + currMsgHdr +
+        '" onClick="reset_refresh()" value=' + persid + '>');
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="currMsgHdr = \"@{list.msg_hdr:}\";">
+<PDM_MACRO name=lsCol hdr="<pusty>" attr=id export=no fmtfunc=fmtType sort=no uid="mass_sel">
+<PDM_MACRO name=lsCol hdr="Nagłówek" attr=msg_hdr exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Data rozpoczęcia" attr=start_date sort=DESC>
+<PDM_MACRO name=lsCol hdr="Status" attr=status_shadow export=no sort=no>
+<PDM_MACRO name=lsCol hdr="Pilność" attr=notify_method>
+<PDM_MACRO name=lsCol attr=msg_text colspan=4 startrow=yes>
+<PDM_MACRO name=lsEnd>
+
+
+</script>
+</PDM_IF>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</center>
+</body>
+</html>
+

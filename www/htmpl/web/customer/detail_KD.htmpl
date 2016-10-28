@@ -1,0 +1,524 @@
+<PDM_IF 0>
+detail_KD.htmpl
+WHEN PRESENTED:
+    When we need to display a detail KD (Submit Knowledge) for Employee and Customer
+INTENT:
+    Display the detail info for the KD (Submit Knowledge)
+
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript">
+var docTitle = '<PDM_FMT ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+var hdrTitleNew = "Create New Document";
+if(docTitle.length > 50)
+	var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>...';
+else	
+ var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>';
+</script>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cst_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cst_catitem.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></script>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></script> 
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+argCstID = "$cst.id";
+cfgGuestUser = "$prop.guest_user";
+cfgDateFormat = "$date_format";
+cfgUserAuth = "$UserAuth";
+var argID = "$args.id";
+var propResolutionMaxSize = "$prop.RESOLUTION_MAX_SIZE";
+
+if ($args.id == 0)
+{ 
+	edit_form = 1;
+}
+</script>
+<script type="text/javascript">
+var doc;
+var sTitle="-TITLE-";
+var sSummary="-SUMMARY-";
+var sProblem="-PROBLEM-";
+var sResolution="-RESOLUTION-";
+var sNotes="-NOTES-";
+var sLeftSpace = "\t\t\t\t";
+var sRightSpace = "\t \t  \t   \t    ";
+
+function SpellCheckContent()
+{
+	doc['HIDDEN_SPELL'].value = ""; //initialize
+	ImgBtnDisableButton("btnSpellcheck");
+	
+	if (doc['SET.TITLE'] != null)
+	{
+		if (trim(doc['SET.TITLE'].value).length > 0)
+		{
+			doc['SET.TITLE'].disabled=true;
+			doc['HIDDEN_SPELL'].value += sLeftSpace + sTitle + sRightSpace + "<BR>";
+			doc['HIDDEN_SPELL'].value += doc['SET.TITLE'].value;
+		}
+	}
+	if (doc['SET.SUMMARY'] != null)
+	{
+		if (trim(doc['SET.SUMMARY'].value).length > 0)
+		{
+			doc['SET.SUMMARY'].disabled = true;
+			doc['HIDDEN_SPELL'].value += "<BR>" + sLeftSpace + sSummary + sRightSpace + "<BR>";
+			doc['HIDDEN_SPELL'].value += doc['SET.SUMMARY'].value;
+		}
+	}
+	if (doc['SET.PROBLEM'] != null)
+	{
+		if (trim(doc['SET.PROBLEM'].value).length > 0)
+		{
+			doc['SET.PROBLEM'].disabled = true;
+			doc['HIDDEN_SPELL'].value += "<BR>" + sLeftSpace + sProblem + sRightSpace + "<BR>";
+			doc['HIDDEN_SPELL'].value += doc['SET.PROBLEM'].value;
+		}
+	}
+	if (doc['SET.RESOLUTION'] != null)
+	{
+		if (trim(doc['SET.RESOLUTION'].value).length > 0)
+		{
+			doc['SET.RESOLUTION'].disabled = true;
+			doc['HIDDEN_SPELL'].value += "<BR>" + sLeftSpace + sResolution + sRightSpace + "<BR>";
+			doc['HIDDEN_SPELL'].value += doc['SET.RESOLUTION'].value;
+		}
+	}
+	if (doc['SET.NOTES'] != null)
+	{
+		if (trim(doc['SET.NOTES'].value).length > 0)
+		{
+			doc['SET.NOTES'].disabled = true;
+			doc['HIDDEN_SPELL'].value += "<BR>" + sLeftSpace + sNotes + sRightSpace + "<BR>";
+			doc['HIDDEN_SPELL'].value += doc['SET.NOTES'].value;
+		}
+	}
+	popup_spellchecker('spell_form','main_form','HIDDEN_SPELL');
+}
+function OnAfterSpellCheck()
+{
+	//Important:Do not localize <BR>, this is html tag
+	var tmpTitle = sLeftSpace + sTitle + sRightSpace + "<BR>";
+	var tmpSummary = "<BR>" + sLeftSpace + sSummary + sRightSpace + "<BR>";
+	var tmpProblem = "<BR>" + sLeftSpace + sProblem + sRightSpace + "<BR>";
+	var tmpResolution = "<BR>" + sLeftSpace + sResolution + sRightSpace + "<BR>";
+	var tmpNotes = "<BR>" + sLeftSpace + sNotes + sRightSpace + "<BR>";
+	var iStartPos = 0, iEndPos = 0;
+	var iTitle = 0, iSummary = 0, iProblem = 0, iResolution = 0, iNotes = 0;
+		
+	if (doc['SET.TITLE'] != null)
+	{
+		if (trim(doc['SET.TITLE'].value).length > 0)
+		{
+			iStartPos = doc['HIDDEN_SPELL'].value.indexOf(tmpTitle) + tmpTitle.length;		
+			iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpSummary);
+			if (iEndPos == -1)
+			{
+				iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpProblem);
+				if (iEndPos == -1)
+				{
+					iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpResolution);
+					if (iEndPos == -1)
+					{
+						iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpNotes);
+						if (iEndPos == -1)
+						{
+							iEndPos = doc['HIDDEN_SPELL'].value.length;
+						}
+					}
+				}
+			}
+			doc['SET.TITLE'].value = doc['HIDDEN_SPELL'].value.substring(iStartPos, iEndPos)
+			doc['SET.TITLE'].disabled = false;
+			iTitle = 1;
+		}
+	}
+	
+	if (doc['SET.SUMMARY'] != null)
+	{
+		if (trim(doc['SET.SUMMARY'].value).length > 0)
+		{
+			iStartPos = doc['HIDDEN_SPELL'].value.indexOf(tmpSummary) + tmpSummary.length;		
+			iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpProblem);
+			if (iEndPos == -1)
+			{
+				iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpResolution);
+				if (iEndPos == -1)
+				{
+					iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpNotes);
+					if (iEndPos == -1)
+					{
+						iEndPos = doc['HIDDEN_SPELL'].value.length;
+					}
+				}
+			}
+			doc['SET.SUMMARY'].value = doc['HIDDEN_SPELL'].value.substring(iStartPos, iEndPos);
+			doc['SET.SUMMARY'].disabled = false;
+			iSummary = 1;
+		}
+	}
+	
+	if (doc['SET.PROBLEM'] != null)
+	{
+		if (trim(doc['SET.PROBLEM'].value).length > 0)
+		{
+			iStartPos = doc['HIDDEN_SPELL'].value.indexOf(tmpProblem) + tmpProblem.length;		
+			iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpResolution);
+			if (iEndPos == -1)
+			{
+				iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpNotes);
+				if (iEndPos == -1)
+				{
+					iEndPos = doc['HIDDEN_SPELL'].value.length;
+				}
+			}
+			doc['SET.PROBLEM'].value = doc['HIDDEN_SPELL'].value.substring(iStartPos, iEndPos);
+			doc['SET.PROBLEM'].disabled = false;
+			iProblem = 1;
+		}
+	}
+	
+	if (doc['SET.RESOLUTION'] != null)
+	{
+		if (trim(doc['SET.RESOLUTION'].value).length > 0)
+		{
+			iStartPos = doc['HIDDEN_SPELL'].value.indexOf(tmpResolution) + tmpResolution.length;		
+			iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpNotes);
+			if (iEndPos == -1)
+			{
+				iEndPos = doc['HIDDEN_SPELL'].value.length;
+			}
+			doc['SET.RESOLUTION'].value = doc['HIDDEN_SPELL'].value.substring(iStartPos, iEndPos);
+			if ( typeof doc['optResolution'] != "undefined")
+			{
+				if (doc['optResolution'][0].checked == true)
+				{
+					doc['optResolution'][1].onclick();
+					doc['optResolution'][0].onclick();
+				}
+			}
+			doc['SET.RESOLUTION'].disabled = false;
+			iResolution = 1;
+		}
+	}
+	if (doc['SET.NOTES'] != null)
+	{
+		if (trim(doc['SET.NOTES'].value).length > 0)
+		{
+			iStartPos = doc['HIDDEN_SPELL'].value.indexOf(tmpNotes) + tmpNotes.length;		
+			iEndPos = doc['HIDDEN_SPELL'].value.length;
+			doc['SET.NOTES'].value = doc['HIDDEN_SPELL'].value.substring(iStartPos, iEndPos);
+			doc['SET.NOTES'].disabled = false;
+			iNotes = 1;
+		}
+	}
+	if ( iTitle == 1)
+	{
+		doc['SET.TITLE'].focus();
+	}
+	else if (iSummary == 1)
+	{
+		doc['SET.SUMMARY'].focus();
+	}
+	else if (iProblem == 1)
+	{
+		doc['SET.PROBLEM'].focus();
+	}
+	else if (iResolution == 1)
+	{
+		doc['SET.RESOLUTION'].focus();
+	}
+	else if (iNotes == 1)
+	{
+		doc['SET.NOTES'].focus();
+	}
+	ImgBtnEnableButton("btnSpellcheck");
+}
+
+function unloadActions()
+{
+	setWindowTitle(cfgProductName, 1);
+}
+function frmOnLoad()
+{	
+	if ( _dtl.edit )
+	{
+		//	Do not invoke the LoadUploadActions function unless the attmnt_upload.htmpl
+		//	file is included - which will only happen if args.KEEP.ATTACHMENT == 1
+		//	and this is a new KD (args.id == 0)
+		if( "$args.KEEP.ATTACHMENT" == "1")
+		{
+			if("$args.id" == "0")
+			{
+				LoadUploadActions();
+			}
+		}
+	}
+	else
+	{	
+		if (argID != "0")
+		{
+			alert(msgtext("Thank_you_for_submitting_a_kno"));//("Thank you for submitting a knowledge document.");
+		}
+	}
+	doc = document.forms["main_form"].elements;
+	if (cfgGuestUser == 1){
+		if (argID == "0")
+		{
+			doc["SET.INITIATOR"].value = "Guest";
+			doc["SET.SUBMIT_EMAIL"].value = "Your email";
+		}
+	}
+	else
+	{	
+		var sUserName = document.getElementById("u_name");
+		var sUserEmail = document.getElementById("u_email");
+		sUserName.innerHTML = '$cst.combo_name';
+		sUserEmail.innerHTML = '$cst.email_address';
+	}
+}
+function Save()
+{
+	if (checkField())
+	{
+		return;
+	}
+	
+	<PDM_IF 0>
+		Do not invoke the Submit function unless the attmnt_upload.htmpl
+		file is included - which will only happen if args.KEEP.ATTACHMENT == 1
+		and this is a new KD (args.id == 0)
+	</PDM_IF>
+	<PDM_IF "$args.KEEP.ATTACHMENT" == "1">
+		<PDM_IF "$args.id" == "0">
+			Submit();  
+		</PDM_IF>
+	<PDM_ELSE>
+		save_requested('main_form','UPDATE');
+	</PDM_IF>
+}
+
+function trim(argvalue)
+{
+	while (1)
+	{
+		if (argvalue.substring(0, 1) != " ")
+			break;
+		argvalue = argvalue.substring(1, argvalue.length);
+	}
+	return argvalue;
+}
+function checkResolutionLength(sText)
+{
+	if (sText.length > propResolutionMaxSize)
+	{
+		//"Resolution field cannot exceed " + propResolutionMaxSize + " characters.";
+		alert(msgtext("Resolution_field_cannot_exceed", propResolutionMaxSize));
+		return 1;
+	}
+	return 0;
+}
+function checkField()
+{
+	var sEmail, sTitle, sSummary, sProblem, sResolution, sNotes;
+	var bIsEmpty = 1;
+	
+	sTitle = trim(doc["SET.TITLE"].value);
+	sSummary = trim(doc["SET.SUMMARY"].value);
+	sProblem = trim(doc["SET.PROBLEM"].value);
+	sResolution = trim(doc["SET.RESOLUTION"].value);
+	sNotes = trim(doc["SET.NOTES"].value);
+	
+	if (cfgGuestUser == 1)
+	{
+		if (argID == "0")
+		{
+			sEmail = trim(doc["SET.SUBMIT_EMAIL"].value);
+			if (sEmail == "")
+			{
+				alertmsg("Please_enter_an_email_address.");//("Please enter an email address.")
+				doc["SET.SUBMIT_EMAIL"].focus();
+				return 1;
+			}
+		}
+	}
+	
+	if (sTitle != "")
+	{
+		bIsEmpty = 0;
+	}
+	else if (sSummary != "")
+	{
+		bIsEmpty = 0;
+	}
+	else if (sProblem != "")
+	{
+		bIsEmpty = 0;
+	}
+	else if (sResolution != "")
+	{
+		bIsEmpty = 0;
+	}
+	
+	if (bIsEmpty)
+	{
+		alertmsg("Please_fill_in_at_least_one_fi");//("Please fill in at least one field from Title, Summary, Problem or Resolution.")
+		doc["SET.TITLE"].focus();
+		return 1;
+	}
+	else
+	{
+		if (sTitle != null && sTitle == "")
+			doc["SET.TITLE"].value = msgtext("untitled_document");
+	}
+	if (checkResolutionLength(sResolution))
+	{
+		return 1;
+	}
+}
+function cancel()
+{
+	ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+
+</script>
+</HEAD>
+<BODY class=emp onLoad="frmOnLoad()" onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="submit_knowledge" header="no">
+
+<CENTER>
+	<script type="text/javascript">
+		
+<PDM_MACRO name=dtlForm button=false factory=KD>
+		
+		ImgBtnRow();
+		if (argID == 0)
+		{
+			_dtl.edit = 1;
+			
+			ImgBtnCreate("btn001", "Save[S]", "Save()", "defer", 0);
+			ImgBtnCreate("btnSpellcheck", "Spelling[p]", "SpellCheckContent()", "defer", 0);
+			if(ahdframeset == ahdtop)//not popup
+			{
+				//simple UI
+				if (typeof ahdtop.toolbarTab == "undefined") 
+				{
+					ImgBtnCreate("btn002", "Cancel[n]", "cancel_update('$prop.form_name_2','$args.id','', 'home.htmpl')", "defer", 0);
+				}
+				else
+				{
+					if (typeof ahdtop.toolbarTab[ahdtop.toolbarCurrentTab] != "undefined" && 
+						ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].id == "kt")
+					{
+						ImgBtnCreate("btn002", "Cancel[n]", "cancel_update('$prop.form_name_2','$args.id','', 'bin_form_np.htmpl')", "defer", 0);
+					}	
+				}
+			}
+			else
+			{
+				ImgBtnCreate("btn002", "Cancel[n]", "cancel()", "defer", 0);
+			}
+		}
+		else
+		{
+			_dtl.edit = 0;
+		}
+		ImgBtnEndRow();	
+
+		if (_dtl.edit == 1)
+		{
+			
+<PDM_MACRO name=dtlStart center="noscroll center">
+		}
+		else
+		{
+			
+<PDM_MACRO name=dtlStart center="noscroll">
+		}
+
+	</script>
+	
+	<script type="text/javascript">
+		
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.guest_user" == 1>
+<PDM_MACRO name=dtlTextbox hdr="Submitted By*" attr=INITIATOR colspan=2 size=30>
+<PDM_MACRO name=dtlTextbox hdr="Email Address*" attr=SUBMIT_EMAIL colspan=2 size=30>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Submitted By" attr=INITIATOR id=u_name>
+<PDM_MACRO name=dtlReadonly hdr="e-mail" attr=SUBMIT_EMAIL id=u_email>
+</PDM_IF>
+<PDM_IF "$args.PRIMARY_INDEX" == "">
+<PDM_MACRO name=dtlLookup hdr="Klasyfikacja" attr=PRIMARY_INDEX autofill=yes colspan=2 extraurl="KEEP.cst=1+ADDITIONAL_WHERE=PARENT_ID=1" size=30>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł" attr=TITLE colspan=4 disp_entities="YES" rows=2 size=125>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Podsumowanie" attr=SUMMARY colspan=4 disp_entities="YES" rows=2 size=125>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Problem" attr=PROBLEM colspan=4 disp_entities="YES" rows=3 size=125>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rozwiązanie" attr=RESOLUTION colspan=4 rows=6 size=125>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr=NOTES colspan=4 rows=2 size=125>
+	</script>
+		<INPUT TYPE=HIDDEN NAME=SET.SUBMIT_ATTMNT>
+		<INPUT TYPE=HIDDEN NAME=HTMPL value=detail_KD.htmpl>
+		<INPUT TYPE=HIDDEN NAME="HIDDEN_SPELL" ID="HIDDEN_SPELL">
+	<script type="text/javascript">
+	
+<PDM_MACRO name=dtlEndTable>
+	</script>
+
+	
+<PDM_MACRO name=dtlEnd>
+	</CENTER>
+	<CENTER>
+	<script type="text/javascript">
+		
+<PDM_MACRO name=dtlStartRow>
+		document.write("<TH ALIGN=left VALIGN=baseline>");
+	</script>
+		
+		
+<PDM_IF "$args.KEEP.ATTACHMENT" == "1">
+<PDM_IF "$args.id" == "0">
+<PDM_IF "$prop.browser" == "IE">			
+					<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=115  View="Attachment" FolderId="SubmitKnowledge" RepId="$prop.SUBMIT_KNOWLEDGE_REPOSITORY">
+				
+<PDM_ELSE>
+					<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=139  View="Attachment" FolderId="SubmitKnowledge" RepId="$prop.SUBMIT_KNOWLEDGE_REPOSITORY">
+				
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+	<script type="text/javascript">
+		document.write("</TH>");
+			
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	<BR>
+	<BR>
+	<BR>
+	</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_KD.htmpl ASPEN.1 2012/04/12 11:01:50 putsr02 Exp $
+</PDM_IF>
+<PDM_WSP>

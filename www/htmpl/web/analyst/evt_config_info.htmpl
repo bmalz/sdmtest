@@ -1,0 +1,57 @@
+<PDM_IF 0>
+evt_config_info.htmpl
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_WSP mode=edit factory=evt>
+tab_banner("Configuration Information");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Czas opóźnienia" attr=delay_time>
+<PDM_MACRO name=dtlTextbox hdr="Czas opóźnienia powtórki" attr=modulo_time>
+<PDM_MACRO name=dtlCheckbox hdr="Zezwalaj na resetowanie czasu" attr=user_settime off=No on=Yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Harmonogram" attr=work_shift colspan=2 lookup=no>
+var c_on_done_flag;
+switch ( "$args.on_done_flag" ) {
+	case "0" : 
+		c_on_done_flag = "No History";
+		break; 
+	case "1" : 
+		c_on_done_flag = "Save History";
+		break;
+	case "2" :
+		c_on_done_flag = "Repeat Event";
+		break;
+         }
+
+detailDropdown("On Done Event Flag","on_done_flag","evt",1,20, 
+true,"","$args.on_done_flag",
+"no","$args.on_done_flag",c_on_done_flag,
+"","","no","","","0",
+"No History","0","Save History","1","Repeat Event","2");
+<PDM_IF "$args.id" == 0>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Warunek(zdarzeni musi być zapisane zanim można załączyć makro z warunkiem)" attr=condition colspan=3>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Warunek" attr=condition colspan=3 extraurl="ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND')AND(ob_type='$args.obj_type')+KEEP.RESTRICT_FROM_EVT=1">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tekst" attr=user_smag colspan=4 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: evt_config_info.htmpl ASPEN.2 2012/06/12 14:46:17 debbi01 Exp $;
+</PDM_IF>

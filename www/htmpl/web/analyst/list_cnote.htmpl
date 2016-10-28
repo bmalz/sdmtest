@@ -1,0 +1,126 @@
+<PDM_IF 0>
+$Id: list_cnote.htmpl,v 1.3 2006/11/10 22:35:34 kubtr01 Exp $
+list_cnote.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Note Boards.
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie Ogłoszeń";
+var hdrTitleList = "Lista Ogłoszeń";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("no", "no");
+var cfgCanEdit = true;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Announcement">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF $ACCESS.FAC_cnote \> 1>
+<PDM_MACRO name=sfStart factory=cnote>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=cnote>
+</PDM_IF>
+
+document.write('<INPUT TYPE=hidden NAME=QBE.GE.id VALUE=0>');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejsza data wysłania" attr=posted_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data wysłania" attr=posted_date qbe_condition=LE>
+<PDM_MACRO name=sfLookup hdr="Wysłany przez" attr=posted_by factory=cnt>
+searchFilterDropdown("Status","active","","Active","1","Inactive","0")
+searchFilterDropdown("Typ Ogłoszenia","cnote_type","","ROUTINE","0","ADVISORY","1","EMERGENCY","2")
+
+
+<PDM_IF $cst.location == "" && $cst.organization == "" >
+<PDM_IF $prop.view_internal == 1> 
+  		document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=" ">');
+	
+<PDM_ELSE>
+		document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=" ((internal = 0 OR internal IS NULL)) ">');
+	
+</PDM_IF>
+<PDM_ELIF $cst.location == "" && $cst.organization != "" >
+<PDM_IF $prop.view_internal == 1>
+		document.write("<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=\"((organization = U'$cst.organization' ) OR (organization IS NULL AND location IS NULL)) \">");
+ 	
+<PDM_ELSE>	
+ 		document.write("<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=\"((internal = 0 OR internal IS NULL) AND ((organization = U'$cst.organization' ) OR (organization IS NULL AND location IS NULL))) \">");
+   	
+</PDM_IF>
+<PDM_ELIF $cst.location != "" && $cst.organization == "" >
+<PDM_IF $prop.view_internal == 1>
+		document.write("<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=\"((location = U'$cst.location') OR (organization IS NULL AND location IS NULL)) \">");
+ 	
+<PDM_ELSE>
+ 		document.write("<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=\"((internal = 0 OR internal IS NULL) AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))) \">");
+   	
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF $prop.view_internal == 1>
+   			cnote_where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))">
+		document.write("<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=\"((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))\">");
+ 	
+<PDM_ELSE>
+ 		document.write("<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=\"((internal = 0 OR internal IS NULL) AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization')))\">");
+   	
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Tekst" attr=text colspan=3 size=60>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono ogłoszeń";
+var msgFound1 = "Znaleziono 1 ogłoszenie";
+var msgFound = "Znaleziono %1 ogłoszeń";
+var msgFoundMore = "Znaleziono %1 ogłoszeń. Wyświetlane %2 z %3";
+var msgSelect = "Kliknij aby wybrać rekord";
+function display_status(value)
+{
+  if ( value == "1" )
+
+     value = "Active";
+
+  else if ( value == "0" )
+
+     value = "Inactive";
+
+  rs.data(value);     
+}
+
+function display_statusExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("Inactive") + ",1," + msgtext("Active");
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.cnote_type:}\" == '0'">
+<PDM_MACRO name=lsWrite text="posted_date_style = 'record';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.cnote_type:}\" == '1'">
+<PDM_MACRO name=lsWrite text="posted_date_style = 'listAdvisory';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.cnote_type:}\" == '2'">
+<PDM_MACRO name=lsWrite text="posted_date_style = 'listEmergency';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Data wysłania" attr=posted_date exportFmt=ShowLink link=yes style=posted_date_style>
+<PDM_MACRO name=lsCol hdr="Tekst" attr=text>
+<PDM_MACRO name=lsCol hdr="Data zamknięcia" attr=close_date>
+<PDM_MACRO name=lsCol hdr="Status" attr=active.enum exportFmt=display_statusExp fmtfunc=display_status sort=no>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

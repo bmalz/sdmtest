@@ -1,0 +1,761 @@
+<script language="JavaScript" src="$CAisd/scripts/kd_viewer_sd_integ.js"></script>
+<script>
+var m_sArgsSD_LAUNCHED = '$args.SD_LAUNCHED';
+var m_sSdSOLUTION_OF = '$args.SOLUTION_OF';
+var m_NX_OTB_MARKET = '$env.NX_OTB_MARKET';
+var m_PROF_BRWS_USER = '$args.PROF_BRWS_USER';
+var m_bOnAccept = false;
+
+var m_faqWindow = "$args.FAQ_WINDOW_NAME";<PDM_IF 0>Used by UpdateSDTicket that's in kd_viewer_sd_integ.js</PDM_IF>
+
+//Document attributes for creating a new iss/request:
+var m_lKdID = "";
+<PDM_IF "$prop.kt_survey_popup" != "true">
+	m_lKdID = "$args.id";
+<PDM_ELSE>
+	m_lKdID = "$args.doc_id";
+</PDM_IF>
+//Using ESC_STYPE of JS2 to preserve the new lines when
+var m_sKDTitle = unescape('<PDM_FMT JUSTIFY=TRUNCATE WIDTH=255 ESC_STYLE=JS2 PAD=NO>$args.TITLE</PDM_FMT>');
+var m_sKDSummary = unescape('<PDM_FMT JUSTIFY=TRUNCATE WIDTH=255 ESC_STYLE=JS2 PAD=NO>$args.SUMMARY</PDM_FMT>');
+var m_sKDProblem = unescape('<PDM_FMT JUSTIFY=TRUNCATE WIDTH=255 ESC_STYLE=JS2 PAD=NO>$args.PROBLEM</PDM_FMT>');
+var m_sKD_SD_PRODUCT_ID = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_PRODUCT_ID</PDM_FMT>';
+var m_sKD_SD_PRODUCT_ID_sym = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_PRODUCT_ID.sym</PDM_FMT>';
+var m_sKD_SD_ASSET_ID = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_ASSET_ID</PDM_FMT>';
+var m_sKD_SD_ASSET_ID_sym = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_ASSET_ID.name</PDM_FMT>';
+var m_sKD_SD_ROOTCAUSE_ID = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_ROOTCAUSE_ID</PDM_FMT>';
+var m_sKD_SD_ROOTCAUSE_sym = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_ROOTCAUSE_ID.sym</PDM_FMT>';
+var m_sKD_SD_PRIORITY_ID = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_PRIORITY_ID</PDM_FMT>';
+var m_sKD_SD_PRIORITY_ID_sym = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_PRIORITY_ID.sym</PDM_FMT>';
+var m_sKD_SD_SEVERITY_ID = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_SEVERITY_ID</PDM_FMT>';
+var m_sKD_SD_SEVERITY_ID_sym = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_SEVERITY_ID.sym</PDM_FMT>';
+var m_sKD_SD_IMPACT_ID = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_IMPACT_ID</PDM_FMT>';
+var m_sKD_SD_IMPACT_ID_sym = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_IMPACT_ID.sym</PDM_FMT>';
+var m_sKD_SD_URGENCY_ID = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_URGENCY_ID</PDM_FMT>';
+var m_sKD_SD_URGENCY_ID_sym = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.SD_URGENCY_ID_sym</PDM_FMT>';
+var m_sKT_SDFieldMapping = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=1000 ESC_STYLE=C PAD=NO>$prop.SD_MAPPING</PDM_FMT>';
+var m_SD_ISSCAT = '$args.PRIMARY_INDEX.SD_ISSCAT';
+var m_SD_CRCAT = '$args.PRIMARY_INDEX.SD_CRCAT';
+var m_SD_INCAT = '$args.PRIMARY_INDEX.SD_INCAT';
+var m_SD_PRCAT = '$args.PRIMARY_INDEX.SD_PRCAT';
+var m_sParentIss = '$args.PARENT_ISS';
+var m_sParentCr = '$args.PARENT_CR';
+var m_sParentCrType = '$args.PARENT_CR.type';
+var m_sSD_Problem = '$args.SD_PROBLEM';
+//js vars used by kt_reply.js
+var m_SOL_SURV_HOW_HELPFUL = "$prop.SOL_SURV_HOW_HELPFUL";
+var m_SOL_SURV_DID_DOC_SOLVE = "$prop.SOL_SURV_DID_DOC_SOLVE";
+<PDM_IF "$prop.kt_survey_popup" == "true">
+	m_lBUID = "$args.doc_BUID";
+</PDM_IF>
+// js var for Primary Category Id
+var m_sPrimaryCategoryId = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.PRIMARY_INDEX</PDM_FMT>';
+var enableSubmit = false;
+
+function NoClicked()
+{
+	
+	UpdateRate(0);
+	ImgBtnEnableButton("submitComment");
+	enableSubmit = true;
+
+}
+
+function YesClicked()
+{
+	if (m_sArgsSD_LAUNCHED != "" || ( typeof ahdtop.ticketObj != "undefined" && ahdtop.ticketObj.isTicketOpened ))
+	{
+		m_bOnAccept = true;
+	}
+	UpdateRate(4);
+	ImgBtnEnableButton("submitComment");
+	enableSubmit = true;
+}
+function UpdateRate (lRate)
+{
+	for (var iElement=0; iElement<document.getElementsByTagName("input").length; iElement++)
+	{
+		if (document.getElementsByTagName("input").item(iElement).id == "Response1" ||
+			document.getElementsByTagName("input").item(iElement).id == "Response2" ||
+			document.getElementsByTagName("input").item(iElement).id == "Response3")
+		{
+			var oElement = document.getElementsByTagName("input").item(iElement);
+			if (oElement.value == lRate)
+			{
+				oElement.checked = true;
+			}
+		}
+	}
+}
+var bOnRate = false;
+function Response_clicked()
+{
+	ImgBtnEnableButton("submitComment");
+	enableSubmit = true;
+}
+function solved_problem_clicked(bSolved) 
+{
+	//When coming from suggest knowledge, turn on the accept flag
+	if (( typeof ahdtop.ticketObj != "undefined" && ahdtop.ticketObj.isTicketOpened ))
+	{
+		m_bOnAccept = true;
+		if(bSolved == 0){
+		
+		m_bOnAccept = false;
+		}
+	}
+	if(bSolved == 1)
+		UpdateRate(4);
+	if(bSolved == 0){
+		UpdateRate(0);
+		
+	}		
+	ImgBtnEnableButton("submitComment");
+	enableSubmit = true;
+}
+
+function Comment_entered()
+{
+	if(document.getElementById("txtComment").value.length>0)
+		ImgBtnEnableButton("submitComment");
+	else if (!enableSubmit)
+		ImgBtnDisableButton("submitComment");
+		
+	if(_browser.isIE) // IE
+		return (document.getElementById("txtComment").value.length <= 255);
+	else // Netscape/Firefox/Opera
+		return true; // otherwise it's impossible to change anything in the textarea
+}
+
+
+function solution_survey_onunload(bKDRefresh, bLogoutAfter)
+{
+	if ( !m_bDontOpenSurvey )
+	{
+		<PDM_IF "$prop.SOL_SURV_FORCE_VOTE" == "1" && "$prop.kt_survey_popup" != "true"  && "$args.SOLUTION_OF" == "" && "$prop.disable" != "true" && "$prop.guest_user" != 1 > //use cst.type temporarily only for analysts until popup issues with cust/emp interface are resolved
+		if (typeof bTenantCanComment != "undefined" && bTenantCanComment)
+		{	
+			if(!m_bEditClicked && !bOnRate && !bKDRefresh) // make sure we don't pop up the solution survey form if we are only 
+			{                                              // refreshing the Knowledge Document when it is in the view user mode 
+				<pdm_if "$args.opener" != "simple">
+					ahdtop.popup_solution_survey("$args.id", m_lBUID, KDTenant, '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.TITLE</PDM_FMT>', "$args.SD_LAUNCHED", "$args.TICKET_FACTORY", "$args.LAUNCHED_ITIL");
+				<PDM_ELSE>
+					var features="location=no,"+
+						"menubar=no,"+
+						"resizeable=no,"+
+						"scrollbars=no$ProductName,"+
+						"status=no,"+
+						"toolbar=no," +				
+						"width=615,height=400";
+					
+					var url=cfgCgi+
+						"?SID="+cfgSID+
+						"+FID="+fid_generator()+
+						"+OP=DISPLAY_FORM"+
+						"+HTMPL=kt_solution_survey_popup.htmpl" + 
+						"+doc_id=" + "$args.id" + 
+						"+doc_BUID=" + m_lBUID + 
+						"+doc_tenant=" + KDTenant + 
+						"+doc_title=" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C PAD=NO>$args.TITLE</PDM_FMT>' +
+                        "+SD_LAUNCHED=" + "$args.SD_LAUNCHED" +
+                        "+TICKET_FACTORY=" + "$args.TICKET_FACTORY" +
+                        "+LAUNCHED_ITIL=" + "$args.LAUNCHED_ITIL" +
+                        "+opener=" + "$args.opener" +
+                        "+logOutAfter=" + bLogoutAfter;
+                    var w = window.open(url,"",features);
+                    check_popup_blocker(w);
+                </PDM_IF>
+			}
+		}
+		</PDM_IF>
+	}
+}
+function comment_onsubmit()
+{
+	var bRateOnly = false;
+	var bCommentOnly = false;
+	var bRateAndComment = false;
+	var iRate = -1;
+	
+	//get values for rating
+	for (var iElement=0; iElement<document.getElementsByTagName("input").length; iElement++)
+	{
+		<PDM_IF "$prop.SOL_SURV_HOW_HELPFUL" == "1">
+			if (document.getElementsByTagName("input").item(iElement).id.search("Response") > -1)
+			{
+				if (document.getElementsByTagName("input").item(iElement).checked)
+				{
+					bRateOnly = true;
+					oRequiredElement=document.getElementsByTagName("input").item(iElement).checked;
+					if(oRequiredElement)
+						iRate = document.getElementsByTagName("input").item(iElement).value;
+				}
+			}
+		</PDM_IF>
+		<PDM_IF "$prop.SOL_SURV_DID_DOC_SOLVE" == "1">
+			if (document.getElementsByTagName("input").item(iElement).id.search("solved_problem") > -1)
+			{
+				if (document.getElementsByTagName("input").item(iElement).checked)
+				{
+					bRateOnly = true;
+					oRequiredElement=document.getElementsByTagName("input").item(iElement).checked;
+					if(oRequiredElement)
+						var iUserSlv = document.getElementsByTagName("input").item(iElement).value;
+				}
+			}
+		</PDM_IF>
+	}
+	if (iRate == -1 && typeof iUserSlv != "undefined")	// Update rate if it's not assigned yet
+		iRate = iUserSlv == 0 ? 0 : 4;	// if doc solved the problem - rate = 4, otherwise 0.
+
+	<PDM_IF "$prop.SUBMIT_COMMENTS" != "1" || "$args.ACTIVE_STATE" == "200">
+		bRateOnly = true;
+	</PDM_IF>
+	if(!bRateOnly)
+	{
+		if(typeof document.getElementById("txtComment") == "undefined" ||
+		   document.getElementById("txtComment") == null ||
+		   document.getElementById("txtComment").value.length == 0)
+		{
+			//nothing to submit
+			return;
+		}
+	}	
+	if(bRateOnly && iRate == -1)
+	{
+		alertmsg("Please_select_values_for_rating");
+		return;
+	}
+	//form must have a BUID in order to rate
+	if(m_lBUID==0 || bOnRate)
+	{
+		//no rating if solution is linked
+		<PDM_IF "$args.SOLUTION_OF" != "" || "$prop.disable" == "true">
+		<PDM_ELSE>	
+			alertmsg("Please_wait_until_form_is_full"); //"Please wait until form is fully loaded."
+			return;
+		</PDM_IF>
+	}
+	bOnRate = true;
+	
+	if(typeof document.getElementById("txtComment") != "undefined" &&
+	   document.getElementById("txtComment") != null &&
+	   document.getElementById("txtComment").value.length>0)
+	{
+		//Guest user required to provide an email entry when submitting a comment.
+		//However, email address value does not need to be validated. 
+		if( "$cst.id" != null && <PDM_FMT ESC_STYLE=JS2>"$cst.combo_name"</PDM_FMT> == "System_Anonymous" && system_Trim(document.getElementById("txtEmail").value) == "")
+		{
+			alertmsg("Email_address_cannot_be_empty.");
+			bOnRate = false;
+			return;
+		}
+		//check comment up to 255 characters
+		if(document.getElementById("txtComment").value.length>255)
+		{
+			alertmsg("Comment_text_cannot_be_longer_");
+			document.getElementById("txtComment").focus();
+			bOnRate = false;
+			return;
+		}
+		bCommentOnly = true;
+	}
+
+	if(bRateOnly && bCommentOnly)
+	{
+		bRateAndComment = true;
+		bRateOnly = false;
+		bCommentOnly = false;
+	}
+	if(bRateOnly || bRateAndComment)
+	{
+		var sRateURL = "";
+		<PDM_IF "$prop.kt_survey_popup" != "true">
+			sRateURL +=	"+SKELETON_ID="+"$args.id"+
+					"+BUID="+m_lBUID;
+		<PDM_ELSE>
+			//solution survey is opened in a popup
+			sRateURL +=	"+SKELETON_ID="+"$args.doc_id"+
+					"+BUID="+"$args.doc_BUID";
+		</PDM_IF>
+		iRate = iRate == -1 ? 2 : iRate;	// iRate = 2 if it was not assigned
+		sRateURL += "+RATING="+iRate;
+		<PDM_IF "$prop.SOL_SURV_DID_DOC_SOLVE" == "1">
+			sRateURL += "+USER_SLV="+iUserSlv;
+		</PDM_IF>
+		<PDM_IF "$args.SD_LAUNCHED" != "">
+			for (var iElement=0; iElement<document.getElementsByTagName("input").length; iElement++)
+			{
+				if (document.getElementsByTagName("input").item(iElement).id.search("solved_problem") > -1)
+				{
+					if (document.getElementsByTagName("input").item(iElement).checked)
+					{
+						oRequiredElement=document.getElementsByTagName("input").item(iElement).checked;
+						if(oRequiredElement)
+							var iAcceptValue = document.getElementsByTagName("input").item(iElement).value;
+					}
+				}
+			}
+			//Adding the Accept / Unlink information:
+			sRateURL += "+ACCEPT=" + iAcceptValue + "+LAUNCHED_ITIL=$args.LAUNCHED_ITIL";
+			sRateURL +="+DT_PATH_IDS=$args.event_log_textdata1";
+		</PDM_IF>
+	}
+	if(bCommentOnly || bRateAndComment)
+	{
+		//do add new comment
+		var sCommentURL = "+KD_ID="+m_lKdID+
+			"+NAME="+system_Trim(nx_escape(document.getElementById("txtName").value))+ 
+			"+EMAIL="+system_Trim(nx_escape(document.getElementById("txtEmail").value))+
+			"+COMMENT="+system_Trim(nx_escape(document.getElementById("txtComment").value));
+		
+		<PDM_IF "$env.NX_KT" == "Yes" && "$args.opener" != "simple" && $SESSION.InterfaceType != 1 && $SESSION.InterfaceType != 2>	
+		    sCommentURL += "+FLG_TYPE_ID="+document.getElementById("slCommentType").value;
+		    var e = document.getElementById("SET.ASSIGNEE_ID");
+		    if (e)
+			    sCommentURL += "+ASSIGNEE="+system_Trim(nx_escape(e.value));
+		<PDM_ELSE>
+			sCommentURL += "+FLG_TYPE_ID=1";
+		</PDM_IF>
+	}	
+	<PDM_IF "$prop.kt_survey_popup" != "true">
+		m_iFrameLoaded+=2;
+	</PDM_IF>
+	//add appropriate op code to url	
+		var	url=cfgCgi+
+			"?SID="+cfgSID+
+			"+FID="+fid_generator();
+	if(bRateOnly)
+		url+= "+OP=KT_RATE_KD" + sRateURL;
+	else if(bCommentOnly)
+	{
+		url+= "+OP=KT_ADD_COMMENT" + sCommentURL;
+		bOnRate = false;
+	}
+	else if(bRateAndComment)
+		url+= "+OP=KT_RATE_AND_COMMENT" + sCommentURL + sRateURL;
+	// Add tenants info
+	if ( typeof KDTenant == "undefined" )
+		KDTenant = "${args.doc_tenant:}";
+	url += "+KDTenant=" + KDTenant;
+	url += "+UserTenant=" + ahdtop.cstTenantId;
+	url += "+SPTenant=" + ahdtop.serviceProviderUuid;
+
+	if(m_sArgsSD_LAUNCHED!="") {
+		url+="+SD_LAUNCHED="+m_sArgsSD_LAUNCHED;
+	}
+	
+	//Sending the URL:
+	<pdm_if "$args.opener" == "simple" && "$prop.kt_survey_popup" == "true">
+		ahdtop.ahdframeset.workframe.location.href = url;
+	<pdm_else>
+		ahdframeset.workframe.location.href = url;	
+	</pdm_if>
+	<pdm_if "$prop.kt_survey_popup" == "true">
+        <pdm_if "$args.logOutAfter" == "true">
+            opener.setTimeout("logout_all_windows(1);", 1500);
+        </pdm_if>
+		window.setTimeout("top.close();", 1000);
+	</pdm_if>	
+}
+function disableCommmentBoxElements()
+{
+	//update title for Rate & Comment Box to not have a hot key as the box is now disabled
+	document.getElementById("spnCommentTitle").innerHTML = titleCommentTxt;
+	ImgBtnDisableButton("submitComment");
+	for (var iElement=0; iElement<document.getElementsByTagName("input").length; iElement++)
+	{
+		if(m_SOL_SURV_HOW_HELPFUL == "1")
+		{
+			if (document.getElementsByTagName("input").item(iElement).id.search("Response") > -1)
+			{
+				document.getElementsByTagName("input").item(iElement).disabled = true;
+			}
+		}
+		if(m_SOL_SURV_DID_DOC_SOLVE == "1")
+		{
+			if (document.getElementsByTagName("input").item(iElement).id.search("solved_problem") > -1)
+			{
+				document.getElementsByTagName("input").item(iElement).disabled = true;
+			}
+		}
+	}
+	<PDM_IF "$prop.SUBMIT_COMMENTS" == "1" && "$args.ACTIVE_STATE" != "200">
+		<PDM_IF "$env.NX_KT" == "Yes" && "$args.opener" != "simple" && $SESSION.InterfaceType != 1 && $SESSION.InterfaceType != 2>	
+			document.getElementById("slCommentType").disabled=true;
+			<pdm_if "$cst.type" == "2307" || "${ANY_CONTACT:0}" == "1">
+				contactLookupDisable("ASSIGNEE_ID", true);
+			</pdm_if>
+		</PDM_IF>
+		document.getElementById("txtEmail").disabled=true;
+		document.getElementById("txtComment").disabled=true;
+	</PDM_IF>
+}
+function slCommentType_onchange()
+{
+	<PDM_IF "$env.NX_KT" != "Yes"> 
+	    return;
+	</PDM_IF>
+	//if comment type has follow-up enable the assignee and lookup links
+	//assignee field doesn't always display so first check if it exists
+	var slCommentType = document.getElementById("slCommentType");
+	if(slCommentType)
+	{
+		<PDM_LIST PREFIX=list FACTORY=KT_FLG_TYPE WHERE="delete_flag=0">
+			var sSym = "$list.SYM";
+			<pdm_if "$cst.type" == "2307" || "${ANY_CONTACT:0}" == "1">
+				if( slCommentType.options[slCommentType.selectedIndex].text == sSym )
+				{
+					var bHasFollowUp = "$list.FOLLOW_UP" == "0" ? true : false;
+					contactLookupDisable("ASSIGNEE_ID", bHasFollowUp);
+				}
+			</pdm_if>	
+		</PDM_LIST>
+	}
+}
+<PDM_IF "$args.id" != ""> // args.id is not assigned if survey opened in popup window
+	function GetUnlinkSolutionHTML()
+	{
+		var html = "";
+		<PDM_LIST prefix=is_solution FACTORY=kdlinks 
+			WHERE="kd=$args.id AND link_type=1 AND (cr='$args.SOLUTION_OF' OR iss='$args.SOLUTION_OF')">
+			html = "<span>" + " Click <a junk=$is_solution.id href=javascript:unlink('$args.id','$args.SOLUTION_OF')>here</a> to unlink the solution from " + GetTicketType() + " ";
+			<PDM_IF "$args.TICKET_FACTORY" == "cr">
+				<PDM_LIST FACTORY=cr PREFIX=crlist WHERE="persistent_id='$args.SOLUTION_OF'">
+					html += "$crlist.ref_num";
+				</PDM_LIST>
+			<PDM_ELIF "$args.TICKET_FACTORY" == "iss">
+				<PDM_LIST FACTORY=iss PREFIX=isslist WHERE="persistent_id='$args.SOLUTION_OF'">
+					html += "$isslist.ref_num";
+				</PDM_LIST>
+			</PDM_IF>
+			html +=".</span>";
+		</PDM_LIST>
+		return html;													
+	}
+</PDM_IF>
+//------------------------------------------------------------------------------
+// FUNCTION GetTicketType
+// Get the related ticket type name to display the unlink message
+//------------------------------------------------------------------------------
+function GetTicketType()
+{
+	var sRetVal = "";
+	<PDM_IF "$args.TICKET_FACTORY" == "cr" && "$args.SOLUTION_OF_ID" != "">
+		<PDM_LIST prefix=itilType FACTORY=cr where="id=$args.SOLUTION_OF_ID">
+			<PDM_IF "$itilType.type" == "I">
+				sRetVal = "incident";
+			<PDM_ELIF "$itilType.type" == "P">
+				sRetVal = "problem";
+			<PDM_ELSE>
+				sRetVal = "request";
+			</PDM_IF>
+		</PDM_LIST>
+		if (sRetVal == ""){
+			sRetVal = "request";
+		}
+	<PDM_ELSE>
+		sRetVal = "issue";
+	</PDM_IF>	
+	return sRetVal;
+}
+function GetLinkSolutionHTML()
+{
+	var html = "";
+	if(typeof ahdtop.ticketObj == "object" && ahdtop.ticketObj.isActive)
+		return html;
+	<PDM_IF "$args.SD_LAUNCHED" != "" && "$args.SOLUTION_OF" == "">
+		html = "Click <a href=javascript:linkToTicket('$args.id','$args.SOLUTION_OF')>here</a> to accept this document as a solution to your ";
+		<PDM_IF "$args.TICKET_FACTORY" == "cr">
+				<PDM_IF "$args.LAUNCHED_ITIL" == "I">
+					html += " incident."
+				<PDM_ELIF "$args.LAUNCHED_ITIL" == "P">
+					html += " problem.";
+				<PDM_ELSE>
+					html += " request.";
+				</PDM_IF>
+			<PDM_ELSE>
+				html += " issue.";
+			</PDM_IF>	
+	</PDM_IF>
+									
+	return html;								
+}
+function linkToTicket()
+{
+	m_bOnAccept = true;
+	var url=cfgCgi+ "?SID=" + cfgSID + "+FID=" + fid_generator()+ "+OP=KT_LINK_KD+SD_LAUNCHED=$args.SD_LAUNCHED" +
+			"+ACCEPT=1+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+DT_PATH_IDS=$args.event_log_textdata1+SKELETON_ID=$args.id";
+	ahdframeset.workframe.location.href = url;	
+}
+
+function linkToTicketCredit()
+{
+	alert("This knowledge document was accepted as solution");
+	m_bOnAccept = true;
+	if(!ahdtop.ticketObj.isActive)
+		return;
+
+	ahdtop.ticketObj.hitKD("$args.id","$args.BUID",1,0); //add credit to these kd
+	ahdtop.ticketObj.closeObject(0);
+	
+}
+
+</script>
+<script>
+	// This section creates hot keys for Comment Survey box
+	<PDM_IF "$prop.SUBMIT_COMMENTS" == "1" && "$args.ACTIVE_STATE" != "200">
+		var titleCommentTxt = "Rate & Comment";
+		var titleComment_loc = "Rate & Comment";
+	<PDM_ELSE>
+		var titleCommentTxt = "Rate";
+		var titleComment_loc = "Rate";
+	</PDM_IF>	
+	var titleComment = titleCommentTxt;
+	if (!nonLatinFlag) 
+	    titleComment_loc = titleComment;
+	<PDM_IF "$prop.disable" != "true">	
+		var actkeyComment = registerActionKey("", titleComment_loc,
+												setCommentsFocus, "txtName" );	
+		if ( actkeyComment != "" )
+			titleComment = fmtLabelWithActkey( titleComment, actkeyComment );	
+													
+		function setCommentsFocus(id)
+		{
+			try
+			{
+				var f = document.getElementById(id);
+				if(f.disabled)
+					f = document.getElementById("txtEmail");
+				if(f)											
+					f.focus();	
+			}
+			catch(e)
+			{
+			}
+		}
+	</PDM_IF>
+</script>
+<form name=frm_comment>
+<table width=100% class='gn_container_no_border' cellSpacing=0 cellpadding=0>
+	<tr width=100%>
+		<td width=100%>
+			<table width=100% class='gn_container_no_border' cellpadding=0 cellspacing=0>
+				<tr width=100%>
+					<td width=100% align=middle>
+						<table width=100% class='gn_container_no_border' cellspacing=0 cellpadding=0>
+							<tr width=100%>
+								<td width=4 height=22 class=portlet_header_left><img src="$CAisd/img/spacer.png" alt='' width=4 height=22></td>
+								<td class=portlet_header_center width=100%><h3 class='portlet_title page_header_title'><span id=spnCommentTitle for="txtName"><script>document.write(titleComment);</script></span></h3></td>
+								<td width=4 height=22 class=portlet_header_right><img src="$CAisd/img/spacer.png" alt='' width=4 height=22></td>
+							</tr>
+						</table>
+					</td>
+				</tr>				
+				<tr>
+					<td>
+						<table width="100%" cellspacing="0" cellpadding="0" height="100" class="portlet_container">
+							<tr valign="top"> 
+							<td>
+							<PDM_IF "$args.SD_LAUNCHED" != "" && "$args.SOLUTION_OF" == "">
+								<table class='table_banded_row gn_container_no_border' cellspacing=0 cellpadding=0 width="100%">
+								<tr>
+								<td nowrap width="100%">
+								<span class=data>&nbsp;
+									Did this solution solve your 
+									<PDM_IF "$args.TICKET_FACTORY" == "cr">
+										<PDM_IF "$args.LAUNCHED_ITIL" == "I">
+											incident?
+										<PDM_ELIF "$args.LAUNCHED_ITIL" == "P">
+											problem?
+										<PDM_ELSE>
+											request?
+										</PDM_IF>
+									<PDM_ELSE>
+										issue?
+									</PDM_IF>
+									<input type=radio value=1 id=solved_problem1 name=solved_problem onclick='YesClicked()'
+									<PDM_IF "$prop.disable" == "true">
+										disabled
+									</PDM_IF>>
+									<span onclick='solved_problem(0).click()' class=clsPaneDataWithHand>
+										Yes
+									</span>
+									<input type=radio value=0 id=solved_problem2 name=solved_problem onclick='NoClicked()'
+									<PDM_IF "$prop.disable" == "true">
+										disabled
+									</PDM_IF>>
+									<span onclick='solved_problem(1).click()' class=clsPaneDataWithHand>
+										No
+									</span>
+								</td>
+								</tr>
+								</table>														
+								</PDM_IF>
+								<table class='table_banded_row gn_container_no_border' cellspacing=0 cellpadding=0 width="100%">
+									<PDM_IF "$prop.SOL_SURV_DID_DOC_SOLVE" == "1" && "$args.SD_LAUNCHED" == "" && "$args.SOLUTION_OF" == "">
+										<tr>
+											<td nowrap width="100%">
+											<span class=data>&nbsp;
+												<PDM_IF "$args.ACTIVE_STATE" != "200">
+													 Did this document solve your problem?
+												<PDM_ELSE>
+													 Did this forum solve your problem?
+												</PDM_IF>
+												<input type=radio value=1 id=solved_problem1 name=solved_problem onclick=solved_problem_clicked(1) 
+												<PDM_IF "$prop.disable" == "true">
+													disabled
+												</PDM_IF>>
+												<span onclick='solved_problem(0).click()' class=clsPaneDataWithHand>
+													Yes
+												</span>
+												<input type=radio value=0 id=solved_problem2 name=solved_problem  onclick=solved_problem_clicked(0) 
+												<PDM_IF "$prop.disable" == "true">
+													disabled
+												</PDM_IF>>
+												<span onclick='solved_problem(1).click()' class=clsPaneDataWithHand>
+													No
+												</span>
+											</td>
+										</tr>
+										</PDM_IF>
+									<PDM_IF "$prop.SOL_SURV_HOW_HELPFUL" == "1" && "$args.SOLUTION_OF" == "">
+										<tr>
+											<td nowrap width="100%">
+											<span class=data>&nbsp;
+												<PDM_IF "$args.ACTIVE_STATE" != "200">
+													How helpful was this document? 
+												<PDM_ELSE>
+													How helpful was this forum? 
+												</PDM_IF>
+												<input type=radio value=4 id=Response1 name=Response onclick=Response_clicked() 
+												<PDM_IF "$prop.disable" == "true">
+													disabled
+												</PDM_IF>>
+												<span onclick='Response(0).click()' class=clsPaneDataWithHand>
+													Very helpful
+												</span>
+												<input type=radio value=2 id=Response2 name=Response onclick=Response_clicked()   
+												<PDM_IF "$prop.disable" == "true">
+													disabled
+												</PDM_IF>>
+												<span onclick='Response(1).click()' class=clsPaneDataWithHand>
+													Somewhat helpful
+												</span>
+												<input type=radio value=0 id=Response3 name=Response  onclick=Response_clicked()  
+												<PDM_IF "$prop.disable" == "true">
+													disabled
+												</PDM_IF>>
+												<span onclick='Response(2).click()' class=clsPaneDataWithHand>
+													Not helpful at all
+												</span>
+											</td>
+										</tr>
+										</PDM_IF>
+										<tr><td>
+												<PDM_IF "$args.SOLUTION_OF" != "" || "$args.SD_LAUNCHED" != "">
+													<span class=data id=spUnlinkSol></span>
+												</PDM_IF>
+											</td>
+										</tr>
+								</table>
+								<table class='table_banded_row gn_container_no_border' cellspacing=0 cellpadding=0 width="100%">
+									<PDM_IF "$prop.SUBMIT_COMMENTS" == "1" && "$args.ACTIVE_STATE" != "200">	
+									<tr  width=100%>
+									    <PDM_IF "$env.NX_KT" == "Yes" && "$args.opener" != "simple" && $SESSION.InterfaceType != 1 && $SESSION.InterfaceType != 2> 
+											<td  nowrap class=clsPaneData>&nbsp;	
+												<label for="txtFlgType"> Comment Type</label><br class='gn_text_normal'>&nbsp;
+												<select id=slCommentType name=slCommentType class='gn_text_normal' onchange=javascript:slCommentType_onchange()>
+													<pdm_list factory=KT_FLG_TYPE prefix=flg_type where="delete_flag=0">
+														<option value='$flg_type.id' <pdm_if '$flg_type.id' == '1'>selected</pdm_if>>$flg_type.SYM</option>
+													</pdm_list>
+												</select>
+											</td>
+											<td nowrap class=clsPaneData>	
+												<pdm_if 0> allow analysts to see Assignee textbox></pdm_if>
+												<pdm_if "$cst.type" == "2307" || "${ANY_CONTACT:0}" == "1">
+													<br>&nbsp;
+													<PDM_IF "$prop.MultiTenancy" != "off">
+														<script>
+														//Set tenant flag as this is not a detail page
+														if ( "${args.tenant:}" == "" ){
+															argGlobalTenant = true;
+														}
+														</script>
+													</PDM_IF>													
+													<script>contactLookup( "Assignee", "frm_comment", "agt", "ASSIGNEE_ID" );</script>
+													<br>&nbsp;
+												</pdm_if>
+											</td>
+										</PDM_IF>
+											</tr>
+											<tr  width=100%>
+												<td nowrap class=clsPaneData>	
+													&nbsp;&nbsp;<label for="txtName">My Name</label><br>&nbsp;
+													<input id=txtName name=txtName type=text class='gn_text_normal' size=22
+													<pdm_if "$prop.disable" == "true">
+														disabled 
+													</pdm_if>
+													<pdm_if "$cst.combo_name" != "">
+														value=<PDM_FMT ESC_STYLE=HTML>"$cst.combo_name"</PDM_FMT>
+													</pdm_if>
+													<pdm_if "$cst.combo_name" != "" && "$cst.combo_name" != "System_Anonymous">
+														disabled
+													</pdm_if>>
+												</td>	
+												<td nowrap class=clsPaneData>	
+													&nbsp;&nbsp;<label for="txtEmail">My Email</label><br>&nbsp;
+													<input id=txtEmail name=txtEmail type=text class='gn_text_normal' size=22 
+													<pdm_if "$prop.disable" == "true"    && "$prop.allowtxt" != "true">
+														disabled 
+													</pdm_if>
+													<pdm_if "$cst.email_address" != "">
+														value="$cst.email_address" disabled
+													</pdm_if>>
+												</td>
+												<td width=100%>&nbsp;</td></tr>
+											<tr width=100%>
+											<td nowrap class=clsPaneData colspan=3>&nbsp;	
+												<label for="txtComment">My Comment</label><br>&nbsp;
+												<textarea id=txtComment name=txtComment cols="120" class='txt_comment' wrap=soft rows=3 onkeypress="return Comment_entered()" onkeyup="return Comment_entered()" onchange="return Comment_entered()" onblur="return Comment_entered()" onfocus="return Comment_entered()"								
+												<pdm_if "$prop.disable" == "true" && "$prop.allowtxt" != "true">
+														disabled
+												</pdm_if>></textarea>&nbsp;&nbsp;
+											</td>
+											</tr>
+											</PDM_IF>
+											<tr width=100%>
+											<PDM_IF "$args.SOLUTION_OF" == "" || "$args.ACTIVE_STATE" != "200">
+											<td colspan=3>
+												<br><center>
+													<script language="Javascript">
+														<PDM_IF "$prop.disable" == "true" && "$prop.allowtxt" != "true">
+															ImgBtnCreate("submitComment", "Submit", "void(0)", false, 0, msgtext("Submit")); 
+														<PDM_ELSE>
+															ImgBtnCreate("submitComment", "Submit", "comment_onsubmit()", false, 0, msgtext("Submit")); 
+														</PDM_IF>
+													</script><br>	
+												</center>
+											</td>
+											</PDM_IF>
+										</tr>
+								</table>
+								</td>
+							</tr>
+						</table>
+					</td></tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</form>
+
+
+<!-- END analyst/kt_comments_box.htmpl -->
+
+
+
+
+
+
+

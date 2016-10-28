@@ -1,0 +1,1018 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  dyn_properties.htmpl
+// Created: 09/24/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: dyn_properties.htmpl,v 1.2 2006/11/09 23:34:59 ralje02 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<!-- Begin dyn_properties.htmpl -->
+<script type="text/javascript">
+<!--
+	function init_properties(factory, form)
+	{
+		if (typeof sink != "object" &&
+		    typeof factory != "undefined" &&
+		    typeof form != "undefined")
+		{
+			var c = form.elements["SET.category"];
+			if (typeof c == "undefined" || !c)
+			    c = form.elements["KEY.category"];
+			    
+			sink = new CategorySink(factory, form, c);
+
+			// If c is undefined, the category field is readonly on the form.
+			if (typeof c != "undefined") {
+				if ((_browser.supportsDOM >= 2) &&
+				    (typeof document.implementation == "object") &&
+				    (typeof document.implementation.hasFeature == "function") &&
+				    (document.implementation.hasFeature("Events", "2.0") == true)) 
+				{
+					c.addEventListener("change", sink, false);
+				}
+				else
+				{
+					// Have to do this the hard way!
+					c.onchange = eventProxy;
+				}
+			}
+		}
+
+		var cat_err_msg = '<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>';
+		if ( cat_err_msg == "") {
+			sink.update_ss_cat_field('<PDM_FMT ESC_STYLE=C PAD=NO>$args.category.ss_sym</PDM_FMT>', 
+				'<PDM_FMT ESC_STYLE=C PAD=NO>$args.category</PDM_FMT>');
+		}
+		
+		sink.clearProperties();
+	
+<PDM_IF "" != "$args.prop0.id">
+   var valgrp0="";
+  <PDM_IF "$args.prop0.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop0.validation_rule" FACTORY=prpval>
+        valgrp0+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop0.validation_type">
+		sink.addProperty('$args.prop0.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop0.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop0.validation_type">
+   		sink.addProperty('$args.prop0.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop0.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp0);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop0.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop0.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop0.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop0.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop1.id">
+   var valgrp1="";
+  <PDM_IF "$args.prop1.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop1.validation_rule" FACTORY=prpval>
+        valgrp1+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop1.validation_type">
+		sink.addProperty('$args.prop1.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop1.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+		alert('$args.prop1.zkalendarz');
+   <PDM_ELIF "100003" == "$args.prop1.validation_type">
+   		sink.addProperty('$args.prop1.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop1.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp1);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop1.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop1.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop1.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop1.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop2.id">
+   var valgrp2="";
+  <PDM_IF "$args.prop2.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop2.validation_rule" FACTORY=prpval>
+        valgrp2+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop2.validation_type">
+		sink.addProperty('$args.prop2.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop2.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop2.validation_type">
+   		sink.addProperty('$args.prop2.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop2.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp2);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop2.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop2.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop2.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop2.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop3.id">
+   var valgrp3="";
+  <PDM_IF "$args.prop3.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop3.validation_rule" FACTORY=prpval>
+        valgrp3+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop3.validation_type">
+		sink.addProperty('$args.prop3.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop3.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop3.validation_type">
+   		sink.addProperty('$args.prop3.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop3.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp3);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop3.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop3.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop3.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop3.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				);
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop4.id">
+   var valgrp4="";
+  <PDM_IF "$args.prop4.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop4.validation_rule" FACTORY=prpval>
+        valgrp4+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop4.validation_type">
+		sink.addProperty('$args.prop4.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop4.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop4.validation_type">
+   		sink.addProperty('$args.prop4.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop4.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp4);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop4.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop4.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop4.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop4.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop5.id">
+   var valgrp5="";
+  <PDM_IF "$args.prop5.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop5.validation_rule" FACTORY=prpval>
+        valgrp5+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop5.validation_type">
+		sink.addProperty('$args.prop5.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop5.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop5.validation_type">
+   		sink.addProperty('$args.prop5.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop5.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp5);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop5.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop5.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop5.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop5.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop6.id">
+   var valgrp6="";
+  <PDM_IF "$args.prop6.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop6.validation_rule" FACTORY=prpval>
+        valgrp6+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop6.validation_type">
+		sink.addProperty('$args.prop6.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop6.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop6.validation_type">
+   		sink.addProperty('$args.prop6.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop6.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp6);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop6.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop6.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop6.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop6.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop7.id">
+   var valgrp7="";
+  <PDM_IF "$args.prop7.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop7.validation_rule" FACTORY=prpval>
+        valgrp7+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop7.validation_type">
+		sink.addProperty('$args.prop7.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop7.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop7.validation_type">
+   		sink.addProperty('$args.prop7.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop7.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp7);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop7.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop7.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop7.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop7.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop8.id">
+   var valgrp8="";
+  <PDM_IF "$args.prop8.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop8.validation_rule" FACTORY=prpval>
+        valgrp8+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop8.validation_type">
+		sink.addProperty('$args.prop8.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop8.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop8.validation_type">
+   		sink.addProperty('$args.prop8.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop8.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp8);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop8.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop8.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop8.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop8.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop9.id">
+   var valgrp9="";
+  <PDM_IF "$args.prop9.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop9.validation_rule" FACTORY=prpval>
+        valgrp9+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop9.validation_type">
+		sink.addProperty('$args.prop9.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop9.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop9.validation_type">
+   		sink.addProperty('$args.prop9.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop9.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp9);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop9.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop9.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop9.description</PDM_FMT>'
+				 '', '',
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop9.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop10.id">
+   var valgrp10="";
+  <PDM_IF "$args.prop10.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop10.validation_rule" FACTORY=prpval>
+        valgrp10+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop10.validation_type">
+		sink.addProperty('$args.prop10.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop10.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop10.validation_type">
+   		sink.addProperty('$args.prop10.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop10.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp10);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop10.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop10.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop10.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop10.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop11.id">
+   var valgrp11="";
+  <PDM_IF "$args.prop11.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop11.validation_rule" FACTORY=prpval>
+        valgrp11+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop11.validation_type">
+		sink.addProperty('$args.prop11.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop11.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop11.validation_type">
+   		sink.addProperty('$args.prop11.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop11.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp11);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop11.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop11.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop11.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop11.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop12.id">
+   var valgrp12="";
+  <PDM_IF "$args.prop12.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop12.validation_rule" FACTORY=prpval>
+        valgrp12+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop12.validation_type">
+		sink.addProperty('$args.prop12.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop12.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop12.validation_type">
+   		sink.addProperty('$args.prop12.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop12.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp12);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop12.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop12.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop12.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop12.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop13.id">
+   var valgrp13="";
+  <PDM_IF "$args.prop13.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop13.validation_rule" FACTORY=prpval>
+        valgrp13+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop13.validation_type">
+		sink.addProperty('$args.prop13.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop13.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop13.validation_type">
+   		sink.addProperty('$args.prop13.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop13.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp13);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop13.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop13.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop13.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop13.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop14.id">
+   var valgrp14="";
+  <PDM_IF "$args.prop14.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop14.validation_rule" FACTORY=prpval>
+        valgrp14+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop14.validation_type">
+		sink.addProperty('$args.prop14.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop14.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop14.validation_type">
+   		sink.addProperty('$args.prop14.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop14.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp14);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop14.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop14.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop14.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop14.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop15.id">
+   var valgrp15="";
+  <PDM_IF "$args.prop15.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop15.validation_rule" FACTORY=prpval>
+        valgrp15+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop15.validation_type">
+		sink.addProperty('$args.prop15.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop15.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop15.validation_type">
+   		sink.addProperty('$args.prop15.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop15.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp15);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop15.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop15.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop15.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop15.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop16.id">
+   var valgrp16="";
+  <PDM_IF "$args.prop16.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop16.validation_rule" FACTORY=prpval>
+        valgrp16+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop16.validation_type">
+		sink.addProperty('$args.prop16.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop16.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop16.validation_type">
+   		sink.addProperty('$args.prop16.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop16.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp16);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop16.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop16.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop16.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop16.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop17.id">
+   var valgrp17="";
+  <PDM_IF "$args.prop17.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop17.validation_rule" FACTORY=prpval>
+        valgrp17+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop17.validation_type">
+		sink.addProperty('$args.prop17.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop17.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop17.validation_type">
+   		sink.addProperty('$args.prop17.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop17.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp17);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop17.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop17.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop17.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop17.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop18.id">
+   var valgrp18="";
+  <PDM_IF "$args.prop18.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop18.validation_rule" FACTORY=prpval>
+        valgrp18+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop18.validation_type">
+		sink.addProperty('$args.prop18.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop18.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop18.validation_type">
+   		sink.addProperty('$args.prop18.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop18.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp18);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop18.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop18.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop18.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop18.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop19.id">
+   var valgrp19="";
+  <PDM_IF "$args.prop19.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop19.validation_rule" FACTORY=prpval>
+        valgrp19+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop19.validation_type">
+		sink.addProperty('$args.prop19.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop19.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop19.validation_type">
+   		sink.addProperty('$args.prop19.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop19.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp19);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop19.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop19.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop19.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop19.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop20.id">
+   var valgrp20="";
+  <PDM_IF "$args.prop20.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop20.validation_rule" FACTORY=prpval>
+        valgrp20+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop20.validation_type">
+		sink.addProperty('$args.prop20.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop20.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop20.validation_type">
+   		sink.addProperty('$args.prop20.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop20.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp20);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop20.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop20.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop20.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop20.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop21.id">
+   var valgrp21="";
+  <PDM_IF "$args.prop21.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop21.validation_rule" FACTORY=prpval>
+        valgrp21+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop21.validation_type">
+		sink.addProperty('$args.prop21.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop21.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop21.validation_type">
+   		sink.addProperty('$args.prop21.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop21.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp21);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop21.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop21.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop21.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop21.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "" != "$args.prop22.id">
+   var valgrp22="";
+  <PDM_IF "$args.prop22.validation_rule" != "">
+     <PDM_LIST PREFIX=list WHERE="owning_rule.id=$args.prop22.validation_rule" FACTORY=prpval>
+        valgrp22+=<PDM_FMT PAD=NO ESC_STYLE=C>"$list.is_default@,@$list.value@,@"</PDM_FMT>;
+   </PDM_LIST>
+  </PDM_IF>
+   <PDM_IF "100002" == "$args.prop22.validation_type">
+		sink.addProperty('$args.prop22.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop22.description</PDM_FMT>',
+				 '', '',
+				 'CHECKBOX');
+   <PDM_ELIF "100003" == "$args.prop22.validation_type">
+   		sink.addProperty('$args.prop22.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop22.description</PDM_FMT>',
+				 '', '',
+				 'SELECT', valgrp22);
+   <PDM_ELSE>
+		sink.addProperty('$args.prop22.id',
+				 Boolean(Number('<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.required</PDM_FMT>')),
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.label</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.value</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO>$args.prop22.sample</PDM_FMT>',
+				 '<PDM_FMT ESC_STYLE=C PAD=NO KEEPTAGS=YES KEEPLINKS=YES>$args.prop22.description</PDM_FMT>'
+				// 20130927 bmalz @ e-xim
+				<PDM_LIST PREFIX=zlist WHERE="owning_area.persistent_id = '$args.category.persistent_id' AND sequence = $args.prop22.sequence AND delete_flag = 0" FACTORY=cr_prptpl>
+					,'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zkalendarz</PDM_FMT>',
+					'<PDM_FMT ESC_STYLE=C PAD=NO>$zlist.zegar</PDM_FMT>'
+				</PDM_LIST>
+				 );
+		</PDM_IF>
+/////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF><PDM_IF 0><!-- prop22 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop21 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop20 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop19 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop18 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop17 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop16 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop15 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop14 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop13 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop12 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop11 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop10 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop9 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop8 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop7 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop6 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop5 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop4 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop3 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop2 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop1 --></PDM_IF>
+</PDM_IF><PDM_IF 0><!-- prop0 --></PDM_IF>
+
+		sink.showProperties();
+	}
+	//-->
+</script>
+<!-- End dyn_properties.htmpl -->
+

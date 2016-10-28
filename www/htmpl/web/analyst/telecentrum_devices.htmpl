@@ -1,0 +1,53 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT>
+jq(document).ready(function () {
+	jq("#application tr").click(function () {
+		jq('#application tr').each(function() {
+			jq(this).removeClass('TelecentrumDataSelected');
+		});
+
+		jq(this).toggleClass('TelecentrumDataSelected');
+		parent.Selected_Device = jq(this).attr('value');
+	});
+});
+
+var numberOf = 0;
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>
+	<tr>
+		<td align='left' width='99%'><h2 style='margin: 0px; font-size: 11px;'>Wyposażenie</h2></td>
+		<td align='right' width='1%'></td>
+	</tr>
+</table>
+<table id="application" class="ResultTable" style="width: 100%">
+<PDM_LIST PREFIX=list FACTORY=znr_user WHERE="cnt.id = U'$args.USERID' AND delete_flag = 0" ESC=HTML>
+	<tr class="TelecentrumData" value=$list.nr.id><td style="padding-left:5px;">$list.resource_name</td><td>$list.class</td></tr>
+	<SCRIPT>numberOf++;</SCRIPT>
+</PDM_LIST>
+</SCRIPT>
+</table>
+<SCRIPT>
+	if(numberOf == 0)
+		document.write('<div class="labeltext" style="width:100%; text-align:center; margin-top: 10px;">Brak wyposażenia</div>');
+</SCRIPT>
+</BODY>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</HTML>
+
+<PDM_WSP>

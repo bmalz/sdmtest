@@ -1,0 +1,87 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of Roles
+</PDM_IF>
+
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Support Automation Access Search";
+var hdrTitleList = "Support Automation Access List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Role">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF $ACCESS.security \> 1>
+<PDM_MACRO name=sfStart factory=sa_role>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=sa_role>
+</PDM_IF>
+document.writeln('<INPUT TYPE=hidden NAME=QBE.GT.id VALUE=0>');
+
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.ForSAAssignedRole" == "1" >
+	document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_sa_role.htmpl>');
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Support Automation Access" attr="roleName" size=20>
+<PDM_IF "$args.KEEP.ForSAAssignedRole" == "1">
+<PDM_MACRO name=sfTextbox hdr="Typ dostępu" attr="isAgent" colspan=1 disabled=yes display_value="Analyst" qbe_condition="EQ" size=10 value="1">
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Typ dostępu" attr="isAgent" codename="accessType">
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="isActive">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Support Automation Access found";
+  var msgFound1 = "1 Support Automation Access found";
+  var msgFound = "%1 Support Automation Access found";
+  var msgFoundMore = "%1 Support Automation Access found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Support Automation Access";
+
+function edit_type(value)
+
+{
+  if ( value == "1" )
+     value = "Analyst";
+
+  else if ( value == "0" )
+     value = "End User";
+
+ 
+  rs.data(value);     
+}
+
+function edit_typeExp()
+{
+	return "LIST_LOOKUP: 1," + msgtext("Analyst") + ",0," + msgtext("End User");
+}
+
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Support Automation Access" attr=roleName exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Typ" attr=isAgent exportfmt=edit_typeExp fmtfunc=edit_type sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=isActive justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_sa_role.htmpl ASPEN.5 2012/03/22 15:36:27 akkvi02 Exp $
+</PDM_IF>
+<PDM_WSP>

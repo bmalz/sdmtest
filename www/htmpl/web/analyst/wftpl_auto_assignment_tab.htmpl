@@ -1,0 +1,45 @@
+<PDM_IF 0>
+wftpl_auto_assignment_tab.htmpl
+
+INTENT:
+    Display auto assignment notebook page for Workflow Templates
+
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=wftpl_auto_assignment_tab" factory=wftpl>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=button caption="Update Groups" endrow=yes func="update_loc_grp('wftpl', '$args.persistent_id', 'cnt', 'service_grps',  'Groups Available', 'Groups Assigned', '')" hotkey_name="Update Groups" id=UPDATE_LREL newrow=yes>
+</PDM_IF>
+}
+</PDM_OBJECT>
+<PDM_MACRO name=tabBanner title="Auto Assignment List" add_btns=true>
+<PDM_MACRO name=dtlStartRow class='center'>
+<PDM_MACRO name=dtlCheckbox hdr="Włączone auto-przypisywanie" attr=auto_assign colspan=2 off=No on=Yes>
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Group List." height=180 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.service_wftpl.wftpl.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.type.id=2308+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlEndTable>
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: wftpl_auto_assignment_tab.htmpl ASPEN.3 2010/10/26 16:47:02 ralje02 Exp $;
+</PDM_IF>

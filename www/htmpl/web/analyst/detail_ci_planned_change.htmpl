@@ -1,0 +1,1683 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show the details of a single Change Specification (aka planned change) 
+//    managed by CACF Change Verification
+//
+// History:
+//    10/05/2011 Initial Version
+//    11/16/2011 Add dynamic form control support for SRELs
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Change Order ${args.chg.chg_ref_num} Change Specification Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Change Order ${args.chg.chg_ref_num} Update Change Specification"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Change Order ${args.chg.chg_ref_num} New Change Specification"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+<PDM_IF 0>
+Setup variables needed for preserving the manage attributes between form refreshes. 
+Use managed attribute values the first time editing the form or when form is read-only. 
+Use KEEP variables when form is refreshed after choosing a different manage attribute.
+</PDM_IF>
+
+<PDM_IF $args.id == 0  || $args.chg.status.assoc_ci_managed_chgstat.0.can_edit_criteria == 1>
+    <PDM_IF "$prop.form_name_3" == "edit">
+        <PDM_SET args.can_edit_criteria="1">
+    <PDM_ELSE>
+        <PDM_SET args.can_edit_criteria="0">
+    </PDM_IF>
+<PDM_ELSE>
+    <PDM_SET args.can_edit_criteria="0">
+</PDM_IF>
+
+<PDM_IF $args.can_edit_criteria == "1" && $args.KEEP.USE_KEEP_VARS != "">
+    // Use KEEP arguments only if in edit mode and attr changed/refresh occurred
+    <PDM_SET args.attribute_type=$args.KEEP.ATTRIBUTE_TYPE>
+    <PDM_SET args.attribute_length=$args.KEEP.ATTRIBUTE_LENGTH>
+    <PDM_SET args.attribute_initial_status=$args.KEEP.ATTRIBUTE_INITIAL_STATUS>
+    <PDM_SET args.srel_factory=$args.KEEP.SREL_FACTORY>
+    <PDM_SET args.srel_rel_attr=$args.KEEP.SREL_RELATTR>
+    <PDM_SET args.srel_common_name_attr=$args.KEEP.SREL_COMMONNAME_ATTR>
+    <PDM_SET args.srel_show_dropdown=$args.KEEP.SREL_SHOW_DROPDOWN>
+    <PDM_SET args.changed_attr_on_edit="1">
+    
+    // Restore the initial CI and attribute IDs when the form was initially loaded
+    <PDM_SET args.initial_ci_id=$args.KEEP.INITIAL_CI_ID>
+    <PDM_SET args.initial_attr_id=$args.KEEP.INITIAL_ATTR_ID>
+    
+<PDM_ELIF "$args.attribute_name.attribute_type" == "0" || "$args.attribute_name.attribute_type" != "" >
+    //  Use managed attribute arguments, non-edit mode or first time editing the object
+    <PDM_SET args.attribute_type=$args.attribute_name.attribute_type>
+    <PDM_SET args.attribute_length=$args.attribute_name.attribute_length>
+    <PDM_SET args.attribute_initial_status=$args.status>
+    <PDM_SET args.srel_factory=$args.attribute_name.srel_factory>
+    <PDM_SET args.srel_rel_attr=$args.attribute_name.srel_rel_attr>
+    <PDM_SET args.srel_common_name_attr=$args.attribute_name.srel_common_name_attr>
+    <PDM_SET args.srel_show_dropdown=$args.attribute_name.srel_show_dropdown>
+    
+    // Save the initial CI and attribute IDs when the form was initially loaded
+    <PDM_SET args.changed_attr_on_edit="0">
+    <PDM_SET args.initial_ci_id=$args.ci>
+    <PDM_SET args.initial_attr_id=$args.attribute_name>
+</PDM_ELSE>
+    // Attribute type is not defined, use string by default
+    <PDM_SET args.attribute_type="0">
+    <PDM_SET args.attribute_length="0">
+    <PDM_SET args.attribute_initial_status="VRFY">
+    <PDM_SET args.srel_factory="">
+    <PDM_SET args.srel_rel_attr="">
+    <PDM_SET args.srel_common_name_attr="">
+    <PDM_SET args.srel_show_dropdown="0">
+    
+    // Save the initial CI and attribute IDs when the form was initially loaded
+    <PDM_SET args.changed_attr_on_edit="0">
+    <PDM_SET args.initial_ci_id=$args.ci>
+    <PDM_SET args.initial_attr_id=$args.attribute_name>
+
+</PDM_IF>
+
+// Use attribute_value_planned STRING attribute for all attributes by default (read-only mode and non-tenanted mode)
+<PDM_SET args.form_attr_name="attribute_value_planned">
+
+<PDM_IF "$prop.MultiTenancy" == "on" && "$args.can_edit_criteria" == "1" && "$args.attribute_type" == "2" >
+     // MT is enabled - We need to use a form variable that uses a LOCAL SREL variable only 
+     // when multitenancy is on AND the attribute is a SREL with lookup control (srel_show_dropdown == 0)
+     <PDM_IF "$args.srel_show_dropdown" == "0" >
+        // SREL planned change attribute, use a LOCAL SREL variable for the
+        // form control - set to appropriate type (SERVICE_PROVIDER_ELIGIBLE or non-SP)
+        <PDM_IF "$args.srel_factory" == "cnt" || "$args.srel_factory" == "mfrmod" >
+            // cnt (contact) and mfrmod (model) factories are always SERVICE_PROVIDER_ELIGIBLE 
+            <PDM_SET args.form_attr_name="attribute_value_planned_sp">
+        </PDM_ELSE>
+            // All other SRELs are considered non-SERVICE_PROVIDER_ELIGIBLE 
+            <PDM_SET args.form_attr_name="attribute_value_planned_nonsp">
+        </PDM_IF>
+     </PDM_IF>
+</PDM_IF>
+
+
+<PDM_IF 0> ** Common values used by the controls and javascript routines **</PDM_IF>
+var form_attr_name = "$args.form_attr_name";           // Name of the attribute used in the form
+var internal_value_attr = "attribute_value_internal";  // Attribute to store the internal ID (SREL)  
+var attribute_type = "$args.attribute_type";           // Attribute type 0-string, 1-relationship, 2-SREL, 3-integer 4-date
+var attribute_value_planned = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_planned"</PDM_FMT>;
+var attribute_value_internal = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_internal"</PDM_FMT>; // Planned value SREL ID or int date
+var attribute_value_discovered = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_discovered"</PDM_FMT>; 
+var attribute_value_original = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_original"</PDM_FMT>; 
+var attribute_value_disc_internal = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_disc_internal"</PDM_FMT>; // Discovered value ID SREL ID or int date 
+var attribute_value_orig_internal = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_orig_internal"</PDM_FMT>; // Original value ID SREL ID or int date 
+var srel_common_name_value = "";                       // Value displayed in SREL control
+
+// Following hold the initial CI and attribute IDs when the form was initially loaded, see get_current_or_original_value() for usage
+var initial_ci_id   = "$args.initial_ci_id";   // Initial CI id
+var initial_attr_id = "$args.initial_attr_id"; // Initial attribute id
+var changed_attr_on_edit = "$args.changed_attr_on_edit"; // 0 - initial form, 1 - form was reloaded per attribute change
+
+// Setup tenancy variable for the SREL
+var attr_tenancy = "0"; // Untenanted by default
+if ( attribute_type == 2 ) // SREL managed attribute
+{
+    // Get the factory tenancy information if SREL is defined
+    attr_tenancy = get_tenant_info( "$args.srel_factory" ); 
+    if ( attr_tenancy == "0" ) // Untenanted
+    {
+        // Untenanated SRELs should use attribute_value_planned which has no tenancy defined 
+        form_attr_name = "attribute_value_planned"; 
+    }
+}
+
+
+<PDM_IF $args.changed_attr_on_edit == "1">
+    // Clear discovered and original values if user switches attributes
+    attribute_value_discovered = "";
+    attribute_value_original = "";
+    attribute_value_disc_internal = "";
+    attribute_value_orig_internal = "";
+</PDM_IF>
+
+var attr_hdrtext = "Planned Value";    // Planned value header label
+var attr_colspan = 1;        // Planned value control spans 1 column
+var attr_is_required = "0";  // Not required 
+var attr_locked = "0";       // Not locked
+var attr_size = "20";        
+
+<PDM_IF  "$args.can_edit_criteria" == "1" && "$args.SEARCH_LAST_COMMONNAME_VALUE_attribute_value_planned" != "">
+    // Set the SREL common name to previous value specified by user passed back in SEARCH_LAST_COMMONNAME_VALUE_attribute_value_planned variable  
+    srel_common_name_value = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.SEARCH_LAST_COMMONNAME_VALUE_attribute_value_planned"</PDM_FMT>;
+</PDM_IF>
+
+<PDM_IF  "$args.can_edit_criteria" == "1" && "$args.SEARCH_STATUS_attribute_value_planned" != "">
+    // Save the search status non-tenanted SREL if this is a subsequent refresh from finding no or multiple SREL values 
+    // SREL specified had no matches or to many - status is "$args.SEARCH_STATUS_attribute_value_planned"
+    
+    // Save last search status for validation of control - "$args.SEARCH_STATUS_attribute_value_planned"
+    // search status is the text label shown below the SREL control e.g. "No matches found" 
+    <PDM_SET args.form_attr_search_status=$args.SEARCH_STATUS_attribute_value_planned>
+    
+<PDM_ELIF  "$args.can_edit_criteria" == "1" && "$args.SEARCH_STATUS_attribute_value_planned_sp" != "">
+    // Save search status for a SERVICE_PROVIDER_ELIGIBLE SREL
+    <PDM_SET args.form_attr_search_status=$args.SEARCH_STATUS_attribute_value_planned_sp>
+    
+<PDM_ELIF  "$args.can_edit_criteria" == "1" && "$args.SEARCH_STATUS_attribute_value_planned_nonsp" != "">
+    // Save search status for a non-SERVICE_PROVIDER_ELIGIBLE SREL
+    <PDM_SET args.form_attr_search_status=$args.SEARCH_STATUS_attribute_value_planned_nonsp>
+    
+</PDM_ELSE>
+    //  No error or read only mode - use last save value for SREL common name value
+    srel_common_name_value = attribute_value_planned;
+    
+    // Do not use the last validation search status clear out in case it's carried over from previous refresh
+    <PDM_SET args.form_attr_search_status="">
+</PDM_IF>
+
+<PDM_SET args.attribute_names_are_not_available="1">
+<PDM_IF $args.id == 0>
+    // Determine if manage attributes are available, if not warn user
+    <PDM_LIST PREFIX=list WHERE="delete_flag=0 AND attribute_name NOT LIKE '*'" FACTORY=$args.FACTORY_attribute_name LOOKUP=attribute_name LENGTH=1 ESC_STYLE=JS2>
+        var first_attr_name = "$list.COMMON_NAME"; // Needed for PDM_LIST to execute query
+        <PDM_SET args.attribute_names_are_not_available="0">
+    </PDM_LIST>
+<PDM_ELSE>
+    // Non edit 
+    <PDM_SET args.attribute_names_are_not_available="0">
+</PDM_IF>
+
+<PDM_IF "$args.attribute_name" == "1000" || "$args.attribute_name" == "" >
+    // The "*" asterisk OOB managed attribute (id=1000) is selected which indicates it's an
+    // unverifiable attribute and applies to all attributes for the CI.
+    <PDM_SET args.is_verifiable_attribute="0">
+<PDM_ELSE>
+    // We have a verifiable attribute is selected (is not "*" asterisk)
+    <PDM_SET args.is_verifiable_attribute="1">
+</PDM_IF>
+
+<PDM_SET args.show_criteria_buttons="0">
+<PDM_IF $args.chg.status.assoc_ci_managed_chgstat.0.verification_active == 1         &&
+        $args.chg.status.assoc_ci_managed_chgstat.0.can_edit_criteria == 0>
+    // Verification is active for this change order, and edit is turned off
+    // show/hide buttons based on current status
+    <PDM_SET args.show_criteria_buttons="1">
+    
+    <PDM_IF $args.is_verifiable_attribute == "1" && "$args.ci" != "">
+        // Show the accept discovered/planned status and buttons 
+        // only if we have a verifiable attribute (not *) or CI is defined
+        <PDM_SET args.show_accept_and_disc_operations="1">
+    <PDM_ELSE>
+        <PDM_SET args.show_accept_and_disc_operations="0">
+    </PDM_IF>
+    
+    <PDM_SET args.show_accept_discovered_button="0">
+    <PDM_SET args.show_accept_planned_button="0">
+    <PDM_SET args.show_cancel_button="0">
+    <PDM_SET args.show_verified_button="0">
+    <PDM_SET args.show_fail_button="0">
+    
+    <PDM_IF $args.chg.status.assoc_ci_managed_chgstat.0.show_override_buttons == 1 >
+        <PDM_IF "$args.status" == "VRFY"          || 
+                "$args.status" == "CANCEL"        ||
+                "$args.status" == "USEDISCOVERED" ||
+                "$args.status" == "USEDDISCOVERED"||
+                "$args.status" == "ACCEPTDISC"    ||
+                "$args.status" == "ACCEPTEDDISC"  ||
+                "$args.status" == "ACCEPTPLAN"    ||
+                "$args.status" == "ACCEPTEDPLAN"  ||
+                "$args.status" == "SET"           ||
+                "$args.status" == "SETCOMPLETE"   ||
+                "$args.status" == "ALLOWED"       ||
+                "$args.status" == "NOCHANGE"      ||
+                "$args.status" == "ROGUE" >
+            // VRFY - verified
+            // CANCEL - cancel
+            // USEDISCOVERED - use discovered value        
+            // USEDDISCOVERED - used discovered value        
+            // ACCEPTDISC - accept discovered value
+            // ACCEPTEDDISC - accepted discovered value
+            // ACCEPTPLAN - accept planned value
+            // ACCEPTEDPLAN - accepted planned value
+            // SET - set after change executed
+            // SETCOMPLETE - set to planned value
+            // ALLOWED - update was allowed
+            // NOCHANGE - no change
+            // ROGUE - rouge change
+            
+            // Don't show any buttons, following line needed for PDM_IF 
+            <PDM_SET args.show_accept_discovered_button="0">
+            
+        <PDM_ELIF "$args.status" == "PEND" ||
+                  "$args.status" == "FAIL">
+            // PEND - verification pending
+            // FAIL - failed verification
+            <PDM_IF "$args.show_accept_and_disc_operations" == "1">
+                <PDM_SET args.show_accept_discovered_button="1">
+                <PDM_SET args.show_accept_planned_button="1">
+            </PDM_IF>
+            <PDM_SET args.show_cancel_button="1">
+            
+        <PDM_ELIF "$args.status" == "MANVRFYACT">
+            // MANVRFY - requires manual verification
+            <PDM_SET args.show_cancel_button="1">
+            <PDM_SET args.show_verified_button="1">
+
+        </PDM_IF>
+    </PDM_IF>
+</PDM_IF>
+
+// Variables for preserving last specified planned & internal values 
+// when no form refresh occurs during validation, see preserve_SREL_value_if_needed()
+var was_form_reloaded_since_last_save = false;
+var last_planned_value = "";
+var last_internal_value = "";
+
+// Variable used to enable/disable refresh of the form when user chooses a managed attribute name.
+// Refresh is disabled when attribute name is using a lookup field (it's not a dropdown)
+var allow_form_to_reload_on_attr_change = true;
+
+/////////////////////////////////////////////////////////////////
+// Routine that initialized internal form variables the first time 
+// the form is loaded.
+/////////////////////////////////////////////////////////////////
+function setup_form_values() 
+{
+    if ( _dtl.edit )
+    {
+        var form = window.document.forms["main_form"];
+        
+        if ( "$args.form_attr_search_status" == "" && attribute_value_internal.length > 0 )
+        {
+            // Preserve the previously save internal value. Don't reset if validation is 
+            // being performed (search status is set e.g. no or multiple matches on a SREL)
+            form.elements["SET.attribute_value_internal"].value = attribute_value_internal;
+        }
+        
+        if ( typeof form.elements["KEY.attribute_name"] != "undefined" )
+        {
+            // The "attribute_name" control is not a dropdown but rather a lookup - reload of form is not supported
+            // This occurs when multitenancy is enabled AND the change order is NOT already specified AND
+            // the user has the ability to specify two or more tenants for the new change specification object.
+            allow_form_to_reload_on_attr_change = false;
+            
+            // The user must save the change specification before specifying a change specification value
+            if ( "$args.id" == "0" )
+            {
+                // Show message indicating the user must click Save to sent the planned value
+                var warning_msg = "You must click Save after changing the managed attribute";
+                showAlertMsg( warning_msg, false );
+            }
+           
+        }
+
+        // Form was loaded for the first time.
+        was_form_reloaded_since_last_save = true;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that gets the dropdown selection list given the SREL information via
+// Ajax call to the GET_SREL_SELECTIONS operation.
+// 
+// Returns:
+// Sets the following global variable:
+//    resultSRELSelections => result selections (blank if none defined) 
+// 
+/////////////////////////////////////////////////////////////////
+var resultSRELSelections = "";
+function get_srel_selections( factory_name, common_name_attr, rel_attr_name ) 
+{
+    var  retrieveOpUrl;
+    
+    resultSRELPersid = "";
+    if ( factory_name.length > 0     && 
+         common_name_attr.length > 0 && 
+         rel_attr_name.length > 0 )
+    {
+        // Setup URL to invoke GET_SREL_SELECTIONS web method synchronously
+        retrieveOpUrl = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+            "+OP=GET_SREL_SELECTIONS+FACTORY=ci_planned_change" +   
+            "+FACTORY_NAME=" + factory_name +                                                           
+            "+COMMON_NAME_ATTR=" + common_name_attr +                                                           
+            "+REL_ATTR_NAME=" + rel_attr_name;
+            
+        // Following call sets resultSRELSelections.
+        SyncAjaxJSCall( retrieveOpUrl );
+        
+        if ( resultSRELSelections != "" )
+        {
+            resultSRELSelections = nx_unescape( resultSRELSelections );
+        }
+    }
+    
+    return resultSRELSelections;
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that gets the current persid and common name values given 
+// the SREL information via Ajax call to the GET_SREL_INFO operation.
+//
+// Returns:
+// Sets the following global variables:
+//   resultSRELPersid => result persid (blank if not found) 
+//   resultSRELCommonName => result common name value (blank if not found) 
+//   resultSRELTenant => result tenant value (blank if not found) 
+//   resultSRELTenantName => result tenant name value (blank if not found)
+//
+/////////////////////////////////////////////////////////////////
+var resultSRELPersid = "";
+var resultSRELCommonName = "";
+var resultSRELTenant = "";
+var resultSRELTenantName = "";
+function get_srel_info( factory_name, common_name_attr, rel_attr_name, srel_value ) 
+{
+    var  retrieveOpUrl;
+    
+    resultSRELPersid = "";
+    resultSRELCommonName = "";
+    resultSRELTenant = "";
+    resultSRELTenantName = "";
+    if ( factory_name.length > 0     && 
+         common_name_attr.length > 0 && 
+         rel_attr_name.length > 0    && 
+         srel_value.length > 0 )
+    {
+        // Setup URL to invoke GET_SREL_INFO web method synchronously
+        retrieveOpUrl = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+            "+OP=GET_SREL_INFO+FACTORY=ci_planned_change" +   
+            "+FACTORY_NAME=" + factory_name +                                                           
+            "+COMMON_NAME_ATTR=" + common_name_attr +                                                           
+            "+REL_ATTR_NAME=" + rel_attr_name +
+            "+SREL_VALUE=" + srel_value;
+            
+        // Following call sets resultSRELPersid, resultSRELCommonName and resultSRELTenant
+        SyncAjaxJSCall( retrieveOpUrl );
+        
+        if ( resultSRELPersid != "" )
+        {
+            resultSRELPersid = nx_unescape( resultSRELPersid );
+        }
+        if ( resultSRELCommonName != "" )
+        {
+            resultSRELCommonName = nx_unescape( resultSRELCommonName );
+        }
+        if ( resultSRELTenant != "" )
+        {
+            resultSRELTenant = nx_unescape( resultSRELTenant );
+        }
+        if ( resultSRELTenantName != "" )
+        {
+            resultSRELTenantName = nx_unescape( resultSRELTenantName );
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that gets the factory tenancy value via Ajax call 
+// to the GET_TENANT_INFO operation.
+// 
+// Returns:
+//  0 - Untenanted
+//  1 - TENANT_OPTIONAL
+//  2 - TENANT_REQUIRED
+// 
+/////////////////////////////////////////////////////////////////
+var resultFactoryTenancy = "";
+function get_tenant_info( factory_name ) 
+{
+    var  retrieveOpUrl;
+    
+    resultFactoryTenancy = "0"; // Untenanted by default
+    if ( factory_name.length > 0 )
+    {
+        // Setup URL to invoke GET_TENANT_INFO web method synchronously
+        retrieveOpUrl = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+            "+OP=GET_TENANT_INFO+FACTORY=ci_planned_change" +   
+            "+FACTORY_NAME=" + factory_name;
+            
+        // Following call sets resultSRELPersid and resultSRELCommonName.
+        SyncAjaxJSCall( retrieveOpUrl );
+        
+        if ( resultFactoryTenancy != "" )
+        {
+            resultFactoryTenancy = nx_unescape( resultFactoryTenancy );
+        }
+    }
+    return resultFactoryTenancy;
+}
+
+
+/////////////////////////////////////////////////////////////////
+// Routine that performs the a criteria operation, invoke the
+// PERFORM_CRITERA_OP passing the operation to be performed
+// including:
+//   CANCEL - cancel verification
+//   ACCEPTDISC - accept discovered 
+//   ACCEPTPLAN - accept planned value
+//   FAIL - fail verification
+//   VRFY - accept verification
+/////////////////////////////////////////////////////////////////
+var resultOpCode = "";
+var resultOpMessage = "";
+function perform_criteria_operation( criteria_op ) 
+{
+    var criteria_id = "$args.id";
+    var retrieveOpUrl = "";
+    var prompt_msg = "";
+    
+    resultOpCode = "";
+    resultOpMessage = "";
+    if ( criteria_id.length > 0 &&
+         criteria_op.length > 0 )
+    {
+        
+        switch ( criteria_op )
+        {
+            case "ACCEPTDISC":
+                prompt_msg = "Do you want to accept the discovered value?";
+                break;
+                
+            case "ACCEPTPLAN":
+                prompt_msg = "Do you want to accept the planned value?";
+                break;
+                
+            case "CANCEL":
+                prompt_msg = "Do you want to cancel this change specification?";
+                break;
+                
+            case "FAIL":
+                prompt_msg = "Do you want to fail this change specification?";
+                break;
+                
+            case "MANVRFYED":
+                prompt_msg = "Do you want to mark this change specification verified?";
+                break;
+        }
+        if ( prompt_msg.length > 0 && confirm( prompt_msg ) )
+        {
+            // Set the status of the ci_planned_change object (change specification), setup URL to invoke PERFORM_CRITERA_OP 
+            // web method synchronously
+            retrieveOpUrl = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+                "+OP=PERFORM_CRITERA_OP+FACTORY=ci_planned_change" +   
+                "+CRITERIA_ID=" + criteria_id +
+                "+CRITERIA_OP=" + criteria_op;
+                
+            // Following call sets resultOpCode and resultOpMessage.
+            SyncAjaxJSCall( retrieveOpUrl );
+            
+            if ( resultOpCode == 0 )
+            {
+                // Wait half sec before doing the retrieve so UI is refreshed.
+                setTimeout( "delay_after_ajax_call()", 500 );
+            }
+            else
+            {
+                if ( resultOpMessage != "" )
+                {
+                    resultOpMessage = nx_unescape( resultOpMessage );
+                    showAlertMsg( resultOpMessage, false );
+                }
+            }
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that performs refresh after a little time to give
+// server some time to process
+/////////////////////////////////////////////////////////////////
+function delay_after_ajax_call() 
+{
+    //  refresh the form showing new status
+    refreshForm();
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Routine that performs any special formatting of the value based on type
+///////////////////////////////////////////////////////////////////////////
+function format_attr_value( attr_type, attribute_value, internal_value )
+{
+    var result_value = "";
+    
+    if ( attr_type == "4" ) // Date
+    {
+        // For dates, convert internal int date to string date
+        var int_date = ""; 
+        if ( internal_value.length > 0 && !isNaN(internal_value))
+        {
+            int_date = internal_value;
+        }
+        else if ( attribute_value.length > 0 )
+        {
+            // No int date set, use the date in the value if possible
+            int_date = get_int_date( attribute_value );
+        }
+        if ( int_date.length > 0 )
+        {
+            result_value = date_to_string( int_date );
+        } 
+    }  
+    else
+    {
+        // Just use the value passed in (no formatting needed)
+        result_value = attribute_value;
+    }
+    
+    if ( result_value.length == 0 )
+    {
+       // Set to blank if no value specified
+       result_value = "&nbsp;";
+    }
+    
+    return result_value;  
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that gets the attribute value for a CI via
+// Ajax call to the GET_ATTR_VALUE operation.
+// 
+// Input:
+//    ci_id - ID of the CI
+//    attr_id - ID of managed attribute 
+//
+// Returns:
+// Sets the following global variable:
+//    resultAttrValue => attribute value
+//    resultIsAttrDefined => flag indicating if the attribute is defined (1) or not (0)
+/////////////////////////////////////////////////////////////////
+var resultAttrValue = "";
+var resultIsAttrDefined = "0";
+var last_fetched_ci_id = "";  
+var last_fetched_attr_id = "";
+function get_attribute_value( ci_id, attr_id ) 
+{
+    var  retrieveOpUrl;
+ 
+    if ( last_fetched_ci_id != ci_id  || last_fetched_attr_id != attr_id )
+    {
+        // Get values only if ci/attribute values have changed
+        
+        last_fetched_ci_id = ci_id;
+        last_fetched_attr_id = attr_id;
+        
+        // Attribute is not defined/set by default
+        resultAttrValue = "";
+        resultIsAttrDefined = "0";
+        if ( ci_id.length > 0 && attr_id.length > 0 )
+        {
+            // Setup URL to invoke GET_ATTR_VALUE web method synchronously
+            retrieveOpUrl = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+                "+OP=GET_ATTR_VALUE+FACTORY=ci_planned_change" +   
+                "+ATTR_ID=" + attr_id +                                                           
+                "+OBJECT_ID=" + ci_id;
+                
+            // Following call sets resultSRELSelections.
+            SyncAjaxJSCall( retrieveOpUrl );
+            if ( resultIsAttrDefined == "1" )
+            {
+                resultAttrValue = nx_unescape( resultAttrValue );
+            }
+        }
+    }
+    else
+    {
+       // Use the current resultAttrValue which still holds the last fetched value
+    }
+    
+    return resultAttrValue;
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that responds to onblur/focus events to update the original value
+/////////////////////////////////////////////////////////////////
+function updateCIValueHandler( element )
+{
+    if ( typeof element != "undefined"  )
+    {
+        // Update the current original value if the CI changes
+        update_original_value();
+    }
+    return true; // allow default processing to occur
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that gets the current attribute or original value of an 
+// an attribute based on the current selected CI/attribute and
+// the initial CI/attribute
+// 
+// NOTE: Uses the global initial_ci_id and initial_attr_id variables
+// that hold the initial values when the form was first displayed
+/////////////////////////////////////////////////////////////////
+function get_current_or_original_value( ci_id, attr_id )
+{
+    var result_value;
+
+    if ( ci_id.length == 0 || attr_id.length == 0 )
+    {
+        // No CI or attribute set, set to blank
+        result_value = "&nbsp;";
+    }
+    else if ( ci_id != initial_ci_id || attr_id != initial_attr_id )
+    {
+        // The CI changed or attribute changed, get the current CI value
+        result_value = get_attribute_value( ci_id, attr_id );
+        result_value = format_attr_value( attribute_type, result_value, result_value );
+    }
+    else
+    {
+        // The CI is set back to the initial CI we started with when the user 
+        // opened the form, reset back the original CI value when we first showed the form.
+        var attr_value_original = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_original"</PDM_FMT>; 
+        var attr_value_orig_internal = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attribute_value_orig_internal"</PDM_FMT>; // Original value ID SREL ID or int date 
+        result_value = format_attr_value( attribute_type, attr_value_original, attr_value_orig_internal );
+    }
+    
+    return result_value;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Routine that updates the original value field with the current CI
+// value when the CI changes
+///////////////////////////////////////////////////////////////////////////
+function update_original_value() 
+{
+    // Update the current original value if the CI changes
+    var form = window.document.forms["main_form"];
+    
+    // Get the current selected CI ID
+    var ci_id = "";
+    if ( typeof form.elements["SET.ci"] != "undefined" )
+    {
+        ci_id = form.elements["SET.ci"].value;
+    }
+
+    // Get the current selected CI name
+    var ci_name = "";
+    if ( typeof form.elements["KEY.ci"] != "undefined" )
+    {
+        // Needed since name may be blank but ID is still set.
+        ci_name = form.elements["KEY.ci"].value; 
+    }
+    
+    // Get the current managed attribute ID
+    var attr_id = "$args.attribute_name"; 
+    
+    if ( attr_id.length == 0 && typeof form.elements["SET.attribute_name"] != "undefined" )
+    {   
+        // We have multi-tenancy enabled, get attr_id from the lookup
+        var attribute_label = "";
+        if ( typeof form.elements["KEY.attribute_name"] != "undefined" )
+        {
+            // Needed since label may be blank but ID is still set.
+            attribute_label = form.elements["KEY.attribute_name"].value; 
+        }
+        if ( attribute_label.length > 0 )
+        {
+            attr_id = form.elements["SET.attribute_name"].value;
+        }
+    }
+
+    var current_attribute_value;
+    
+    if ( ci_name.length == 0 )
+    {
+        // No CI or attribute set, set to blank
+        current_attribute_value = "&nbsp;";
+    }
+    else
+    {
+        // Get the initial original value or current CI value if CI or attribute changed.
+        current_attribute_value = get_current_or_original_value( ci_id, attr_id );
+    }
+    
+    // Update the original value field
+    var original_value_elm = document.getElementById("attribute_value_original_id");
+    if ( original_value_elm != null )
+    {
+        original_value_elm.innerHTML = current_attribute_value;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that performs custom format when showing the original value field
+// which updates the original value based on initial CI or newly selected CI
+/////////////////////////////////////////////////////////////////
+function set_original_value( current_original_value )
+{
+    var result_value = current_original_value;
+    
+    var form = window.document.forms["main_form"];
+    var ci_id = "";
+    if ( typeof form.elements["SET.ci"] != "undefined" )
+    {
+        // In edit mode
+        ci_id = form.elements["SET.ci"].value;
+    }
+    else
+    {   
+        // In read-only mode
+        ci_id = "$args.ci";
+    }
+    
+    // Get the current managed attribute ID
+    var attr_id = "$args.attribute_name"; 
+    
+    // Get the initial original value or current CI value if CI or attribute changed.
+    result_value = get_current_or_original_value( ci_id, attr_id );
+    
+    return result_value;     
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that converts an input value to an int date
+/////////////////////////////////////////////////////////////////
+function get_int_date( date_value ) 
+{
+    var result_int_date = "0";
+    
+    // Int date is not set, convert the date value to an int date
+    if ( date_value.length > 0 )
+    {
+        if ( isNaN( date_value ) )
+        {
+            // Convert string date to int time
+            result_int_date = string_to_date( "", date_value, "" );
+        }
+        else
+        {
+            // Value is a number, assume it's an int date
+            result_int_date = date_value;
+        }
+    }
+    
+    return result_int_date;
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that causes the form to reload while in edit mode
+// to show the appropriate form control (lookup, textbox, etc) 
+// based on attribute type
+/////////////////////////////////////////////////////////////////
+function reload_form() 
+{ 
+    if ( allow_form_to_reload_on_attr_change == false )
+    {
+        // Attribute name is a lookup with MT turned on,
+        // ignore the form refresh request (user must click save first).
+        return;
+    }
+    
+    if ( !is_action_in_progress() ) // Returns false when form is still busy 
+    {
+       // Form is still loading, wait till it's done and try again after a half sec.
+       setTimeout( "reload_form()", 500 );
+       return;
+    }
+
+    var form = window.document.forms["main_form"];
+    
+    // Clear previously specified values in the current form field/variables
+    if ( typeof form.elements["SET." + form_attr_name ] != "undefined" )
+    {
+        // Clear the planned value 
+        form.elements["SET." + form_attr_name ].value = "";
+    }
+    if ( typeof form.elements["KEY." + form_attr_name ] != "undefined" )
+    {
+        // Clear the SREL common name
+        form.elements["KEY." + form_attr_name ].value = "";
+    }
+
+    // Also clear attribute_value_planned field if it's an SREL using local variable field
+    if ( form_attr_name != "attribute_value_planned" &&
+         typeof form.elements["SET.attribute_value_planned"] != "undefined" )
+    {
+       form.elements["SET.attribute_value_planned"].value = "";
+    }
+    
+    // Also clear the internal field.            
+    form.elements["SET.attribute_value_internal"].value = "";
+
+    // Enable refresh during edit mode for next refresh only
+    form.REFRESH_AND_STAY_EDIT.value="1";
+    pdm_submit('main_form','UPDATE',void(0),true);
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine called from preSaveTrigger() that saves or resets 
+// the current SREL form variables as a result of user pressing
+// save multiple times without refreshing the form. 
+// We need to preserve the previously specified values since we 
+// are faking out the attribute to look like an SREL. 
+/////////////////////////////////////////////////////////////////
+function preserve_SREL_value_if_needed( cur_srel_id, cur_srel_common_name ) 
+{ 
+    if ( was_form_reloaded_since_last_save )
+    {
+        // This is the first time the user clicked "Save" since the 
+        // form was last reloaded. Save the last ID and common name values 
+        // for the currently selected SREL.
+        was_form_reloaded_since_last_save = false; 
+        last_internal_value = cur_srel_id;
+        last_planned_value = cur_srel_common_name;
+    }
+    else
+    {
+        // User is clicking "Save" a subsequent time AND the form was not reloaded
+        // since the last save was clicked. This occurs when a required field 
+        // (change order) missing and user clicks "Save".
+    
+        // Did the SREL entered by the user change since the last Save click?
+        if ( cur_srel_common_name == last_planned_value && 
+             cur_srel_common_name == cur_srel_id &&    
+             last_internal_value.length > 0 )
+        {
+            // No, restore the previous SREL ID 
+            // in the internal field and in the form key field
+            var form = window.document.forms["main_form"];
+            form.elements["SET." + internal_value_attr].value = last_internal_value;
+        }
+        else
+        {
+            // Yes, save the new values.
+            last_internal_value = cur_srel_id;
+            last_planned_value = cur_srel_common_name;
+        }
+    } 
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine called from preSaveTrigger() that determines if a given
+// integer value is valid. Routine will reformat the integer as needed
+// since we are faking out the attribute to look like an integer. 
+// Reformat will  
+//  - trim off whitespace
+//  - strip off leading "+"
+//  - truncate decimal value
+//
+// Returns:
+//    result.is_valid_integer - true if a valid integer, false if invalid
+//    result.integer_value = reformatted integer value
+// 
+/////////////////////////////////////////////////////////////////
+function validate_int_and_reformat( integer_value ) 
+{ 
+    var result = new Object();
+    result.is_valid_integer = true;
+    result.integer_value = "";
+    
+    // Trim leading and trailing spaces.
+    integer_value = ltrim( integer_value );
+    integer_value = rtrim( integer_value );
+        
+    var cur_char;
+    var cur_pos;
+    var has_a_decimal = false;
+    for ( cur_pos = 0; cur_pos < integer_value.length; cur_pos++ )
+    {
+        cur_char = integer_value.charAt( cur_pos );
+
+        if ( cur_pos == 0 && ( cur_char == "+" || cur_char == "-" ) )
+        {
+            if ( cur_char == "+" )
+            {
+               // Strip off the leading "+"
+            }
+            else 
+            {
+               // Keep the leading "-"
+               result.integer_value += cur_char;
+            }
+        }
+        else if (cur_char == ".") 
+        {
+            if ( has_a_decimal ) 
+            {
+                // Invalid integer - Two or more decimals specified
+                result.is_valid_integer = false;
+                break;
+            }
+            else
+            {
+                has_a_decimal = true;
+                result.integer_value += cur_char;
+            }
+        }
+        else if ( "0" > cur_char || cur_char > "9")
+        {
+            // Invalid integer - Char is not 0, 1, .. or 9 
+            result.is_valid_integer = false;
+            break;
+        }
+        else
+        {
+            result.integer_value += cur_char;
+        }
+    }
+    
+    cur_pos = result.integer_value.indexOf( "." );
+    if ( cur_pos != -1 )
+    {
+        // Decimal specified - truncate off the decimal portion of the number
+        result.integer_value = result.integer_value.substring(0, cur_pos);
+    }
+    
+    return result;
+}
+
+/////////////////////////////////////////////////////////////////
+// Routine that performs pre-save processing to preserve the 
+// planned and internal value as needed.
+/////////////////////////////////////////////////////////////////
+function preSaveTrigger()
+{
+    var form = window.document.forms["main_form"];
+    
+    // Ensure the ID,int value and string values (common name and internal value) 
+    // are in synce prior to save
+    
+    var attrSETValue = "";
+    var attrKEYValue = "";
+    
+    // Get the SET value 
+    if ( typeof form.elements["SET." + form_attr_name] != "undefined" )
+    {
+        attrSETValue = form.elements["SET." + form_attr_name].value;
+    }
+    
+    if ( attribute_type == "2" ) // SREL - 2
+    {
+        // SREL value specified, preserve the common name and ID
+        if ( typeof form.elements["KEY." + form_attr_name] != "undefined" )
+        {
+            // **** SREL lookup control displayed ****
+            
+            attrKEYValue = form.elements["KEY." + form_attr_name].value;
+            
+            // Note: KEY holds the common name
+            //       SET holds the SREL id
+            
+            if ( "$args.srel_factory" == "cnt" )
+            {
+                 // Get the form control for the contact since the KEY value is not always 
+                 // set when using lookup/type ahead for contacts.
+                 var lookupControl = null;
+                 var elmArray = window.document.getElementsByName( form_attr_name + "_combo_name" );
+                 if ( elmArray.length > 0 )
+                 {
+                     // Get the common name value specified in the control
+                     lookupControl = elmArray[0];
+                     attrKEYValue = lookupControl.value;
+                 }
+            }
+
+            if ( attrSETValue.length > 0 )
+            {
+                // id is set 
+                
+                // Save the SREL ID in the internal field
+                form.elements["SET." + internal_value_attr].value = attrSETValue;
+                // Save the common name value specified using lookup/type ahead
+                form.elements["SET." + form_attr_name].value = attrKEYValue;
+                
+                // Save the common name value in the attribute_value_planned field if
+                // SREL is using a local variable field
+                if ( form_attr_name != "attribute_value_planned" &&
+                     typeof form.elements["SET.attribute_value_planned"] != "undefined" )
+                {
+                   form.elements["SET.attribute_value_planned"].value = attrKEYValue;
+                }
+               
+                // Save or reset the current SREL info form variables as needed. based on
+                // first "Save" click or later "Save" click AND a required field (change order) 
+                // was missing and the form was not reloaded.
+                preserve_SREL_value_if_needed( attrSETValue, attrKEYValue );
+            }
+            else 
+            {
+                // SREL id is NOT set 
+                if ( attrKEYValue.length > 0 )
+                {
+                   if ( attribute_value_internal.length == 0 && srel_common_name_value.length > 0 &&
+                        attrKEYValue == srel_common_name_value &&  srel_search_status.length == 0)
+                   {
+                       // The attribute_value_internal SREL ID value was not set due to planned value
+                       // being modified externally of the UI. This condition occurs if the user does not
+                       // enter a new SREL value during the edit session of this form. Preserve 
+                       // the value specified and bypass validation check.
+                       
+                       // Save the common name value previously specified 
+                       form.elements["SET." + form_attr_name].value = attrKEYValue;
+                       
+                        // Save the common name value in the attribute_value_planned field if
+                        // SREL is using a local variable field
+                       if ( form_attr_name != "attribute_value_planned" &&
+                            typeof form.elements["SET.attribute_value_planned"] != "undefined" )
+                       {
+                          form.elements["SET.attribute_value_planned"].value = attrKEYValue;
+                       }
+
+                       return true; // Perform save
+                   }
+                
+                    // ID not set but value specified by user (value that does not match)
+                    // Do not override the planned value, just use KEY value already set in the form
+                    // which will be used by the server when performing the lookup to find matches based on
+                    // the current value entered by the user. 
+                    
+                    // Set keep variables with the SREL information needed to perform the lookup 
+                    // so we can fake out the field as a SREL in freeaccess.spl do_lookup_on_attr() and 
+                    // srel_lookup() that has corresponding code to handle this specific case.
+                    form.elements["KEEP.SREL_FACTORY"].value = "$args.srel_factory";
+                    form.elements["KEEP.SREL_RELATTR"].value = "$args.srel_rel_attr";
+                    form.elements["KEEP.SREL_COMMONNAME_ATTR"].value = "$args.srel_common_name_attr"; 
+                    
+                    // Save the last common name value so we can return it back to the form in 
+                    // when we show the control on subsequent refresh.
+                    form.elements["KEEP.SREL_LAST_COMMONNAME_VALUE"].value = attrKEYValue;
+                }
+                else
+                {
+                    // ID and common name not set - user is clearing out the value
+                      
+                    // Clear the common name value
+                    form.elements["SET." + form_attr_name].value = "";
+                
+                    // Clear the SREL ID 
+                   form.elements["SET." + internal_value_attr].value = "";
+                   
+                   // Clear out the common name value in the attribute_value_planned field if
+                   // SREL is using a local variable field
+                   if ( form_attr_name != "attribute_value_planned" &&
+                        typeof form.elements["SET.attribute_value_planned"] != "undefined" )
+                   {
+                      form.elements["SET.attribute_value_planned"].value = "";
+                   }
+                }
+            }
+        }
+        else
+        {
+            // **** SREL dropdown control displayed ****
+            var selected_value = "";
+            var planned_value_dropdown = document.main_form.elements["SET." + form_attr_name]; 
+            
+            if ((typeof planned_value_dropdown != "undefined") && (planned_value_dropdown.type == "select-one"))	  
+            {
+                if ( planned_value_dropdown.selectedIndex > 0 )
+                {
+                    // Non empty value selected by the user, save it. Note that "<empty>" is at position 0.
+                    selected_value = planned_value_dropdown.options[planned_value_dropdown.selectedIndex].text;
+                }
+                
+                if ( attrSETValue == "noneoftheabove" )
+                {
+                    // Validation dropdown control is displayed and the user selected "None Of The Above" 
+                    // from a shortened pulldown list created when entering a search value into an srel 
+                    // lookup, which returned fewer than nx.MaxSelectList number of entries.  To allow the 
+                    // user to search again, the form is refreshed via the common refreshNoneOfTheAbove() routine
+                    // so that the web server can rebuild the html form.
+                    
+                    // Don't update the planned value or internal value, process the save so the
+                    // form will be re-displayed with "Selection cancelled" and previously 
+                    // specified SREL value in the lookup control.
+                    
+                    // Set the SREL factory keep variable so we can fake out the field as a SREL in freeaccess.spl 
+                    // do_lookup_on_attr() that has corresponding code to handle this specific case.
+                    form.elements["KEEP.SREL_FACTORY"].value = "$args.srel_factory";
+                    
+                    // Save the last common name value so we can return it back to the form in 
+                    // when we show the control on subsequent refresh.
+                    form.elements["KEEP.SREL_LAST_COMMONNAME_VALUE"].value = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.SEARCH_LAST_COMMONNAME_VALUE_attribute_value_planned"</PDM_FMT>;
+                }
+                else
+                {
+                    // Save selected dropdown value.
+                    
+                    var change_order_specified = true;
+                    if ( typeof form.elements["KEY.chg"] != "undefined" )
+                    {
+                        // See if the change order is specified, if is not, we don't override the
+                        // planned change dropdown since the save will not occur and the form is not refreshed.
+                        var change_order_common_name = form.elements["KEY.chg"].value;
+                        var change_order_id = form.elements["SET.chg"].value;
+                        if ( change_order_common_name.length == 0 || change_order_id.length == 0 )
+                        {
+                           change_order_specified = false;
+                        }
+                    }
+
+                    if ( change_order_specified )
+                    {
+                        // Save the common name only if change order required field is specified
+                        planned_value_dropdown.options[planned_value_dropdown.selectedIndex].value = selected_value;
+                    }
+                    // Save the SREL ID 
+                    form.elements["SET." + internal_value_attr].value = attrSETValue;
+                    
+                    // Save or reset the current SREL info form variables as needed. based on
+                    // first "Save" click or later "Save" click AND a required field (change order) 
+                    // was missing and the form was not reloaded.
+                    preserve_SREL_value_if_needed( attrSETValue, selected_value );
+                }
+            }
+        }
+    }
+    else if ( attribute_type == "4" && 
+              typeof form.elements["SET." + form_attr_name + "_INT_DATE"] != "undefined" )
+    {
+        // **** Date control displayed ****
+        
+        // Get the current int date 
+        var cur_int_date = form.elements["SET."  + form_attr_name + "_INT_DATE"].value; 
+        if ( cur_int_date == 0  && attrSETValue.length > 0 )
+        {
+           // Convert to epoch time if possible
+           cur_int_date = string_to_date( "", attrSETValue, "" );
+        }
+        // Save the date string specified
+        form.elements["SET." + form_attr_name].value = attrSETValue;
+        
+        // Save the integer date value
+        form.elements["SET." + internal_value_attr].value = cur_int_date;
+    }
+    else if ( attribute_type == "3" )
+    {
+        // **** Integer control displayed ****
+        
+        // Reformat the integer as needed:
+        //  - trim off whitespace
+        //  - strip off leading "+"
+        //  - truncate decimal value
+        var result = validate_int_and_reformat( attrSETValue );
+        if ( result.is_valid_integer )
+        {
+            // Save the integer string specified 
+            form.elements["SET." + form_attr_name].value = result.integer_value;
+        }
+        else
+        {
+            //  Display error message since value is still not a number 
+            //  and set focus to planned value field
+            alertmsg( "Error:_\_%1\__is_not_a_number", attrSETValue ); 
+            form.elements["SET." + form_attr_name].focus();
+            return false;
+        }
+    }
+    else
+    {
+        // **** String value *****
+        
+        // SET variable will already be set, don't save string in the internal value
+    }
+    
+    return true;
+}
+
+<PDM_IF "$args.status" == "FAIL" || "$args.status" == "MANVRFYACT" >
+   // Show the form title in "red" with trailing asterisks if 
+   // the change specification is marked failed or requires manual verification
+   <PDM_SET args.sla_violation=1>
+   
+    // Use the emergency indicator
+    ahdtop.cfgIndSLAViolPrev = ahdtop.cfgIndSLAViol;
+    ahdtop.cfgIndSLAViol = ahdtop.cfgIndEmergency; 
+</PDM_IF>
+    
+</script>
+
+</head>
+
+<body class=detailro onunload="unloadActions()" onload="setup_form_values()" >
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<center>
+
+<script language="JavaScript">
+
+<PDM_IF "$args.sla_violation" == "1">
+    // Restore the previous indicator
+    ahdtop.cfgIndSLAViol = ahdtop.cfgIndSLAViolPrev;
+</PDM_IF>
+<PDM_IF $args.show_criteria_buttons == "1">
+<PDM_MACRO name=dtlForm button=false factory="ci_planned_change">
+<PDM_ELSE>
+<PDM_MACRO name=dtlForm factory="ci_planned_change">
+</PDM_IF>
+<PDM_IF $args.attribute_names_are_not_available == "1" && $args.id == 0>
+    AlertMsg = "Change specification criterion cannot be created without an existing managed attribute. Managed attributes must be created by an administrator";
+</PDM_IF>
+    
+// Show the buttons for updating the criteria status when form is read-only.
+
+<PDM_IF $args.show_criteria_buttons == "1">
+<PDM_MACRO name=btnStartRow>
+<PDM_IF $args.show_accept_discovered_button == "1">
+<PDM_MACRO name=button caption="Accept Discovered Value" disabled="no" func="perform_criteria_operation('ACCEPTDISC');" hotkey_name="Accept Discovered Value" id="chgver_accept_discovered" tooltip="Make the last discovered value of this change specification the authorized state.  Usually performed because of an error in the change order specification." width=0>
+</PDM_IF>
+<PDM_IF $args.show_accept_planned_button == "1">
+<PDM_MACRO name=button caption="Accept Planned Value" disabled="no" func="perform_criteria_operation('ACCEPTPLAN');" hotkey_name="Accept Planned Value" id="chgver_accept_planned" tooltip="Make the planned value of this change specification the authorized state, usually due to delay in the discovery process." width=0>
+</PDM_IF>
+<PDM_IF $args.show_verified_button == "1">
+<PDM_MACRO name=button caption="Mark as Verified" disabled="no" func="perform_criteria_operation('MANVRFYED');" hotkey_name="Mark as Verified" id="chgver_accept_ver" tooltip="Mark this verification verified, usually due to the result of a manual verification." width=0>
+</PDM_IF>
+<PDM_IF $args.show_fail_button == "1">
+<PDM_MACRO name=button caption="Fail Verification" disabled="no" func="perform_criteria_operation('FAIL');" hotkey_name="Fail Verification" id="chgver_failed_ver" tooltip="Fail this verification, usually due to the result of a manual verification." width=0>
+</PDM_IF>
+<PDM_IF $args.show_cancel_button == "1">
+<PDM_MACRO name=button caption="Cancel Verification" disabled="no" func="perform_criteria_operation('CANCEL');" hotkey_name="Cancel Verification" id="chgver_cancel" tooltip="Cancel this verification, essentially ignoring this change specification.  Usually due to deferred change implementation." width=0>
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+
+if ( _dtl.edit )
+{
+    // Enable refresh during edit
+    docWriteln("<input type=\"hidden\" name=\"REFRESH_AND_STAY_EDIT\" value=\"0\">");
+}
+
+// Hidden variable for holding internal attribute value
+docWriteln("<input type=\"hidden\" name=\"SET.attribute_value_internal\" value=\"\">");
+
+// Setup the attribute_value_planned value if SREL is using a local variable field
+if ( form_attr_name != "attribute_value_planned" )
+{
+   docWriteln("<input type=\"hidden\" name=\"SET.attribute_value_planned\" value=\"" + attribute_value_planned + "\">");
+}
+
+// Hidden variables to hold dynamic attribute information, corresponds to ci_managed_attribute 
+docWriteln("<input type='hidden' name=\"KEEP.USE_KEEP_VARS\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.ATTRIBUTE_TYPE\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.ATTRIBUTE_LENGTH\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.ATTRIBUTE_INITIAL_STATUS\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.SREL_FACTORY\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.SREL_RELATTR\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.SREL_COMMONNAME_ATTR\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.SREL_SHOW_DROPDOWN\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.SREL_LAST_COMMONNAME_VALUE\" value=\"\">");
+
+// Hidden variables for holding the initial CI and managed attribute ID values
+if ( changed_attr_on_edit == "0" )
+{ 
+    // First time form is shown, save initial values 
+    docWriteln("<input type='hidden' name=\"KEEP.INITIAL_CI_ID\" value='$args.ci'>");
+    docWriteln("<input type='hidden' name=\"KEEP.INITIAL_ATTR_ID\" value='$args.attribute_name'>");
+}
+
+</script>
+
+<PDM_IF $args.id != 0  && $args.chg.status.assoc_ci_managed_chgstat.0.verification_active == 1 && $args.chg.status.assoc_ci_managed_chgstat.0.can_edit_criteria == 0>
+<table id="cmdbversioninghelptextTable" class="page_section_instruction_area gn_container_no_margin" width="100%">
+<td valign="center">
+<img src="/CAisd/img/Information_16.png">
+<label id="cmdbversioninghelptext" class="page_section_instructions_text">Updating this change specification is limited because the change order state is $args.chg.status.sym </label>
+</td>
+</table>
+</PDM_IF>
+
+<script language="JavaScript">
+
+<PDM_IF 0>    
+<!-- --------------------------------------------------------------------------------------------------------------------------- -->
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF $args.id == 0>
+<PDM_IF $args.chg != 0 && $args.KEEP.CHG_WAS_PRESET == 1 >
+            <PDM_SET args.show_change_readonly="1">
+        
+<PDM_ELSE>
+            <PDM_SET args.show_change_readonly="0">
+        
+</PDM_IF>
+<PDM_ELSE>
+         <PDM_SET args.show_change_readonly="1">
+    
+</PDM_IF>
+<PDM_IF "$args.show_change_readonly" == "1" >
+<PDM_MACRO name=dtlLookupReadonly hdr="Zmiana" attr="chg">
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Zmiana" attr="chg" evt="onBlur=\\\"updateCIValueHandler(this)\\\" onFocus=\\\"updateCIValueHandler(this)\\\"" size=20>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Status zmiany" attr="chg.status">
+<PDM_IF "$args.can_edit_criteria" == "1" >
+<PDM_MACRO name=dtlLookup hdr="Nazwa CI" attr="ci" evt="onBlur=\\\"updateCIValueHandler(this)\\\" onFocus=\\\"updateCIValueHandler(this)\\\"" size=20>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Nazwa CI" attr="ci">
+</PDM_IF>
+<PDM_IF "$args.can_edit_criteria" == "1" >
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" evt="onBlur=\\\"updateCIValueHandler(this)\\\" onFocus=\\\"updateCIValueHandler(this)\\\"" make_required="yes">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" make_required="yes">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.can_edit_criteria" == "1" >
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 evt="onBlur=\\\"updateCIValueHandler(this)\\\" onFocus=\\\"updateCIValueHandler(this)\\\"" size=60>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Opis" attr="description" colspan=4>
+</PDM_IF>
+<PDM_IF 0>    
+<!-- --------------------------------------------------------------------------------------------------------------------------- -->
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartExpRow label="Attribute Level Change Details" colspan=2 exp_rows="1,2" form_name="detail_ci_planned_change">
+<PDM_IF $args.id == 0  || $args.chg.status.assoc_ci_managed_chgstat.0.can_edit_criteria == 1 >
+<PDM_MACRO name=dtlDropdown hdr="Managed Attribute" attr="attribute_name" evt="onBlur=\\\"updateCIValueHandler(this)\\\" onFocus=\\\"updateCIValueHandler(this)\\\" onchange=\\\"reload_form(this)\\\"" whereclause="delete_flag=0">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Managed Attribute" attr="attribute_name">
+</PDM_IF>
+<PDM_IF 0>*** Planned Value ***</PDM_IF>
+<PDM_IF $args.is_verifiable_attribute == "0" >
+<PDM_IF 0>*** "*" selected (All attributes) or no attribute specified - show read only planned value ***</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Planowana wartość" attr="attribute_value_planned">
+<PDM_ELIF "$args.attribute_type" == "0" ||
+              "$args.attribute_type" == "3" >
+<PDM_IF 0>*** String or Integer planned value ***</PDM_IF>
+<PDM_IF $args.can_edit_criteria == "1" >
+           var attr_maxsize = "$args.attribute_length";
+           var attr_dob_data_type = "";
+           
+<PDM_IF $args.attribute_type == "3">
+               // Integer - set the dob data type to 0 to enable integer verification
+               attr_dob_data_type = "0";
+           
+</PDM_IF>
+    
+           detailTextbox( 
+               attr_hdrtext,               
+               form_attr_name,             
+               attr_colspan, 
+               1,  // rows 
+               attr_size, 
+               attr_is_required,
+               attr_maxsize, 
+               attribute_value_planned, 
+               "no", // turn off spell check
+               "no", // turn off search knowledge button
+               "",   // turn off JSButton code
+               attr_dob_data_type, 
+               "no", // turn off password handling
+               attr_locked );
+                                                                     
+        
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Planowana wartość" attr="attribute_value_planned">
+</PDM_IF>
+<PDM_ELIF "$args.attribute_type" == "2" >
+<PDM_IF 0>*** SREL planned value ***</PDM_IF>
+       
+       var show_link = "yes";
+       var srel_persid = ""; 
+       var srel_rel_attr_id = "";
+       var attr_extra_url = "";
+       
+       // Get the SREL information for control setup, 
+       // note that srel_common_name_value is set above based on presence of search results 
+       var srel_factory = "$args.srel_factory";
+       var srel_common_name_attr = "$args.srel_common_name_attr";
+       var srel_rel_attr = "$args.srel_rel_attr";
+       var srel_search_status = "$args.form_attr_search_status"; 
+       var srel_search_results = ""; 
+       if ( srel_search_status.length > 0 )
+       {
+           // Only set search results if status is non-blank
+           srel_search_results = "$args.SEARCH_RESULTS_attribute_value_planned"; 
+       }
+       
+       var attr_serviceProviderEligible;
+       if ( form_attr_name == "attribute_value_planned_sp" )
+       {
+           // Using the SP SREL attribute, must set flag to indicate value is also service provider eligible
+           attr_serviceProviderEligible = "1"; 
+       }
+       else
+       {
+           // Non SP SREL
+           attr_serviceProviderEligible = "0"; 
+       }
+       
+       if ( attribute_value_internal.length > 0 )
+       {
+           // Get the current persid and common name values for the SREL
+           get_srel_info( srel_factory, srel_common_name_attr, srel_rel_attr, attribute_value_internal );
+                                
+           srel_rel_attr_id = attribute_value_internal;
+           srel_persid = resultSRELPersid;
+           if ( srel_search_status.length == 0 )
+           {
+               // Use the current common name value for the SREL if form is not doing field validation
+               srel_common_name_value = resultSRELCommonName;
+               
+               if ( resultSRELCommonName.length == 0 )
+               {
+                  // Clear out the rel attr id if no common name was found
+                  srel_rel_attr_id = "";
+               }
+           }
+       }
+       
+       
+<PDM_IF "$args.can_edit_criteria" == "1" >
+<PDM_IF "$args.srel_show_dropdown" == "0" >
+<PDM_IF 0>*** Show SREL lookup **</PDM_IF>
+               
+               detailLookup(
+                   attr_hdrtext,               
+                   form_attr_name,             
+                   srel_factory,          
+                   attr_colspan,               
+                   attr_size,               
+                   attr_is_required, 
+                   srel_persid,           
+                   srel_rel_attr_id,      
+                   "yes",                 
+                   srel_common_name_attr, 
+                   srel_common_name_value,
+                   srel_search_status,    
+                   srel_search_results,   
+                   show_link,                            
+                   attr_extra_url,        
+                   attr_tenancy,                
+                   attr_serviceProviderEligible,
+                   attr_locked );               
+           
+<PDM_ELSE>
+<PDM_IF 0>*** Show SREL dropdown **</PDM_IF>
+               // Get the SREL selections for the dropdown control
+               var srel_selections = get_srel_selections( srel_factory, srel_common_name_attr, srel_rel_attr );
+               
+               detailDropdown(
+                   attr_hdrtext,          
+                   form_attr_name,        
+                   srel_factory,             
+                   attr_colspan,          
+                   attr_size, 
+                   "0:0",            // is_required (0 indicates NO) : locked (0 indicates NO) 
+                   srel_persid,               
+                   srel_rel_attr_id,          
+                   "yes:" + attr_tenancy +":" + attr_serviceProviderEligible,        // autofill, : attr_tenancy : attr_serviceProviderEligible 
+                   srel_common_name_attr, 
+                   srel_common_name_value,
+                   srel_search_status,    
+                   srel_search_results,   
+                   "no",             // don't show link since object does not have detail form
+                   "0",              // cbwidth
+                   attr_extra_url,           
+                   "",               // no default selection
+                   srel_selections ); 
+           
+</PDM_IF>
+           
+          // Add tenancy implying attribute registration (logic from dtlLookup/dtlDropdown  macro)
+          if ( attr_tenancy == "1" || attr_tenancy == "2" )
+          {
+              // Attribute is  1 - TENANT_OPTIONAL OR  2 - TENANT_REQUIRED
+              if ( resultSRELTenant != "" && resultSRELTenant != "00" )
+              {
+                  detailAddTenantImplyingAttr( form_attr_name, resultSRELTenant, resultSRELTenantName, attr_tenancy, attr_serviceProviderEligible);
+              }
+          }
+               
+       
+<PDM_ELSE>
+           if ( "$args.srel_show_dropdown" == "1" || srel_persid == "" )
+           {
+               // Hide the link for dropdown or SREL with no persid set
+               show_link = "no"; 
+           }
+           detailLookupReadonly( 
+               attr_hdrtext, 
+               form_attr_name, 
+               attr_colspan,
+               srel_persid, 
+               srel_common_name_value, 
+               show_link );
+       
+</PDM_IF>
+<PDM_ELIF "$args.attribute_type" == "4" >
+<PDM_IF 0>*** Date planned value ***</PDM_IF>
+          
+        var attr_value_int_date = "0";
+        if ( attribute_value_internal.length > 0 && !isNaN(attribute_value_internal) )
+        {
+            // int date was specified
+            attr_value_int_date = attribute_value_internal;
+        }
+        else
+        {
+            // Int date is not set, convert the planned value to an int date if possible
+            attr_value_int_date = get_int_date( attribute_value_planned );
+        }
+        detailDate(
+            attr_hdrtext,          
+            form_attr_name,        
+            attr_colspan, 
+            attr_size,       
+            "yes",          // show time with date
+            attr_is_required, 
+            attr_value_int_date,
+            attr_locked ); 
+    
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF 0>*** Last Discovered Value ***</PDM_IF>
+<PDM_IF "$args.attribute_type" == "4" >
+<PDM_IF 0>*** Date planned value ***</PDM_IF>
+        // For dates, convert last discovered internal int date to string date
+        var attribute_value_disc_int_date = "0"; 
+        if ( attribute_value_disc_internal.length > 0 && !isNaN(attribute_value_disc_internal))
+        {
+            attribute_value_disc_int_date = attribute_value_disc_internal;
+        }
+        else
+        {
+            // No int date was previously set, use the date in the discovered value if possible
+            attribute_value_disc_int_date = get_int_date( attribute_value_discovered );
+        }
+        detailDateReadonly(
+           "Last Discovered Value",          
+           "attribute_value_discovered",        
+           attr_colspan, 
+           "yes",          // show time with date
+           attribute_value_disc_int_date );
+    
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Last Discovered Value" attr="attribute_value_discovered">
+</PDM_IF>
+<PDM_IF 0>*** Original Value ***</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Wartość oryginalna" attr="attribute_value_original" fmtfunc=set_original_value id=attribute_value_original_id>
+<PDM_IF 0>    
+<!-- --------------------------------------------------------------------------------------------------------------------------- -->
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartExpRow label="Verification Status" colspan=4 exp_rows="1,2" form_name="detail_ci_planned_change">
+<PDM_IF "$AlertMsg" != "" || "$args.form_attr_search_status" != "">
+         // Preserve the last selected verify status if an error (alert msg is set) or SREL validation (form_attr_search_status is set)
+         <PDM_SET args.attribute_initial_status="">
+    
+</PDM_IF>
+<PDM_IF $args.id == 0>
+<PDM_MACRO name=dtlDropdown hdr="Status weryfikacji" attr="status" evt="onBlur=\\\"updateCIValueHandler(this)\\\" onFocus=\\\"updateCIValueHandler(this)\\\"" initial="$args.attribute_initial_status" make_required=yes whereclause="delete_flag=0 AND isinitial=1 AND isselectable=1">
+<PDM_ELSE>
+<PDM_IF $args.chg.status.assoc_ci_managed_chgstat.0.can_edit_criteria == 1>
+<PDM_MACRO name=dtlDropdown hdr="Status weryfikacji" attr="status" evt="onBlur=\\\"updateCIValueHandler(this)\\\" onFocus=\\\"updateCIValueHandler(this)\\\"" initial="$args.attribute_initial_status" make_required=yes whereclause="delete_flag=0 AND isselectable=1">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Status weryfikacji" attr="status">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Ostatnie polityka weryfikacja" attr="last_verification_policy">
+<PDM_MACRO name=dtlLookupReadonly hdr="Incydent" attr="incident" link="yes">
+<PDM_MACRO name=dtlLookupReadonly hdr="TWA" attr="ci_twa_ci" link="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Wiadomość weryfikacji" attr="verification_msg" colspan=4>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_IF 0>    
+<!-- --------------------------------------------------------------------------------------------------------------------------- -->
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>
+<PDM_MACRO name=startNotebook hdr=nrro_nb>
+<PDM_IF $args.id == 0>
+        <PDM_SET args.no_dp_option="+NO_DP=yes">
+    
+<PDM_ELSE>
+        <PDM_SET args.no_dp_option="">
+    
+</PDM_IF>
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=TAB title="Verification Log" height=520 id=verification_log src="OP=SEARCH+FACTORY=ci_verification_log+QBE.EQ.ci_planned_change=$args.id+KEEP.planned_change_id=$args.id+KEEP.parentFac=$prop.factory">
+<PDM_ELSE>
+        <PDM_SET args.keep_tab_banner="KEEP.TAB_BANNER=Verification Log List">
+        <PDM_SET args.keep_tab_msg="KEEP.TAB_MSG=This tab is inactive until the Change Specification is saved">
+        
+<PDM_MACRO name=TAB title="Verification Log" height=100 id=verification_log src="OP=SHOW_DETAIL+HTMPL=cmdb_empty_tab.htmpl+FACTORY=ci_planned_change+PERSID=$args.persistent_id+NO_DP=yes+$args.keep_tab_banner+$args.keep_tab_msg">
+</PDM_IF>
+<PDM_IF "$args.id" != "0">
+        <PDM_SET args.status_filter="ADDITIONAL_WHERE=status.sym IN ('VRFY','ACCPEPTEDPLAN','ACCPEPTEDDISC','ALLOWED','USEDDISCOVERED','MANVRFYED','SETCOMPLETE')">
+        
+<PDM_MACRO name=TAB title="Discovered Attribute History" height=520 id=attr_history src="OP=SEARCH+FACTORY=ci_verification_log+QBE.EQ.ci_managed_attribute=$args.attribute_name+KEEP.managed_attribute_id=$args.attribute_name+QBE.EQ.nr=$args.ci+KEEP.nr_id=$args.ci+QBE.NE.ci_planned_change=$args.id+KEEP.planned_change_id=$args.id+KEEP.showattrhistory=YES+$args.status_filter">
+<PDM_ELSE>
+        <PDM_SET args.keep_tab_banner="KEEP.TAB_BANNER=Discovered Attribute History List">
+        <PDM_SET args.keep_tab_msg="KEEP.TAB_MSG=This tab is inactive until the Change Specification is saved">
+        
+<PDM_MACRO name=TAB title="Discovered Attribute History" height=100 id=attr_history src="OP=SHOW_DETAIL+HTMPL=cmdb_empty_tab.htmpl+FACTORY=ci_planned_change+PERSID=$args.persistent_id+NO_DP=yes+$args.keep_tab_banner+$args.keep_tab_msg">
+</PDM_IF>
+    
+    <PDM_SET args.prop_tab_banner="prop.tab_banner=Change Specification History">
+    
+<PDM_MACRO name=TAB title="Change Specification History" height=455 id=cmdb_versioning src="OP=SHOW_DETAIL+HTMPL=cmdb_versioning_tab.htmpl+FACTORY=ci_verification_policy+PERSID=$args.persistent_id+prop.datafilename_suffix=obj+$args.no_dp_option+$args.prop_tab_banner">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_ci_planned_change.htmpl ASPEN.48 2012/04/13 12:06:23 tomjo02 Exp $;
+</PDM_IF>
+<PDM_WSP>
+

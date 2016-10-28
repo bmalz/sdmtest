@@ -1,0 +1,152 @@
+<PDM_IF 0>
+detail_wf.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Workflow Task
+INTENT:
+    Display the detail info for the Workflow Task
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  wf  args	The Workflow Task object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/wf.maj for the
+                        definition of attributes for 'OBJECT wf'
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Szczegóły Change Workflow";
+var hdrTitleUpd = "Aktualizowanie Change Workflow";
+var hdrTitleNew = "Tworzenie Change Workflow";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script>
+cfgDateFormat = "$date_format"
+</script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attevts.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+</script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Change Workflow">
+<center>
+
+
+<input type="hidden" name=FACTORY value=wf>
+<PDM_IF "$prop.form_name_3" == "edit">
+<input type="hidden" name=OP value="UPDATE">
+<PDM_IF 0 == $args.id>
+<span class="labeltext">You are not allowed to create a new Workflow</span>
+<PDM_ELSE>
+<PDM_IF $args.id>
+<input type="hidden" name=SET.id  value="$args.id">
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=wf>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Save[s]" Func="detailSave()" hotkey_name="Save[s]" ID="btn001" Width=120>
+<PDM_MACRO name=button Caption="Cancel[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" ID="btncncl" Width=120>
+<PDM_MACRO name=button Caption="Reset[r]" Func="pdm_reset()" hotkey_name="Reset[r]" ID="btn003" Width=120>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+</script>
+<PDM_IF "$prop.form_name_3" == "ro">
+<script type="text/javascript">
+<PDM_MACRO name=btnStartRow>
+</script>
+<PDM_IF $UserAuth \> 1>
+<PDM_FORM NAME="frmDTLRO">
+<input type="hidden" name=FACTORY value=wf>
+<input type="hidden" name=SET.id  value="$args.id">
+<input type="hidden" name=OP>
+<script type="text/javascript">
+if (allow_wf_edit()) {
+<PDM_MACRO name=button Caption="Edit[d]" Func="pdm_submit('frmDTLRO','UPDATE')" hotkey_name="Edit[d]" ID="btn001" Width=120>
+}
+</script>
+</PDM_FORM>
+</PDM_IF>
+<script type="text/javascript">
+<PDM_MACRO name=button Caption="Event History" Func="show_evt('wf', 'atev', $args.id)" hotkey_name="Event History" ID="SHOW_EVT_HISTORY" Width=0>
+<PDM_MACRO name=btnEndRow>
+</script>
+</PDM_IF>
+<script>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zadanie" attr=task.sym>
+
+<PDM_MACRO name=dtlLookup hdr="Element konfiguracji" attr=asset>
+<PDM_MACRO name=dtlDate hdr="Rzeczywista data rozpoczęcia" attr=start_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr=assignee size=30>
+<PDM_MACRO name=dtlLookup hdr="Grupa" attr=group size=30>
+<PDM_MACRO name=dtlLookup hdr="Skompletowany przez" attr=done_by colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Przewidywany czas trwania" attr=est_duration evt="onBlur='validate_duration_ts(this)'" size=30>
+<PDM_MACRO name=dtlTextbox hdr="Przewidywany koszt" attr=est_cost size=30>
+<PDM_MACRO name=dtlDate hdr="Przewiidywana data skompletowania" attr=est_completion_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rzeczywisty czas trwania" attr=actual_duration evt="onBlur='validate_duration_ts(this)'" size=30>
+<PDM_MACRO name=dtlTextbox hdr="Rzeczywisty koszt" attr=cost size=30>
+<PDM_MACRO name=dtlDate hdr="Rzeczywista data skompletowania" attr=completion_date>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Kolejność" attr=sequence>
+detailRowHdr("Status", 1 , "$args.REQUIRED_status");
+var item = '<PDM_SELECT NAME=SET.status ESC_STYLE=HTML FACTORY=tskstat WF_FAC_FOR_TSKSTAT=wf SELECTED="$args.status" SELECTED_SYM="$args.status.COMMON_NAME" TITLE="' + _dtl.lastHdrtext + '">';
+var ins_pos = item.indexOf("NAME=");
+if (ins_pos > 0) 
+{
+    _dtl.tabIndex++;
+    item = item.substring(0, ins_pos) + " TABINDEX=" + _dtl.tabIndex + " " + item.substring(ins_pos, item.length);
+}
+detailSetRowData(item);
+<PDM_MACRO name=dtlLookupReadonly hdr="Zmiana#" attr=chg>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Typ serwisowy" attr=support_lev>
+<PDM_MACRO name=dtlLookupReadonly hdr="Zmiana#" attr=chg>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr=chg.category.sym colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Kolejność" attr=sequence colspan=2>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=status.sym colspan=2>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis zadania" attr=description colspan=4 keeplinks=yes rows=4 size=70 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarze zadań" attr=comments colspan=4 rows=4 size=70 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_MACRO name=startNotebook hdr=wf_nb>
+<PDM_MACRO name=tab title="Service Type" file="xx_stype_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

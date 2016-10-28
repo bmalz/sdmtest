@@ -1,0 +1,27 @@
+<PDM_IF 0>
+@(#)$Id: kt_dtbuilder3.htmpl FWr1.2 2007/8/14 11:6:25 peeei01 Exp $
+WHEN PRESENTED:
+    Part of the Decision Tree Builder frameset.
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT>
+// Used by inner frames to determine if they are inside a popup or not
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+var strStatusID = "$args.KEEP.CURRENT_STATUS";
+var strWinName = "$args.KEEP.POPUP_NAME";
+
+var ahdframeset = ( window.name == "cai_main" ? window : ahdtop );
+var ahdframe;
+
+<pdm_include file=menubar_dtbuilder.htmpl>
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<PDM_INCLUDE FILE=kt_dtbuilder_frameset.htmpl DTDocID=$args.DTDocID Tenant=$args.Tenant>
+</HTML>

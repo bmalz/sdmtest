@@ -1,0 +1,241 @@
+<html lang="en"><PDM_IF 0>
+	menu_frames_role.htmpl
+	WHEN PRESENTED:
+	    As the main menu when configured to do frames.
+	VARIABLES:
+	    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+	    object      SESSION This object has one member, SID, which is the
+	                        session identifier.  The session identifier is
+	                        needed so that users do not have to log in every
+	                        time they want to see a new page.
+</PDM_IF>
+	<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/factory_size.js"></script>
+<PDM_INCLUDE FILE=ahdtop.htmpl KT_CACHE=yes>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/popup.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/profile_browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/report.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/antiecho.js"></script>
+<script type="text/javascript">redirect_if_echo('menu_frames_role.htmpl');</script>
+	<script type="text/javascript">
+	<!--
+		if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+			window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+
+var sdadmin = $INTERFACE.sd_admin;
+var sdanalyst = $INTERFACE.sd_analyst;
+var sdemployee = $INTERFACE.sd_employee;
+var sdcustomer = $INTERFACE.sd_customer;
+var ktadmin = $INTERFACE.kt_admin;
+var ktmanager = $INTERFACE.kt_manager;
+var ktengineer = $INTERFACE.kt_engineer;
+var ktanalyst = $INTERFACE.kt_analyst;
+var ktcustomer = $INTERFACE.kt_customer;
+var config = $INTERFACE.config;
+var cfgFID = "$prop.FID";
+
+var use_role = true;
+var toolbarTab = new Array();
+var sd_menubar = "";
+var url_menubar = "";
+<PDM_LIST PREFIX=list FACTORY=role_tab WHERE="role_obj = $SESSION.ROLE_ID" ORDER_BY="sequence" ESC_STYLE=C>
+    var idx = toolbarTab.length;
+    toolbarTab[idx] =
+    {	
+	label :	"$list.tab_obj.display_name",
+	tooltip: "$list.tab_obj.description",
+	id: "tab_" + "$list.tab_obj.id",
+	role_menubar: "$list.tab_obj.menu_bar_obj.htmpl_name",
+	code: "$list.tab_obj.code",
+	src: resolveWebFormVars("$list.tab_obj.web_form_obj.resource") 
+    };
+    if ("$list.tab_obj.menu_bar_obj.code".match(/^sd/i) != null || "$list.tab_obj.menu_bar_obj.htmpl_name" != null) {
+        sd_menubar = "$list.tab_obj.menu_bar_obj.htmpl_name";
+        if ("$prop.initial_popup" != "" && "$list.tab_obj.web_form_obj.code" == "sd")
+        {
+            url_menubar = sd_menubar;
+        }
+    }
+</PDM_LIST>
+
+<PDM_IF "$prop.initial_popup" == "">
+	var toolbarCurrentTab = -1;
+<PDM_ELSE>
+	var toolbarCurrentTab = 0;
+</PDM_IF>
+
+var tbarFrameCount = 2;
+
+var tbarData = new Object();
+tbarData["lSel"] = "$CAisd/img/portal_tab_selected_left.png";
+tbarData["mSel"] = "$CAisd/img/portal_tab_selected_center.png";
+tbarData["rSel"] = "$CAisd/img/portal_tab_selected_right.png";
+tbarData["lUnsel"] = "$CAisd/img/portal_tab_unselected_left.png";
+tbarData["mUnsel"] = "$CAisd/img/portal_tab_unselected_center.png";
+tbarData["rUnsel"] = "$CAisd/img/portal_tab_unselected_right.png";
+tbarData["space1x1"] = "$CAisd/img/space1x1.gif";
+tbarData["empty"] = "$CAisd/html/empty.html";
+
+
+	//-->
+	</script>
+
+<script>
+document.write("<title>" + cfgFormTitle + "<" + "/title>");
+// All available hidden frames that could be used for 
+// issuing the url in the background.
+var ahdframeset = window;
+var work_frames = new Array("workframe_1", "workframe_2", "workframe_3");
+var work_frame_mgr = void(0);
+var cfgWorkFrameTimeout = "$prop.WorkFrameTimeout";
+<PDM_IF "$prop.URL_CI" != "">
+var ciSearchWindow = get_popup_window_name("ci_window");
+var propUrlCi = "$prop.URL_CI";
+</PDM_IF>
+var toolbarInitialTab = ahdtop.GetUSPPreferences("WEB_TOOLBAR_TAB");
+if ( window.location.search.match(/NBTAB=([^&+]+)/) )
+  toolbarInitialTab = RegExp.\$1;
+if (typeof toolbarInitialTab == "undefined" || toolbarInitialTab == "") toolbarInitialTab = 0;
+setTimeoutWarning();
+
+function set_ahdframe()
+{
+    if (toolbarTab.length == 1 && 
+	toolbarTab[0].role_menubar == "" &&
+	typeof window.product != "undefined")
+	window.ahdframe = window.product;
+}
+</script>
+</head>
+<script>
+    if ("$prop.initial_popup" == "" &&
+	toolbarTab.length > 1)
+    {
+		if(_browser.isSafari || _browser.isIE )
+			docWrite('<frameset id="mainFrameSet" rows="80,26,26,*,40,1,1,1,1,1,1,1,1,1" ');
+		else
+			docWrite('<frameset id="mainFrameSet" rows="80,26,22,*,40,1,1,1,1,1,1,1,1,1" ');
+   }
+    else 
+    {
+		docWrite('<frameset id="mainFrameSet" rows="80,26,*,40,1,1,1,1,1,1,1,1,1" ');
+    }
+    docWriteln('frameborder=yes border="0" onload="set_ahdframe()" onunload="closing_main_window()">');
+    docWrite('<frame src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=gobtn_role.htmpl" name="gobtn" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Go button navigation">');
+    docWrite('<frame src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=welcome_banner.htmpl" name="welcome_banner" ');
+    docWriteln('noresize="noresize" scrolling="no" marginheight="0" marginwidth="0" frameborder="0" border="0" title="User name and logoff link">');
+
+    var scroll_flag = "SCROLLING=no";
+    if (ahdtop.cfgUserType != "analyst")
+	scroll_flag = "";
+    if ("$prop.initial_popup" == "")
+    { 
+	if (toolbarTab.length > 1)
+	{
+	    docWrite('<frame id="toolbarframe" name="toolbar" marginheight="0" marginwidth="0" frameborder="0" border="0" noresize="noresize" scrolling="auto" ');
+	    docWriteln('src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=toolbar.htmpl" title="Product tabs">');
+	}
+	if (toolbarTab.length == 0 )
+	{
+	    docWrite('<frame name="product" marginheight="0" marginwidth="0" frameborder="0" border="0" ' + scroll_flag + ' ');
+	    docWrite('src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=notabs.htmpl"');
+
+	}
+	else if (toolbarTab.length == 1 && 
+	    toolbarTab[0].role_menubar == "")
+	{
+	    docWrite('<frame name="product" marginheight="0" marginwidth="0" frameborder="0" border="0" ' + scroll_flag + ' ');
+	    docWrite('src="' + toolbarTab[0].src + '" ');
+	    docWriteln('title="Hidden frame - do not navigate here">');
+	}
+	else 
+	{
+	    docWrite('<frame name="product" marginheight="0" marginwidth="0" frameborder="0" border="0" ' + scroll_flag + ' ');
+	    docWrite('src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=product.htmpl" ');
+	    docWriteln('title="Hidden frame - do not navigate here">');
+	}
+    }
+    else 
+    {
+	docWrite('<frame name="product" marginheight="0" marginwidth="0" frameborder="0" border="0" ' + scroll_flag + ' ');
+	docWrite('src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=role_main.htmpl');
+	if (ahdtop.cfgUserType == "analyst")
+	{
+          if (typeof url_menubar == "string" && url_menubar != "") {
+	        docWrite('+prop.role_menubar=' + url_menubar);
+          }
+          else if (typeof sd_menubar == "string" && sd_menubar != "") {
+	        docWrite('+prop.role_menubar=' + sd_menubar);
+	    }
+	    else {
+	        docWrite('+prop.role_menubar=menubar_sd.htmpl');
+	    }
+	}
+	else 
+	    docWrite('+prop.role_menubar=menubar_.htmpl+KEEP.scrolling=yes');
+	docWriteln('" title="Hidden frame - do not navigate here">');
+    }
+    docWrite('<frame name="copyright" tabindex="-1" noresize="noresize" marginheight="0" marginwidth="0" frameborder="0" border="0" ');
+    docWriteln('src="$CAisd/html/copyright.html" scrolling="no" title="C A copyright notice - read only">');
+     
+    //  DO NOT MODIFY frames boframe, oneway_frame, workframe, workframe_1, workframe_2,
+    //  workframe_3, and top_splash.  These frames are used by the Service Desk application,
+    //  and any modification to them can cause runtime failures.
+
+    docWrite('<frame src="$CAisd/html/empty.html" name="topframe" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWrite('<frame src="$CAisd/html/empty.html" name="boframe" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWrite('<frame src="$CAisd/html/empty.html" name="oneway_frame" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWrite('<frame src="$CAisd/html/empty.html" name="workframe" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWrite('<frame src="$CAisd/html/empty.html" name="workframe_1" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWrite('<frame src="$CAisd/html/empty.html" name="workframe_2" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+docWrite('<frame name="workframe_3" tabindex="-1" noresize="noresize" scrolling="no" ');
+docWrite('src="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=125+HTMPL=load_cache.htmpl" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWrite('<frame src="$CAisd/html/empty.html" name="top_splash" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWrite('<frame src="$CAisd/html/empty.html" name="Export" tabindex="-1" noresize="noresize" scrolling="no" ');
+    docWriteln('marginheight="0" marginwidth="0" frameborder="0" border="0" title="Hidden frame - do not navigate here">');
+    docWriteln('<NOFRAMES>');
+    <PDM_IF "$env.NX_CMDB" == "STANDALONE">
+	docWriteln(nx_unescape('<PDM_FMT KEEPTAGS=yes ESC_STYLE=JS2><H2>Frames-Compatible Browser Required</H2>
+         The web interface to CA CMDB requires a browser that
+         supports frames, such as the latest version of
+         <A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A>,
+         <A ID=lnk004 href=http://www.mozilla.org>Mozilla</A>, or
+         <A ID=lnk005 href=http://www.netscape.com>Netscape</A>.</PDM_FMT>'));
+    <PDM_ELIF "$env.NX_CMDB" == "NOTSTANDALONE">
+	docWriteln(nx_unescape('<PDM_FMT KEEPTAGS=yes ESC_STYLE=JS2><H2>Frames-Compatible Browser Required</H2>
+         The web interface to $ProductName/CA CMDB requires a browser that
+         supports frames, such as the latest version of
+         <A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A>,
+         <A ID=lnk004 href=http://www.mozilla.org>Mozilla</A>, or
+         <A ID=lnk005 href=http://www.netscape.com>Netscape</A>.</PDM_FMT>'));
+    <PDM_ELSE>
+	docWriteln(nx_unescape('<PDM_FMT KEEPTAGS=yes ESC_STYLE=JS2><H2>Frames-Compatible Browser Required</H2>
+         The web interface to $ProductName requires a browser that
+         supports frames, such as the latest version of
+         <A ID=lnk003 href=http://www.microsoft.com>Internet Explorer</A>,
+         <A ID=lnk004 href=http://www.mozilla.org>Mozilla</A>, or
+         <A ID=lnk005 href=http://www.netscape.com>Netscape</A>.</PDM_FMT>'));
+    </PDM_IF>
+    docWriteln('</NOFRAMES>');
+    docWriteln('</frameset>');
+</script>
+</html>
+<PDM_IF 0>
+$Id: menu_frames_role.htmpl,v 1.2 2007/01/04 00:50:37 jenji01 Exp $
+</PDM_IF>

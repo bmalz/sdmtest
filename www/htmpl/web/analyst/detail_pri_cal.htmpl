@@ -1,0 +1,173 @@
+<PDM_IF 0>
+detail_pri_cal.htmpl
+WHEN PRESENTED:
+    When we need to display details of a Priority Calculation Factory
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Priority Calculation Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Priority Calculation"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Priority Calculation $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/spellcheck.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+//This function will set the value of checkbox conrol to checkbox attribute
+function setCheckboxVal(checkbox_element, attr_name)
+{
+	var attr_element = document.main_form.elements[attr_name];
+    if ( typeof attr_element == "undefined" ||
+         typeof checkbox_element == "undefined" ) return;
+    
+    if (checkbox_element.checked)
+    {
+		attr_element.value = 1;
+	}
+	else
+    {
+		attr_element.value = 0;
+	}
+}
+
+//This function will Enable or Disable given dropdown conrols
+function enableDropdown(dropdown_element, status)
+{
+    if ( typeof dropdown_element == "undefined" ) return;
+
+    if (status == true)
+    {
+        dropdown_element.disabled=false;
+        dropdown_element.style.backgroundColor = "";
+    }
+    else
+    {
+        dropdown_element.disabled=true;
+        dropdown_element.style.backgroundColor = "gainsboro";
+    }
+}
+
+//This function will Enable or Disble Dropdown control on the basis of value of value of check box.
+function setDropdownStatus(dropdown_name, checkbox_element)
+{
+	var dropdown_element = document.main_form.elements[dropdown_name];
+	if ( typeof dropdown_element == "undefined" ) return;
+
+    if (checkbox_element.checked)
+    {
+        dropdown_element.disabled=false;
+        dropdown_element.style.backgroundColor = "";
+    }
+    else
+    {
+        dropdown_element.disabled=true;
+        dropdown_element.style.backgroundColor = "gainsboro";
+    }
+}
+
+// This function will intialize necesary dropdown control of this form.
+function initializeControls()
+{
+    if (!_dtl.edit) return;
+    
+	//Inittialize  Dropdown on loading
+	var dropdown_element1 = document.main_form.elements["SET.bk_window"];
+	if (typeof dropdown_element1 != "undefined" && 
+        '$args.bk_window' != '')
+		dropdown_element1.value = "$args.bk_window";
+
+	if ('$args.ci_imp' == '1')
+		enableDropdown(dropdown_element1, true);
+	else
+		enableDropdown(dropdown_element1, false);
+
+	//Inittialize  Dropdown on loading
+	var dropdown_element2 = document.main_form.elements["SET.cnt_vip"];
+	if (typeof dropdown_element2 != "undefined" && 
+        '$args.cnt_vip' != '')
+		dropdown_element2.value = "$args.cnt_vip";
+        
+	if ('$args.cat_urg' == '1')
+		enableDropdown(dropdown_element2, true);
+	else
+		enableDropdown(dropdown_element2, false);
+}
+
+// This function will add "onReset" event to main form.
+function add_reset_event()
+{
+    if (typeof document.main_form != "undefined")
+    {
+      	if(document.main_form.addEventListener)
+        {
+    		document.main_form.addEventListener('reset', initializeControls, false);
+        }
+    	else if(document.main_form.attachEvent)
+        {
+    		document.main_form.attachEvent('onreset', initializeControls);
+        }
+    }
+}
+
+</script>
+
+</head>
+
+<body class="detailro" onload="initializeControls(); add_reset_event();" >
+<PDM_INCLUDE FILE=std_body.htmpl filename="PriorityCalculation" key="$args.sym">
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory=pri_cal>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr="name">
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="delete_flag" lookup=no>
+<PDM_MACRO name=dtlCheckbox hdr="Incydenty" attr="in_flag" off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Problemy" attr="pr_flag" off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 rows=4 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=priMatrix impact_label="Impact" matrix_name="Priority Matrix" reset_btn_name="Reset" urgency_label="Urgency">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext colspan=6 dataclass=hdr value="Priority Calculation Options">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdownWithDesc hdr="Domyślne ustawienia wpływu" attr="imp_def" desc="Default ticket Impact value." sel_fac="imp" value="$args.imp_def.sym">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="Nadpisz wpływ" attr="ci_imp" code="$args.ci_imp" desc="Override the ticket's Impact with the Impact of the attached Affected Service." evt="onClick=\\\"setCheckboxVal(this, 'SET.ci_imp'); setDropdownStatus('SET.bk_window', this)\\\"" value="$args.ci_imp.sym">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdownWithDesc hdr="Zwiększ wpływ" attr="bk_window" desc="Increment the ticket's Impact with this value if the ticket's open date is within a Blackout Window." sel_list="1@,@1@,@2@,@2@,@3@,@3@,@4@,@4@,@5@,@5" value="$args.bk_window">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdownWithDesc hdr="Domyślne ustawienia pilności" attr="urg_def" desc="Default ticket Urgency value." sel_fac="urg" value="$args.urg_def.sym">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="Nadpisz pilność" attr="cat_urg" code="$args.cat_urg" desc="Override the ticket's Urgency with the Urgency of the ticket's area." evt="onClick=\\\"setCheckboxVal(this, 'SET.cat_urg'); setDropdownStatus('SET.cnt_vip', this)\\\"" value="$args.cat_urg.sym">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdownWithDesc hdr="Zwiększ pilmość" attr="cnt_vip" desc="Increment the ticket's Urgency with this value if the ticket's Affected End User has the Escalate Urgency flag set." sel_list="1@,@1@,@2@,@2@,@3@,@3@,@4@,@4@,@5@,@5" value="$args.cnt_vip">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="Przechwyć powód" attr="cap_reason" code="$args.cap_reason" desc="Require the user to enter a justification for manually modifying a ticket's Urgency or Impact." evt="onClick=\\\"setCheckboxVal(this, 'SET.cap_reason'); \\\"" value="$args.cap_reason.sym">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="Włącz dla szablonów" attr="template_flag" code="$args.template_flag" desc="Enable Automatic Priority Calculation for tickets created from Template." evt="onClick=\\\"setCheckboxVal(this, 'SET.template_flag'); \\\"" value="$args.template_flag.sym">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_pri_cal.htmpl ASPEN.4 2010/10/04 15:39:23 saima01 Exp $;
+</PDM_IF>
+
+<PDM_WSP>

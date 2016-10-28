@@ -1,0 +1,58 @@
+<PDM_IF 0>
+list_ctab.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Data Partition Controlled tables.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Data Partition Controlled tables Search";
+var hdrTitleList = "Data Partition Controlled tables List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("ctabsum.rpt", "ctabdtl.rpt");
+var cfgCanEdit = false;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Data Partition Controlled tables">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=ctab>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa tabeli" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Obiekt" attr=obj_name size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=desc size=40>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Data Partition Controlled tables found";
+var msgFound1 = "1 Data Partition Controlled table found";
+var msgFound = "%1 Data Partition Controlled tables found";
+var msgFoundMore = "%1 Data Partition Controlled tables found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Data Partition Controlled table";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa tabeli" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Obiekt" attr=obj_name>
+<PDM_MACRO name=lsCol hdr="Opis" attr=desc>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_ctab.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

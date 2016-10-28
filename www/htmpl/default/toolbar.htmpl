@@ -1,0 +1,40 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	Toolbar.htmpl
+</PDM_IF>	
+<html lang="pl">
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="OP=MENU">
+<LINK REL="stylesheet" href="$CAisd/css/castyles.css">
+<head>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/product_toolbar.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript">
+var ahdtop = parent;
+var ahdframeset = parent;
+var propFormName = "$prop.form_name";
+std_head_setup("no","$args.KEEP.ForLrel");
+disable_right_click();
+var toolbar;
+if (_browser.isSafari)
+{
+  toolbar.tabClick = tabClick;
+  ahdtop.toolbar = toolbar;
+}
+</script>
+</head>
+<body onload="loadOK()" onresize="scrollbarFrame();"class="gn_sdm_header_background">
+<div style='text-align: center'>
+<table id="toolbarTable" class=toolbar_container>
+   <tr valign="bottom">
+   
+<script type="text/javascript">
+generateToolbar();
+</script>
+		<td class='tab_remainder'>&nbsp;</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<PDM_IF 0>
+20130920 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	var frm = "";
+	if ( !parent.product )
+	{
+		frm = parent.categories;
+	}
+	else { frm = parent.product; }
+	
+	if (typeof frm.PrintFindCategory == "function")
+    {
+		var tabCategories = [];
+		// 0 - ss_sym
+		// 1 - sym
+		// 2 - path
+		// 3 - name
+		// 4 - id
+		// 5 - type
+		// 6 - group
+
+		<PDM_LIST PREFIX=list FACTORY=pcat WHERE="sym like '%$args.phrase%' AND owning_contract IN ($args.Owning_Contract) AND owning_contract.delete_flag = 0 AND delete_flag = 0" ORDER_BY = "sym">
+			var Category = "$list.ss_sym";
+			var CategorySplit = Category.split('.');
+			var CategoryLastItem = CategorySplit[CategorySplit.length-1];
+			var CategoryFirstItem = CategorySplit[0];
+			CategorySplit.pop();
+			var CategoryPath = CategorySplit.join(' / ');
+
+			if(CategoryFirstItem == parent.TopCategory) {
+				if(CategoryLastItem.toLowerCase().indexOf('$args.phrase'.toLowerCase()) > -1) {
+					if('$list.in_flag' == '1')
+						tabCategories.push(["$list.ss_sym", "$list.sym", CategoryPath, CategoryLastItem, "$list.id", "in", "$list.group" ]);
+
+					if('$list.cr_flag' == '1') 
+						tabCategories.push(["$list.ss_sym", "$list.sym", CategoryPath, CategoryLastItem, "$list.id", "cr", "$list.group" ]);
+				}
+			}
+		</PDM_LIST>
+		
+		frm.PrintFindCategory(tabCategories);
+    }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

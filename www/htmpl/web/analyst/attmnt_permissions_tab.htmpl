@@ -1,0 +1,34 @@
+<PDM_IF 0>
+@(#)$Id: attmnt_permissions_tab.htmpl ASPEN.1 2010/10/27 17:25:08 saima01 Exp $
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=attmnt_permissions_tab" factory=attmnt_folder>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/webtab.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+
+<BODY onLoad='MakePermissionScreen()'>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Permissions Tab">
+<SCRIPT>
+<PDM_MACRO name=tabBanner title="Permissions" show_bar=false>
+</SCRIPT>
+
+<PDM_IF "$args.id" == "0">
+	<PDM_INCLUDE FILE=kt_permissions.htmpl sRead=$args.READ_PGROUP sWrite=$args.WRITE_PGROUP iInheritPermission=$args.parent_id sPrimaryRead=$args.PARENT_READ_PGROUP sPrimaryWrite=$args.PARENT_WRITE_PGROUP type=2 iParentID=$args.parent_id IsEdit=$args.KEEP.IS_EDIT folderID=$args.id>
+<PDM_ELSE>
+	<PDM_INCLUDE FILE=kt_permissions.htmpl sRead=$args.READ_PGROUP sWrite=$args.WRITE_PGROUP iInheritPermission=$args.inherit_permission_id sPrimaryRead=$args.PARENT_READ_PGROUP sPrimaryWrite=$args.PARENT_WRITE_PGROUP type=2 iParentID=$args.parent_id IsEdit=$args.KEEP.IS_EDIT folderID=$args.id>
+</PDM_IF>
+
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: attmnt_permissions_tab.htmpl,v 1.2 2006/11/08 00:48:55 olsjo01 Exp $
+</PDM_IF>

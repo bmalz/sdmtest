@@ -1,0 +1,86 @@
+<PDM_IF 0>
+detail_ical_event_template.htmpl
+WHEN PRESENTED:
+    When we need to display a details of a single iCalendar Event Template
+INTENT:
+    Display the detail and edit info for the iCalendar Event Template
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  ical_event_template args	The ical_event_template object we are displaying.
+							                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+							                        definition of attributes for 'OBJECT ical_event_template'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym iCalendar Event Template Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update iCalendar Event Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New iCalendar Event Template $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="iCalendar Event Template" key="$args.sym">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=ical_event_template>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=obj_type>
+<PDM_MACRO name=dtlReadonly hdr="Data rozpoczęcia" attr=start_date>
+<PDM_MACRO name=dtlReadonly hdr="Data zakończenia" attr=end_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Alarm" attr=alarm lookup=no>
+<PDM_MACRO name=dtlTextbox hdr="Klasyfikacja" attr=categories colspan=2 size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Podsumowanie" attr=summary colspan=3 size=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 rows=4 size=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="URL" attr=url colspan=3 size=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Dodatkowe wpisy" attr=extra_entries colspan=3 rows=4 size=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: detail_ical_event_template.htmpl ANDERSON.2 2009/06/16 15:38:14 bihtu01 Exp $";
+</PDM_IF>
+<PDM_WSP>

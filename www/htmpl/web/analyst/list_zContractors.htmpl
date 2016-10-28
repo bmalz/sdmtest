@@ -1,0 +1,59 @@
+<PDM_IF 0>
+20130916 bmalz @ e-xim
+</PDM_IF>
+<HTML lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwarka kontrahentów";
+var hdrTitleList = "Lista kontrahentów";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zContractorssum.rpt", "zContractorsdtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=sfStart factory="zContractors">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="sym" size=20>
+<PDM_MACRO name=sfTextbox hdr="Ulica" attr="Street" size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod pocztowy" attr="PostCode" size=20>
+<PDM_MACRO name=sfTextbox hdr="Miasto" attr="City" size=20>
+<PDM_MACRO name=sfTextbox hdr="Państwo" attr="Country" size=20>
+<PDM_IF "zContractors" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO NAME=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono kontrahentów";
+  var msgFound1 = "Znaleziono 1 kontrahenta";
+  var msgFound = "Znaleziono %1 kontrahentów";
+  var msgFoundMore = "Znaleziono %1 kontrahentów.  Wyświetlono %2 z %3";
+  var msgSelect = "Kliknij aby wybrać żądany element";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="sym" exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Ulica" attr="Street">
+<PDM_MACRO name=lsCol hdr="Kod pocztowy" attr="PostCode">
+<PDM_MACRO name=lsCol hdr="Miasto" attr="City">
+<PDM_MACRO name=lsCol hdr="Państwo" attr="Country">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

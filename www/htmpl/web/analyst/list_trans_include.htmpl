@@ -1,0 +1,220 @@
+<PDM_IF 0>
+list_trans_include.htmpl
+WHEN PRESENTED:
+	Common code shared by all list form for Status Transition.
+	Input properties:
+        transFactory: factory for the transition (cr_trans, in_trans, pr_trans, chg_trans or iss_trans
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="NBTAB=list_trans_include" factory=cr_trans>
+<!-- BEGIN ($prop.transFactory, $args.KEEP.PERSID) -->
+<PDM_INCLUDE FILE=std_body.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+var autoRefreshWindows = new Object();
+function doInitialTransitions(factory, type, persid)
+{
+    var actWinName = "";
+    var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+    "+OP=SEARCH+QBE.EQ.delete_flag=0"+
+    "+KEEP.FACT="+factory+"+TYPE="+type+
+    "+KEEP.PERSID="+persid+
+    "+HTMPL=";
+
+	switch(factory) {
+		case "cr_trans":
+            actWinName = "Request";
+            url += "list_crs_cr.htmpl"+
+                "+FACTORY=crs_cr";
+			break;
+		case "in_trans":
+            actWinName = "Incident";
+            url += "list_crs_in.htmpl"+
+                "+FACTORY=crs_in";
+			break;
+		case "pr_trans":
+            actWinName = "Problem";
+            url += "list_crs_pr.htmpl"+
+                "+FACTORY=crs_pr";
+			break;
+		case "chg_trans":
+            actWinName = "Change Order";
+            url += "list_chgstat.htmpl"+
+                "+FACTORY=chgstat";
+			break;
+		case "iss_trans":
+            actWinName = "Issue";
+            url += "list_issstat.htmpl"+
+                "+FACTORY=issstat";
+			break;
+	}
+    if (type == 0)
+        actWinName+="InitialTransitions";
+    else
+        actWinName+="UpdateTransitions";
+    
+    var features = "directories=no" + ",location=no" + ",menubar=no" + ",status=no" + 
+                    ",height=" + popupHeight(MEDIUM_POPUP) +
+                    ",width=" + popupWidth(MEDIUM_POPUP);
+    url += "+popupType=" + MEDIUM_POPUP;
+    preparePopup(url,actWinName,features,void(0),void(0),"KEEP.AHD_menu=No").focus();  //focus on the popup too
+}
+
+<PDM_IF "$prop.transFactory" == "cr_trans">
+<PDM_IF $ACCESS.FAC_cr_trans == 2>
+var cfgExtraButton;     //Extra button to launch Initial Transitions
+<PDM_IF "$args.KEEP.PERSID" == "">
+cfgExtraButton=new Array("Initial_Transitions", "doInitialTransitions('$prop.transFactory', 0, '$args.KEEP.PERSID')");
+<PDM_ELSE>
+cfgExtraButton=new Array("Update_Transitions", "doInitialTransitions('$prop.transFactory', 1, '$args.KEEP.PERSID')");
+</PDM_IF>
+<PDM_MACRO name=sfStart create=true extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.transFactory" == "in_trans">
+<PDM_IF $ACCESS.FAC_in_trans == 2>
+var cfgExtraButton;     //Extra button to launch Initial Transitions
+<PDM_IF "$args.KEEP.PERSID" == "">
+cfgExtraButton=new Array("Initial_Transitions", "doInitialTransitions('$prop.transFactory', 0, '$args.KEEP.PERSID')");
+<PDM_ELSE>
+cfgExtraButton=new Array("Update_Transitions", "doInitialTransitions('$prop.transFactory', 1, '$args.KEEP.PERSID')");
+</PDM_IF>
+<PDM_MACRO name=sfStart create=true extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.transFactory" == "pr_trans">
+<PDM_IF $ACCESS.FAC_pr_trans == 2>
+var cfgExtraButton;     //Extra button to launch Initial Transitions
+<PDM_IF "$args.KEEP.PERSID" == "">
+cfgExtraButton=new Array("Initial_Transitions", "doInitialTransitions('$prop.transFactory', 0, '$args.KEEP.PERSID')");
+<PDM_ELSE>
+cfgExtraButton=new Array("Update_Transitions", "doInitialTransitions('$prop.transFactory', 1, '$args.KEEP.PERSID')");
+</PDM_IF>
+<PDM_MACRO name=sfStart create=true extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.transFactory" == "chg_trans">
+<PDM_IF $ACCESS.FAC_chg_trans == 2>
+var cfgExtraButton;     //Extra button to launch Initial Transitions
+<PDM_IF "$args.KEEP.PERSID" == "">
+cfgExtraButton=new Array("Initial_Transitions", "doInitialTransitions('$prop.transFactory', 0, '$args.KEEP.PERSID')");
+<PDM_ELSE>
+cfgExtraButton=new Array("Update_Transitions", "doInitialTransitions('$prop.transFactory', 1, '$args.KEEP.PERSID')");
+</PDM_IF>
+<PDM_MACRO name=sfStart create=true extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.transFactory" == "iss_trans">
+<PDM_IF $ACCESS.FAC_iss_trans == 2>
+var cfgExtraButton;     //Extra button to launch Initial Transitions
+<PDM_IF "$args.KEEP.PERSID" == "">
+cfgExtraButton=new Array("Initial_Transitions", "doInitialTransitions('$prop.transFactory', 0, '$args.KEEP.PERSID')");
+<PDM_ELSE>
+cfgExtraButton=new Array("Update_Transitions", "doInitialTransitions('$prop.transFactory', 1, '$args.KEEP.PERSID')");
+</PDM_IF>
+<PDM_MACRO name=sfStart create=true extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false extracreateurl=$args.KEEP.STATUS_CODE factory=$prop.transFactory>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.PERSID" == "">
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status factory=$prop.statFactory>
+</PDM_IF>
+<PDM_MACRO name=sfDropdown hdr="Nowy status" attr=new_status factory=$prop.statFactory>
+
+searchFilterDropdown("Default","is_default","","No","0","Yes","1");
+searchFilterDropdown("Must Comment","must_comment","","No","0","Yes","1");
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_IF "$prop.transFactory" == "in_trans" || "$prop.transFactory" == "cr_trans">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup attr=t_type>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis statusu" attr=description colspan=3 size=80>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+
+<pdm_jscript file=list_edit.js>
+startListEdit(__search_filter);
+listEditStartRow();
+listEditField("delete_flag");
+listEditReadonly("description", 3);
+listEditEndRow();
+<PDM_IF "$args.KEEP.PERSID" == "">
+listEditField("status");
+</PDM_IF>
+listEditField("new_status");
+listEditField("is_default");
+listEditField("must_comment");
+endListEdit();
+
+var msgFoundNone, msgFound1, msgFound, msgFoundMore, msgSelect;
+msgFoundNone = "No status transition found";
+msgFound1    = "1 status transition found";
+msgFound     = "%1 status transitions found";
+msgFoundMore = "%1 status transitions found.  Displaying %2 through %3";
+msgSelect    = "Click to select desired status transition";
+
+function display_YN_value(value)
+{
+  if ( value == "1" )
+     value = "Yes";
+  else 
+     value = "No";
+  rs.data(value);     
+}
+function display_T_value(value)
+{
+<PDM_IF "$prop.MultiTenancy" != "off">
+    if ( value != "" && tenant != "" )
+    {
+        value += ahdtop.cfgIndTenant;
+    }
+</PDM_IF>
+    rs.data(value);
+}
+function display_T_value2(value)
+{
+<PDM_IF "$prop.MultiTenancy" != "off">
+    if ( value != "" && tenant2 != "" )
+    {
+        value += ahdtop.cfgIndTenant;
+    }
+</PDM_IF>
+    rs.data(value);
+}
+var tenant, tenant2;
+<PDM_IF "$args.KEEP.PERSID" == "">
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="tenant = \"@{list.status.tenant}\"">
+<PDM_MACRO name=lsWrite text="tenant2 = \"@{list.new_status.tenant}\"">
+<PDM_MACRO name=lsCol hdr="Status" attr=status fmtfunc=display_T_value link=yes sort="status.sym ASC, new_status.sym ASC">
+<PDM_MACRO name=lsCol hdr="Nowy status" attr=new_status fmtfunc=display_T_value2 link=yes>
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr=is_default exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_MACRO name=lsCol hdr="Wymaga komentarza" attr=must_comment exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_IF "$prop.transFactory" == "in_trans" || "$prop.transFactory" == "cr_trans">
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=t_type>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Opis statusu" attr=description>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+<PDM_ELSE>
+<PDM_INCLUDE FILE=list_trans_include2.htmpl>
+</PDM_IF>
+</SCRIPT>
+</PDM_IF>
+
+<!-- END -->

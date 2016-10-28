@@ -1,0 +1,16 @@
+<PDM_IF 0>
+cancel_empty.htmpl
+WHEN PRESENTED:
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+</HEAD>
+<BODY>
+<PDM_FORM NAME="main_form">
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: cancel_empty.htmpl,v 1.0 2007/05/17 15:59:41 jenji01 Exp $;
+</PDM_IF>

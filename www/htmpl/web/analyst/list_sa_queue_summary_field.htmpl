@@ -1,0 +1,64 @@
+<PDM_IF 0>
+list_sa_queue.htmpl
+WHEN PRESENTED:
+    When we need to display a list of SA Queue Summary Fields (sa_queue_summary_field factory)
+INTENT:
+    Display the list of SA Queue Summary Fields
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Queue Summary Fields Search";
+			var hdrTitleList = "Queue Summary Fields List";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=sfStart factory="sa_queue_summary_field">
+<PDM_MACRO name=sfStartRow>
+					document.writeln('<INPUT TYPE=hidden NAME=QBE.GT.id VALUE=0>');
+					
+<PDM_MACRO name=sfDropdown hdr="Nazwa pola" attr="fieldID.fieldName" factory=sa_field>
+<PDM_MACRO name=sfTextbox hdr="Nazwa wyświetlana" attr="fieldID.displayName" size=40>
+<PDM_MACRO name=sfEnd>
+			var edit_field_count = 0;
+
+
+		</SCRIPT>
+		<PDM_FORM NAME="frmFID">
+		</PDM_FORM>
+		
+		
+<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+
+  				var msgFoundNone = "No Queue Summary Fields found";
+ 	 			var msgFound1 = "1 Queue Summary Field found";
+  				var msgFound = "%1 Queue Summary Fields found";
+  				var msgFoundMore = "%1 Queue Summary Fields found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired Queue Summary Field";
+  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa pola" attr="fieldID.fieldName" exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa wyświetlana" attr="fieldID.displayName" link="no">
+<PDM_MACRO name=lsCol hdr="Typ pola" attr="fieldID.fieldType" link="no" sort="no">
+<PDM_MACRO name=lsCol hdr="Kolejność" attr="fieldOrder" link="no">
+<PDM_MACRO name=lsEnd>
+  			</script>
+		
+</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>
+<PDM_WSP>

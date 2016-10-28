@@ -1,0 +1,100 @@
+<PDM_IF 0>
+$Id: list_kdsched.htmpl Exp $
+WHEN PRESENTED:
+	When we need to display the Knowledge Management Schedule
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="OP=DISPLAY_FORM&HTMPL=list_kdsched.htmpl" factory=kd>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Knowledge Schedule Filter";
+var hdrTitleList = "Knowledge Management Schedule";
+var msgMore = "...%1 more documents";
+var msgMore1 = "...1 more document";
+
+var tenantSort = "no"; //By default all tenant columns are sortable. This variable is needed to make the
+						//tenant column not sortable
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<PDM_IF 0>Knowledge Schedule Configuration</PDM_IF>
+<PDM_INCLUDE FILE=list_kdsched_config.htmpl>
+
+<script type="text/javascript">
+var rptName = new Array("kdsum.rpt", "kd_itildtl.rpt");
+var cfgCanEdit = true;
+
+var cfgUserAuth = parseInt("$UserAuth",10);
+var from_detail = "$args.KEEP.from_detail";
+var advSearchCatIds = "$args.KEEP.catIds";
+var advSearchCatPathCaptions = "$args.KEEP.catPathCaptions";
+</script>
+<script type="text/javascript" SRC="$CAisd/scripts/val_type.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" SRC="$CAisd/scripts/comboname.js"></script>
+<script type="text/javascript" SRC="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body CLASS="list" onload="setupSchedule()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Knowledge">
+<script type="text/javascript">
+
+<PDM_MACRO name=sfStart create=false export=no factory="KD">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=list_kdsched.htmpl>');
+<PDM_MACRO name=sfStartRow>
+	document.writeln("<th valign=baseline align=left colspan=3><span class=labeltext>Event Type </span></th>");
+	document.writeln("<tr><td nowrap colspan=3>");
+		ShowCheckbox("cbSubmission", "Submission", true);
+		ShowCheckbox("cbReview", "Review", true);
+		ShowCheckbox("cbPublication", "Publication", true);
+		ShowCheckbox("cbRetirement", "Retirement", true);
+	document.writeln("</td></tr>");
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Właściciel" attr=OWNER_ID>
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=ASSIGNEE_ID>
+<PDM_MACRO name=sfLookup hdr="Znawca tematu" attr=SUBJECT_EXPERT_ID>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="STATUS_ID">
+<PDM_MACRO name=sfStartRow>		
+	searchCategoriesMultiLookup(2);
+
+<PDM_MACRO name=sfEnd>		
+
+
+
+
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<div id=schedButtonDiv class=page_header></div>
+<script type="text/javascript">
+var msgFoundNone = "No Knowledge Documents found";
+var msgFound1 = "1 Knowledge Documents found";
+var msgFound = "%1 Knowledge Documents found";
+var msgFoundMore = "%1 Knowledge Documents found.  Displaying %2 through %3";
+
+var ref_num_style;
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Dokument bazy wiedzy #" attr=id sort=no>
+<PDM_MACRO name=lsCol hdr="Tytuł" attr=TITLE link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Data utworzenia" attr=CREATION_DATE sort=no>
+<PDM_MACRO name=lsCol hdr="Data publikacji" attr=PUBLISHED_DATE sort=no>
+<PDM_MACRO name=lsCol hdr="Data rozpoczęcia" attr=START_DATE sort=no>
+<PDM_MACRO name=lsCol hdr="Data przeglądu" attr=REVIEW_DATE sort=no>
+<PDM_MACRO name=lsCol hdr="Data wygaśnięcia" attr=EXPIRATION_DATE sort=no>
+<PDM_MACRO name=lsEnd sort="CREATION_DATE">
+</script>
+<!-- Creating div to display calendar views -->
+<div id=schedDiv style="display:block"></div>
+<script type="text/javascript">
+// Hiding list view by default
+rs.hide();
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

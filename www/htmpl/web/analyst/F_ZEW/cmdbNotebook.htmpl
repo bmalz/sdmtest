@@ -1,0 +1,113 @@
+<PDM_IF 0>
+        cmdbNotebook.htmpl
+        Displays the notebook tabs used by all CI detail forms.
+	SCO # 29218 - 10/15/2009 - aliab01 - Added Related Configuration Items tab back into Anderson/12.5 release
+	                           There is no longer a SD standalone install, hence re-organized the tabs to remove the duplicate code blocks.
+</PDM_IF>
+<PDM_MACRO name=startNotebook hdr=nrro_nb>
+
+<PDM_IF 0>
+        // Arguments used for display of empty tabs when CI is first created.
+</PDM_IF>
+
+<PDM_SET args.empty_tab_url="OP=SHOW_DETAIL+HTMPL=cmdb_empty_tab.htmpl+FACTORY=nr+PERSID=$args.persistent_id+NO_DP=yes+KEEP.TAB_BANNER">
+<PDM_SET args.empty_tab_height="100">
+
+
+<PDM_MACRO name = startTabGroup title="Atrybuty CMDB">
+<PDM_MACRO NAME = TAB  title="Atrybuty" file=nr_cmdb_${prop.extension}_tab.htmpl>
+<PDM_MACRO NAME = TAB  title="Wsparcie"  file="nr_serv_tab.htmpl" new_row=Yes>
+<PDM_IF "$args.id" == "0">
+    <PDM_SET args.no_dp_option="+NO_DP=yes">
+<PDM_ELSE>
+    <PDM_SET args.no_dp_option="">
+</PDM_IF>
+
+<PDM_IF "$prop.form_name_2" != "cntx" && "$prop.form_name_2" != "locx" && "$prop.form_name_2" != "orgx">
+      <PDM_MACRO NAME = TAB  title="Inventory"                 file="nr_inv_tab.htmpl">
+</PDM_IF>
+
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=nr+PERSID=$args.persistent_id+NO_DP=yes">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=nr+PERSID=$args.persistent_id+SDBP_FLAG=1">
+</PDM_IF>
+
+
+<PDM_IF 0>
+	//End of BSI+CMDB Integration Tabs
+</PDM_IF>
+
+
+
+
+<PDM_MACRO name = startTabGroup>
+   <PDM_MACRO NAME = TAB  title="Kontakty" file="nr_contact_tab.htmpl">
+
+<PDM_IF "$prop.form_name_2" == "cntx" ||
+        "$prop.form_name_2" == "locx" || 
+        "$prop.form_name_2" == "orgx">
+
+    <!-- Organization does not have Organization tab displayed. -->
+
+    <PDM_IF "$prop.form_name_2" == "cntx">
+               <PDM_MACRO NAME = TAB  title="Lokalizacja" file="nr_loc_tab.htmpl">
+               <PDM_MACRO NAME = TAB  title="Organizcje" ID=nr_org height=300 
+                    SRC="OP=SEARCH+FACTORY=org+QBE.EQ.oenv.nr.id=$args.wc_dob_id+KEEP.forNrToOrg=1+KEEP.NR_PERSID=$args.persistent_id+KEEP.NR_ID=$args.id">  
+    <PDM_ELIF "$prop.form_name_2" == "locx">
+              <PDM_MACRO NAME = TAB  title="Organizcje" ID=nr_org height=300 
+                    SRC="OP=SEARCH+FACTORY=org+QBE.EQ.oenv.nr.id=$args.wc_dob_id+KEEP.forNrToOrg=1+KEEP.NR_PERSID=$args.persistent_id+KEEP.NR_ID=$args.id">  
+    </PDM_IF>
+
+<PDM_ELSE>
+       <PDM_MACRO NAME = TAB  title="Lokalizacja" file="nr_loc_tab.htmpl">
+</PDM_IF>
+
+
+<PDM_IF "$env.NX_CMDB" == "NOTSTANDALONE"> <PDM_IF 0> There is no Service Desk Standalone, Anderson/12.5 is Combined Install (or) CMDB Only Install   </PDM_IF>
+
+ <PDM_MACRO name = startTabGroup title ="Dodatkowe Informacje">
+        <PDM_IF $ACCESS.FAC_svc_contract \> 0 >
+
+            <PDM_MACRO NAME = TAB  title="Kontrakty serwisowe" ID=nr_svc_contract height=300 
+                SRC="OP=SEARCH+FACTORY=svc_contract+QBE.EQ.my_nr_maps.map_persid=nr:$dob.id+KEEP.forNrToSvcContract=1">  
+        </PDM_IF>
+
+    <PDM_MACRO name = startTabGroup title ="Powiązane zgłoszenia">
+
+        <PDM_IF 0>
+			<PDM_MACRO NAME = TAB  title="Issues" SRC="OP=SEARCH+FACTORY=iss+QBE.EQ.asset.nr.id=$dob.id+KEEP.forNrtoIss=1+QBE.EQ.active=1" height=300 new_row=YES>
+		</PDM_IF>
+        <PDM_MACRO NAME = TAB  title="Incydenty" src="OP=SEARCH+FACTORY=in+QBE.EQ.affected_resource=$dob.id+QBE.EQ.active=1+KEEP.forNrtoIn=1" height=300>  
+        <PDM_MACRO NAME = TAB  title="Problemy" src="OP=SEARCH+FACTORY=pr+QBE.EQ.affected_resource=$dob.id+QBE.EQ.active=1+KEEP.forNrtoPr=1" height=300>  
+        <PDM_MACRO NAME = TAB  title="Wnioski" SRC="OP=SEARCH+FACTORY=cr+QBE.NE.type=P+QBE.NE.type=I+QBE.EQ.affected_resource=$dob.id+QBE.EQ.active=1+KEEP.forNrtoCr=1" height=300>   
+        
+        <PDM_IF "$args.id" != "0">
+            <PDM_IF $UserAuth \> 1 > 
+                <PDM_SET args.keep_nr_id="KEEP.nr_id=$args.id">
+            <PDM_ELSE>
+                <PDM_SET args.keep_nr_id="KEEP.ALLOW_CREATE_CHG_SPEC=false">
+            </PDM_IF>
+            
+		</PDM_IF>
+
+   
+
+    <PDM_MACRO name = startTabGroup title="Zarządzanie Wiedzą">	  
+        <PDM_IF "$args.id" != "0">
+
+                   <PDM_MACRO NAME = TAB  title="Baza Wiedzy" src="OP=SEARCH+FACTORY=KD+QBE.EQ.SD_ASSET_ID=$args.id+KEEP.search_type=nr+QBE.GE.ACTIVE_STATE=0" height="300">  
+        <PDM_ELSE>
+
+                   <PDM_MACRO NAME = TAB  title="Baza Wiedzy" ID=knowledge SRC="$args.empty_tab_url=Knowledge Document List" height=$args.empty_tab_height>  
+        </PDM_IF>
+	
+	
+		
+</PDM_IF>
+<PDM_MACRO name = endNotebook>
+
+<PDM_IF 0>
+@(#)$Id: cmdbNotebook.htmpl ASPEN.25 2012/06/13 15:00:45 putsr02 Exp $;
+</PDM_IF>
+

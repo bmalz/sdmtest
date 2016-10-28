@@ -1,0 +1,51 @@
+<html lang="en"><PDM_IF 0>
+$Id: sd_main_role.htmpl,v 1.0 2006/04/25 16:53:28 poibr01 Exp $
+	WHEN PRESENTED:
+	    As the ticketing tab of the main page
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="OP=MENU+NBTAB=sd">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+function frameset_loaded()
+{
+	ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].loaded=true;
+    ahdframe = window.cai_main;
+    ahdframeset.ahdframe = ahdframe;
+    if (typeof parent.ahdframe == "object")
+	parent.ahdframe = ahdframe;
+    if (typeof parent.ahdframeset == "object")
+	parent.ahdframeset.ahdframe = ahdframe;
+}
+</script>
+</HEAD>
+<SCRIPT>
+<PDM_IF "$prop.initial_popup" == "">
+    <PDM_MACRO NAME=startFrameset id="frameset1" cols="240,*,0" border=2 FRAMEBORDER=1 onload="frameset_loaded();">
+    <PDM_MACRO NAME=frame id="scoreboard" frame_name="scoreboard" web_form_name="scrbd"  scrolling="$SESSION.scrolling" TITLE="Scoreboard" style="border: 1px #8B939A solid;" MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=1>
+	<PDM_MACRO NAME=frame id="cai_main" frame_name="cai_main" web_form_name="cai_main"  scrolling="$SESSION.scrolling" TITLE="$ProductName main" style="border: 1px #8B939A solid;" FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0>                  
+    <pdm_if "$prop.UpdatedAnnouncementsPopup" != "">
+	<PDM_MACRO NAME=frame id="hidden_frame" frame_name="hidden_frame" web_form_url="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=cnote_tracker.htmpl+KEEP.CNOTE_TRACKER=1+BKGD=1" tabindex=-1 TITLE="Hidden frame - do not navigate here">
+    </pdm_if>
+    <PDM_MACRO NAME=endFrameset>
+<PDM_ELSE>
+    <PDM_MACRO NAME=startFrameset id="frameset1" border=2 onload="frameset_loaded();">
+	<PDM_MACRO NAME=frame id="cai_main" frame_name="cai_main" web_form_url="$cgi?SID=$SESSION.SID+FID=123+$prop.initial_load_last_use" scrolling="$SESSION.scrolling" TITLE="$ProductName main" style="border: 1px #8B939A solid;" FRAMEBORDER=0 MARGINHEIGHT=0 MARGINWIDTH=0>
+    <PDM_MACRO NAME=endFrameset>
+</PDM_IF>
+</SCRIPT>
+</HTML>

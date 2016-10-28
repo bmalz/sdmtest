@@ -1,0 +1,247 @@
+<pdm_if 0>
+nr_child_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Asset 
+INTENT:
+    Display a notebook page for nr children.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be includednr children in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</pdm_if>
+<html lang="en"><head>
+<pdm_pragma RELEASE=110>
+<pdm_wsp mode=edit factory=nr preview="NBTAB=nr_rel_tab">
+<pdm_include file=styles.htmpl>
+<pdm_include file=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<pdm_include file=std_body.htmpl filename="">
+<pdm_form name="frmDTLRO">
+<pdm_jscript file=convert_date.js>
+<pdm_jscript file=date_helper.js>
+<script language="JavaScript">
+if (argID != "0")
+{
+	function add_button_to_tab_banner(){
+	<pdm_if $ACCESS.FAC_hier \> 1>
+		ImgBtnRow();
+		ImgBtnCreate("btn203", "Add_Parent", 'add_hier(this.form, "$args.persistent_id", <PDM_FMT PAD=NO ESC_STYLE=JS2>"$cst.combo_name"</PDM_FMT>, <PDM_FMT PAD=NO ESC_STYLE=JS2>"$args.name"</PDM_FMT>, 0)', <pdm_if $UserAuth \> 1>true<pdm_else>false</pdm_if>, 120);
+		ImgBtnCreate("btn204", "Add_Child", 'add_hier(this.form, "$args.persistent_id", <PDM_FMT PAD=NO ESC_STYLE=JS2>"$cst.combo_name"</PDM_FMT>, <PDM_FMT PAD=NO ESC_STYLE=JS2>"$args.name"</PDM_FMT>, 1)', <pdm_if $UserAuth \> 1>true<pdm_else>false</pdm_if>, 120);
+		ImgBtnEndRow();
+	</pdm_if>
+	}
+}
+if (argID != "0") {
+	tab_banner("Related Configuration Items List",true);
+}
+else
+{
+	tab_banner("Related Configuration Items List");
+}	
+var html = "";
+<pdm_if $args.child_hier.length == 0 && $args.parent_hier.length == 0>
+html += "<table><tr><td align='left' class='detailro' colspan='4'>\n";
+html += "There are no related configuration items\n";
+html += "</td></tr></table>\n";
+<pdm_else>
+var assetPersid = new Array();
+var relPersid = new Array();
+var lnkid = 0;
+<pdm_if "$prop.MultiTenancy" != "off">
+<pdm_if '$ACCESS.Tenant_Restriction' != '1'>
+var showTenantColumn = true;
+var showPublicColumn = false;
+<pdm_elif '$INTERFACE.tn_admin' != '0' || '$ACCESS.admin' != '0'>
+var showTenantColumn = false;
+var showPublicColumn = true;
+<pdm_else>
+var showTenantColumn = false;
+var showPublicColumn = false;
+</pdm_if>
+</pdm_if>
+
+<pdm_if $args.child_hier.length != 0 >
+var childMenu = new ContextMenu("childMenu");
+childMenu.addItem("View Child","showDetailWithPersid(self.assetPersid[self.lnkid])");
+childMenu.addItem("View Relation","showDetailWithPersidKeep(self.relPersid[self.lnkid],'ForHier','$args.persistent_id')");
+if ( !_dtl.edit ) {
+childMenu.addItem("Delete Relation","delete_hier('$args.persistent_id',self.relPersid[self.lnkid])");
+}
+childMenu.finish();
+</pdm_if>
+<pdm_if $args.parent_hier.length != 0 >
+var parentMenu = new ContextMenu("parentMenu");
+parentMenu.addItem("View Parent","showDetailWithPersid(self.assetPersid[self.lnkid])");
+parentMenu.addItem("View Relation","showDetailWithPersidKeep(self.relPersid[self.lnkid],'ForHier','$args.persistent_id')");
+if ( !_dtl.edit ) {
+parentMenu.addItem("Delete Relation","delete_hier('$args.persistent_id',self.relPersid[self.lnkid])");
+}
+parentMenu.finish();
+</pdm_if>
+<pdm_if "$SESSION.usingScreenReader" == "1">
+html += "<table id='tbl201' class='tab' summary='Parent C.I.s'>\n";
+<pdm_else>
+html += "<table id='tbl201' class='tab' summary='Related C.I.s'>\n";
+</pdm_if>
+html += "<tr>\n";
+
+html += "<th scope='col' align='left' class='results'>\n";
+html += "Parent CI(s)";
+html += "</th>\n";
+
+<pdm_if "$prop.MultiTenancy" != "off">
+if ( showTenantColumn )
+  html += "<th scope='col' align='left' class='results'>Tenant</th>";
+else if ( showPublicColumn )
+  html += "<th scope='col' align='left' class='results'>Public</th>";
+</pdm_if>
+
+html += "<th scope='col' align='left' class='results'>Contact</th>\n";
+html += "<th scope='col' align='left' class='results'>Date of Entry</th>\n";
+html += "<th scope='col' align='left' class='results'>Identifier</th>\n";
+html += "</tr>\n";
+<pdm_set args.hasParent=0>
+var counter=0;
+<pdm_list SOURCE=args.parent_hier ESC_STYLE=C>
+<pdm_if "$args.parent_hier.parent.id" != "">
+<pdm_set args.hasParent=1>
+counter++;
+var sClass;
+if(counter%2)
+  sClass = "results0";
+else
+  sClass = "results1";
+html += parentMenu.tr(" lnkid=" + lnkid, "class=" + sClass) + "\n";
+
+html += "<td class='results'>\n";
+assetPersid[lnkid] = "nr:$args.parent_hier.parent.id";
+relPersid[lnkid] = "hier:$args.parent_hier.id";
+html += "<a" + detailNextID() +
+        " href=\"javascript:showDetailWithPersid(assetPersid[" + lnkid +
+        "]);\"" + parentMenu.mouseEvents("lnkid=" + lnkid) + getMOPreviewEventHtml( assetPersid[lnkid] ) + ">\n" +
+        "$args.parent_hier.parent.name</a>\n";
+html += "</td>\n";
+
+<pdm_if "$prop.MultiTenancy" != "off">
+if ( showTenantColumn )
+  html += "<td class='results'>$args.parent_hier.parent.tenant.name</td>";
+else if ( showPublicColumn )
+<pdm_if "$args.parent_hier.parent.tenant" == "">
+  html += "<td class='results'>Yes</td>";
+<pdm_else>
+  html += "<td class='results'>No</td>";
+</pdm_if>
+</pdm_if>
+
+html += "<td valign='top' class='results'>\n";
+html += "<a" + detailNextID(true) +
+        " href=\"javascript:showDetailWithPersid('cnt:$args.parent_hier.parent.resource_contact')\"" + getMOPreviewEventHtml( "cnt:$args.parent_hier.parent.resource_contact" ) + ">\n";
+html += "$args.parent_hier.parent.resource_contact.combo_name</a></td>\n";
+html += "<td valign='top' class='results'>\n";
+html += date_to_string('$args.parent_hier.log_date_INT_DATE', 0) + "\n";
+html += "</td>\n";
+html += "<td valign='top' class='results'>$args.parent_hier.license_num</td>\n";
+html += "</tr>\n";
+lnkid++;
+</pdm_if>
+</pdm_list>
+
+<pdm_if "$args.hasParent" == "0">
+html += "<tr><td align='left' class='detailro' colspan='4'>\n";    
+html += "No Parent Configuration Items Attached\n";
+html += "</td></tr>\n";
+</pdm_if>
+
+<pdm_if "$SESSION.usingScreenReader" == "1">
+html += "</table>\n";
+html += "<table id='tbl202' class='tab' summary='Child C.I.s'>\n";
+</pdm_if>
+html += "<tr>\n";
+html += "<th scope='col' align='left' class='results'\n";
+html += "Child CI(s)\n";
+html += "</th>\n";
+
+<pdm_if "$prop.MultiTenancy" != "off">
+if ( showTenantColumn )
+  html += "<th scope='col' align='left' class='results'>Tenant</th>";
+else if ( showPublicColumn )
+  html += "<th scope='col' align='left' class='results'>Public</th>";
+</pdm_if>
+
+html += "<th scope='col' align='left' class='results'>Contact</th>\n";
+html += "<th scope='col' align='left' class='results'>Date of Entry</th>\n";
+html += "<th scope='col' align='left' class='results'>Identifier</th>\n";
+html += "</tr>\n";
+var counter=0;
+<pdm_set args.hasChild=0>
+<pdm_list SOURCE=args.child_hier ESC_STYLE=C>
+<pdm_if "$args.child_hier.child.id" != "">
+<pdm_set args.hasChild=1>
+counter++;
+var sClass;
+if(counter%2)
+  sClass = "results0";
+else
+  sClass = "results1";
+html += childMenu.tr(" lnkid=" + lnkid, "class=" + sClass) + "\n";
+
+html += "<td class='results'>\n";
+assetPersid[lnkid] = "nr:$args.child_hier.child.id";
+relPersid[lnkid] = "hier:$args.child_hier.id";
+html += "<a" + detailNextID() +
+        " href=\"javascript:showDetailWithPersid(assetPersid[" + lnkid +
+        "]);\"" + childMenu.mouseEvents("lnkid=" + lnkid) + getMOPreviewEventHtml( assetPersid[lnkid] ) + ">\n" +
+        "$args.child_hier.child.name</a>\n";
+html += "</td>\n";
+
+<pdm_if "$prop.MultiTenancy" != "off">
+if ( showTenantColumn )
+  html += "<td class='results'>$args.child_hier.child.tenant.name</td>";
+else if ( showPublicColumn )
+<pdm_if "$args.child_hier.child.tenant" == "">
+  html += "<td class='results'>Yes</td>";
+<pdm_else>
+  html += "<td class='results'>No</td>";
+</pdm_if>
+</pdm_if>
+
+html += "<td valign='top' class='results'>\n";
+html += "<a" + detailNextID(true) +
+        " href=\"javascript:showDetailWithPersid('cnt:$args.child_hier.child.resource_contact')\"" + getMOPreviewEventHtml( "cnt:$args.child_hier.child.resource_contact" ) +">\n";
+html += "$args.child_hier.child.resource_contact.combo_name</a></td>\n";
+html += "<td valign='top' class='results'>\n";
+html += date_to_string('$args.child_hier.log_date_INT_DATE', 0) + "\n";
+html += "</td>\n";
+html += "<td valign='top' class='results'>$args.child_hier.license_num</td>\n";
+html += "</tr>\n";
+lnkid++;
+</pdm_if>
+</pdm_list>
+
+<pdm_if "$args.hasChild" == "0">
+html += "<tr><td align='left' class='detailro' colspan='4'>\n";    
+html += "No Child Configuration Items Attached\n";
+html += "</td></tr>\n";
+</pdm_if>
+
+html += "</table>\n";
+</pdm_if>
+docWrite(html);
+</script>
+</pdm_form>
+</body>
+</html>
+<pdm_if 0>
+@(#)$Id: nr_rel_tab.htmpl ASPEN.4 2010/11/18 13:12:54 tomjo02 Exp $
+</pdm_if>

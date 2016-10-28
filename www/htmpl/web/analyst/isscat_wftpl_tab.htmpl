@@ -1,0 +1,291 @@
+<PDM_IF 0>
+isscat_wftpl_tab.htmpl
+
+INTENT:
+	Display a Workflow notebook page for Issue Category.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=isscat_wftpl_tab" factory=isscat>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro">
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+
+<PDM_FORM NAME="frmDTLRO" CLASS=searchFilterList>
+<script type="text/javascript">
+var restriction_keep = '<PDM_FMT ESC_STYLE=C PAD=NO>KEEP.SVC_CONTRACT_ID=$args.owning_contract+KEEP.SVC_CONTRACT_SYM=$args.owning_contract.sym</PDM_FMT>';
+var wf_htmpl = "wfdef.htmpl";
+var wfITPAM_htmpl = "wfITPAMdef.htmpl";
+
+var flag = "$args.flow_flag";	// current workflow in use (0=Classic, 1=CAWF, 2=ITPAM)
+var button_flag = "";
+
+<PDM_OBJECT>
+// callback function for tab_banner()
+function add_button_to_tab_banner() {
+   
+<PDM_MACRO name=btnStartRow>
+
+   // Create CA IT PAM buttons on selection
+   if ( button_flag == "2" ) {
+      
+<PDM_MACRO name=button caption="Select IT PAM" func="launchITPAM()" hotkey_name="Select IT PAM" id=btnITPAM>
+<PDM_MACRO name=button caption="Remove" btntype=negative func="removeWF()" hotkey_name="Remove" id=btnRemove>
+   }
+   // Create CAWF buttons on selection
+   else if ( button_flag == "1" ) {
+      
+<PDM_MACRO name=button caption="Select CA Workflow" func="launchCAWF()" hotkey_name="Select CA Workflow" id=btnSelect_CAWF>
+<PDM_MACRO name=button caption="Remove" btntype=negative func="removeWF()" hotkey_name="Remove" id=btnRemove>
+   }
+   // Create Classic Workflow buttons on selection
+   else if ( button_flag == "0" ) {
+      
+<PDM_MACRO name=button caption="Add Classic Workflow" func="launchWF()" hotkey_name="Add Classic Workflow" id=btnAdd_Classic>
+<PDM_MACRO name=button caption="Remove" btntype=negative func="removeWF()" hotkey_name="Remove" id=btnRemove>
+   }
+   else {
+      // Create CA IT PAM button on default 
+      if ("$env.NX_CAEXTWF_ENDPOINT" != "" ) {
+         
+<PDM_MACRO name=button caption="Use ITPAM" func="launchITPAM();showITPAM()" hotkey_name="Use ITPAM" id=btnUse_ITPAM>
+      }
+      // Create CAWF button on default
+      if (pmURL != "" && pmLocal != "" ) {
+         
+<PDM_MACRO name=button caption="Use CA Workflow" func="launchCAWF();showCAWF()" hotkey_name="Use CA Workflow" id=btnUse_CAWF>
+      }
+
+      // Create Classic Workflow button on default
+      
+<PDM_MACRO name=button caption="Use Classic Workflow" func="launchWF();showWF()" hotkey_name="Use Classic Workflow" id=btnUse_Classic>
+   }
+<PDM_IF "$args.id" == "0">
+   ImgBtnEnableButton("btnAdd_Classic", false);
+   ImgBtnEnableButton("btnRemove", false);
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+}
+</PDM_OBJECT>
+
+function showITPAM() {
+	itpam_div.style.display = "block";
+	cawf_div.style.display = "none";
+	classic_div.style.display = "none";
+	default_div.style.display = "none";
+}
+
+function showCAWF() {
+	itpam_div.style.display = "none";
+	cawf_div.style.display = "block";
+	classic_div.style.display = "none";
+	default_div.style.display = "none";	
+}
+
+function showWF() {
+	itpam_div.style.display = "none";
+	cawf_div.style.display = "none";
+	classic_div.style.display = "block";
+	default_div.style.display = "none";
+}
+
+function showDefault() {
+
+	itpam_div.style.display = "none";
+	cawf_div.style.display = "none";
+	classic_div.style.display = "none";
+	default_div.style.display = "block";
+}
+
+// Launch ITPAM
+function launchITPAM() {
+	showITPAM();
+	getITPAMDefinitions(wfITPAM_htmpl, "isscat");
+	document.getElementById("flowflag").value = "2";
+}
+
+// Launch CA Workflow
+function launchCAWF() {
+	showCAWF();
+	getDefinitions(wf_htmpl);
+	document.getElementById("flowflag").value = "1";
+}
+
+// Launch Classic workflow
+function launchWF() {
+	showWF();
+	add_wftpl_isscat('$args.persistent_id','isscat_wftpl', "'" + restriction_keep + "'");
+	document.getElementById("flowflag").value = "0";
+}
+
+function removeWF() {
+	document.getElementById("flowflag").value = "";
+	showDefault();
+	reset();
+}
+
+// Intermidiate method called after clicking Save
+// returns true to continue save operation
+//         false to stop save op
+function preSaveTrigger() {
+	var tempflag = document.getElementById("flowflag").value;
+	if (tempflag == "1") {
+		// check for non empty values in CAWF view
+		if (document.getElementsByName("SET.cawf_defname")[0].value == "") {
+			var message = msgtext("Cannot_proceed_to_save_%1", "CA Workflow Definition Name");
+			alertmsg(message);
+			return false;
+		}
+	}
+	else if (tempflag == "2") {
+		// check for non empty values in ITPAM view
+		if (document.getElementsByName("SET.caextwf_start_id.caextwf_form")[0].value == "") {
+			var message = msgtext("Cannot_proceed_to_save_%1", msgtext("CA_IT_PAM") + " Process Name");
+			alertmsg(message);
+			return false;
+		}
+	}
+	return true;
+}
+
+// Format change function to display YES or NO 
+
+function fmt_change(value)
+        {
+            var fmtReturn = "";
+            if ( "$args.cawf_active" == "Y" ) {
+                fmtReturn = msgtext("Yes");
+            }
+            else if ( "$args.cawf_active" == "" ) {
+                fmtReturn = "";
+            }
+            else {
+                fmtReturn =  msgtext("No");
+            }
+            return(fmtReturn);     
+        }
+		
+// Set all text box fields to null when remove button is clicked
+
+function reset()
+{ 	
+	if ("$env.NX_CAEXTWF_ENDPOINT" != "" )
+		{
+		document.getElementsByName("SET.caextwf_start_id.caextwf_form")[0].value="";
+		document.getElementsByName("SET.caextwf_start_id.caextwf_path")[0].value="";
+		}
+	else if (pmURL != "" && pmLocal != "" )
+		{
+		document.getElementsByName("SET.cawf_defname")[0].value="";
+		document.getElementsByName("SET.cawf_defid")[0].value="";
+		document.getElementsByName("SET.cawf_desc")[0].value="";
+		document.getElementsByName("SET.cawf_active")[0].value="";
+		}
+    
+}
+
+// Default view ...
+<PDM_MACRO name=dtlStartDiv class="gn_display_none" divid="default_div">
+button_flag = ""
+<PDM_MACRO name=tabBanner title="Workflow" add_btns=true>
+	if ( !_dtl.edit ) 
+	{	
+	ImgBtnHideButton("btnUse_ITPAM");
+	ImgBtnHideButton("btnUse_CAWF");
+	ImgBtnHideButton("btnUse_Classic");
+	}
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext dataclass="detailro gn_content_center" value="No Workflow Attached">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+
+// ITPAM view ...
+<PDM_MACRO name=dtlStartDiv class="gn_display_none" divid="itpam_div">
+
+button_flag = "2"
+if ( _dtl.edit ) 	
+	
+<PDM_MACRO name=tabBanner title="CA IT PAM Workflow" add_btns=true>
+else 	
+	
+<PDM_MACRO name=tabBanner title="CA IT PAM Workflow">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa procesu CA IT PAM" attr="caextwf_start_id.caextwf_form">
+<PDM_MACRO name=dtlTextbox hdr="Ścieżka procesu CA IT PAM" attr="caextwf_start_id.caextwf_path">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+
+// CA Workflow view ...
+
+<PDM_MACRO name=dtlStartDiv class="gn_display_none" divid="cawf_div">
+
+button_flag = "1"
+if ( _dtl.edit ) 
+	
+<PDM_MACRO name=tabBanner title="CA Workflow" add_btns=true>
+else 
+	
+<PDM_MACRO name=tabBanner title="CA Workflow">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa definicji CA Workflow" attr="cawf_defname">
+<PDM_MACRO name=dtlTextbox hdr="ID" attr="cawf_defid">
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="cawf_desc">
+if ( _dtl.edit ) 
+<PDM_MACRO name=dtlTextbox hdr="Aktywne" attr="cawf_active">
+else
+<PDM_MACRO name=dtlReadonly hdr="Aktywne" attr="cawf_active" fmtfunc=fmt_change>
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+
+
+// Classic Workflow view ...
+
+<PDM_MACRO name=dtlStartDiv class="gn_display_none" divid="classic_div">
+button_flag = "0"
+
+if ( _dtl.edit ) 
+	
+<PDM_MACRO name=tabBanner title="Classic Workflow" add_btns=true>
+else 
+	
+<PDM_MACRO name=tabBanner title="Classic Workflow">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList src="OP=SEARCH+FACTORY=wftpl+QBE.EQ.object_type=iss+QBE.EQ.object_attrval=$dob.id+QBE.EQ.delete_flag=0+KEEP.IS_EDIT=$prop.form_name_3">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+docWrite("<input id='flowflag' type='hidden' name='SET.flow_flag' value='$args.flow_flag'>");
+
+var itpam_div = document.getElementById("itpam_div");
+var cawf_div = document.getElementById("cawf_div");
+var classic_div = document.getElementById("classic_div");
+var default_div = document.getElementById("default_div");
+
+// Show current view
+if (flag == "1")
+	showCAWF();
+else if (flag == "2")
+	showITPAM();
+else if ( flag == "0" && $args.all_workflow_templates.length != 0)
+	showWF();
+else 
+	showDefault();
+
+</script>
+</PDM_FORM>
+
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: isscat_wftpl_tab.htmpl ASPEN.6 2011/02/04 08:22:22 ralje02 Exp $;
+</PDM_IF>

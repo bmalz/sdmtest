@@ -1,0 +1,28 @@
+<PDM_IF 0>
+@(#)$Id: kt_dtbuilder_frameset.htmpl ASPEN.2 2012/01/13 16:11:39 kumka02 Exp $
+WHEN PRESENTED:
+    Used as PDM_INCLUDE to create the Decision Tree Builder frameset.
+</PDM_IF>
+
+<frameset cols="30%,*,0,0" framespacing=<PDM_If "$prop.browser" == "IE">"2"<PDM_ELSE>"3" FRAMEBORDER=1</PDM_IF>
+        onload="ahdframe = window.frmDTBuilderTree; ahdframeset.ahdframe = ahdframe;">
+  <frame id=frmDTBuilderTree name=frmDTBuilderTree scrolling=auto
+        src="$CAisd/html/empty.html"
+  <PDM_IF "$prop.browser" == "IE">
+        style="padding-left:5px;padding-top:5px" frameborder=no
+  </PDM_IF>
+        title="Entire Decision Tree" marginwidth=0 marginheight=0 border=0 FRAMEBORDER=1>
+ <frame id=frmDTBuilderNode name=frmDTBuilderNode
+        src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=kt_dtbuilder_node.htmpl+DTDocID=$prop.DTDocID+Tenant=$prop.Tenant+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME"
+        style="border: 1px #8B939A solid;" scrolling=$SESSION.scrolling Marginheight=0
+        marginwidth=0 frameborder=no border=0
+        title="Current Tree Node">
+ <frame id=frmDTBuilderSaveTreeForm name=frmDTBuilderSaveTreeForm
+        src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=kt_dtbuilder_save_tree_form.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME"
+        scrolling=no marginheight=0 marginwidth=0 frameborder=no border=0
+        title="Hidden frame - do not navigate here">
+ <frame id=frmDTBuilderSaveTreeReply  name=frmDTBuilderSaveTreeReply
+        src="$CAisd/html/empty.html"
+        scrolling=no marginheight=0 marginwidth=0 frameborder=no border=0
+        title="Hidden frame - do not navigate here">
+</frameset>

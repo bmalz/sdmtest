@@ -1,0 +1,73 @@
+<PDM_IF 0>
+nr_cmdb_invothx_tab.htmpl
+WHEN PRESENTED:
+    Display Investment.Other family attributes of the selected CI
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+
+History:
+       24-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_invothx.htmpl" where="family.extension_name='invothx'" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Investment Type" attr=assoc_invothx.type size=30>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr=bm_status factory=bms lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Ryzyko" attr=assoc_invothx.risk>
+<PDM_MACRO name=dtlTextbox hdr="Investment Active?" attr=assoc_invothx.active>
+<PDM_MACRO name=dtlTextbox hdr="Investment Priority" attr=assoc_invothx.investment_priority>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Menadżer" attr=assoc_invothx.manager>
+<PDM_MACRO name=dtlTextbox hdr="Stage" attr=assoc_invothx.stage>
+<PDM_MACRO name=dtlTextbox hdr="Goal" attr=assoc_invothx.goal>
+<PDM_MACRO name=dtlTextbox hdr="Progress" attr=assoc_invothx.progress>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Alignment" attr=assoc_invothx.alignment>
+<PDM_MACRO name=dtlTextbox hdr="Investment Status" attr=assoc_invothx.investment_status>
+<PDM_MACRO name=dtlTextbox hdr="Investment Status Indicator" attr=assoc_invothx.status_indicator size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Investment Status Comment" attr=assoc_invothx.status_comment colspan=4 keeplinks=yes rows=2 size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data rozpoczęcia" attr=assoc_invothx.start_date>
+<PDM_MACRO name=dtlDate hdr="Finish Date" attr=assoc_invothx.finish_date>
+<PDM_MACRO name=dtlTextbox hdr="Kod opłaty" attr=assoc_invothx.charge_code>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Currency" attr=assoc_invothx.currency colspan=1 rows=1 size=3 spellchk=no>
+<PDM_MACRO name=dtlTextbox hdr="Total Cost" attr=assoc_invothx.total_cost>
+<PDM_MACRO name=dtlTextbox hdr="Total Effort" attr=assoc_invothx.total_effort>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>

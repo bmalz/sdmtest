@@ -1,0 +1,57 @@
+<PDM_IF 0>
+role_goform_tab.htmpl
+
+INTENT:
+    Display a Go Resource notebook page for the Role form.
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=role_goform_tab" factory=role>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/role.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class=detailro onunload="cancel_any_lrel_update()" onLoad="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class=detailro onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+// Default go resource data used by list form.
+var grdefs = new attached_defaults("$args.persistent_id");
+
+<PDM_OBJECT>
+function add_button_to_tab_banner() {
+   if( ($ACCESS.FAC_role > 1) && ($ACCESS.FAC_role_go_form > 1)) {
+      
+<PDM_MACRO name=button caption="Update Go Resources" func="update_lrel_goform('role', '$args.persistent_id', 'web_form', 'go_forms',  'Go Resources Available', 'Go Resources Assigned', '')" hotkey_name="Update Go Resources" id=UPDATE_LREL newrow=yes>
+
+      if (_dtl.edit) {
+         
+<PDM_MACRO name=button caption="Set Default" disabled=yes endrow=yes func="set_default_goform('$args.id', grdefs)" hotkey_name="Set Default" id=SET_DEFAULT_ROLE>
+      }
+      else {
+         
+<PDM_MACRO name=button caption="Set Default" endrow=yes func="set_default_goform('$args.id', grdefs)" hotkey_name="Set Default" id=SET_DEFAULT_ROLE>
+      }
+   }
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=tabBanner add_btns=true show_bar=false>
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList btntitle="Load Go Resource List." height=300 src="OP=SEARCH+FACTORY=role_go_form+QBE.EQ.role_obj.id=$dob.id+QBE.EQ.web_form_obj.delete_flag=0+KEEP.ROLE_ID=$args.id+KEEP.IS_EDIT=$prop.form_name_3+KEEP.roleUserAuth=$UserAuth">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+</PDM_FORM>
+</body>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: role_goform_tab.htmpl ASPEN.3 2010/12/08 10:01:21 ralje02 Exp $
+</PDM_IF>

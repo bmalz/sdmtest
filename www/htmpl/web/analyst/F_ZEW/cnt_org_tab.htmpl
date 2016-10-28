@@ -1,0 +1,49 @@
+<PDM_IF 0>
+cnt_org_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Contact 
+INTENT:
+    Display a notebook page for cnt organization. 
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=cnt_org_tab" factory=cnt>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=tabBanner title="Informacje organizacyjne">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlReadonly hdr="Organizacja funkcjonalna" attr=organization size=30>
+<PDM_MACRO name=dtlReadonly hdr="Dział" attr=dept>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Organizacja administracyjna" attr=admin_org size=30>
+<PDM_MACRO name=dtlReadonly hdr="MPK" attr=billing_code>
+<PDM_MACRO name=dtlLookup hdr="Sprzedawca" attr=vendor>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przełożony" attr=supervisor_contact_uuid>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: cnt_org_tab.htmpl ASPEN.1 2010/10/26 16:00:54 saima01 Exp $
+</PDM_IF>

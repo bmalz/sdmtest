@@ -1,0 +1,88 @@
+<PDM_IF 0>
+$Id: list_attmnt_KD.htmpl,v 1.0
+WHEN PRESENTED:
+		When we need to display a list of Attachments for a specific KD.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+	var hdrTitle = "Document Attachment";
+	var hdrTitleList = "Attachment List";
+	var hdrTitleTempl = "Document Template Attachment";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_upload.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_lib.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript">
+	var linkOnly, repName, folderPath, attmntNmae;
+</script>
+</HEAD>
+
+<BODY leftmargin=0 topmargin=0 CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="attachments" header=yes>
+
+<script type="text/javascript">
+<PDM_MACRO name=sfStart button=false export=no factory=attmnt>
+<PDM_MACRO name=sfEnd>
+var arrFields = new Array;
+var tenantSort = "no"; // Turn off sorting for tenant
+
+	var msgFoundNone = "No attachments found";
+	var msgFound1 = "1 Attachment found";
+	var msgFound = "%1 Attachments found";
+	var msgFoundMore = "%1 Attachments found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Attachments";
+	var msgSelectAlg = "Click to select desired Attachments and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired Attachments template";
+<PDM_MACRO name=lsStart search_type=GET_DOB>
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-attmnt_id'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-persistent_id'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.persistent_id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-attmnt_name'] = '<PDM_FMT ESC_STYLE=C>@{list.attmnt_name}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-orig_file_name'] = '<PDM_FMT ESC_STYLE=C>@{list.orig_file_name}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-link_only'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.link_only}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.servlet_path'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.repository.servlet_path}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields['@{list.persistent_id}-repository.server'] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.repository.server}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="linkOnly = \"@{list.link_only:}\";">
+<PDM_MACRO name=lsWrite text="repName = \"@{list.repository.sym:}\";">
+<PDM_MACRO name=lsWrite text="folderPath = \"@{list.folder_id.folder_path}\";">
+<PDM_MACRO name=lsWrite text="attmntNmae = \"@{list.attmnt_name}\";">
+<PDM_MACRO name=lsWrite both=yes text="if (typeof parent.parent.getEdit != 'undefined' && parent.parent.getEdit() != 0) {">
+<PDM_MACRO name=lsCol hdr="Załącznik" attr=attmnt_name fmtfunc=fmtPath link=yes sort=no>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="else {">
+<PDM_MACRO name=lsCol hdr="Załącznik" attr=attmnt_name export=no fmtfunc=fmtPath sort=no>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd>
+
+	if ( typeof parent.parent.getEdit != "undefined" &&
+         parent.parent.getEdit() != 0)
+	{
+		var ctxMenu=new ContextMenu("idMenuTabAttachments");
+		rs.setLinkOnclick(function(){ViewAttmntDetail(self.activePersid);});
+		ctxMenu.addItem(msgtext("View_Details"), "ViewAttmntDetail(self.activePersid);");
+		ctxMenu.addItem(msgtext("View_Content"), "listDownloadFile(self.activePersid);");
+		ctxMenu.addItem(msgtext("Detach0"), "DeleteAttachmentLink(self.activePersid);");
+		ctxMenu.finish();
+		//
+		//Added to allow right click context menu on tenanted documents
+		//RO Context menu is here as its overrides menu in resultset.js that changes the context menu if multi-tenency is on
+		var ctxMenuRO = new ContextMenu("idMenuTabAttachmentsRo");
+		ctxMenuRO.addItem(msgtext("View_Details"), "ViewAttmntDetail(self.activePersid);");
+		ctxMenuRO.addItem(msgtext("View_Content"), "listDownloadFile(self.activePersid);");
+		ctxMenuRO.addItem(msgtext("Detach0"), "DeleteAttachmentLink(self.activePersid);");
+		ctxMenuRO.finish();
+	}	
+	
+</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+
+<PDM_WSP>

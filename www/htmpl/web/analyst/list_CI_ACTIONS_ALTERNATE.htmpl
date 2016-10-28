@@ -1,0 +1,71 @@
+<PDM_IF 0>
+$Id: list_CI_ACTIONS_ALTERNATE.htmpl,v 1.2 2006/11/08 00:54:05 olsjo01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of alternate assignee for a task.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Alternate Assignee";
+var hdrTitleList = "Alternate Assignee List";
+var argActionID = "$args.ACTION_ID";
+var nUserAuth = "$args.KEEP.USER_AUTH" != "" ? $args.KEEP.USER_AUTH : 0;
+var tenant='${args.KEEP.templateTenant:}';
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+</head>
+<body class="list gn_left_top_margin_0">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ciaction" header=no menubar=no>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+	<script language="JavaScript">
+		var arrFields = new Array;
+		var arrPredefined = new Array;
+		var nCount = 0;
+		var msgFoundNone = "No alternate assignees found";
+		var msgFound1 = "1 alternate assignee found";
+		var msgFound = "%1 alternate assignees found";
+		var msgFoundMore = "%1 alternate assignees found.  Displaying %2 through %3";
+		
+		document.write("<table cellspacing='0' cellpadding='0' width='100%' class='page_header gn_container_no_border'>");
+		document.write("<tr>");
+		document.write("<td align='left' class='gn_text_small' width='99%'>Assignee List</TD>");
+		document.write("<td align='left' width='1%'>");
+		if (nUserAuth > 1)
+		{
+			document.write("<div align='right'>");
+			ImgBtnRow();
+			ImgBtnCreate("btnAddAssignee", "Add_Assignee", "AddAssignee();");
+			ImgBtnEndRow();
+			document.write("</div>");
+		}
+		document.write("</td>");
+		document.write("</tr>");
+		document.write("</table>");		
+		
+		
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa przypisanego" attr=CONTACT_ID.combo_name exportfmt=ShowLink link=yes sort=no width=80>
+<PDM_MACRO name=lsEnd factory=CI_ACTIONS_ALTERNATE>
+		
+		rs.setLinkOnclick(function(){ViewAssignee(self.activePersid)});
+		//rs.overrideMenu=true;
+
+		var ctxMenu=new ContextMenu("idMenuAssignee");
+		//ctxMenu.addItem("New", "AddAssignee();");
+		ctxMenu.addItem("View", "ViewAssignee(self.activePersid);");
+		ctxMenu.addItem("Edit", "EditAssignee(self.activePersid);");
+		ctxMenu.addItem("Delete", "DeleteAssignee(self.activePersid);");
+		ctxMenu.finish();
+	</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+
+<PDM_WSP>

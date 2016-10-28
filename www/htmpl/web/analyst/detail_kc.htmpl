@@ -1,0 +1,332 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a KPI Catalog
+
+    If the type is "sys", only allow the user to edit the status.
+    Also, do not allow the user to create a new entry of type "sys".
+
+    When creating a new kc, the create new form will initially just
+    get a Name and Type (sql or stored_query).  Then you must Continue
+    to get a larger create new form that has the rest of the fields 
+    applicable to that Type.
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.kpi_name KPI Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.kpi_name Update KPI"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New KPI $args.kpi_name"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function set_metric_type(value)
+{
+   var mtreturn = "";
+   if ( value == "0" )
+      mtreturn = "Count";
+   else if ( value == "1" )
+      mtreturn = "Sum";
+   else if ( value == "2" )
+      mtreturn = "Max";
+   else if ( value == "3" )
+      mtreturn = "Duration";
+   return(mtreturn);     
+}
+
+function set_type(value)
+{
+   var treturn = "";
+   if ( value == "0" )
+      treturn = "System";
+   else if ( value == "1" )
+      treturn = "Stored Query";
+   else if ( value == "2" )
+      treturn = "SQL";
+   return(treturn);     
+}
+
+function set_process_type(value)
+{
+   var ptreturn = "";
+   if ( value == "0" )
+      ptreturn = "bpvirtdb";
+   else if ( value == "1" )
+      ptreturn = "domsrvr";
+   else if ( value == "2" )
+      ptreturn = "webengine";
+   else if ( value == "3" )
+      ptreturn = "db_agent";
+
+   return(ptreturn);     
+}
+
+
+function change_status(value)
+{
+  if (typeof ahdframe._dtl != "object") return;
+
+    var persid;
+    persid = ahdframe.argPersistentID;
+
+    var factory = persid.substr(0,persid.indexOf(":"));
+    var method;
+    var flag;
+    var display_str;
+
+    //Take status as a flag
+
+    if(value =="1")
+       flag =  "KEEP.CHANGE_KPI_STATUS=0";
+    else if(value == "0")
+       flag = "KEEP.CHANGE_KPI_STATUS=1";
+
+    // Assume there is a make copy function for this factory.
+    method = "change_kpi_status";
+
+    // Build a string for display_new_page.
+    var display_str = cfgCgi + 
+                      "?SID=" + cfgSID+
+                      "+FID=" + cfgFID + 
+                      "+OP=CHANGE_KPI_STATUS" +
+                      "+FACTORY=" + factory +
+                      "+PERSID=" + persid +
+                      "+METHOD=" + method +
+                      "+" + flag;
+  
+    display_new_page(display_str); 
+}
+
+
+</script>
+</head>
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" == "initial" && "$args.KEEP.MAKE_COPY" != "1">
+   <script type="text/javascript">
+
+   
+<PDM_MACRO name=dtlForm button=false factory="kc">
+<PDM_IF 0>
+      This is the initial Create New form.
+      Only the allow the creation of new SQL or Stored Query KPIs.
+      Web interface does not allow the creation of System KPIs.
+   
+</PDM_IF>
+
+   _dtl.backfillReq = false; // We have a Continue button - suppress automatic close and backfill on save
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Continue" func="detailSave()" hotkey_name="Continue" id="btn001" width=120>
+<PDM_MACRO name=button caption="Cancel" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="pdm_reset()" hotkey_name="Reset[r]" id="btn004" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart center=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa KPI" attr="kpi_name">
+
+   detailDropdown("Type","type","kc",1,20, 
+   "1","","$args.type",
+   "no","","$args.type",
+   "","","no","","0","",
+   "Stored Query","1","SQL","2");
+
+   
+<PDM_IF 0>
+      The metric_type field is required. Begin with value=0, Count.
+   
+</PDM_IF>
+   docWriteln("<input type='hidden' name=\"SET.metric_type\" value=\"0\">");
+
+   
+<PDM_MACRO name=dtlEndTable>
+   </script>
+   
+<PDM_MACRO name=dtlEnd>
+<PDM_ELSE>
+   <script type="text/javascript">
+
+  
+<PDM_IF 0>
+      If Keep Existing Version field is checked, do substitute, else update
+  
+</PDM_IF>
+<PDM_MACRO name=dtlForm factory="kc">
+<PDM_IF "$prop.form_name_3" != "edit" >
+<PDM_IF "$args.delete_flag" == "1">
+<PDM_MACRO name=button caption="Activate" func="change_status('$args.delete_flag')" hotkey_name="Activate" id="btnActivate">
+<PDM_MACRO name=button caption="Deactivate" disabled="yes" func="change_status('$args.delete_flag')" hotkey_name="Deactivate" id="btnDeactivate">
+<PDM_ELSE>
+<PDM_MACRO name=button caption="Activate" disabled="yes" func="change_status('$args.delete_flag')" hotkey_name="Activate" id="btnActivate">
+<PDM_MACRO name=button caption="Deactivate" func="change_status('$args.delete_flag')" hotkey_name="Deactivate" id="btnDeactivate">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" != "initial">
+<PDM_MACRO name=dtlReadonly hdr="Nazwa KPI" attr="kpi_name" colspan=1>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa KPI" attr="kpi_name" colspan=1>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" != "ro" >
+<PDM_IF  "$prop.form_name_3" == "edit" && "$args.id" != 0>
+<PDM_IF "$env.NX_ALWAYS_KEEP_KPI_VERSIONS" == "Yes" && "$AlertMsg" == "">
+    	        	detailCheckboxReadonly("Keep Existing Version","keep_version",1,"1", "Yes", "No");
+			docWriteln("<input type='hidden' name=\"CBX.keep_version\" value=\"1\">");	    
+        	
+<PDM_ELSE>
+<PDM_IF  "$AlertMsg" == "">
+       	               		 detailCheckbox("Keep Existing Version","keep_version",1,"0", "Yes", "No");
+                	
+<PDM_ELSE>
+                        	 detailCheckboxReadonly("Keep Existing Version","keep_version",1,"0", "Yes", "No");
+                	
+</PDM_IF>
+</PDM_IF>
+<PDM_ELSE>
+        	detailCheckboxReadonly("Keep Existing Version","keep_version",1,"0", "Yes", "No");
+        
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro" >
+<PDM_MACRO name=dtlReadonly hdr="Wersja" attr="version_number" colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Wersja" attr="version_number" colspan=1>
+</PDM_IF>
+<PDM_IF  "$prop.form_name_3" == "edit" && "$args.id" != 0 >
+<PDM_MACRO name=dtlReadonly hdr="Status rekordu" attr="delete_flag" colspan=1>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no size=20>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Typ" attr="type" colspan=1 fmtfunc=set_type>
+<PDM_IF "$args.type" == "0">
+<PDM_IF 0>
+         Type = sys.
+         Edit: Allowed to modify the kpi_name, status and description.
+         Substitite: Allowed to modify the Edit fields plus refresh_time. But not status.
+      
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ miary" attr="metric_type" colspan=1 fmtfunc=set_metric_type>
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" != "initial">
+<PDM_MACRO name=dtlTextbox hdr="Czas odświeżania" attr="refresh_time" evt="onChange='validate_duration_ts(this)'">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Czas odświeżania" attr="refresh_time" colspan=1>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ procesu" attr="process_type" colspan=1 fmtfunc=set_process_type>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa systemowa" attr="sys_name" colspan=4>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 keeplinks=yes size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Znacznik czasu ostatniego wykonania KPI" attr="curr_kpi_time_stamp" colspan=4>
+<PDM_ELIF "$args.type" == "1">
+<PDM_IF 0>
+         Type = stored_query.
+         Metric type must be count.
+         stored_query_id is required and can only be set on the initial create.
+         Edit: Allowed to modify the kpi_name, status and description.
+         Substitite: Allowed to modify the Edit fields plus refresh_time, user_context and role. But not status.
+      
+</PDM_IF>
+
+      function copy_from_parent()
+      {
+      }
+
+      
+<PDM_MACRO name=dtlReadonly hdr="Typ miary" attr="metric_type" colspan=1 fmtfunc=set_metric_type>
+<PDM_MACRO name=dtlTextbox hdr="Czas odświeżania" attr="refresh_time" evt="onChange='validate_duration_ts(this)'">
+<PDM_MACRO name=dtlLookup hdr="Kontekst użytkownika" attr="user_context">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Zapytanie składowane" attr="stored_query_id" colspan=4 extraurl="KEEP.CrsqType=KPI" make_required="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 keeplinks=yes size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Znacznik czasu ostatniego wykonania KPI" attr="curr_kpi_time_stamp" colspan=4>
+<PDM_ELIF "$args.type" == "2">
+<PDM_IF 0>
+         Type = sql.
+         Metric type can be sum, count, max or duration.
+         sql_query is required and can only be set on the initial create.
+         Edit: Allowed to modify the kpi_name, status and description.
+         Substitite: Allowed to modify the Edit fields plus refresh_time, user_context and role. But not status.
+      
+</PDM_IF>
+
+      function copy_from_parent()
+      {
+      }
+
+  
+      var c_metric_type;
+      switch ( "$args.metric_type" ) { 
+         case "0" : 
+            c_metric_type = "Count";
+            break;
+         case "1" : 
+            c_metric_type = "Sum";
+            break;
+         case "2" : 
+            c_metric_type = "Max";
+            break;
+         case "3" : 
+            c_metric_type = "Duration";
+            break;
+         }
+         detailDropdown("Metric Type","metric_type","kc",1,20, 
+         true,"","$args.metric_type",
+         "no","$args.metric_type",c_metric_type,
+         "","","no","","","0",
+         "Count","0","Sum","1",
+         "Max","2","Duration","3");
+ 
+
+
+      
+<PDM_MACRO name=dtlTextbox hdr="Czas odświeżania" attr="refresh_time" evt="onChange='validate_duration_ts(this)'">
+<PDM_MACRO name=dtlLookup hdr="Kontekst użytkownika" attr="user_context">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zapytanie SQL" attr="sql_query" colspan=4 make_required="yes" rows=4 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=4 keeplinks=yes size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Znacznik czasu ostatniego wykonania KPI" attr="curr_kpi_time_stamp" colspan=4>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+   </script>
+   
+<PDM_MACRO name=dtlEnd>
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_kc.htmpl ASPEN.1 2010/11/17 23:42:16 saima01 Exp $;
+</PDM_IF>
+<PDM_WSP>

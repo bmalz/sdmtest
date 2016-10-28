@@ -1,0 +1,121 @@
+// 20130916 bmalz @ e-xim
+
+zCorrespondenceIncome::setRef_num(...) {
+	send_wait(0, top_object(), "call_attr", "zCorrespondenceIncome", "sync_fetch", "RLIST_DYNAMIC", "",  -1, 0);
+	int listlength;
+	string itemnum;
+	listlength = msg[1] + 1;
+
+	// < get year
+	string now_str;
+	now_str = format("%s", now());
+	string day;
+	day = substr(now_str, sindex(now_str, '/') + 1);
+	string month;
+	month = substr(day, sindex(day, '/') + 1);
+	string year;
+	year = substr(month, sindex(month, '/') + 1, 4);
+	// >
+
+	// < get abbreviation cmpny
+	string cmpny;
+	cmpny = AbbreviationCmpny.abbreviation;
+	// >
+
+	if (CorrespondanceLetterType == 400003) {
+		itemnum=format("BOP/%s/%d/%s", cmpny, listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400004) {
+		itemnum=format("PKN/BOP/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400005) {
+		itemnum=format("PKN/GKB/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400006) {
+		itemnum=format("BOP/CUK/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400007 || CorrespondanceLetterType == 400008 || CorrespondanceLetterType == 400009 || CorrespondanceLetterType == 400010) {
+		itemnum=format("PKN/BOP/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400011|| CorrespondanceLetterType == 400012 || CorrespondanceLetterType == 400013 || CorrespondanceLetterType == 400014) {
+		itemnum=format("BOP/%s/%d/%s", cmpny, listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400015 || CorrespondanceLetterType == 400016 || CorrespondanceLetterType == 400017 || CorrespondanceLetterType == 400018) {
+		itemnum=format("PKN/GKB/%d/%s", listlength, year);
+	}
+
+	send_wait(0, this, "call_attr", "ref_num", "set_val", itemnum, "INTERP");
+	logf(TRACE, "Set ref_num (#%d) for %s", itemnum, persistent_id);
+}
+
+zCorrespondanceOucome::setRef_num(...) {
+	send_wait(0, top_object(), "call_attr", "zCorrespondanceOucome", "sync_fetch", "RLIST_DYNAMIC", "",  -1, 0);
+	int listlength;
+	string itemnum;
+	listlength = msg[1] + 1;
+
+	// < get year
+	string now_str;
+	now_str = format("%s", now());
+	string day;
+	day = substr(now_str, sindex(now_str, '/') + 1);
+	string month;
+	month = substr(day, sindex(day, '/') + 1);
+	string year;
+	year = substr(month, sindex(month, '/') + 1, 4);
+	// >
+
+	// < get abbreviation cmpny
+	string cmpny;
+	cmpny = AbbreviationCmpny.abbreviation;
+	// >
+
+	if (CorrespondanceLetterType == 400003) {
+		itemnum=format("BOP/%s/%d/%s", cmpny, listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400004) {
+		itemnum=format("PKN/BOP/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400005) {
+		itemnum=format("PKN/GKB/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400006) {
+		itemnum=format("BOP/CUK/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400007 || CorrespondanceLetterType == 400008 || CorrespondanceLetterType == 400009 || CorrespondanceLetterType == 400010) {
+		itemnum=format("PKN/BOP/%d/%s", listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400011 || CorrespondanceLetterType == 400012 || CorrespondanceLetterType == 400013 || CorrespondanceLetterType == 400014) {
+		itemnum=format("BOP/%s/%d/%s", cmpny, listlength, year);
+	}
+
+	if (CorrespondanceLetterType == 400015 || CorrespondanceLetterType == 400016 || CorrespondanceLetterType == 400017 || CorrespondanceLetterType == 400018) {
+		itemnum=format("PKN/GKB/%d/%s", listlength, year);
+	}
+
+	send_wait(0, this, "call_attr", "ref_num", "set_val", itemnum, "INTERP");
+	logf(TRACE, "Set ref_num (#%d) for %s", itemnum, persistent_id);
+}
+
+test (...) {
+	string year_str;
+	year_str = format("%s", now());
+	string day;
+	day = substr(year_str, sindex(year_str, '/') + 1);
+	string month;
+	month = substr(day, sindex(day, '/') + 1);
+	string year;
+	year = substr(month, sindex(month, '/') + 1, 4);
+	printf("%s: year=%s", year_str, year);
+}

@@ -1,0 +1,138 @@
+<PDM_IF 0>
+detail_tskstat.htmpl
+WHEN PRESENTED:
+    When we need to display a details of a single Task Status
+INTENT:
+    Display the detail and edit info for the Task Status
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  tskstat  args	The Task Status object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/D:CA_SDAHDbase.maj for the
+                        definition of attributes for 'OBJECT tskstat'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły statusu zadania $args.sym "</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>" Aktualizowanie statusu zadania $args.sym"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie statusu zadania $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function copy_from_parent()
+{}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+
+function uncheck(field_name)
+{
+
+	if (field_name == "task_complete")
+	{
+		if(window.document.forms["main_form"].df_1_0.checked && window.document.forms["main_form"].df_1_1.checked )			
+		alertmsg("Checking_'Allow_Task_Update'_w");
+		window.document.forms["main_form"].df_1_1.checked=0;
+		if(window.document.forms["main_form"].df_1_0.checked)
+		{
+		document.main_form.elements["SET.allow_task_update"].value = 1;
+		document.main_form.elements["SET.task_complete"].value = 0;
+		}
+		else
+		{
+		document.main_form.elements["SET.allow_task_update"].value = 0;
+		}
+	}
+	
+	if (field_name == "allow_task_update")
+	{
+		if(window.document.forms["main_form"].df_1_1.checked && window.document.forms["main_form"].df_1_0.checked)
+		alertmsg("Checking_'Task_Completed'_will");
+		window.document.forms["main_form"].df_1_0.checked=0;
+		if(window.document.forms["main_form"].df_1_1.checked)
+		{
+		document.main_form.elements["SET.task_complete"].value = 1;
+		document.main_form.elements["SET.allow_task_update"].value = 0;
+		}
+		else
+		{
+		document.main_form.elements["SET.task_complete"].value = 0;
+		}
+	}
+}
+
+</script>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Task Status" key="$args.sym">
+<CENTER>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=tskstat>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_EDIT_COMPLETED_TASKS" != "Yes">
+detailSetEventHandler("onClick='uncheck(\"allow_task_update\")'");
+</PDM_IF>
+<PDM_IF "$env.NX_EDIT_COMPLETED_TASKS" != "Yes">
+detailSetEventHandler("onClick='uncheck(\"task_complete\")'");
+</PDM_IF>
+<PDM_MACRO name=dtlCheckbox hdr="Zadanie akceptacyjne edytowalne" attr=allow_task_update off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Zadanie zewnętrzne edytowalne" attr=allow_accumulate off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Zadanie wewnętrzne edytowalne" attr=hold colspan=2 off=No on=Yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zadanie wykonane" attr=task_complete off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Przejdź do następnego zadania" attr=do_next_task off=No on=Yes>
+<PDM_IF 0>
+<PDM_MACRO name=dtlCheckbox hdr="Zadanie wewnętrzen edytowalne" attr=hold colspan=2 off=No on=Yes>
+
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr=modified_date>
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr=last_mod_by colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_tskstat.htmpl ASPEN.2 2012/06/12 14:46:17 debbi01 Exp $;
+</PDM_IF>
+<PDM_WSP>

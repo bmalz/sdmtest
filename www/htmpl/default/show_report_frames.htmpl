@@ -1,0 +1,113 @@
+<PDM_IF 0>
+$Id: show_report_frames.htmpl,v 1.0 2006/04/25 16:53:28 poibr01 Exp $
+	WHEN PRESENTED:
+	    Show the report banner with an InfoView button on the top and 
+	    a report frame on the bottom which could include one or more 
+	    reports.   
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/report.js"></script>
+<title>$prop.Formtitle</title>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe = window;
+var save_prev_Frame1_admin_url="";
+var save_prev_Frame2_admin_url="";
+
+ahdframeset.ahdframe = ahdframe;
+if (typeof parent.ahdframe == "object")
+    parent.ahdframe = ahdframe;
+if (typeof parent.ahdframeset == "object")
+    parent.ahdframeset.ahdframe = ahdframe;
+activateActionKeys();
+var cfgCgi = "$cgi";
+var cfgSID = "$SESSION.SID";
+var bop_sid = 0;
+function get_local_bopsid()
+{
+	var target_url=cfgCgi+
+	"?SID="+cfgSID+
+	"+FID="+fid_generator()+
+	"+OP=LINK_WITH_BOPSID"+
+	"+CALLBACK=ahdframe.assignBopsid('"+nx_escape("%")+"bopsid')"+
+	"+SHARE_SESSION=1+POPUP_NAME="+ahdframeset.name;
+	var responseJS = parent.ahdframe.SyncAjaxCall(target_url);
+	var sindex=responseJS.lastIndexOf("<SCRIPT>");
+	var eindex=responseJS.indexOf("SCRIPT>", sindex+8);
+	if(sindex!=-1&&eindex!=-1)
+	{
+		var myScript=responseJS.substring(sindex+8,eindex-2);
+		eval(myScript);
+	}
+}
+function assignBopsid(bopsid)
+{
+	bop_sid = bopsid;
+}
+function infoView()
+{
+	get_local_bopsid();
+	var userid;
+	userid=parent.ahdtop.cfgUserid;
+	var url = ahdtop.cfgServletURL + ahdtop.cfgCAISD + 
+	      "/BOServlet?BOPSID="+bop_sid+"&USERID="+userid+"&INFOVIEW=1";
+		  
+	if ( typeof parent.ahdtop.cfgBOServerAuth != "undefined" && "secLDAP" == parent.ahdtop.cfgBOServerAuth )
+	{
+		if ( typeof parent.ahdtop.bo_auth != "undefined" && parent.ahdtop.bo_auth == "0" && typeof bo_info != "undefined")
+		{
+			//make the web method call and get bo info and send it to the boservlet
+			var ajax_call_url = cfgCgi +
+				"?SID=" + cfgSID +
+				"+FID=" + fid_generator() +
+				"+OP=GET_BO_INFO" +
+				"+GET_BO_INFO=1";
+			var responseJS = parent.ahdframe.SyncAjaxCall(ajax_call_url);
+			var sindex=responseJS.lastIndexOf("<SCRIPT>");
+			var eindex=responseJS.indexOf("SCRIPT>", sindex+8);
+			if(sindex!=-1&&eindex!=-1)
+			{
+				var _script=responseJS.substring(sindex+8,eindex-2);
+				eval(_script);
+			}
+			url += "&BO_INFO=" + bo_info;
+		}
+	}
+
+    var features = "directories=no" +
+		   ",location=no" +
+		   ",status=no" + 
+		   ",resizable=yes" + 
+		   ",toolbar=yes,menubar=yes" +
+		   ",scrollbars=yes";
+	var w = window.open(url, "InfoView", features, true);
+}
+function infoViewFrame()
+{
+	var frameUrl = "$CAisd/html/info_view.html";
+	var frameEle = document.getElementById("show_rpt_title");
+	if (frameEle == null || frameEle == undefined)
+		alert("frameElement is null");
+	else
+		frameEle.src = frameUrl;
+}
+</script>
+</head>
+<script>
+<PDM_IF  "$prop.browser" != "IE">
+    <PDM_MACRO NAME=startFrameset id="show_rpt_frameset" rows="40,*" border=0 onload="infoViewFrame();">
+<PDM_ELSE>
+    <PDM_MACRO NAME=startFrameset id="show_rpt_frameset" rows="37,*" border=0 onload="infoViewFrame();">
+</PDM_IF>
+    <PDM_MACRO NAME=frame id="show_rpt_title" frame_name="show_rpt_title" web_form_url="$CAisd/html/info_view.html" scrolling="no" title="Report banner with InfoView button" style="border: 1px #8B939A solid;" marginheight=0 marginwidth=0>
+    <PDM_MACRO NAME=frame id="show_rpts" frame_name="show_rpts" web_form_name="$args.KEEP.report_form" title="Report frame" style="border: 1px #8B939A solid;" marginheight=0 marginwidth=0>
+    <PDM_MACRO NAME=endFrameset>
+</script>
+</html>
+<PDM_WSP>

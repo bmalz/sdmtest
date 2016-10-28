@@ -1,0 +1,23 @@
+<PDM_IF 0>
+@(#)$Id: kt_architect_init.htmpl,v 1.3 2006/11/11 04:12:17 SAIMA01 Exp $
+WHEN PRESENTED:
+    When we need to display the knowledge categories screen
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">	
+<PDM_INCLUDE file=menubar_admin.htmpl>
+</SCRIPT>
+</HTML>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+		<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0 class=page_header>
+			<TR height=25>			
+				<TD align=left>Knowledge Categories</TD>
+			</TR>
+		</TABLE>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>

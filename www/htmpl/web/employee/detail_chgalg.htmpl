@@ -1,0 +1,81 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  detail_chgalg_edit.htmpl
+// Created: 09/05/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: detail_chgalg.htmpl,v 1.3 2006/11/16 00:54:37 jenji01 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="EDIT_HTMPL=detail_chgalg_edit.htmpl+ACTIVITY_LOG_TYPE=LOG+PERSID={chg:}+FACTORY=chg+OP=UPDATE" factory=chgalg>
+<html lang="en">	<HEAD>
+<script language="JavaScript">
+		var hdrTitleUpd ="Add Comment to Change Order $args.chg_ref_num"; 
+</script>
+<PDM_INCLUDE FILE="std_head.htmpl">
+		<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+		<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+		<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+		<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/val_type.js"></SCRIPT>
+	</head>
+	<body onUnload="unload_check()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+		<script language="JavaScript">		
+		var edit_form = 1;
+		<!--
+			maxSize=new Array("SET.chgalg.description","Description", $args.chgalg.LENGTH_description);
+		//-->
+		</script>
+		<center>
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+<PDM_MACRO name=dtlForm factory=chgalg>
+</SCRIPT>		  
+<PDM_IF "" == "$args.chgalg.change_id" && "$prop.WSPHOST" == "">
+<!-- This should not be a problem for editing existing Activity Logs,
+     but may show up when creating new Logs... -->
+					<span class=labeltext>
+						HTMPL coding error.  Expecting change_id to be pre_set in the form
+						or link that invoked this page
+					</span>
+<PDM_ELSE>
+					<input type=hidden name=SET.chgalg.change_id value=$args.chgalg.change_id>
+					<INPUT TYPE=HIDDEN NAME=SET.chgalg.analyst VALUE=$cst.id>
+					<INPUT TYPE=HIDDEN NAME=SET.chgalg.internal VALUE=0>
+					<INPUT TYPE=HIDDEN NAME=SET.chgalg.type VALUE=LOG>
+					<INPUT TYPE=hidden NAME=FACTORY VALUE=cr>
+					<INPUT TYPE=hidden NAME=SET.id VALUE="$args.id">
+					<INPUT TYPE=hidden NAME=OP VALUE="UPDATE">
+
+
+<SCRIPT LANGUAGE="JavaScript">					
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=chgalg.description colspan=3 rows=8 size=80 spellchk=no>
+</SCRIPT>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>	
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+"@(#)$Id: detail_chgalg.htmpl FWr1.1 2008/5/9 16:51:25 versa01 Exp $";
+</PDM_IF>

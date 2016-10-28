@@ -1,0 +1,297 @@
+<PDM_IF 0>
+list_ntfl.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Object Contact Notifications.
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Wyszukiwanie obiektów kontaktów notyfikacji";
+var hdrTitleList = "Lista obiektów kontaktów notyfikacji";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("ntflsum.rpt", "ntfldtl.rpt");
+var cfgCanEdit = true;
+
+<PDM_IF "$args.KEEP.forNtfrToNtfl" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.NTFR_ID" != "0" && $ACCESS.FAC_ntfr \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Object_Contacts", "UpdateObjectContacts()", enableExtraBtn);
+
+    function UpdateObjectContacts() {
+       update_with_lrel_style("ntfr", "$args.KEEP.NTFR_PERSID", "ntfl", "ntfr_ntflist", 
+                              "Object Contacts", 
+                              "Notification Recipients", 
+                              "", "KEEP.forNtfrToNtfl=0+KEEP.ForNtfrNTFL=1+KEEP.obj_type=$args.KEEP.obj_type");
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forMgsToNtfl" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.MGS_ID" != "0" && $ACCESS.FAC_mgs \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Object_Contacts", "UpdateMgsObjectContacts()", enableExtraBtn);
+
+    function UpdateMgsObjectContacts() {
+       update_with_lrel_style("mgs", "$args.KEEP.MGS_PERSID", "ntfl", "dist_ntflist", 
+                              "Object Contacts", 
+                              "Notification Recipients", 
+                              "", "KEEP.forMgsToNtfl=0+KEEP.ForMgs=1");
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forNFAtyList" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.ATY_ID" != "0" && $ACCESS.FAC_aty \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Object_Contacts", "UpdateAtyObjectContacts()", enableExtraBtn);
+
+    function UpdateAtyObjectContacts() {
+       update_lrel_nf_ntfl("aty", "aty:" + "$args.KEEP.ATY_ID", "ntfl", "$args.KEEP.obj_type" + "_nf_ntflist",  
+                           "Object Contacts", "Notification Recipients", 
+                           "", "$args.KEEP.obj_type");
+    }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forMacroToNtfl" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.MACRO_ID" != "0" && $ACCESS.FAC_macro \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Object_Contacts", "UpdateMacroObjectContacts()", enableExtraBtn);
+
+    function UpdateMacroObjectContacts() {
+       update_lrel_macro_ntfl("macro", "$args.KEEP.MACRO_PERSID", "ntfl", "att_ntflist", 
+                              "Object Contacts", 
+                              "Notification Recipients", 
+                              "", "$args.KEEP.MACRO_OB_TYPE");
+    }
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Object Contact Notifications">
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.forNtfrToNtfl" != "1" && "$args.KEEP.forMgsToNtfl" != "1" && "$args.KEEP.noCreateBtn" != "1" && "$args.KEEP.forMacroToNtfl" != "1" && $ACCESS.FAC_ntfl \> 1>
+<PDM_MACRO name=sfStart factory=ntfl>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=ntfl>
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_ntfl.htmpl>');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forNtfrToNtfl" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.att_ntfrlist.ntfr.id" value="$args.QBE.EQ.att_ntfrlist.ntfr.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forMacroToNtfl" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.macro_ntf.macro.id" value="$args.QBE.EQ.macro_ntf.macro.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forMgsToNtfl" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.mgs_ntf.mgs.id" value="$args.QBE.EQ.mgs_ntf.mgs.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.cr_nf_list.aty_srel.id" != "">
+    docWrite('<input type="hidden" name="QBE.EQ.cr_nf_list.aty_srel.id" value="$args.QBE.EQ.cr_nf_list.aty_srel.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.chg_nf_list.aty_srel.id" != "">
+    docWrite('<input type="hidden" name="QBE.EQ.chg_nf_list.aty_srel.id" value="$args.QBE.EQ.chg_nf_list.aty_srel.id">');
+</PDM_IF>
+<PDM_IF "$args.QBE.EQ.iss_nf_list.aty_srel.id" != "">
+    docWrite('<input type="hidden" name="QBE.EQ.iss_nf_list.aty_srel.id" value="$args.QBE.EQ.iss_nf_list.aty_srel.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.ForMgs" == "1">
+searchFilterTextDisabled("Object Type","object_type",10, "mgs", "Managed Survey", "EQ");
+<PDM_ELIF "$args.KEEP.ForNtfrNTFL" == "1" || "$args.KEEP.ForNFNTFL" == "1" || "$args.KEEP.forNFAtyList" == "1">
+<PDM_IF "$args.KEEP.obj_type" == "cr">
+<PDM_IF "$args.KEEP.forNFAtyList" != "1">
+			searchFilterDropdown("Object Type","object_type","", "noempty",
+		
+<PDM_ELSE>
+			searchFilterDropdown("Object Type","object_type","",
+		
+</PDM_IF>
+			"Request/Incident/Problem","cr","Request/Incident/Problem Activity Log","alg",1);			
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "chg">
+<PDM_IF "$args.KEEP.forNFAtyList" != "1">
+			searchFilterDropdown("Object Type","object_type","", "noempty"
+		
+<PDM_ELSE>
+			searchFilterDropdown("Object Type","object_type",""
+		
+</PDM_IF>
+				<PDM_LIST PREFIX=list WHERE="sym='chg' OR sym='chgalg' " FACTORY="object_notify_prod_list" ESC_STYLE=JS2>
+					,"$list.COMMON_NAME","$list.REL_ATTR"
+				</PDM_LIST>	
+				,1);		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "nr">
+			searchFilterDropdown("Object Type","object_type","", "noempty"
+				<PDM_LIST PREFIX=list WHERE="sym='nr' OR sym='cialg' " FACTORY="object_notify_prod_list" ESC_STYLE=JS2>
+					,"$list.COMMON_NAME","$list.REL_ATTR"
+				</PDM_LIST>	
+				,1);		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "cnt">
+			searchFilterDropdown("Object Type","object_type","", "noempty"
+				<PDM_LIST PREFIX=list WHERE="sym='cnt' OR sym='cntalg' " FACTORY="object_notify_prod_list" ESC_STYLE=JS2>
+					,"$list.COMMON_NAME","$list.REL_ATTR"
+				</PDM_LIST>	
+				,1);		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "iss">
+<PDM_IF "$args.KEEP.forNFAtyList" != "1">
+			searchFilterDropdown("Object Type","object_type","", "noempty"
+		
+<PDM_ELSE>
+			searchFilterDropdown("Object Type","object_type",""
+		
+</PDM_IF>
+				<PDM_LIST PREFIX=list WHERE="sym='iss' OR sym='issalg' " FACTORY="object_notify_prod_list" ESC_STYLE=JS2>
+					,"$list.COMMON_NAME","$list.REL_ATTR"
+				</PDM_LIST>	
+				,1);		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "mgs">
+			searchFilterDropdown("Object Type","object_type","", "noempty"
+				<PDM_LIST PREFIX=list WHERE="sym='mgs' OR sym='mgsalg' " FACTORY="object_notify_prod_list" ESC_STYLE=JS2>
+					,"$list.COMMON_NAME","$list.REL_ATTR"
+				</PDM_LIST>	
+				,1);		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "KD">
+			searchFilterTextDisabled("Object Type","object_type",10, "$args.KEEP.obj_type", "Knowledge Document", "EQ");		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "O_COMMENTS">
+			searchFilterTextDisabled("Object Type","object_type",10, "$args.KEEP.obj_type", "Knowledge Document Comment", "EQ");		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "KT_REPORT_CARD">
+			searchFilterTextDisabled("Object Type","object_type",10, "$args.KEEP.obj_type", "Knowledge Report Card", "EQ");		
+	
+<PDM_ELIF "$args.KEEP.obj_type" == "sa_notif">
+			searchFilterTextDisabled("Object Type","object_type",10, "$args.KEEP.obj_type", "Assistance Session", "EQ");		
+	
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.ForMacroNTFL" == "1">
+		var hold_obj_type_text;
+		
+<PDM_IF "$args.KEEP.obj_type" == "cr">	
+		hold_obj_type_text = "Request/Incident/Problem";		
+		
+<PDM_ELIF "$args.KEEP.obj_type"  == "chg">
+		hold_obj_type_text = "Change Order";
+        
+<PDM_ELIF "$args.KEEP.obj_type"  == "nr">
+		hold_obj_type_text = "Configuration Item";
+        
+<PDM_ELIF "$args.KEEP.obj_type"  == "cnt">
+		hold_obj_type_text = "Contact";
+		
+<PDM_ELIF "$args.KEEP.obj_type" == "iss">
+		hold_obj_type_text = "Issue";
+		
+<PDM_ELIF "$args.KEEP.obj_type" == "iss_wf">
+		hold_obj_type_text = "Issue Workflow Task";
+		
+<PDM_ELIF "$args.KEEP.obj_type" == "KD">
+		hold_obj_type_text = "Knowledge Document";
+		
+<PDM_ELIF "$args.KEEP.obj_type" == "KT_REPORT_CARD">
+		hold_obj_type_text = "Knowledge Report Card";
+		
+<PDM_ELIF "$args.KEEP.obj_type" == "sa_notif">
+		hold_obj_type_text = "Assistance Session";
+		
+<PDM_ELIF "$args.KEEP.obj_type" == "wf">
+		hold_obj_type_text = "Workflow Task";
+		
+<PDM_ELIF "$args.KEEP.obj_type" == "mgs">
+		hold_obj_type_text = "Managed Surveys";
+		
+</PDM_IF>
+	searchFilterTextDisabled("Object Type","object_type",10, "$args.KEEP.obj_type", hold_obj_type_text, "EQ");
+<PDM_ELSE>	
+	searchFilterDropdown("Object Type","object_type","",
+	"Change Order","chg",
+	"Change Order Activity Log","chgalg",
+    "Configuration Item","nr",
+	"Configuration Item Activity Log","cialg",
+    "Contact","cnt",
+	"Contact Activity Log","cntalg",
+    "Issue","iss",
+	"Issue Activity Log","issalg",
+	"Issue Workflow Task","iss_wf",
+	"Knowledge Document","KD",
+	"Knowledge Document Comment","O_COMMENTS",
+	"Knowledge Report Card","KT_REPORT_CARD",
+	"Assistance Session","sa_notif",
+	"Managed Survey","mgs",
+	"Managed Survey Activity Log","mgsalg",
+	"Request/Incident/Problem","cr",
+	"Request/Incident/Problem Activity Log","alg",
+	"Workflow Task","wf",1);			
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No Object Contact Notifications found";
+var msgFound1 = "1 Object Contact Notification found";
+var msgFound = "%1 Object Contact Notifications found";
+var msgFoundMore = "%1 Object Contact Notifications found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Object Contact Notification";
+function for_itil(value)
+{	
+	if(listobjtypecode == "cr")
+	value = "Request/Incident/Problem";
+	else if(listobjtypecode == "alg")	
+	value = "Request/Incident/Problem Activity Log"; 
+rs.data(value);  
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text=" var listobjtypecode = '@{list.object_type:}';">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_IF "$args.KEEP.forNtfrToNtfl" != "1" && "$args.KEEP.forMgsToNtfl" != "1"  && "$args.KEEP.forNFAtyList" != "1" && "$args.KEEP.forMacroToNtfl" != "1">
+<PDM_MACRO name=lsCol hdr="Typ obiektu" attr=object_type fmtfunc=for_itil sort=no>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description max_char=60 width=400>
+<PDM_MACRO name=lsCol hdr="Status rekordu" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: list_ntfl.htmpl ASPEN.10 2012/06/05 11:03:43 kumka02 Exp $;
+</PDM_IF>
+<PDM_WSP>

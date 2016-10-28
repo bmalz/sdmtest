@@ -1,0 +1,42 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_reconciliation_tab.htmpl
+//
+// Purpose: CMDB CI Reconciliation Management support - Reconciliation tab 
+//
+//          This tab used by the following forms:
+//          1) CI detail forms for superseding ambiguous CIs for focal CI  
+//          2) ci_twa_ci detail form for specifying target CIs  
+//
+//
+// 06-Aug-2009 tomjo02 SCO 26513 & 26514 - CI and TWA Reconciliation Management Support - Initial version 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=cmdb_reconciliation_tab" factory=nr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>                                           
+
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript" src="$CAisd/scripts/cmdb_reconciliation.js"></script>
+<script language="JavaScript">
+
+<PDM_INCLUDE FILE=cmdb_reconciliation.htmpl >
+
+<PDM_MACRO name=tabBanner title="Reconciliation Management" add_btns=true>
+
+// Display the tab content
+cmdbShowReconciliationTable();
+
+</script>
+</PDM_FORM>
+</body>
+</html>

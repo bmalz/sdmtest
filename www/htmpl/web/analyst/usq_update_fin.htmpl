@@ -1,0 +1,33 @@
+<PDM_IF 0>
+usq_update_fin
+WHEN PRESENTED:
+    When a User Query update has finished.  This page instructs
+	the parent frame to reload itself.
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user
+    object ACCESS           List containing the user's access to the various
+                            function groups
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="usq_update.htmpl+COPY_FROM=role%3a2402+USQ_OP=COPY_USQ">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Dostosowywanie Tablicy wyników";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=bins onLoad="parent.location.reload()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<CENTER>
+<H2>Wgrywanie...</H2>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: usq_update_fin.htmpl FWr1.1 2007/5/31 17:19:50 jenji01 Exp $
+</PDM_IF>

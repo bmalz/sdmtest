@@ -1,0 +1,60 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+
+20130913 bmalz @ e-xim
+</PDM_IF>
+<HTML lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "zCorrespondence Search";
+var hdrTitleList = "zCorrespondence List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zCorrespondencesum.rpt", "zCorrespondencedtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=sfStart factory="zCorrespondence">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nadawca" attr="INSender" size=20>
+<PDM_MACRO name=sfTextbox hdr="Adresat" attr="INRecipientEmployee" size=20>
+<PDM_MACRO name=sfTextbox hdr="Rodzaj przesyłki" attr="CorrespondanceLetter" size=20>
+<PDM_MACRO name=sfTextbox hdr="Data przyjęcia" attr="INIncomeDate" size=20>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="Description">
+<PDM_IF "zCorrespondence" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO NAME=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No zCorrespondences found";
+  var msgFound1 = "1 zCorrespondence found";
+  var msgFound = "%1 zCorrespondences found";
+  var msgFoundMore = "%1 zCorrespondences found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired zCorrespondence";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Rodzaj" attr="Type">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

@@ -1,0 +1,2 @@
+pdm_ldap_import
+pdm_ldap_sync -l "id = ? AND userAccountControl=2"

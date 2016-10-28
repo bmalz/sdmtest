@@ -1,0 +1,175 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Feedbak Detail";
+var hdrTitleUpd = "None";
+var hdrTitleNew = "Rate and Comment";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+ahdframeset.top_splash.next_persid = "KD:$args.DOC_ID";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function onload()
+{
+	if ("$prop.form_name_3" == "edit")
+	{
+		//Set the mail textbox
+		var emailInput = document.forms["main_form"].elements["SET.EMAIL_ADDRESS"];
+		<PDM_IF "$cst.email_address" != "">
+			emailInput.value = '<PDM_FMT WIDTH=255 ESC_STYLE=C>$cst.email_address</PDM_FMT>';
+			emailInput.disabled = true;
+		</PDM_IF>
+	}
+	//Set the user name hidden input
+	document.forms["main_form"].elements["SET.USER_NAME"].value = ahdtop.cstComboName;
+}
+////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION preSaveTrigger
+//	Being called from detail_form.js before the form is submitted
+////////////////////////////////////////////////////////////////////////////////////
+function preSaveTrigger()
+{
+	//Calculate USER_SLV value:
+	var oElement = document.getElementById("radioYes1");//Accesing the yes radio button
+	if (oElement != null)
+	{
+		if (oElement.checked)
+		{
+			document.forms["main_form"].elements["SET.USER_SLV"].value = "1";
+			document.forms["main_form"].elements["SET.HIT_NO_VOTE"].value = "0";//User rated
+		}
+	}
+	oElement = document.getElementById("radioRate1");//Accesing the Very helpfull radio button
+	if (oElement != null)
+	{
+		var rate = "None";
+		for (var i = 1; i < 4; i++)
+		{
+			oElement = document.getElementById("radioRate" + i);//Accesing the radio button
+			if (oElement.checked)
+			{
+				rate = oElement.value;
+			}
+		}
+		if (rate != "None")
+		{
+			document.forms["main_form"].elements["SET.HIT_NO_VOTE"].value = "0";//User rated
+			document.forms["main_form"].elements["SET.BU_RATING"].value = rate;//User rate value
+		}
+	}	
+	return true;
+}
+</script>
+
+</head>
+
+<body class=detailro onunload="unloadActions()" onload="onload()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="BU_TRANS">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+</script>
+<input type=hidden name="SET.ADD_HIT" value="1">
+<input type=hidden name="SET.BU_RATING" value="$prop.BU_NO_VOTE_RATING">
+<input type=hidden name="SET.HIT_NO_VOTE" value="1">
+<input type=hidden name="SET.USER_SLV" value="0">
+<input type=hidden name="SET.TICKET_SLV" value="0">
+<input type=hidden name="SET.USER_NAME" value="">
+<input type=hidden name=HTMPL value=show_main_detail.htmpl>
+<tr>
+<td width=100% colspan=6 class=data>
+<PDM_IF "$args.DOC_ID.VOTE_COUNT" == "0" || "$args.DOC_ID.VOTE_COUNT" == "">
+	Be the first to rate this Knowledge File!
+<PDM_ELSE>
+	<script>
+	document.write(formatmsg("Knowledge File was rated <b>%1</b> times.", "$args.DOC_ID.VOTE_COUNT"));
+	document.write("<br>");
+	var iRating = Math.round("$args.DOC_ID.AVG_RATING");
+	if(iRating == 0)
+		document.write("Average rating is <b>Not helpful at all</b>.");
+	else if(iRating  > 0 && iRating <= 2)
+		document.write("Average rating is <b>Somewhat helpful</b>.");
+	else
+		document.write("Average rating is <b>Very helpful</b>.");
+	</script>
+</PDM_IF>
+</td>
+</tr>
+<tr>
+<th class=labeltext valign=baseline scope=col align=left colspan=2>Did&nbsp;this&nbsp;file&nbsp;solve&nbsp;your&nbsp;problem?</th>
+<th class=labeltext valign=baseline scope=col align=left colspan=3>How&nbsp;helpful&nbsp;was&nbsp;this&nbsp;file?</th>
+</tr>
+<tr valign=top>
+<td valign=top align=left>
+	<span class=data><label for="radioYes1">Yes</label></span>
+</td>
+<td valign=top align=left><input type=radio value=1 name=radioYes id=radioYes1></td>
+<td valign=top align=left>
+	<span class=data><label for="radioRate1">Very&nbsp;helpful</label></span>
+</td>
+<td valign=top align=left><input type=radio value=4 name=radioRate id=radioRate1></td>
+<td valign=top align=left width=100%></td>
+</tr>
+<tr valign=top>
+<td valign=top align=left>
+	<span class=data><label for="radioYes2">No</label></span>
+</td>
+<td valign=top align=left><input type=radio value=2 name=radioYes id=radioYes2></td>
+<td valign=top align=left>
+	<span class=data><label for="radioRate2">Somewhat&nbsp;helpful</label></span>
+</td>
+<td valign=top align=left><input type=radio value=2 name=radioRate id=radioRate2></td>
+<td valign=top align=left width=100%></td>
+</tr>
+<tr valign=top>
+<td valign=top align=left>&nbsp;</td>
+<td valign=top align=left>&nbsp;</td>
+<td valign=top align=left>
+	<span class=data><label for="radioRate3">Not&nbsp;helpful&nbsp;at&nbsp;all</label></span>
+</td>
+<td valign=top align=left><input type=radio value=0 name=radioRate id=radioRate3></td>
+<td valign=top align=left width=100%></td>
+</tr>
+<script>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Mój e-mail" attr="EMAIL_ADDRESS" colspan=5 size=55>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="COMMENT" colspan=5 rows=5 size=55>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

@@ -1,0 +1,52 @@
+<PDM_IF 0>
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_xx.htmpl" factory=in>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+
+<SCRIPT LANGUAGE="JavaScript">
+
+// 20131023 bmalz @ e-xim
+function SetZfz() {
+	if (typeof document.main_form.elements["SET.zfz"].value != "undefined" && document.main_form.elements["SET.zfz"].value.length > 1
+		&& typeof document.main_form.elements['SET.category'].value != "undefined" && document.main_form.elements['SET.category'].value.length > 1) {
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+			"+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=exim_pcat_getzfzsdsc.htmpl"+
+			"+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements['SET.category'].value.replace("pcat:", "")); //"+QBE.EQ.persistent_id=$args.category" ;
+
+		// if (ahdframeset.name != "AHDtop") {
+		//    display_new_page(url,ahdframeset.workframe);
+		// }
+
+		jq("#HiddenDiv").load(url, function(response, status, xhr) {
+			if (status == "error") {
+				var msg = "Sorry but there was an error: ";
+				alert( msg + xhr.status + " " + xhr.statusText );
+			}
+		});
+	}
+}
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Firma zewnętrzna" attr="zfz" extraURL="ADDITIONAL_WHERE=name='$args.category.owning_contract.zfz.name' AND zfz=1" evt="onBlur=\\\"SetZfz()\\\"">
+<PDM_MACRO name=dtlTextbox hdr="Więcej" attr="zuwagifz" colspan="2" rows="3" value="">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="F-Z Umowa SLA" attr=zfzsla extraURL="ADDITIONAL_WHERE=usluga=$args.category.owning_contract AND forfz=1">
+<PDM_MACRO name=dtlLookup hdr="F-Z Poziom usług" attr="zfzsdsc" link="no">
+<PDM_MACRO name=dtlDateReadonly hdr="F-Z termin realizacji" attr="zfztermin_realizacji">
+<PDM_MACRO NAME=dtlEndTable>
+
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+

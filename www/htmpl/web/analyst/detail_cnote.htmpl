@@ -1,0 +1,227 @@
+<PDM_IF 0>
+(#)$Id: detail_cnote.htmpl,v 1.4 2007/01/04 22:52:14 tuach01 Exp $
+WHEN PRESENTED:
+    When we need to display a detail of a single Announcement
+INTENT:
+    Display the detail info for the Announcement
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  cnote  args	The Announcement object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm.maj for the
+                        definition of attributes for 'OBJECT cnote'
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Szczegóły ogłoszenia";
+var hdrTitleUpd = "Aktualizowanie ogłoszenia";
+var hdrTitleNew = "Tworzenie ogłoszenia";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script>
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+</script>
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Ogłoszenie">
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=cnote>
+<PDM_MACRO name=dtlStart>
+document.writeln("<br>");
+if (  ! _dtl.edit )   
+{
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ogłoszenie" attr=text colspan=4 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr=location colspan=2>
+<PDM_IF 1 == $prop.view_internal>
+<PDM_MACRO name=dtlCheckbox hdr="Ogłoszenie wewnętrzne" attr=internal colspan=2 off=No on=Yes>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Organizacja" attr=organization colspan=4>
+}
+else
+{
+<PDM_IF "$args.KEEP.refresh_cnote" == "1">
+var RefreshCnote = 1;
+docWriteln("<input type='hidden' name=HTMPL value=show_main_detail.htmpl>");
+</PDM_IF>
+detailStartRow("Center");
+<PDM_MACRO name=dtlTextbox hdr="Ogłoszenie" attr=text colspan=4 keeplinks=yes rows=6 size=90 spellchk=no>
+ detailStartRow("Center");          
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr=location>
+<PDM_MACRO name=dtlDropdown hdr="Obszar" attr=zHelpDeskType>
+<PDM_IF 1 == $prop.view_internal>
+<PDM_MACRO name=dtlCheckbox hdr="Ogłoszenie wewnętrzne" attr=internal off=No on=Yes>
+</PDM_IF>
+<PDM_MACRO name=dtlLookup hdr="Organizacja" attr=organization>
+}
+<PDM_MACRO name=dtlStartRow>
+var ctype_name;
+switch ( "$args.cnote_type" ) { 
+	case "1" : 
+		ctype_name = "Porada";
+		break;
+	case "2" :
+		ctype_name = "Awaria";
+		break;
+	default :
+		ctype_name = "Bieżące";
+		break;
+         }
+
+detailDropdown("Typ ogłoszenia","cnote_type","cnote",1,20, 
+true,"","$args.cnote_type",
+"no","$args.cnote_type",ctype_name,
+"","","no","","","0",
+"Porada","0","Bieżące","1","Awaria","2"); 
+
+
+var m_cnote_type;
+switch ( "$args.active" ) { 
+	case "1" : 
+		m_cnote_type = "Aktywne";
+		break;
+	case "0" :
+		m_cnote_type = "Nieaktywne";
+		break;
+         }
+detailDropdown("Status","active","cnote",1,20, 
+true,"","$args.active",
+"no","$args.cnote_type",m_cnote_type,
+"","","no","","","1",
+"Aktywne","1","Nieaktywne","0");
+
+
+<PDM_MACRO name=dtlDate hdr="Data zamknięcia" attr=close_date>
+<PDM_MACRO name=dtlCheckbox hdr="Ogłoszenie dolne" attr="zBottom" off=No on=Yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data modyfikacji" attr="posted_date">
+<PDM_MACRO name=dtlReadonly hdr="Zmodyfikowane przez" attr="posted_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<!-- handles the 'insert link' functionality -->
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+<PDM_IF "$prop.form_name_3" == "edit">
+<br><br>
+<table border=5>
+<th class="label">Wstaw link do dokumentu Bazy Wiedzy
+<tr><td>
+
+<PDM_FORM NAME=INSERT_FORM>
+<input type="hidden" name="KEY.linkItem" id="KEY.linkItem">
+<input type="hidden" name='SET.linkItem' id='SET.linkItem'>
+<table>
+<tr>
+<th align="center" width="100%" valign="baseline" class="labeltext" scope=row>
+<script type="text/javascript">
+    var lookupLinkText;
+    var linkTabindex;
+    if ( ahdtop.cstUsingScreenReader ) {
+      lookupLinkText = "Wstaw link do dokumentu Bazy Wiedzy"
+      linkTabindex = "";
+    }
+    else {
+      lookupLinkText = " Dokument:"
+      linkTabindex = " tabindex=" + (++_dtl.tabIndex);
+      write_img_link("$CAisd/img/lookup.gif", "KD", "SET.linkItem", "INSERT_FORM", "", "Find KD", 0); 
+    }
+document.write("<a class='lookup1em'" + linkTabindex + " href='javascript:void(0)' onClick=\"popup_search('KD','SET.linkItem', 'INSERT_FORM', '', 0);return false\">" + lookupLinkText + "</a></th>")
+var linktextIdText = detailNextID(1,true);
+var linktextID = _dtl.currID;
+document.write("<td align='left' valign='bottom' class='detailro' id=linkitemID>"+
+    "</td></tr></table>\n"+
+    "<table style='margin-top:8px;'><tr><td align='center' colspan=2>");
+<PDM_MACRO name=button Caption="Dodaj dokument" Disabled="yes" Func="javascript:do_insert()" hotkey_name="" ID="InsertItem" Width=0>
+var text = "</td></tr><tr>" +
+      "<th align='left' valign='baseline' class='labeltext'><label for='" +
+      linktextID + "'>Link do tekstu</label></th></tr>" +
+      "<tr><td>" +
+      "<input" + linktextIdText + " type=text colspan=2 size=50 name=" +
+      linktextID + " value=''></td>";
+document.write(text);
+</script>
+</tr>
+</table>
+
+<script type="text/javascript">
+
+// To capture persid of returned item
+var curPersid = "";
+function backfill_event(momform, field_name, what2fill,
+		persid, rel_attr_val)
+{
+
+if ( field_name == "SET.linkItem" &&
+     typeof persid == "string" && persid.length > 0 ) {
+	var commonName = document.getElementById("SET.linkItem").value;
+	ImgBtnEnableButton("InsertItem");
+	curPersid = persid;
+var currId = persid.substring(3);
+	document.getElementById("SET.linkItem").value = currId;
+	document.getElementById("linkitemID").innerHTML = currId;
+	var e = document.getElementById(linktextID);
+e.value = commonName;
+e.focus();
+}
+}
+
+// Inserts and HTML link into the announcement text
+function do_insert()
+{
+
+if (null != curPersid && curPersid.length > 0) {
+	
+	var key_val = document.getElementById(linktextID).value;
+	if (typeof key_val == "undefined" || 
+		key_val == null || 
+		key_val.length <= 0) {
+		
+		alert(msgtext("Please_enter_text_for_the_Anno"));
+		return;
+	}
+		
+	var el_text = findElem("SET.text");
+	var doc_id = curPersid.match(/[0-9]+/);
+	
+	var link_txt = "<a href=\"javascript:OpenDocumentViewer(" + doc_id + ", 2);\">";
+	link_txt += key_val + "</a>";
+	
+	el_text.value = el_text.value + link_txt;
+	
+}
+}
+</script>
+</pdm_form>
+
+</table>
+</PDM_IF>
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP>

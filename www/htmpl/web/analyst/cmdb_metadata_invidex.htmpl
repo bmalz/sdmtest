@@ -1,0 +1,49 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/01/29
+// Title  : cmdb_metadata_invidex.htmpl (family specific attributes)
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_invidex_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="idea_priority"              heading="Idea Priority" help="Idea Priority">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="subject"                    heading="Subject" help="Subject">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="target_manager"             heading="Target Manager" help="Target Manager">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="business_unit"              heading="Business Unit" help="Business Unit">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="existing_initiative_impact" heading="Existing Initiative Impact" help="Existing Initiative Impact">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="dependencies"               heading="Dependencies" help="Dependencies">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="risks"                      heading="Risks" help="Risks">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="general_notes"              heading="General Notes" help="General Notes">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="owner"                      heading="Owner" help="Owner">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="est_start_date"             heading="Estimated Start Date" help="Estimated Start Date">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="est_finish_date"            heading="Estimated Finish Date" help="Estimated Finish Date">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="invidex" attr="active"                     heading="Idea Active?" help="Investment Active?">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

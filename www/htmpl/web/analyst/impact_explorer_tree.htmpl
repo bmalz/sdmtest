@@ -1,0 +1,290 @@
+<PDM_IF 0>
+impact_explorer_tree.htmpl
+WHEN PRESENTED:
+	Htmpl for display the Impact Explorer tree.     
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+<script type="text/javascript" src=$CAisd/scripts/report.js></script>
+<script language=javascript>
+var m_lArrayNumber = 0;
+var lParentID = 0;
+var rootID = -1;
+var ticketRefNum = "";
+var ciName = "";
+var imp_expl_form_title = "";
+
+function MenuTreeOnClick(lCurrCatID, sfile_name, update_flag, snew_file_name, isImage)
+{
+    ahdframe = window.parent.ahdframe;
+    ahdframe.parent.setCurrentIndex(lCurrCatID);
+    LoadMenuTree(lCurrCatID,sfile_name, update_flag, snew_file_name, isImage);
+}
+
+function LoadMenuTree(lCurrCatID, sfile_name, update_flag, snew_file_name, isImage)
+{
+    var sLCaseFileName = sfile_name;
+    sLCaseFileName.toLowerCase();
+    if (update_flag == 1)
+    {
+	var found_already = false;
+	var found_at = -1;
+	
+	for(i = 0; i<ahdframe.parent.test_cache.length; i++)
+	{
+	    if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+	    {
+		found_already = true;
+		found_at = i;
+		break;
+	    }
+	}
+	if(!found_already)
+	{		
+	    var oldlen = ahdframe.parent.test_cache.length;
+	    var ee = new ahdframe.parent.testobj(lCurrCatID, snew_file_name);
+	    ahdframe.parent.test_cache.push(ee);
+	}
+	else
+	{
+	    ahdframe.parent.test_cache[found_at].nname = snew_file_name;
+	}
+    }
+
+    var index=sfile_name.indexOf("OP=");
+    var indexrpt=sfile_name.toLowerCase().indexOf(".rpt");
+
+    var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + "+";
+    var form = "";
+
+    if(lCurrCatID == rootID)
+	form = "imp_expl_tab_dflt.htmpl";		
+    else if (index != -1)
+    {
+	for(i = 0; i < ahdframe.parent.test_cache.length; i++)
+	{ 
+	    if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+	    {
+		sfile_name = ahdframe.parent.test_cache[i].nname;
+		break;
+	    }
+	}	
+	if (lCurrCatID != rootID && sfile_name =="")
+	    form = "menu_empty.htmpl";             		 			
+	else
+	    form += sfile_name;
+             		
+	if (isImage != true ) {	 
+	    ExpandCollapseCurrNodeChilds();
+	}
+		
+    }
+    //  Need to load report processing instead of a url if the sfile_name extension is .rpt
+    else if (indexrpt != -1)
+    {				
+	for(i = 0; i < ahdframe.parent.test_cache.length; i++)
+	{
+	    if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+	    {
+		sfile_name = ahdframe.parent.test_cache[i].nname;					
+		break;
+	    }
+	}
+	form = "menu_empty.htmpl";
+	if (lCurrCatID != rootID && sfile_name !="")	
+	    popup_report(sfile_name,"");
+    }		
+    else
+    {				
+	for(i = 0; i < ahdframe.parent.test_cache.length; i++)
+	{
+	    if(ahdframe.parent.test_cache[i].nid == lCurrCatID)
+	    {
+		sfile_name = ahdframe.parent.test_cache[i].nname;					
+		break;
+	    }
+	}
+	if (lCurrCatID != rootID && sfile_name =="")
+	    form = "menu_empty.htmpl";		            			
+	else
+	    form = sfile_name;
+
+	if (isImage != true ) {
+	    ExpandCollapseCurrNodeChilds();
+	}
+    }	
+    if ( form != "" ) 
+    {
+	// If OP is specified in the form name don't append OP=DISPLAY_FORM_HTMPL
+          
+	var op_found_index=form.indexOf("OP=");
+	if(op_found_index !=-1) {
+	    url+=form;
+	}
+	else {
+	    url += "OP=DISPLAY_FORM+HTMPL=" + form;
+	    url += "+imp_expl_form_title=" + nx_escape(imp_expl_form_title);
+	}
+    }
+        		
+    // For when the menu tree is being displayed by using the
+    // Customize Menu functionality from detail_menu_tree_name.htmpl.
+    if ( typeof ahdframeset == "object" && ahdframeset != ahdtop )
+    {
+        url += "+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME";
+    }
+
+       	
+    ahdframe.location=url;
+}
+
+function fetch_ChgRefNum() {
+<PDM_IF "$args.ticket_persid" != "">
+    return '<PDM_LIST PREFIX=list LENGTH=1 FACTORY="chg" WHERE="persistent_id = '$args.ticket_persid'"><PDM_FMT PAD=NO ESC_STYLE=C>$list.chg_ref_num</PDM_FMT></PDM_LIST>';
+<PDM_ELSE>
+    return '';
+</PDM_IF>
+}
+function fetch_CIName() {
+<PDM_IF "$args.ci_id" != "">
+    return '<PDM_LIST PREFIX=list LENGTH=1 FACTORY="nr" WHERE="id = U'$args.ci_id'"><PDM_FMT PAD=NO ESC_STYLE=C>$list.name</PDM_FMT></PDM_LIST>';
+<PDM_ELSE>
+    return '';
+</PDM_IF>
+}
+
+function InitTree()
+{
+<PDM_IF  "$args.ticket_persid" != "">
+    ticketRefNum = nx_escape(fetch_ChgRefNum());
+    //Impact Explorer Change Order  + ticketRefNum;
+    imp_expl_form_title = msgtext("Imp_expl_for_chg", nx_unescape(ticketRefNum));
+
+<PDM_ELIF "$args.ci_id" != "">
+    ciName = nx_escape(fetch_CIName());
+    // Impact Explorer Configuration Item + ciName;
+    imp_expl_form_title = msgtext("Imp_expl_for_ci", nx_unescape(ciName));
+
+<PDM_ELSE>
+	alert(formatmsg("Either a ticket_persid or a ci_id value must be in the URL for frame: %1.", window.name));
+	return;
+</PDM_IF>
+
+    rootID = 1;
+    var sObjectName, sFrameTitle;
+    sObjectName = "menu_tree";    
+    sFrameTitle = msgtext("Menu_Tree"); // Menu Tree 
+    var sRepName = "";
+    var MenuTree = window.frames["MenuTree"];
+    
+    if (typeof ahdframeset.menuTreeWindows == "undefined")
+    {
+        ahdframeset.menuTreeWindows = new Array();
+        m_lArrayNumber = 0;
+    }
+    else 
+    {
+        m_lArrayNumber = ahdframeset.menuTreeWindows.length;
+    }
+
+    ahdframeset.menuTreeWindows[m_lArrayNumber] = window;
+    var url= cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+             "+OP=DISPLAY_FORM+HTMPL=hiersel_impact_explorer.htmpl" +
+             "+PARENT_ID=" + lParentID + 
+	     "+OBJECT_NAME=" + sObjectName + 
+             "+lArrayNumber=" + m_lArrayNumber +
+	     "+rootID=" + rootID + 
+             "+ticket_persid=$args.ticket_persid" +
+             "+ci_id=$args.ci_id" +
+             "+ticketRefNum=" + ticketRefNum +
+             "+ciName=" + ciName;
+
+    if ( typeof ahdframeset == "object" && ahdframeset != ahdtop )
+    {
+        url += "+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME";
+    }
+    if ( typeof MenuTree != "object" || MenuTree == null )
+    {
+        alert(formatmsg("The frame, MenuTree, is not defined in the frame: %1", window.name));
+    }
+    else 
+    {
+        MenuTree.location.href = url;     
+	MenuTree.title = sFrameTitle;
+    }
+}
+
+function MenuTreeLoaded()
+{
+    MenuTree.Init(window,MenuTree);
+}
+
+function GetTreeFrame()
+{   
+    return MenuTree.GetTreeFrame();
+}
+
+function DeleteNode(lNodeID, bDeleteChidNodes)
+{
+    ahdframeset.menuTreeWindows[m_lArrayNumber].GetTreeFrame().DeleteNode(lNodeID, bDeleteChidNodes);
+}
+   
+function UpdateTree(lNodeID,bIsNew,sNodeCaption,lParentID,sRelID,iHAS_CHILDREN)
+{
+    var oTreeFrame = ahdframeset.menuTreeWindows[m_lArrayNumber].GetTreeFrame();
+    if (typeof oTreeFrame != "undefined")
+    {
+        oTreeFrame.UpdateTree(lNodeID,bIsNew,sNodeCaption,lParentID,sRelID,iHAS_CHILDREN);
+    }
+}
+
+function ExpandCollapseCurrNodeChilds()
+{
+    if (!is_action_in_progress())
+    {
+	return;
+    }
+    else
+    {
+        var oTreeFrame = ahdframeset.menuTreeWindows[m_lArrayNumber].GetTreeFrame();
+        if (typeof oTreeFrame != "undefined")
+        {
+            var oNode = oTreeFrame.Tree_Lib_GetCurrNode();
+	    // It's not a father or it's a root node, don't 
+	    // do anything.
+            if (!oNode.kt_Tree_Is_Father || oNode.kt_tree_id == rootID)
+            {
+                return;
+            }
+
+            var lNodeID = oNode.TreeNodeID;
+            if (!oNode.kt_tree_child_Data_loaded)
+            {
+                oTreeFrame.TreeOnPlusMinusClick(lNodeID)
+            }
+	    else
+            {
+		if (!oNode.TreeIsOpen)
+		    oNode.Tree_Expand();
+                else
+                    oNode.Tree_Collapse();
+            }
+        }
+    }
+}
+
+</script>
+</HEAD>
+<frameset rows="*,0" onload= "InitTree()"
+          frameborder=0 framespacing=0>
+<frame id=MenuTree name=MenuTree src="$CAisd/html/empty.html" SCROLLING=$SESSION.scrolling
+       title="Menu Tree">
+<frame id=KTCatData name=KTCatData src="$CAisd/html/empty.html"
+       title="Hidden frame - do not navigate here">
+</frameset>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: impact_explorer_tree.htmpl ASPEN.1 2010/11/24 19:26:38 pstso01 Exp $;
+</PDM_IF>

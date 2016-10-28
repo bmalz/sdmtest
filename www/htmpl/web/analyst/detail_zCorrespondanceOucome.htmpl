@@ -1,0 +1,173 @@
+<PDM_IF 0>
+20130916 bmalz @ e-xim
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Korespondencja wychodząca"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Edycja korespondencji wychodzącej"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie nowej korespondencji wychodzącej ${args.COMMON_NAME}"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+
+
+jq(document).ready(function () {
+	<PDM_IF "$args.KEEP.IsReply" == "1">
+	
+		var url = cfgCgi + "?sid=" + cfgSID + "+fid=" + fid_generator() +
+	            "+OP=SEARCH+FACTORY=zCorrespondenceIncome+SKIPLIST=1+HTMPL=getCorrespondenceIncomeDetails.htmpl"+
+	            "+QBE.EQ.id=" + "$args.KEEP.SelectedPersId".replace("zCorrespondenceIncome:", "");
+
+		jq("#HiddenDiv").load(url, function(response, status, xhr) {
+	      if ( status == "error" ) {
+	        var msg = "Sorry but there was an error: ";
+	        alert( msg + xhr.status + " " + xhr.statusText );
+	      }
+	    });
+	</PDM_IF>
+
+	<PDM_IF "$prop.form_name_3" == "edit" && "$args.id" == "0">
+		if (jq('input[name=KEY.CountryRef]').val != "") {
+			jq('input[name=SET.CountryRef]').val("197");
+			jq('input[name=KEY.CountryRef]').val("Poland");
+		}
+	</PDM_IF>
+});
+
+// 20130823 bmalz @ e-xim
+function backfill_event( form_name, field_name, value,
+                         persid, rel_attr_val, caller_type )
+{
+	if (field_name == "KEY.Recipient" && typeof value != "undefined" && value.length > 1) 
+    {        
+		var url = cfgCgi + "?sid=" + cfgSID + "+fid=" + fid_generator() +
+            "+OP=SEARCH+FACTORY=zContractors+SKIPLIST=1+HTMPL=getContractors.htmpl"+
+            "+QBE.EQ.id=" + rel_attr_val;
+
+        // 20131021 bmalz @ e-xim
+		jq("#HiddenDiv").load(url, function(response, status, xhr) {
+	      if ( status == "error" ) {
+	        var msg = "Sorry but there was an error: ";
+	        alert( msg + xhr.status + " " + xhr.statusText );
+	      }
+	    });
+	} 
+}
+
+// 20131022 bmalz @ e-xim : Extended
+function GetContractors(Street, PostCode, City, CountryID, CountryCN, Building, Room) {
+	jq('input[pdmqa=Street]').val(Street);
+	jq('input[pdmqa=PostCode]').val(PostCode);
+	jq('input[pdmqa=City]').val(City);
+	jq('input[name=SET.CountryRef]').val(CountryID);
+	jq('input[name=KEY.CountryRef]').val(CountryCN);
+	jq('input[pdmqa=Building]').val(Building);
+	jq('input[pdmqa=Room]').val(Room);
+}
+
+// 20131022 bmalz @ e-xim
+function GetDetails(Name, Surname, Department) {
+	jq('input[pdmqa=Name]').val(Name);
+	jq('input[pdmqa=Surname]').val(Surname);
+	jq('input[pdmqa=Department]').val(Department);
+}
+
+// 20131021 bmalz @ e-xim
+function GetCr(CrSet, CrKey) {
+	jq('input[name=SET.cr]').val(CrSet);
+	jq('input[name=KEY.cr]').val(CrKey);
+}
+
+// 20131021 bmalz @ e-xim
+function GetRecipient(RecipientSet, RecipientKey) {
+	jq('input[name=SET.Recipient]').val(RecipientSet);
+	jq('input[name=KEY.Recipient]').val(RecipientKey);
+}
+
+// 20131021 bmalz @ e-xim
+function GetAbroad(Abroad) {
+	if(Abroad == "1") {
+		jq('input[name=CBX.Abroad]').val(Abroad);
+		jq('input[name=CBX.Abroad]').attr('checked', true);
+		jq('input[name=SET.Abroad]').val(Abroad);
+	}
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=dtlForm factory="zCorrespondanceOucome">
+<PDM_MACRO NAME=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Rodzaj przesyłki" attr="CorrespondanceLetterType" lookup=no>
+<PDM_MACRO name=dtlCheckbox hdr="Przesyłka zagraniczna" attr="Abroad" off=No on=Yes>
+<PDM_MACRO name=dtlCheckbox hdr="Za zwrotnym potwierdzeniem odbioru" attr="FeedbackConfirmation" off=No on=Yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data wyjścia" attr="OutcomeDate" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Nr nadawczy" attr="LetterNumber" size=20>
+<PDM_MACRO name=dtlLookup hdr="Powiązany wniosek" attr="cr" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Skrót nazwy spółki" attr="AbbreviationCmpny" colspan="2">
+<PDM_MACRO name=dtlStartExpRow label="Opis" colspan=3 exp_rows="1" form_name="detail_zCorrespondanceOucome">
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="Description" colspan=3 rows=8 size=120 spellchk=no>
+<PDM_IF 0>
+<PDM_MACRO name=dtlStartExpRow label="Nadawca" colspan=3 exp_rows="1" form_name="detail_zCorrespondanceOucome">
+<PDM_MACRO name=dtlLookup hdr="Nadawca" attr="SenderEmployee" size=20>
+<PDM_MACRO name=dtlLookup hdr="Organizacja" attr="SenderOrganization" colspan="2" size=20>
+</PDM_IF>
+<PDM_MACRO name=dtlStartExpRow label="Adresat" colspan=3 exp_rows="1,2,3,4" form_name="detail_zCorrespondanceOucome">
+<PDM_MACRO name=dtlLookup hdr="Adresat" attr="Recipient" colspan="3" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Imię" attr="Name">
+<PDM_MACRO name=dtlTextbox hdr="Nazwisko" attr="Surname">
+<PDM_MACRO name=dtlTextbox hdr="Dział" attr="Department">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ulica" attr="Street" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Nr budynku" attr="Building" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Nr lokalu" attr="Room" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kod pocztowy" attr="PostCode" evt="onBlur=\\\"check_post_code(this, 'CountryRef')\\\"" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Miasto" attr="City" size=20>
+<PDM_MACRO name=dtlLookup hdr="Państwo" attr="CountryRef">
+<PDM_MACRO name=dtlStartExpRow label="Uwagi" colspan=3 exp_rows="1" form_name="detail_zCorrespondanceOucome">
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr="Note" colspan=3 rows=8 size=120 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data modyfikacji" attr=last_mod_dt>
+<PDM_MACRO name=dtlReadonly hdr="Osoba modyfikująca" attr=last_mod_by>
+<PDM_MACRO NAME=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO NAME=dtlEnd>
+
+<div style="display: none;" id="HiddenDiv"></div>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_WSP>

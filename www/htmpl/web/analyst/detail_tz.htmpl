@@ -1,0 +1,302 @@
+<PDM_IF 0>
+detail_tz.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Timezone
+INTENT:
+    Display the detail info for Timezone
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Timezone Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Timezone"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Timezone $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Timezone" key="$args.sym">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=tz>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Przesunięcie GMT" attr=gmt_delta>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Daylight Saving Time Delta (Enter 0 to Ignore DST)" attr=dst_delta colspan=3>
+<PDM_MACRO name=dtlCheckbox hdr="Użyj jako domyślnego dla systemu" attr=default_flag off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+docWriteln("<TABLE cellpadding=1 cellspacing=5 WIDTH='90%'>");
+docWriteln("<TR VALIGN=TOP>")
+docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro>Daylight Saving Time STARTS</TH>");
+docWriteln("</TR>");
+docWriteln("</TABLE>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+var cstart_pos;
+switch ( "$args.start_pos" ) { 
+	case "0" : 
+		cstart_pos = "FIRST";
+		break;
+	case "2" :
+		cstart_pos = "SECOND";
+		break;
+	case "3" :
+		cstart_pos = "THIRD";
+		break;
+	case "4" :
+		cstart_pos = "FOURTH";
+		break;
+	case "1" :
+		cstart_pos = "LAST";
+		break;
+	default :
+		cstart_pos = "FIRST";
+		break;
+         }
+
+detailDropdown("Start Position","start_pos","tz",1,20, 
+true,"","$args.start_pos",
+"no","$args.start_pos",cstart_pos,
+"","","no","","","0",
+"FIRST","0","SECOND","2","THIRD","3","FOURTH","4","LAST","1");
+
+var cstart_day;
+switch ( "$args.start_day" ) { 
+	case "0" : 
+		cstart_day = "SUNDAY";
+		break;
+	case "1" :
+		cstart_day = "MONDAY";
+		break;
+	case "2" :
+		cstart_day = "TUESDAY";
+		break;
+	case "3" :
+		cstart_day = "WEDNESDAY";
+		break;
+	case "4" :
+		cstart_day = "THURSDAY";
+		break;
+	case "5" :
+		cstart_day = "FRIDAY";
+		break;
+	case "6" :
+		cstart_day = "SATURDAY";
+		break;					
+         }
+
+detailDropdown("Start Day","start_day","tz",1,20, 
+true,"","$args.start_day",
+"no","$args.start_day",cstart_day,
+"","","no","","","0",
+"SUNDAY","0","MONDAY","1","TUESDAY","2","WEDNESDAY","3","THURSDAY","4","FRIDAY","5","SATURDAY","6");
+
+var cstart_mon;
+switch ( "$args.start_mon" ) { 
+	case "0" : 
+		cstart_mon = "JANUARY";
+		break;
+	case "1" :
+		cstart_mon = "FEBRUARY";
+		break;
+	case "2" :
+		cstart_mon = "MARCH";
+		break;
+	case "3" :
+		cstart_mon = "APRIL";
+		break;
+	case "4" :
+		cstart_mon = "MAY";
+		break;
+	case "5" :
+		cstart_mon = "JUNE";
+		break;
+	case "6" :
+		cstart_mon = "JULY";
+		break;		
+	case "7" :
+		cstart_mon = "AUGUST";
+		break;		
+	case "8" :
+		cstart_mon = "SEPTEMBER";
+		break;	
+	case "9" :
+		cstart_mon = "OCTOBER";
+		break;	
+	case "10" :
+		cstart_mon = "NOVEMBER";
+		break;	
+	case "11" :
+		cstart_mon = "DECEMBER";
+		break;						
+         }
+
+detailDropdown("Start Month","start_mon","tz",1,20, 
+true,"","$args.start_mon",
+"no","$args.start_mon",cstart_mon,
+"","","no","","","0",
+"JANUARY","0","FEBRUARY","1","MARCH","2","APRIL","3","MAY","4","JUNE","5",
+"JULY","6","AUGUST","7","SEPTEMBER","8","OCTOBER","9","NOVEMBER","10","DECEMBER","11");
+
+detailStartRow("Center");    
+<PDM_MACRO name=dtlTextbox hdr="OR on this date" attr=start_abs_date title="Or daylight saving time starts on this date">
+<PDM_MACRO name=dtlStartRow>
+docWriteln("<TABLE cellpadding=1 cellspacing=5 WIDTH='90%'>");
+docWriteln("<TR VALIGN=TOP>")
+docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro>Daylight Saving Time ENDS</TH>");
+docWriteln("</TR>");
+docWriteln("</TABLE>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+var cend_pos;
+switch ( "$args.end_pos" ) { 
+	case "0" : 
+		cend_pos = "FIRST";
+		break;
+	case "2" : 
+		cend_pos = "SECOND";
+		break;
+	case "3" : 
+		cend_pos = "THIRD";
+		break;
+	case "4" : 
+		cend_pos = "FOURTH";
+		break;
+	case "1" :
+		cend_pos = "LAST";
+		break;
+	default :
+		cend_pos = "FIRST";
+		break;
+         }
+
+detailDropdown("End Position","end_pos","tz",1,20, 
+true,"","$args.end_pos",
+"no","$args.end_pos",cend_pos,
+"","","no","","","0",
+"FIRST","0","SECOND","2","THIRD","3","FOURTH","4","LAST","1");
+
+var cend_day;
+switch ( "$args.end_day" ) { 
+	case "0" : 
+		cend_day = "SUNDAY";
+		break;
+	case "1" :
+		cend_day = "MONDAY";
+		break;
+	case "2" :
+		cend_day = "TUESDAY";
+		break;
+	case "3" :
+		cend_day = "WEDNESDAY";
+		break;
+	case "4" :
+		cend_day = "THURSDAY";
+		break;
+	case "5" :
+		cend_day = "FRIDAY";
+		break;
+	case "6" :
+		cend_day = "SATURDAY";
+		break;					
+         }
+
+detailDropdown("End Day","end_day","tz",1,20, 
+true,"","$args.end_day",
+"no","$args.end_day",cend_day,
+"","","no","","","0",
+"SUNDAY","0","MONDAY","1","TUESDAY","2","WEDNESDAY","3","THURSDAY","4","FRIDAY","5","SATURDAY","6");
+
+var cend_mon;
+switch ( "$args.end_mon" ) { 
+	case "0" : 
+		cend_mon = "JANUARY";
+		break;
+	case "1" :
+		cend_mon = "FEBRUARY";
+		break;
+	case "2" :
+		cend_mon = "MARCH";
+		break;
+	case "3" :
+		cend_mon = "APRIL";
+		break;
+	case "4" :
+		cend_mon = "MAY";
+		break;
+	case "5" :
+		cend_mon = "JUNE";
+		break;
+	case "6" :
+		cend_mon = "JULY";
+		break;		
+	case "7" :
+		cend_mon = "AUGUST";
+		break;		
+	case "8" :
+		cend_mon = "SEPTEMBER";
+		break;	
+	case "9" :
+		cend_mon = "OCTOBER";
+		break;	
+	case "10" :
+		cend_mon = "NOVEMBER";
+		break;	
+	case "11" :
+		cend_mon = "DECEMBER";
+		break;						
+         }
+
+detailDropdown("End Month","end_mon","tz",1,20, 
+true,"","$args.end_mon",
+"no","$args.end_mon",cend_mon,
+"","","no","","","0",
+"JANUARY","0","FEBRUARY","1","MARCH","2","APRIL","3","MAY","4","JUNE","5",
+"JULY","6","AUGUST","7","SEPTEMBER","8","OCTOBER","9","NOVEMBER","10","DECEMBER","11");
+
+
+detailStartRow("Center");    
+<PDM_MACRO name=dtlTextbox hdr="OR on this date" attr=end_abs_date title="Or daylight saving time ends on this date">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_tz.htmpl ANDERSON.2 2009/06/16 15:38:14 bihtu01 Exp $;
+</PDM_IF>
+<PDM_WSP>

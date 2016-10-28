@@ -1,0 +1,1739 @@
+<PDM_IF 0>
+@(#)$Id: detail_USP_PREFERENCES.htmpl ASPEN.8 2012/05/03 16:55:14 pitva01 Exp $
+detail_USP_PREFERENCES.htmpl
+WHEN PRESENTED:
+    When we need to display user preferences
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT>
+    var form_title = "Ustawienia";
+</SCRIPT>
+<SCRIPT>
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/analyst_styles.css">
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/timer.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attevts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT>
+// global vars
+var arrAvailDocPropTexts = new Array(); 
+var arrAvailDocPropValues = new Array(); 
+var arrSlctDocPropTexts = new Array(); 
+var arrSlctDocPropValues = new Array();
+var propResolutionProhibited = $prop.EBR_SEARCH_PROHIBIT_RESOLUTION;
+var slctDocPropsId, availDocPropsId;
+
+var arrIdAttr = new Array();
+var arrIdValue = new Array();
+function getDetailIds(n)
+{
+  for ( var i = 0; i < n; i++ ) {
+    arrIdAttr[i] = detailNextID(1, i == n-1);
+    arrIdValue[i] = _dtl.currID;
+  }
+}
+
+function LoadAvailableItems()
+{
+    //always clear list box before adding to the list box
+    ClearList(availDocPropsId);
+    
+    if (ahdtop.GetUSPPreferences("DOC_ID") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Document Id", "DOC_ID");                                            
+                                            
+    if (ahdtop.GetUSPPreferences("USER_DEF_ID") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("User Defined ID", "USER_DEF_ID");
+        
+    if (ahdtop.GetUSPPreferences("AUTHOR") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Author", "AUTHOR");
+        
+    if (ahdtop.GetUSPPreferences("OWNER") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Owner", "OWNER");
+        
+    if (ahdtop.GetUSPPreferences("SUBJECT_EXPERT") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Subject Expert", "SUBJECT_EXPERT");
+        
+    if (ahdtop.GetUSPPreferences("INITIATOR") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Initiator", "INITIATOR");
+                                                    
+    if (ahdtop.GetUSPPreferences("ASSIGNEE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Assignee", "ASSIGNEE");
+        
+    if (ahdtop.GetUSPPreferences("CREATION_DATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Creation Date", "CREATION_DATE");
+        
+    if (ahdtop.GetUSPPreferences("MODIFY_DATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Modify Date", "MODIFY_DATE");
+        
+    if (ahdtop.GetUSPPreferences("START_DATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Start Date", "START_DATE");
+        
+    if (ahdtop.GetUSPPreferences("EXPIRATION_DATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Expiration Date", "EXPIRATION_DATE");
+        
+    if (ahdtop.GetUSPPreferences("REVIEW_DATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Review Date", "REVIEW_DATE");
+    
+    if (ahdtop.GetUSPPreferences("LAST_ACCEPTED_DATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Last Accepted Date", "LAST_ACCEPTED_DATE");
+
+    if (ahdtop.GetUSPPreferences("PUBLISHED_DATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Publish Date", "PUBLISHED_DATE");
+        
+    if (ahdtop.GetUSPPreferences("PRIORITY") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Approval Process Priority", "PRIORITY");
+                
+    if (ahdtop.GetUSPPreferences("STATUS") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Document Status", "STATUS");
+        
+    if (ahdtop.GetUSPPreferences("DOC_TYPE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Document Type", "DOC_TYPE");
+                                                            
+    if (ahdtop.GetUSPPreferences("BU_RESULT") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("FAQ Rating", "BU_RESULT");
+    
+    if (ahdtop.GetUSPPreferences("HITS") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Hits", "HITS");
+        
+    if (ahdtop.GetUSPPreferences("CREATED_VIA") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Created Via", "CREATED_VIA");
+        
+    if (ahdtop.GetUSPPreferences("PRIMARY_INDEX") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Primary Category", "PRIMARY_INDEX");
+        
+    if (ahdtop.GetUSPPreferences("CURRENT_ACTION") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Current Task", "CURRENT_ACTION");
+        
+    if (ahdtop.GetUSPPreferences("DOC_TEMPLATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Document Template", "DOC_TEMPLATE");
+        
+    if (ahdtop.GetUSPPreferences("WF_TEMPLATE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Approval Process Template", "WF_TEMPLATE");
+        
+    if (ahdtop.GetUSPPreferences("PRODUCT") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Product", "PRODUCT");
+        
+    if (ahdtop.GetUSPPreferences("ITEM") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Asset", "ITEM");
+        
+    if (ahdtop.GetUSPPreferences("SD_PRIORITY") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Priority", "SD_PRIORITY");
+    
+    if (ahdtop.GetUSPPreferences("SD_SEVERITY") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Severity", "SD_SEVERITY");
+            
+    if (ahdtop.GetUSPPreferences("SD_IMPACT") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Impact", "SD_IMPACT");
+        
+    if (ahdtop.GetUSPPreferences("SD_URGENCY") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Urgency", "SD_URGENCY");
+        
+    if (ahdtop.GetUSPPreferences("SD_ROOTCAUSE") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Root Cause", "SD_ROOTCAUSE");
+        
+    if (ahdtop.GetUSPPreferences("SD_ACCEPTED_HITS") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Solution Count", "SD_ACCEPTED_HITS");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM1") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Custom1", "CUSTOM1");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM2") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Custom2", "CUSTOM2");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM3") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Custom3", "CUSTOM3");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM4") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Custom4", "CUSTOM4");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM5") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Custom5", "CUSTOM5");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM_NUM1") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Custom_Num1", "CUSTOM_NUM1");
+    
+    if (ahdtop.GetUSPPreferences("CUSTOM_NUM2") == "0")
+        document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option("Custom_Num2", "CUSTOM_NUM2");
+   
+    //set initial arrays for shuttle control
+    for (j=0;j<document.getElementById(availDocPropsId).options.length;j++) 
+        {
+	    var tmp_text = document.getElementById(availDocPropsId).options[j].text;
+	    document.getElementById(availDocPropsId).options[j].text = tmp_text.replace(/&#39;/g, "'");
+            arrAvailDocPropTexts[j]=document.getElementById(availDocPropsId).options[j].text;
+            arrAvailDocPropValues[j]=document.getElementById(availDocPropsId).options[j].value;
+        }
+}
+function LoadSelectedItems()
+{    
+    //always clear list box before adding to the list box
+    ClearList(slctDocPropsId);
+    
+    if (ahdtop.GetUSPPreferences("DOC_ID") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Document Id", "DOC_ID");                                            
+                                            
+    if (ahdtop.GetUSPPreferences("USER_DEF_ID") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("User Defined ID", "USER_DEF_ID");
+        
+    if (ahdtop.GetUSPPreferences("AUTHOR") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Author", "AUTHOR");
+        
+    if (ahdtop.GetUSPPreferences("OWNER") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Owner", "OWNER");
+        
+    if (ahdtop.GetUSPPreferences("SUBJECT_EXPERT") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Subject Expert", "SUBJECT_EXPERT");
+        
+    if (ahdtop.GetUSPPreferences("INITIATOR") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Initiator", "INITIATOR");
+                                                    
+    if (ahdtop.GetUSPPreferences("ASSIGNEE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Assignee", "ASSIGNEE");
+        
+    if (ahdtop.GetUSPPreferences("CREATION_DATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Creation Date", "CREATION_DATE");
+        
+    if (ahdtop.GetUSPPreferences("MODIFY_DATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Modify Date", "MODIFY_DATE");
+        
+    if (ahdtop.GetUSPPreferences("START_DATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Start Date", "START_DATE");
+        
+    if (ahdtop.GetUSPPreferences("EXPIRATION_DATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Expiration Date", "EXPIRATION_DATE");
+        
+    if (ahdtop.GetUSPPreferences("REVIEW_DATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Review Date", "REVIEW_DATE");
+    
+    if (ahdtop.GetUSPPreferences("LAST_ACCEPTED_DATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Last Accepted Date", "LAST_ACCEPTED_DATE");
+
+    if (ahdtop.GetUSPPreferences("PUBLISHED_DATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Publish Date", "PUBLISHED_DATE");
+        
+    if (ahdtop.GetUSPPreferences("PRIORITY") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Approval Process Priority", "PRIORITY");
+                
+    if (ahdtop.GetUSPPreferences("STATUS") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Document Status", "STATUS");
+        
+    if (ahdtop.GetUSPPreferences("DOC_TYPE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Document Type", "DOC_TYPE");
+                                                            
+    if (ahdtop.GetUSPPreferences("BU_RESULT") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("FAQ Rating", "BU_RESULT");
+    
+    if (ahdtop.GetUSPPreferences("HITS") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Hits", "HITS");
+        
+    if (ahdtop.GetUSPPreferences("CREATED_VIA") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Created Via", "CREATED_VIA");
+        
+    if (ahdtop.GetUSPPreferences("PRIMARY_INDEX") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Primary Category", "PRIMARY_INDEX");
+        
+    if (ahdtop.GetUSPPreferences("CURRENT_ACTION") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Current Task", "CURRENT_ACTION");
+        
+    if (ahdtop.GetUSPPreferences("DOC_TEMPLATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Document Template", "DOC_TEMPLATE");
+        
+    if (ahdtop.GetUSPPreferences("WF_TEMPLATE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Approval Process Template", "WF_TEMPLATE");
+        
+    if (ahdtop.GetUSPPreferences("PRODUCT") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Product", "PRODUCT");
+        
+    if (ahdtop.GetUSPPreferences("ITEM") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Asset", "ITEM");
+        
+    if (ahdtop.GetUSPPreferences("SD_PRIORITY") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Priority", "SD_PRIORITY");
+    
+    if (ahdtop.GetUSPPreferences("SD_SEVERITY") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Severity", "SD_SEVERITY");
+            
+    if (ahdtop.GetUSPPreferences("SD_IMPACT") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Impact", "SD_IMPACT");
+        
+    if (ahdtop.GetUSPPreferences("SD_URGENCY") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Urgency", "SD_URGENCY");
+        
+    if (ahdtop.GetUSPPreferences("SD_ROOTCAUSE") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Root Cause", "SD_ROOTCAUSE");
+        
+    if (ahdtop.GetUSPPreferences("SD_ACCEPTED_HITS") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Solution Count", "SD_ACCEPTED_HITS");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM1") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Custom1", "CUSTOM1");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM2") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Custom2", "CUSTOM2");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM3") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Custom3", "CUSTOM3");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM4") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Custom4", "CUSTOM4");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM5") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Custom5", "CUSTOM5");
+        
+    if (ahdtop.GetUSPPreferences("CUSTOM_NUM1") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Custom_Num1", "CUSTOM_NUM1");
+    
+    if (ahdtop.GetUSPPreferences("CUSTOM_NUM2") == "1")
+        document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option("Custom_Num2", "CUSTOM_NUM2");
+  
+    //set initial arrays for shuttle control
+    for (j=0;j<document.getElementById(slctDocPropsId).options.length;j++) 
+    {
+            var tmp_text = document.getElementById(slctDocPropsId).options[j].text;
+            document.getElementById(slctDocPropsId).options[j].text = tmp_text.replace(/&#39;/g, "'");    
+            arrSlctDocPropTexts[j]=document.getElementById(slctDocPropsId).options[j].text;
+            arrSlctDocPropValues[j]=document.getElementById(slctDocPropsId).options[j].value;
+    }
+}
+
+function window_onload()
+{    
+
+    if ("$env.NX_KT" == "Yes" && "$args.KEEP.SHOW_KT_PREFS" == "true" && "$env.NX_CMDB" != "STANDALONE")
+    {
+        try
+        {
+            <PDM_IF 0>if after save and architect page is open, let's update architect with the new prefrences</PDM_IF>
+            if (parent.SavedPref == "1")
+            {
+                parent.SavedPref == "0";//Turn it off for next time
+                var ArchitectWin = ahdtop.GetArchitectTreeWindow();
+                if (typeof ArchitectWin != "undefined" && ArchitectWin != null)
+                {
+                    ArchitectWin.UpdateListKDsPageAfterPrefSave();
+                }
+            }
+        }
+        catch(e)
+        {
+        }
+    
+        //Get values from ahdtop.GetUSPPreferences and load into the list boxes
+        LoadAvailableItems();
+        LoadSelectedItems();
+        
+        //set Search Preferences selections
+        if (ahdtop.GetUSPPreferences("ONE_B_SEARCH_TYPE") == "1" && ahdtop.cfgEBRVersion != "SEARCH_ENGINE")
+        {
+            document.getElementById("no_search_in").style.display="none";
+            document.getElementById("search_in").style.display="";
+            document.forms["main_form"].elements["SET.ONE_B_SEARCH_TYPE"].selectedIndex=1;    //Keyword search    
+        }
+        else
+        {
+            document.getElementById("no_search_in").style.display="";
+            document.getElementById("search_in").style.display="none";
+            document.forms["main_form"].elements["SET.ONE_B_SEARCH_TYPE"].selectedIndex=0;    //NLS search
+            if (ahdtop.cfgEBRVersion == "SEARCH_ENGINE")
+				document.getElementById("hide_search_type").style.display="none";
+        }
+        //
+       
+        if (ahdtop.GetUSPPreferences("ONE_B_MATCH_TYPE") == "2")
+            document.forms["main_form"].elements["SET.ONE_B_MATCH_TYPE"].selectedIndex=1;    //All words
+        else if (ahdtop.GetUSPPreferences("ONE_B_MATCH_TYPE") == "3")
+            document.forms["main_form"].elements["SET.ONE_B_MATCH_TYPE"].selectedIndex=2;    //Exact words
+        else
+            document.forms["main_form"].elements["SET.ONE_B_MATCH_TYPE"].selectedIndex=0;    //Any phrase
+        //
+        if (ahdtop.GetUSPPreferences("ONE_B_WORD_PARTS") == "2")
+            document.forms["main_form"].elements["SET.ONE_B_WORD_PARTS"].selectedIndex=1;    //Whole beginning with...
+        else if (ahdtop.GetUSPPreferences("ONE_B_WORD_PARTS") == "3")
+            document.forms["main_form"].elements["SET.ONE_B_WORD_PARTS"].selectedIndex=2;    //Words partially matching
+        else
+            document.forms["main_form"].elements["SET.ONE_B_WORD_PARTS"].selectedIndex=0;    //Whole words    
+        //        
+        var oOptions = document.forms["main_form"].elements["SET.ONE_B_SEARCH_ORDER"].options;
+        for (var iOption=0; iOption < oOptions.length; iOption++)
+        {
+            if (oOptions[iOption].value == ahdtop.GetUSPPreferences("ONE_B_SEARCH_ORDER"))
+            {
+                document.forms["main_form"].elements["SET.ONE_B_SEARCH_ORDER"].selectedIndex = iOption;
+            }
+        }
+        //
+        <PDM_IF 0><JH>This needs to be taken out SDT 33667
+        if (ahdtop.GetUSPPreferences("ONE_B_DOC_VIEW_MODE") == "0")
+            document.forms["main_form"].elements["SET.ONE_B_DOC_VIEW_MODE"].selectedIndex=0;    //Open in Right Pane
+        else
+            document.forms["main_form"].elements["SET.ONE_B_DOC_VIEW_MODE"].selectedIndex=1;    //Open in Separate Window    
+        </PDM_IF>
+        //
+        if (ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") == "10")
+            document.forms["main_form"].elements["SET.ONE_B_DOCS_TO_DISPLAY"].selectedIndex=0;    //10 docs per page
+        else if (ahdtop.GetUSPPreferences("ONE_B_DOCS_TO_DISPLAY") == "25")
+            document.forms["main_form"].elements["SET.ONE_B_DOCS_TO_DISPLAY"].selectedIndex=1;    //25 docs per page
+        else 
+            document.forms["main_form"].elements["SET.ONE_B_DOCS_TO_DISPLAY"].selectedIndex=2;    //50 docs per page
+        //
+        if (ahdtop.GetUSPPreferences("ONE_B_HIDE_DETAILS") != "1")
+            document.forms["main_form"].elements["cbONE_B_HIDE_DETAILS"].checked = true;    
+        
+        var nFieldsToSearch = parseInt(ahdtop.GetUSPPreferences("ONE_B_SEARCH_FIELDS"));
+        if (nFieldsToSearch % 2 == 1)
+            document.forms["main_form"].elements["cbSearchTitle"].checked = true
+        nFieldsToSearch = parseInt(nFieldsToSearch / 2);
+        if (nFieldsToSearch % 2 == 1)
+            document.forms["main_form"].elements["cbSearchSummary"].checked = true
+        nFieldsToSearch = parseInt(nFieldsToSearch / 2);
+        if (nFieldsToSearch % 2 == 1)
+            document.forms["main_form"].elements["cbSearchProblem"].checked = true
+        nFieldsToSearch = parseInt(nFieldsToSearch / 2);
+        <PDM_IF $prop.EBR_SEARCH_PROHIBIT_RESOLUTION == "1">
+            if (nFieldsToSearch % 2 == 1)
+                document.forms["main_form"].elements["cbSearchResolution"].checked = true
+        </PDM_IF>    
+        document.forms["main_form"].elements["SET.ONE_B_HIDE_DETAILS"].value = ahdtop.GetUSPPreferences("ONE_B_HIDE_DETAILS");
+        document.forms["main_form"].elements["SET.ONE_B_SEARCH_FIELDS"].value = ahdtop.GetUSPPreferences("ONE_B_SEARCH_FIELDS");
+        //end Search Preferences selections
+        
+        //Architect Preferences
+		if ( "$env.NX_HIDE_KNOW_CAT_PREFRENCES"!= "1" )
+        {
+            document.getElementById("divArchSection").style.display="";
+            if (ahdtop.GetUSPPreferences("ARC_DOCS_TO_DISPLAY") == "10")
+                document.forms["main_form"].elements["SET.ARC_DOCS_TO_DISPLAY"].selectedIndex=0;    //10 docs per page
+            else if (ahdtop.GetUSPPreferences("ARC_DOCS_TO_DISPLAY") == "25")
+                document.forms["main_form"].elements["SET.ARC_DOCS_TO_DISPLAY"].selectedIndex=1;    //25 docs per page
+            else 
+                document.forms["main_form"].elements["SET.ARC_DOCS_TO_DISPLAY"].selectedIndex=2;    //50 docs per page
+        }
+        //end Architect Preferences
+    }
+    // General Preferences
+    // We get values from ahdtop because the USP_PREFERENCES record may not be created and 
+    // the ahdtop saves the default values.
+    document.forms["main_form"].elements["SET.WEB_PREFERENCES"].value = ahdtop.GetUSPPreferences("WEB_PREFERENCES");
+    document.forms["main_form"].elements["SET.WEB_POPUP1_HEIGHT"].value = ahdtop.GetUSPPreferences("WEB_POPUP1_HEIGHT");
+    document.forms["main_form"].elements["SET.WEB_POPUP1_WIDTH"].value = ahdtop.GetUSPPreferences("WEB_POPUP1_WIDTH");
+    document.forms["main_form"].elements["SET.WEB_POPUP2_HEIGHT"].value = ahdtop.GetUSPPreferences("WEB_POPUP2_HEIGHT");
+    document.forms["main_form"].elements["SET.WEB_POPUP2_WIDTH"].value = ahdtop.GetUSPPreferences("WEB_POPUP2_WIDTH");
+    document.forms["main_form"].elements["SET.CLASSIC_RESULTSET_CONTEXT"].value = ahdtop.GetUSPPreferences("CLASSIC_RESULTSET_CONTEXT");
+    document.forms["main_form"].elements["SET.USE_DEFAULT_ROLE"].value = ahdtop.GetUSPPreferences("USE_DEFAULT_ROLE");
+    // end General Preferences
+    
+    //Disable Control if it is read only mode
+    if (propFormName3 == "ro")
+    {
+        var iIndex = document.forms["main_form"].elements.length;
+        for ( var i = 0; i < iIndex; i++)
+        {
+            document.forms["main_form"].elements[i].disabled = true;
+        } 
+    }
+    detailFocus1st();
+}
+
+</SCRIPT>
+<script language=javascript>
+function UpdateAllInputs(value)
+{
+    var m = document.getElementById(slctDocPropsId).options.length;
+    for (var i=0; i<m; i++)
+    {    
+        document.getElementById("SET." + document.getElementById(slctDocPropsId).options[i].value).value = value; 
+    }
+    
+    var n = document.getElementById(availDocPropsId).options.length;
+    for (var i=0; i<n; i++)
+    {    
+        document.getElementById("SET." + document.getElementById(availDocPropsId).options[i].value).value = value;
+    }
+    /*
+    for (var i=0; i<arrSlctDocPropValues.length; i++)
+    {    
+        document.getElementById("SET." + arrSlctDocPropValues[i]).value = value; 
+    }
+    for (var i=0; i<arrAvailDocPropValues.length; i++)
+    {    
+        document.getElementById("SET." + arrAvailDocPropValues[i]).value = value;
+    }
+    */
+}
+
+function ClearArray(select_name)
+{
+    //move all elements from one array to the other
+    if(select_name == availDocPropsId)
+    {
+        var tempPropTexts = arrAvailDocPropTexts.splice(0, document.getElementById(availDocPropsId).options.length);
+        var tempPropValues = arrAvailDocPropValues.splice(0, document.getElementById(availDocPropsId).options.length);
+        for (var i=0; i<tempPropValues.length; i++)
+        {
+            arrSlctDocPropTexts[arrSlctDocPropTexts.length]=tempPropTexts[i];
+            arrSlctDocPropValues[arrSlctDocPropValues.length]=tempPropValues[i];
+        }
+    }
+    if (select_name == slctDocPropsId)
+    {
+        var tempPropTexts = arrSlctDocPropTexts.splice(0, document.getElementById(slctDocPropsId).options.length);
+        var tempPropValues = arrSlctDocPropValues.splice(0, document.getElementById(slctDocPropsId).options.length);
+        for (var i=0; i<tempPropValues.length; i++)
+        {
+            arrAvailDocPropTexts[arrAvailDocPropTexts.length]=tempPropTexts[i];
+            arrAvailDocPropValues[arrAvailDocPropValues.length]=tempPropValues[i];
+        }
+    }
+}
+function ClearList(select_name)
+{
+    
+    for (var j=document.getElementById(select_name).options.length-1;j>=0;j--) 
+    {
+        document.getElementById(select_name).options.length--;
+    }
+}
+//
+function LoadList(select_name)
+{
+    if( select_name == availDocPropsId)
+    {
+        for (var i=0; i<arrAvailDocPropTexts.length; i++)
+        {
+            document.getElementById(select_name).options[document.getElementById(select_name).options.length] = new Option(arrAvailDocPropTexts[i], arrAvailDocPropValues[i]);
+        }
+    }    
+    if( select_name == slctDocPropsId)
+    {
+        for (var i=0; i<arrSlctDocPropTexts.length; i++)
+        {
+            document.getElementById(select_name).options[document.getElementById(select_name).options.length] = new Option(arrSlctDocPropTexts[i], arrSlctDocPropValues[i]);
+        }
+    }
+}
+function SelectAll()
+{
+    if (propFormName3 == "edit")
+    {
+        for (var i=0; i<document.getElementById(availDocPropsId).options.length; i++)
+        {
+            document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option(document.getElementById(availDocPropsId).options[i].text, document.getElementById(availDocPropsId).options[i].value);
+        }
+        ClearArray(availDocPropsId);    
+        ClearList(availDocPropsId);                
+        UpdateAllInputs("1");
+    }
+}
+//
+function SelectItem()
+{
+    if (propFormName3 == "edit")
+    {
+        if(document.getElementById(availDocPropsId).selectedIndex == -1)
+        {
+            return;
+        }
+        var iLength = document.getElementById(availDocPropsId).options.length;
+        for ( var i = 0; i < iLength; i++)
+        {
+            if (document.getElementById(availDocPropsId).options[i].selected == true )
+            {
+                //document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option(document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).selectedIndex].text, document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).selectedIndex].value);
+                //add item to selected
+                document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).options.length] = new Option(document.getElementById(availDocPropsId).options[i].text, document.getElementById(availDocPropsId).options[i].value);
+                
+                //remove item from available array
+                arrAvailDocPropTexts.splice(document.getElementById(availDocPropsId).selectedIndex, 1);
+                arrAvailDocPropValues.splice(document.getElementById(availDocPropsId).selectedIndex, 1);
+        
+                // add item to selected array
+                arrSlctDocPropTexts[arrSlctDocPropTexts.length] = document.getElementById(availDocPropsId).options[i].text;
+                arrSlctDocPropValues[arrSlctDocPropValues.length] = document.getElementById(availDocPropsId).options[i].value;
+        
+                //update hidden data bound input
+                document.getElementById("SET." + document.getElementById(availDocPropsId).options[i].value).value = 1; 
+            }
+        }
+        // reload the list
+        ClearList(availDocPropsId);
+        LoadList(availDocPropsId);
+    }
+}
+//
+function RemoveAll()
+{
+    if (propFormName3 == "edit")
+    {
+        for (var i=0; i<document.getElementById(slctDocPropsId).options.length; i++)
+        {
+            document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option(document.getElementById(slctDocPropsId).options[i].text, document.getElementById(slctDocPropsId).options[i].value);
+        }
+        ClearArray(slctDocPropsId);    
+        ClearList(slctDocPropsId);    
+        UpdateAllInputs("0");
+    }
+}
+//
+function RemoveItem()
+{
+    if (propFormName3 == "edit")
+    {
+        if(document.getElementById(slctDocPropsId).selectedIndex == -1)
+        {
+            return;
+        }
+        var iLength = document.getElementById(slctDocPropsId).options.length;
+        for ( var i = 0; i < iLength; i++)
+        {
+            if (document.getElementById(slctDocPropsId).options[i].selected == true )
+            {
+                //document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option(document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).selectedIndex].text, document.getElementById(slctDocPropsId).options[document.getElementById(slctDocPropsId).selectedIndex].value);
+                document.getElementById(availDocPropsId).options[document.getElementById(availDocPropsId).options.length] = new Option(document.getElementById(slctDocPropsId).options[i].text, document.getElementById(slctDocPropsId).options[i].value);
+                
+                //remove item from selected array
+                arrSlctDocPropTexts.splice(document.getElementById(slctDocPropsId).selectedIndex, 1);
+                arrSlctDocPropValues.splice(document.getElementById(slctDocPropsId).selectedIndex, 1);
+                // add item to available array
+                arrAvailDocPropTexts[arrAvailDocPropTexts.length] = document.getElementById(slctDocPropsId).options[i].text;
+                arrAvailDocPropValues[arrAvailDocPropValues.length] = document.getElementById(slctDocPropsId).options[i].value;
+                //update hidden data bound input
+                document.getElementById("SET." + document.getElementById(slctDocPropsId).options[i].value).value = 0; 
+            }
+        }
+        //reload the list
+        ClearList(slctDocPropsId);
+        LoadList(slctDocPropsId);
+    }
+}
+//
+function cbHideDetails_change()
+{
+    if(document.forms["main_form"].elements["cbONE_B_HIDE_DETAILS"].checked == true)
+    {
+        document.getElementById("SET.ONE_B_HIDE_DETAILS").value = 0;
+    }
+    else
+    {
+        document.getElementById("SET.ONE_B_HIDE_DETAILS").value = 1;
+    }
+}
+//
+function SearchType_change()
+{
+    if(document.getElementById("SET.ONE_B_SEARCH_TYPE").selectedIndex == 0) //NLS search 
+    {
+        var exactOptionIndex = -1;
+        // Get the index of the EXACT option
+        for (var i=0; i < document.getElementById("SET.ONE_B_MATCH_TYPE").length; i++) 
+        {
+            var option = document.getElementById("SET.ONE_B_MATCH_TYPE").options[i];
+            if (option.value == "3") //exact phrase
+            {
+                exactOptionIndex = i;
+                break;
+            }
+        }
+        if (exactOptionIndex >= 0) 
+        {
+            // Remove the EXACT option from the match_type drop-down list
+            document.getElementById("SET.ONE_B_MATCH_TYPE").options[exactOptionIndex] = null;
+            if (document.getElementById("SET.ONE_B_MATCH_TYPE").selectedIndex == exactOptionIndex)
+                document.getElementById("SET.ONE_B_MATCH_TYPE").selectedIndex = 0;
+        }
+        // Hide the "Search in" check boxes when using NLS
+        var searchInDiv = document.getElementById("search_in");
+        searchInDiv.style.display = "none";
+        var nosearchInDiv = document.getElementById("no_search_in");
+        nosearchInDiv.style.display = "block";
+    }
+    else    //Keyword Search
+    {
+        //add back the exact phrase option
+        // if its not there
+        var exactOptionIndex = -1;
+        for (var i=0; i < document.getElementById("SET.ONE_B_MATCH_TYPE").length; i++) 
+        {
+            var option = document.getElementById("SET.ONE_B_MATCH_TYPE").options[i];
+            if (option.value == "3") //value for "exact"
+            {
+                exactOptionIndex = i;
+                break;
+            }
+        }
+        if (exactOptionIndex == -1) 
+        {
+            var exactOption = new Option("Exact phrase", "3");
+            document.getElementById("SET.ONE_B_MATCH_TYPE").options[document.getElementById("SET.ONE_B_MATCH_TYPE").options.length] = exactOption;    
+        }
+        // Hide the "Search in" check boxes when using NLS
+        var searchInDiv = document.getElementById("search_in");
+        searchInDiv.style.display = "block";
+        var nosearchInDiv = document.getElementById("no_search_in");
+        nosearchInDiv.style.display = "none";
+    }
+    
+}
+//
+function cbSearch_change()
+{
+    var iSearchFieldsValue = 0;
+    var frm_obj = document.forms["main_form"];
+    if (frm_obj.elements["cbSearchTitle"].checked)
+        iSearchFieldsValue = iSearchFieldsValue + 1;
+    if (frm_obj.elements["cbSearchSummary"].checked)
+        iSearchFieldsValue = iSearchFieldsValue + 2;    
+    if (frm_obj.elements["cbSearchProblem"].checked)
+        iSearchFieldsValue = iSearchFieldsValue + 4;    
+    <PDM_IF $prop.EBR_SEARCH_PROHIBIT_RESOLUTION == "1">
+        if (frm_obj.elements["cbSearchResolution"].checked)
+            iSearchFieldsValue = iSearchFieldsValue + 8;    
+    </PDM_IF>        
+    frm_obj.elements["SET.ONE_B_SEARCH_FIELDS"].value = iSearchFieldsValue;
+}
+//
+
+// General 
+var orig_value = new Object();
+var usp_pref_orig_onsubmit = void(0);
+
+function prefsSave()
+{
+   parent.SavedPref = "1";<PDM_IF 0>Flag it as saved, so after save is done we could check architect pref updates on window on load</PDM_IF>
+
+   var f = document.main_form;
+
+   var prefs = 0;
+   // If it's inside Portal, keep original value.
+   if (typeof ahdtop.insidePortal == "boolean" &&
+       ahdtop.insidePortal)
+    prefs = ahdtop.cstPrefs & 0x0001;
+   else
+   { 
+    if ( f.reducePopups.checked )
+        prefs = 1;
+   }
+//   if ( ! f.keepLR.checked )
+      prefs += 2;
+   if ( f.ScoreCountLeft.checked )
+      prefs += 4;
+//   if ( f.UsingScreenReader.checked )
+//      prefs += 8;
+<PDM_IF "$prop.MultiTenancy" != "off" && "$ACCESS.Tenant_Restriction" != "1">
+   if ( f.RetainTenant.checked )
+      prefs += 16;
+</PDM_IF>
+
+        // If UsingScreenReader or Mouseover Menus, then set Disable Mouseover Previews.
+	// If UsingScreenReader then set AvoidPopup and prompt to the user
+	
+//	if (true==f.UsingScreenReader.checked)
+//		{
+		
+//		 if ((false == f.reducePopups.checked) && (false == ahdtop.cstUsingScreenReader))
+//			 {
+//			  	 prefs += 1;
+//				 alert("Enabling 'Using Screen Reader' activates the 'Avoid Popups' preference (it can be deactivated, if needed), activates the 'Disable Mouseover Previews' preference and deactivates 'Auto-Suggest' on lookups.");
+//			 }
+//		 else if (false == f.DisablePreviews.checked)
+//			 {
+//			 	prefs += 32;
+//			    alert("Enabling 'Using Screen Reader' activates the 'Disable Mouseover Previews' preference and deactivates 'Auto-Suggest' on lookups.");
+//			 }
+		
+//		}
+	 if ((true == f.classicResultsetContext.checked ) && (false == f.DisablePreviews.checked)) 
+		{		 
+			   {
+   			     alert("Enabling 'Mouseover Menus' activates the 'Disable Mouseover Previews' preference.");
+				 prefs += 32;;
+			   }
+		
+		}
+	else if (true == f.DisablePreviews.checked)  
+		{						
+				prefs += 32;
+		}
+	
+
+    if(f.elements["SET.SA_ANALYST_LOCALIZATION"])
+    {
+        ahdtop.arrUSPPreferences["SA_ANALYST_LOCALIZATION"] = f.elements["SET.SA_ANALYST_LOCALIZATION"].value;
+        prefsSet ("SA_ANALYST_LOCALIZATION", ahdtop.arrUSPPreferences["SA_ANALYST_LOCALIZATION"]);
+        ahdtop.saAnalystUILocalization = ahdtop.arrUSPPreferences["SA_ANALYST_LOCALIZATION"];
+    }
+
+   if ( prefs != ahdtop.cstPrefs ) {
+      ahdtop.cstPrefs = prefs;
+      if (typeof ahdtop.insidePortal != "boolean" || 
+      !ahdtop.insidePortal)
+      ahdtop.cstReducePopups = prefs & 0x0001;
+      ahdtop.cstCloseLogRdr  = prefs & 0x0002;
+      ahdtop.cstScoreCountLeft  = prefs & 0x0004;
+<PDM_IF "$prop.MultiTenancy" != "off" && "$ACCESS.Tenant_Restriction" != "1">
+      ahdtop.cstRetainTenant  = prefs & 0x0010;
+</PDM_IF>
+      prefsSet("WEB_PREFERENCES", prefs);
+      try { ahdtop.product.setNewPrefs(); }
+        catch(e) {}
+   }
+   ahdtop.cstDisablePreviews  = ( (prefs & 0x0020) || (prefs & 0x0008) || f.classicResultsetContext.checked );
+
+   if ( orig_value["preservePopup"] != f.preservePopup.checked ) {
+      ahdtop.cstPopup1[0] = 0;
+      ahdtop.cstPopup1[1] = 0;
+      ahdtop.cstPopup2[0] = 0;
+      ahdtop.cstPopup2[1] = 0;
+      ahdtop.cstPopup3[0] = 0;
+      ahdtop.cstPopup3[1] = 0;
+      ahdtop.cstPopup4[0] = 0;
+      ahdtop.cstPopup4[1] = 0;
+      if ( f.preservePopup.checked ) {
+         ahdtop.cstPopup1[0] = popupHeight(LARGE_POPUP);
+         ahdtop.cstPopup1[1] = popupWidth(LARGE_POPUP);
+         ahdtop.cstPopup2[0] = popupHeight(MEDIUM_POPUP);
+         ahdtop.cstPopup2[1] = popupWidth(MEDIUM_POPUP);
+         ahdtop.cstPopup3[0] = popupHeight(SMALL_POPUP);
+         ahdtop.cstPopup3[1] = popupWidth(SMALL_POPUP);
+         ahdtop.cstPopup4[0] = popupHeight(XSMALL_POPUP);
+         ahdtop.cstPopup4[1] = popupWidth(XSMALL_POPUP);
+     ahdtop.preservePopup = true;
+      }
+      else 
+    ahdtop.preservePopup = false;
+      prefsSet("WEB_POPUP1_HEIGHT", ahdtop.cstPopup1[0]);
+      prefsSet("WEB_POPUP1_WIDTH", ahdtop.cstPopup1[1]);
+      prefsSet("WEB_POPUP2_HEIGHT", ahdtop.cstPopup2[0]);
+      prefsSet("WEB_POPUP2_WIDTH", ahdtop.cstPopup2[1]);
+      prefsSet("WEB_POPUP3_HEIGHT", ahdtop.cstPopup3[0]);
+      prefsSet("WEB_POPUP3_WIDTH", ahdtop.cstPopup3[1]);
+      prefsSet("WEB_POPUP4_HEIGHT", ahdtop.cstPopup4[0]);
+      prefsSet("WEB_POPUP4_WIDTH", ahdtop.cstPopup4[1]);
+   }
+   
+   if ( f.classicResultsetContext.checked )
+      ahdtop.arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"] = 1;
+   else
+      ahdtop.arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"] = 0;   
+   prefsSet("CLASSIC_RESULTSET_CONTEXT", ahdtop.arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"]);
+   ahdtop.mouseoverMenus = ahdtop.arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"];
+
+   if ( f.useDefaultRole.checked )
+      ahdtop.arrUSPPreferences["USE_DEFAULT_ROLE"] = 1;
+   else
+      ahdtop.arrUSPPreferences["USE_DEFAULT_ROLE"] = 0;   
+   prefsSet("USE_DEFAULT_ROLE", ahdtop.arrUSPPreferences["USE_DEFAULT_ROLE"]);
+   
+   ahdtop.useDefaultPrefs = 0; //Don't use default no more.
+<PDM_IF 0> <!-- Contact info -->
+   for ( var i = 0; i < f.elements.length; i++ ) {
+      var e = f.elements[i];
+      if ( e.name != "SET.id" &&
+           e.name != "SET.pref_attrs" &&
+           e.name != "SET.pref_vals" &&
+           e.name != "SET.pref_cnt_attrs" &&
+           e.name != "SET.pref_cnt_vals" &&
+           e.name.match(/SET\.(.*)/) ) {
+         var value;
+         if ( e.type != "select-one" )
+            value = e.value;
+         else
+            value = e.options[e.selectedIndex].value;
+         prefsCntSet(RegExp.\$1, value);
+      }
+   }
+</PDM_IF>
+    <PDM_IF "$env.NX_KT" == "Yes" && "$args.KEEP.SHOW_KT_PREFS" == "true" && "$env.NX_CMDB" != "STANDALONE">
+        //if it is Keyword search type(not KS), make sure at least one field is chosen
+        if (f.elements["SET.ONE_B_SEARCH_TYPE"][f.elements["SET.ONE_B_SEARCH_TYPE"].selectedIndex].value == 1)
+        {
+            if (f.elements["cbSearchTitle"].checked == false && f.elements["cbSearchSummary"].checked  == false && f.elements["cbSearchProblem"].checked == false)
+            {
+                if (propResolutionProhibited == 1)
+                {
+                    if (f.elements["cbSearchResolution"].checked == false)
+                    {
+                        alert("Because 'Keyword' search type is selected, please check at least one option from Title, Summary, Problem or Resolution field.");
+                        return;
+                    }
+                }
+                else
+                {
+                    alert("Because 'Keyword' search type is selected, please check at least one option from Title, Summary, or Problem field.");
+                    return;
+                }
+            }
+        }
+    </PDM_IF>
+    
+    // run original onsubmit handler if any
+    if (typeof usp_pref_orig_onsubmit != "undefined" && 
+    usp_pref_orig_onsubmit != "")
+      return usp_pref_orig_onsubmit();
+    return true;
+}
+
+function prefsSet( name, value )
+{
+   var f = document.main_form;
+   var pref_attr = f.elements["SET."  + name];
+   if (typeof pref_attr == "object") 
+      pref_attr.value = value;
+}
+
+<PDM_IF 0> <!-- Contact info -->
+function prefsCntSet( name, value )
+{
+   if ( typeof value != "string" )
+      var svalue = value.toString();
+   else if ( value.indexOf("'") == -1 )
+      var svalue = "'" + value + "'";
+   else
+      var svalue = "\"" + value + "\"";
+   var f = document.main_form;
+   var pref_cnt_attrs = f.elements["SET.pref_cnt_attrs"];
+   var pref_cnt_vals = f.elements["SET.pref_cnt_vals"];
+   if ( pref_cnt_attrs.value.length == 0 ) {
+      pref_cnt_attrs.value = name;
+      pref_cnt_vals.value = svalue;
+   }
+   else {
+      pref_cnt_attrs.value += "," + name;
+      pref_cnt_vals.value += "," + svalue;
+   }
+}
+</PDM_IF>
+
+function prefsCbx( name, hdr, checked, help )
+{
+    // detailStartRow();
+   var html = "<TR><TD ALIGN=left nowrap>&nbsp;&nbsp;" +
+              "<INPUT TYPE=checkbox " + detailNextID(true) + 
+              " VALUE=1 NAME=" + name;
+   if ( checked ) {
+      html += " CHECKED";
+      orig_value[name] = true;
+   }
+   else {
+      orig_value[name] = false;
+   }
+   html += "></TD>\n";
+   html += "<th align=left class=label>" +
+           "<label for='" + _dtl.currID + "'>" + hdr + "</label></th>\n";
+   if ( arguments.length > 3 ) {
+      html += "<TD ALIGN=left CLASS=labeltext>";
+      for ( var i = 3; i < arguments.length; i++ )
+         html += arguments[i];
+      html += "</TD>";
+   }
+   html += "</TR><tr height=4><td></td></tr>";
+   // docWriteln(html);
+    document.writeln(html);
+    
+}
+
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload();adjScrollDivHeight();">
+<PDM_INCLUDE FILE=std_body.htmpl filename="usp_preferences" header=no>
+<SCRIPT>    
+    
+<PDM_MACRO name=dtlForm factory=USP_PREFERENCES>
+<PDM_MACRO name=dtlStart>
+    
+    if (typeof window.document.main_form.onsubmit != "undefined" && 
+        window.document.main_form.onsubmit != "")
+    {
+        usp_pref_orig_onsubmit = window.document.main_form.onsubmit;
+    } 
+        
+    window.document.main_form.onsubmit = prefsSave; 
+    
+</SCRIPT>
+<CENTER>
+
+<SCRIPT>
+var html = "<INPUT TYPE=hidden NAME=SET.WEB_PREFERENCES>" +
+     "<INPUT TYPE=hidden NAME=SET.WEB_POPUP1_HEIGHT>" +
+         "<INPUT TYPE=hidden NAME=SET.WEB_POPUP1_WIDTH>" +
+     "<INPUT TYPE=hidden NAME=SET.WEB_POPUP2_HEIGHT>" +
+         "<INPUT TYPE=hidden NAME=SET.WEB_POPUP2_WIDTH>" +
+     "<INPUT TYPE=hidden NAME=SET.WEB_POPUP3_HEIGHT>" +
+         "<INPUT TYPE=hidden NAME=SET.WEB_POPUP3_WIDTH>" +
+     "<INPUT TYPE=hidden NAME=SET.WEB_POPUP4_HEIGHT>" +
+         "<INPUT TYPE=hidden NAME=SET.WEB_POPUP4_WIDTH>" + 
+     "<INPUT TYPE=hidden NAME=SET.CLASSIC_RESULTSET_CONTEXT>" +
+     "<INPUT TYPE=hidden NAME=SET.USE_DEFAULT_ROLE>";  
+document.writeln(html);
+</SCRIPT>
+
+<DIV class=page_section id="usp_preferences_div">
+<TABLE width="100%" cellspacing="0" cellpadding="0">
+    <TR>
+        <TD width="4" height="22" class="page_section_header_left"><IMG src="$CAisd/img/spacer.png" width="4" height="22" alt=""></TD>
+        <TD class="page_section_header_center"><SPAN  class="page_section_header_text" >Ustawienia preferencji</SPAN></TD>
+        <TD width="4" height="22" class="page_section_header_right"><SPAN class="page_section_header_right"><IMG src="$CAisd/img/spacer.png" width="4" height="22" alt=""></SPAN></TD>
+    </TR>
+</TABLE>
+<TABLE cellspacing=0 cellpadding=0 width="99%">
+    <TR width='100%'>
+        <TD align=left nowrap>
+            <SPAN class=label>&bull;&nbsp;Główne ustawienia</SPAN>
+        </TD>
+        <td height=32px>&nbsp;</td>
+    </TR>
+</TABLE>
+<TABLE cellspacing=0 cellpadding=0 width="99%" summary="General Settings">
+<SCRIPT>
+if (typeof ahdtop.insidePortal != "boolean" || 
+    !ahdtop.insidePortal)
+{
+    prefsCbx("reducePopups", "Unikaj wyskakujących okien", ahdtop.cstReducePopups,
+         "Zredukuj liczbę wyskakujących okien przez wyświetlanie nowych formularzy na głównej stronie o ile to możliwe.");
+}
+prefsCbx("ScoreCountLeft", "Wyświetlaj licznik trafień", ahdtop.cstScoreCountLeft,
+   "Wyświetlaj licznik trafień wyjustowany do lewej.");  
+//prefsCbx("keepLR", "Keep Log Reader Window", ! ahdtop.cstCloseLogRdr,
+//   "Keep the Log Reader window open after Close All Popups or Logoff.");
+prefsCbx("preservePopup", "Zachowaj rozmiar wyskakującyh okien",
+   ahdtop.preservePopup,
+   "Zachowaj rozmiar wyskakujących okien po zmianie przeskalowaniu (używaj tych samych rozmiaróe dla nowych okien).");
+prefsCbx("classicResultsetContext", "Menu po najechaniu myszą",
+   ahdtop.arrUSPPreferences["CLASSIC_RESULTSET_CONTEXT"],
+"Wyświetlaj menu kiedy wskaźnik jest nad łączem (bez konieczności kliknięcia).  Musisz odświeżyć formularz aby zmiana tego ustawienia weszła w życie dla menu na formularzu.");   
+//prefsCbx("UsingScreenReader", "Using Screen Reader", ( 0 != ( ahdtop.cstPrefs & 0x0008 )),
+//   "Modify $ProductName behavior for optimal use with a screen reader for blind and limited vision users.  You must logoff and log back in again after changing this preference.");  
+prefsCbx("useDefaultRole", "Użyj domyślnej roli", ahdtop.arrUSPPreferences["USE_DEFAULT_ROLE"], "Używaj domyślnej roli przypisanej do kontaktu lub do typu dostępu kontaktu jako początkowej roli kiedy kontakt loguje się.");
+prefsCbx("DisablePreviews", "Wyłącz podgląd", 
+   ahdtop.cstDisablePreviews,
+   "Wyłącz podglądy ukazujące się kiedy wskaźnik znajduje się nad łączami na listach i formularzach. Podglądy są wyłączane automatycznie kiedy ustawienie &#39;Menu po najechaniu myszą&#39; jest włączone.");  
+<PDM_IF "$prop.MultiTenancy" != "off" && "$ACCESS.Tenant_Restriction" != "1">
+prefsCbx("RetainTenant", "Retain Tenant", ahdtop.cstRetainTenant,
+   "Automatically set the tenant of a new object to that of the previous object viewed.");
+</PDM_IF>
+</SCRIPT>
+</TABLE>
+
+<br>
+<PDM_IF 0>
+        If the analyst has his/her own preferences, re-populate the Javascript array with the values
+        of the preferences where the analyst_id is $cst.id (the ID of the logged in contact).
+</PDM_IF>
+<PDM_IF "$env.NX_KT" == "Yes" && "$args.KEEP.SHOW_KT_PREFS" == "true" && "$env.NX_CMDB" != "STANDALONE">
+<SCRIPT>
+    <PDM_LIST PREFIX=list WHERE="ANALYST_ID=U'$cst.id'" FACTORY="USP_PREFERENCES">
+        ahdtop.useDefaultPrefs = 0;
+        ahdtop.arrUSPPreferences["ARC_DOCS_TO_DISPLAY"] = '$list.ARC_DOCS_TO_DISPLAY';
+        ahdtop.arrUSPPreferences["USER_DEF_ID"] = '$list.USER_DEF_ID';
+        ahdtop.arrUSPPreferences["AUTHOR"] = '$list.AUTHOR';
+        ahdtop.arrUSPPreferences["STATUS"] = '$list.STATUS';
+        ahdtop.arrUSPPreferences["OWNER"] = '$list.OWNER';
+        ahdtop.arrUSPPreferences["SUBJECT_EXPERT"] = '$list.SUBJECT_EXPERT';
+        ahdtop.arrUSPPreferences["INITIATOR"] = '$list.INITIATOR';
+        ahdtop.arrUSPPreferences["ASSIGNEE"] = '$list.ASSIGNEE';
+        ahdtop.arrUSPPreferences["PRIORITY"] = '$list.PRIORITY';
+        ahdtop.arrUSPPreferences["DOC_TYPE"] = '$list.DOC_TYPE';
+        ahdtop.arrUSPPreferences["CREATION_DATE"] = '$list.CREATION_DATE';
+        ahdtop.arrUSPPreferences["MODIFY_DATE"] = '$list.MODIFY_DATE';
+        ahdtop.arrUSPPreferences["START_DATE"] = '$list.START_DATE';
+        ahdtop.arrUSPPreferences["EXPIRATION_DATE"] = '$list.EXPIRATION_DATE';
+        ahdtop.arrUSPPreferences["REVIEW_DATE"] = '$list.REVIEW_DATE';
+        ahdtop.arrUSPPreferences["LAST_ACCEPTED_DATE"] = '$list.LAST_ACCEPTED_DATE';
+        ahdtop.arrUSPPreferences["PUBLISHED_DATE"] = '$list.PUBLISHED_DATE';
+        ahdtop.arrUSPPreferences["BU_RESULT"] = '$list.BU_RESULT';
+        ahdtop.arrUSPPreferences["PRODUCT"] = '$list.PRODUCT';
+        ahdtop.arrUSPPreferences["ITEM"] = '$list.ITEM';
+        ahdtop.arrUSPPreferences["SD_ROOTCAUSE"] = '$list.SD_ROOTCAUSE';
+        ahdtop.arrUSPPreferences["SD_PRIORITY"] = '$list.SD_PRIORITY';
+        ahdtop.arrUSPPreferences["SD_SEVERITY"] = '$list.SD_SEVERITY';
+        ahdtop.arrUSPPreferences["SD_IMPACT"] = '$list.SD_IMPACT';
+        ahdtop.arrUSPPreferences["SD_URGENCY"] = '$list.SD_URGENCY';
+        ahdtop.arrUSPPreferences["SD_ACCEPTED_HITS"] = '$list.SD_ACCEPTED_HITS';
+        ahdtop.arrUSPPreferences["CREATED_VIA"] = '$list.CREATED_VIA';
+        ahdtop.arrUSPPreferences["PRIMARY_INDEX"] = '$list.PRIMARY_INDEX';
+        ahdtop.arrUSPPreferences["CURRENT_ACTION"] = '$list.CURRENT_ACTION';
+        ahdtop.arrUSPPreferences["DOC_TEMPLATE"] = '$list.DOC_TEMPLATE';
+        ahdtop.arrUSPPreferences["WF_TEMPLATE"] = '$list.WF_TEMPLATE';
+        ahdtop.arrUSPPreferences["CUSTOM1"] = '$list.CUSTOM1';
+        ahdtop.arrUSPPreferences["CUSTOM2"] = '$list.CUSTOM2';
+        ahdtop.arrUSPPreferences["CUSTOM3"] = '$list.CUSTOM3';
+        ahdtop.arrUSPPreferences["CUSTOM4"] = '$list.CUSTOM4';
+        ahdtop.arrUSPPreferences["CUSTOM5"] = '$list.CUSTOM5';
+        ahdtop.arrUSPPreferences["CUSTOM_NUM1"] = '$list.CUSTOM_NUM1';
+        ahdtop.arrUSPPreferences["CUSTOM_NUM2"] = '$list.CUSTOM_NUM2';
+        ahdtop.arrUSPPreferences["ONE_B_DOCS_TO_DISPLAY"] = '$list.ONE_B_DOCS_TO_DISPLAY';
+        ahdtop.arrUSPPreferences["ONE_B_SEARCH_TYPE"] = '$list.ONE_B_SEARCH_TYPE';
+        ahdtop.arrUSPPreferences["ONE_B_DOC_VIEW_MODE"] = '$list.ONE_B_DOC_VIEW_MODE';
+        ahdtop.arrUSPPreferences["ONE_B_HIDE_DETAILS"] = '$list.ONE_B_HIDE_DETAILS';
+        ahdtop.arrUSPPreferences["DOC_ID"] = '$list.DOC_ID';
+        ahdtop.arrUSPPreferences["HITS"] = '$list.HITS';
+        ahdtop.arrUSPPreferences["INBOX_COUNTER"] = '$list.INBOX_COUNTER';
+        ahdtop.arrUSPPreferences["ONE_B_WORD_PARTS"] = '$list.ONE_B_WORD_PARTS';
+        ahdtop.arrUSPPreferences["ONE_B_MATCH_TYPE"] = '$list.ONE_B_MATCH_TYPE';
+        ahdtop.arrUSPPreferences["ONE_B_SEARCH_FIELDS"] = '$list.ONE_B_SEARCH_FIELDS';
+        ahdtop.arrUSPPreferences["ONE_B_SEARCH_ORDER"] = '$list.ONE_B_SEARCH_ORDER';
+    </PDM_LIST>
+</SCRIPT>
+<PDM_IF 0>
+    <TABLE cellspacing=0 cellpadding=0 width="99%">
+        <TR widht='100%'>
+            <TD align=left nowrap>
+                <SPAN class=label>&bull;&nbsp;Support Automation Analyst UI Localization</SPAN>
+            </TD>
+            <td height=32px align=left>&nbsp;</td>
+        </TR>
+    </TABLE>
+    <TABLE cellspacing=0 cellpadding=0 width="99%" summary="Support Automation Analyst UI Localization">
+        <TR width='100%'>
+            <TD colspan=1 align=left>
+                &nbsp;&nbsp;
+            
+            <script type="text/javascript">
+     	
+            	getDetailIds(1)
+                var sltText0 = "<SELECT name='SET.SA_ANALYST_LOCALIZATION'";
+                sltText0 = sltText0 + arrIdAttr[0] + ">";
+                document.writeln(sltText0);
+                var sa_analyst_localization_id = ahdtop.GetUSPPreferences("SA_ANALYST_LOCALIZATION");
+                if (sa_analyst_localization_id == "") {
+                   <PDM_LIST PREFIX=list WHERE="is_default=1" FACTORY="sa_localization">
+                      sa_analyst_localization_id = "$list.localizationID";
+                   </PDM_LIST>
+                }
+            </script>
+               <PDM_LIST PREFIX=list WHERE="enabled=1" FACTORY="sa_localization">
+                 <script type="text/javascript">
+                   if (sa_analyst_localization_id == "$list.localizationID")
+                     document.writeln("<OPTION value='$list.localizationID' selected>$list.name</OPTION>");
+                   else
+                     document.writeln("<OPTION value='$list.localizationID'>$list.name</OPTION>");
+                 </script>
+               </PDM_LIST>
+              </SELECT>
+            </TD>
+        </TR>
+    </TABLE>
+</PDM_IF>
+    <TABLE cellspacing=0 cellpadding=0 width="99%">
+        <TR widht='100%'>
+            <TD align=left nowrap>
+                <SPAN class=label>&bull;&nbsp;Ustawienia wyszukiwania w bazie wiedzy</SPAN>
+            </TD>
+            <td height=32px align=left>&nbsp;</td>
+        </TR>
+    </TABLE>
+    <TABLE cellspacing=0 cellpadding=0 width="99%" summary="Ustawienia wyszukiwania w bazie wiedzy">
+        <TR width='100%'>
+            <TD colspan=1 align=left>
+                &nbsp;
+            </TD>
+            <script type="text/javascript">
+            getDetailIds(4)
+            var text1 = "<td align=left><span class=label><label for='";
+            var text2 = "'>";
+            var text3 = "<" + "/label><" + "/span><" + "/td>\n";
+            if (ahdtop.cfgEBRVersion != "SEARCH_ENGINE")
+            {
+				document.write(text1 + arrIdValue[0] + text2 + "Typ wyszukiwania" + text3 +
+							text1 + arrIdValue[1] + text2 + "Typ porównania" + text3 +
+							text1 + arrIdValue[2] + text2 + "Warunek" + text3 +
+							text1 + arrIdValue[3] + text2 + "Sortowanie" + text3);
+			}
+			else 
+			{
+				document.write(	text1 + arrIdValue[0] + text2 + "" + text3 +
+							text1 + arrIdValue[1] + text2 + "Typ porównania" + text3 +
+							text1 + arrIdValue[2] + text2 + "Warunek" + text3 +
+							text1 + arrIdValue[3] + text2 + "Sortowanie" + text3);
+			}
+		</script>
+        </TR>
+        <TR width='100%'>
+            <TD colspan=1 align=left>
+                &nbsp;
+            </TD>
+            <TD colspan=1 align=left>
+				<DIV ID=hide_search_type NAME=hide_search_type  style='display:block'>
+					<TABLE>	
+					<SCRIPT>
+						var sltText1 = "<SELECT name='SET.ONE_B_SEARCH_TYPE' onchange='SearchType_change()'";
+							sltText1 = sltText1 + arrIdAttr[0] + ">";
+						document.writeln(sltText1);
+					</SCRIPT>
+						<OPTION value="0">Według pisma</OPTION>
+						<OPTION value="1">Według słów kluczowych</OPTION>
+					</SELECT>
+					</TABLE>	
+				</DIV>
+            </TD>
+           
+            <TD colspan=1 align=left>
+                <SCRIPT>
+                    var sltText2 = "<SELECT name='SET.ONE_B_MATCH_TYPE'";
+                        sltText2 = sltText2 + arrIdAttr[1] + ">";
+                    document.writeln(sltText2);
+                </SCRIPT>
+                
+                    <OPTION value="1">Którekolwiek ze słów (OR)</OPTION>
+                    <OPTION value="2">Wszystkie ze słów (AND)</OPTION>
+                    <OPTION value="3">Dokładne dopasowanie</OPTION>            
+                </SELECT>
+            </TD>
+            <TD colspan=1 align=left>
+                <SCRIPT>
+                    var sltText3 = "<SELECT name='SET.ONE_B_WORD_PARTS'";
+                        sltText3 = sltText3 + arrIdAttr[2] + ">";
+                    document.writeln(sltText3);
+                </SCRIPT>
+                    <OPTION value="1">Całe słowo</OPTION>                    
+                    <OPTION value="2">Słowa zaczynające się na...</OPTION>        
+                </SELECT>
+            </TD>
+            <TD colspan=1 align=left>
+                <SCRIPT>
+                    var sltText4 = "<SELECT name='SET.ONE_B_SEARCH_ORDER'";
+                        sltText4 = sltText4 + arrIdAttr[3] + ">";
+                    document.writeln(sltText4);
+                </SCRIPT>
+                <OPTION value="RELEVANCE">Trafność</OPTION>            
+                <OPTION value="BU_RESULT">Ocena FAQ</OPTION>                
+                <OPTION value="HITS">Ilość trafień</OPTION>                            
+                <OPTION value="SD_ACCEPTED_HITS">Ilość rozwiązań</OPTION>    
+                <OPTION value="MODIFY_DATE">Data modyfikacji</OPTION>            
+            </SELECT>
+            </TD>
+        </TR>
+    </TABLE>
+    <DIV ID=no_search_in NAME=no_search_in style='display:none'>    
+        <table width=99% cellspacing=0 cellpadding=0>
+            <TR>
+                <td width=100%>&nbsp;</td>
+            </TR>
+        </table>
+    </DIV>        
+    <DIV ID=search_in NAME=search_in style='display:block'>
+        <table width=99% cellspacing=0 cellpadding=0 summary="Knowledge search in attributes default settings">
+            <TR>
+                <TD width='15%' align=left>
+                        &nbsp;
+                    </TD>
+                </TR>
+            <TR>
+                <TD width='15%' nowrap align=left>
+                    <span class=label>&nbsp;&nbsp;&nbsp;&nbsp;Szukaj w:</span>        
+                </TD>
+                <td height=24px align=left>&nbsp;</td>
+            </TR>
+            <TR>
+                <script type="text/javascript">
+                text1 = "<td width='15%' align=left><span class=label><label for='";
+                
+<PDM_IF $prop.EBR_SEARCH_PROHIBIT_RESOLUTION == "1">
+                getDetailIds(4)
+                document.write(text1 + arrIdValue[0] + text2 + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tytuł" + text3 +
+                               text1 + arrIdValue[1] + text2 + "Podsumowanie" + text3 +
+                               text1 + arrIdValue[2] + text2 + "Problem" + text3 +
+                               text1 + arrIdValue[3] + text2 + "Rozwiązanie" + text3);
+                
+<PDM_ELSE>
+                getDetailIds(3)
+                document.write(text1 + arrIdValue[0] + text2 + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tytuł" + text3 +
+                               text1 + arrIdValue[1] + text2 + "Podsumowanie" + text3 +
+                               text1 + arrIdValue[2] + text2 + "Problem" + text3);
+                
+</PDM_IF>
+                </script>
+            </TR>
+            <TR>
+                <TD width='15%' align=left>&nbsp;&nbsp;
+                    <SCRIPT>
+                        var chkText1= "<input type=checkbox name='cbSearchTitle' onchange='cbSearch_change()' ";
+                        chkText1 = chkText1 + arrIdAttr[0] + ">";
+                        document.writeln(chkText1);
+                    </SCRIPT>
+                </TD>
+                <TD width='15%' align=left>
+                    <SCRIPT>
+                        var chkText2= "<input type=checkbox name='cbSearchSummary' onchange='cbSearch_change()' "; 
+                        chkText2 = chkText2 + arrIdAttr[1] + ">";
+                        document.writeln(chkText2);
+                    </SCRIPT>
+                </TD>
+                <TD width='15%' align=left>
+                    <SCRIPT>
+                        var chkText3= "<input type=checkbox name='cbSearchProblem' onchange='cbSearch_change()' "; 
+                        chkText3 = chkText3 + arrIdAttr[2] + ">";
+                        document.writeln(chkText3);
+                    </SCRIPT>
+                </TD>
+                
+<PDM_IF $prop.EBR_SEARCH_PROHIBIT_RESOLUTION == "1">
+                    <TD width='15%' align=left>
+                        <SCRIPT>
+                            var chkText4= "<input type=checkbox name='cbSearchResolution' onchange='cbSearch_change()' ";
+                            chkText4 = chkText4 + arrIdAttr[3] + ">";
+                            document.writeln(chkText4);
+                        </SCRIPT>
+                    </TD>
+                
+</PDM_IF>    
+                <TD width='40%' align=left>
+                </TD>
+                <TD>
+                    <input type=hidden name="SET.ONE_B_SEARCH_FIELDS" id="SET.ONE_B_SEARCH_FIELDS">
+                </TD>
+            </TR>
+        </TABLE>
+    </DIV>
+    <BR>
+    <TABLE cellspacing=0 cellpadding=0 width="99%">
+        <TR widht='100%'>
+            <TD align=left nowrap>
+                <SPAN class=label>&bull;&nbsp;Ustawienia listy dokumentów bazy wiedzy</SPAN>
+                <td height=32px align=left>&nbsp;</td>
+            </TD>
+        </TR>
+    </TABLE>
+    <TABLE cellspacing=0 cellpadding=0 width="99%" summary="Ustawienia listy dokumentów bazy wiedzy">
+            <TR>
+                
+<PDM_IF 0><JH>This needs to be taken out SDT 33667
+                <TD align=left>
+                    <span class=label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document View Mode</span>
+                </TD>
+                
+</PDM_IF>
+                <script type="text/javascript">
+                getDetailIds(2)
+                text1 = "<td align=left><span class=label><label for='";
+                document.write(text1 + arrIdValue[0] + text2 + "&nbsp;&nbsp;&nbsp;&nbsp;Dokumentów na stronie" + text3 +
+                               text1 + arrIdValue[1] + text2 + "Pokaż szczegóły dokumentu" + text3);
+                </script>
+            </TR>    
+            <TR>
+                
+<PDM_IF 0><JH>This needs to be taken out SDT 33667
+                <TD align=left>&nbsp;&nbsp;
+                    <SCRIPT>
+                        var sltText5 = "<SELECT name='SET.ONE_B_DOC_VIEW_MODE' ";
+                            sltText5 = sltText5 + detailNextID(true) + ">";
+                        document.writeln(sltText5);
+                    </SCRIPT>
+                        <OPTION value="0">Open in Right Pane</OPTION>  <PDM_IF 0><<-localization->></PDM_IF>
+                        <OPTION value="2">Open in Separate Window</OPTION>            <PDM_IF 0><<-localization->></PDM_IF>
+                    </SELECT>
+                </TD>
+                
+</PDM_IF>
+                <TD align=left>&nbsp;&nbsp;
+                    <SCRIPT>
+                        var sltText6 = "<SELECT name='SET.ONE_B_DOCS_TO_DISPLAY' ";
+                            sltText6 = sltText6 + arrIdAttr[0] + ">";
+                        document.writeln(sltText6);
+                    </SCRIPT>
+                        <OPTION value="10">10</OPTION>                
+                        <OPTION value="25">25</OPTION>            
+                        <OPTION value="50">50</OPTION>            
+                    </SELECT>
+                </TD>
+                <TD align=left>
+                    <SCRIPT>
+                        var chkText5 = "<input type=checkbox name='cbONE_B_HIDE_DETAILS' onchange='cbHideDetails_change()' ";
+                        chkText5 = chkText5 + arrIdAttr[1] + ">";
+                        document.writeln(chkText5);
+                    </SCRIPT>
+                    <input type=hidden name="SET.ONE_B_HIDE_DETAILS" id="SET.ONE_B_HIDE_DETAILS">
+                </TD>
+            </TR>
+    </table>
+    <BR>
+<DIV id='divArchSection' name='divArchSection' style='display:none'>
+    <TABLE cellspacing=0 cellpadding=0 width="99%">
+        <TR widht='100%'>
+            <TD align=left nowrap>
+                <SPAN class=label>&bull;&nbsp;Ustawienia listy kategorii dokumentów bazy wiedzy</SPAN>
+                <td height=32px align=left>&nbsp;</td>
+            </TD>
+        </TR>
+    </TABLE>
+    <TABLE cellSpacing="0" cellPadding="0" width="99%" summary="Ustawienia listy kategorii dokumentów bazy wiedzy">
+        <TR>
+            <script type="text/javascript">
+            getDetailIds(1)
+            document.write(text1 + arrIdValue[0] + text2 + "&nbsp;&nbsp;&nbsp;&nbsp;Dokumentów na stronie" + text3);
+            </script>
+        </TR>
+        <TR>
+            <TD align=left>&nbsp;&nbsp;
+                <SCRIPT>
+                    var sltText7 = "<SELECT name='SET.ARC_DOCS_TO_DISPLAY' ";
+                        sltText7 = sltText7 + arrIdAttr[0] + ">";
+                    document.writeln(sltText7);
+                </SCRIPT>
+                    <OPTION value="10">10</OPTION>                
+                    <OPTION value="25">25</OPTION>            
+                    <OPTION value="50">50</OPTION>            
+                </SELECT>
+            </TD>
+        </TR>
+        <TR>
+            <TD align=left>
+                &nbsp;
+            </TD>
+        </TR>    
+        <TR>
+            <TD vAlign=baseline align=left>
+                <span class=label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty wyświetlane na liście</span>
+            </TD>
+            <td height=24px align=left>&nbsp;</td>
+        </TR>
+    </TABLE>
+    <TABLE cellSpacing="0" cellPadding="0" width="99%" summary="Knowledge attributes shown in list settings">
+        <TR>
+            <TD align=left>
+                <img src="$CAisd/img/spacer.png" width="2px" height="20" alt="">
+            </TD>
+            <TD align=left>
+                <TABLE cellSpacing="0" cellPadding="0" width="100%">
+                    <TR>
+                        <TD align=left>
+                            <table width="100%" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="4" height="20" class="groupbox_header_left" align=left><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></td>
+                                    <td class="groupbox_header_center" align=left><span  class="groupbox_header_text" >Wybierz atrybuty dokumentu</span></td>
+                                    <td width="4" height="20" class="groupbox_header_right" align=left><img src="$CAisd/img/spacer.png" width="4" height="20" alt=""></td>
+                                </tr>
+                            </table>
+                        </TD>
+                    </TR>
+                    <TR>
+                        <TD class="groupbox_content" vAlign="top" align="left">
+                            <TABLE cellSpacing="0" cellPadding="0" width="100%">
+                                <TR> 
+                                    <script type="text/javascript">
+                                    getDetailIds(2)
+                                    arrIdAttr[0] = detailNextID(1, false);
+                                    availDocPropsId = _dtl.currID;
+                                    var imgTabindex = _dtl.tabIndex;
+                                    _dtl.tabIndex += 4;
+                                    arrIdAttr[1] = detailNextID(1, true);
+                                    slctDocPropsId = _dtl.currID;
+                                    text1 = "<td class='page_section_header_center' align=left><span class='page_section_header_text'><label for='";
+                                    </script>
+                                    <td nowrap align=left>
+                                        <table width="100%" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td width="4" height="22" class="page_section_header_left" align=left><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+                                                <script>document.write(text1 + availDocPropsId + text2 + "Dostępne" + text3);</script>
+                                                <td width="4" height="22" class="page_section_header_right" align=left><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+                                            </tr>
+                                        </table>
+                                    </TD>
+                                    <td width="11" align=left>&nbsp;</td>
+                                    <td nowrap align=left>
+                                        <table width="100%" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td width="4" height="22" class="page_section_header_left" align=left><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+                                                <script>document.write(text1 + slctDocPropsId + text2 + "Wybrane" + text3);</script>
+                                                <td width="4" height="22" class="page_section_header_right" align=left><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </TR>
+                                <TR>
+                                    <TD vAlign="top" height="121" align=left>
+                                        <SCRIPT>
+                                            var sltText8 = "<SELECT style='WIDTH: 100%' multiple size='10' name='" +
+                                                           availDocPropsId + "' " + arrIdAttr[0] + ">";
+                                            document.writeln(sltText8);
+                                        </SCRIPT>
+                                        </SELECT>
+                                    </TD>
+                                    <TD width="11" align=left>
+                                        <TABLE cellSpacing="4" cellPadding="0" ID="Table3">
+                                            <TBODY>
+                                                <TR align="center">
+                                                    <script type="text/javascript">
+                                                    var imgtxt = '<td><a href="javascript:SelectAll()" title="' + "Select all available attributes" + '"';
+                                                    imgtxt += ' tabindex=' + (imgTabindex++);
+                                                    imgtxt += '><img class="image_buttons" alt="' + "Select all available attributes" + '" src="$CAisd/img/button-right2.png"></a></td>';
+                                                    document.write(imgtxt);
+                                                    </script>
+                                                </TR>
+                                                <TR align="center">
+                                                    <script type="text/javascript">
+                                                    imgtxt = '<td><a href="javascript:SelectItem()" title="' + "Copy attributes selected in Available list to Selected list" + '"';
+                                                    imgtxt += ' tabindex=' + (imgTabindex++);
+                                                    imgtxt += '><img class="image_buttons" alt="' + "Copy attributes selected in Available list to Selected list" + '" src="$CAisd/img/rightarrow.png"></a></td>';
+                                                    document.write(imgtxt);
+                                                    </script>
+                                                </TR>
+                                                <TR align="center">
+                                                    <TD>&nbsp;
+                                                    </TD>
+                                                </TR>
+                                                <TR align="center">
+                                                    <script type="text/javascript">
+                                                   imgtxt = '<td><a href="javascript:RemoveItem()" title="' + "Remove attributes selected in Selected list" + '"';
+                                                    imgtxt += ' tabindex=' + (imgTabindex++);
+                                                    imgtxt += '><img class="image_buttons" alt="' + "Remove attributes selected in Selected list" + '" src="$CAisd/img/leftarrow.png"></a></td>';
+                                                    document.write(imgtxt);
+                                                    </script>
+                                                </TR>
+                                                <TR align="center">
+                                                    <script type="text/javascript">
+                                                    imgtxt = '<td><a href="javascript:RemoveAll()" title="' + "Remove all attributes from Selected list" + '"';
+                                                    imgtxt += ' tabindex=' + (imgTabindex++);
+                                                    imgtxt += '><img class="image_buttons" alt="' + "Remove all attributes from Selected list" + '" src="$CAisd/img/button-left2.png"></a></td>';
+                                                    document.write(imgtxt);
+                                                    </script>
+                                                </TR>
+                                            </TBODY>
+                                        </TABLE>
+                                    </TD>
+                                    <TD vAlign="top" height="121" align=left>
+                                        <SCRIPT>
+                                            var sltText9 = "<SELECT style='WIDTH: 100%' multiple size='10' name='" +
+                                                           slctDocPropsId + "' " + arrIdAttr[1] + ">";
+                                            document.writeln(sltText9);
+                                        </SCRIPT>
+                                        </SELECT>
+                                    </TD>
+                                </TR>
+                            </TABLE>
+                        </TD>
+                    </TR>            
+                </TABLE>
+            </TD>
+        </TR>
+    </TABLE>
+</DIV>
+        <table>
+            <tr>
+                <td>                                           
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("DOC_ID") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.DOC_ID ID=SET.DOC_ID>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("USER_DEF_ID") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.USER_DEF_ID ID=SET.USER_DEF_ID>
+                            
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("AUTHOR") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.AUTHOR ID=SET.AUTHOR>        
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("OWNER") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.OWNER ID=SET.OWNER>
+                            
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("SUBJECT_EXPERT") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.SUBJECT_EXPERT ID=SET.SUBJECT_EXPERT>        
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("INITIATOR") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.INITIATOR ID=SET.INITIATOR>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("ASSIGNEE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.ASSIGNEE ID=SET.ASSIGNEE>
+                            
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CREATION_DATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CREATION_DATE ID=SET.CREATION_DATE>    
+                            
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("MODIFY_DATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.MODIFY_DATE ID=SET.MODIFY_DATE>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("START_DATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.START_DATE ID=SET.START_DATE>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("EXPIRATION_DATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.EXPIRATION_DATE ID=SET.EXPIRATION_DATE>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("REVIEW_DATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.REVIEW_DATE ID=SET.REVIEW_DATE>
+                            
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("LAST_ACCEPTED_DATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.LAST_ACCEPTED_DATE ID=SET.LAST_ACCEPTED_DATE>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("PUBLISHED_DATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.PUBLISHED_DATE ID=SET.PUBLISHED_DATE>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("PRIORITY") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.PRIORITY ID=SET.PRIORITY>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("STATUS") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.STATUS ID=SET.STATUS>    
+                            
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("DOC_TYPE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.DOC_TYPE ID=SET.DOC_TYPE>
+                                
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("BU_RESULT") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.BU_RESULT ID=SET.BU_RESULT>
+                                
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("HITS") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.HITS ID=SET.HITS>        
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CREATED_VIA") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CREATED_VIA ID=SET.CREATED_VIA>
+                            
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("PRIMARY_INDEX") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.PRIMARY_INDEX ID=SET.PRIMARY_INDEX>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CURRENT_ACTION") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CURRENT_ACTION ID=SET.CURRENT_ACTION>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("DOC_TEMPLATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.DOC_TEMPLATE ID=SET.DOC_TEMPLATE>    
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("WF_TEMPLATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.WF_TEMPLATE ID=SET.WF_TEMPLATE>
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("PRODUCT") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.PRODUCT ID=SET.PRODUCT>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("DOC_TEMPLATE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.DOC_TEMPLATE ID=SET.DOC_TEMPLATE>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("ITEM") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.ITEM ID=SET.ITEM>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("SD_PRIORITY") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.SD_PRIORITY ID=SET.SD_PRIORITY>
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("SD_SEVERITY") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.SD_SEVERITY ID=SET.SD_SEVERITY>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("SD_IMPACT") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.SD_IMPACT ID=SET.SD_IMPACT>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("SD_URGENCY") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.SD_URGENCY ID=SET.SD_URGENCY>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("SD_ROOTCAUSE") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.SD_ROOTCAUSE ID=SET.SD_ROOTCAUSE>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("SD_ACCEPTED_HITS") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.SD_ACCEPTED_HITS ID=SET.SD_ACCEPTED_HITS>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CUSTOM1") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CUSTOM1 ID=SET.CUSTOM1>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CUSTOM2") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CUSTOM2 ID=SET.CUSTOM2>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CUSTOM3") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CUSTOM3 ID=SET.CUSTOM3>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CUSTOM4") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CUSTOM4 ID=SET.CUSTOM4>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CUSTOM5") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CUSTOM5 ID=SET.CUSTOM5>
+                        
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CUSTOM_NUM1") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CUSTOM_NUM1 ID=SET.CUSTOM_NUM1>
+                    
+                    <SCRIPT>
+                        if (ahdtop.GetUSPPreferences("CUSTOM_NUM2") == "1") document.write("<INPUT type=hidden value=1"); else document.write("<INPUT type=hidden value=0"); 
+                    </SCRIPT>
+                    name=SET.CUSTOM_NUM2 ID=SET.CUSTOM_NUM2>
+                </td>
+            </tr>
+        </table>
+</PDM_IF>    
+</DIV>    
+</CENTER>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

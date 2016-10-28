@@ -1,0 +1,124 @@
+<PDM_IF 0>
+order_status_change.htmpl
+WHEN PRESENTED:
+    when the app needs to update the status of an issue. When the user
+    clicks the 'Close Change Order' button from the 'Update Change Order' screen.
+INTENT:
+    change the status of a change order
+VARIABLES:
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "Status Change Change Order $args.chg_ref_num";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var edit_form = 1;
+var alg_factory = "chgalg";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argChgRefNum = "$args.chg_ref_num";
+var argID = "$args.id";
+var def_code=alert_banner_fix_text("$args.KEEP.DEF_CODE");
+var def_sym=alert_banner_fix_text("$args.KEEP.DEF_SYM");
+var requestType = "$args.type";     // used in popup.js to demultiplex ticket types when searching for status values
+<PDM_IF "<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>" != "">
+	var user_set_status = "${args.user_set_status:}";
+	var user_set_status_sym = "${args.user_set_status_sym:}";
+</PDM_IF>
+var CheckCancel = 0;
+
+function LocalOnUnload()
+{
+  if(CheckCancel == 0)
+    detailResetSyncFields();
+}
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<TITLE>Change Order $args.chg_ref_num Status Change</TITLE>
+
+<SCRIPT LANGUAGE="JavaScript">
+//This must be included AFTER detail_form.js in order to override that files definition of backfill_event()
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=chg_trans>
+</SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY onload="load_from_scratchpad('0')" onUnload="unload_check();LocalOnUnload()" class=editform>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" editForm=1>
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+var resp_sym = new Array();
+var resp_ids = new Array();
+resp_sym[0] = "";
+resp_ids[0] = "";
+resp_field="SET.chgalg.description";
+resp_persid='$args.persistent_id';
+
+<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND chg_flag=1">
+resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+resp_ids[resp_ids.length] = '$list.id';
+</PDM_LIST>
+
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+<PDM_MACRO name=dtlForm factory=chg>
+<PDM_MACRO name=dtlStart>
+
+docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+docWriteln("<INPUT TYPE=hidden NAME=KEEP.IsModified VALUE='1'>");
+
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Numer zmiany" attr=chg_ref_num>
+<PDM_MACRO name=dtlReadonly hdr="Streszcznie zmiany" attr=summary colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr=status>
+<PDM_IF "$args.KEEP.DEF_CODE" == "">
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!default_trans_sym!" evt="onBlur=\\\"detailSyncEditForms(this)\\\" onChange=\\\"make_desc_required(this)\\\"" initial="!default_trans_code!">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Nowy status" attr=status default="!def_sym!" evt="onBlur=\\\"detailSyncEditForms(this)\\\" onChange=\\\"make_desc_required(this)\\\"" initial="!def_code!">
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="New Closure Code" attr=closure_code evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Czas spędzony" attr=chgalg.time_spent evt="onBlur='validate_duration_ts(this)'" maxlength=100>
+<PDM_MACRO name=dtlDate hdr="Data czynności" attr=chgalg.time_stamp>
+<PDM_MACRO name=dtlDateReadonly hdr="Znacznik czasu" attr=chgalg.system_time>
+<PDM_IF "$prop.view_internal" == "1">
+<PDM_MACRO name=dtlCheckbox hdr="Wewnętrzne?" attr=chgalg.internal>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=chgalg.description colspan=4 rows=8 size=80 spellchk=no>
+
+make_desc_required();	       
+
+if (resp_ids.length > 1)
+{
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory="response" list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND chg_flag=1">  
+}
+
+if (typeof document.main_form.elements["KEY.status"] != "undefined")
+    set_default_toggle(document.main_form.elements["KEY.status"]);
+else
+    set_default_toggle(document.main_form.elements["SET.status"]);
+        
+</SCRIPT>
+<PDM_MACRO name=dtlEnd>
+</PDM_FORM>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: order_status_change.htmpl ASPEN.3 2012/03/13 13:52:03 kumka02 Exp $
+</PDM_IF>
+
+<PDM_WSP>

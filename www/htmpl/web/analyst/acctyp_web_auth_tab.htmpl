@@ -1,0 +1,78 @@
+<PDM_IF 0>
+acctyp_web_auth_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=acctyp_web_auth_tab" factory=acctyp>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+tab_banner("Web Authentication");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zezwalaj na zewnętrzną autentykację" attr=external_auth colspan=2 off="No" on="Yes">
+<PDM_IF "$env.NX_LDAP_ENABLE" == "Yes">
+<PDM_IF "$env.NX_LDAP_ENABLE_GROUPS" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="Grupa dostępu LDAP" attr=ldap_access_group colspan=2>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_MACRO name=dtlStartRow>
+<PDM_ELSE>
+detailStartRow("Center");
+</PDM_IF>
+var c_user_auth;
+
+<PDM_IF "$env.NX_USE_EIAM_AUTHENTICATION" == "Yes">
+var os_auth_method = "CA EEM-Use CA Embedded Entitlements Manager";
+<PDM_ELSE>
+var os_auth_method = "OS-Use Operating System authentication";
+</PDM_IF>
+
+switch ( "$args.user_auth" ) {
+	case "0" : 
+		c_user_auth = "No Access";
+		break; 
+	case "1" : 
+		c_user_auth = "Open-always allow access";
+		break;
+	case "2" :
+		c_user_auth = os_auth_method;
+		break;
+	case "3" :
+		c_user_auth = "PIN-Use PIN field on Contact Record";
+		break;
+         }
+
+detailSetEventHandler("onChange='objtype_click(this)'");
+detailDropdown("Validation Type","user_auth","acctyp",2,20, 
+true,"","$args.user_auth",
+"no","$args.user_auth",c_user_auth,
+"","","no","","","0",
+"No Access","0","Open-always allow access","1",os_auth_method,"2","PIN-Use PIN field on Contact Record","3");
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlEndTable>
+docWriteln("<BR><DIV  id=\"divpinfld\">");
+docWriteln("<TABLE><TR VALIGN=TOP><TH  VALIGN=baseline CLASS=labeltext>PIN Field (set field name from contact record to use as PIN)</TH></TR>");
+docWriteln("<TR><TD VALIGN=top><INPUT TYPE=TEXT SIZE =40" + detailNextID(true) +
+		"NAME=SET.pin_field VALUE='$args.pin_field'>");
+docWriteln("</TD></TR></TABLE></DIV>")
+<PDM_IF "$args.user_auth" != "3">
+document.getElementById("divpinfld").style.display = "none";
+</PDM_IF>
+<PDM_ELIF "$prop.form_name_3" != "edit" && "$args.user_auth" == "3" >
+<PDM_MACRO name=dtlReadonly hdr="Pole PIN" attr=pin_field>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: acctyp_web_auth_tab.htmpl SDr12.1.1 2008/10/21 10:02:02 ralje02 Exp $;
+</PDM_IF>

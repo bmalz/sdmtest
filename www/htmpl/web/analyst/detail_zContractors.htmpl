@@ -1,0 +1,73 @@
+<PDM_IF 0>
+20130916 bmalz @ e-xim
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} szczegóły"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} aktualizacja"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Utwórz nowy ${args.COMMON_NAME}"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/exim_mods.js"></script>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+jq(document).ready(function () {
+	<PDM_IF "$prop.form_name_3" == "edit" && "$args.id" == "0">
+		if (jq('input[name=KEY.CountryRef]').val != "") {
+			jq('input[name=SET.CountryRef]').val("197");
+			jq('input[name=KEY.CountryRef]').val("Poland");
+		}
+	</PDM_IF>
+});
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=dtlForm factory="zContractors">
+<PDM_MACRO NAME=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr="sym" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ulica" attr="Street" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Nr budynku" attr="Building" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Nr lokalu" attr="Room" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kod pocztowy" attr="PostCode" evt="onBlur=\\\"check_post_code(this, 'CountryRef')\\\"" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Miasto" attr="City" size=20>
+<PDM_MACRO name=dtlLookup hdr="Państwo" attr="CountryRef">
+<PDM_MACRO NAME=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO NAME=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_WSP>

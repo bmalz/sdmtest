@@ -1,0 +1,49 @@
+<PDM_IF 0>
+aty_santf_svy_tab.htmpl
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=aty_santf_svy_tab+KEEP.obj_type=Assistance%20Session" factory=aty>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/popup.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+
+<PDM_MACRO name=tabBanner title="Survey">
+
+if("$args.sa_notif_flag.sym" == "YES")
+{
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Wysyłać ankietę?" attr=sa_send_survey off=No on=Yes>
+<PDM_MACRO name=dtlLookup hdr="Domyślna ankieta" attr=sa_default_survey>
+<PDM_MACRO name=dtlDropdown hdr="Metoda notyfikacji" attr=sa_survey_method lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł wiadomości ankiety" attr=sa_survey_msgtitle colspan=4 size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Treść wiadomości ankiety" attr=sa_survey_msgbody colspan=4 keeplinks=yes rows=4 size=60>
+}
+else
+{ 
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Wysyłać ankietę?" attr="sa_send_survey" off=No on=Yes>
+<PDM_MACRO name=dtlReadonly hdr="Domyślna ankieta" attr=sa_default_survey>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł wiadomości ankiety" attr=sa_survey_msgtitle colspan=4>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Treść wiadomości ankiety" attr=sa_survey_msgbody colspan=4>
+}
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: aty_santf_svy_tab.htmpl ASPEN.2 2012/06/04 17:24:01 kumka02 Exp $";
+</PDM_IF>

@@ -1,0 +1,101 @@
+<PDM_IF 0>
+spellcheck.htmpl
+WHEN PRESENTED:
+    When we need to display spell checker.
+INTENT:
+    Display spell checking results.
+VARIABLES:
+    string      image   The location of the image directory as specified in
+                            in the config file.
+    string      date_format The date format defined in the web.cfg file.
+    object      args.KEEP   The prefix for the variable that is used to carry 
+                            value between forms.       
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Sprawdzanie pisowni";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+<script>
+$args.SPELLCHK_RESPONSE
+</script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="editform" onload="spminit()" leftmargin="0" topmargin="0" onunload="spmcancel();">
+<script type="text/javascript">
+activateActionKeys();
+<PDM_MACRO NAME=dtlForm button=false>
+<PDM_MACRO NAME=dtlStart>
+</script>
+<form name="SpellingForm">
+    <table class="spell_check_fields_container">
+     <tr>
+      <th class="spell_check_field_header_container" align="right">
+         <span class="labeltext"><label id="ProblemType" for="MisspelledWord"></label></span></th> 
+      <td class="spell_check_field" align="left">
+          <input  readonly="readonly" style="border-top-style: none; border-right-style: none; border-left-style: none; border-bottom-style: none" id="MisspelledWord" size="24" maxlength="96"> 
+     </td>
+     </tr>
+     <tr>
+      <th class="spell_check_field_header_container" align="right">
+        <span class="labeltext"><label for="ChangeToWord">Zmień na:</label></span></th>
+      <td class="spell_check_field" align="left">
+        <input id="ChangeToWord" size="24" maxlength="96" onfocus="this.className='focusField'" onblur="this.className=''"  ></td>
+     </tr>
+     <tr>
+      <th class="spell_check_field_header_container" align="right">
+        <span class="labeltext"><label for="Suggestions">Sugestia:</label></span></th>
+      <td class="spell_check_field" align="left">
+        <select id="Suggestions" size="1" onchange="selword()"><option selected="selected"> 
+        </option></select></td>
+     </tr>
+     </table>
+     <center>
+    <table class="spell_check_text_area_container">
+     <tr>
+      <td class="spell_check_text_area_field">
+       <div id="ContextArea" class="spell_check_text_area" align="left"></div>
+       </td>
+     </tr>
+     </table>
+     </center>
+   </form>
+<script type="text/javascript">
+<PDM_MACRO NAME=btnStartRow padding="95%">
+<PDM_MACRO NAME=button caption="Ignoruj" hotkey_name="Ignoruj" id="btn001" width=0
+    func="selectnext()">
+<PDM_MACRO NAME=button caption="Ignoruj wszystkie" hotkey_name="Ignoruj wszystkie" id="btn002" width=0
+    func="skipword()">
+<PDM_MACRO NAME=button caption="Zmień" hotkey_name="Zmień" id="btn003" width=0
+    func="acceptword()">
+<PDM_MACRO NAME=button caption="Zmień wszystkie" hotkey_name="Zmień wszystkie" id="btn004" width=0
+    func="updateall()">
+<PDM_MACRO NAME=button caption="Zamknij" hotkey_name="Zamknij" id="btn005" width=0
+    func="spmsave()">
+<PDM_MACRO NAME=btnEndRow>
+</script>
+<script type="text/javascript">
+// docWriteln("<a href=\"javascript:void(0)\" TABINDEX=10  onfocus='document.links[GetlnkIndex(\"imgBtn0\")].focus()'></a>");
+docWriteln("</form>");
+<PDM_MACRO NAME=dtlEndTable>
+</script>
+
+<PDM_MACRO NAME=dtlEnd>
+<script type="text/javascript">
+setsource(window.opener.document.forms['$args.KEEP.form_name'].elements['$args.KEEP.control_name']);
+dupform('$args.KEEP.form_name', '$args.KEEP.control_name', '$args.KEEP.evallang',
+        '$args.KEEP.evalopts', '$args.KEEP.evallexlist');
+</script>
+
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: spellcheck.htmpl ASPEN.3 2011/01/21 15:53:14 saima01 Exp $
+</PDM_IF>

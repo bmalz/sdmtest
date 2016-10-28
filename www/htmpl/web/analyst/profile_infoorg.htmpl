@@ -1,0 +1,78 @@
+<html lang="en"><PDM_IF 0>
+profile_infoorg.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_browser.htmpl+PERSID={cnt:}+NBTAB=infoorg">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "<PDM_FMT ESC_STYLE=C>Organization Information for $dobref.organization.name</PDM_FMT>";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no>
+<TABLE ID="tbl001" WIDTH=90%>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Organization</TH>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Primary Contact</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.organization.name    </TD>
+<TD VALIGN=TOP class=detailro>$dobref.organization.contact.combo_name</TD>
+</TR>
+</TABLE>
+<TABLE ID="tbl002" WIDTH=90%>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Organization Number</TH>
+<TH ALIGN=LEFT WIDTH=50% class=detailro>Description</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.organization.org_num    </TD>
+<TD VALIGN=TOP class=detailro>$dobref.organization.description    </TD>
+</TR>
+</TABLE>
+<TABLE ID="tbl003" WIDTH=90%>
+<TH ALIGN=LEFT WIDTH=33% class=detailro>Phone Number</TH>
+<TH ALIGN=LEFT WIDTH=33% class=detailro>Fax Number</TH>
+<TH ALIGN=LEFT WIDTH=33% class=detailro>Alt. Phone Number</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>$dobref.organization.phone_number    </TD>
+<TD VALIGN=TOP class=detailro>$dobref.organization.fax_phone    </TD>
+<TD VALIGN=TOP class=detailro>$dobref.organization.alt_phone    </TD>
+</TR>
+</TABLE>
+<TABLE ID="tbl005" WIDTH=90%>
+<TH ALIGN=LEFT class=detailro>Email Address</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>
+<PDM_FMT WIDTH=60 JUSTIFY=LINE>$dobref.organization.email_addr</PDM_FMT>
+</TD>
+</TR>
+</TABLE>
+<TABLE ID="tbl006" WIDTH=90%>
+<TH ALIGN=LEFT WIDTH=33% class=detailro>Location</TH>
+<TH ALIGN=LEFT WIDTH=33% class=detailro>Billing Code</TH>
+<TH ALIGN=LEFT WIDTH=33% class=detailro>Service Type</TH>
+<TR>
+<TD VALIGN=TOP class=detailro>
+$dobref.organization.location.name
+</PDM_LINK>
+</TD>
+<TD VALIGN=TOP class=detailro>$dobref.organization.billing_code    </TD>
+<TD VALIGN=TOP class=detailro>
+$dobref.organization.service_type.sym
+</PDM_LINK>
+</TD>
+</TR>
+</TABLE>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

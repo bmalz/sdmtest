@@ -1,0 +1,72 @@
+<PDM_IF 0>
+detail_sa_queue.htmpl
+WHEN PRESENTED:
+    When we need to display details of a SA Queue (sa_queue factory)
+INTENT:
+   	Display details of a SA Queue
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+	<PDM_PRAGMA RELEASE=110>
+	<PDM_INCLUDE FILE=styles.htmpl>
+	<SCRIPT LANGUAGE="JavaScript">
+		var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Support Automation Property"</PDM_FMT>;
+		var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Support Automation Property ${args.COMMON_NAME}"</PDM_FMT>;
+		var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Add New Support Automation Property ${args.COMMON_NAME}"</PDM_FMT>;
+	</SCRIPT>
+	<PDM_INCLUDE FILE=std_head.htmpl>
+
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+	<SCRIPT LANGUAGE="JavaScript">
+		argPersistentID = "$args.persistent_id";
+
+		function unloadActions()
+		{
+   			if ( _dtl.edit )
+      			unload_check();
+		}
+	</SCRIPT>
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+	<PDM_INCLUDE FILE=std_body.htmpl>
+	<CENTER>
+
+	<SCRIPT LANGUAGE="JavaScript">
+		
+<PDM_MACRO name=dtlForm factory="sa_system_property">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.id" == 0>
+<PDM_MACRO name=dtlDropdown hdr="Właściwość" attr="propertyKey" autofill="no" colspan=3 factory="sa_system_property" list_display="$list.propertyKey" lookup="no" make_required="yes" rel_attr_name="propertyKey" size=100 use_list_display=1 whereclause="isGlobal=0 and obsolete=0 and (tenant IS NULL)">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Właściwość" attr="propertyKey" colspan="3">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Wartość" attr="propertyValue" colspan="3" size="100">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="propertyDescription" colspan="3" rows="3" size="100">
+<PDM_IF "$prop.MultiTenancy" != "off" >
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Globalne" attr="isGlobal">
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+	</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+
+<PDM_WSP>

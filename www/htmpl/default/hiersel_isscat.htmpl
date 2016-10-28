@@ -1,0 +1,60 @@
+<PDM_IF 0>
+hiersel_isscat.htmpl
+WHEN PRESENTED:
+    When we need to display a hierarchical selection list
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var argFactory = "isscat";
+var argBackfillField = '${args.KEEP.backfill_field:}';
+var argBackfillForm = '${args.KEEP.backfill_form:}';
+var argBackfillAttr = '${args.KEEP.backfill_attr:}';
+var form_title = "Category Selection";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/backfill.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fldrtree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/hier_set.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onLoad="fldrtreeTabOff()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+HierInit("Category", msgtext("Click_to_select_desired_Catego"),
+         nx_unescape('<PDM_FMT ESC_STYLE=JS2>$args.KEEP.HierKey</PDM_FMT>'));
+</SCRIPT>
+<TABLE ID=tb1501 CLASS=normalTxt>
+<TR>
+<TD>
+&nbsp;
+</TD>
+<TD>    
+<SCRIPT LANGUAGE="JavaScript">          
+
+<PDM_LIST PREFIX=list FACTORY=isscat WHERE="${args.KEEP.HierWc:}"
+          HIER_KEY="$args.KEEP.HierKey">
+HierAddLine('<PDM_FMT ESC_STYLE=JS>$list.HIER_level_name</PDM_FMT>',
+            '<PDM_FMT ESC_STYLE=JS>$list.COMMON_NAME</PDM_FMT>',
+            '<PDM_FMT ESC_STYLE=JS>$list.description</PDM_FMT>',
+            '<PDM_FMT ESC_STYLE=JS>$list.REL_ATTR</PDM_FMT>',
+            "$list.persistent_id",
+            '$list.HIER_is_node','$list.HIER_has_children'<PDM_IF "$prop.MultiTenancy" == "off">);<PDM_ELSE>,
+            "$list.tenant", "$list.tenant.name");
+</PDM_IF>
+</PDM_LIST>
+if ( HierShowFirst() )
+   initializeDocument();
+</SCRIPT>
+</TD>
+</TR>
+</TABLE>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: hiersel_isscat.htmpl ASPEN.1 2011/10/24 11:35:50 visan03 Exp $
+</PDM_IF>

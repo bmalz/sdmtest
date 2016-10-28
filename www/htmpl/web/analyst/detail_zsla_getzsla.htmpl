@@ -1,0 +1,34 @@
+<PDM_IF 0>
+	20130823 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	var frm = "";
+	if ( !parent.cai_main )
+	{
+		frm = parent.ahdframe;
+	}
+	else { frm = parent.cai_main; }
+    if (typeof frm.GetUslugaIdArray == "function")
+    {
+		var zSLAs = "";
+		<PDM_LIST PREFIX=list FACTORY=zSLA WHERE="usluga.id=$args.OwningContract">
+			zSLAs += '$list.id' + ';';
+		</PDM_LIST>
+        frm.GetUslugaIdArray(zSLAs);
+    }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+</BODY>
+</HTML>

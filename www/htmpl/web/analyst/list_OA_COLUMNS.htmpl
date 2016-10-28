@@ -1,0 +1,63 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of OA_COLUMNS.
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Attribute Search";
+var hdrTitleList = "Attribute List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = false;
+var cfgCanView = false;
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=OA_COLUMNS>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Atrybut" attr=COLUMN_NAME>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Attribute found";
+var msgFound1 = "1 Attribute found";
+var msgFound = "%1 Attributes found";
+var msgFoundMore = "%1 Attributes found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Attribute";
+
+function display_table_name(value)
+{
+  if ( value == "cr" )          value = "Request";
+  else if ( value == "in" )     value = "Incident";
+  else if ( value == "pr" )     value = "Problem";
+  else if ( value == "chg" )    value = "Change Order";
+  else if ( value == "iss" )    value = "Issue";
+  rs.data(value);     
+}
+
+<PDM_MACRO name=lsStart search_type=DISPLAY>
+<PDM_MACRO name=lsCol hdr="Obiekt" attr=TABLE_NAME fmtfunc=display_table_name>
+<PDM_MACRO name=lsCol hdr="Atrybut" attr=COLUMN_NAME link=yes>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

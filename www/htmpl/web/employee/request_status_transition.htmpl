@@ -1,0 +1,74 @@
+<PDM_IF 0>
+request_status_transition.htmpl
+WHEN PRESENTED:
+   In the Self-Service interface, when the detail form calls to update 
+   the status of an incident or request using Status Transition buttons.
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="request_status_transition.htmpl+OP=UPDATE+KEEP.SS_BUTTON_TEXT=Accept+KEEP.SS_HEADER_TEXT=Accept%20Resolution+KEEP.SS_NEW_STATUS=CL+PERSID={cr:}" factory=cr>
+<html lang="en"><head>
+<script type="text/javascript">
+
+<PDM_IF "$args.KEEP.tick_fac" == "in">
+form_title = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.SS_HEADER_TEXT Incident $args.ref_num"</PDM_FMT>;
+<PDM_ELIF "$args.KEEP.tick_fac" == "cr">
+form_title = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.SS_HEADER_TEXT Request $args.ref_num"</PDM_FMT>;
+<PDM_ELSE>
+form_title = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.SS_HEADER_TEXT"</PDM_FMT>;
+</PDM_IF>
+	
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cst_update_status.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+edit_form = 1;
+argPersistentID = "$args.persistent_id";
+if ( ! _browser.supportsLayers )
+   document.writeln('<scr' + 'ipt type="text/javascript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+</script>
+</head>
+<body onunload="unload_check()" class="emp">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=cr>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="$args.KEEP.SS_BUTTON_TEXT" disabled="defer" func="check_before_save()" hotkey_name="$args.KEEP.SS_BUTTON_TEXT" id="btn001">
+<PDM_MACRO name=button caption="Cancel" btntype=negative disabled="defer" func="detailCancel()" hotkey_name="Cancel" id="btn002">
+<PDM_MACRO name=button caption="Clear Remarks" disabled="defer" func="document.main_form.reset()" hotkey_name="Clear Remarks" id="btn003">
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+</script>
+
+<input type="hidden" name="SET.status" value="$args.KEEP.SS_NEW_STATUS">
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Obecny status" attr="status">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KEEP.SS_MUST_COMMENT" == "1">
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr="alg.description" colspan=4 keeplinks=yes make_required=yes rows=4 size=80 spellchk=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr="alg.description" colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<!-- If Cancel Link brings up the form other than main menu, we do not want to
+     set the TARGET to _top because it will cause the next form to show without
+     main menu on the side.
+-->
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: request_status_transition.htmpl ASPEN.4 2011/10/19 23:32:13 chapr06 Exp $
+</PDM_IF>

@@ -1,0 +1,97 @@
+<PDM_IF 0>
+	menu_tree_editor3.htmpl
+WHEN PRESENTED:
+	From the detail_menu_tree_name.htmpl when using Customize Menu.
+	Loads the menu_tree.htmpl in the left pane and uses the right pane 
+	for the node functionality.
+</PDM_IF>
+<html lang="en">
+
+<PDM_PRAGMA RELEASE=110>
+<HEAD>
+<script language=javascript>
+
+var test_cache = new Array();
+
+function testobj(nid,nname)
+{
+this.nid=nid;
+this.nname=nname;
+}
+
+function setCurrentIndex(IndexId)
+{
+	m_CurrentIndex = IndexId;
+}
+
+function getCurrentIndex()
+{
+	return m_CurrentIndex;
+}
+
+function setCurrentIndexPath(sIndexPath)
+{
+	m_CurrentIndexPath = sIndexPath;
+}
+
+function getCurrentIndexPath()
+{
+	return m_CurrentIndexPath;
+}
+
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+
+var ahdframeset = parent.ahdframeset;
+var ahdframe;
+function frameset_loaded()
+{
+	ahdframe = window.menu_tree_main;
+	ahdframeset.ahdframe = ahdframe;
+		window.menu_tree_main.location.href = "$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID" + 
+		    "+HTMPL=menu_tab_dflt.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME";
+}
+
+<pdm_include file=menubar_admin.htmpl>
+
+</script>
+</HEAD>
+
+<SCRIPT>
+<PDM_IF "$prop.browser" != "IE">	
+docWriteln('<FRAMESET COLS="240,*" FRAMESPACING="3"  FRAMEBORDER="1" onLoad="frameset_loaded()">');
+<PDM_ELSE>
+docWriteln('<FRAMESET Cols="240,*" FRAMESPACING="2" onLoad="frameset_loaded()">');
+</PDM_IF>
+
+docWrite('<FRAME id=frmMenuEditTree name=frmMenuEditTree ');
+docWrite('src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID');
+docWrite('+HTMPL=menu_tree.htmpl');
+docWrite('+menu_name=' + nx_escape("$args.menu_name"));
+docWrite('+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME');
+docWrite('+KEEP.ALLOW_MENU_TREE_EDIT=$args.KEEP.ALLOW_MENU_TREE_EDIT" ');
+docWrite('style="border:1px #8B939A solid;padding-left:5px;padding-top:5px" ');
+<PDM_IF "$prop.browser" != "IE">
+	docWrite('SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=1 BORDER=0 ');
+<PDM_ELSE>
+	docWrite('SCROLLING=no MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 BORDER=0 ');
+</PDM_IF>
+docWriteln('title="Hidden frame - do not navigate here"> ');
+docWrite('<FRAME id=menu_tree_main name=menu_tree_main style="border: 1px #8B939A solid;" ');
+<PDM_IF "$prop.browser" != "IE">
+	docWrite('SCROLLING=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 BORDER=0 ');
+<PDM_ELSE>
+	docWrite('SCROLLING=$SESSION.scrolling MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=0 BORDER=0 ');
+</PDM_IF>
+docWriteln('title="Menu Tree Editor frame">');
+
+docWriteln('</FRAMESET>');
+</SCRIPT>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: menu_tree_editor3.htmpl ASPEN.2 2012/01/13 16:21:04 kumka02 Exp $;
+</PDM_IF>

@@ -1,0 +1,222 @@
+<html lang="en"><PDM_IF 0>
+scratchpad_cr.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<head>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_browser.htmpl+PERSID={cnt:}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Scratch Pad";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var loaded = false;
+var nbtab_processed = false;
+var call_type = "";
+var curr_fac = "cr";
+var curr_fac_name = "request";
+var deferred_create_callback = void(0);
+var argCstID = "$cst.id";
+var m_sdLaunched = "$args.SD_LAUNCHED";
+setTempKeyDownHandler(pb_keydown);
+
+function backfill_event( form, field, value, persid )
+{
+   document.scrpadForm["SET.template_name"].value = persid;
+   if ( typeof deferred_create_callback == "function" ) {
+      deferred_create_callback();
+      deferred_create_callback = void(0);
+   }
+}
+
+</script>
+
+<script type="text/javascript">
+if ( ! _browser.supportsLayers )
+document.writeln('<scr' + 'ipt type="text/javascript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+</script>
+</head>
+<body class="detailro" onload="loaded=true;pb_focus('pbfld0')">
+<script>
+var caption = "Nowe zgłoszenie";
+var caption_loc = "Nowe zgłoszenie";
+if (!nonLatinFlag)
+    caption_loc = caption;
+var actKey = registerActionKey( "p", caption_loc, focusById, "pbfld100" ); 
+document.writeln("<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>");
+document.writeln("<tr>");
+document.writeln("<td align='left' width='99%'><h2 style='margin:0px;'>" + fmtLabelWithActkey(caption, actKey) + "</h2></td>");
+document.writeln("<td align='right' width='1%'></td></tr></table>");		 
+ImgBtnSetDefaultTabIndex(10);
+<PDM_MACRO NAME=btnStartRow>
+<PDM_IF 0>
+	<PDM_MACRO NAME=button caption="Spelling[p]" hotkey_name="Spelling[p]" id="btn005" width=0 disabled="defer"
+    func="popup_spellchecker('spell_form','scrpadForm', 'pbfld100')">
+</PDM_IF>
+<PDM_MACRO NAME=button caption="Przeszukaj bazę wiedzy[k]" hotkey_name="Przeszukaj bazę wiedzy[k]" id="btn011"
+    func="KD_search()">
+<PDM_MACRO NAME=button caption="Wyczyść[!sea]" hotkey_name="Wyczyść[!sea]" id="btn010" width=0 Tooltip="Clear existing scratchpad text and set focus for new text entry"
+    func="pb_clear_scratchpad()">
+<PDM_MACRO NAME=button caption="Quick Close" hotkey_name="Quick Close" id="btn012" width=0 disabled="yes" Tooltip="Create and save new close ticket"
+    func="pb_qclose()">
+<PDM_MACRO NAME=btnEndRow>
+document.writeln("</td>");
+document.writeln("</tr>");
+document.writeln("</table>");
+startScrollbar();
+var show_header = 0;
+</script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no menubar="no">
+<script type="text/javascript">insertTabToFrameLink('page','menu');</script>
+<PDM_FORM ID="scrpadForm" NAME="scrpadForm" onSubmit="return false;">
+<br>
+<table>
+<tr>
+<td>
+<textarea id=pbfld100 name=pbfld100 cols=80 rows=4
+          title="Description" tabindex=5
+          onfocus="this.className='focusField'" onblur="this.className=''">
+</textarea>
+</td>
+<td>
+<table>
+<tr>
+<th>
+</th>
+<th class="labeltext" align="left">
+<span id=pblab102 style="display: none">Quick Template</span>
+</th>
+</tr>
+<tr>
+<td>
+<script type="text/javascript">
+<PDM_MACRO NAME=button caption="Quick" hotkey_name="Quick" id="btn009" width=0 disabled="yes" Tooltip="Create and save a new ticket or issue from selected template"
+    func="pb_qtemplate()">
+</script>
+</td>
+<td>
+<select id=pbfld102 tabindex=10 name=qtemplate style="display: none;" title="Quick Template">
+</select>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<center>
+<table>
+<tr>
+<th class="labeltext" align="left"><label for="obj_type">Typ</label></th>
+<th class="labeltext" align="left">
+<script type="text/javascript">
+var caption, link;
+var caption_loc;
+var titletext = "Template";
+var actKey; 
+if ( ahdtop.cstUsingScreenReader ) {
+  caption = "Template Lookup";
+  caption_loc = "Template Lookup";
+  if (!nonLatinFlag)
+    caption_loc = caption;
+  link = "";
+  titletext = msgtext("%1_-_autofill;_up_arrow_for_lo", titletext);
+}
+else {
+  caption = "Template";
+  caption_loc = "Template";
+  if (!nonLatinFlag)
+    caption_loc = caption;
+  link = '<img width=12 HEIGHT=11 src="' + 
+           cfgCAISD + '/img/lookup.gif" alt="Pop up lookup form">' + ' ';
+  actKey = registerActionKey( "m", caption_loc, focusById, "pbfld101" ); 
+}
+link += '<a class="lookup font_normal" tabindex=-1 style="cursor:pointer;" id=pbfld101_lnk' +
+        " onfocus=\"this.className='focusField'\"" +
+        " onblur=\"this.className=''\"" +
+        " title=\"Template Lookup\"" +
+        ' href="javascript:void(0)" onclick="pb_select_template()">' +
+
+        fmtLabelWithActkey( caption, actKey ) + "&nbsp;" +
+        '</a>';
+//document.write(link);
+</script>
+</th>
+</tr>
+<tr>
+<td>
+<script type="text/javascript">
+document.write('<select id="obj_type" name="obj_type" tabindex=10 onchange="clear_template_name()">');
+
+if($ACCESS.FAC_cr > 1) {
+	if(parent.CategoryType == "R") {
+		document.write('<option value="cr" selected>Wniosek</option>');
+	} else {
+		document.write('<option value="cr">Wniosek</option>');
+	}
+	if($ACCESS.FAC_in > 1) {
+		if(parent.CategoryType == "I") {
+			document.write('<option value="in" selected>Incydent</option>');
+		} else {
+			document.write('<option value="in">Incydent</option>');
+		}
+	}
+	if($ACCESS.FAC_pr > 1 && 0)
+        	document.write('<option value="pr">Problem</option>');
+}
+if ($ACCESS.FAC_chg > 1) {
+    document.write('<option value="chg">Zmiana</option>');
+}
+if($ACCESS.FAC_iss > 1 && 0) {
+    document.writeln('<option value="iss">Issue</option></select>');
+}
+</script>
+</td>
+<td>
+<script>
+//document.write("<input id=pbfld101 name=template_name size=20 tabindex=10");
+//document.write(" title='" + titletext + "'");
+//document.write(" onchange=\"document.scrpadForm['SET.template_name'].value='';\"");
+//document.writeln(" onfocus=\"this.className='focusField'\" onblur=\"this.className=''\">");
+//document.writeln("<input type='hidden' id=CatSET name='CatSET' value='pcat:" + parent.CategoryID + "'>");
+//document.writeln("<input type='hidden' id=CatKEY name='CatKEY' value='" + parent.CategorySym + "'>");
+</script>
+<input type="hidden" id=pbfld101_persid name='SET.template_name'>
+</td>
+<td>&nbsp;&nbsp;</td>
+<td>
+<script type="text/javascript">
+<PDM_MACRO NAME=button caption="Utwórz" hotkey_name="Utwórz" id="btn007" width=0 disabled="yes" Tooltip="Pop up new request or issue initialized from scratchpad"
+    func="pb_create()">
+</script>
+</td>
+</tr>
+</table>
+</center>
+</PDM_FORM>
+<form method=POST action=$cgi name=qtemplate_form>
+<input type="hidden" name=factory>
+<input type="hidden" name=OP value=QUICK_TENPLATE>
+<input type="hidden" name=description>
+<input type="hidden" name=qtemplate_persid>
+<input type="hidden" name=customer_id>
+</form>
+<script type="text/javascript">
+if ( ! _browser.supportsLayers ) {
+window.hiddenform = "spell_form";
+do_hiddenfm('spell_form','scrpadForm');
+}
+insertTabToFrameLink('menu');
+</script>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

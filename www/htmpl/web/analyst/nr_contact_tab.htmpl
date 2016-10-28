@@ -1,0 +1,103 @@
+<PDM_IF 0>
+nr_contact_tab.htmpl
+WHEN PRESENTED:
+    When we need to display contact assignments for a single Asset 
+INTENT:
+    Display a notebook page for nr request.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=nr_contact_tab" factory=nr>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()">
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Przypisane kontakty">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+   if ( enableBtns ) {
+      
+<PDM_MACRO name=button Caption="Aktualizuj Kontakty" EndRow=yes Func="update_lrel('nr', '$args.persistent_id', 'cnt', 'cntref',  'Contacts', 'Assigned to CI', '')" hotkey_name="Update Contacts" ID=UPDATE_LREL NewRow=yes>
+   }
+   else {
+      
+<PDM_MACRO name=button Caption="Aktualizuj Kontakty" Disabled=yes EndRow=yes Func="update_lrel('nr', '$args.persistent_id', 'cnt', 'cntref',  'Contacts', 'Assigned to CI', '')" hotkey_name="Update Contacts" ID=UPDATE_LREL NewRow=yes>
+   }
+}
+</PDM_OBJECT>
+<PDM_MACRO name=tabBanner title="Kontakty" add_btns=true>
+
+function showEmail(value)
+{
+    var emailhtml = "";
+    if (value != "") {
+        emailhtml = "<a class='lookup1em' href=\"mailto:${args.resource_contact.email_address}\">$args.resource_contact.email_address</a>" ;
+    }
+    return(emailhtml);
+}
+
+var showTenantColumn = false;
+<PDM_IF "$prop.MultiTenancy" != "off" && '$ACCESS.Tenant_Restriction' != '1'>
+    showTenantColumn = true;
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_IF "$prop.MultiTenancy" == "off">
+<PDM_MACRO name=dtlLookup hdr="Główny kontakt" attr=resource_contact>
+<PDM_ELSE>
+    if ( showTenantColumn ) {
+        
+<PDM_MACRO name=dtlLookup hdr="Główny kontakt" attr=resource_contact>
+<PDM_MACRO name=dtlReadonly hdr="Tenant" attr="resource_contact.tenant.name">
+    } else {
+        
+<PDM_MACRO name=dtlLookup hdr="Główny kontakt" attr=resource_contact>
+    }
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Telefon" attr=resource_contact.phone_number>
+<PDM_MACRO name=dtlReadonly hdr="e-mail" attr=resource_contact.email_address fmtfunc=showEmail>
+<PDM_MACRO name=dtlReadonly hdr="Organizacja" attr=resource_contact.organization.name>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Administrator merytoryczny" attr=support_contact1_uuid>
+<PDM_MACRO name=dtlLookup hdr="Właściciel biznesowy" attr=billing_contact_uuid>
+<PDM_MACRO name=dtlLookup hdr="Administrator techniczny" attr=support_contact2_uuid>
+<PDM_IF 0><PDM_MACRO name=dtlLookup hdr="Administrator techniczny  II" attr=support_contact3_uuid></PDM_IF>
+<PDM_IF 0><PDM_MACRO name=dtlLookup hdr="Administrator biznesowy zastępca" attr=zvice_support_contact1_uuid></PDM_IF>
+<PDM_IF 0><PDM_MACRO name=dtlLookup hdr="Właściciel biznesowy zastępca" attr=zvice_billing_contact_uuid></PDM_IF>
+<PDM_MACRO name=dtlLookup hdr="Właściciel techniczny" attr=assoc_entservx.zServiceOwner>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Odzyskiwanie danych" attr=disaster_recovery_contact_uuid>
+<PDM_MACRO name=dtlLookup hdr="Backupowanie Usługi" attr=backup_services_contact_uuid>
+<PDM_MACRO name=dtlLookup hdr="Utrzymanie sieciowe" attr=network_contact_uuid>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=tabList brbefore=yes btntitle="Lista przypisanych dodatkowych kontaktów." colspan=4 height=180 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.cenv.nr.id=$args.wc_dob_id+QBE.NE.id=$args.resource_contact.id+QBE.EQ.delete_flag=0+KEEP.forNrtoCnt=1">
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: nr_contact_tab.htmpl ASPEN.7 2011/02/28 15:32:10 pstso01 Exp $
+</PDM_IF>

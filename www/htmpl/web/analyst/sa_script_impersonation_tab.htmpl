@@ -1,0 +1,35 @@
+<PDM_IF 0>
+sa_script_impersonation_tab.htmpl
+</PDM_IF>
+<html lang="en">
+<BODY>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=sa_script_impersonation_tab" factory=sa_script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM>
+	    <SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=tabBanner title="Impersonation">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Impersonate" attr="impersonate" evt="onClick='impersonateCBXStateChanged(this.checked)'">
+        				if ( defaultCredentialsDefined == "yes" )
+        				{              
+        					
+<PDM_MACRO name=dtlCheckbox hdr="Use default credentials" attr="credentialsType" colspan="1" evt="onClick='defaultCredentialsCBXStateChanged(this.checked)'">
+        				}
+        			
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Login name" attr="credLogin" size="30">
+<PDM_MACRO name=dtlTextbox hdr="Hasło" attr="credPswdPlain" password="yes" size="30">
+<PDM_MACRO name=dtlTextbox hdr="Domena" attr="credDomain" size="30">
+<PDM_MACRO name=dtlEndTable>
+				setInitialDisabledState();
+        </SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: sa_script_impersonation_tab.htmpl ASPEN.0 2010/12/27 17:45:55 datsi03 Exp $
+</PDM_IF>
+
+

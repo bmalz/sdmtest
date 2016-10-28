@@ -1,0 +1,61 @@
+<PDM_IF 0>
+org_address_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=org_address_tab" factory=org>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=tabBanner title="Address">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlReadonly hdr="Ulica" attr=location.address1>
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address2</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address2>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address3</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address3>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address4</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address4>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address5</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address5>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address6</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address6>
+}
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlReadonly hdr="Miasto" attr=location.city>
+<PDM_MACRO name=dtlReadonly hdr="Województwo" attr=location.state>
+<PDM_MACRO name=dtlReadonly hdr="Kod pocztowy" attr=location.zip>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlReadonly hdr="Państwo" attr=location.country>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: org_address_tab.htmpl ASPEN.1 2010/10/26 12:17:32 saima01 Exp $;
+</PDM_IF>

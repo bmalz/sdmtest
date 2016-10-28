@@ -1,0 +1,145 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Recommended Documents Search";
+var hdrTitleList = "Recommended Documents List";
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT>
+function window_onload()
+{
+	for (var iElement=0; iElement<document.getElementsByTagName("input").length; iElement++)
+	{
+		if (document.getElementsByTagName("input").item(iElement).name == "QBE.IN.KCAT.CAPTION")
+		{
+			//disable the autofill for the category element
+			var oElement = document.getElementsByTagName("input").item(iElement);
+			oElement.onchange = null;
+			var caption = oElement.value;
+			oElement.value = replaceGT_LT(caption);
+		}
+	}
+}
+function backfill_event( form, field_name, value, persid, rel_attr, type )
+{
+	document.getElementById("QBE.EQ.KCAT").value = rel_attr;
+}
+</SCRIPT>
+</HEAD>
+
+<BODY CLASS="list" onload="window_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="KT_BLC">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Autor" attr="AUTHOR_ID">
+<PDM_MACRO name=sfDropdown hdr="Typ" attr="BLC_TYPE">
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Frazy/Hasła" attr="BLC_TEXT" colspan=3 size=67>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data modyfikacji" attr=last_mod_dt qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data modyfikacji" attr=last_mod_dt colspan=2 qbe_condition=LE>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+
+var msgFoundNone = "No recommended documents found";
+var msgFound1 = "1 recommended document found";
+var msgFound = "%1 recommended documents found";
+var msgFoundMore = "%1 recommended documents found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired recommended document";
+//
+function CreateDocLink(value)
+{
+	var title = value;
+	if(title.length > 50)
+	{	
+		title = title.slice(0, 50) + "...";
+	}
+	var html = "<a class=record href='javascript:OpenDoc(" + doc_id + ")'>" + title + "</a>";
+	rs.data(html);
+	return;
+}
+function OpenDoc(doc_id)
+{
+	var persid = "KD:" + doc_id;
+	var features="directories=no"+
+		",location=no"+
+		",height=" + popupHeight(LARGE_POPUP) +
+		",width=" + popupWidth(LARGE_POPUP)+
+		",status=no";
+	popup_window(persid,'SHOW_DETAIL', 0, 0, features, 'PERSID=' + persid);
+}
+function CreateBLCLink(value)
+{
+	var blc = value;
+	if(blc.length > 50)
+	{	
+		blc = blc.slice(0, 50) + "...";
+	}
+	var html = "<a class=record href='javascript:OpenBLC(" + blc_id + ")'>" + blc + "</a>";
+	rs.data(html);
+	return;
+}
+function OpenBLC(blc_id)
+{
+	var persid = "KT_BLC:" + blc_id;
+	var features="directories=no"+
+		",location=no"+
+		",height=" + popupHeight(LARGE_POPUP) +
+		",width=" + popupWidth(LARGE_POPUP)+
+		",status=no";
+	popup_window(persid,'SHOW_DETAIL', 0, 0, features, 'PERSID=' + persid);
+}
+
+var sCondition = "";
+	
+	function fmtCondition(value)
+	{
+		rs.data(sCondition);
+	}
+
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var doc_id = '@{list.KD.id}'">
+<PDM_MACRO name=lsWrite text="var blc_id = '@{list.id}'">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.BLC_TYPE:}' != '4'">
+<PDM_MACRO name=lsWrite text="sCondition= '@{list.BLC_TEXT:}'">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="sCondition= '@{list.KCAT.INDEX_PATH:}'">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Warunek" attr="BLC_TEXT" export=no fmtfunc=fmtCondition link=CreateBLCLink sort=no>
+<PDM_MACRO name=lsCol hdr="Dokument bazy wiedzy" attr="KD" export=no fmtfunc=CreateDocLink sort=no>
+<PDM_MACRO name=lsCol hdr="Autor" attr="AUTHOR_ID">
+<PDM_MACRO name=lsCol hdr="Data modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=lsCol label="Type" attr="BLC_TYPE" startrow=yes>
+<PDM_MACRO name=lsCol label="ID" attr="KD.id" colspan=2>
+<PDM_MACRO name=lsCol label="Status" attr="delete_flag">
+<PDM_MACRO name=lsEnd>
+
+</SCRIPT>
+</PDM_IF>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

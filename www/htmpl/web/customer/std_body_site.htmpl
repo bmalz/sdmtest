@@ -1,0 +1,99 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2003 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  customer/std_body_site.htmpl  
+// Created: 02/04/2003
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains the definition for the menu bar of the customer
+//    interface.  Any customer HTMPL page should include this file:
+//
+//    You should place your customized version of std_body_site.htmpl in
+//    site/mods/htmpl/www/web/customer/std_body_site.htmpl
+////////////////////////////////////////////////////////////////////////////
+// $Id: std_body_site.htmpl,v 1.3 2006/11/13 23:01:32 ricma09 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="OP=menu">
+<SCRIPT>
+var for_role = 0;
+if (typeof ahdtop != "undefined" && 
+    typeof ahdtop.toolbarTab != "undefined" &&
+    typeof ahdtop.toolbarTab[0].role_menubar == "string")
+{
+    for_role = 1;
+}
+<!-- BEGIN customer/std_body_site.htmpl -->
+if (for_role)
+{
+    document.writeln('<table width="100%" cellspacing="0" cellpadding="0">');
+    document.writeln('<tr class="menulink">');
+}
+else
+{
+    document.writeln('<table width="100%" cellspacing="0" cellpadding="0" >');
+    document.writeln('<tr class="welcomebanner">');
+}
+</SCRIPT>
+<pdm_include file=wspicon.htmpl user_type="Customer">
+<SCRIPT>
+
+if (!for_role)
+{
+    document.writeln('<td valign="middle" width="56%">');
+    document.writeln('<span class="welcomebannerlabel gn_text_dot8">Logged in as:</span>');
+    <PDM_IF "$prop.guest_user" != "1">
+	document.writeln('<span class="welcomebannerlogin gn_text_dot8">$cst.first_name $cst.last_name</span>');
+    <PDM_ELSE>
+	document.writeln('<span class="welcomebannerlogin gn_text_dot8">Guest</span>');
+    </PDM_IF>
+    <PDM_IF "1" != "${args.KEEP.IsPopUp:0}">
+    <PDM_IF "$prop.portal_session" == "">	
+	document.write('&nbsp;<span class=welcomebannerlink>(</span><a href="JavaScript: logout_all_windows(1);" ');
+    	document.writeln('class=cst_menu><span>Logout</span></a><span class=welcomebannerlink>)</span>');
+    </PDM_IF>
+    </PDM_IF>
+    document.writeln('</td>');
+}
+document.writeln("<td valign='middle' align='right'>");
+<PDM_IF "1" != "${args.KEEP.IsPopUp:0}" && "1" != "${args.popupType:0}">
+    if (for_role)
+    {
+	document.write('&nbsp;<A HREF="$cgi?SID=$prop.SID+FID=123+OP=DISPLAY_FORM+HTMPL=home.htmpl" ');
+	document.writeln('accesskey=m><span>Home</span></A>&nbsp;');
+	document.writeln('<SPAN class="menulink_separator">|</SPAN>');
+	document.write('&nbsp;<A HREF="$cgi?SID=$prop.SID+FID=123+OP=DISPLAY_FORM+HTMPL=about.htmpl" ');
+	document.writeln('><span>About</span></A>&nbsp;');
+	document.writeln('<SPAN class="menulink_separator">|</SPAN>');
+	document.write('&nbsp;<a href="JavaScript:help_on_form(\'$prop.form_name\');" ');
+	document.writeln('><span>Help</span></a>&nbsp;');
+    }
+    else
+    {
+	document.write('&nbsp;<A HREF="$cgi?SID=$prop.SID+FID=123+OP=DISPLAY_FORM+HTMPL=home.htmpl" ');
+	document.writeln('class=cst_menu accesskey=m><span>Home</span></A>&nbsp;');
+	document.write('&nbsp;<A HREF="$cgi?SID=$prop.SID+FID=123+OP=DISPLAY_FORM+HTMPL=about.htmpl" ');
+	document.writeln('class=cst_menu><span>About</span></A>&nbsp;');
+	document.write('&nbsp;<a href="JavaScript:help_on_form(\'$prop.form_name\');" ');
+	document.writeln('class=cst_menu><span>Help</span></a>&nbsp;');
+    }
+</PDM_IF>
+document.writeln('</td>');
+document.writeln('</table>');
+</SCRIPT>
+<!-- END customer/std_body_site.htmpl -->

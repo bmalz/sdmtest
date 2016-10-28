@@ -1,0 +1,98 @@
+<PDM_IF 0>
+cnt_addr_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Contact 
+INTENT:
+    Display a notebook page for cnt address. 
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=cnt_addr_tab" factory=cnt>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()">
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+   if ( enableBtns ) {
+      
+<PDM_MACRO name=button Caption="Aktualizuj lokalizacje" EndRow=yes Func="update_lrel('cnt', '$args.persistent_id', 'loc', 'locref',  'Lokalizacje', 'Przypisane do użytkownika', '')" hotkey_name="Aktualizuj lokalizacje" ID=UPDATE_LREL NewRow=yes>
+   }
+   else {
+      
+<PDM_MACRO name=button Caption="Aktualizuj Kontakt" Disabled=yes EndRow=yes Func="update_lrel('nr', '$args.persistent_id', 'cnt', 'cntref',  'Contacts', 'Assigned to CI', '')" hotkey_name="Update Contacts" ID=UPDATE_LREL NewRow=yes>
+   }
+}
+
+</PDM_OBJECT>
+<PDM_MACRO name=tabBanner title="Adresy">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr=location>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlReadonly hdr="Ulica" attr=location.address1>
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address2</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address2>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address3</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address3>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address4</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address4>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address5</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address5>
+}
+if ('<PDM_FMT ESC_STYLE=C PAD=NO>$args.location.address6</PDM_FMT>' != '')
+{
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="" attr=location.address6>
+}
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlReadonly hdr="Miasto" attr=location.city>
+<PDM_MACRO name=dtlReadonly hdr="Województwo" attr=location.state>
+<PDM_MACRO name=dtlReadonly hdr="Kod pocztowy" attr=location.zip>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlReadonly hdr="Państwo" attr=location.country>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: cnt_addr_tab.htmpl ASPEN.1 2010/10/25 15:59:39 saima01 Exp $
+</PDM_IF>

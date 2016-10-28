@@ -1,0 +1,263 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+<HTML>
+<HTML lang="en">
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Recommended Document Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Recommended Document"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Recommended Document"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+function onloadActions()
+{
+	if ("$prop.form_name_3" == "edit")
+	{
+		frmMain=document.forms["main_form"].elements;
+		oKCAT = frmMain["KEY.KCAT"];
+		if ("$args.BLC_TYPE" == 4)	// Knowledge Category
+		{
+			if ("$args.KCAT" != "" && "$args.KCAT" != "0")
+			{
+				oKCAT.value = "$args.KCAT.INDEX_PATH";
+			}
+		}
+		else
+		{
+			oKCAT.value = "";
+		}
+		
+		type_onchange();
+	}
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function type_onchange()
+{
+	if ("$prop.form_name_3" == "edit")
+	{
+		frmMain=document.forms["main_form"].elements;
+		oBLC_TYPE = frmMain["SET.BLC_TYPE"];
+		oBLC_TEXT = frmMain["SET.BLC_TEXT"];
+		oKCAT = frmMain["KEY.KCAT"];
+		oKCAT_ID = frmMain["SET.KCAT"];
+		var vTableHeaders = document.body.getElementsByTagName("TH");
+		
+		if (oBLC_TYPE.value == 0)		// Nothing chosen
+		{
+			// if no type is chosen, we don't want to show the error messages
+			// if OBLC_TEXT or OKCAT is not filled
+			if (oBLC_TEXT.value == "")
+			{
+				oBLC_TEXT.value = "_";
+			}
+			if (oKCAT.value == "")
+			{
+				oKCAT.value = "_";
+				oKCAT_ID.value = "1";
+			}
+			
+			oBLC_TEXT.style.display = "none";
+			oKCAT.style.display = "none";
+			for(var i=0; i<vTableHeaders.length;i++)
+				{
+					var sInnerHTML = vTableHeaders[i].innerHTML; 
+					if(sInnerHTML.indexOf(msgtext("Phrase_Keywords")) != -1)
+					{
+						vTableHeaders[i].style.display = "none";
+					}	
+					if(sInnerHTML.indexOf(msgtext("Knowledge_Category"))!= -1)
+					{
+						vTableHeaders[i].style.display = "none";
+					}	
+				}
+				return;
+		}
+		else if (oBLC_TYPE.value == 4)		// Knowledge Category
+		{
+			// if oBLC_TYPE.value == 4, oBLC_TEXT is not important 
+			// if oBLC_TEXT is empty, replace it with space
+			// to be able to save the BLC
+			if (oBLC_TEXT.value == "")
+			{
+				oBLC_TEXT.value = "_";
+			}
+			// if oKCAT contains just space, remove it
+			if (oKCAT.value == "_")
+			{
+				oKCAT.value = "";
+				oKCAT_ID.value = "";
+			}
+			
+			oBLC_TEXT.style.display = "none";
+			oKCAT.style.display = "";
+			for(var i=0; i<vTableHeaders.length;i++)
+				{
+					var sInnerHTML = vTableHeaders[i].innerHTML; 
+					if(sInnerHTML.indexOf(msgtext("Phrase_Keywords")) != -1)
+					{
+						vTableHeaders[i].style.display = "none";
+					}	
+					if(sInnerHTML.indexOf(msgtext("Knowledge_Category"))!= -1)
+					{
+						vTableHeaders[i].style.display = "";
+					}	
+				}
+				return;
+		}
+		else
+		{
+			// if oKCAT.value == 4, oKCAT is not important 
+			// if oKCAT is empty, replace it with space
+			// to be able to save the BLC
+			if (oKCAT.value == "")
+			{
+				oKCAT.value = "_";
+				oKCAT_ID.value = "1";
+			}
+			// if oBLC_TEXT contains just space, remove it
+			if (oBLC_TEXT.value == "_")
+			{
+				oBLC_TEXT.value = "";
+			}
+
+			oBLC_TEXT.style.display = "";
+			oKCAT.style.display = "none";
+			for(var i=0; i<vTableHeaders.length;i++)
+				{
+					var sInnerHTML = vTableHeaders[i].innerHTML;
+					if(sInnerHTML.indexOf(msgtext("Phrase_Keywords")) != -1)
+					{
+						vTableHeaders[i].style.display = "";
+					}	
+					if(sInnerHTML.indexOf(msgtext("Knowledge_Category"))!= -1)
+					{
+						vTableHeaders[i].style.display = "none";
+					}	
+				}
+				return;
+		}
+	}
+}
+
+function preSaveTrigger()
+{
+	var oBLC_TYPE = frmMain["SET.BLC_TYPE"];
+	var oBLC_TEXT = frmMain["SET.BLC_TEXT"];
+	var oKCAT = frmMain["KEY.KCAT"];
+	var oKCAT_ID = frmMain["SET.KCAT"];
+
+	if (oBLC_TEXT.style.display == "none")
+	{
+		oBLC_TEXT.value = "_";
+	}
+
+	if (oKCAT.style.display == "none")
+	{
+		oKCAT.value = "_";
+		oKCAT_ID.value = "1";
+	}
+	
+	if (oBLC_TYPE.value != 0 && oBLC_TYPE.value != 4)
+	{
+		oBLC_TEXT.value = oBLC_TEXT.value.toLowerCase();
+		oBLC_TEXT.value = oBLC_TEXT.value.replace(/[ ]+/g, " ");
+		oBLC_TEXT.value = system_Trim(oBLC_TEXT.value);
+	}
+	return true;
+}
+
+//
+// This function is used to make the input textbox for the Knowledge Category field 
+// created using the dtlHier macro like a label using the CSS style class 'dtl_txt_ro'. 
+// We also set the events (onkeydown, onkeyup,...) to the empty string, so we can 
+// disable auto suggest and auto fill, we just want to mimic a plan text label.
+//
+function kcatTextboxToLabel()
+{
+  if ("$prop.form_name_3" == "edit")
+  {
+    try
+    {
+      var ele = document.getElementsByName('KEY.KCAT');
+      
+      if (ele != undefined && ele != null)
+      {
+        ele[0].className = 'dtl_txt_ro';
+        ele[0].onkeydown = '';
+        ele[0].onkeyup   = '';
+        ele[0].onchange  = '';
+        ele[0].onblur    = '';
+        ele[0].onfocus   = '';
+        ele[0].onclick   = '';
+      }
+    }
+    catch (err)
+    {
+    }
+  }
+}
+</SCRIPT>
+</HEAD>
+
+<BODY class=detailro onload="onloadActions();kcatTextboxToLabel();" onUnload="unloadActions();">
+<PDM_INCLUDE FILE=std_body.htmpl >
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory="KT_BLC">
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.id" == "0">
+</SCRIPT>
+<SCRIPT>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlLookup hdr="Dokument bazy wiedzy" attr="KD" extraurl="KEEP.search_type=RecommendedResults" make_required=yes size=80>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Dokument bazy wiedzy" attr=KD.TITLE>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ warunku" attr="BLC_TYPE" evt="onchange=type_onchange()" lookup="no" make_required=yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlTextbox hdr="Frazy/Hasła" attr="BLC_TEXT" make_required=yes size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja bazy wiedzy" attr=KCAT autofill=no make_required=yes>
+<PDM_ELSE>
+<PDM_IF "$args.BLC_TYPE" == "4">
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja bazy wiedzy" attr=KCAT.INDEX_PATH>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Frazy/Hasła" attr="BLC_TEXT" size=80>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

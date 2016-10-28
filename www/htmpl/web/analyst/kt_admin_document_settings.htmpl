@@ -1,0 +1,244 @@
+<PDM_IF 0>
+kt_admin_document_settings.htmpl
+WHEN PRESENTED:
+    When we need to display the document settings admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES 
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/spellcheck.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+var iTreeNavigation;
+var iSubmitComment;
+var iViewComment;
+var iRepositoryID;
+var iResolutionSize;
+var iAvoidDuplicate;
+var iNotifyDaysBefExp;
+var strDBID = new Array("","","","","","");
+var iDefValue = new Array(0,0,0,0,0,0,0);
+var arrFields = new Array;
+var nCount = 0;
+var jCount = 0;
+
+<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+	<PDM_IF "$ciProps.PROPERTY_NAME" == "TREE_OPEN_MODE">
+		strDBID[0] = "$ciProps.id";
+		iDefValue[0] = "$ciProps.PROPERTY_DEFAULT";
+		if ("$ciProps.PROPERTY_VALUE" == "1")
+		{
+			iTreeNavigation = 1;
+		}
+		else
+		{
+			iTreeNavigation = 0;
+		}
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "SUBMIT_COMMENTS">
+		strDBID[1] = "$ciProps.id";
+		iDefValue[1] = "$ciProps.PROPERTY_DEFAULT";
+		if ("$ciProps.PROPERTY_VALUE" == "1")
+		{
+			iSubmitComment = 1;
+		}
+		else
+		{
+			iSubmitComment = 0;
+		}
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "VIEW_COMMENTS">
+		strDBID[2] = "$ciProps.id";
+		iDefValue[2] = "$ciProps.PROPERTY_DEFAULT";
+		if ("$ciProps.PROPERTY_VALUE" == "1")
+		{
+			iViewComment = 1;
+		}
+		else
+		{
+			iViewComment = 0;
+		}
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "SUBMIT_KNOWLEDGE_REPOSITORY">
+		strDBID[3] = "$ciProps.id";
+		iDefValue[3] = "$ciProps.PROPERTY_DEFAULT";
+		iRepositoryID = "$ciProps.PROPERTY_VALUE";	
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "RESOLUTION_MAX_SIZE">
+		strDBID[4] = "$ciProps.id";
+		iDefValue[4] = "$ciProps.PROPERTY_DEFAULT";
+		iResolutionSize = "$ciProps.PROPERTY_VALUE";	
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "AVOID_DUPLICATE_DOC">
+		strDBID[5] = "$ciProps.id";
+		iDefValue[5] = "$ciProps.PROPERTY_DEFAULT";
+		iAvoidDuplicate = "$ciProps.PROPERTY_VALUE";		
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "NOTIFY_DAYS_BEF_DOC_EXP">
+		strDBID[6] = "$ciProps.id";
+		iDefValue[6] = "$ciProps.PROPERTY_DEFAULT";
+		iNotifyDaysBefExp = "$ciProps.PROPERTY_VALUE";
+	</PDM_IF>	
+</PDM_LIST>
+<PDM_LIST PREFIX=docRep FACTORY=doc_rep WHERE="repository_type=2" ESC_STYLE=C>
+		arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$docRep.sym</PDM_FMT>';
+		arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$docRep.persistent_id</PDM_FMT>';
+		arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$docRep.default_rep</PDM_FMT>';	
+		jCount++;
+</PDM_LIST>
+</script>
+</head>
+<body class=detailro onload="frmDocumentSettingsOnLoad();" onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<form>
+<table cellSpacing=0 cellPadding=0 width='100%' class='page_header gn_container_no_border'>
+	<tr>
+		<td align=left width='99%'><h2 class="page_header_title">Documents</h2>
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(100);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmDocumentSettings')",true, "" , msgtext("Save[S]"))
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmDocumentSettings')",true, "" , msgtext("Reset_Defaults"))
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table class='gn_container_no_border' width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+      <td class="page_section_header_center"><h3 class="page_section_header_text kt_adm_doc_set">Document Settings</h3></td>
+      <td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class=page_section>
+<table class="gn_container_no_border" cellspacing=0 cellpadding=0 width="99%">
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Knowledge Tree Document Viewing:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			&nbsp;
+			<input tabindex=10 type="radio" id="optTreeViewing" name="optTreeViewing" class="data" onclick="bDirty=true;"
+                   title="Knowledge tree document viewing: Open in tree mode" DBID= DefValue= >
+			<span class="data" onclick="optTreeViewing[0].click()">Open in Tree mode</span>
+			<br>
+			&nbsp;
+			<input tabindex=10 type="radio" id="optTreeViewing" name="optTreeViewing" class="data" onclick="bDirty=true;"
+                   title="Knowledge tree document viewing: Open in document mode" DBID= DefValue= >
+			<span class="data" onclick="optTreeViewing[1].click()">Open in Document mode</span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<span class=label>&bull;&nbsp;Comments:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			&nbsp;
+			<input tabindex=10 type="radio" id="optComments" name="optComments" class="data" onclick="bDirty=true;"
+                   title="Comments: Allow comment submission and comment viewing" DBID= DefValue= >
+			<span class="data" onclick="optComments[0].click()">Allow comment submission and comment viewing</span>
+			<br>
+			&nbsp;
+			<input tabindex=10 type="radio" id="optComments" name="optComments" class="data" onclick="bDirty=true;"
+                   title="Comments: Allow comment submission but not comment viewing" DBID= DefValue= >
+			<span class="data" onclick="optComments[1].click()">Allow comment submission but not comment viewing</span>
+			<br>
+			&nbsp;
+			<input tabindex=10 type="radio" id="optComments" name="optComments" class="data" onclick="bDirty=true;"
+                   title="Comments: Allow neither comment submission nor comment viewing" DBID= DefValue= >
+			<span class="data" onclick="optComments[2].click()">Allow neither comment submission nor comment viewing</span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<span class=label>&bull;&nbsp;Submit Knowledge:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			&nbsp;&nbsp;
+			<span class="data">Submit Knowledge Repository</span>&nbsp;<select tabindex=10 id=slctRepository name=slctRepository class='kt_width_200'></select>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<span class=label>&bull;&nbsp;Maximum Resolution Size:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			&nbsp;&nbsp;
+			<span class="data">Maximum number of characters allowed in Resolution field</span>&nbsp;
+            <input tabindex=10 type="text" id="txtResolutionSize" name="txtResolutionSize" size="10"
+                   title="Maximum Resolution Size: Maximum number of characters allowed in Resolution field (Note: The maximum number of characters allowed is 256000.)">
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			&nbsp;&nbsp;
+			<span class="inline_error">(Note: The maximum number of characters allowed is 256000.)</span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<span class=label>&bull;&nbsp;Duplicate Document Avoidance:</span>
+		</td>
+	</tr>	
+	<tr>
+		<td nowrap>
+			&nbsp;&nbsp;
+			<input tabindex=10 type="checkbox" id="cbAvoidDuplicate" name="cbAvoidDuplicate" class="" onfocus="this.className='focusField';" onblur="this.className='';" DBID= iDisplay=>
+			<span class=data><label for="cbAvoidDuplicate">Prompt with similar documents when creating new knowledge documents</label></span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<span class=label>&bull;&nbsp;Notification before Expiration:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			&nbsp;&nbsp;
+			<span class="data">Number of Days before Expiration of a Document to send Notification</span>&nbsp;
+            <input tabindex=10 type="text" id="txtNotificationDays" name="txtNotificationDays" size="3"
+                   title="Number of Days before Expiration of a Document to send Notification">
+		</td>
+	</tr>		
+</table>
+</div>
+<script>
+	if ( !ahdtop.canEditAdminKT_MT() )
+	  {	  
+		disableFormElements();
+	  }
+	endScrollbar();
+</script>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

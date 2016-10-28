@@ -1,0 +1,55 @@
+<PDM_IF 0>
+list_actbool.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Object Status Type.
+	This form is kindof like a helper form that can only be accessed
+	from the detail_atomic_cond.htmpl file if "Active" is selected as an Attribute
+	and Data Value is selected from "Select Attribute or Data Value" field. Selecting
+	these fields displays the "Data Value" field as a Lookup. Clicking the lookup link
+	brings up this form. The form has minimum functionality and have not included the 
+	Search Filter fields on purpose.
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Object Status Type Search";
+var hdrTitleList = "Object Status Type List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanView = false;
+var cfgCanEdit = false;
+</SCRIPT>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Object Status Type">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=actbool>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Object Status Type found";
+var msgFound1 = "1 Object Status Type found";
+var msgFound = "%1 Object Status Types found";
+var msgFoundMore = "%1 Object Status Types found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Object Status Type";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsEnd factory=actbool>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+</PDM_IF>
+
+<PDM_WSP>

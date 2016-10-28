@@ -1,0 +1,1228 @@
+<PDM_IF 0>
+detail_in.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Call Req
+INTENT:
+    Display the detail info for the Call Req
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  cr  args	The Call Req object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm
+/opt/CApdm/bopcfg/majic/writer.maj:OBJECT cr {.maj for the
+                        definition of attributes for 'OBJECT cr'
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Szczegóły zgłoszenia $args.ref_num";
+var hdrTitleUpd = "Aktualizacja zgłoszenia $args.ref_num";
+var hdrTitleNew = "Tworzenie zgłoszenia $args.ref_num";
+var hdrTitleTempl = '$args.ref_num Incident Template <PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT> Detail';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl DebugSource=1>
+<script type="text/javascript">
+// 20130826 bmalz @ e-xim
+var CustomerLocSiteId = "";
+var CategoryOwningContractId = "";
+
+var argHumantouchLog = "$args.KEEP.humantouch_log";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argRefNum = "$args.ref_num";
+var argID = "$args.id";
+var argChange = "$args.change";
+var argActive = "$args.active";
+var rptName = new Array("insum.rpt", "indtl.rpt");
+var argSearchSqlClause = "Call_Req.id = $args.id";
+var formAsset = new Array("main_form","KEY.affected_resource");
+var formEnduser = new Array("main_form","customer");
+var propSearchConfig="$prop.SD_SEARCH_CONFIG_CR";
+var prop_ref = "${prop_ref:}"; 
+var cfgCheckAgtInAreaDef = "$env.NX_CHECK_ASSIGNEE_IN_AREA_DEFAULTS";
+var requestType="$args.type";
+var requestTypeSym="$args.type.sym";
+var cawf_defid = "";
+var cawf_set;
+var new_attmnts = new Array();
+
+<PDM_INCLUDE file=inc_valid_trans.htmpl transStatus=$args.status transFactory=in_trans transTrigger=1>
+
+propFormName = "detail_in.htmpl";
+propFormName2 = "in";
+disable_right_click();
+var argDescription = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.description</PDM_FMT>';
+var argSummary = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.summary</PDM_FMT>';
+</script>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/change_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/timer.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attevts.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/wf_visible.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_reply.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/apc.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/exim_mods.js"></script>
+<script type="text/javascript">
+var w_name = get_popup_window_name("ci_window");
+var loadFilterArr=new Array();
+
+var cus_value = "";
+
+var ok_to_save  = true;     // track cross-field validation results in a global
+                             // so that preSaveTrigger2 can determine whether
+                             // to allow a ticket to be saved
+
+// This function is used to perform a client side validation that ensures that
+// the Major Incident checkbox and the Template Name text controls are exclusive
+// so that a Template with the Major Incident flag is never allowed to be saved.
+// The method is called from onChange of the Major Incident checkbox (below) and
+// via the onchange_template_name() method in xx_template_tab.htmpl
+//
+// In a better implementation, this validation would be handled using the 
+// createValidateObject objects and the detailValidate mechanism since this 
+// would incorporate more standard validation behaviors (EG putting a red
+// border around failed fields.  Unfortunately, this route would require
+// extending the createValidateObject with (for example) a custom validation
+// function which in itself wouldn't be difficult, but then the PDM_MACRO
+// syntax would need to somehow support the specification of any custom
+// validations.  Since we're post Beta right now, this seems a little too
+// big a can of worms to open.  Perhaps in a future release....
+// 
+function crossval_tempate_name_major_incident(elem)
+{
+    var emsg    = "";
+    
+    ok_to_save = true;
+        
+    if (typeof elem == "object" && elem.type == "checkbox")
+    {
+        var txt = document.main_form.elements["SET.template_name"];
+        if (typeof txt == "object" && txt.type == "text" )
+        {
+            emsg = msgtext("Can't_Template_a_Major_Incident");
+                
+            if (elem.checked && txt.value != "")
+                ok_to_save   = false;
+        }
+    }
+    
+    if (typeof elem == "object" && elem.type == "text")
+    {
+        var cbx = document.main_form.elements["CBX.major_incident"];
+        if (typeof cbx == "object" && cbx.type == "checkbox")
+        {
+            emsg = msgtext("Can't_Template_a_Major_Incident");
+            
+            if (elem.value.length && cbx.checked)
+                ok_to_save   = false;
+        }
+    }
+    
+    if (emsg.length > 0)
+    {
+        if (AlertMsg.indexOf(emsg) == -1)
+        {
+            if (!ok_to_save)
+                showAlertMsg(emsg);
+        }
+        else
+        {
+            if (ok_to_save)
+                showAlertMsg(AlertMsg.replace(emsg, ""));
+        }
+    }
+    
+    return;
+}
+
+// This function is used to 'extend' the preSaveTrigger() method defined in
+// inc_valid_trans.htmpl.  The purpose of this method is to prevent a save
+// from proceeding if the crossval_tempate_name_major_incident
+// 
+function preSaveTrigger2()
+{
+    return ok_to_save;
+}
+
+
+
+///////  Variables for Priority calculation Starts/////////
+var ticket_factory = "in";
+var pri_cal_persid = "$args.KEEP.pri_cal_persid";
+var pri_cal_matrix=new Array();
+var capture_reason = "$args.KEEP.cap_reason";
+var pri_cal_enabled = "$args.KEEP.auto_pri_cal";
+var pri_cal_templ_enabled = "$args.KEEP.template_flag";
+var override_impact = "$args.KEEP.ci_imp";
+var override_urgency = "$args.KEEP.cat_urg";
+var open_date_val = '$args.open_date_INT_DATE';
+var preset_impact = "$args.KEEP.pre_imp";
+var preset_urgency = "$args.KEEP.pre_urg";
+var defualt_impact = "$args.KEEP.imp_def";
+var defualt_urgency = "$args.KEEP.urg_def";
+var old_end_user = "$args.customer";
+var old_affected_area = "$args.category";
+var old_urgency = "$args.urgency";
+var old_affected_service = "$args.affected_service";
+var old_impact = "$args.impact";
+var manual_change = false;
+var context = "$Context";
+var base_template = "$args.base_template";
+var esc_imp = -1;
+var esc_urg = -1;
+var old_id = "$args.id";
+var nextAction = "";
+var reasonCaptured = 2; // 1 - Manual Change, 2 - Reason Captured
+var escalateActivity = 1; // 1 - No escalate activity yet, 3 - Escalate activity has been performed
+var created_from_KD = "$args.based_on_kd";
+var created_from_other_src = ""; // This is non-empty when the ticket is created from change order or request
+///////  Variables for Priority calculation Ends/////////
+
+//////////////////////Functions for priority calculations Starts/////////////////////////////////
+function detailPostOnloadAction()
+{
+    // APC Code begins 
+    if ( !_dtl.edit || "$Context" != "initial") return;
+
+    // Incident can be created from Change order. 
+    created_from_other_src = '$args.caused_by_chg';
+    
+    // If Incident is created from Request
+    if (created_from_other_src.length == 0)
+    {
+        var parent_element = document.main_form.elements["KEY.parent"];
+        if (typeof parent_element != "undefined")
+            created_from_other_src = parent_element.value
+    }    
+
+    // If Inident created from other sources like Request or Change order then update priority.
+    if (pri_cal_enabled =='true' && created_from_other_src.length > 0 )
+    {
+        var imp_element = document.main_form.elements["SET.impact"];
+        var urg_element = document.main_form.elements["SET.urgency"];
+        
+        if (typeof imp_element != "undefined")
+            defualt_impact = imp_element.value;
+        
+        if (typeof urg_element != "undefined")
+            defualt_urgency = urg_element.value;
+        
+        // Intialize APC init values.
+        intialize_local_var(defualt_impact, defualt_urgency);
+
+        // Set priority value based on updated Impact and Urgency.
+        if (pri_cal_matrix.length > 0)
+        {
+            set_priority(pri_cal_matrix, defualt_impact, defualt_urgency);
+        }
+    }
+    // APC Code ends
+}
+
+//This function is called when Analayst saves the Incident ticket from detail_form.js.
+function check_manual_change(p_nextAction)
+{
+	nextAction = p_nextAction;
+	var returnValue = 0;
+	// if reason has not been captured for the latest manual change
+	if ( pri_cal_enabled == "true" && capture_reason == "1" && reasonCaptured != 2 ) 
+	{
+		// if an escalate activity has already been performed
+		if ( esc_imp != -1 && esc_urg != -1 ) 
+		{
+			var urg_element = document.main_form.elements["SET.urgency"];
+			var imp_element = document.main_form.elements["SET.impact"];
+			if ( imp_element != null && urg_element != null )
+			{
+				// if the current value equals the value from last escalation
+				if ( esc_imp == imp_element.value && esc_urg == urg_element.value ) 
+					manual_change = false;
+				else
+				{
+					var init_urgency = document.main_form.elements["SET.init_urg"];
+					var init_impact = document.main_form.elements["SET.init_imp"];
+					if ( ( init_impact.value == "-1" && imp_element.value == "" ) &&
+							( init_urgency.value == "-1" && urg_element.value == "" ) )
+							manual_change = false;
+					else if ( ( init_impact.value == "-1" && imp_element.value == "" ) &&
+							( init_urgency.value == urg_element.value ) )
+							manual_change = false;
+					else if ( ( init_impact.value == imp_element.value ) &&
+							( init_urgency.value == "-1" && urg_element.value == "" ) )
+							manual_change = false;
+					else if ( imp_element.value != init_impact.value || urg_element.value != init_urgency.value )
+						manual_change = true;
+					else
+						manual_change = false;
+				}
+			}
+		}
+		else
+			check_urg_imp(); // set manual_change to true if manual change has been performed
+		if ( manual_change == true )
+		{
+			popupEscalateActivity();
+			returnValue = 0;
+		}
+		else
+		{
+			returnValue = 1;
+		}
+	}
+	else
+	{
+		returnValue = 1;
+	}
+	return returnValue;
+}
+
+// This function is called from apc.js to set the latest values when an escalate activity has been performed
+function setLastSavedUrgImp()
+{
+	var urg_element = document.main_form.elements["SET.urgency"];
+	if ( urg_element != null )
+		esc_urg = urg_element.value;
+	var imp_element = document.main_form.elements["SET.impact"];
+	if ( imp_element != null )
+		esc_imp = imp_element.value;
+}
+
+//This function will check if manual change has been performed on Urgency/Impact fields.
+function check_urg_imp()
+{
+	//Check for manual modification of Urgency
+    var urg_element = document.main_form.elements["SET.urgency"];
+	
+	// Get Auto, Initial and Manual Urgency element.
+    var auto_urgency = document.main_form.elements["SET.auto_urg"];
+    var init_urgency = document.main_form.elements["SET.init_urg"];
+    var man_urgency = document.main_form.elements["SET.man_urg"];
+
+    if (typeof auto_urgency != "undefined")
+    {
+        // If Auto Urgency is NOT -1 then compare Urgency value with Auto Urgency value
+        if (auto_urgency.value != '-1' &&
+            auto_urgency.value != urg_element.value)
+        {
+			if (typeof man_urgency != "undefined") man_urgency.value = urg_element.value;
+			else man_urgency.value = -1;
+		}
+		// If Auto Urgency is -1 then compare Urgency value with Init Urgency value
+		else if (auto_urgency.value == '-1' &&
+			typeof init_urgency != "undefined" &&
+			init_urgency.value != urg_element.value)
+		{
+			if (typeof man_urgency != "undefined") 
+			{
+				if ( init_urgency.value == "-1" && urg_element.value == "" ) man_urgency.value = -1;
+				else man_urgency.value = urg_element.value;
+			}
+			else man_urgency.value = -1;
+        }
+    }
+	
+
+	//Check for manual modification of Impact
+    var imp_element = document.main_form.elements["SET.impact"];
+	
+	// Get Auto, Initial and Manual Impact element.
+    var auto_impact = document.main_form.elements["SET.auto_imp"];
+    var init_impact = document.main_form.elements["SET.init_imp"];
+    var man_impact = document.main_form.elements["SET.man_imp"];
+
+    if (typeof auto_impact != "undefined")
+    {
+        // If Auto Impact is NOT -1 then compare impact value with Auto impact value
+        if (auto_impact.value != '-1' &&
+            auto_impact.value != imp_element.value)
+        {
+			if (typeof man_impact != "undefined") man_impact.value = imp_element.value;
+			else man_impact.value = -1;
+		}
+		// If Auto Impact is -1 then check for Intial impact value
+		else if (auto_impact.value == '-1' &&
+			typeof init_impact != "undefined" &&
+			init_impact.value != imp_element.value)
+		{
+			if (typeof man_impact != "undefined")
+			{
+				if ( init_impact.value == "-1" && imp_element.value == "" ) man_impact.value = -1;
+				else man_impact.value = imp_element.value;
+			}
+			else man_impact.value = -1;
+		}
+	}
+	
+	if ( pri_cal_enabled == "true" && capture_reason == "1" && 
+		(((typeof man_impact != "undefined") && (man_impact.value != -1)) ||
+		((typeof man_urgency != "undefined") && (man_urgency.value != -1))) )
+	{
+		manual_change = true;
+	}
+	else
+	{
+		manual_change = false;
+	}
+	
+}
+
+// Pops up escalate activity window
+function popupEscalateActivity()
+{
+	var query_str = "$cgi?SID=$SESSION.SID" + "+FID=" + fid_generator() + 
+				"+FACTORY=cr" +
+				"+PERSID=$args.persistent_id" + 
+				"+OP=UPDATE+ACTIVITY_LOG_TYPE=ESC" +
+				"+HTMPL=xfer_esc_cr.htmpl";
+		
+	if ( ahdtop.cfgMultiTenancy != "off" && "$args.id" == "0" )
+	{
+		var tenantID = get_form_tenant_id();
+		query_str += "+KEEP.TENANT_ID="+tenantID;
+		query_str += "+KEEP.tkt_factory="+ticket_factory;
+		query_str += "+KEEP.auto_pri_cal_mt="+pri_cal_enabled;
+		if ( tenantID != "" )
+		{
+			popupActivityWithURL( query_str, 'xfer' );
+		}
+		else
+		{
+			var alertmsg_ele = document.getElementById("alertmsgText");
+			if ( alertmsg_ele )
+			{
+				var errorMsg = msgtext("Please_enter_a_valid_value_for_tenant");
+				if ( alertmsg_ele.innerHTML.indexOf(errorMsg) == -1 )
+					showAlertMsg(msgtext("Please_enter_a_valid_value_for_tenant"));
+			}
+		}
+	}
+	else
+	{
+		popupActivityWithURL( query_str, 'xfer' );
+	}
+	
+}
+
+// Updates the init urgency and impact elements with the values from parent form.
+function updateFieldsForCapReason()
+{
+	var imp_element = document.main_form.elements["SET.impact"];
+	var urg_element = document.main_form.elements["SET.urgency"];
+
+	var init_urgency = document.main_form.elements["SET.init_urg"];
+	var init_impact = document.main_form.elements["SET.init_imp"];
+	
+	if ( init_impact && init_urgency && imp_element && urg_element )
+	{
+		init_impact.value = imp_element.value;
+		init_urgency.value = urg_element.value;
+	}
+}
+//This function will get called  detail_form.js and it will get called on Blur event of tenant combo control.
+function tenantOnBlur()
+{
+    if ( ahdframe.currentAction != ACTN_COMPLETE ) {
+        if ( typeof ahdframe.resumeAction != "string" ||
+             ahdframe.resumeAction.length == 0 )
+        {     
+            ahdframe.resumeAction = "tenantOnBlur()";
+        }
+        return;
+    }
+
+    var tenantUUID = "";
+    if (ticket_factory.length > 0)
+    {
+        tenantUUID = get_form_tenant_id();
+        var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() + 
+                  "+OP=GET_PRI_CAL"+
+                  "+TENANT_ID="+tenantUUID+
+                  "+FACTORY="+ ticket_factory+
+                  "+CALLBACK=got_pri_cal_info";
+        SyncAjaxJSCall(url);
+        //alert(url);
+    }
+}
+//////////////////////Functions for priority calculations Ends/////////////////////////////////
+
+// 20130823 bmalz @ e-xim
+//  function backfill_event( form_name, field_name, value,
+//                          persid, rel_attr_val, caller_type )
+// {
+// 	if (field_name == "KEY.zfz" && typeof value != "undefined" && value.length > 1) 
+// 		{
+// 			var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+// 				"+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=detail_pcat_getzfzsdsc.htmpl"+
+// 				"+QBE.EQ.persistent_id=$args.category" ;
+// 			if (ahdframeset.name != "AHDtop") {
+// 			   display_new_page(url,ahdframeset.workframe);
+// 			}
+// 		} 
+
+// 	if (field_name == "KEY.category" && typeof value != "undefined" && value.length > 1) 
+//     {
+//         var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+//             "+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=detail_pcat_getowningcontract.htmpl"+
+//             "+QBE.EQ.ss_sym=" + value ;
+//      	if (ahdframeset.name != "AHDtop") {
+//      	   display_new_page(url,ahdframeset.workframe);
+//         }
+// 	} 
+
+// } 
+
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type, tenant, tenantName )
+{
+   var setOrgId = 0; 
+   var cat_related_cnt = 0; 
+
+   if ( typeof base_name != "string" ) {
+      form_name = "main_form";
+      base_name = "requested_by";
+      caller_type = "";
+   }
+   if ( base_name == "requested_by" ) {
+      var f = document.main_form;
+      if ( typeof f == "object" &&
+           typeof f.customer_combo_name == "object" &&
+           typeof f.requested_by_combo_name == "object" &&
+           ( f.customer_combo_name.value == cus_value ||
+             f.customer_combo_name.value == "" ) ) {
+         cus_value = f.requested_by_combo_name.value; 
+         f.customer_combo_name.value = cus_value;
+         f.customer_fname.value = f.requested_by_fname.value;
+         f.customer_mname.value = f.requested_by_mname.value;
+         f.customer_lname.value = f.requested_by_lname.value;
+         f.elements["SET.customer"].value = f.elements["SET.requested_by"].value;
+         f.elements["KEY.customer"].value = f.elements["KEY.requested_by"].value;
+	 cat_related_cnt = 1;
+         if ( f.elements["SET.customer"].value != "" ) {
+            setOrgId = 1;
+            alert_banner(f.elements["SET.customer"].value);
+         }
+         if ( typeof tenant == "string" && tenant.length > 0 )
+           detailSetTenant( "customer", tenant, tenantName ); 
+         else if ( typeof _dtl.tenantImplyingFields == "object" ) {
+           detailSetTenant( "requested_by", "", "" );
+           detailSetTenant( "customer", "", "" );
+         }
+      }
+   } 
+   if(base_name == "customer") {
+	cat_related_cnt = 1;
+   	if(typeof cntID!="undefined" && cntID.length > 0) alert_banner(cntID);
+   }
+   if (_dtl.edit && !_dtl.skip_agt_check)
+   {
+	var f = void(0);
+	var r = form_name.match(/main_form([0-9]*)/);
+	if ( r != null ) {
+	    if ( r[1].length == 0 )
+		f = _dtl.form[0];
+	    else
+		f = _dtl.form[r[1]-0];
+	}
+	detailAgtCheck(f, base_name, cntID, prop_ref);
+   }
+   detailCntBackfill( form_name, base_name, lname, fname, mname,
+                      cntID, caller_type );
+
+    if (cat_related_cnt && typeof cancel_cnt_lookup == "integer") 
+	cancel_cnt_lookup = 0;
+    // Contract enforcement:  wyłączone e-xim mch                
+//    if (ahdtop.cfgNX_CLASSIC_SLA_PROCESSING != 'Yes' &&
+//	cat_related_cnt && typeof cntID != "undefined" && cntID.length > 1) 
+//    {
+//        upd_workframe("GET_SVC_CONTRACT", "new_customer=cnt:" + cntID,
+//			  "func=parent.ahdframe.get_svc_callback");
+//    }
+    if (ahdtop.cfgMultiTenancy != "off")
+    {
+        tenantOnBlur();
+    }
+	
+	//e-xim
+	if (base_name == "customer" && typeof cntID != "undefined" && cntID.length > 1) 
+    {
+        var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+            "+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_cnt_userdetails.htmpl"+
+            "+QBE.EQ.id=" + cntID ;
+
+        jq("#HiddenDiv").load(url, function(response, status, xhr) {
+			if (status == "error") {
+				var msg = "Sorry but there was an error: ";
+				alert( msg + xhr.status + " " + xhr.statusText );
+			}
+		});
+     	// if (ahdframeset.name != "AHDtop") {
+     	//    display_new_page(url,ahdframeset.workframe2);
+      //   }
+	}
+}
+
+// 20130920 bmalz @ e-xim
+function GetCntMore() {
+	if(document.main_form.elements["SET.customer"].value != "") {
+        var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+            "+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_cnt_userdetails.htmpl"+
+            "+QBE.EQ.id=" + document.main_form.elements["SET.customer"].value ;
+			
+     	// if (ahdframeset.name != "AHDtop") {
+     	//    display_new_page(url,ahdframeset.workframe2);
+      //   }
+        jq("#HiddenDiv").load(url, function(response, status, xhr) {
+			if (status == "error") {
+				var msg = "Sorry but there was an error: ";
+				alert( msg + xhr.status + " " + xhr.statusText );
+			}
+		});
+	}
+}
+
+// 20130823 bmalz @ e-xim
+function GetCustomerLocSiteId(SiteId) {
+	CustomerLocSiteId = SiteId;
+	GetLrelzSLA();
+}
+
+// 20130823 bmalz @ e-xim
+function GetOwningContractId(OwningContractId) {
+	CategoryOwningContractId = OwningContractId;
+	GetLrelzSLA();
+}
+
+// 20130826 bmalz @ e-xim
+function GetSiteIdOwningContractId(SiteId, OwningContractId) {
+	CategoryOwningContractId = OwningContractId;
+	CustomerLocSiteId = SiteId;
+	if(!document.main_form.elements["SET.zsla"].value)
+		GetLrelzSLA();
+}
+
+// 20130826 bmalz @ e-xim
+function GetLrelzSLA() {
+	if(CustomerLocSiteId && CategoryOwningContractId) {
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+			"+OP=SEARCH+FACTORY=zSLA+SKIPLIST=1+HTMPL=exim_zsla_getdetails.htmpl"+
+	        "+OwningContractId=" + CategoryOwningContractId + "+SiteId=" + CustomerLocSiteId;
+
+	    jq("#HiddenDiv").load(url, function(response, status, xhr) {
+			if (status == "error") {
+				var msg = "Sorry but there was an error: ";
+				alert( msg + xhr.status + " " + xhr.statusText );
+			}
+		});
+	}
+}
+
+// 20130826 bmalz @ e-xim
+function SetzSLA(zSLAId, zSLAName) {
+	document.main_form.elements["KEY.zsla"].value = zSLAName;
+	document.main_form.elements["SET.zsla"].value = zSLAId;
+}
+
+// 20131015 mch @ e-xim
+function GetZsdsc(zsdscName, zsdscCode) {
+	document.main_form.elements["KEY.zsdsc"].value = zsdscName;
+	document.main_form.elements["SET.zsdsc"].value = zsdscCode;
+}
+
+// 20131016 mch @ e-xim
+function GetZfzsdsc(zsdscName, zsdscCode) {
+	document.main_form.elements["KEY.zfzsdsc"].value = zsdscName;
+	document.main_form.elements["SET.zfzsdsc"].value = zsdscCode;
+}
+
+//e-xim
+function zcst_getmore(mpk_id, email, phone, nazwa)
+{
+	var ele_obj=document.forms["main_form"].elements;
+
+//	ele_obj["SET.location"].value=loc_uuid;
+//	ele_obj["KEY.location"].value=loc_name;
+//alert(mpk_id);
+//alert(email);
+//alert(phone);
+//alert(nazwa);
+//	ele_obj["SET.string1"].value='E-mail:' + email + ' Nr telefonu: ' + phone;
+	document.main_form.elements["SET.zcustomer"].value = 'E-mail:' + email + ' Nr telefonu: ' + phone;
+//	var nam = document.getElementsByName('SET.string1');
+//	alert(nam[0].value);
+//	if (typeof nam == "object" && nam[0] != null) nam[0].value = nazwa;
+//	alert(nam[0].value);
+   // loc_uuid, loc_name, position_id, pos_sym, phone, name
+/*   var l_set = document.getElementsByName('SET.location');
+   if (typeof l_set == "object" && l_set[0] != null) l_set[0].value = loc_uuid;
+   var l_key = document.getElementsByName('KEY.location');
+   if (typeof l_key == "object" && l_key[0] != null) l_key[0].value = loc_name;
+   var p_set = document.getElementsByName('SET.job_title');
+   if (typeof p_set == "object" && p_set[0] != null) {
+        p_set[0].value = pos_sym;
+    }
+   var pho = document.getElementsByName('SET.string2');
+   if (typeof pho == "object" && pho[0] != null) pho[0].value = phone;
+   var nam = document.getElementsByName('SET.string1');
+   if (typeof nam == "object" && nam[0] != null) nam[0].value = name;
+   
+*/
+}
+
+// 20130826 bmalz @ e-xim
+function EventForCategory(callback) {
+	/* var oldvalue = document.main_form.elements["SET.category"].value;
+	 setInterval(function(){
+		if (document.main_form.elements["SET.category"].value != oldvalue){
+			oldvalue = document.main_form.elements["SET.category"].value;
+			callback();
+		}
+	}, 1500); */
+}
+
+function loadActions()
+{
+   if ( _dtl.edit ) {
+		// 20130826 bmalz @ e-xim
+	<PDM_IF "$prop.form_name_3" == "edit">
+		
+		// 201306 bmalz @ e-xim
+		if('$args.KEEP.category_key' != '')
+			document.main_form.elements['KEY.category'].value='$args.KEEP.category_key';
+
+		if('$args.KEEP.category_set' != '')
+			document.main_form.elements['SET.category'].value='$args.KEEP.category_set';
+
+		
+		GetCntMore(); // 20130920 bmalz @ e-xim
+		var url = "";
+		var url2 = "";
+		if(document.main_form.elements["SET.category"].value && document.main_form.elements["SET.customer"].value) {
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	           	"+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_list_siteid_owningcontr.htmpl"+
+	            "+CustomerId=" + encodeURIComponent(document.main_form.elements["SET.customer"].value) +
+				"+CategoryId=" + encodeURIComponent(document.main_form.elements["KEY.category"].value.replace("pcat:",""));
+
+			jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		      if ( status == "error" ) {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+
+			url2 = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	            "+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=exim_pcat_getzsdsc.htmpl" +
+	            "+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements["SET.category"].value.replace("pcat:", ""));
+
+	        jq("#HiddenDiv").load(url2, function(response, status, xhr) {
+		      if (status == "error") {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+		} else if (document.main_form.elements["SET.customer"].value) {
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	           	"+OP=SEARCH+FACTORY=cnt+SKIPLIST=1+HTMPL=exim_cnt_userdetauls.htmpl"+
+	            "+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements["SET.customer"].value);
+
+			jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		      if (status == "error") {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+		} else if (document.main_form.elements["SET.category"].value) {
+			url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+	            "+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=exim_pcat_getdetails.htmpl"+
+	            "+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements["SET.category"].value.replace("pcat:", ""));
+
+	        jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		      if (status == "error") {
+		        var msg = "Sorry but there was an error: ";
+		        alert( msg + xhr.status + " " + xhr.statusText );
+		      }
+		    });
+		}		
+	</PDM_IF>	
+
+       //Form should retain the context for the status field in case change in status was done prior to save and save failed.	 
+       if(typeof "$args.old_status" != "undefined" && "$args.old_status" != "" )
+       {
+	 	window.document.main_form.elements["SET.status"].value =  "$args.old_status";
+	 	var setinp=window.document.main_form.elements["SET.status"];
+	 	setinp.value="$args.old_status";
+  	 	set_default_toggle(setinp);
+       }
+      save_initial_vals();
+       <PDM_LIST PREFIX=list WHERE="delete_flag = 0" FACTORY=ctimer>
+            addctimer("$list.threshold", "$list.color", $list.beep, "$list.text");
+            <PDM_IF "$list.beep" == "1">
+               <PDM_SET args.needs_beep=1>
+            </PDM_IF>
+      </PDM_LIST>
+		if ('$args.KEEP.use_kd_values_fromahdtop' == '1' && "0" == "$args.id")
+		{
+			//This code used when creating a request from a link that was created by the HTML Editor. SDT 32942
+			ahdframe.detailExtUpdate (ahdtop.KDValuesToUse);
+			ahdtop.KDValuesToUse = null;
+		}      
+      StartTheTimer("main_form","timer");
+      loadFilterArray();
+   } else {
+	loadFilterArr["summary"]=<PDM_FMT ESC_STYLE=C>"$args.summary"</PDM_FMT>;
+	loadFilterArr["description"]=<PDM_FMT ESC_STYLE=C>"$args.description"</PDM_FMT>;
+	loadFilterArr["affected_resource"]=<PDM_FMT ESC_STYLE=C>"$args.affected_resource.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["affected_resource_id"]="$args.affected_resource";	
+	loadFilterArr["impact"]="$args.impact";
+	loadFilterArr["urgency"]="$args.urgency";
+	loadFilterArr["priority"]="$args.priority";
+	loadFilterArr["category"]=<PDM_FMT ESC_STYLE=C>"$args.category.COMMON_NAME"</PDM_FMT>;
+	loadFilterArr["category_relAttr"]="$args.category.REL_ATTR";
+	loadFilterArr["problem"]="$args.problem";
+   }
+   
+	// SDT 22046 get around IE 5.5 repaint problem by delaying call
+   window.setTimeout('default_scratchpad()', 250);
+
+   // Need to fill in the 'customer' if 'reqested_by' is pre-loaded from the 
+   // sratched. This code was copied from the 'detail_chg.htmpl' form see 
+   // the comment SDT 22898 on that form
+   if (  _dtl.edit && "$args.id" == 0  ) {
+      backfill_cnt_event();
+   }
+
+    // Automatic Priority Calculation starts
+    if ( _dtl.edit ) {
+        if (pri_cal_enabled =='true')
+        {			
+            var pri_element = document.main_form.elements["SET.priority"];
+            if (typeof pri_element != "undefined")
+            {
+                pri_element.disabled = true;
+            	pri_element.style.backgroundColor = "gainsboro";
+            }
+			if  (typeof pri_cal_matrix != "undefined")
+            {
+                var matrix_data = '$args.KEEP.mat_data';
+                pri_cal_matrix = matrix_data.split("@,@");
+            }
+            
+            if ( ("$Context" == "initial")  )
+            {				
+                pri_element.value = '$args.KEEP.pri_init';
+
+                var imp_element = document.main_form.elements["SET.impact"];
+                imp_element.value = '$args.KEEP.imp_def';
+
+                var urg_element = document.main_form.elements["SET.urgency"];
+                urg_element.value = '$args.KEEP.urg_def';
+
+                intialize_local_var('$args.KEEP.imp_def', '$args.KEEP.urg_def');
+                
+            }	
+			
+            else 
+            {
+               //Any kind of update including existing tickets created from templates
+			   intialize_local_var('$args.impact', '$args.urgency');
+            }			           
+        }
+    }
+	
+	var affected_user = document.main_form.elements["SET.customer"];
+	if (typeof affected_user != "undefined")
+		old_end_user = affected_user.value;
+		
+    var affected_area = document.main_form.elements["SET.category"];
+	if (typeof affected_area != "undefined")
+		old_affected_area = affected_area.value;
+    
+	var affected_service = document.main_form.elements["SET.affected_service"];
+	if (typeof affected_service != "undefined")
+		old_affected_service = affected_service.value;
+	
+    // Automatic Priority Calculation ends
+   
+   alert_banner("$args.customer");
+   
+	// 20131013 bmalz @ e-xim
+	<PDM_IF "$prop.form_name_3" != "edit">
+		<PDM_IF "$args.KEEP.SaveAndClose" == "1">
+			if(typeof(ahdtop.frames[1].set_role(true)) != "") { };
+		</PDM_IF>
+		<PDM_IF "$args.KEEP.AutoClose" == "1">
+			if(typeof(ahdtop.frames[1].set_role(true)) != "") { };
+		</PDM_IF>
+	</PDM_IF>
+	
+	// 20131014 bmalz @ e-xim : Close at end
+	<PDM_IF "$prop.form_name_3" == "edit">
+		<PDM_IF "$args.KEEP.SaveAndClose" == "1">
+			window.setTimeout(function(){ImgBtnExecute(0)},1000);
+		</PDM_IF>
+	</PDM_IF>
+}
+
+var alert_banner_last="";
+var alert_banner_obj="in";
+var alert_banner_attr="customer";
+
+function default_scratchpad() {
+    var initTenantUUID = get_form_tenant_id();
+
+	if ( _dtl.edit ) {
+		load_from_scratchpad("$args.id", "$args.KEEP.FROM_PROF_BRWS");
+        
+        var currTenantUUID = get_form_tenant_id();
+
+        // After load_from_scratchpad call, verify whether Tenant UUID has been changed or not. 
+        // Generally when creating from Quick Profile's Scratchpad, Tenant will get changed to parent's Tenant value.
+        // If there is change in tenant, load Tenant specific data.
+        if ( ahdtop.cfgMultiTenancy != "off" && initTenantUUID != currTenantUUID)
+        {
+            tenantOnBlur();
+        }
+	}
+	detailFocus1st();
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+   cancel_any_lrel_update();
+}
+
+function copy_from_cr()
+{
+    if ("$args.KEEP.MAKE_COPY" == "1")
+    {
+	var exceptions = new Array();
+	exceptions[0] = "SET.customer";
+    exceptions[0] = "SET.requested_by";
+	detailCopyEditForm(exceptions);
+    }
+}
+
+// detailExtraSaveButtons()
+// Provide extra save buttons for edit form
+function detailExtraSaveButtons(generate)
+{
+  var count = 0;
+	<PDM_IF $ACCESS.FAC_chg == 2 && "$args.change" == "">
+  if ( cfgUserAuth \> 1 ) {
+    count++;
+    if ( generate ) {
+    	// 20131024 bmalz @ e-xim
+    	<PDM_IF 0><PDM_MACRO NAME=button caption="Utwórz Zmianę[!ea]" hotkey_name="Utwórz Zmianę[!ea]" id=btnchg 
+	  func="detailSave('NEW_CHANGE')" Tooltip="Zapisz i utwórz Zmianę"></PDM_IF>
+    }
+  }
+</PDM_IF>
+<PDM_IF "$args.problem" == "">
+  if ( cfgUserAuth \> 1 ) {
+    count++;
+    if ( generate ) {
+    	// 20131024 bmalz @ e-xim
+    	<PDM_IF 0><PDM_MACRO NAME=button caption="Utwórz Problem[!ea]" hotkey_name="Utwórz Problem[!ea]" id=ITIL_PROBLEM 
+	  func="itil_problem()" Tooltip="Zapisz i utwórz Problem"></PDM_IF>
+    }
+  }
+</PDM_IF>
+  return count;
+}
+   
+function itil_problem()
+{
+  parent.createProblem = true;
+  detailSave();
+}
+</script>
+</head>
+<body class="detailro" onload="loadActions()" onunload="unloadActions()">
+<PDM_IF "$args.needs_beep" == "1" && "$prop.form_name_3" == "edit">
+<embed src="/CAisd/img/beep.wav" autostart="false" style="display:none" width="0" height="0" id="beep" name='beep' enablejavascript="true">
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="Incident" key="$args.ref_num" >
+<center>
+
+<form name="frm002">
+<input type="hidden" name="SET.customer" value="$args.customer">
+<input type="hidden" name="customer_combo_name" value="$args.customer.combo_name">
+<input type="hidden" name="SET.assignee" value="$args.assignee">
+<input type="hidden" name="assignee_combo_name" value="$args.assignee.combo_name">
+<input type="hidden" name="SET.group" value="$args.group">
+<input type="hidden" name="group_combo_name" value="$args.group.combo_name">
+<input type="hidden" name="SET.priority" value="$args.priority">
+<input type="hidden" name="SET.urgency" value="$args.urgency">
+<input type="hidden" name="SET.impact" value="$args.impact">
+<input type="hidden" name="SET.change" value="$args.change">
+<input type="hidden" name="KEY.change" value="$args.change.chg_ref_num">
+<input type="hidden" name="SET.affected_resource" value="$args.affected_resource">
+<input type="hidden" name="KEY.affected_resource" value=<PDM_FMT ESC_STYLE=C>"$args.affected_resource.COMMON_NAME"</PDM_FMT>>
+<input type="hidden" name="SET.summary" value=<PDM_FMT ESC_STYLE=JS2>"$args.summary"</PDM_FMT>>
+<input type="hidden" name="SET.description" value=<PDM_FMT ESC_STYLE=JS2>"$args.description 
+(created from Incident $args.ref_num)"</PDM_FMT>>
+
+</form>
+
+<script type="text/javascript">
+<PDM_IF "$prop.form_name_3" != "edit">
+if ( typeof parent.createProblem == "boolean" &&
+     parent.createProblem ) {
+  if (typeof ahdframeset.workframe == "object")
+    ahdframeset.workframe.SkipInitialFocus = "1";
+  create_new('cr',0,0,0,'PRESET=type:P','INITFROM=frm002', 'PRESET=from_incident:$args.persistent_id');
+}
+</PDM_IF>
+parent.createProblem = void(0);
+
+<PDM_MACRO name=dtlForm factory=cr>
+<PDM_IF "$prop.form_name_3" == "edit">
+if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SEARCH_ENGINE" ) {
+	//Add the find similar button
+        
+<PDM_MACRO name=button Caption="Znajdź podobny" Func="find_similar_tickets('in')" hotkey_name="Find Similar" ID=FIND_SIMILAR Tooltip="Find Similar">
+}           
+// 20131024 bmalz @ e-xim
+<PDM_IF 0><PDM_MACRO name=button Caption="Podgląd Profilu[Q]" Disabled=yes Func="if ( document.main_form['SET.customer'].value != '' ) edit_profile_browser('id', document.main_form['SET.customer'].value); else edit_profile_browser('combo_name', document.main_form['customer_combo_name'].value)" hotkey_name="Quick Profile[Q]" ID=PROFILE_BROWSER></PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$args.category" != "" >
+<PDM_IF "$args.category.auto_assign" == "1" || "$args.category.auto_assign" == "2">
+<PDM_MACRO name=button Caption="Re Auto Assign" Func="re_auto_assign('$args.assignee','$args.group','$args.customer','$args.category','$args.auto_assign','$args.persistent_id','$args.affected_resource','$args.category.auto_assign')" hotkey_name="Re Auto Assign" ID=btn010>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF $ACCESS.FAC_chg == 2 && "$args.change" == "">
+if ( cfgUserAuth \> 1 ) {
+   
+<PDM_MACRO name=button Caption="Create Change Order[!ea]" Func="detailSave('NEW_CHANGE')" hotkey_name="Create Change Order[!ea]" ID=btnchg>
+}
+</PDM_IF>
+<PDM_IF "$args.problem" == "">
+if ( cfgUserAuth \> 1 ) {
+  
+<PDM_MACRO name=button Caption="Utwórz  Problem[!ea]" Func="create_new('cr',0,0,0,'PRESET=type:P','INITFROM=frm002', 'PRESET=from_incident:$args.persistent_id')" hotkey_name="Create Problem[!ea]" ID=ITIL_PROBLEM>
+}
+</PDM_IF>
+if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SEARCH_ENGINE" ) {
+	//Add the find similar button
+        
+<PDM_MACRO name=button Caption="Znajdź podobny" Func="find_similar_tickets('in')" hotkey_name="Find Similar" ID=FIND_SIMILAR Tooltip="Find Similar">
+}
+<PDM_MACRO name=button Caption="Podgląd Profilu[Q]" Func="profile_browser('$args.customer.persistent_id',void(0),void(0),'$args.persistent_id')" hotkey_name="Quick Profile[Q]" ID=PROFILE_BROWSER>
+</PDM_IF>
+<PDM_IF "$prop.URL_CI" != "">
+<PDM_MACRO name=button Caption="Przeszukaj Baze Wiedzy[K]" Func='do_kt_search();' hotkey_name="Search Knowledge[K]" ID=btn005>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+// 20131024 bmalz @ e-xim
+<PDM_IF 0><PDM_MACRO name=button Caption="Użyj szablonu[*Q]" Func="apply_template('frm001', 'SET.customer', 'in')" hotkey_name="Use Template[*Q]" ID=btn010></PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStart scroll=true>
+<PDM_IF "$prop.form_name_3" == "edit">
+</script>
+<input type="hidden" name="SET.man_imp" value="$args.man_imp">
+<input type="hidden" name="SET.man_urg" value="$args.man_urg">
+<input type="hidden" name="SET.init_imp" value="$args.init_imp">
+<input type="hidden" name="SET.init_urg" value="$args.init_urg">
+<input type="hidden" name="SET.auto_imp" value="$args.auto_imp">
+<input type="hidden" name="SET.auto_urg" value="$args.auto_urg">
+<input type="hidden" name="SET.view_type" value="0">
+<input type="hidden" name="change_category" value=0>
+<input type="hidden" name="SET.call_back_flag" value="$args.call_back_flag" id="SET.call_back_flag">
+<input type="hidden" name="NEW_ATTMNTS" id="NEW_ATTMNTS">
+<script type="text/javascript">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Zgłaszający" attr=customer evt="onBlur='calculateUrgency()'">
+<PDM_IF $args.id == 0>
+	<PDM_MACRO name=dtlDropdown hdr="Status" attr=status factory=crs_in whereclause="(code='OP')">
+<PDM_ELSE>
+	<PDM_MACRO name=dtlDropdown hdr="Status" attr=status factory=crs_in>
+</PDM_IF>
+<PDM_MACRO name=dtlLookupReadonly hdr="Organizacja" attr="orig_user_organization">
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja" attr=category autofill=no evt="onChange=\\\"change_category_func('in',null,'pcat_in');\\\" onBlur='calculateUrgency();'" factory=pcat_in>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr=" " attr="zcustomer" rows="2">
+<PDM_MACRO name=dtlLookupReadonly hdr="Klasyfikacja - Kontrakt" attr="category.owning_contract">
+<PDM_MACRO name=dtlLookupReadonly hdr="Usługa" attr="category.owning_contract.zusluga">
+<PDM_MACRO name=dtlLookup hdr="Umowa SLA" attr="zsla">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Poziom usługi" attr="zsdsc" link="no">
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr="zloc">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Numer MPK" attr="zmpk">
+<PDM_MACRO name=dtlLookup hdr="Jednostka konfiguracji" attr=affected_resource>
+<PDM_MACRO name=dtlLookup hdr="System" attr="affected_service" evt="onBlur='calculateImpact()'" extraURL="KEEP.service_only=1">
+<PDM_IF 0>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Aktywne?" attr=active>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.template_name" == "">
+<PDM_MACRO name=dtlCheckbox hdr=" Incydent główny" attr=major_incident evt="onChange='crossval_tempate_name_major_incident(this);'" off="No" on="Yes">
+<PDM_ELSE>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Incydent główny" attr=major_incident off="No" on="Yes">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Problem" attr=problem factory=pr>
+<PDM_MACRO name=dtlDropdown hdr="Symptom" attr=symptom_code>
+<PDM_MACRO name=dtlDropdown hdr="Kod Rozwiązania" attr=resolution_code lookup=no>
+<PDM_MACRO name=dtlDropdown hdr=" Metoda Rozwiązania" attr=resolution_method lookup=no>
+<PDM_MACRO name=dtlStartRow>
+	
+	var cbDateCheck = 0;
+	if ( _dtl.edit)
+	    cbDateCheck = 1;
+	    
+	if ( "$args.call_back_date_INT_DATE" != "" || ! _dtl.edit ) {
+	   
+	
+
+	} else {
+	   detailDateDropdown("Call Back Date/Time", "call_back_date", 1, 20,
+	                      "$args.REQUIRED_call_back_date",
+	                      "SET.call_back_flag",
+	                      86400, msgtext("In_one_day"),   // In one day
+	                      172800, msgtext("In_two_days"),  // In two days
+	                      604800, msgtext("In_one_week")); // In one week
+	}
+	
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlLookup hdr="Zmiana" attr=change>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookupReadonly hdr="Zmiana" attr=change>
+</PDM_IF>
+<PDM_MACRO name=dtlLookup attr=caused_by_chg factory=chg>
+<PDM_MACRO name=dtlTextbox hdr="Zgłoszenie w systemie zewnętrznym" attr=external_system_ticket keeptags=yes>
+</PDM_IF>
+<PDM_MACRO name=dtlStartExpRow label="Opis incydentu" colspan=6 exp_rows="1,2,3" form_name="detail_in"> 
+
+if(propSearchConfig.indexOf("summary*") > -1) 
+{
+	
+<PDM_MACRO name=dtlTextbox hdr="Temat" attr=summary colspan=3 keeplinks=yes size=120 spellchk=no srchknow=yes>
+<PDM_MACRO name=dtlDate hdr="Data/Czas odwołania" attr=call_back_date>
+} else {
+	
+<PDM_MACRO name=dtlTextbox hdr="Temat" attr=summary colspan=3 keeplinks=yes size=120 spellchk=no srchknow=no>
+}
+<PDM_MACRO name=dtlReadonly hdr="Całkowity czas czynności" attr=time_spent_sum>
+<PDM_MACRO name=dtlStartRow>
+if(propSearchConfig.indexOf("description*") > -1) 
+{
+	
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=120 spellchk=no srchknow=yes>
+} else {	   
+	
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=120 spellchk=no srchknow=no>
+}
+<PDM_IF "$prop.form_name_3" == "edit">
+   detailRowHdr("Czas aktywności");
+   detailSetRowData("<input type=text " + detailNextID() +
+                    " name='timer' value='' size=8 readonly>");
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rejestracji" attr=open_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data modyfikacji" attr=last_mod_dt>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rozwiązania" attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zamknięcia" attr=close_date>
+<PDM_MACRO name=dtlStartExpRow label="Opis rozwiązania" colspan=6 exp_rows="1,2,3" form_name="detail_cr">
+<PDM_MACRO name=dtlDropdown hdr="Kod rozwiązania" attr=resolution_code lookup=no size=60 whereclause="(zTyp!='HR')">
+<PDM_MACRO name=dtlDropdown hdr="Metoda rozwiązania" attr=resolution_method lookup=no size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis rozwiązania" attr=zrozwiazanie colspan=4 keeplinks=yes rows=4 size=120 srchknow=no>
+
+
+</script>
+
+<input type="hidden" name="catg_cawf_defid" value="" size="20">
+
+<script type="text/javascript">
+
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr="inro_nb">
+<PDM_MACRO name=startTabGroup title="Dodatkowe informacje">
+<PDM_MACRO name=tab title="Ogólne" file="tab_in_ogolne.htmpl">
+<PDM_MACRO name=tab title="Serwis" file="tab_in_serwis.htmpl">
+<PDM_MACRO name=tab title="Właściwości" file="xx_prop_tab.htmpl">
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=cr+PERSID=$args.persistent_id+NO_DP=yes">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Załączniki" height=300 id=attmnt src="OP=SHOW_DETAIL+HTMPL=xx_attmnt_tab.htmpl+FACTORY=cr+PERSID=$args.persistent_id+SDBP_FLAG=1">
+</PDM_IF>
+<PDM_MACRO name=tab title="Poziomy usług" file="xx_stype_tab.htmpl" id=stype>
+<PDM_MACRO name=tab title="Akceptacje" file="cr_akceptacje_tab.htmpl">
+<PDM_MACRO name=startTabGroup title="Komunikacja">
+<PDM_IF "$prop.view_internal" == "0">
+<PDM_MACRO name=tab title="Czynności" height=300 id=alg src="OP=SEARCH+FACTORY=alg+QBE.EQ.call_req_id=$args.persistent_id+QBE.EQ.internal=0">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Czynności" height=300 id=alg src="OP=SEARCH+FACTORY=alg+QBE.EQ.call_req_id=$args.persistent_id">
+</PDM_IF>
+<PDM_MACRO name=tab title="Dziennik zdarzeń" height=300 src="OP=SEARCH+FACTORY=event_log+QBE.EQ.sd_obj_type=cr+QBE.EQ.sd_obj_id=$dob.id">
+<PDM_MACRO name=startTabGroup title="Baza Wiedzy">
+<PDM_MACRO name=tab title="Baza wiedzy" height=300 src="KEEP.LAUNCHED_ITIL=I+OP=SEARCH+FACTORY=KD+KEEP.SD_LAUNCHED=$args.persistent_id+KEEP.DISPLAY_FROM=cr+KEEP.search_type=ticket+KEEP.tenantWc=buildWc+KEEP.backfill_field=None">
+<PDM_MACRO name=tab title="Rozwiązania" file="xx_solnalg_tab.htmpl" id=soln>
+<PDM_MACRO name=startTabGroup title="Relacje">
+<PDM_MACRO name=tab title="Hierarchiczne" file="in_relreq_tab.htmpl">
+<PDM_IF "$env.NX_CAEXTWF_ENDPOINT" != "" || "$env.NX_CAWF_PM_URL" != "" && "$env.NX_CAWF_PM_LOCATION" != "">
+<PDM_IF "$args.cawf_procid" != "">
+<PDM_MACRO name=tab title="Zadania Workflow" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.CAWorkflow+ARG0=getWorkflowInstance+ARG1=+ARG2=$args.category.cawf_defid+ARG3=$args.cawf_procid+ARG4=1+ARG5=1+HTMPL=workitems.htmpl">
+<PDM_ELIF "$args.caextwf_instance_id" != "">
+<PDM_MACRO name=tab title="Zadania Workflow" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.ItpamWorkflow+ARG0=getProcessInstanceLogs+ARG1=+ARG2=$args.caextwf_instance_id.instance_id+ARG3=1+OBJID=$args.caextwf_instance_id+END_DATE=$args.caextwf_instance_id.endtime+HTMPL=wfITPAMinstance.htmpl">
+<PDM_ELSE>
+<PDM_MACRO name=tab title="Zadania Workflow" file="xx_wf_tab.htmpl">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+
+<!-- must be in the main form-->
+<input type="hidden" name="category_contract" value="$args.category.owning_contract">
+<input type="hidden" name="user_contract" value="$args.customer.organization.owning_contract">
+<input type="hidden" name="org_id" value="$args.customer.organization.id">
+
+<div style="display: none;" id="HiddenDiv"></div>
+
+<PDM_MACRO name=dtlEnd>
+
+<script type="text/javascript">
+<PDM_IF "$args.itg_url_name" != "">
+function launchIntegrateUrl() {
+url="$args.itg_url_name";
+system_name="$args.affected_resource.system_name";
+alarm_id="$args.affected_resource.alarm_id";
+host=system_name?system_name:alarm_id;
+   if(typeof host == "string" && host.length) {
+      url+="?"+"HOST="+host;
+   }
+   var w = window.open(url,"","width=850,height=600,location,alwaysRaised");
+   check_popup_blocker(w);
+}
+
+// necessary for focus on itg popup window
+window.setTimeout('launchIntegrateUrl()',0);
+</PDM_IF>
+	//Feature:APC - This function updates the init Impact/Urgency fields after the form has been loaded.
+	if(window.addEventListener)
+		window.addEventListener('load', updateFieldsForCapReason, false);
+	else if(window.attachEvent)
+		window.attachEvent('onload', updateFieldsForCapReason);
+</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_in.htmpl ASPEN.25 2012/04/18 16:14:21 pstso01 Exp $
+</PDM_IF>
+<PDM_WSP>

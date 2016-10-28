@@ -1,0 +1,161 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to search issues using FAST search engine
+INTENT:
+    Issues keyword Search
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general factory=iss>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Issues Keyword Search";
+var hdrTitleList = "Issues Keyword Search";
+
+var sFindSimilarPersID = "";
+var sFindSimilarFactory = "";
+<PDM_IF "$args.KEEP.FIND_SIMILAR_PERSID" != "" >
+	var _sFindSimilarPersID = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.FIND_SIMILAR_PERSID</PDM_FMT>');
+	var _sFindSimilarFactory = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$args.KEEP.FIND_SIMILAR_FACTORY</PDM_FMT>');
+	var _sFindSimilarFactoryName = "Issue";
+	var _sFindSimilarRefNum= "";
+	var _sFindSimilarSummary = "";
+	var _sFindSimilarDescription = "";
+
+	var bTicketFound = false;
+	<PDM_LIST PREFIX=listSimilar FACTORY="iss" WHERE="persistent_id='$args.KEEP.FIND_SIMILAR_PERSID'">
+		bTicketFound = true;
+		_sFindSimilarRefNum = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$listSimilar.ref_num</PDM_FMT>');
+		_sFindSimilarSummary = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$listSimilar.summary</PDM_FMT>');
+		_sFindSimilarDescription = nx_unescape('<PDM_FMT PAD=NO ESC_STYLE=JS2>$listSimilar.description</PDM_FMT>');
+	</PDM_LIST>
+	if ( !bTicketFound ) // if the ticket was not found this could be b/c it's a new ticket that has not been saved yet, 
+						 //try hook th information from is window
+	{
+		var winTicket = ahdtop.detailForms[_sFindSimilarPersID];
+		if ( typeof winTicket != "undefined" && winTicket != null ){
+			try {
+				_sFindSimilarDescription = winTicket.ahdframe.document.forms["main_form"].elements["SET.description"].value;
+				_sFindSimilarSummary = winTicket.ahdframe.document.forms["main_form"].elements["SET.summary"].value;
+				_sFindSimilarRefNum = winTicket.ahdframe.argRefNum;
+				}
+			catch(e){}
+		}
+	}	
+	hdrTitle = "Find Similar for " + _sFindSimilarFactoryName + " " + _sFindSimilarRefNum;
+	hdrTitleList = "Find Similar results for " + _sFindSimilarFactoryName + " " + _sFindSimilarRefNum;
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("&{factory}sum.rpt", "&{factory}dtl.rpt");
+var cfgCanEdit = true;
+
+function List_iss_kt_onload() 
+{
+	<PDM_IF "$args.KEEP.FIND_SIMILAR_PERSID" != "">
+	if ( typeof parent.FirstFindSeimilar == "undefined" ){
+		parent.FirstFindSeimilar = false;
+		document.getElementById("ebr_search_text").value = _sFindSimilarSummary + " " + _sFindSimilarDescription;
+		//Added try & catch here for cases persID parsing go worng 
+		try
+		{
+			var sFindSimilarID = _sFindSimilarPersID.split(":")[1];
+			document.getElementById("QBE.NE.id").value = sFindSimilarID;
+		}
+		catch(e)
+		{
+		}
+	}
+	</PDM_IF>
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" onLoad="List_iss_kt_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl logo=no>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory="iss" forcesearchwithkeywords="true" knowledgesearchtext="true">
+document.writeln("<input type=hidden id=HTMPL NAME=HTMPL VALUE='list_iss_kt.htmpl'>");
+document.writeln("<input type=hidden NAME=KEEP.FIND_SIMILAR_PERSID VALUE='$args.KEEP.FIND_SIMILAR_PERSID'>");
+document.writeln("<input type=hidden NAME=KEEP.FIND_SIMILAR_FACTORY VALUE='$args.KEEP.FIND_SIMILAR_FACTORY'>");
+<PDM_MACRO name=ebr_search_filter factory="iss" order_by="false" view="Knowledge">
+<PDM_IF "$args.KEEP.FIND_SIMILAR_PERSID" != "">
+document.writeln("<input type=hidden name=QBE.NE.id id=QBE.NE.id value='$args.QBE.NE.id'>");
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfStartRow>
+searchFilterDropdown("Assignment Status","","",
+"Has assignee","(assignee IS NOT NULL)",
+"Has group","(group IS NOT NULL)",
+"Assignee or group","(assignee IS NOT NULL OR group IS NOT NULL)",
+"Assignee and group","(assignee IS NOT NULL AND group IS NOT NULL)",
+"Assignee; no group","(assignee IS NOT NULL AND group IS NULL)",
+"Group; no assignee","(assignee IS NULL AND group IS NOT NULL)",
+"No assignee","(assignee IS NULL)",
+"No group","(group IS NULL)",
+"No assignee; no group","(assignee IS NULL AND group IS NULL)",2);
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee factory=agt>
+<PDM_MACRO name=sfLookup hdr="Grupa" attr=group factory=grp>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=status factory=issstat>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Priorytet" attr=priority factory=pri>
+<PDM_MACRO name=sfLookup hdr="Dotknięty użytkownik" attr=requestor factory=cnt>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas wymagalności" attr=need_by qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas wymagalności" attr=need_by qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas otwarcia" attr=open_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas otwarcia" attr=open_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rozwiązania" attr=resolve_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rozwiązania" attr=resolve_date qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas zamknięcia" attr=close_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas zamknięcia" attr=close_date qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas szacunkowego skompletowania" attr=est_comp_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas szacunkowego skompletowania" attr=est_comp_date qbe_condition=LE>
+<PDM_MACRO name=sfDate hdr="Najwczęśniejszy czas rzeczywistego skompletowania" attr=actual_comp_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejszy czas rzeczywistego skompletowania" attr=actual_comp_date qbe_condition=LE>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Issues found";
+  var msgFound1 = "1 Issue found";
+  var msgFound = "%1 Issues found";
+  var msgFoundMore = "%1 Issues found. Displaying %2 through %3";
+  var msgSelect = "Click to select desired Issue";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listHilite';">
+<PDM_MACRO name=lsWrite text="pdm_elif \"@{list.macro_predicted_violation:0}\" != '0' || \"@{list.predicted_sla_violation:0}\" != '0'">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+<PDM_IF "$env.NX_TTV_HIGHLIGHT" == 'Yes' && "$env.NX_TTV_ENABLED" != "">
+<PDM_MACRO name=lsWrite text="pdm_elif @{list.ttv_att_slas.length:0} != 0">
+<PDM_MACRO name=lsWrite text="ref_num_style = 'listWarning';">
+</PDM_IF>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsWrite text="ref_num_style = '';">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Issue #" attr=ref_num exportfmt=ShowLink link=yes required=yes sort=no style=ref_num_style>
+<PDM_MACRO name=lsCol hdr="Status" attr=status sort=no>
+<PDM_MACRO name=lsCol hdr="Data otwarcia" attr=open_date sort=no>
+<PDM_MACRO name=lsCol hdr="Priorytet" attr=priority sort=no>
+<PDM_MACRO name=lsCol hdr="Klasyfikacja/Opis" attr=category colspan=2 sort=no>
+<PDM_MACRO name=lsCol hdr="Kontakty" attr=assignee label="Assignee" sort=no>
+<PDM_MACRO name=lsCol attr=summary colspan=4 startrow=yes width=50>
+<PDM_MACRO name=lsCol label="Parent" attr=parent.ref_num>
+<PDM_MACRO name=lsCol label="#Child" attr=children display_attr=length export=no>
+<PDM_MACRO name=lsCol label="End User" attr=requestor>
+<PDM_MACRO name=lsEnd isticketfactory=1>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

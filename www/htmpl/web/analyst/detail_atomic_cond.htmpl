@@ -1,0 +1,479 @@
+<PDM_IF 0>
+detail_atomic_cond.htmpl
+WHEN PRESENTED:
+    When we need to display a details of a single Atomic Condition
+INTENT:
+    Display the detail and edit info for the Atomic Condition
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  atomic_cond  args	The atomic_cond object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/D:CA_SDAHDbase.maj for the
+                        definition of attributes for 'OBJECT atomic_cond'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Atomic Condition Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Atomic Condition"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Atomic Condition $args.sym"</PDM_FMT>;
+var noCancelAtomicCond = 0; 
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+<PDM_IF "$args.id" == "0">
+ahdframeset.top_splash.next_persid ='$args.KEEP.macro_persid';
+<PDM_ELSE>
+ahdframeset.top_splash.next_persid ='$args.owning_macro';
+</PDM_IF>
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+// to get past an IE6.0 sp2 on XP bug with onchange handler getting invoked just clicking the dropdown without really changing the value	
+if (_browser.isXPIE60SP2) 
+var zflag = 0;
+
+function refresh_atomic_cond_screen() { 
+	if ( _browser.isXPIE60SP2 && zflag == 1)
+	return;	
+	
+	var f = window.document.forms["main_form"];
+	f.REFRESH_AND_STAY_EDIT.value="1";
+
+	if (_browser.isXPIE60SP2)
+	zflag = 1;	
+	
+	<PDM_IF 0>
+	 Calling detail_save() to submit everything to freeaccess. Note in this case I am restrict the 
+	 save from happening if REFRESH_AND_STAY_EDIT.value is set to 1 in the freeaccess code, It just refreshes the screen
+	 and displays the appropriate "Data/Attribute value" field for value selected in the "select an attribute" lookup or "Data/Attribute value" dropdown or 
+	 "Change Value" Btn.Note also that it hold all the values in the fields on the form prior to the refresh	
+	 </PDM_IF>
+	// This form should not be cancelled.It just refreshes the screen. This variable is used
+	// inside std_footer.js
+	
+	noCancelAtomicCond = 1; 
+	pdm_submit('main_form','UPDATE',void(0),true);
+}
+
+</script>
+
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Atomic Condition" key="$args.sym">
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=atomic_cond>
+<PDM_MACRO name=dtlStart>
+	docWriteln("<input type='hidden' name=\"REFRESH_AND_STAY_EDIT\" value=\"0\">");
+	docWriteln("<input type='hidden' name=\"KEEP.IS_SREL\" value=\"0\">");
+	docWriteln("<input type='hidden' name=\"KEEP.SREL_FACTORY\" value=\"\">");
+	docWriteln("<input type='hidden' name=\"KEEP.SREL_FACTORY_CNAME\" value=\"\">");
+	docWriteln("<input type='hidden' name=\"KEEP.DAA_VAL\" value=\"-1\">");	
+<PDM_IF "$args.id" == "0">
+docWriteln("<input type='hidden' name=SET.owning_macro value='$args.KEEP.macro_persid'>");
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro" && "$args.id" != 0>
+docWriteln("<input type='hidden' name=\"KEEP.ATOMIC_COND_PARENT\" value=\"1\">");
+</PDM_IF>
+
+// close the atomic_cond form and give focus on the macro form
+if ( _dtl.edit ) 
+{
+docWriteln("<input type='hidden' name=HTMPL value='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+    
+}    
+
+if ( _dtl.edit ) 
+	if("$args.KEEP.obj_type" == "Data Value")
+	{
+	 
+<PDM_IF 0>note: Need to set KEY and SET to ''(null) for SREL Fields.</PDM_IF>
+	docWriteln("<input type='hidden' name=KEY.rval_assoc value=''>");//NULL value  --- Trying to be consistent with the Java Client
+	docWriteln("<input type='hidden' name=SET.rval_assoc value=''>");//NULL value  --- Trying to be consistent with the Java Client
+	}
+	else if("$args.KEEP.obj_type"  == "Attribute")
+	{	
+	docWriteln("<input type='hidden' name=SET.rval value=''>"); //blank value --- Trying to be consistent with the Java Client	
+	}
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kolejność" attr=sequence colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=2 rows=4 size=80 spellchk=no>
+
+// special code in backfill_event() to call refresh_atomic_cond_screen() for "lval" field       
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Wybierz atrybut" attr=lval extraurl="ADDITIONAL_WHERE=ob_type='$args.owning_macro.ob_type'" make_required="yes">   
+
+var c_operator;
+switch ( "$args.operator" ) { 
+	case "0" : 
+		c_operator = "Equals";
+		break;
+	case "1" :
+		c_operator = "Does not Equal";
+		break;
+	case "2" :
+		c_operator = "Greater Than";
+		break;
+	case "3" :
+		c_operator = "Less Than";
+		break;
+	case "4" :
+		c_operator = "Empty/Null";
+		break;		
+	case "5" :
+		c_operator = "Not Empty/Null";
+		break;						
+         }
+
+if ( _dtl.edit )   
+{  
+<PDM_MACRO name=dtlStartRow>
+}   
+detailSetEventHandler("onChange='refresh_atomic_cond_screen()'");    
+detailDropdown("Choose Operator","operator","atomic_cond",1,20, 
+true,"","$args.operator",
+"no","$args.operator",c_operator,
+"","","no","","","0",
+"Equals","0","Does not Equal","1","Greater Than","2","Less Than","3","Empty/Null","4","Not Empty/Null","5");  
+
+if ( _dtl.edit )   
+{	
+	detailSetEventHandler("onChange='refresh_atomic_cond_screen()'");
+	detailDropdown("Select Attribute or Data Value","KEEP.obj_type","atomic_cond",1,40, 
+	true,"","$args.KEEP.obj_type",
+	"no","","$args.KEEP.obj_type",
+	"","","no","","",
+	
+<PDM_IF "$args.rval_assoc" != "" || "$args.id" == "0">"Attribute"<PDM_ELIF "$args.rval_assoc" == "" && "$args.id" != "0">"Data Value"</PDM_IF>,
+	"Attribute","Attribute","Data Value","Data Value"); 
+}
+if("$args.lval" !="")
+{
+if("$args.KEEP.obj_type" == "")
+{
+  if ("$args.id" == "0")
+  {
+  	
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.owning_macro.ob_type'" size=40>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.owning_macro.ob_type'" make_required="yes" size=40>
+</PDM_IF>
+  }
+  else if ("$args.id" != "0"  && _dtl.edit ) 
+  {
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlEndTable>
+	docWriteln("<table cellpadding=1 cellspacing=5 width='90%'>");
+	docWriteln("<tr valign='top'>");
+	docWriteln("<th colspan=2 align='left'>");
+	docWriteln("<table>");
+	docWriteln("<tr>");
+	
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">  
+	docWriteln("<th colspan=2 align='left' valign='middle' class='labeltext'>");
+	
+<PDM_ELSE> 
+	docWriteln("<th colspan=2 align='left' valign='middle' class='requiredlabeltext'>");
+	
+</PDM_IF>
+	if ('$args.rval_assoc'=='')
+	docWriteln("Data Value");
+	else
+	docWriteln("Attribute Value");
+	docWriteln("</th>");
+	docWriteln("<th>");
+<PDM_MACRO name=button caption="Change Value" func="refresh_atomic_cond_screen()" hotkey_name="Change Value" id="btn2">
+	docWriteln("</th>");
+	docWriteln("</tr>");
+	docWriteln("</table>");
+	docWriteln("</th>");
+	docWriteln("</tr>");
+	docWriteln("<tr>");
+	docWriteln("<td colspan=2 align='left' valign='top' class='detailro'>$args.rval_display</td>");
+	docWriteln("</tr>");
+	docWriteln("</table>");
+  }
+  else if (! _dtl.edit )
+  {
+  	
+<PDM_MACRO name=dtlStartRow>
+  	if ('$args.rval_assoc'=='')
+	
+<PDM_MACRO name=dtlReadonly hdr="Wartość danych" attr=rval_display>
+	else
+	
+<PDM_MACRO name=dtlReadonly hdr="Wartość atrybutu" attr=rval_display>
+	
+  }
+}
+else
+{
+<PDM_MACRO name=dtlStartRow>
+if ("$args.KEEP.obj_type" == "Attribute")
+{
+if('$args.owning_macro.ob_type' =='')
+{
+	
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.KEEP.ob_type'" size=40>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.KEEP.ob_type'" make_required="yes" size=40>
+</PDM_IF>
+}		
+else
+{
+	
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.owning_macro.ob_type'" size=40>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.owning_macro.ob_type'" make_required="yes" size=40>
+</PDM_IF>
+}
+}
+else if	("$args.KEEP.obj_type" == "" && '$args.rval' == '')   
+{
+<PDM_IF 0> Display "Attribute Value" field if KEEP.obj_type and rval fields are blank </PDM_IF>
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.owning_macro.ob_type'" size=40>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Wartość atrybutu" attr=rval_assoc extraurl="ADDITIONAL_WHERE=ob_type='$args.owning_macro.ob_type'" make_required="yes" size=40>
+</PDM_IF>
+	
+}
+else if ("$args.KEEP.obj_type" == "Data Value")
+{
+	   	if ("$args.KEEP.IS_SREL" == "1")
+	   	{
+	   		if( _dtl.edit )
+	   		{
+				if("$args.KEEP.SREL_FACTORY" == "bool" || "$args.KEEP.SREL_FACTORY" == "actbool" )
+	   			{
+	   				
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5"> 
+	   					detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+							"0","","",
+							"yes","$args.KEEP.CNAME",
+							"$args.rval",
+							"","","yes","ADDITIONAL_WHERE=id>0");
+					
+<PDM_ELSE> 
+	   					detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+							"1","","",
+							"yes","$args.KEEP.CNAME",
+							"$args.rval_display",
+							"","","yes","ADDITIONAL_WHERE=id>0");
+					
+</PDM_IF>
+				}
+				else
+				{
+				
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5"> 
+					detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+						"0","","",
+						"yes","$args.KEEP.CNAME",
+						"$args.rval",
+						"","","yes");
+				
+<PDM_ELSE> 
+				 	detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+						"1","","",
+						"yes","$args.KEEP.CNAME",
+						"$args.rval",
+						"","","yes");
+				
+</PDM_IF>
+				}
+			}
+			else
+			{
+			
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Wartość danych" attr=rval_display>
+			}
+		}
+		else 
+		{	
+		  if (_dtl.edit)
+		  {
+			if("$args.KEEP.SREL_FACTORY" == "" && "$args.KEEP.DAA_VAL" =="-1")
+			{			
+	       		
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlEndTable>
+			docWriteln("<table cellpadding=1 cellspacing=5 width='90%'>");
+			docWriteln("<tr valign='top'>");
+			docWriteln("<th colspan=2 align='left'>");
+			docWriteln("<table>");
+			docWriteln("<tr>");
+			
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5"> 
+			docWriteln("<th colspan=2 align='left' valign='middle' class='labeltext'>");
+			
+<PDM_ELSE>
+			docWriteln("<th colspan=2 align='left' valign='middle' class='requiredlabeltext'>");
+			
+</PDM_IF>
+			if ('$args.rval_assoc'=='')
+			docWriteln("Data Value");
+			else
+			docWriteln("Attribute Value");
+			docWriteln("</th>");
+			docWriteln("<th>");
+<PDM_MACRO name=button caption="Change Value" func="refresh_atomic_cond_screen()" hotkey_name="Change Value" id="btn2">
+			docWriteln("</th>");
+			docWriteln("</tr>");
+			docWriteln("</table>");
+			docWriteln("</th>");
+			docWriteln("</tr>");
+			docWriteln("<tr>");
+			docWriteln("<td colspan=2 align='left' valign='top' class='detailro'>$args.rval_display</td>");
+			docWriteln("</tr>");
+			docWriteln("</table>");
+			}
+			else if ("$args.KEEP.SREL_FACTORY" != "")
+			{
+				
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5"> 
+					detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+							"0","","",
+							"yes","$args.KEEP.CNAME",
+							"$args.rval","","","yes");
+				
+<PDM_ELSE>
+					detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+							"1","","",
+							"yes","$args.KEEP.CNAME",
+							"$args.rval","","","yes");				
+				
+</PDM_IF>
+			}
+			else if ("$args.KEEP.DAA_VAL" !="-1")
+			{
+				if ("$args.KEEP.DAA_VAL" =="7")
+				{
+					
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+<PDM_MACRO name=dtlDate hdr="Data/Czas" attr=rval>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDate hdr="Data/Czas" attr=rval make_required="yes">
+</PDM_IF>
+				}
+				else if ("$args.KEEP.DAA_VAL" =="8")
+				{
+				detailSetEventHandler("onBlur='validate_duration_ts(this)'");
+				
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+<PDM_MACRO name=dtlTextbox hdr="Wartość danych" attr=rval>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Wartość danych" attr=rval make_required="yes">
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+				docWriteln("<table id=tbl201 class='tab'>");
+				docWriteln("<tr>");
+				docWriteln("<td></td><td></td><td></td><td></td>");
+				docWriteln("<td valign='top' class='detailro'>");				
+				docWriteln("(Format for duration must be hh:mm:ss)");
+				docWriteln("</td>");
+				docWriteln("</tr>");
+				docWriteln("</table>");			
+				}
+				else
+				{
+				 	
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+<PDM_MACRO name=dtlTextbox hdr="Wartość danych" attr=rval>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Wartość danych" attr=rval make_required="yes">
+</PDM_IF>
+				}
+			}
+		}
+		 else 
+		 {
+		 
+<PDM_MACRO name=dtlReadonly hdr="Wartość danych" attr=rval_display>
+		 }
+	      }
+}	       	  		             
+else if	("$args.KEEP.obj_type" == "" && '$args.rval_assoc' == '')   
+{
+		if("$args.KEEP.SREL_FACTORY" == "bool" || "$args.KEEP.SREL_FACTORY" == "actbool" )
+	   	{
+	   		
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+	   			detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+					"0","","",
+					"yes","$args.KEEP.CNAME",
+					"$args.rval","","","yes","ADDITIONAL_WHERE=id>0");	   		
+	   		
+<PDM_ELSE>
+	   			detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+					"1","","",
+					"yes","$args.KEEP.CNAME",
+					"$args.rval","","","yes","ADDITIONAL_WHERE=id>0");
+			
+</PDM_IF>
+		
+	   	}
+	   	else
+	   	{
+	   		
+<PDM_IF "$args.operator" == "4" || "$args.operator" == "5">
+				detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+							"0","","",
+							"yes","$args.KEEP.CNAME",
+							"$args.rval","","","yes");
+			
+<PDM_ELSE>
+				detailLookup("Data Value","rval","$args.KEEP.SREL_FACTORY",1,40,
+							"1","","",
+							"yes","$args.KEEP.CNAME",
+							"$args.rval","","","yes");			
+			
+</PDM_IF>
+		}
+}
+}
+
+} // end of "args.lval" !="" if loop
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_atomic_cond.htmpl ASPEN.2 2012/03/18 10:58:01 maide01 Exp $;
+</PDM_IF>
+<PDM_WSP>

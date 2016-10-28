@@ -1,0 +1,82 @@
+<PDM_IF 0>
+xx_service_outage_tab.htmpl
+WHEN PRESENTED:
+    On the incident detail form, when the tab is selected.
+INTENT:
+    Display a notebook page for some service outage information.
+</PDM_IF>
+<html lang="en">
+<HEAD>
+    <PDM_PRAGMA RELEASE=110>
+    <PDM_WSP mode=edit preview="NBTAB=xx_service_outage_tab" factory=cr>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msg_cat.js"></SCRIPT>
+</HEAD>
+<BODY>
+    <PDM_INCLUDE FILE=std_body.htmpl filename="">
+    <PDM_FORM NAME="frmDTLRO">
+    <SCRIPT LANGUAGE="JavaScript">
+    
+    var bypass_validate_int = true;     // This global allows us to avoid the val_type.js validate_int()
+                                        // functions pop-up messages
+    
+    function tabValidatePctServiceRestored(fld_obj)
+    {
+        if (typeof fld_obj == "undefined") {
+            return true;
+        }
+        
+        // Trim whitespace
+        fld_obj.value = ltrim(fld_obj.value);
+        fld_obj.value = rtrim(fld_obj.value);
+
+        if ( fld_obj.value.length > 0)
+        {
+            if ( fld_obj.value.match(/\D+/) || fld_obj.value.length > 3)
+            {
+                detailReportValidation( fld_obj, 1, msgtext("Value_not_a_percentage", fld_obj.value));
+                return false;
+            }
+            
+            var nValue = parseInt(fld_obj.value, 10);
+            if (nValue < 0 || nValue > 100)
+            {
+                detailReportValidation( fld_obj, 1, msgtext("Value_not_a_percentage", fld_obj.value));
+                return false;
+            }
+        }
+        
+        detailReportValidation(fld_obj,0);
+        return true;
+    } 
+    
+        
+<PDM_MACRO name=tabBanner title="Service Outage">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Czas ropzoczęcia" attr=outage_start_time>
+<PDM_MACRO name=dtlDate hdr="Data zakończenia" attr=outage_end_time>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Typ" attr=outage_type>
+<PDM_MACRO name=dtlCheckbox hdr="Return to Service" attr="return_to_service" off="No" on="Yes">
+<PDM_MACRO name=dtlTextbox hdr="Percent of Service Restored" attr="pct_service_restored" evt="onBlur=\\\"tabValidatePctServiceRestored(this)\\\"" keeptags=yes maxlength="3" size=5>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Powód" attr="outage_reason_desc" colspan=3 size=120>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Who" attr=outage_detail_who colspan=3 size=120>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="What" attr=outage_detail_what colspan=3 size=120>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Why" attr=outage_detail_why colspan=3 size=120>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlEndTable>
+    </SCRIPT>
+    </PDM_FORM>
+</BODY>     
+</HTML>
+<PDM_IF 0>
+@(#)$Id: xx_service_outage_tab.htmpl ASPEN.1 2010/10/26 14:40:01 saima01 Exp $
+</PDM_IF>
+

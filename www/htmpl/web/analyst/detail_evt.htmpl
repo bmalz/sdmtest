@@ -1,0 +1,113 @@
+<PDM_IF 0>
+detail_evt.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Event
+INTENT:
+    Display the detail info for the Event
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  evt  args	The Event object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/bopevt.maj for the
+                        definition of attributes for 'OBJECT evt'
+</PDM_IF>
+
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły Event $args.sym "</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowanie Event $args.sym"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie Event $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+cfgMachineName = "$SESSION.MachineName";
+argPersistentID = "$args.persistent_id";
+cfgCAISD = "$CAisd";
+cfgCgi = "$cgi";
+cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+cfgDateFormat = "$date_format";
+cfgAccessNotify = "$ACCESS.notify";
+argID = "$args.id";
+cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+argSearchSqlClause = "id = $args.id";
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Event" key="$args.name">
+<CENTER>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=evt>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=40>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+		detailDropdown("Object Type","obj_type","event_prod_list",1,20, 
+		"1","","$args.obj_type","yes","name","","","",
+		"no","0","","",
+		"Change Order","chg",
+		"Configuration Item","nr",
+		"Contact","cnt",
+		"Issue","iss",
+		"Issue Workflow Task","iss_wf",
+		"Knowledge Document","KD",
+		"Knowledge Document Comment","O_COMMENTS",
+		"Knowledge Report Card","KT_REPORT_CARD",
+		"Assistance Session","sa_notif",
+		"Managed Survey","mgs",
+		"Request/Incident/Problem","cr",
+		"Rest Access","rest_access",
+		"Workflow Task","wf",
+"Task","ztask");	
+<PDM_ELSE>
+<PDM_IF "$args.obj_type" == "cr">
+		detailTextboxReadonly("Object Type","obj_type",1,"Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=obj_type>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=startNotebook hdr="evt_tabs">
+<PDM_MACRO name=TAB title="Configuration Information" file="evt_config_info.htmpl">
+<PDM_MACRO name=TAB title="Action Information" file="evt_action_info.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_evt.htmpl ASPEN.4 2010/11/25 17:08:00 wynwa01 Exp $;
+</PDM_IF>
+<PDM_WSP>

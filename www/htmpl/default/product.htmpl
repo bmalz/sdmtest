@@ -1,0 +1,47 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	product.htmpl
+</PDM_IF>	
+<html lang="en">
+<PDM_PRAGMA RELEASE=110>
+<LINK REL="stylesheet" href="$CAisd/css/castyles.css">
+<head>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/product_toolbar.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript">
+var ahdtop = parent;
+var ahdframeset = parent;
+var propFormName = "$prop.form_name";
+disable_right_click();
+function show_rpt_logoff(bFlag)
+{
+    var l_box = document.getElementById("logoff_div");
+    if (l_box != null)
+    {
+	if (bFlag)
+	{
+	    l_box.style.display = "block";
+	    set_action_in_progress(ACTN_BO_LOGOFF);
+	}
+	else 
+	{
+	    l_box.style.display = "none"
+	    set_action_in_progress(ACTN_COMPLETE);
+	}
+    }
+}
+</script>
+</head>
+<body onload="loadOK()" class="detailro">
+<form>
+<div id="logoff_div" class="logoff_reports_mesg">
+<br><br><br>
+<th>Logging out the Web Report server...</th>
+</div>
+</form>
+<script type="text/javascript">
+generateIframes();
+</script>
+</body>
+</html>

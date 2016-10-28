@@ -1,0 +1,195 @@
+<html lang="en"><PDM_IF 0>
+g_scratchpad.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Global Scratchpad";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var loaded = false;
+var call_type = "";
+var curr_fac = "cr";
+var curr_fac_name = "request";
+var deferred_create_callback = void(0);
+
+var isItil=1;
+
+setTempKeyDownHandler(pb_keydown);
+
+function backfill_event( form, field, value, persid )
+{
+   document.scrpadForm["SET.template_name"].value = persid;
+   if ( typeof deferred_create_callback == "function" ) {
+      deferred_create_callback();
+      deferred_create_callback = void(0);
+   }
+}
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+if ( ! _browser.supportsLayers )
+document.writeln('<scr' + 'ipt type="text/javascript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+</script>
+</head>
+<body class="detailro" onload="loaded=true;">
+<script>
+var caption = "Global Scratchpad";
+var caption_loc = "Global Scratchpad";
+if (!nonLatinFlag)
+    caption_loc = caption;
+var initialFocusField = "pbfld100";
+var actKey = registerActionKey( "p", caption_loc, focusById, initialFocusField);
+document.writeln("<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>");
+document.writeln("<tr>");
+document.writeln("<td align='left' width='99%'><h2 style='margin:0px;'><h2 style='margin:0px;'>" + fmtLabelWithActkey(caption, actKey) + "</h2></td>");
+document.writeln("<td align='right' width='1%'></td></tr></table>");
+var show_header=0;
+</script>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no menubar="no">
+
+<script type="text/javascript">insertTabToFrameLink('page','menu');</script>
+
+<PDM_FORM ID="scrpadForm" NAME="scrpadForm" onSubmit="return false;">
+<br>
+
+<table>
+  <td>
+  <th class="labeltext" align="left">
+Selected Contact
+  </th>
+  </td>
+  <td>
+  <th class='labeltext font_normal' align="left">
+    <input id=pbfld101 name=gscrcnt size=30 readonly="readonly">
+  </th>
+  </td>
+  <td>
+  <th class="labeltext" align="left">
+Remote System
+  </th>
+  </td>
+  <td>
+  <th class='labeltext font_normal' align="left">
+    <input id=pbfld102 name=gscrremsys size=30 readonly="readonly">
+  </th>
+  </td>
+  <td>
+    <script type="text/javascript">      
+<PDM_MACRO NAME=button caption="Jump To Contacts System" hotkey_name="Jump To Contacts System" id="btn030" width=0 disabled="yes" Tooltip="Go to the remote system"
+    func="gpb_launch_remote()">
+    </script>
+  </td> 
+  <tr><td>&nbsp</td></tr>
+</table>
+
+
+<table>
+  <tr>
+  <td>
+    <script>
+<PDM_MACRO NAME=button caption="Spelling[p]" hotkey_name="Spelling[p]" id="btn005" width=0 disabled="defer"
+    func="popup_spellchecker('spell_form','scrpadForm','pbfld100')">
+    </script>
+  </td>
+  <td>
+    <script type="text/javascript">
+<PDM_MACRO NAME=button caption="Clear Scratchpad[!sea]" hotkey_name="Clear Scratchpad[!sea]" id="btn025" width=0 Tooltip="Clear existing scratchpad text and set focus for new text entry"
+    func="pb_clear_scratchpad()">
+    </script>
+  </td> 
+</tr>
+</table>
+
+
+<table>
+<tr>
+  <td rowspan="4"  colspan="3">
+    <textarea id=pbfld100 name=scrpadtext cols=75 rows=6
+        title="Description"
+        onfocus="this.className='focusField'" onblur="this.className=''" >
+    </textarea>
+  </td>
+  <td>
+    <script type="text/javascript">     
+<PDM_MACRO NAME=button caption="Create Request[q]" hotkey_name="Create Request[q]" id="btn010" width=0 disabled="yes" Tooltip="Create a new Request for the selected Contact on the remote system"
+    func="gpb_newcr('R')">
+    </script>
+  </td>
+</tr>
+<tr>
+  <td>
+    <script type="text/javascript">      
+<PDM_MACRO NAME=button caption="Create Incident[!eai]" hotkey_name="Create Incident[!eai]" id="btn011" width=0 disabled="yes" Tooltip="Create a new Incident for the selected contact on the remote system"
+    func="gpb_newcr('I')">
+    </script>
+  </td>
+</tr>
+<tr>
+  <td>
+    <script type="text/javascript">      
+<PDM_MACRO NAME=button caption="Create Problem[!ea]" hotkey_name="Create Problem[!ea]" id="btn012" width=0 disabled="yes" Tooltip="Create a new Problem for the selected Contact on the remote system"
+    func="gpb_newcr('P')">
+    </script>
+  </td>
+</tr>
+<tr>
+  <td>
+    <script type="text/javascript">    
+<PDM_MACRO NAME=button caption="Create Change Order[!ea]" hotkey_name="Create Change Order[!ea]" id="btn013" width=0 disabled="yes" Tooltip="Create a new Change Order for the selected Contact on the remote system"
+    func="gpb_newchg()">
+    </script>
+  </td>
+</tr>
+<tr>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td>
+    <script type="text/javascript">
+<PDM_MACRO NAME=button caption="Create Issue[!ea]" hotkey_name="Create Issue[!ea]" id="btn014" width=0 disabled="yes" Tooltip="Create a new Issue for the selected Contact on the remote system."
+    func="gpb_newiss()">
+    </script>
+  </td>
+</tr>
+<tr>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+</table>
+</tr>
+<tr>
+
+
+
+</PDM_FORM>
+<script type="text/javascript">
+if ( ! _browser.supportsLayers ) {
+window.hiddenform = "spell_form";
+do_hiddenfm('spell_form','scrpadForm');
+}
+insertTabToFrameLink('menu');
+</script>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

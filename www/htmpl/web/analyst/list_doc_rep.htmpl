@@ -1,0 +1,81 @@
+<PDM_IF 0>
+list_doc_rep.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Attachment Repositories.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Attachement Repository Search";
+var hdrTitleList = "Attachment Repository List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Attachment Repository">
+<SCRIPT LANGUAGE="JavaScript">
+
+function getRepositoryType(rep_type)
+{
+	var rep_type_text = "";
+	switch(rep_type)
+	{
+		case "0":
+			rep_type_text = "Service Desk Attachments";
+			break;
+		case "2":
+			rep_type_text = "Knowledge Attachments";
+			break;
+		case "3":
+			rep_type_text = "Images";
+			break;					
+	}
+
+  rs.data(rep_type_text);  
+}
+
+
+
+<PDM_MACRO name=sfStart factory=doc_rep>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="sym" colspan=2 size=40>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="description" colspan=2 size=40>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa serwera" attr="server" colspan=2 size=40>
+
+
+searchFilterDropdown("Repository Type","repository_type","","Service Desk Attachments","0","Knowledge Attachments","2","Images","3");
+
+
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Attachment Repository found";
+var msgFound1 = "1 Attachment Repository found";
+var msgFound = "%1 Attachment Repository found";
+var msgFoundMore = "%1 Attachment Repositories found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Attachment Repository";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Repozytorium" attr=repository_type fmtfunc=getRepositoryType>
+<PDM_MACRO name=lsCol hdr="Nazwa serwera" attr=server>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_doc_rep.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

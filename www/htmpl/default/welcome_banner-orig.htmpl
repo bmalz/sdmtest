@@ -1,0 +1,280 @@
+<PDM_IF 0>
+welcome_banner.htmpl
+WHEN PRESENTED:
+    When we need to display the currently logged-in user's name, Logout link, and scoreboard update time
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript">
+    var _browser = parent._browser;
+    var openedFromAnalystUI = parent.location.search.match(/sdmPageType=(\w+)/);
+	var propFormName = "$prop.form_name";
+	var propFormRelease = "$prop.release" - 0;
+	std_head_setup("no", "$args.KEEP.ForLrel");
+	disable_right_click();
+	var welcomeName = "";
+    <PDM_FMT PAD=NO ESC_STYLE=C>
+	<PDM_IF "$cst.last_name" == "">
+		welcomeName = "$cst.first_name";
+	<PDM_ELSE>
+		<PDM_IF "$cst.first_name" == "">
+			welcomeName = "$cst.last_name";
+		<PDM_ELSE>
+			welcomeName = "$cst.last_name, $cst.first_name";
+		</PDM_IF>
+	</PDM_IF>
+    </PDM_FMT>
+    function close_window()
+    {
+        if (openedFromAnalystUI) {
+            // If it's a window opened from SA AnalystUI set opener to 
+            // some value to make IE think it has an opener and allow closing it unconditionally
+            //and close it
+            window.parent.opener = 'top';
+            ahdframeset.close();
+            return;
+        }
+        // If it's log reader, close with checking.
+        if ((ahdframeset.name == "AHDtop") &&
+        (typeof ahdframeset.log_reader_banner == "object"))
+        {
+            ahdframeset.close();
+            return;
+        }
+        if ( ! cancel_window() )
+            ahdframeset.close();
+        else if ( typeof parent.menubar == "object" )
+            parent.menubar.close_window_is_clicked = true;
+    }
+    
+    function set_role()
+    {
+	    var roles = document.getElementById("roles");
+	    var id = roles.options[roles.selectedIndex].value;
+	    if (id == "$SESSION.ROLE_ID")
+	        return;
+        // Close all windows. If user wants to 
+        // do more editing, don't change role. 
+        if (ahdtop.do_close_all_windows("", true)) 
+            return;
+
+        var func_str = "javascript:parent.ahdtop." + window.name + ".set_role_cb('%bopsid');"; 
+        var url = ahdtop.cfgCgi + "?SID=" + ahdtop.cfgSID +
+	                              "+FID=" + fid_generator() + "+OP=LINK_WITH_BOPSID+SHARE_SESSION=1" +  
+	                              "+URL=" + nx_escape(func_str); 
+        load_workframe(url, 0, "ROLE_CHANGE");
+    }
+
+    function set_role_cb(bopsid)
+    {
+	next_workframe("ROLE_CHANGE");
+	if (bopsid == "")
+	    return;
+	var roles = document.getElementById("roles");
+	var id = roles.options[roles.selectedIndex].value;
+	var form = document.forms["role_change"];
+	if (typeof form != "undefined")
+	{
+	    var role_id_f = form.elements["role_id"];
+	    var bopsid_f = form.elements["rc_bopsid"];
+	    if (typeof role_id_f != "undefined" && 
+		typeof bopsid_f != "undefined")
+	    {
+		role_id_f.value = id;
+		bopsid_f.value = bopsid;
+		// Prevent it from sending ENDSESSION message
+		if (typeof ahdtop.AHD_logout_requested != "undefined")
+		    ahdtop.AHD_logout_requested = void(0);
+		form.submit();
+	    }
+	}
+    }
+
+    function sort_roles(sels)
+    {
+	var temp_arr = new Array();
+	var ret_arr = new Array();
+	var sort_arr = new Array();
+	var i, j;
+	for (i = 0, j = 0; i < sels.length; i += 2, j++)
+	{
+	    sort_arr[j] = sels[i];
+	    temp_arr[sels[i]] = sels[i+1];  
+	}
+	sort_arr.sort(function(x,y) { 
+		var a = String(x).toUpperCase(); 
+		var b = String(y).toUpperCase(); 
+		if (a > b) 
+			return 1;
+		if (a < b) 
+			return -1;
+		return 0; 
+	}); 
+	for (i = 0, j = 0; j < sort_arr.length; i += 2, j++)
+	{
+	    ret_arr[i] = sort_arr[j];
+	    ret_arr[i+1] = temp_arr[sort_arr[j]]; 
+	}
+	return ret_arr;
+    }
+
+function reset_busycursor()
+{
+	if(typeof set_action_in_progress=="function")
+	set_action_in_progress(0);
+}
+
+function check_workframe_loaded()
+{
+      //SDT 14958837 -Take down busy cursor if the workframe is already loaded.
+      //Welcome banner can get loaded slowly in certain cases.   
+      //call set_action_in_progress(0) function onload. 
+	if(typeof parent.is_form_loaded=="boolean")
+	{
+    		if( ( window.name == "welcomebanner" || 
+          		window.name == "welcome_banner"  )  &&
+	  	    window.parent.is_form_loaded == true )
+		{        	
+			if(typeof window.onload =="undefined" || 
+                	   window.onload==null)
+				window.onload=reset_busycursor;
+			
+		}
+	}
+}
+
+function get_search_text() {
+	return jq("input[id=SearchBox]").val();
+}
+
+</script>
+<body class="gn_sdm_header_background">
+<table  class="generic_table">
+  <tr class="welcomebanner">
+  <td style='padding: 0px;'>
+	<table class=welcome_banner_container style='float: right;'>
+	<tr>
+  <pdm_include file=wspicon.htmpl user_type="Analyst">
+		<script type="text/javascript">	
+			if (ahdtop.propPortalSession.length > 0)
+			  document.writeln("<td style='width: 100%;' class=welcome_banner_login_info>");
+			else
+			  document.writeln("<td class=welcome_banner_login_info>");
+		</script>
+		<script type="text/javascript">	
+			if (_browser.isIE)
+			  document.writeln("<img src=\"$prop.CAisd/img/user_login_16.png\" alt=\"\" style=\"vertical-align: -4px;\"></img>");
+			else
+			  document.writeln("<img src=\"$prop.CAisd/img/user_login_16.png\" alt=\"\" style=\"vertical-align: middle\"></img>");
+		</script>
+		<script type="text/javascript">		
+		document.write("<span class=\"welcomebannerlink\" style=\"font-weight: bold;\" title=\"" + welcomeName + "\">");
+		</script>
+
+			<script type="text/javascript">
+				//var link1 = cfgCgi + "?SID=$SESSION.SID+FID=" + fid_generator() + "+OP=UPDATE+FACTORY=cnt+SET.id=$cst.id+KEEP.Update=1+KEEP.POPUP_NAME=aktualizacja_danych_uzytkownika"
+				var link1 = "javascript:popup_window('UserDetail','UPDATE', 0, 0, 'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes','FACTORY=cnt', 'HTMPL=detail_cnt.htmpl', 'SET.id=$cst.id')";
+				document.writeln('<a href="' + link1 + '" alt="Edytuj profil" target="_blank">' + welcomeName + '</a>');
+			</script>			
+		</span>
+		<script type="text/javascript">
+        <PDM_IF "$prop.WSPHOST" == "">
+			var logoutLabel = "Wyloguj";
+			var hotkeyPosn = -1;
+			var logout_loc = "Log Out";
+			if (!nonLatinFlag)
+			    logout_loc = logoutLabel;
+		    var hotkey = registerActionKey( "L", logout_loc, logout_all_windows, 1);
+		    logoutLabel = fmtLabelWithActkey( logoutLabel, hotkey );
+		   // document.writeln("<a href=\"javascript:logout_all_windows(1)\" tabindex=1 class='welcomebannerlogin'><span>" + logoutLabel + "</span></a>");
+		document.write('<a id="imgLogoutBtn" name="imgLogoutBtn" class="button enabledattr buttonEnabled" title="Wyloguj" ondragstart="return false" href="javascript:logout_all_windows(1);"><span>' + logoutLabel + '</span></a>');
+
+        </PDM_IF>
+												
+		</script>
+	</td>
+	<td style='width: 10px; padding: 0px;'></td>
+	<script type="text/javascript">	
+	    if (ahdframeset == ahdtop && !openedFromAnalystUI) 
+	    {
+		<PDM_IF "$prop.WSPHOST" == "">
+		if (ahdtop.propPortalSession.length <= 0 &&
+		    typeof ahdtop.use_role != "undefined" && ahdtop.use_role &&
+		    (typeof cfgGuestUser == "undefined" || cfgGuestUser == "0")) 
+		{
+		    var role_list = <PDM_FMT ESC_STYLE=C PAD=NO>"$SESSION.ROLE_LIST"</PDM_FMT>;
+		    var sels = role_list.split( "@,@" );
+		    sels = sort_roles(sels);
+		    if (sels.length > 2)
+		    {
+			document.writeln("<td class=welcome_banner_role_info>");
+			document.writeln("<select name=roles id=roles tabindex=1 style=\"vertical-align:middle\" title=\"Role list\">");
+			for (var i = 1; i < sels.length; i += 2)
+			{
+			    document.write("<option value=" + sels[i]);
+			    if (sels[i] == "$SESSION.ROLE_ID")
+				document.write(" selected='selected'");
+			    document.writeln(">" + sels[i - 1] + "</option>");
+			}
+			document.writeln("</select>");
+			var setroleLabel = "Set Role";
+			<PDM_MACRO NAME=button 
+				id="btnsetrole" 
+				caption="Zmień Rolę[O]" 
+				func="set_role()" 
+				hotkey_name="Zmień Rolę[O]" >
+
+			document.writeln("</td>");
+		    }
+		}
+		</PDM_IF>
+	    }
+	    else {
+			var closeWinLabel = "Close Window";
+			var hotkeyPosn = -1;
+			var closeWin_loc = "Close Window";
+			if (!nonLatinFlag)
+			    closeWin_loc = closeWinLabel;
+			var hotkey = registerActionKey( "C", 
+							closeWin_loc, close_window );			
+			closeWinLabel = fmtLabelWithActkey( closeWinLabel, hotkey );
+			document.writeln("<td class=welcome_banner_close_window_link>");
+			document.writeln("<span class='welcomebannerlabel'>(</span><a href=\"javascript:close_window()\" class='welcomebannerlink' tabindex=1><span>" + closeWinLabel + "</span></a><span class='welcomebannerlabel'>)</span>");
+			document.writeln("</td>");
+        }
+	</script>
+  <PDM_IF $SESSION.ROLE_ID == "10005">
+  	<td style="padding-left: 20px;"><div style="display:block;"><input type="text" id="SearchBox" name="string" title="Szukaj" onfocus="this.className='focusField';" onblur="this.className='';"></div>
+	</td>
+	<td>
+	<a id="imgSearchServiceBtn" name="imgSearchServiceBtn" class="button enabledattr buttonEnabled" title="Szukaj usługi" ondragstart="return false" onclick="" href="javascript:SearchService(get_search_text());"><span>Szukaj usługi</span></a><a id="imgSearchKBBtn" name="imgSearchKBBtn" class="button enabledattr buttonEnabled" title="Szukaj usługi" ondragstart="return false" href="javascript:SearchKB(get_search_text());"><span>Szukaj w BW</span></a>
+    </td>
+  </PDM_IF>
+	</tr>
+	</table>
+  </td>
+  </tr>
+</table>
+<form name=role_change method=POST action="$cgi" target="_parent">
+<input type="hidden" name=SID value="$SESSION.SID">
+<input type="hidden" name=FID value="1234">
+<input type="hidden" name=OP value="ROLE_CHANGE"> 
+<input type="hidden" name=role_id value=""> 
+<input type="hidden" name=rc_bopsid value=""> 
+</form>
+<script type="text/javascript">
+//SDT 14958837-Take down busy cursor if the propForm is already loaded before welcome banner.  
+check_workframe_loaded();
+</script>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: welcome_banner.htmpl ASPEN.10 2012/03/12 16:18:50 chapr06 Exp $
+</PDM_IF>

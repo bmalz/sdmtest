@@ -1,0 +1,56 @@
+<PDM_IF 0>
+@(#)$Id: cancel.htmpl ANDERSON.1 2009/05/06 14:00:37 mitst04 Exp $
+cancel.htmpl
+WHEN PRESENTED:
+	When a "cancel" link is clicked in a popup that doesn't have a history.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT>
+var form_title = "Update cancellation in progress";
+var argFromJC = "$args.KEEP.FROM_JC";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT>
+	window.onload = function()
+	{
+                if ( window.name == "content" && argFromJC != "1") {
+                   var url = "$cgi?SID=$prop.SID+FID=$prop.FID" +
+                             "+OP=DISPLAY_FORM+HTMPL=bin_form_np.htmpl";
+                   window.location.href = url;
+                }
+                else {
+                   var win;
+                   if (typeof self.parent == "object")
+                           win = self.parent;
+                   else
+                           win = self;
+                   
+                   if ((typeof ahdtop == "object") &&
+                       (typeof ahdtop.close_edit_window == "object") &&
+                       (ahdtop.close_edit_window.edit_windows.length > 0))
+                        ahdtop.close_edit_window.next_window(win.name);
+                        
+                   if (typeof win.doClose == "function" )
+                           win.doClose();
+                   else
+		   {
+			if (typeof win.parent.ahdframeset == "object" &&
+			    win.parent.ahdframeset != null &&
+			    win.parent.ahdframeset != ahdtop)
+			    win.close();
+			else
+			{
+			    var url = "$cgi?SID=$prop.SID+FID=$prop.FID" +
+				      "+OP=DISPLAY_FORM" + 
+				      "+HTMPL=bin_form_np.htmpl";
+			    window.location.href = url;
+			}
+		  }
+	       }
+	}
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+</HTML>

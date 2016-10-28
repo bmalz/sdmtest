@@ -1,0 +1,85 @@
+<PDM_IF 0>
+detail_sa_cr_template.htmpl
+
+ WHEN PRESENTED: When we need to display details of Request template
+
+</PDM_IF>
+
+<HTML lang="en">
+
+<HEAD>
+	<PDM_PRAGMA RELEASE=110>
+	<PDM_INCLUDE FILE=styles.htmpl>
+	<SCRIPT LANGUAGE="JavaScript">
+		var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Request Template Association Detail"</PDM_FMT>;
+		var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Request Template Association"</PDM_FMT>;
+		var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Request Template Association"</PDM_FMT>;
+	</SCRIPT>
+	<PDM_INCLUDE FILE=std_head.htmpl>
+
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+	<SCRIPT LANGUAGE="JavaScript">
+		argPersistentID = "$args.persistent_id";
+
+		function preSaveTrigger()
+		{
+			var frmMain = document.forms["main_form"].elements;
+			
+			var isDefault = frmMain["SET.is_default"];
+			var isActive = frmMain["SET.isActive"];
+			
+			if ((isDefault == undefined || isDefault.value == 1) && isActive.value == 0) {
+				alert("Cannot set default template as not active!");
+				return false;
+			}
+			return true;
+		}
+		
+		function unloadActions()
+		{
+   			if ( _dtl.edit )
+      			unload_check();
+		}
+	</SCRIPT>
+</HEAD>
+
+<BODY class="detailro" onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER><SCRIPT LANGUAGE="JavaScript">
+		
+<PDM_MACRO name=dtlForm factory="sa_cr_template">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=dtlReadonly hdr="Nazwa" attr="tpl" colspan="3">
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Nazwa" attr="tpl" colspan="3" factory="cr_tpl">
+</PDM_IF>
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis" attr="tpl.description" colspan="3">
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Ustaw status zgłoszenia na" attr="ticket_status" factory="crs_in">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "${args.is_default}" != "1">
+<PDM_MACRO name=dtlCheckbox hdr="Domyślnie" attr="is_default">
+<PDM_ELSE>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Domyślnie" attr="is_default">
+</PDM_IF>
+<PDM_MACRO name=dtlCheckbox hdr="Aktywne" attr="isActive">
+<PDM_MACRO name=dtlEndTable>
+	</SCRIPT> 
+	
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

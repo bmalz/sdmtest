@@ -1,0 +1,46 @@
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+function frameset_loaded()
+{
+    // If cai_main is defined, save it in ahdframe, 
+    // otherwise, the HTMPL page needs to figure out 
+    // how to set ahdframe.
+    if (typeof window.cai_main != "undefined")
+    {
+	ahdframe = window.cai_main;
+	ahdframeset.ahdframe = ahdframe;
+	if (typeof parent.ahdframe == "object")
+	    parent.ahdframe = ahdframe;
+	if (typeof parent.ahdframeset == "object")
+	    parent.ahdframeset.ahdframe = ahdframe;
+    }
+}
+
+var where_clause = "assignee.id = U'" + cstID + "' AND active = 1";
+var fid = fid_generator();
+</script>
+</HEAD>
+<SCRIPT>
+	document.write('<FRAMESET ROWS="61,*" FRAMEBORDER=0>');
+		document.write('<FRAME style="border: 0px" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=mytasks_topbar.htmpl" NAME=MyTasks>')
+			document.write('<FRAME style="border: 0px" SRC="$cgi?OP=SEARCH+FACTORY=ztask+KEEP.NoBar=1+KEEP.where_clause="' + encodeURIComponent(where_clause) + 'NAME=MyTasksList>');
+	document.write('</FRAMESET>');
+</SCRIPT>
+</HTML>
+<PDM_WSP>

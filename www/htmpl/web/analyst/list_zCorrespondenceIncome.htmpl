@@ -1,0 +1,131 @@
+<PDM_IF 0>
+20130913 bmalz @ e-xim
+LastMod: 20131003
+</PDM_IF>
+<HTML lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwarka korespondencji przychodzącej";
+var hdrTitleList = "Lista korespondencji przychodzącej";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zCorrespondenceIncomesum.rpt", "zCorrespondenceIncomedtl.rpt");
+var cfgCanEdit = true;
+if(typeof ahdtop != "undefined" && typeof ahdtop.toolbarTab != "undefined" && ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].code=='sd')
+	var cfgCanCopy = false;
+else
+	var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+
+// 20131016 bmalz @ e-xim
+<PDM_IF "$args.KEEP.CanAdd" == "1">
+  var enableExtraBtn = true;
+  cfgExtraButtonBefore = new Array("Dodaj", "AddCorrespondence()", "Utwórz odpowiedź", "CreateReply()");
+
+  function AddCorrespondence() {
+    popup_window('RequestDetail', 'CREATE_NEW', 0, 0, 
+    'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+    'FACTORY=zCorrespondenceIncome', 
+    '', 
+    'PRESET=cr:$args.KEEP.CrId');
+  }
+
+  function CreateReply() {
+    if(self.activePersid != "") {
+      popup_window('RequestDetail', 'CREATE_NEW', 0, 0, 
+        'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+        'FACTORY=zCorrespondanceOucome', 
+        '', 
+        'KEEP.IsReply=1', 'KEEP.SelectedPersId=' + self.activePersid);
+    } else {
+      alert("Wybierz korespondencje, której dotyczyć ma odpowiedź.");
+    }
+  }
+</PDM_IF>
+
+<PDM_IF "$args.KEEP.forCrtoCorr" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+	var enableExtraBtn = true;
+    cfgExtraButton = new Array("Aktualizuj korespondencje", "UpdateCorrespondenceIncome()", enableExtraBtn);
+
+    function UpdateCorrespondenceIncome() {
+        update_with_lrel_style("cr", "$args.KEEP.CR_PERID", "zCorrespondenceIncome", "zCorrespondenceIncomeRef", "Korespondencja przychodząca", "Korespondencja powiązana", "", "KEEP.forCrtoCorr=0");
+    }
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=sfStart factory="zCorrespondenceIncome">
+<PDM_IF "$args.KEEP.forCrtoCorr" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.zCorrespondenceIncome.id" value="$args.QBE.EQ.zCorrespondenceIncome.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+	document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_org.htmpl>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nadawca" attr="Sender">
+<PDM_IF 0>
+  <PDM_MACRO name=sfLookup hdr="Adresat" attr="RecipientEmployee">
+  <PDM_MACRO name=sfLookup hdr="Organizacja" attr="RecipientOrganization">
+</PDM_IF>
+<PDM_MACRO name=sfLookup hdr="Rodzaj przesyłki" attr="CorrespondanceLetterType">
+<PDM_MACRO name=sfTextbox hdr="Data" attr="IncomeDate" size=20>
+<PDM_MACRO name=sfLookup hdr="Wniosek" attr="cr">
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="Description" size=20>
+<PDM_IF "zCorrespondenceIncome" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO NAME=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono korespondencji przychodzącej";
+  var msgFound1 = "Znaleziono 1 korespondencje przychodzącą";
+  var msgFound = "Znaleziono %1 korespondencji przychodzącej";
+  var msgFoundMore = "Znaleziono %1 korespondencji przychodzącej.  Wyświetlono %2 z %3";
+  var msgSelect = "Kliknij aby wybrać żądany element";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Numer" attr="ref_num" exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Nadawca" attr="Sender">
+<PDM_IF 0>
+  <PDM_MACRO name=lsCol hdr="Adresat" attr="RecipientEmployee">
+  <PDM_MACRO name=lsCol hdr="Organizacja" attr="RecipientOrganization">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Rodzaj przesyłki" attr="CorrespondanceLetterType">
+<PDM_MACRO name=lsCol hdr="Data" attr="IncomeDate">
+<PDM_MACRO name=lsCol hdr="Wniosek" attr="cr">
+<PDM_MACRO name=lsCol hdr="Opis" attr="Description">
+<PDM_MACRO name=lsEnd>
+<PDM_IF "$args.KEEP.forCrtoCorr" == "1">
+
+</PDM_IF>
+// 20131016 bmalz @ e-xim
+ImgBtnHideButton("btnShowHide");
+ImgBtnHideButton("btndflt");
+ImgBtnHideButton("btnClear");
+ImgBtnHideButton("btnExport");
+
+<PDM_IF "$args.KEEP.CanAdd" == "1" || "$args.KEEP.forCrtoCorr" == "1">
+  ImgBtnHideButton("btnNew");
+</PDM_IF>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

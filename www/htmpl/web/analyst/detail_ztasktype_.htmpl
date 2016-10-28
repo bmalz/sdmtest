@@ -1,0 +1,63 @@
+<PDM_IF 0>
+detail_ztasktype.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Task Type
+INTENT:
+    Display the detail info for the  Task Type
+
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Typ zadania $args.sym"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowanie typu zadania $args.sym"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie typu zadania $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+   cancel_any_lrel_update();
+   deregister_window();
+}
+</script>
+
+</head>
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Task Type" key="$args.name">
+<CENTER>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=ztasktype>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Klasa zadania" attr="task">
+<PDM_MACRO name=dtlTextbox hdr="Typ zadania" attr=sym>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_IF 0>
+detailDropdown("Rodzaj obiektu","zparent_type","zparent_type",1,20, 
+		"0","","$args.zparent_type","yes","name","","","",
+		"no","0","","",
+		"Wniosek","cr",
+		"Zmiana","chg");	
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr=modified_date colspan=2>
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr=last_mod_by.combo_name colspan=2>
+<PDM_WSP>

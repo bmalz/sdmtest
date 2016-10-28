@@ -1,0 +1,68 @@
+<PDM_IF 0>
+$Id: list_O_EVENTS.htmpl,v 1.3 2006/11/09 17:52:15 kubtr01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of history events.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Event Search";
+var hdrTitleList = "Event List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script>
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css">
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/comboname.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kd_tabs.js"></script>
+</head>
+<body class="list gn_left_top_margin_0" onload="LoadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="events" header=no>
+
+<script>
+<PDM_MACRO name=sfStart create=false factory=O_EVENTS>
+document.writeln("<input type='hidden' name='QBE.EQ.ENTITY_ID' id='QBE.EQ.ENTITY_ID' value='$args.id'>");
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nazwa użytkownika" attr=WF_USER_ID>
+<PDM_MACRO name=sfDate hdr="Data początkowa" attr=EVENT_TIMESTAMP qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Data końcowa" attr=EVENT_TIMESTAMP qbe_condition=LE>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No events found";
+var msgFound1 = "1 event found";
+var msgFound = "%1 events found";
+var msgFoundMore = "%1 events found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired events";
+var msgSelectAlg = "Click to select desired events and add a %1 activity log";
+var msgSelectTempl = "Click to select desired events template";
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Zdarzenie" attr=EVENT_NAME sort=no>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=WF_USER_ID sort=no>
+<PDM_MACRO name=lsCol hdr="Znacznik czasu" attr=EVENT_TIMESTAMP sort=no>
+<PDM_MACRO name=lsCol hdr="Numer wesji" attr=VER_COUNT sort=no>
+<PDM_MACRO name=lsCol hdr="Szczegóły zdarzenia" attr=ACTION exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsEnd>
+
+//rs.overrideMenu=true;
+
+var ctxMenu=new ContextMenu("idMenueTabHistory");
+ctxMenu.addItem("View", "ViewEvent(self.activePersid);");
+ctxMenu.finish();
+
+</script>
+</PDM_IF>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

@@ -1,0 +1,63 @@
+<PDM_IF 0>
+preview_pr.htmpl
+WHEN PRESENTED:
+   Mouseover Preview form for problems.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "$args.ref_num Problem Detail";
+var hdrTitleTempl = '$args.ref_num Problem Template <PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT> Detail';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</script>
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=cr>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zgłaszający" attr=requested_by>
+<PDM_MACRO name=dtlReadonly attr=customer>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja problemu" attr=category>
+<PDM_MACRO name=dtlReadonly attr=status>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly attr=assignee>
+<PDM_MACRO name=dtlReadonly attr=group>
+<PDM_MACRO name=dtlReadonly attr=active>
+<PDM_MACRO name=dtlReadonly attr=priority>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly attr=parent>
+<PDM_MACRO name=dtlReadonly attr=change>
+<PDM_MACRO name=dtlReadonly attr=rootcause>
+<PDM_MACRO name=dtlReadonly attr=affected_resource>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox attr=summary colspan=4 keeplinks=yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly attr=open_date>
+<PDM_MACRO name=dtlDateReadonly attr=last_mod_dt>
+<PDM_MACRO name=dtlDateReadonly attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly attr=close_date>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: preview_pr.htmpl ASPEN.0 2010/10/04 09:27:24 ralje02 Exp $
+</PDM_IF>
+
+<PDM_WSP>

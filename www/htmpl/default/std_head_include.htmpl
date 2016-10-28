@@ -1,0 +1,37 @@
+<PDM_IF 0>
+$Id: std_head_include.htmpl,v 1.2 2006/12/12 18:31:44 jenji01 Exp $
+
+Note: The list of JavaScript files included here MUST be identical to the
+      contents of std_head.js, including file sequence.
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<PDM_IF "$prop.DebugScript" != "1">
+<script type="text/javascript" src="$CAisd/scripts/std_head.js"></script>
+<PDM_ELSE>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ajax.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/dynlayer.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/contact_flds.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/popup.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/menus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/profile_browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/gsub.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/imgbutton.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_faqsearch_menus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/architect_menus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/std_footer.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/frameset.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/mouseover_preview.js"></script>
+</PDM_IF>
+<script type="text/javascript" src="$CAisd/scripts/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/jquery/jquery-ui.min.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/jquery/jquery.tools.min.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/jquery/jquery.ui.autocomplete.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/jquery/grid.locale-en.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/jquery/jquery.jqGrid.min.js"></script>
+<PDM_JSCRIPT INSERT=HERE>

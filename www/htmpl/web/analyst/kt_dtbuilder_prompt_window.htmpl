@@ -1,0 +1,36 @@
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Prompt";
+function window_onload()
+{
+  document.getElementById("txtValue").value = top.opener.GetNodeName();
+}
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/kt_dtbuilder_prompt_window.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+</head>
+<body onload="window_onload()">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+
+<table class="dtl_page_hdr_container">
+<tr><td>
+<label id="lblMessage" class="label"><PDM_IF 0>LOCALIZATION</PDM_IF>Please enter the new node name:</label>
+</td></tr><tr><td>
+<input name="txtValue" id="txtValue" class="gn_dtbuilder_textbox">
+</td></tr><tr><td>
+<script>
+<PDM_MACRO name=dtlForm button=false factory="USP_PROPERTIES" skiphdr=yes>
+<PDM_MACRO name=button caption="OK[O]" disabled="defer" func="SaveData()" hotkey_name="OK[O]" id="btnOK" newrow="yes">
+<PDM_MACRO name=button caption="Cancel[a]" btntype=negative disabled="defer" endrow="yes" func="top.close()" hotkey_name="Cancel[a]" id="btnCancel">
+</script>   
+</td></tr>
+</table>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</HTML>
+<PDM_WSP>

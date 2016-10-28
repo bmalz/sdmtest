@@ -1,0 +1,254 @@
+<PDM_IF 0>
+$Id: list_KT_LIFE_CYCLE_REP.htmpl,v 1.2 2006/11/08 00:54:33 olsjo01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of documents that were tagged due to an automated policy.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Knowledge Document List";
+var hdrTitleList = "Knowledge Document List";
+var cfgCanEdit = true;
+var subGridKeepTags = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list" onload=window_onload()>
+<PDM_INCLUDE FILE=std_body.htmpl filename="documents" header=no>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=KT_LIFE_CYCLE_REP>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Polisa" attr=POLICY>
+<PDM_MACRO name=sfLookup hdr="Właściciel dokumentu" attr=KD.OWNER_ID factory="cnt">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data utworzenia" attr=KD.CREATION_DATE qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data utworzenia" attr=KD.CREATION_DATE qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+    searchCategoriesMultiLookup(2);
+<PDM_MACRO name=sfEnd>
+function window_onload()
+{
+	for (var iElement=0; iElement<document.getElementsByTagName("input").length; iElement++)
+	{
+		if (document.getElementsByTagName("input").item(iElement).name == "QBE.IN.KD.PRIMARY_INDEX.RELATIONAL_ID")
+		{
+		//disable the autofill for the category element
+		var oElement = document.getElementsByTagName("input").item(iElement);
+		oElement.onChange = null;
+		}
+	}
+}
+function CreateDocLink(value)
+{
+	var html = "<a class=record id='aDocLink" + row_counter + "' href='javascript:OpenDoc(" + doc_id + ")'>" + value + "</a>";
+	rs.data(html);
+	return;
+}
+function OpenDoc(doc_id)
+{
+	var persid = "KD:" + doc_id;
+	var features="directories=no"+
+		",location=no"+
+		",height=" + popupHeight(LARGE_POPUP) +
+		",width=" + popupWidth(LARGE_POPUP)+
+		",status=no";
+	popup_window(persid,'SHOW_DETAIL', 0, 0, features, 'PERSID=' + persid);
+}
+function CreatePolicyLink(value)
+{
+	var html = "<a class=record id='aPolicyLink" + row_counter + "' href='javascript:OpenPolicy(" + policy_id + ")'>" + value + "</a>";
+	rs.data(html);
+	return;
+}
+function OpenPolicy(policy_id)
+{
+	var persid = "QUERY_POLICY:" + policy_id;
+	var features="directories=no"+
+		",location=no"+
+		",height=" + popupHeight(MEDIUM_POPUP) +
+		",width=" + popupWidth(MEDIUM_POPUP)+
+		",status=no";
+	popup_window(persid,'SHOW_DETAIL', 0, 0, features, 'PERSID=' + persid);
+}
+function CreateOpenCommentLink(value)
+{
+	var html = "<a class=record id='aFlagLink" + row_counter + "' href='javascript:CreateFlag(" + doc_id + ")'>" + "Open a Follow-Up Comment" + "</a>";
+	rs.data(html);
+	return;
+}
+function CreateFlag(doc_id)
+{
+	var features="directories=no"+
+		",location=no"+
+		",height=" + popupHeight(MEDIUM_POPUP) +
+		",width=" + popupWidth(MEDIUM_POPUP)+
+		",status=no";
+	popup_window('comment:' + doc_id,'CREATE_NEW', 0, 0, features, 'FACTORY=O_COMMENTS', 'PRESET=DOC_ID:' + doc_id);
+}
+function CreateDontAlertLink(value)
+{
+	var html = "<a class=record id='aDontAlert" + row_counter + "' href='javascript:DontAlert(" + kt_lifecycle_id + "," + doc_id + ")'>" + "Don't alert on this document again" + "</a>";
+	rs.data(html);
+	return;
+}
+function DontAlert(kt_lifecycle_id, doc_id)
+{
+	var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+	"+OP=KT_UPDATE_LIFE_CYCLE_REP"+
+	"+DELETE_ID="+kt_lifecycle_id+
+	"+DOC_ID="+doc_id+
+	"+SKIP_AUTO_POLICIES=1";
+	
+	ahdframeset.workframe.location.href=url;
+}
+function CreateRemoveLink(value)
+{
+	var html = "<a class=record id='aRemoveFromList" + row_counter + "' href='javascript:RemoveFromList(" + kt_lifecycle_id + "," + doc_id + ")'>" + "Remove from list" + "</a>";
+	rs.data(html);
+	return;
+}
+function RemoveFromList(kt_lifecycle_id, doc_id)
+{
+	var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+	"+OP=KT_UPDATE_LIFE_CYCLE_REP"+
+	"+DELETE_ID="+kt_lifecycle_id+
+	"+DOC_ID="+doc_id+	
+	"+SKIP_AUTO_POLICIES=0";
+	
+	ahdframeset.workframe.location.href=url;
+}
+function CreateEmptyCell(value)
+{
+	rs.data("&nbsp;");
+	return;
+}
+function CreateHitsLink(value)
+{
+	var html;
+    if ( value == '0')
+      html = value;
+    else
+      html = "<A CLASS=record " + 
+             "HREF=\"javascript:popup_window('','SEARCH', 0, 0, 'directories=no,location=no,menubar=no,status=no', " + 
+             "'FACTORY=BU_TRANS', 'QBE.EQ.DOC_ID=" + doc_id + "'" + 
+             ",'KEEP.IsPopUp=1'" + ",'DOC_ID=" + doc_id + "')\">" + value + "</A>\n";
+    rs.data(html);
+}
+function DisableCurrentRow()
+{
+	if ( m_active_row >= 0)
+	{
+		for ( var i = 0; ; i++ ) 
+		{
+			var selRow = "rsTR" + m_active_row + "_" + i;
+			selRow = document.getElementById(selRow);
+
+			if ( typeof selRow != "object" ||
+				selRow == null )
+				break;
+			selRow.disabled = true;
+			selRow.removeAttribute("href"); 
+			selRow.onclick = null;
+		}
+		var e = document.getElementById("rsmsg" + m_active_row);
+		if ( typeof e == "object" && e != null && e.style.display != "none" )
+			e.childNodes[0].className = "reserr" + (row % 2);
+		window.status = window.defaultStatus;
+   //disable all links
+   var row = Number(m_active_row);
+   row++;
+   document.getElementById("aDocLink" + row).disabled = true;
+   document.getElementById("aDocLink" + row).removeAttribute("href"); 
+   document.getElementById("aDocLink" + row).onclick = null;
+   //
+   document.getElementById("aPolicyLink" + row).disabled = true;
+   document.getElementById("aPolicyLink" + row).removeAttribute("href"); 
+   document.getElementById("aPolicyLink" + row).onclick = null;
+   //
+   document.getElementById("aFlagLink" + row).disabled = true;
+   document.getElementById("aFlagLink" + row).removeAttribute("href"); 
+   document.getElementById("aFlagLink" + row).onclick = null;
+   //
+   document.getElementById("aRemoveFromList" + row).disabled = true;
+   document.getElementById("aRemoveFromList" + row).removeAttribute("href"); 
+   document.getElementById("aRemoveFromList" + row).onclick = null;
+   //
+   document.getElementById("aDontAlert" + row).disabled = true;
+   document.getElementById("aDontAlert" + row).removeAttribute("href"); 
+   document.getElementById("aDontAlert" + row).onclick = null;
+   //
+   }
+   
+}
+var m_active_row;
+function rsGetActiveRow(row)
+{
+	m_active_row = row;
+}
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+	<SCRIPT LANGUAGE="JavaScript">
+		var arrFields = new Array;
+		var msgFoundNone = "No documents found";
+		var msgFound1 = "1 document found";
+		var msgFound = "%1 documents found";
+		var msgFoundMore = "%1 documents found.  Displaying %2 through %3";
+		var row_counter = 0;
+		
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var doc_id = '@{list.KD.id}'">
+<PDM_MACRO name=lsWrite text="var policy_id = '@{list.POLICY.id}'">
+<PDM_MACRO name=lsWrite text="var kt_lifecycle_id = '@{list.id}'">
+<PDM_MACRO name=lsWrite text="row_counter++">
+		//row 1
+		
+<PDM_MACRO name=lsCol hdr="Tytuł" attr=KD.TITLE fmtfunc=CreateDocLink link=yes nowrap=yes sort=no width=255>
+<PDM_MACRO name=lsCol hdr="Polisa / Akcja" attr=POLICY export=no fmtfunc=CreatePolicyLink nowrap=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Atrybuty" attr=KD.STATUS_ID.STATUS label="Status" nowrap=yes>
+		//row 2
+		
+<PDM_MACRO name=lsCol label="Category" attr=KD.PRIMARY_INDEX.INDEX_PATH colspan=2 export=no nowrap=yes sort=no startrow=yes width=255>
+<PDM_MACRO name=lsCol label="Created" attr=KD.CREATION_DATE nowrap=yes>
+		//row 3		
+		
+<PDM_MACRO name=lsCol attr=POLICY export=no fmtfunc=CreateEmptyCell nowrap=yes sort=no startrow=yes>
+<PDM_MACRO name=lsCol attr=POLICY export=no fmtfunc=CreateOpenCommentLink nowrap=yes sort=no>
+<PDM_MACRO name=lsCol label="Hits" attr=KD.HITS export=no fmtfunc=CreateHitsLink sort=no>
+		//row 4
+		
+<PDM_MACRO name=lsCol attr=POLICY export=no fmtfunc=CreateEmptyCell nowrap=yes sort=no startrow=yes>
+<PDM_MACRO name=lsCol attr=POLICY export=no fmtfunc=CreateDontAlertLink nowrap=yes sort=no>
+<PDM_MACRO name=lsCol label="Last Hit" attr=KD.LAST_HIT_DATE nowrap=yes>
+		//row 5
+		
+<PDM_MACRO name=lsCol attr=POLICY export=no fmtfunc=CreateEmptyCell nowrap=yes sort=no startrow=yes>
+<PDM_MACRO name=lsCol attr=POLICY export=no fmtfunc=CreateRemoveLink nowrap=yes sort=no>
+<PDM_MACRO name=lsCol label="Solution Count" attr=KD.SD_ACCEPTED_HITS>
+		//row 6
+		
+<PDM_MACRO name=lsCol attr=POLICY colspan=2 export=no fmtfunc=CreateEmptyCell nowrap=yes sort=no startrow=yes>
+<PDM_MACRO name=lsCol label="Last Solution" attr=KD.LAST_ACCEPTED_DATE nowrap=yes>
+<PDM_MACRO name=lsEnd>	
+		
+		//don't display standard context menu items
+		var ctxMenu=new ContextMenu("idMenuActions");
+		ctxMenu.finish();
+	</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

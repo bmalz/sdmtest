@@ -1,0 +1,386 @@
+<PDM_IF 0>
+@(#)$Id: screen_reader_usage.htmpl ASPEN.1 2010/08/26 18:31:40 bansu06 Exp $
+</PDM_IF>
+<head>
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript">
+var form_title = "Using a Screen Reader with $ProductName";
+</script>
+<pdm_include file=styles.htmpl>
+<pdm_include file=std_head.htmpl>
+<script type="text/javascript" src=$CAisd/scripts/sitemods.js></script>
+<style type="text/css">
+th {vertical-align: top; align: left;}
+td class=editinfo {vertical-align: top; align: left;}
+</style>
+</head>
+<body class=editform>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<script type="text/javascript">
+startScrollbar();
+</script>
+<h2>Overview</h2>
+$ProductName includes a number of features to enhance its
+accessibility for visually handicapped users working with a screen reader,
+such as JAWS or Window-Eyes.  In addition to standard
+accessibility measures, such as frame titles and table summaries,
+$ProductName modifies its user interface for optimal use with a
+screen reader when the Using Screen Reader preference is selected from
+the Preferences item on the View menu.  This page describes the operation
+of $ProductName for users with this preference selected.
+<h2 id="Product_Toolbar">Product Toolbar</h2>
+<PDM_IF "$env.NX_KT" == "Yes">
+The $ProductName main page contains a product toolbar with a number of tab areas 
+			(depending on your role authorization). To navigate to the toolbar, press Alt+P, 
+			tab to the area you want, and then press Enter to display the main page for that product. 
+			It may be necessary to cancel virtual cursor mode in your screen reader in order for 
+			the screen reader cursor to follow the screen cursor to the desired tab. 
+<PDM_ELSE>
+The main page of $ProductName contains
+a product toolbar, showing up to three product
+areas (depending on your authorization).  These are Service Desk,
+Keyword Search,
+and Administration. To navigate
+to the toolbar, press Alt+P, then tab to the product you want, then press
+Enter to display the main page for that product.  It may be necessary to cancel virtual cursor mode in your screen reader in order for the screen reader cursor to follow the screen cursor to the tab.
+</PDM_IF>
+<h2 id="Menu_Bar">Menu Bar</h2>
+All $ProductName pages contain a menu bar.
+The menu bar is a small form consisting of several drop down
+select boxes whose initial entry names the menu, such as File Menu or View
+Menu.  To navigate to the menu bar, press Alt+M, tab to the menu you
+want, and use it as a standard forms control.  The control automatically
+reverts to its first entry (the xx menu title) after you make a selection.
+<p id="Context_Menus">
+Certain links, such as list items, have context menus.  These are activated
+with the right mouse click function of the screen reader, or by pressing
+right arrow when the screen focus is on the link and the screen reader
+is in forms mode.  $ProductName displays a context menu in a new browser
+window that contains only a header and a list of links.  The last link in
+a context menu window is always "Close Menu Window".
+To select a menu item, activate the corresponding link.
+To close the context menu without selecting an item, either activate
+the Close Menu Window link, or use the browser close window
+hotkey, normally Ctrl+W.
+<h2 id="Go_Button">Go Button</h2>
+All $ProductName pages contain a Go button form allowing display
+of a specific object (such as a request or change order).  The Go button 
+form consists of a dropdown select box to select the object type, an
+input box for the object's key, and the Go button itself.  To navigate to
+the Go button form, press Alt+G, which shifts focus to the dropdown
+select.
+<h2>Product Main Pages</h2>
+<h3>Product Main Page Overview</h3>
+
+				All $ProductName main pages consist of two frames. The left frame contains a tree pane. 
+				Each node on the tree is either an item or a folder, which can contain other folders or items. 
+				Folders are preceded by a link that can be used to open or close the folder. All folders are 
+				initially closed. Folder and item names are also links, with a context menu. To navigate to 
+				the left frame of the current main page, press Alt+X, which shifts focus to the top link of
+				the frame.
+				
+			
+<p>
+The right frame of a product main page displays information requested by activating a
+			 tree item link or certain menu bar items. It typically contains a list page, though it may also
+			 contain a detail page if the Avoid Popups user preference is active. 
+<h3 id="SD_Main">$ProductName Main Page</h3>
+The left frame of the $ProductName main page contains the scoreboard.  The
+scoreboard is a tree whose item nodes are stored queries, each identified by
+name and followed by a parentheses count of the objects selected by the
+query.  Clicking on a query displays in the right frame a list of the items selected by the query.
+An Update Counts button at the top of the scoreboard frame
+can be used to update the scoreboard counts from the current contents of
+the database.
+<p>
+A <a href="#Context_Menus" title="Context Menus">
+context menu</a> on scoreboard folders allows you to pop up a new page with
+a graph.  The graph is a chart with a visual representation of the counts of the
+items in the folder, and is of limited use to a visually handicapped user.
+<PDM_IF "$env.NX_KT" == "Yes">
+<h3>Knowledge Main Page</h3>
+The left frame of the Knowledge page is a tree whose
+item nodes are knowledge categories. Clicking on a folder or item displays
+in the right frame a list of the knowledge documents in the category.
+<p>
+A <a href="#Context_Menus" title="Context Menus">
+context menu</a> on knowledge categories allows you to create new
+documents in the category.
+<p>
+The right frame of the Knowledge main page is a knowledge search form.
+This is a standard search form, except the text box for entering keywords
+is placed before the search filter and to the left of the buttons.  This text
+box is the first one on the frame.
+<PDM_ELSE>
+<h3>Keyword Search Main Page</h3>
+The Knowledge Search main page consists of a single frame containing
+a knowledge search form.
+This is a standard search form, except the text box for entering keywords
+is placed before the search filter and to the left of the buttons.  This text
+box is the first one on the frame.
+</PDM_IF>
+<h3>Administration Main Page</h3>
+The left frame of the Administration main page contains a tree whose
+item nodes are administrative objects.  Activating the link of an item
+displays in the right frame a list of the objects.
+<p>
+A <a href="#Context_Menus" title="Context Menus">
+context menu</a> on administration objects in the tree allows you to
+view, modify, add or remove nodes from the tree.
+<h2 id="List_Page">List Pages</h2>
+A list page displays a list of objects from the database.  Typically, you
+display a list page either by activating an item node link in a tree in 
+the left frame of a main form, or by selecting an item from the Search Menu 
+in the menu bar and pressing the Search button (either by navigating to it
+or by pressing Alt+S).
+<h3 id="Search_Filter">Search Filter</h3>
+
+				The top portion of a list page is called the search filter, which contains search
+				criteria in QBE format. The search filter is preceded by a level 3 header.
+				It consists of one or more standard HTML forms containing text boxes and dropdown select
+				controls. Each control is labeled with the name of the field it contains. Some labels are
+				links, identified by the word "Lookup" at the end of the label. When the screen focus is in
+				a text box with an associated lookup link, you can press up arrow to navigate to the link,
+				then Enter to activate the link and pop up a list page, allowing you to find and select a
+				value for the field. Alternatively, you can type the first few characters of the desired
+				value and press Tab to ask $ProductName to fill the field automatically.
+				$ProductName does this if it can find a unique value that begins with the characters
+				you typed; otherwise, it will display the search page, just as if you had activated
+				the lookup link.
+			
+<p>
+Once you've filled in search criteria, you can initiate a search by activating the
+Search button.  This can be done either by navigating to it, or by pressing Alt+S.
+When the search completes, $ProductName pops up a dialog box
+summarizing the results of the search, and rewrites the form 
+to include a table of the items found (the results list).
+<h3 id="Results_List">Results List</h3>
+Search results are displayed in an HTML table at the bottom of the page. 
+The results list is also preceded by a level 3 header.
+Some of the column headers in the
+search results table are links.  Activating a column header link redisplays the table
+sorted by the field named by the header.
+<p>
+Table rows below the header display list results.  Depending on the list page, a
+list result may take one or two table rows.  One of the values of a detail line is
+a link.  Activating this link displays a
+<a href="#Detail_Page">detail page</a>.  Detail pages are normally
+popped up in a new window,
+but can overlay the list page if the Avoid Popups preference is active.
+<p>
+You can also request a
+<a href="#Context_Menus" title="Context Menus">
+context menu</a> from a link in a list.  The context menu gives you a number
+of options with the detail record, such as editing it or creating an activity log.
+<p>
+A results list normally shows a maximum of 25 results (the maximum can be
+configured by your site).  If a search returns more than 25 objects, the total 
+number is shown at the top and bottom of the form, between the Prev and
+Next links that you can use to move to different pages of the list.
+<h3 id="List_Edit">Editing in a List</h3>
+Some list pages (for example, the Request list) allow you to edit data directly
+on the list page.  This can be a convenient way of changing several detail
+records at the same time.
+<p>
+If a list page contains a list edit form, it will have an Edit in List button.
+You enter list edit mode by activating the Edit in List button, either by
+navigating to it or by pressing Alt+E.
+<p>
+Activating list edit mode copies data from the first result in the list into the
+list edit form.  You can edit this data directly in the form.  Changes you make
+are copied to the results list, but not to the database.  You can change the
+record shown in the list edit form either by using the up and down arrow keys
+or by activating the link on a result.  Once you have made all the changes you
+want, you can write them to the database by activating the Save button on the
+list edit form.
+<p>
+In addition to Save, there are two other buttons on the List Edit form.
+The Cancel button reverts all changes not already saved and leaves list edit
+mode.  The Change All button copies all changes in the current detail row
+to all rows in the list.
+<h3>List Page Access Key Summary</h3>
+The following access keys are supported on list pages:
+<table summary="List Page Access Keys (Forms Mode)" class=table>
+	<tr>
+		<th class=table_sortable_column_header_background width="137" scope="col">Access Key</td>
+		<th class=table_sortable_column_header_background scope="col">Significance</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+C</td>
+		<td class=help_content_list>Activates the List Edit Cancel button to cancel edit mode and discard all unsaved updates.  Does nothing if not in List Edit mode.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+E</td>
+		<td class=help_content_list>Activates the Edit in List button to switch to List Edit mode.
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+G</td>
+		<td class=help_content_list>Switches focus to the object type dropdown select in the <a href="#Go_Button" title="Go Button">
+Go button</a> frame<td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+M</td>
+		<td class=help_content_list>Switches focus to the first menu in the main <a href="#Menu_Bar" title="Menu Bar">
+menu bar</a> (the File menu)</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+P</td>
+		<td class=help_content_list>Switches focus to the first tab in the <a href="#Product_Toolbar" title="Product Toolbar">
+product toolbar</a> (the Service Desk tab)</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+S</th>
+		<td class=help_content_list>Activates the Search button to request a new search.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+X</td>
+		<td class=help_content_list>Switches focus to the top of the tree control in the left frame of the current page.
+        There are left-frame tree controls on all tabs of the main page, the Knowledge Categories form, and the 
+        Knowledge Tree Designer.
+        Alt+X has no effect if the current page does not include a left frame containing a tree control.
+	</tr>
+</table>
+<h2 id="Detail_Page">Detail Pages</h2>
+A detail page displays information about a single object. Typically, you
+display a detail page by activating a link on a list page, or by requesting
+an object on the <a href="#Go_Button" title="Go Button">Go button</a> frame.
+You can also request a detail page for creating a new object by selecting
+an appropriate item from the File Menu in the
+<a href="#Menu_Bar" title="Menu Bar">menu bar</a>, or by pressing
+the Create New button on certain list pages.
+<p>
+Data fields from the object are displayed in multiple layout tables,
+one table per row of data fields.  The summary of each table names the
+data fields it contains, so you can use your screen reader's table list
+function to quickly find the field you want.
+<p>
+By default, detail pages are displayed in a new browser window.  You can
+request that $ProductName display detail pages in an existing
+window (for example, by overlaying a list page) by selecting the
+Avoid Popups user preference
+<h3 id="Modes">Detail Page Mode</h3>
+There are two display modes for a detail page: read only and edit.
+In read only mode, object fields that reference other objects (such as the Assignee field
+on a request) are formatted as links.  Activating a link displays the
+detail page for the referenced object in a new popup window (unless the
+Avoid Popups user preference is active).
+<p>
+In edit mode, data fields for an object are displayed in a form, allowing
+you to change them.  Most form controls are either text boxes or dropdown
+selects. Each control is labeled with the name of the field it
+contains.  Some labels are followed by an asterisk, indicating a
+required field.
+Other labels are links, identified by the word "Lookup" at the end
+of the label.
+When the screen focus is in a text box with an associated lookup link,
+you can press up arrow to navigate to the link, then Enter to activate the
+link and pop up
+a list page, allowing you to find and select a value for
+the field.  Alternatively, you can type the first few characters of the
+desired value and press Tab to ask $ProductName to automatically
+fill the field.
+$ProductName will do this if it can find a unique value that
+begins with the characters you type; otherwise, it will pop up the search
+page, just as if you'd activated the lookup link.
+<p>
+To switch from read only mode to edit mode, activate the Edit button, either
+by navigating to it or pressing Alt+E.  To return to read only mode and
+save changes, activate the Save button, either by navigating to it or
+pressing Alt+S.  To return to read only mode without saving changes,
+activate the Cancel button, either by navigating to it or pressing Alt+C.
+<h3 id="Notebook">Notebooks</h3>
+A detail page with a large number of data fields usually contains a
+notebook control to organize them.  A notebook consists of a number of field
+groups called tabs.  There is a tab index at the top of the notebook,
+listing the names of all the tabs and providing a means to navigate to
+a particular tab.  A detail page has at most one notebook at the bottom
+of the page.  If present, the notebook index is marked by a level three header.
+<p>
+For a sighted user, $ProductName shows a notebook with all but
+one tab hidden, and the user clicks on a link in the index to display a
+different tab.  For a user with the screen reader preference, 
+$ProductName expands a notebook so that all tabs are on the
+page at the same time.  The user activates a link on the index to 
+navigate to a particular tab within the notebook.
+<p>
+Each notebook tab is preceded by a level three header.  To navigate to
+a notebook tab, use your screen reader's header listing function to find
+the desired header.  Alternatively, you can navigate to the notebook's
+index by pressing Alt+N (it may be necessary also to disable the screen
+reader virtual cursor mode so that screen reader focus follows application
+focus). You can then tab to the
+index link for the desired tab, and activate it to switch focus to the
+tab.  Alternatively, you can use Alt+1, Alt+2, etc. to navigate directly
+to the index link for one of the first ten tabs (Alt+0 selects tab 10),
+and then activate the link. (Mozilla
+users do not need to separately activate the link).
+<h3>Deferred Tabs</h3>
+Some notebook tabs, such as Activity and Event Log tabs, are deferred, which means that 
+			they contain an independent form that is not loaded until the appropriate index link is activated. 
+			Deferred tabs always contain a frame, which is listed on a screen reader frames list
+			as "xxx Deferred Notebook Tab". Once the deferred tab is loaded, the word "Deferred" is removed 
+			from its frame title. 
+<p>
+When a form is first loaded, its deferred tabs contain a single button labeled 
+			"Load xxx Deferred Notebook Tab". You can load content into a deferred tab either by 
+			pressing this button, or by activating the corresponding link on the notebook index. 
+
+<p>
+Many deferred tabs contain list pages, so it is possible for a detail form to contain 
+			multiple list pages in its frames. A list page in a tab is navigated like a standard list page, 
+			except that its buttons cannot be activated by using access keys. 
+			
+<h3>Detail Page Access Key Summary</h3>
+The following access keys are supported on detail pages:
+<table summary="Detail Page Access Keys (Forms Mode)" class=table>
+	<tr>
+		<th class=table_sortable_column_header_background width="137" scope="col">Access Key</td>
+		<th class=table_sortable_column_header_background scope="col">Significance</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+C</td>
+		<td class=help_content_list>In edit mode, activates the Cancel button to return to read only mode and discard all unsaved changes.  Does nothing in read only mode.
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+E</td>
+		<td class=help_content_list>In read only mode, activates the Edit button to switch to read only mode.  Does nothing in edit mode.
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+G</td>
+		<td class=help_content_list>Switches focus to the object type dropdown select in the <a href="#Go_Button" title="Go Button">
+Go button</a> frame<td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+M</td>
+		<td class=help_content_list>Switches focus to the first menu in the main <a href="#Menu_Bar" title="Menu Bar">
+menu bar</a> (the File menu)</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+N</td>
+		<td class=help_content_list>Switches focus to the first link on the index of the page's <a href="#Notebook" title="Notebook"> notebook</a> (if present).<td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+P</td>
+		<td class=help_content_list>Switches focus to the first tab in the <a href="#Product_Toolbar" title="Product Toolbar">
+product toolbar</a> (the Service Desk tab)</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+S</th>
+		<td class=help_content_list>In edit mode, submits the form by activating the Save, Continue, OK, or Finished button.  In read only mode, activates the Search button on the first deferred tab containing a list page, or does nothing if no exposed deferred tabs contain a list page.</td>
+	</tr>
+	<tr class=table_banded_row>
+		<th class=help_content_list width="137">Alt+number</td>
+		<td class=help_content_list>Switches focus to the notebook index link for one of the ten tabs in the notebook.  Alt+1 switches focus to the index link of the first tab; Alt+2 to that of second tab; and so on to Alt+0, which switches focus to the index link of the tenth tab.  In Internet Explorer, you must activate the link by pressing Enter after the pressing the access key.  In Mozilla, the link is automatically activated when you press the access key.</td>
+	</tr>
+	<tr class=table_row>
+		<th class=help_content_list width="137">Alt+X</td>
+		<td class=help_content_list>Switches focus to the top of the tree control in the left frame of the current page.
+        There are left-frame tree controls on all tabs of the main page, the Knowledge Categories form, and the 
+        Knowledge Tree Designer.
+        Alt+X has no effect if the current page does not include a left frame containing a tree control.
+	</tr>
+</table>
+<br>&nbsp;
+<pdm_include file=std_footer.htmpl>
+</body>
+</html>

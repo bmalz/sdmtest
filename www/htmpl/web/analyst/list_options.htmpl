@@ -1,0 +1,67 @@
+<PDM_IF 0>
+list_options.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Options.	
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie opcji";
+var hdrTitleList = "Lista opcji";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Option">
+<SCRIPT LANGUAGE="JavaScript">		
+
+// KEEP.show_search_fltr is set in cm.dat in th eresource field of the Option Manager node #254
+// so that the node click on the "Option Manager" node bring up the  Search_Filter 
+// All other nodes under "Option Manager" brings up the resulset Directly 
+
+<PDM_MACRO name=sfStart create=false factory=options>
+if("$args.KEEP.show_search_fltr" == "1" || "$args.KEEP.isHierSearch" == "0")
+{
+docWriteln('<INPUT TYPE=HIDDEN NAME="QBE.GE.id" VALUE="0">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opcja" attr=sym size=40>
+<PDM_MACRO name=sfTextbox hdr="Aplikacja" attr=app_name size=40>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=60>
+}
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Nie znaleziono opcji";
+var msgFound1 = "Znaleziono 1 opcję";
+var msgFound = "Znaleziono %1 opcji";
+var msgFoundMore = "Znaleziono %1 opcji. Wyświetlanie %2 z %3";
+var msgSelect = "Kliknij aby wybrać opcje";
+
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Opcja" attr=sym exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Aplikacja" attr=app_name>
+<PDM_MACRO name=lsCol hdr="Wartość" attr=ui_value export=no sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=action_status>
+<PDM_MACRO name=lsCol attr=description colspan=4 label="Opis" startrow=yes>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_options.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

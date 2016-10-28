@@ -1,0 +1,170 @@
+<PDM_IF 0>
+@(#)$Id: kd_content_tab.htmpl ASPEN.4 2012/02/16 18:15:03 pitva01 Exp $
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=kd_content_tab" factory=KD>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</script>
+</head>
+
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Content Tab">
+<PDM_FORM NAME="frmDTLRO">
+<input type=hidden name="STAY_EDIT" name="STAY_EDIT" value="0" />
+<input type=hidden name="HTMPL" id="HTMPL" value="" />
+<input type=hidden name="HIDDEN_SPELL" id="HIDDEN_SPELL" />
+<input type=hidden name="KD_UNPUBLISH" id="KD_UNPUBLISH" />
+<input type=hidden name=KEEP.edit_from_viewer value="$args.KEEP.edit_from_viewer" />
+<input type=hidden name=PERSID value="KD:$args.id" />
+<input type=hidden name=BUID value="$args.KEEP.BUID" />
+<input type=hidden name=opener />
+<input type=hidden name=open_mode />
+
+<script>
+<PDM_MACRO name=tabBanner title="Content">
+</script>
+<script>
+	
+<PDM_IF "$prop.form_name_3" == "edit" && "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" != "2">	
+		ImgBtnSetDefaultTabIndex(_dtl.tabIndex+10);
+<PDM_MACRO name=btnStartRow centered=true>
+<PDM_MACRO name=button caption="Spell Check All Fields" func="SpellCheckContent()" hotkey_name="Spell Check All Fields" id="btnSpellcheck" tooltip="Check spelling of Title, Summary, Problem, Resolution and Notes fields" width=0>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+
+</script>
+<script>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.PRIMARY_INDEX" == "" && "$args.ACTIVE_STATE" != "300">
+<PDM_IF "$args.SD_CATEGORY" == "">
+		//if we are under multi tenancy then use the dtlLookup that handles this better including backfill
+		
+<PDM_IF  "$prop.MultiTenancy" == "on">
+<PDM_MACRO name=dtlLookup hdr="Klasyfikacja" attr=PRIMARY_INDEX autofill=yes colspan=2 extraurl="ADDITIONAL_WHERE=PARENT_ID=1">
+<PDM_ELSE>
+<PDM_MACRO name=dtlHier hdr="Klasyfikacja" attr=PRIMARY_INDEX autofill=no colspan=2>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ACTIVE_STATE" != "300">
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlCheckbox hdr="Przypisz do właściciela klasyfikacji" attr=SUBMIT_CAT_EXPERT colspan=1>
+</PDM_IF>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=dtlDropdown hdr="Szablon dokumentu" attr=DOC_TEMPLATE_ID cbwidth=300 evt="onChange=template_onChange(this.value)" lookup=no whereclause="id>1">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartExpRow colspan=2 exp_rows="1" form_name="detail_KD">
+<PDM_IF "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "2" && "$args.STATUS_ID" == "70">
+<PDM_MACRO name=dtlReadonly hdr="Tytuł" attr=TITLE colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł" attr=TITLE colspan=2 disp_entities="YES" evt="onChange=content_onChange(this.value)" rows=1 size=105>
+</PDM_IF>
+<PDM_MACRO name=dtlStartExpRow colspan=2 exp_rows="1" form_name="detail_KD">
+<PDM_IF "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "2" && "$args.STATUS_ID" == "70">
+<PDM_MACRO name=dtlReadonly hdr="Podsumowanie" attr=SUMMARY colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Podsumowanie" attr=SUMMARY colspan=2 disp_entities="YES" evt="onChange=content_onChange(this.value)" rows=3 size=105>
+</PDM_IF>
+<PDM_MACRO name=dtlStartExpRow colspan=2 exp_rows="1" form_name="detail_KD">
+<PDM_IF "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "2" && "$args.STATUS_ID" == "70">
+<PDM_MACRO name=dtlReadonly hdr="Problem" attr=PROBLEM colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Problem" attr=PROBLEM colspan=2 disp_entities="YES" evt="onChange=content_onChange(this.value)" rows=3 size=105>
+</PDM_IF>
+<PDM_IF "$args.KEEP.IS_TREE" == "1">
+<PDM_ELIF "$args.DOC_TYPE_ID" == "2">
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartExpRow colspan=2 exp_rows="1" form_name="detail_KD">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_IF "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "2" && "$args.STATUS_ID" == "70">
+<PDM_MACRO name=dtlHTMLEditBox hdr="Rozwiązanie" attr="RESOLUTION" colspan=2 optionid=optResolution readonly=yes rows=10 size=105 toolbar=kd>
+<PDM_ELSE>
+<PDM_MACRO name=dtlHTMLEditBox hdr="Rozwiązanie" attr="RESOLUTION" colspan=2 evt="onChange=content_onChange(this.value)" optionid=optResolution rows=10 size=105 toolbar=kd>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "2" && "$args.STATUS_ID" == "70">
+<PDM_MACRO name=dtlHTMLEditBox hdr="Rozwiązanie" attr="RESOLUTION" colspan=2 optionid=optResolution readonly=yes rows=10 size=105 toolbar=kd>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Rozwiązanie" attr="RESOLUTION" colspan=2 disp_entities="YES" evt="onChange=content_onChange(this.value)" rows=3 size=105>
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "2" && "$args.STATUS_ID" == "70">
+<PDM_MACRO name=dtlReadonly hdr="Uwagi" attr=NOTES colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr=NOTES colspan=2 disp_entities="YES" evt="onChange=content_onChange(this.value)" rows=3 size=105>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KEEP.IS_TREE" == "1">
+<PDM_MACRO name=button caption="Design Tree" func="OpenDesignTree()" hotkey_name="Design Tree" id="btnTree">
+<PDM_ELIF "$args.DOC_TYPE_ID" == "2">
+<PDM_MACRO name=button caption="Design Tree" func="OpenDesignTree()" hotkey_name="Design Tree" id="btnTree">
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+
+if ("$args.id" != "0")
+{
+  if ("$prop.form_name_3" == "edit")
+  {
+    ImgBtnEnableButton("btnTree");
+  }
+  else
+  {
+    ImgBtnDisableButton("btnTree");
+  }
+}
+else
+{
+  ImgBtnDisableButton("btnTree");
+}
+
+//
+// For the 'Category' field above, it uses the dtlLookup macro when multi-tenancy is 
+// on and the dtlHier macro otherwise. The code below is used to make the input textbox 
+// for the dtlHier macro look like a label using the CSS style class 'dtl_txt_ro'. We 
+// also set the events (onkeydown, onkeyup,...) to the empty string, so we can disable 
+// auto suggest and auto fill, we just want a mimic a plan label.
+//
+if ("$args.PRIMARY_INDEX" == "" && "$args.ACTIVE_STATE" != "300")
+{
+  if ("$args.SD_CATEGORY" == "")
+  { 
+    if ("$prop.MultiTenancy" != "on")
+    {
+      try
+      {
+        var ele = document.getElementsByName('KEY.PRIMARY_INDEX');
+
+        if (ele != undefined && ele != null)
+        {
+          ele[0].className = 'dtl_txt_ro';
+          ele[0].onkeydown = '';
+          ele[0].onkeyup   = '';
+          ele[0].onchange  = '';
+          ele[0].onblur    = '';
+          ele[0].onfocus   = '';
+          ele[0].onclick   = '';
+        }
+      }
+      catch (err)
+      {
+      }
+    }
+  }
+}
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: kd_content_tab.htmpl,v 1.3 2006/11/11 00:18:50 taoyu02 Exp $
+</PDM_IF>

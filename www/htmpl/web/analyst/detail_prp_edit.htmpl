@@ -1,0 +1,144 @@
+<PDM_IF 0>
+detail_prp_edit.htmpl
+WHEN PRESENTED:
+    When the app needs input to create a new Property or update an
+    existing one.
+INTENT:
+    Capture user input for a new Property, create/update a Property
+    when submitted.
+VARIABLES:
+    string	image	    The location of the image directory as 
+			    specified in the config file.
+    object prp   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/wf.maj for the
+                            definition of attributes for 'OBJECT prp'
+    int   	logged_in   A flag to say we have a user login object.
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "$args.label Property Detail";
+var hdrTitleUpd = "$args.label Update Property";
+var hdrTitleNew = "Create New Property $args.label";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onunload="unload_check()" class="editform">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Property:" key="$args.label">
+<center>
+<PDM_FORM name="main_form" ONSUBMIT="return check_submit()">
+<input type="hidden" name=FACTORY value=prp>
+<PDM_IF $args.id>
+<input type="hidden" name=SET.id  value="$args.id">
+</PDM_IF>
+<input type="hidden" name=OP value="UPDATE">
+<script type="text/javascript">
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Save[s]" hotkey_name="Save[s]" id="btn001" width=120
+    func="pdm_submit('main_form','UPDATE')">
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" id="btncncl" btnType="negative" width=120
+    func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')">
+<PDM_MACRO NAME=button caption="Reset[r]" hotkey_name="Reset[r]" id="btn003" width=120
+    func="pdm_reset()">
+<PDM_MACRO NAME=btnEndRow>
+</script>
+<br>
+<!--   EDIT TAGS -->
+<table id="tbl001">
+<th align="left">
+<table id="tbl002">
+<th align="left">
+<span class="labeltext">Change Order Number</span>
+</th>
+<th align="left">
+<span class="labeltext">  Value Required?</span>
+</th>
+<tr>
+<td valign="top">
+<span class="bodytext">$args.object_id.chg_ref_num</span>
+</td>
+<td valign="top">
+<span class="bodytext">
+<PDM_IF $args.required == 1>
+YES
+<PDM_ELSE>
+NO
+</PDM_IF>
+</span>
+</td>
+</tr>
+</table>
+<!--  I am commenting out the Description as I am unable to get a value to display
+<table id="tbl003">
+<th align="left">
+<span class="labeltext">Description</span>
+</th>
+<tr>
+<td valign="top">
+<span class="bodytext">$args.property.description</span>
+</td>
+</tr>
+</table>
+-->
+<table id="tbl004">
+<th align="left">
+<span class="labeltext">Label</span>
+</th>
+<tr>
+<td valign="top">
+<span class="bodytext">$args.property.label</span>
+</td>
+</tr>
+</table>
+<!--  I am commenting out the Examples as I am unable to get a value to display
+<table id="tbl005">
+<th align="left">
+<span class="labeltext">Examples</span>
+</th>
+<tr>
+<td valign="top">
+<span class="bodytext">$args.property.sample</span>
+</td>
+</tr>
+</table>
+-->
+<table id="tbl006">
+<th align="left">
+<PDM_IF 0 != $args.REQUIRED_required>
+<span class="requiredlabeltext">Value</span>
+<PDM_ELSE>
+<span class="labeltext">Value</span>
+</PDM_IF>
+</th>
+<tr>
+<td valign="top">
+<input text name=SET.value size=60 value='<PDM_FMT PAD=NO ESC_STYLE=HTML>$args.value</PDM_FMT>'>
+</td>
+</tr>
+</table>
+</th>
+</table>
+
+</PDM_FORM>
+<!-- If Cancel Link brings up the form other than main menu, we do not want to
+     set the TARGET to _top because it will cause the next form to show without
+     main menu on the side.
+-->
+<PDM_IF 0 == $args.id>
+<PDM_IF "" == "$args.NEXT_PERSID">
+
+</PDM_IF>
+</PDM_IF>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_prp_edit.htmpl ASPEN.2 2011/10/19 17:59:26 visan03 Exp $
+</PDM_IF>

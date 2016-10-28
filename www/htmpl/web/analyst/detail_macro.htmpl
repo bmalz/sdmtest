@@ -1,0 +1,721 @@
+<PDM_IF 0>
+detail_macro.htmpl
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_IF '$args.KEEP.FORM_NAME' == 'ATY'>
+var hdrTitle = "Szczegóły Message Template";
+var hdrTitleUpd = "Aktualizowanie Message Template";
+var hdrTitleNew = "Tworzenie Message Template";
+<PDM_ELSE>
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Macro Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Macro"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Macro $args.sym"</PDM_FMT>;
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/list_edit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/wf_visible.js"></script>
+<PDM_IF 0>
+Added this line to include browser.js for Screen Reader. The _browser 
+object has to be defined locally to solve a JS error when selecting  
+an Macro Type value with ALT+Down Arrow. 
+</PDM_IF>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+cfgCAISD = "$CAisd";
+cfgCgi = "$cgi";
+cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+argID = "$args.id";
+var was_save_clicked = 0;
+var propFormName="detail_macro.htmpl";
+<PDM_IF '$args.KEEP.ForBhvtpl' != '' && "$args.id" != "0">
+ahdframeset.top_splash.next_persid = '$args.KEEP.ForBhvtpl';
+</PDM_IF>
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+var autoRefreshWindows = new Object();
+
+// This is a placeholder for the like-named function in list_edit.htmpl -
+// it's called here from the deferred tab's Edit in List code because deferred
+// tabs have no workframe.
+// We simply pass it back.
+// cheap way of passing args...do it better
+function listEditShowResults(msg, arg1, arg2, arg3, arg4, arg5) {
+	window.frames["atomics_iframe"].listEditShowResults(msg,arg1, arg2, arg3, arg4, arg5);
+}
+
+
+<pdm_if "$prop.form_name_3" == "edit" && "$Context" != "initial" && "$args.type" == "COND_SITE">
+// stub handler - see check_submit.js
+// Unsaved edit-in-list changes are not picked up when the parent form is saved.
+function check_submit_htmpl() {
+	if (window.frames["atomics_iframe"].ImgBtnDisabled("btnEdit") && !window.frames["atomics_iframe"].ImgBtnDisabled("btnSave") ) {
+		alert(msgtext("Please_save_your_Edit_in_List_"));
+		return false;
+	}
+	return true;
+}
+</pdm_if>
+
+// Refresh screen if value selected/changed on the "Macro Type" dropdown in the initial screen.
+function refresh_screen_without_saving(select_obj) { 
+	var f = window.document.forms["main_form"];
+	f.REFRESH_AND_STAY_EDIT.value="1";
+	f.MACRO_TYPE.value = select_obj.value;
+	<PDM_IF 0>
+	 Calling detail_save() to submit everything to freeaccess. Note in this case I am restrict the 
+	 save from happening if REFRESH_AND_STAY_EDIT.value is set to 1 in the freeaccess code, It just refreshes the screen.
+	Note also that it hold all the values in the fields on the form prior to the refresh
+	// The variable KEEP.BHVNOTIFY_MANY_SELECTED is also set to 1 in freeaccess	
+	 </PDM_IF>
+	pdm_submit('main_form','UPDATE',void(0),true);
+}
+
+function cancel_clicked()
+{
+	if (was_save_clicked != 1)
+	{
+	detailCancel();
+  }
+}
+function save_clicked()
+{
+	was_save_clicked = 1;
+	check_cawf_itpam_def_before_save();
+	//detailSave();
+}
+
+function check_cawf_itpam_def_before_save()
+{
+	clearAlertMsg(window.parent);
+	AlertMsg = "";
+	if("$args.type" == "ITPAM"){	
+		if ( (typeof window.document.main_form.elements["SET.usr_string1"] != "undefined") 
+		&& (window.document.main_form.elements["SET.usr_string1"] != null) ){
+				var itpam_def = window.document.main_form.elements["SET.usr_string1"];
+				if (itpam_def.value == "")
+				{
+				showAlertMsg(msgtext('CA_IT_PAM') + " " + "Definition is required");
+				return;
+			 }
+ 		 }
+ 		 		else {
+ 				showAlertMsg(msgtext('CA_IT_PAM') + " " + "Definition is required");
+				return;
+ 		}
+ 	}
+ 	if("$args.type" == "CAWF"){	
+ 	
+ 		if ( (typeof window.document.main_form.elements["SET.usr_string1"] != "undefined") 
+		&& (window.document.main_form.elements["SET.usr_string1"] != null) ){
+				var cawf_def = window.document.main_form.elements["SET.usr_string1"];
+				if (cawf_def.value == "")	
+			   {
+			  showAlertMsg(msgtext('CA_WF') + " " + "Definition is required");				
+				return;
+			}
+ 		}
+ 		else {
+ 				showAlertMsg(msgtext('CA_WF') + " " + "Definition is required");
+				return;
+ 		}
+ 	}
+	//pdm_submit('main_form','UPDATE');
+	detailSave();
+}
+
+function get_extra_url()
+{
+    var url = "+ADDITIONAL_WHERE=obj_type='$args.ob_type'+KEEP.evt_obj_type=$args.ob_type" + 
+	      "+KEEP.evt_obj_sym=" + nx_escape(<PDM_FMT ESC_STYLE=C PAD=NO>"$args.ob_type.name"</PDM_FMT>);
+    return url;
+}
+
+</script>
+</head>
+
+<body class="detailro"  onunload="unloadActions()">
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="Message Template">
+<center>
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" == "initial">
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=macro>
+_dtl.backfillReq = false; // We have a Continue button - suppress automatic close and backfill on save
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Kontynuuj" func="detailSave()" hotkey_name="Kontynuuj" id="btn001" width=120>
+<PDM_MACRO name=button caption="Anuluj[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Anuluj[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Resetuj[r]" func="pdm_reset()" hotkey_name="Resetuj[r]" id="btn004" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart center=true>
+docWriteln("<input type='hidden' name=\"REFRESH_AND_STAY_EDIT\" value=\"0\">");
+docWriteln("<input type='hidden' name=\"MACRO_TYPE\" value=\"\">");
+docWriteln("<input type='hidden' name=\"KEEP.BHVNOTIFY_MANY_SELECTED\" value=\"0\">");
+docWriteln("<input type='hidden' name=\"KEEP.CAWF_SELECTED\" value=\"0\">");
+docWriteln("<input type='hidden' name=\"KEEP.ITPAM_SELECTED\" value=\"0\">");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=50>
+
+detailSetEventHandler("onChange='refresh_screen_without_saving(this)'");
+detailDropdown("Macro Type", "type","macro", 1, 20,
+               "1", "", "$args.type",
+                "no", "", "$args.type",
+               "", "", "no", "","0",""
+<PDM_IF "$env.NX_CAWF_PM_URL" != "" && "$env.NX_CAEXTWF_ENDPOINT" != "" >
+  		<PDM_LIST PREFIX=list WHERE="code !='ACT' AND code !='COND'" FACTORY=macro_type>
+   		<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);
+<PDM_ELIF "$env.NX_CAWF_PM_URL" != "" && "$env.NX_CAEXTWF_ENDPOINT" == "" >
+		<PDM_LIST PREFIX=list WHERE="code !='ACT' AND code !='COND' AND code != 'ITPAM'" FACTORY=macro_type>
+		<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);  
+<PDM_ELIF "$env.NX_CAWF_PM_URL" == "" && "$env.NX_CAEXTWF_ENDPOINT" != "" >
+		<PDM_LIST PREFIX=list WHERE="code !='ACT' AND code !='COND' AND code != 'CAWF'" FACTORY=macro_type>
+   		<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);	
+<PDM_ELSE>
+		<PDM_LIST PREFIX=list WHERE="code !='ACT' AND code !='COND' AND code != 'CAWF' AND code != 'ITPAM'" FACTORY=macro_type>
+		<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);  
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KEEP.BHVNOTIFY_MANY_SELECTED" == "1">
+  		detailDropdown("Object Type","ob_type","macro_prod_list",1,20, 
+		"1","","$args.ob_type","yes","name","","","","no","0","","",
+                "Configuration Item","nr",
+                "Contact","cnt",
+		"Change Order","chg",
+                "Issue","iss",
+                "Issue Workflow Task","iss_wf",
+		"Request/Incident/Problem","cr",
+                "Workflow Task","wf",
+		"Task","ztask");  
+<PDM_ELIF "$args.KEEP.CAWF_SELECTED" == "1" || "$args.KEEP.ITPAM_SELECTED" == "1">
+               	detailDropdown("Object Type","ob_type","macro_prod_list",1,20, 
+		"1","","$args.ob_type","yes","name","","","","no","0","","",
+                "Configuration Item","nr",
+                "Contact","cnt",
+		"Change Order","chg",
+                "Issue","iss",
+                "Issue Workflow Task","iss_wf",
+                "Knowledge Document","KD",
+		"Knowledge Document Comment","O_COMMENTS",
+		"Knowledge Report Card","KT_REPORT_CARD",  
+		"Request/Incident/Problem","cr",
+                "Workflow Task","wf",
+		"Task","ztask");
+<PDM_ELSE>
+		detailDropdown("Object Type","ob_type","macro_prod_list",1,20, 
+		"1","","$args.ob_type","yes","name","","","","no","0","","",
+                "Assistance Session","sa_notif", 
+                "Configuration Item","nr",
+                "Contact","cnt",
+		"Change Order","chg",
+                "Issue","iss",
+                "Issue Workflow Task","iss_wf",
+                "Knowledge Document","KD",
+		"Knowledge Document Comment","O_COMMENTS",
+		"Knowledge Report Card","KT_REPORT_CARD",  
+                "Managed Survey","mgs",
+		"Request/Incident/Problem","cr",
+                "Workflow Task","wf",
+"Task","ztask");
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_ELSE>
+<PDM_IF '$args.KEEP.FORM_NAME' == 'ATY'>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=macro>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Zapisz[s]" func="pdm_submit('main_form','UPDATE')" hotkey_name="Zapisz[s]" id="btn001" width=120>
+<PDM_MACRO name=button caption="Anuluj[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','show_main_detail.htmpl')" hotkey_name="Anuluj[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Resetuj[r]" func="pdm_reset()" hotkey_name="Resetuj[r]" id="btn003" width=120>
+</PDM_IF>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$prop.form_name_3" == "edit">
+docWriteln("<input type='hidden' name=HTMPL value=show_main_detail.htmpl>");
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Auto powiadomienie" attr=usr_integer2 off=No on=Yes>
+var ctype_name;
+switch ( "$args.usr_integer1" ) { 
+	case "1" : 
+		ctype_name = "Low";
+		break;
+	case "2" :
+		ctype_name = "Normal";
+		break;
+	case "3" :
+		ctype_name = "High";
+		break;
+	case "4" :
+		ctype_name = "Emergency";
+		break;
+	default :
+		ctype_name = "";
+		break;
+         }
+
+detailDropdown("Notify Level","usr_integer1","aty",1,20, 
+false,"","$args.usr_integer1",
+"no","",ctype_name,
+"","","no","","","0",
+"Low","1","Normal","2","High","3","Emergency","4");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł wiadomości powiadomienia" attr=usr_string3 colspan=4 size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Treść wiadomości powiadomienia" attr=usr_string1 colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+<PDM_IF "$args.usr_string4" != "NF">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlHTMLEditBox hdr="Wiadomość HTML" attr=msg_html colspan=4 rows=7 size=80>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_ELSE>
+<script type="text/javascript">
+if (ahdtop.cstReducePopups == 1)
+{
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlForm button=false factory=macro>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Zapisz[s]" func="save_clicked()" hotkey_name="Zapisz[s]" id="btn001" width=120>
+<PDM_MACRO name=button caption="Anuluj[n]" btntype="negative" func="cancel_clicked()" hotkey_name="Anuluj[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Resetuj[r]" func="pdm_reset()" hotkey_name="Resetuj[r]" id="btn004" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_ELSE>
+<PDM_MACRO name=dtlForm factory=macro>
+</PDM_IF>
+}
+else
+{
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=dtlForm button=false factory=macro>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Zapisz[s]" func="check_cawf_itpam_def_before_save()" hotkey_name="Zapisz[s]" id="btn001" width=120>
+<PDM_MACRO name=button caption="Anuluj[n]" btntype="negative" func="cancel_clicked()" hotkey_name="Anuluj[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Resetuj[r]" func="pdm_reset()" hotkey_name="Resetuj[r]" id="btn004" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_ELSE>
+<PDM_MACRO name=dtlForm factory=macro>
+</PDM_IF>
+}	
+<PDM_MACRO name=dtlStart>
+<PDM_IF '$args.KEEP.ForBhvtpl' != ''>
+<PDM_IF "$prop.form_name_3" == "ro" && "$args.id" != 0>
+docWriteln("<input type='hidden' name=\"KEEP.CO_PARENT\" value=\"1\">");
+docWriteln("<input type='hidden' name=\"KEEP.PARENT_PERSID\" value="+ '$args.KEEP.ForBhvtpl' +">");
+</PDM_IF>
+
+// close this form and give focus on the main form
+if ( _dtl.edit ) 
+{
+docWriteln("<input type='hidden' name=HTMPL value='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+    
+}
+</PDM_IF>
+<PDM_IF "$args.type" == "ACT" || "$args.type" == "COND"> //Action and Condition Macros
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag colspan=2 lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis makra" attr=description colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ob_type" == "cr">
+		detailTextboxReadonly("Object Type","ob_type",1,"Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=ob_type>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ makra" attr=type>
+detailCheckboxReadonly("Lock Object","lock_object",1,"$args.lock_object","Yes","No")
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis typu makra" attr=type.description colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Kod makra" attr=usr_string1 colspan=3>
+<PDM_ELIF "$args.type" == "BHVEVTATTACH">  //Attached Events Macros
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=dtlReadonly hdr="ID rekordu" attr=id>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis makra" attr=description colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ob_type" == "cr">
+		detailTextboxReadonly("Object Type","ob_type",1,"Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=ob_type>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ makra" attr=type colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis typu makra" attr=type.description colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "ro">
+detailRowHdr("Event",3);
+<PDM_LIST PREFIX=list FACTORY=evt WHERE="persistent_id='$args.usr_string1'" ESC_STYLE=C> 
+orgLink = "<a" + detailNextID() +
+			" href=\"javascript:showDetailWithPersid('$list.persistent_id')\">$list.sym</a>";     
+detailSetReadonlyRowData(orgLink);
+detailWriteRow();
+</PDM_LIST>
+
+<PDM_ELSE> 
+
+// Need to use the JS call cos this Event Lookup is stored in the DB as a STRING and not a usual SREL
+//The Macro will display only the code field which is not we want. We need the sym
+
+detailLookup("Event","usr_string1","evt",1,40,
+1,"","$args.code","yes","sym",
+<PDM_IF '$args.usr_string1'== ''> 
+""
+<PDM_ELSE>
+<PDM_LIST PREFIX=list FACTORY=evt WHERE="persistent_id='$args.usr_string1'" ESC_STYLE=C>
+<PDM_FMT PAD=NO ESC_STYLE=C>'$list.sym'</PDM_FMT></PDM_LIST></PDM_IF>,"","","yes","javascript:get_extra_url();");
+
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("Elapsed Time delay", 1);
+var ms='$args.usr_integer1';
+var strh = Math.floor(ms/3600);
+var strm = Math.floor((ms%3600)/60);
+var strs = Math.floor((ms%3600)%60);
+var strh = "" + Math.floor(ms/3600);
+var strm = "" + Math.floor((ms%3600)/60);
+var strs = "" + Math.floor((ms%3600)%60);
+var str = ((strh.length == 1)?("0"+strh): strh) + ":"+((strm.length == 1)?("0"+strm) : strm) + ":"+((strs.length == 1)?("0"+strs): strs);
+detailSetRowData(str);
+ 
+<PDM_MACRO name=dtlReadonly hdr="Nazwa grupy" attr=usr_string2 colspan=2>
+<PDM_ELIF "$args.type" == "BHVEXEC_RRF">     //Remote Reference Macros
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis makra" attr=description colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ob_type" == "cr">
+		detailTextboxReadonly("Object Type","ob_type",1,"Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=ob_type>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ makra" attr=type colspan=2>
+<PDM_ELIF "$args.type" == "BHVNOTIFY_MANY">     //Multiple Notification
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis makra" attr=description colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ob_type" == "cr">
+		detailTextboxReadonly("Object Type","ob_type",1,"Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=ob_type>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ makra" attr=type colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis typu makra" attr=type.description colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=msg_tmpl_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.ob_type')+KEEP.RESTRICT_FROM_BHVNOTIFY_MANY=1+KEEP.ob_type=$args.ob_type+KEEP.ob_type_sym=$args.ob_type.name" make_required="yes" size=60>
+<PDM_ELIF "$args.type" == "COND_SITE">     //site-condition
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=40>
+<PDM_IF "$args.ob_type" == "cr">
+		detailTextboxReadonly("Object Type","ob_type",1,"Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=ob_type>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ makra" attr=type colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis makra" attr=description colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>      
+var c_oper;
+switch ( "$args.usr_integer2" ) {
+	case "0" : 
+		c_oper = "TRUE";
+		break; 
+	case "1" : 
+		c_oper = "FALSE";
+		break;
+         }
+
+detailDropdown("If all Conditions succeed return","usr_integer2","macro",2,20, 
+true,"","$args.usr_integer2",
+"no","$args.usr_integer2",c_oper,
+"","","no","","","0",
+"TRUE","0","FALSE","1"); 
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_MACRO name=dtlReadonly hdr="Kod makra" attr=usr_string1 colspan=4>
+<PDM_ELSE>
+detailTextboxReadonly("Macro Code","",4,<PDM_FMT ESC_STYLE=JS2>'$args.usr_string1'</PDM_FMT>,"","detailro");
+</PDM_IF>
+<PDM_ELIF "$args.type" == "CAWF" ||  "$args.type" == "ITPAM" > // Execute CA Workflow Action or Execute CA IT PAM Action
+    
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_IF "$args.id" != "0">
+<PDM_MACRO name=dtlReadonly hdr="ID rekordu" attr=id>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis makra" attr=description colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.ob_type" == "cr">
+	detailTextboxReadonly("Object Type","ob_type",1,"Request/Incident/Problem", "");
+    
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=ob_type>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Typ makra" attr=type>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis typu makra" attr=type.description colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type" == "CAWF">
+               var wf_htmpl="wfdef.htmpl";
+               var link="";
+               var bId=false;
+
+               
+<PDM_IF "$args.id" != "0" >
+                    bId=true;
+               
+</PDM_IF>
+               
+               if(_dtl.edit)
+               {               
+                  if(bId)
+                  {
+                     link += "<table id=table00 class='tab'>";
+                  }
+                     
+                    link += "<th align='left' valign='middle'>";
+                    link +="<a href=\"javascript:getDefinitions(wf_htmpl)\" class='lookup1em'>";
+                    link +="<img src=";
+                    link += cfgCAISD;
+                    link += "/img/lookup.gif class=\"dtl_img_attr\" alt=\"Pop up CA Workflow Definition form\">";
+                    link += "<span class='requiredlookup'>&nbsp;";
+                    link += "CA Workflow Definition *";
+                    link += "</span>"; 
+                    link += "</a></th>";
+
+                  if(bId)
+                    link += "</table>";
+                  
+               }
+               
+               if(bId)
+               {
+                    link += "<table id=table01 class='tab' summary='CA Workflow Definition'";
+                    link += "<tr>";
+                    link += "<th scope='col' align='left' class='detailro'>CA Workflow Definition Name";
+                    link += "</th>";
+                    link += "<th scope='col' align='left' class='detailro'>ID";
+                    link += "</th>";
+                    link += "<th scope='col' align='left' class='detailro'>Description";
+                    link += "</th>";
+                    link += "<th scope='col' align='left' class='detailro'>Active";
+                    link += "</th></tr>";
+               }
+
+               
+               link += "<tr>";
+               var fmtName=<PDM_FMT ESC_STYLE=C>"$args.cawf_defname"</PDM_FMT>;
+               if(_dtl.edit)
+                    link += "<td align='left' class='detailroTab' valign='top'><input id='defName' type='Text' readonly='readonly' name='SET.cawf_defname' value='" + fmtName + "' size=40>";
+               else
+                     link += "<td valign='top' class='detailro'>" + fmtName + "";
+               
+               link +="</td>";
+
+               var fmtId=<PDM_FMT ESC_STYLE=C>"$args.usr_string1"</PDM_FMT>;
+               if(_dtl.edit)
+               {
+                    if(bId)
+                       link += "<td align='left' class='detailroTab' valign='top'><input id='defId' type='Text' readonly='readonly' name='SET.usr_string1' value='" + fmtId + "' size=20>";
+                    else
+                       link += "<td><input id='defId' type='hidden' name='SET.usr_string1' value='" + fmtId + "'>";
+               }
+               else
+                    link += "<td valign='top' class='detailro'>" + fmtId + "";
+
+               link +="</td>";
+
+               var fmtDesc=<PDM_FMT ESC_STYLE=C>"$args.cawf_desc"</PDM_FMT>;
+               if(_dtl.edit)
+               {
+                   if(bId) 
+                       link += "<td align='left' class='detailroTab' valign='top'><input id='defDesc' type='Text' readonly='readonly' name='SET.cawf_desc' value='" + fmtDesc + "' size=40>";
+                   else
+                       link += "<td><input id='defDesc' type='hidden' name='SET.cawf_desc' value='" + fmtDesc + "'>";
+               }
+               else
+                    link += "<td valign='top' class='detailro'>" + fmtDesc + "";
+
+               link +="</td>";
+               var fmtActive;
+               
+<PDM_IF "$args.cawf_active" == "Y">
+                   fmtActive=msgtext("Yes");
+               
+<PDM_ELSE>
+                   fmtActive=msgtext("No");
+               
+</PDM_IF>
+
+               if(_dtl.edit)
+               {
+                    if(bId)
+                       link += "<td align='left' class='detailroTab' valign='top'><input id='defAct' type='Text' readonly='readonly' name='SET.cawf_active' value='" + fmtActive + "' size=4>";
+                    else
+                       link += "<td><input id='defAct' type='hidden' name='SET.cawf_active' value='" + fmtActive + "'>";
+               }
+               else
+                       link += "<td valign='top' class='detailro'>" + fmtActive + "";
+               link +="</td>";
+               link +="</tr>";
+               
+               if(bId)
+                    link += "</table>";
+               else
+                    docWriteln(link);
+                 
+         
+</PDM_IF>
+<PDM_IF "$args.type" == "ITPAM">
+               var itpam_htmpl="wfITPAMdef.htmpl";
+               var link="";
+               var bId=false;
+
+               
+<PDM_IF "$args.id" != "0" >
+                    bId=true;
+               
+</PDM_IF>
+               
+               if(_dtl.edit)
+               {               
+                  if(bId)
+                  {
+                     link += "<table id=table00 class='tab'>";
+                  }
+                     
+                    link += "<th align='left' valign='middle'>";
+                    link +="<a href=\"javascript:getITPAMDefinitions(itpam_htmpl,'macro')\" class='lookup1em'>";
+                    link +="<img src=";
+                    link += cfgCAISD;
+                    link += "/img/lookup.gif class=\"dtl_img_attr\" alt=\"Pop up" + " " + msgtext ('CA_IT_PAM') + " " + "Definition Form \">";
+                    link += "<span class='requiredlookup'>&nbsp;";
+                    link += "" + msgtext('CA_IT_PAM') + " " + "Definition *";
+                    link += "</span>"; 
+                    link += "</a></th>";
+
+                  if(bId)
+                    link += "</table>";
+                  
+               }
+               
+               if(bId)
+               {
+                    link += "<table id=table01 class='tab' summary='CA ITPAM Definition'";
+                    link += "<tr>";
+                    link += "<th scope='col' align='left' class='detailro'>" + msgtext("CA_IT_PAM") + " " + "Process Name";
+                    link += "</th>";
+                    link += "<th scope='col' align='left' class='detailro'>" + msgtext("CA_IT_PAM") + " " + "Process Path";
+                    link += "</th></tr>";
+               }
+
+               
+               link += "<tr>";
+               var fmtName=<PDM_FMT ESC_STYLE=C>"$args.usr_string1"</PDM_FMT>;
+               if(_dtl.edit)
+                    link += "<td align='left' class='detailroTab' valign='top'><input id='defName' type='Text' readonly='readonly' name='SET.usr_string1' value='" + fmtName + "' size=40>";
+               else
+                     link += "<td valign='top' class='detailro'>" + fmtName + "";
+               
+               link +="</td>";
+
+               var fmtPath=<PDM_FMT ESC_STYLE=C>"$args.usr_string2"</PDM_FMT>;
+               if(_dtl.edit)
+               {
+                    if(bId)
+                       link += "<td align='left' class='detailroTab' valign='top'><input id='defPath' type='Text' readonly='readonly' name='SET.usr_string2' value='" + fmtPath + "' size=20>";
+                    else
+                       link += "<td><input id='defId' type='hidden' name='SET.usr_string2' value='" + fmtPath + "'>";
+               }
+               else
+                    link += "<td valign='top' class='detailro'>" + fmtPath + "";
+
+               link +="</td>";
+               link +="</tr>";
+               
+               if(bId)
+                    link += "</table>";
+               else
+                    docWriteln(link);
+                 
+         
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=startNotebook hdr="macro_nb">
+<PDM_IF "$args.type" == "BHVNOTIFY_MANY">
+<PDM_MACRO name=TAB title="Object Contacts" height=300 id=att_ntf src="OP=SEARCH+FACTORY=ntfl+QBE.EQ.macro_ntf.macro.id=$dob.id+KEEP.forMacroToNtfl=1+KEEP.MACRO_PERSID=$args.persistent_id+KEEP.MACRO_ID=$args.id+KEEP.MACRO_OB_TYPE=$args.ob_type+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=TAB title="Contacts" height=300 id=att_cnt src="OP=SEARCH+FACTORY=cnt+QBE.EQ.macro_ntf.macro.id=$dob.id+KEEP.forMacroToCnt=1+KEEP.MACRO_PERSID=$args.persistent_id+KEEP.MACRO_ID=$args.id+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=TAB title="Contact Types" height=300 id=att_ctp src="OP=SEARCH+FACTORY=ctp+QBE.EQ.macro_ntf.macro.id=$dob.id+KEEP.forMacroToCtp=1+KEEP.MACRO_PERSID=$args.persistent_id+KEEP.MACRO_ID=$args.id+QBE.EQ.delete_flag=0">
+<PDM_ELIF "$args.type" == "COND_SITE">
+<!-- Note function showListEditResults() defined above - required to get Edit in List working in deferred tabs. -->
+<PDM_MACRO name=TAB title="Conditions" height="300" id=atomics src="OP=SEARCH+FACTORY=atomic_cond+QBE.EQ.owning_macro=$args.persistent_id">
+<PDM_ELIF "$args.type" == "BHVEXEC_RRF">
+<PDM_MACRO name=TAB title="Remote Reference" file="macro_rrf_tab.htmpl">
+<PDM_ELIF "$args.type" == "CAWF" && "$args.id" != "0">
+<PDM_MACRO name=TAB title="Workflow" file="macro_cawf_tab.htmpl">
+<PDM_ELIF "$args.type" == "ITPAM" && "$args.id" != "0">
+<PDM_MACRO name=TAB title="CA IT PAM" file="macro_itpam_tab.htmpl">
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+<script type="text/javascript">
+</PDM_IF>
+</PDM_IF> 
+</script>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_macro.htmpl ASPEN.9 2011/05/18 11:18:32 ralje02 Exp $;
+</PDM_IF>
+<PDM_WSP>

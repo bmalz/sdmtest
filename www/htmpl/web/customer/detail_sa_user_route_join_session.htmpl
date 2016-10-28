@@ -1,0 +1,161 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2005 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  detail_sa_user_route_join_session.htmpl
+//
+////////////////////////////////////////////////////////////////////////////
+// Description: This is a launch page of Support Automation End user Client
+// 				for eusers to join an analyst in direct session. 
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////
+
+</PDM_IF>	
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Join Analyst Now"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Join Analyst Now"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Join Analyst Now" </PDM_FMT>;
+
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/cst_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cst_catitem.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/resultset.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+
+<script language="JavaScript">
+
+argPersistentID = "$args.persistent_id";
+
+
+if ( ! _browser.supportsLayers )
+   document.writeln('<scr' + 'ipt language="JavaScript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+
+function call_save()
+{
+	detailSave();
+}
+
+function loadActions()
+{
+	<PDM_IF "$args.id" != "0">
+		//when we have the id of the corresponding sa_user_route record forward it to the SA JSP
+		call_sa();
+	<PDM_ELIF "$args.KEEP.external_url" == "1">
+		//when we have come from an external URL
+		window.setTimeout("call_save()", 500);
+	</PDM_IF>
+}
+
+
+function call_sa()
+{ 
+    if( ahdtop.isSupportAutomationEnabled())
+    {
+        var routeID = "$args.id";
+        var directSessionCode = '<PDM_FMT ESC_STYLE=C>$args.direct_session_code</PDM_FMT>';
+        directSessionCode = directSessionCode.replace(/^\s+|\s+$/g, ''); // Trim leading and trailing whitespaces
+    	if (directSessionCode == "") {
+        	return;
+        }
+        var sa_url=ahdtop.cfgNX_SUPPORTAUTOMATION_URL+"/jsp/assistanceSession/forceLogin.jsp?BOPSID=%bopsid&roleID="+ahdtop.cfgCurrentRoleID+"&routeID="+routeID+"&code="+directSessionCode;
+
+        //if the user is using a non Windows OS or SA option system.use.WebChat is set then use webchat client instead		
+        if (ahdtop.m_sa_use_web_chat || !_browser.isWindows) {
+            sa_url += "&webChatClient=true";
+        }
+        
+        var url=ahdtop.cfgCgi+"?SID="+ahdtop.cfgSID+
+			"+FID="+ahdframe.cfgFID+
+			"+OP=LINK_WITH_BOPSID"+
+			"+URL="+nx_escape(sa_url);
+	
+	<PDM_IF "$args.KEEP.external_url" == "1">
+		ahdframeset.location.replace(url);
+	<PDM_ELSE>
+		popupWithURL(url, 1);  		
+		close_window();
+	</PDM_IF>
+    } 
+}
+
+function close_window()
+{
+    ahdframeset.close();
+}
+
+function save_on_enter(e) {
+	e = e || window.event;
+	var code = e.keyCode || e.which;
+	if(code == 13)
+		window.setTimeout("call_save()", 100);
+}
+
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</HEAD>
+
+<BODY class=detailro onload="loadActions()">
+<PDM_INCLUDE FILE="std_body.htmpl">
+
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=sa_user_route skip_tenant_hdr=true>
+<PDM_MACRO name=button caption="Launch" disabled="defer" func="call_save();" hotkey_name="Launch" id=btnSave newrow=yes>
+<PDM_MACRO name=button caption="Cancel" btntype="negative" endrow=yes func="close_window();" hotkey_name="Cancel[n]" id=btncncl>
+<PDM_MACRO name=dtlStart>
+</SCRIPT>
+	<input type=hidden name=SET.userID value="$cst.id">
+	
+<SCRIPT>
+	document.writeln("<INPUT TYPE=hidden NAME=SET.sdm_web_addrs VALUE="+location.protocol+"//"+ location.host+location.pathname+">");	
+</SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Session Join Code" attr="direct_session_code" evt="onKeyDown=save_on_enter(event)" make_required=yes>
+<PDM_MACRO name=dtlEndTable>	
+
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=self_service_include.htmpl status=0 ticket_factory="cr">
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

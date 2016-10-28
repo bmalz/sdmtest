@@ -1,0 +1,2158 @@
+/* Copyright (c) 2003 Computer Associates International, Inc */
+/*
+* Copyright (c) 2004 Computer Associates International, Inc. All Rights Reserved.
+* This software is the confidential and proprietary information of
+* Computer Associates International ("Confidential Information").  You shall not
+* disclose such Confidential Information.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND COMES WITH NO SUPPORT, WARRANTY,
+* OR GUARANTEE OF ANY KIND FOR ITS SUITABILITY FOR ANY PURPOSE.
+*/
+/*
+Component Name: castyler1.css
+description: This CSS implements the UI thin client standards r1.
+Change Log:
+date: 18th May, 2004
+Phase 1: Standards for the following:
+Buttons, Page Sections, Tables,Breadcrumbs,
+Links, Messages, Tabs, fonts, forms,Shuttle Controls
+Progress Indicators
+date: 21st May, 2004
+Phase 2: Standards for the following:
+Branding, Color Palette, AnchorLinks,IconUsage
+General PageLayout, About Page, date Picker, Menu Bars
+Portlets, Charts / Graphs, Quick StartPortlets
+email Notifications, Log In Pages,Search & Results
+Wizards.
+date: 25th May, 2004
+QA: Updated the CSS with the QA findings and the changes to the UI
+standards. Removed Non-Standard,Compliant Classes:
+portlet_button, portlet_header,page_section_headergroupbox, subtab_unselected_background, 				subtab_selected_left, subtab_selected_right, subtab_selected_center,subtab_separator
+table_titlebar
+date: 31st May, 2004
+* Removed the color attribute from buttons & page_button because of Mozilla issues with
+disabled buttons.
+date: 10th June, 2004
+* Peter Carrasco: Replaced "url('images/" with "url('/CAisd/img/" so that it works in ServicePlus
+date: 20th September, 2010
+* Yogish Shettigar (UI Designer): Updated the parameter values as per the latest R7 look.
+*/
+.datalink
+{
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #336699;
+font-weight: normal;
+text-align : left;
+text-decoration: none;
+}
+.datalink_white
+{
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #ffffff;
+font-weight: normal;
+text-align : left;
+text-decoration: none;
+}
+.system_linktext
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 60%;
+font-weight: bold;
+color: #336699;
+text-decoration: none;
+}
+.datalink_numeric
+{
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+text-decoration: none;
+color: #336699;
+font-weight: normal;
+text-align : left;
+text-decoration: none;
+text-align: right
+}
+blockquote
+{
+margin-bottom: 3px;
+margin-left: 10px;
+}
+ul
+{
+margin-left: 20px;
+margin-right: 10px;
+margin-top: 0px;
+margin-bottom: 0px;
+}
+li
+{
+margin-left: 0px;
+margin-right: 0px;
+margin-top: 0px;
+margin-bottom: 0px;
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: normal;
+}
+body
+{
+background-color: #ffffff;
+font-size: 100%;
+font-family: verdana, arial, helvetica, sans-serif;
+margin-top: 0px;
+margin-right: 0px;
+margin-left: 0px;
+margin-bottom: 0px;
+padding : 0px;
+}
+a
+{
+text-decoration: none;
+}
+a:hover
+{
+text-decoration: none;
+}
+/*adding text-decoration:underline on a:hover style is resulting in underlining the image inside
+the anchor tag in firefox(After adding Doctype validation). To overcome this the below style is added */
+a:hover span
+{
+text-decoration:underline;
+}
+a:active
+{
+text-decoration: none;
+}
+a.datalink:visited
+{
+color: #336699;
+}
+.page_button
+{
+padding-right: 2px;
+padding-left: 2px;
+font-weight: bold;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 1.0em;
+cursor: pointer;
+background-repeat: repeat-x;
+background-color: #4496d1;
+text-align: right;
+}
+.button_left
+{
+background-image: url('/CAisd/img/pagebutton-start.png');
+height:20px;
+}
+.button_center
+{
+background-image: url('/CAisd/img/bkg-pagebuttons.png');
+height:20px;
+}
+.button_right
+{
+background-image: url('/CAisd/img/pagebutton-end.png');
+height:20px;
+}
+.buttons
+{
+border:0px none; padding-right: 0px;
+padding-left: 0px;
+font-weight: bold;
+font-size: 1.0em;
+background-image: url('/CAisd/img/pagebutton_bg2.png');
+cursor: pointer;
+background-repeat: repeat-x;
+font-family: verdana, arial, helvetica, sans-serif;
+background-color: #4496d1;
+white-space:nowrap;
+}
+.hspace
+{
+margin-left: 4px;
+margin-right: 4px;
+}
+.vspace
+{
+padding-top: 4px;
+}
+.hide_show_button
+{
+vertical-align : middle;
+border-left: #22619b  1px solid;
+border-top: #22619b  1px solid;
+border-right: #22619b 1px solid;
+border-bottom: #22619b 1px solid;
+margin:2px;
+cursor:pointer;
+}
+.header
+{
+background-color: #ffffff ;
+}
+.header:hover
+{
+text-decoration: none;
+}
+.global_link
+{
+padding: 1px;
+color : #FFFFFF;
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: bold;
+font-size: 60%;
+text-decoration:none;
+}
+.image_buttons
+{
+cursor: pointer;
+border-style: none;
+}
+.breadcrumb_trail
+{
+margin-top: 0px;
+margin-right: 4px;
+margin-bottom: 4px;
+margin-left: 4px;
+}
+.breadcrumb
+{
+color:#336699;
+padding: 1px;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 60%;
+font-weight: normal;
+text-decoration:none;
+}
+.breadcrumb_current
+{
+color: #333333;
+padding: 1px;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 60%;
+font-weight: normal;
+}
+.page_section
+{
+background: #ebf0f9;
+padding: 4px;
+border-bottom: 4px #adb1bc solid;
+}
+.page_section_graph
+{
+background: #ffffff;
+padding: 4px;
+border-bottom: 1px #adb1bc solid;
+border-right: 1px #adb1bc solid;
+border-left: 1px #adb1bc solid;
+}
+.page_section_header_text
+{
+padding-right: 2px;
+padding-left: 6px;
+font-weight: bold;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 75%;
+padding-bottom: 2px;
+color: #ffffff;
+padding-top: 2px;
+text-align : left;
+vertical-align : middle;
+}
+.page_section_header_text_hs
+{
+padding-right: 2px;
+padding-left: 6px;
+font-weight: bold;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 75%;
+padding-bottom: 2px;
+color: #ffffff;
+padding-top: 2px;
+text-align : left;
+vertical-align : middle;
+text-decoration:none;
+cursor:pointer;
+}
+.page_section_header_left
+{
+background-image: url('/CAisd/sitemods/img/table_header_left.png');
+width: 4px;
+height: 22px;
+border-width: 0px;
+border-collapse: collapse;
+margin: 0px;
+padding: 0px;
+}
+.page_section_header_left_img
+{
+width: 4px;
+height: 22px;
+border-width: 0px;
+border-collapse: collapse;
+margin: 0px;
+padding: 0px;
+}
+.page_section_header_right
+{
+background-image: url('/CAisd/sitemods/img/table_header_right.png');
+width: 4px;
+height: 22px;
+border-width: 0px;
+border-collapse: collapse;
+margin: 0px;
+padding: 0px;
+}
+.page_section_header_center
+{
+background: #336699 url('/CAisd/sitemods/img/table_header_center.png');
+border-width: 0px;
+border-collapse: collapse;
+margin: 0px;
+padding: 0px;
+}
+.page_section_header_container
+{
+width: 100%;
+border-width: 0px;
+border-collapse: collapse;
+margin: 0px;
+padding: 0px;
+}
+.page_section_instruction_area
+{
+background: #f7f8fa;
+border-bottom: #adb1bc 1px solid;
+}
+.page_section_instructions_text
+{
+padding: 4px;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+}
+.page_instructions_text
+{
+padding-right: 2px;
+padding-left: 2px;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica;
+}
+.page_instruction_area
+{
+background: #f7f8fa;
+padding: 4px;
+}
+.groupbox_header_text
+{
+padding-right: 2px;
+padding-left: 6px;
+padding-bottom: 2px;
+padding-top: 2px;
+font-weight: bold;
+font-size: 75%;
+color: #333333;
+font-family: Arial, Helvetica, sans-serif;
+text-align : left;
+vertical-align : middle;
+}
+.groupbox_header_left
+{
+background-image: url('/CAisd/img/groupbox_header_left.png');
+border-bottom: 1px solid #adb1bc;
+}
+.groupbox_header_right
+{
+background-image: url('/CAisd/img/groupbox_header_right.png');
+border-bottom: 1px solid #adb1bc;
+}
+.groupbox_header_center
+{
+background-image: url('/CAisd/img/groupbox_header_center.png');
+border-bottom: 1px solid #adb1bc;
+}
+.groupbox_content
+{
+border-right: #adb1bc 1px solid;
+border-left: #adb1bc 1px solid;
+padding: 3px;
+border-bottom: #adb1bc 1px solid;
+background-color: #f7f8fa;
+}
+.page_header_text
+{
+font-size: 100%;
+padding-left: 5px;
+padding-right: 2px;
+padding-top: 2px;
+padding-bottom: 2px;
+font-family: Arial, Helvetica, sans-serif;
+font-weight: bold;
+font-style: normal;
+color : #336699;
+}
+.page_header_background
+{
+background-image:url('/CAisd/img/portal_tab_selected_center.png');
+border-bottom: 1px solid #adb1bc;
+}
+.page_header_error
+{
+font-size: 100%;
+padding-left: 10px;
+font-family: Arial, Helvetica, sans-serif;
+font-weight: bold;
+font-style: normal;
+text-transform : uppercase;
+color : #ff0000;
+}
+.help_section
+{
+background-color: #f7f8fa;
+padding: 4px;
+}
+.hide_show_button
+{
+vertical-align : middle;
+border-left: #B8d5ed  1px solid;
+border-top: #B8d5ed  1px solid;
+border-right: #000000 1px solid;
+border-bottom: #000000 1px solid;
+margin:2px;
+cursor:pointer;
+}
+.message_header_text
+{
+padding-right: 2px;
+padding-left: 2px;
+font-weight: bold;
+font-size: 80%;
+padding-bottom: 2px;
+color: #333333;
+padding-top: 2px;
+font-family: verdana, arial, helvetica;
+}
+.message
+{
+margin: 3px;
+background-color: #f3f4e2;
+border: #adb1bc 1px solid;
+}
+.message_content
+{
+border-right: #adb1bc 1px solid;
+border-left: #adb1bc 1px solid;
+padding: 3px;
+border-bottom: #adb1bc 1px solid;
+background-color: #f7f8fa;
+}
+.tip_text
+{
+color: #000000;
+font-size: 60%;
+font-weight: normal;
+font-family: verdana, arial, helvetica, sans-serif;
+}
+.tip
+{
+color: #333333;
+font-size: 60%;
+font-weight: bold;
+font-family: verdana, arial, helvetica, sans-serif;
+padding: 2px;
+}
+.error_label
+{
+padding: 2px;
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #ff0000;
+font-weight: bold;
+text-align: left;
+}
+.error
+{
+padding: 2px;
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #ff0000;
+font-weight: normal;
+text-align: left;
+}
+.inline_error
+{
+padding: 1px;
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #ff0000;
+font-weight: normal;
+text-align: left;
+}
+.data
+{
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #333333;
+font-weight: normal;
+text-align: left;
+}
+.data_white
+{
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #ffffff;
+font-weight: normal;
+text-align: left;
+}
+.data_fixed_width
+{
+font-family: courier;
+font-size: 70%;
+color: #333333;
+font-weight: normal;
+}
+.label
+{
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #333333;
+font-weight: bold;
+}
+.label_white
+{
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #ffffff;
+font-weight: bold;
+text-align: left;
+text-decoration: none;
+}
+.symbol
+{
+font-family: symbol;
+font-size: 80%;
+font-weight: bold;
+color: #333333;
+}
+.bull
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 0.9em;
+font-weight: normal;
+color: #ffCC33;
+text-decoration: none;
+padding: 1px ;
+}
+.footer_text
+{
+color:#333333;
+padding: 1px;
+font-family: verdana, arial, helvetica;
+font-size: 60%;
+font-weight: normal;
+text-decoration:none;
+}
+.footer_link
+{
+color:#336699;
+padding: 1px;
+font-family: verdana, arial, helvetica;
+font-size: 60%;
+font-weight: normal;
+text-decoration:underline;
+}
+.headertab_unselected_left_top
+{
+background-image: url('/CAisd/sitemods/img/toplevel_tab_unselected_left.png');
+border-bottom: 1px solid #999999;
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 1px;
+}
+.headertab_unselected_right_top
+{
+background-image: url('/CAisd/sitemods/img/toplevel_tab_unselected_right.png');
+border-bottom: 1px solid #999999;
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 1px;
+}
+.headertab_unselected_center
+{
+background-image: url('/CAisd/sitemods/img/toplevel_tab_unselected_center.png');
+border-bottom: 1px solid #999999;
+text-align: center;
+padding: 0px;
+}
+.headertab_text
+{
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 75%;
+padding: 2px;
+font-weight: bold;
+color: #ffffff;
+white-space:nowrap;
+}
+.headertab_selected_left_top
+{
+background-image: url('/CAisd/sitemods/img/toplevel_tab_selected_left.png');
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 1px;
+}
+.headertab_selected_right_top
+{
+background-image: url('/CAisd/sitemods/img/toplevel_tab_selected_right.png');
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 1px;
+}
+.headertab_selected_center
+{
+background-image: url('/CAisd/sitemods/img/toplevel_tab_selected_center.png');
+text-align: center;
+padding: 0px;
+}
+.main_content
+{
+width:99%;
+height:98%;
+margin:0px auto;
+padding-top:1px;
+border:#adb1bc 1px solid;
+border-top:#adb1bc 1px solid;
+}
+.main_content_container_visible
+{
+left:0px;
+top:0px;
+right:0px;
+bottom:0px;
+width:100%;
+height:100%;
+visibility:visible;
+text-align:center;
+position:absolute;
+}
+.main_content_container_hidden
+{
+left:0px;
+top:0px;
+right:0px;
+bottom:0px;
+width:0px;
+height:0px;
+visibility:hidden;
+text-align:center;
+position:absolute;
+}
+.tab_container
+{
+text-align: center;
+padding: 0px;
+}
+.tab_unselected_edge_space_img
+{
+border-width: 0px;
+height: 8px;
+}
+.tab_unselected_left_top
+{
+background-image: url('/CAisd/img/portal_tab_unselected_left.png');
+border-bottom: 1px solid #adb1bc;
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 0px;
+}
+.tab_unselected_right_top
+{
+background-image: url('/CAisd/img/portal_tab_unselected_right.png');
+border-bottom: 1px solid #adb1bc;
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 0px;
+}
+.tab_selected_left_top
+{
+background-image: url('/CAisd/img/portal_tab_selected_left.png');
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 0px;
+}
+.tab_selected_right_top
+{
+background-image: url('/CAisd/img/portal_tab_selected_right.png');
+width: 10px;
+height: 22px;
+vertical-align: top;
+padding: 0px;
+}
+.tab_selected_left
+{
+background-image: url('/CAisd/img/portal_tab_selected_left.png');
+}
+.tab_selected_right
+{
+background-image: url('/CAisd/img/portal_tab_selected_right.png');
+}
+.tab_selected_center
+{
+background-image: url('/CAisd/img/portal_tab_selected_center.png');
+text-align: center;
+padding: 0px;
+}
+.tab_selected_text
+{
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 75%;
+padding: 2px;
+font-weight: bold;
+color: #333333;
+white-space:nowrap;
+}
+.tab_unselected_left
+{
+background-image: url('/CAisd/img/portal_tab_unselected_left.png');
+border-bottom: 1px solid #adb1bc;
+}
+.tab_unselected_right
+{
+background-image: url('/CAisd/img/portal_tab_unselected_right.png');
+border-bottom: 1px solid #adb1bc;
+}
+.tab_unselected_center
+{
+background-image: url('/CAisd/img/portal_tab_unselected_center.png');
+border-bottom: 1px solid #adb1bc;
+text-align: center;
+padding: 0px;
+}
+.tab_unselected_text
+{
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 75%;
+padding: 2px;
+font-weight: bold;
+color: #333333;
+white-space:nowrap;
+}
+.tab_remainder
+{
+background-color: #BFC4C6;
+width: 100%;
+text-align: center;
+padding: 0px;
+}
+.tab_content
+{
+background-color: #ffffff;
+border-left: #adb1bc 1px solid;
+border-bottom: #adb1bc 1px solid;
+border-right: #adb1bc 1px solid;
+padding-top: 0px;
+padding-bottom: 3px;
+overflow: auto;
+}
+.subtab_content
+{
+padding: 3px;
+border-top: 1px solid #adb1bc;
+}
+.sidenav_content
+{
+padding: 3px;
+border-top: 1px solid #adb1bc;
+}
+.subtab
+{
+background-image: url('/CAisd/img/sub_tabs_background.png');
+background-color: #adb1bc;
+border-right: 1px solid #adb1bc;
+border-left: 1px solid #adb1bc;
+padding-top: 0px;
+padding-bottom: 3px
+}
+.subtab_unselected
+{
+font-family:  verdana, arial, helvetica, sans-serif;
+font-weight: normal;
+color: #333333;
+font-size: 70%;
+vertical-align : middle;
+text-decoration: none;
+padding-left: 4px;
+padding-right: 4px;
+padding:3px;
+white-space:nowrap;
+}
+.subtab_selected
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: bold;
+font-size: 70%;
+color: #333333;
+vertical-align : middle;
+text-decoration: none;
+padding:3px;
+white-space:nowrap;
+}
+.subtab_empty
+{
+background-color: #eff6ff;
+background-image: url('/CAisd/img/sub_tabs_empty_background.png');
+border-right: 1px solid #adb1bc;
+border-left: 1px solid #adb1bc;
+}
+.sidenav
+{
+padding-top: 4px;
+padding-bottom: 4px;
+padding-right: 4px;
+padding-left: 4px;
+background-color: #d9e2f3;
+height: 100%;
+}
+.sidenav_title
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: bold;
+font-size: 70%;
+color: #333333;
+vertical-align : middle;
+text-decoration: none;
+}
+.sidenavlink_selected
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: bold;
+font-size: 70%;
+color: #333333;
+padding-left:2px;
+line-height: 12pt;
+}
+.sidenavlink_unselected
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: normal;
+font-size: 65%;
+color: #336699;
+line-height: 12pt;
+padding-left:2px;
+}
+.sidenav_right
+{
+background-color: #d9e2f3;
+/*background-image: url('/CAisd/img/sidemenu_background_right.png');*/
+width: 10px
+}
+.sidenav_left
+{
+background-color: #d9e2f3;
+/*background-image: url('/CAisd/img/sidemenu_background_left.png');*/
+}
+.sidenav_bottom
+{
+background-color: #d9e2f3;
+/*background-image: url('/CAisd/img/sidemenu_bottom_background.png');*/
+height: 10px
+}
+.sidenav_corner
+{
+background-color: #d9e2f3;
+/*background-image: url('/CAisd/img/sidemenu_bottom_right.png');*/
+height: 10px;
+width: 10px
+}
+.sidenav_corner_bottom_left
+{
+background-color: #d9e2f3;
+/*background-image: url('/CAisd/img/sidemenu_bottom_left.png');*/
+height: 10px;
+width: 10px
+}
+.sidenavsublink_unselected_text
+{
+font-size: 65%;
+color: #336699;
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: normal;
+padding-left:30px;
+line-height: 12pt;
+}
+.sidenavsublink_selected_text
+{
+font-size: 65%;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: bold;
+padding-left:30px;
+line-height: 12pt;
+}
+th
+{
+font-family: verdana, arial, helvetica, sans-serif;
+margin-right: 5px;
+}
+.table
+{
+background: #ebf0f9;
+}
+.table_control_label
+{
+padding-right: 1px;
+padding-left: 1px;
+font-weight: bold;
+font-size: 70%;
+padding-bottom: 2px;
+color: #333333;
+padding-top: 2px;
+font-family: verdana, arial, helvetica;
+}
+.table_control_link
+{
+padding-left: 2px;
+padding-right: 2px;
+padding-top: 2px;
+padding-bottom: 2px;
+font-weight: bold;
+font-size: 70%;
+color: #336699;
+font-family: verdana, arial, helvetica;
+text-decoration: none;
+}
+.table_view_options
+{
+background: #cbd1da;
+padding-bottom: 1px;
+padding-top: 1px;
+padding-left: 1px;
+border-left: 1px solid #adb1bc;
+border-right: 1px solid #adb1bc;
+}
+.table_view_options_text
+{
+padding-right: 1px;
+padding-left: 1px;
+font-weight: normal;
+font-size: 70%;
+padding-bottom: 1px;
+color: #333333;
+padding-top: 1px;
+font-family: verdana, arial, helvetica;
+}
+.table_view_options_link
+{
+padding-right: 1px;
+padding-left: 1px;
+font-weight: normal;
+font-size: 70%;
+padding-bottom: 1px;
+color: #336699;
+padding-top: 1px;
+font-family: verdana, arial, helvetica, sans-serif;
+text-decoration: none;
+}
+.table_header_left
+{
+background-image: url('/CAisd/sitemods/img/table_header_left.png');
+}
+.table_header_right
+{
+background-image: url('/CAisd/sitemods/img/table_header_right.png');
+}
+.table_header_center
+{
+background: #336699 url('/CAisd/sitemods/img/table_header_center.png');
+}
+.table_header_text
+{
+padding-right:2px;
+padding-left:6px;
+font-weight: bold;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 75%;
+padding-bottom: 2px;
+color: #ffffff;
+padding-top: 2px;
+text-align : left;
+vertical-align : middle;
+}
+.table_instructions
+{
+background: #fffedf;
+border-bottom: #adb1bc 1px solid;
+border-left: #adb1bc 1px solid;
+border-right: #adb1bc 1px solid;
+padding: 4px;
+}
+.table_instructions_text
+{
+padding-right: 2px;
+padding-left: 2px;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica;
+}
+.table_column_header_text
+{
+font-weight: bold;
+font-size: 100%;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+}
+.table_column_header_text_small
+{
+font-weight: bold;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+}
+.table_column_header_background
+{
+padding: 1px;
+background: #cdd2d9;
+text-align: left;
+border: 1px solid #adb1bc;
+}
+.table_sortable_column_header_background
+{
+border-right: #adb1bc 1px solid;
+padding: 1px;
+border-top: #adb1bc 1px solid;
+background: #cdd2d9;
+border-left: #adb1bc 1px solid;
+border-bottom: #adb1bc 1px solid;
+text-align: left;
+line-height : 100%;
+}
+.table_row_header_background
+{
+padding: 1px;
+background: #f4e9d3;
+text-align: right;
+border: 1px solid #bcc7dd;
+}
+.table_banded_row
+{
+background-color: #ebf0f9;
+}
+.table_row
+{
+background-color: #ffffff;
+}
+.table_row_selected
+{
+background-color: #7a97d1;
+}
+.table_navigation
+{
+background: #ffffff;
+padding-top: 1px;
+padding-bottom: 1px;
+padding-left: 1px;
+padding-right: 1px;
+}
+.table_navigation_text
+{
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+font-weight: normal;
+text-decoration: none;
+}
+.table_navigation_arrows
+{
+color: #336699;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 90%;
+font-weight: bold;
+text-decoration: none;
+}
+.calendar_navigation_arrows
+{
+color: #ffffff;
+font-size: 100%;
+font-weight: bold;
+text-decoration: none;
+}
+.table_data_numeric
+{
+padding-right: 2px;
+padding-left: 2px;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica;
+text-align: right;
+}
+.table_link_numeric:visited
+{
+color: #336699;
+}
+.table_icon
+{
+padding-right: 2px;
+padding-left: 2px;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+text-align: center;
+}
+.table_row_action
+{
+padding-right: 5px;
+padding-left: 2px;
+white-space: nowrap;
+text-align: right;
+}
+.table_tree_parent
+{
+padding-right: 1px;
+padding-left: 2px;
+font-weight: bold;
+font-size: 70%;
+padding-bottom: 1px;
+color: #333333;
+padding-top: 1px;
+font-family: verdana, arial, helvetica, sans-serif;
+}
+.table_tree_child
+{
+margin-left: 10px;
+}
+.progress_percentage
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: bold;
+font-size: 80%;
+color: #336699;
+}
+.ca_circle_logo
+{
+text-align: left;
+vertical-align : middle;
+width: 118px;
+height: 81px;
+background-image : url('/CAisd/sitemods/img/Orlen.png');
+}
+.product_name
+{
+text-align : left;
+font-family: Arial, Helvetica, sans-serif;
+font-weight: 100;
+font-size: 1.25em;
+letter-spacing: -1.5px;
+color: #336699;
+}
+.tmark
+{
+font-family: Arial, Helvetica, sans-serif;
+font-size: 0.75em;
+vertical-align : top;
+color: #336699;
+letter-spacing: -1px;
+}
+hr
+{
+background-Image: url('/CAisd/img/blue.png');
+height: 1px;
+width: 99%;
+border: 0px none;
+}
+.fotter_text{
+text-align : left;
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-weight: normal;
+font-size: 60%;
+color: #333333;
+}
+.footer_link{
+text-align: right;
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-weight: normal;
+font-size: 60%;
+color: #336699;
+}
+.sdm_product_name
+{
+display: block;
+text-align : center;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+font-weight: bold;
+font-size: 22px;
+color: #666;
+-webkit-margin-before: 0.3em;
+-webkit-margin-after: 0.3em;
+-webkit-margin-start: 0px;
+-webkit-margin-end: 0px;
+vertical-align: middle;
+width: 100%;
+}
+.CA_logo
+{
+width: 80px;
+height: 65px;
+border-width: 0px;
+border-collapse: collapse;
+margin: 0px;
+padding: 0px;
+text-align: center;
+}
+.CA_logo_td
+{
+width: 81px;
+}
+.head_line
+{
+z-index: 1;
+position: absolute;
+top: 0;
+right: 0;
+width: 100%;
+margin: 0px;
+height: 14px;
+background-image: url('/CAisd/sitemods/img/topbar_bgrd.png');
+background-position: bottom;
+}
+.logo_img
+{
+height: 65px;
+}
+.product_name_container
+{
+text-align : center;
+padding: 0px;
+border-width: 0px;
+margin: 0px;
+border-collapse: collapse;
+}
+.product_info_container
+{
+padding: 0px;
+border-width: 0px;
+margin: 0px;
+border-collapse: collapse;
+border-spacing: 0px;
+background-color: white;
+width: 100%;
+}
+.gn_sdm_header_background
+{
+background-color: #BFC4C6;
+}
+.anchor
+{
+font-family: verdana, arial, Helvetica, sans-serif;
+font-weight: bold;
+font-size: 70%;
+color: #336699;
+text-decoration: none;
+}
+.subtab_seperator
+{
+font-family: verdana, arial, Helvetica, sans-serif;
+font-weight: normal;
+font-size: 100%;
+color: #333333;
+padding: 1px;
+}
+.global_link
+{
+font-family: verdana, arial, halvetica, sans-serif;
+color: #336699;
+font-size: 60%;
+font-weight: bold;
+text-decoration: none;
+padding: 1px;
+}
+.content
+{
+text-align: center;
+margin-top: 4px;
+margin-right: 4px;
+margin-bottom: 4px;
+margin-left: 4px;
+}
+.calendar_navigation_arrows
+{
+font-weight: bold;
+font-size: 100%;
+color: #ffffff;
+text-decoration: none;
+}
+.calendar_navigation_arrows
+{
+font-weight: bold;
+font-size: 100%;
+color: #ffffff;
+text-decoration: none;
+}
+.date_icon
+{
+background-image : url('/CAisd/img/date_16_2.gif');
+cursor:pointer;
+vertical-align:middle
+}
+.table_column_header_background_text
+{
+font-family: verdana, arial, Helvetica, sans-serif;
+font-weight: bold;
+font-size: 70%;
+color: #333333;
+}
+.menubar_background
+{
+background: #adb1bc;
+}
+.menubar_selected_background
+{
+background-color: #ebf0f9;
+padding: 3px;
+}
+.menu_unselected_text
+{
+color: #333333;
+font-family: verdana, arial, Helvetica, sans-serif;
+font-weight: bold;
+font-size: 70%;
+}
+.menu_selected_text
+{
+font-family: verdana, arial, Helvetica, sans-serif;
+color: #336699;
+font-weight: bold;
+font-size: 70%;
+text-decoration:underline;
+}
+/* adding text-decoration:underline for the style 'menu_selected_text' works only for IE.
+the below style is added for firefox  */
+.menu_selected_text:hover
+{
+text-decoration:underline;
+}
+.menubar_unselected_background
+{
+background-color: #f7f8fa;
+padding: 3px;
+}
+.submenu
+{
+border: #adb1bc 1px solid;
+}
+.menu_arrow_down
+{
+background-image: url('/CAisd/img/arrow_asc_bk.png');
+}
+.menu_arrow_right
+{
+background-image: url('/CAisd/img/arrow_right_blk.png');
+}
+.portlet_header_left
+{
+background-image: url('/CAisd/img/portlet_header_left.png');
+}
+.portlet_header_center
+{
+background-image: url('/CAisd/img/portlet_header_center.png');
+}
+.portlet_header_right
+{
+background-image: url('/CAisd/img/portlet_header_right.png');
+}
+.portlet_title
+{
+font-family: arial, Helvetica, sans-serif;
+font-size: 75%;
+color: #333333;
+font-weight: bold;
+padding-left: 5px;
+text-align: left;
+vertical-align: middle;
+}
+.portlet_container
+{
+border-bottom: 1px #adb1bc solid;
+border-right: 1px #adb1bc solid;
+border-left: 1px #adb1bc solid;
+}
+/* Charts / Graphs  */
+.charts_graphs_general
+{
+text-align: center;
+background: #ffffff
+}
+.axis
+{
+font-family: arial, helvetica, sans-serif;
+font-weight: normal;
+font-size: 0.8em;
+color: #333333;
+}
+.grids
+{
+color: #333333;
+}
+.chart_graph_title
+{
+text-align: center;
+font-family: Arial, Helvetica, sans-serif;
+font-weight: bold;
+font-size: 0.8em;
+color: #333333;
+}
+.legend
+{
+text-align: center;
+font-family: Arial, Helvetica, sans-serif;
+font-weight: normal;
+font-size: 0.8em;
+color: #333333;
+}
+.icon
+{
+text-align : center;
+width : 32px;
+height : 32px;
+}
+.link_parent
+{
+color: #336699;
+font-family: verdana, arial, Helvetica, sans-serif;
+font-weight: bold;
+font-size: 60%;
+background-image: url('/CAisd/img/arrow.png');
+}
+.login_product_name
+{
+text-align: left;
+font-family: arial, Helvetica, sans-serif;
+font-weight: 200;
+font-size: 1.9em;
+background-color: #336699;
+color: #ffffff;
+letter-spacing: -1px;
+}
+.tmark_white
+{
+font-family: arial, helvetica, sans-serif;
+font-size: 0.75em;
+vertical-align: top;
+color: #ffffff;
+letter-spacing: -1px;
+}
+.login_footer_text
+{
+color: #000000;
+padding-top: 10px;
+padding-bottom: 12px;
+padding-right: 12px;
+padding-left: 12px;
+font-family: verdana, arial, Helvetica;
+font-weight: normal;
+font-size: 60%;
+text-decoration: none;
+}
+.login_form_formatting
+{
+padding: 2px;
+border: 1px solid #336699;
+}
+.tableborder
+{
+border: 1px solid #000302;
+}
+.aboveCAlogo
+{
+border-top: 1px solid #000302;
+background-color: #ffffff;
+}
+.login_padding
+{
+border: 20px solid #336699;
+background-color: #336699;
+}
+.data_white
+{
+text-align : left;
+font-family: verdana, arial, Helvetica, sans-serif;
+font-weight: normal;
+font-size: 70%;
+color: #ffffff;
+text-decoration: none;
+}
+.datalink_white
+{
+text-align: left;
+font-family: verdana, arial, Helvetica, sans-serif;
+font-weight: normal;
+font-size: 70%;
+color:#ffffff;
+text-decoration: underline;
+}
+.wizard_active_background
+{
+background-image: url('/CAisd/img/wz_active_left.png');
+}
+.wizard_active_background_right
+{
+background-image: url('/CAisd/img/wz_active_right.png');
+}
+.wizard_inactive_background
+{
+background-image: url('/CAisd/img/wz_inactive_left.png');
+}
+.wizard_inactive_background_right
+{
+background-image: url('/CAisd/img/wz_inactive_right.png');
+width:6px;
+height:31px
+}
+.wizard_disabled_background
+{
+background-image: url('/CAisd/img/wz_disabled_left.png');
+}
+.wizard_disabled_background_right
+{
+background-image: url('/CAisd/img/wz_disabled_right.png');
+width:6px;
+height:31px
+}
+.wizard_text_active
+{
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+font-weight: bold;
+text-align: left;
+vertical-align: middle;
+}
+.wizard_text_inactive
+{
+color: #336699;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+font-weight: bold;
+text-align: left;
+vertical-align: middle;
+}
+.wizard_text_disabled
+{
+color: #999999;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+font-weight: bold;
+text-align: left;
+vertical-align: middle;
+}
+.wizard_number_active
+{
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+font-weight: bold;
+text-align: center;
+vertical-align: middle;
+}
+.wizard_number_disabled
+{
+color: #999999;
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+font-weight: bold;
+text-align: center;
+vertical-align: middle;
+}
+.wizard_background
+{
+background-color: #f7f8fa;
+}
+.table_title_text
+{
+font-family: Verdana, Arial, Helvetica, Sans-serif;
+font-weight: bold;
+font-size: 75%;
+color: #ffffff;
+}
+.menudropdown
+{
+border: 1px solid #336699;
+background-image:url('/CAisd/img/portal_tab_unselected_center.png');
+background-repeat: repeat;
+}
+.menulink
+{
+color: #336699;
+font-family: verdana, arial, helvetica, sans-serif;
+font-weight: bold;
+font-size: 80%
+}
+.menubar
+{
+background-color: #adb1bc;
+}
+.subtab_unselected_text
+{
+font-family:  verdana, arial, helvetica, sans-serif;
+font-weight: normal;
+color: #333333;
+vertical-align : middle;
+font-size: 70%;
+text-decoration: none;
+}
+.subtab_selected_background
+{
+padding-top: 4px;
+}
+.subtab_selected_text
+{
+font-size: 70%;
+color: #333333;
+font-weight: bold;
+font-family: verdana, arial, helvetica, sans-serif;
+text-decoration: none;
+}
+.table_title_text
+{
+padding-right: 2px;
+padding-left: 6px;
+font-weight: bold;
+font-family: verdana, Arial, Helvetica, sans-serif;
+font-size: 75%;
+padding-bottom: 2px;
+color: #ffffff;
+padding-TOP: 2px;
+text-align : left;
+vertical-align : middle;
+}
+.table_column_header
+{
+padding: 1px;
+font-weight: bold;
+font-size: 70%;
+background: #cdd2d9;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;;
+text-align: center;
+border: 1px solid #adb1bc;
+}
+.table_sortable_column_header
+{
+border-right: #adb1bc 1px solid;
+padding: 1px;
+border-top: #adb1bc 1px solid;
+background-color: #cdd2d9;
+border-left: #adb1bc 1px solid;
+border-bottom: #adb1bc 1px solid;
+text-align: center;
+line-height : 100%;
+}
+.table_sortable_column_header_text
+{
+font-weight: bold;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+}
+.table_data
+{
+padding-right: 2px;
+padding-left: 2px;
+font-size: 70%;
+color: #333333;
+font-family: verdana, arial, helvetica, sans-serif;
+}
+.table_link
+{
+padding-right: 1px;
+padding-left: 1px;
+font-size: 70%;
+padding-bottom: 1px;
+color: #336699;
+padding-top: 1px;
+font-family: verdana, arial, helvetica, sans-serif;
+text-decoration: none
+}
+.table_link:hover
+{
+text-decoration: underline
+}
+.table_link:visited
+{
+color: #336699
+}
+.table_link_numeric
+{
+padding-right: 2px;
+padding-left: 2px;
+font-size: 70%;
+color: #336699;
+font-family: verdana, arial, helvetica, sans-serif;
+text-align: right;
+text-decoration: none
+}
+.header_text
+{
+font-family: Verdana, Arial, helvetica, sans-serif;
+color: #333333;
+font-size: 60%;
+font-weight: bold;
+padding: 1px
+}
+.portlet_data
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+color: #333333;
+font-weight: normal;
+}
+.portlet_label
+{
+font-family:  verdana, arial, helvetica, sans-serif;
+font-size: 70%;
+color: #333333;
+font-weight: bold;
+text-align : left;
+vertical-align : middle;
+}
+.portlet_link
+{
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 70%; color: #336699;
+text-decoration: none
+}
+.portlet_linktext:hover
+{
+text-decoration: underline
+}
+.page_section_header_link
+{
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 70%;
+color: #ffffff;
+font-weight: bold;
+padding-left: 6px;
+padding-right: 4px;
+text-align: left;
+vertical-align: middle;
+}
+.page_instruction_area2
+{
+padding: 4px;
+BORDER-RIGHT: #adb1bc 1px solid;
+BORDER-TOP: #adb1bc 1px solid;
+BACKGROUND: #f7f8fa;
+BORDER-LEFT: #adb1bc 1px solid;
+BORDER-BOTTOM: #adb1bc 1px solid;
+}
+.page_instructions_text2
+{
+FONT-WEIGHT: normal;
+FONT-SIZE: 70%;
+COLOR: #333333;
+FONT-FAMILY: verdana, arial, Helvetica, sans-serif;
+}
+.toolbar_container
+{
+border-spacing: 0px;
+padding: 0px;
+width: 99%;
+border-width: 0px;
+text-align: center;
+margin-left:auto;
+margin-right:auto;
+border-collapse: collapse;
+}
+.tab_below_content_sel_left
+{
+border-bottom: #adb1bc 1px solid;
+border-left: #adb1bc 1px solid;
+}
+.tab_below_content_sel_cent
+{
+border-bottom: #adb1bc 1px solid;
+}
+.tab_below_content_sel_right
+{
+border-bottom: #adb1bc 1px solid;
+border-right: #adb1bc 1px solid;
+}
+.tab_below_content_unsel_left
+{
+border-bottom: #adb1bc 1px solid;
+border-left: #adb1bc 1px solid;
+}
+.tab_below_content_unsel_cent
+{
+border-bottom: #adb1bc 1px solid;
+}
+.tab_below_content_unsel_right
+{
+border-bottom: #adb1bc 1px solid;
+border-right: #adb1bc 1px solid;
+}
+ul.power_user_tips
+{
+margin-left: 0px;
+margin-right: 10px;
+margin-top: 0px;
+margin-bottom: 0px;
+padding-left: 20px;
+}
+/*SCO40646 - username and password input field will be 91% of parent tag-td,
+this is done to avoid the different behavior shown in ipad when size attribute is used in login.htmpl*/
+#USERNAME,#PIN{font-size:11px;width:91%;}
+.login_page {
+background-color: #F2F2F2;
+text-align:center;
+}
+.login_table {
+background-color: #ffffff;
+text-align:center;
+vertical-align:middle;
+width: 460px;
+background-image:url(../img/login_bg_center.png);
+margin:0px;
+padding:0px;
+}
+.login_productname {
+color: #DD3126;
+font-family: CAlibri, Verdana, Arial, Helvetica, sans-serif;
+font-weight: bold;
+font-size: 26px;
+text-align:left;
+/*	height:40px;
+padding-bottom:20px;
+*/
+}
+.login_inputs {
+padding-top:35px;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 17px;
+color: #DD3126;
+font-weight: bold;
+}
+.login_header {
+padding-bottom:6px;
+font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 11px; color: #333333; font-weight: bold;
+text-align:left;
+vertical-align:middle;
+}
+.loginfooter {
+font-family: Verdana, Arial, sans-serif;
+font-size: 11px;
+color: #FFFFFF;
+padding-top: 8px;
+height: 17px;
+}
+.disableSuggest {
+color:#999999;
+}
+.employeeBoxContent {
+color: #666;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+font-size: 11px;
+text-align: left;
+}
+.afooter {
+font-size: 11px;
+border-left: 1px solid #fff;
+color: #fff;
+padding: 0 12px 0 15px;
+}
+.contractContent {
+color: #666;
+font-size: 11px;
+text-align: left;
+}
+.contractContent ul {
+padding-top: 10px;
+padding-left: 0px;
+}
+.contractContent li {
+padding-bottom: 3px;
+}
+.contractContentCategory li a:link {
+color: #DD3126;
+text-decoration: none;
+border-bottom: 0px;
+}
+.contractContentCategory li a:hover {
+text-decoration: none;
+border-bottom: 1px solid red;
+}
+p.contractContentTitle {
+font-size: 14px;
+text-transform: uppercase;
+font-weight: bold;
+padding: 0px;
+margin-top: 0px;
+margin-bottom: 5px;
+}
+.contractContentFav {
+padding-right: 5px;
+vertical-align: bottom;
+border: 0px;
+}
+p.contractContentTitle a:link {
+color: #DD3126;
+font-size: 14px;
+text-transform: uppercase;
+font-weight: bold;
+padding: 0px;
+text-decoration: none;
+}
+p.contractContentTitle a:hover {
+font-size: 14px;
+text-transform: uppercase;
+font-weight: bold;
+text-decoration: none;
+border-bottom: 1px solid red;
+}
+.scoreboardCell {
+width: 200px;
+font-size: 11px;
+font-weight: normal;
+padding-left: 5px;
+}
+.scoreboardCellElement {
+padding-left: 8px;
+}
+p.scoreboardCell {
+-webkit-margin-before: 10px;
+-webkit-margin-after: 2px;
+font-size: 11px;
+font-weight: bold;
+text-transform: uppercase;
+}
+p.scoreboardCell a:link {
+color: #666 !important;
+font-size: 11px;
+font-weight: bold;
+text-transform: uppercase;
+}
+p.scoreboardCellFolder {
+color: #666 !important;
+font-size: 11px;
+font-weight: bold;
+margin-bottom: 2px;
+}
+p.scoreboardCell a:hover {
+font-size: 11px;
+font-weight: bold;
+text-transform: uppercase;
+text-decoration: none;
+border-bottom: 1px solid red;
+}
+.scoreboardCell a:link {
+color: #666 !important;
+font-size: 11px;
+font-weight: normal;
+}
+.scoreboardCell a:hover {
+font-size: 11px;
+text-decoration: none !important;
+border-bottom: 1px solid red;
+}
+hr.scoreboardCell {
+border: 0;
+height: 0;
+border-bottom: 1px solid #DD3126;
+width: 90%;
+background-image: none;
+padding-top: 5px;
+padding-bottom: 5px;
+}
+p.scoreboardLabel {
+color: #666;
+font-size: 11px;
+font-weight: bold;
+text-transform: uppercase;
+-webkit-margin-before: 15px;
+-webkit-margin-after: 1px;
+}
+.UserInfo {
+z-index: 99;
+width: 150px;
+height: 73px;
+position: absolute;
+right: 0px;
+top: 15px;
+}
+p.UserInfoItem {
+font-weight: normal;
+margin: 0px;
+font-size: 9px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+color: #666;
+}
+p.UserInfoItemHighlighted {
+font-weight: bold;
+margin: 0px;
+font-size: 9px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+color: #336699;
+}
+.ResultTable {
+width: 100%;
+border-collapse: collapse;
+border-spacing: 0;
+}
+.ResultTable td {
+padding-top: 5px;
+padding-bottom: 5px;
+}
+.ResultTable tr:hover {
+background-color: #F4F4F4;
+color: #000000;
+cursor: pointer;
+}
+.ResultTable td:hover {
+background-color: #F4F4F4;
+cursor: pointer;
+cursor: hand;
+}
+.PropTable {
+width: 100%;
+border-collapse: collapse;
+border-spacing: 1;
+border: 1px solid #F3F3F3;
+}
+.PropTable td {
+padding-top: 5px;
+padding-bottom: 5px;
+}
+.PropTableDark {
+background-color: #F6F6F6;
+}
+.PropTableLight {
+background-color: #F9F9F9;
+}
+.PropTable tr:hover {
+background-color: #F4F4F4;
+color: #000000;
+}
+.PropTable td:hover {
+background-color: #F4F4F4;
+}
+.TelecentrumLabel {
+background-color: #F7F7F7;
+color: Gray;
+font-size: 10px;
+padding: 2px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+}
+.TelecentrumUserLabel {
+background-color: #F7F7F7;
+color: Gray;
+font-size: 11px;
+padding: 2px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+}
+.TelecentrumData {
+background-color: #FFFFFF;
+font-size: 10px;
+padding: 2px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+}
+.TelecentrumDataHead {
+background-color: #FFFFFF;
+font-size: 10px;
+padding: 2px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+}
+.TelecentrumUserData {
+background-color: #FFFFFF;
+font-size: 11px;
+padding: 2px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+}
+.TelecentrumDataSelected {
+font-size: 10px;
+padding: 2px;
+font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+color: #FFFFFF;
+background: #707070;
+}
+.TelecentrumEditLink a:link {
+color: #666 !important;
+font-size: 11px;
+font-weight: normal;
+}
+.TelecentrumEditLink a:hover {
+font-size: 11px;
+text-decoration: none !important;
+border-bottom: 1px solid red;
+}
+.TelecentrumColumn {
+color: #666 !important;
+font-size: 11px;
+font-weight: normal;
+text-align: center;
+}
+.TelecentrumTableHead {
+color: #666 !important;
+font-size: 10px;
+font-weight: normal;
+text-align: center;
+border-bottom: 1px dotted gray;
+background-color: #F4F4F4 !important;
+}
+.TelecentrumHead {
+font-size:x-large;
+font-weight:bolder;
+text-decoration:none;
+padding: 20px;
+color: #666;
+}
+.HomeMessage {
+position: fixed;
+top: 7px;
+right: 7px;
+background-color: #FFE97F;
+width: 210px;
+padding: 10px;
+font-size: 10px;
+z-index: 9999;
+}
+.HomeMessage a:link {
+border-bottom: 1px dotted gray;
+}
+.HomeMessage a:hover {
+border-bottom: 1px solid red;
+}
+.MyItemsMenu {
+font-size: 10px;
+font-weight: normal;
+text-decoration: none;
+}
+.MyItemsMenu a:link {
+font-size: 10px;
+font-weight: normal;
+text-decoration: none;
+border-bottom: 1px dotted gray;
+}
+.MyItemsMenu a:hover {
+font-size: 10px;
+font-weight: normal;
+text-decoration: none;
+border-bottom: 1px solid red;
+}
+div.CnoteDot {
+width: 12px;
+height: 12px;
+margin-left: 3px;
+float: left;
+background: #D8D8D8;
+}
+div.CnoteDot:hover {
+background: #DD3126;
+cursor: pointer;
+cursor: hand;
+}

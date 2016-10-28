@@ -1,0 +1,88 @@
+<PDM_IF 0>
+$Id: list_crs_pr.htmpl,v 1.2 2006/11/08 00:14:35 olsjo01 Exp $
+list_crs_pr.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Problem Statuss.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF "$args.KEEP.FACT" != "">
+<PDM_INCLUDE FILE=list_status_trans_include.htmpl>
+<PDM_IF "$args.KEEP.PERSID" != "">
+var hdrTitle = "Update Problem Status Transition Search";
+var hdrTitleList = "Update Problem Status Transitions";
+<PDM_ELSE>
+var hdrTitle = "Initial Problem Status Transition Search";
+var hdrTitleList = "Initial Problem Status Transitions";
+</PDM_IF>
+<PDM_ELSE>
+var hdrTitle = "Problem Status Search";
+var hdrTitleList = "Problem Status List";
+</PDM_IF>
+var reset_flag = 1;
+
+function checkReset()
+{
+   if ((typeof doReset != "undefined") && (typeof reset_flag != "undefined") && (reset_flag)) {
+      doReset();
+      reset_flag = 0;
+      }
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = false;
+var cfgDefaultStatus = "${args.DEFAULT_STATUS:}";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list"  onLoad="checkReset();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF "$args.KEEP.FACT" != "">
+<PDM_MACRO name=sfStart create=false extracreateurl="KEEP.FLD_NOT_TO_RESET=pr_flag" factory=crs_pr>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart extracreateurl="KEEP.FLD_NOT_TO_RESET=pr_flag" factory=crs_pr>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No status codes found";
+var msgFound1 = "1 status code found";
+var msgFound = "%1 status codes found";
+var msgFoundMore = "%1 status codes found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired problem status";
+
+<PDM_IF "$args.KEEP.FACT" != "">
+<PDM_INCLUDE FILE=list_status_trans_include2.htmpl>
+<PDM_ELSE>
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</PDM_IF>
+
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+Note: Because of other PDM_INCLUDE, the PDM_WSP tag must be the last to ensure the correct factory is used
+</PDM_IF>
+<PDM_WSP mode=list factory=crs>

@@ -1,0 +1,244 @@
+<PDM_IF 0>
+scoreboard.htmpl
+WHEN PRESENTED:
+    A possible form to show as a middle frame when using frames
+INTENT:
+    This menu presents the OLAF scoreboard
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user
+    object ACCESS           List containing the user's access to the various
+                            function groups
+</PDM_IF>
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="OP=menu+NBTAB=sd">
+<PDM_INCLUDE FILE=styles.htmpl>
+<STYLE>
+	.RefreshButton {
+		display: block;
+		width: 16px;
+		height: 16px;
+		background: url('$CAisd/sitemods/img/refresh_0.png');
+	}
+	
+	.RefreshButton:hover {
+		background: url('$CAisd/sitemods/img/refresh_1.png');
+	}
+</STYLE>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript">
+<!--
+	if (_browser.isUnix == true)
+		document.write("<link rel='stylesheet' type='text/css' href='$CAisd/css/unix.css'>\n");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<script type="text/javascript">
+cfgCAISD = "$CAisd";
+cfgCgi = "$cgi";
+cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+cfgProductName = "$ProductName";
+var cfgFormTitle = "$prop.FormTitle";
+var cfgDateFormat = "$date_format";
+cfgProductID = "$ProductID";
+cfgCIurl = "$prop.URL_CI";
+cfgHTurl = "$prop.URL_HT";
+cfgUserType = "$prop.user_type";
+cfgGuestUser = "$prop.guest_user";
+cfgAllowPopupResize = true;
+var cfgAutoUpdate = "$env.NX_WEB_AUTO_UPDATE" - 0;
+if ( ahdtop.cstUsingScreenReader )
+   cfgAutoUpdate = 0;
+var propFormName="scoreboard.htmpl";
+var ahdframeset = ahdtop;
+function NS_update_graph()
+{
+   if ( _browser.supportsLayers )
+       Folder.update_graph();
+}
+
+var usq_owner_sym = "Tablica wyników";
+usq_owner_sym = usq_owner_sym.replace(/&#39;/g, "'");
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/fldrtree.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/pdmqa.js"></script>
+<script type="text/javascript">
+<PDM_IF "$prop.DebugSource" != "1">
+disable_right_click();
+</PDM_IF>
+window.parent.scoreboard.scrolling = "no";
+window.ahdtop.scoreboard = window;
+
+// If and when'cstm_scbd_id' is passed, immediately
+//	launch the customize scoreboard interface for 
+// the id specified.  The id *should* be an Access Type id.
+function customize_scbd() {
+
+    var cstm_id = "$args.KEEP.cstm_scbd_id";
+    
+    if (null != cstm_id && cstm_id.length > 1) {
+        if ( typeof ahdtop == "object" )
+        {
+            ahdtop.scoreboard.maintain_tree_for_acctyp(cstm_id);
+            return;
+        }
+    }
+    
+	// Use IE event model, to attach onresize event. 
+	//<body onresize> doesnt work when Doctype validation is added (IE only Problem)
+	if(_browser.isIE && is_standardmode_on && window != undefined && window.parent != undefined && window.parent.attachEvent)
+		window.parent.attachEvent( "onresize", adjScrollDivHeight );
+		
+    // Set the focus back to the customize scoreboard screen when web_auto_update option is set and the scoreboard is refreshed.
+    // IE only Problem 
+    if ( _browser.isIE && !document.hasFocus()) {
+									return;
+    }    
+    fldrtreeTabOff();
+}
+//
+// This function adds 'pdmqa' tags to the 'scoreborad.htmpl' form to 
+// support form automation testing. It calls the user defined PdmQA 
+// JavaScript Class/Object to do the actual work.   
+//
+function pdmqa() {
+  var PdmQA = "$PdmQA";
+
+  //
+  // If the 'PdmQA' variable is set to yes in 'web.cfg' write the 
+  // tags. Note by default (OTB) the 'PdmQA' variable is set to no.
+  //
+  if (PdmQA == "yes") {
+    Folder.pdmqa();
+  }
+}
+</script>
+</head>
+<body class=scbd onload="NS_update_graph();adjScrollDivHeight();customize_scbd();pdmqa();" onResize="adjScrollDivHeight()">
+<script type="text/javascript">
+if ( ! ahdtop.cstUsingScreenReader ) {
+  activateActionKeys();
+  var actKey = registerActionKey( "x", "X", fldrtreeTabOff, "" ); 
+}
+</script>
+<center>
+<!-- 20130925 bmalz @ e-xim -->
+<!-- <h3 class=scbd>
+Tablica wyników
+<br>
+na dzień
+<br> 
+<script>
+document.write("<span class=scbdhead id=scoreboard_asof_date>" + date_to_string(Math.round( new Date().getTime() / 1000)) + "</span>")
+</script>
+</h3>
+-->
+<div style="position:absolute; right:10px; top:10px;"><a class="RefreshButton" href="javascript:request_reset()" title="Aktualizuj liczniki"></a></div> <!-- 20130925 bmalz @ e-xim -->
+<script type="text/javascript">
+// 20130925 bmalz @ e-xim
+<PDM_IF 0>
+	<PDM_MACRO NAME=button caption="Aktualizuj liczniki[a]" hotkey_name="Aktualizuj liczniki[a]" id="btn001" width=0 Tooltip="Aktualizacja tablicy wyników"
+		NewRow=yes EndRow=yes
+		func="request_reset()">
+</PDM_IF>
+if ( cfgAutoUpdate > 0 ) {
+   if ( cfgAutoUpdate < 60 )
+      cfgAutoUpdate = 60000;
+   else
+      cfgAutoUpdate *= 1000;
+   var nextRefresh = new Date((new Date()).getTime() + cfgAutoUpdate);
+	// 20130925 bmalz @ e-xim
+	var godz = nextRefresh.getHours();
+	var min = nextRefresh.getMinutes();
+	var sec = nextRefresh.getSeconds();
+	if (min < 10)
+    	min = '0' + min;
+	if (sec < 10)
+	    sec = '0' + sec;
+	docWriteln("<div style='margin:10px; font-size: 16px;'><span class='hinttext'>Stan na  <span id=autoUpdTime>" + godz + ":" + min + ":" + sec + "</span></span></div>");
+   // docWriteln("<span class='hinttext'>Stan na  <span id=autoUpdTime>" + nextRefresh.toTimeString() + "</span></span>"); // 20130925 bmalz @ e-xim
+   cfgTimeoutID = window.setTimeout("request_reset(1)", cfgAutoUpdate);
+}
+//dLog("Loading scoreboard"); // Force allocation of log in main window
+<PDM_IF 0>
+<PDM_MACRO NAME=button caption="Debug Log" hotkey_name="Debug Log" id="btn002" width=0 Tooltip="Show contents of debug log" func="dLogShow()">
+</PDM_IF>
+</script>
+</center>
+<script type="text/javascript">
+startScrollbar();
+</script>
+<PDM_SCOREBOARD target=ahdframe>
+<PDM_IF "$prop.SupportR50" == "yes">
+<br>  
+<h3 class="scbd">Service Desk 5.0 Menu</h3>
+<base target=$_top>
+<PDM_LINK OP=ENDSESSION><B>Wyloguj |</B></PDM_LINK>
+<base target=ahdframe>
+<PDM_LINK OP=DISPLAY_FORM HTMPL=bin_form_np.htmpl><B>Ogłoszenia</B></PDM_LINK>
+
+<HR>
+
+<PDM_IF "$MenuFeatures" : "Request">
+<PDM_IF $ACCESS.call_mgr \> 0>
+    <span class=scbdtext>Wnioski</span></th>
+    <span class=scbdtext>
+<PDM_IF $ACCESS.FAC_cr \> 1>
+    <LI><PDM_LINK OP=CREATE_NEW FACTORY=cr>Nowy</PDM_LINK>
+</PDM_IF>
+<PDM_IF $ACCESS.FAC_cr_tpl \> 1>
+    <LI><PDM_LINK OP=CREATE_NEW FACTORY=cr use_template=1>Nowy z szablonu</PDM_LINK>
+</PDM_IF>
+    <LI><PDM_LINK OP=SEARCH_CR>Wyszukaj</PDM_LINK>
+    <LI><PDM_LINK OP=SEARCH_CRKN>Baza Wiedzy</PDM_LINK>
+        <PDM_FORM>
+            <input type="hidden" name=OP value=QUERY_CR>
+            Wniosek #
+            <input type=TEXT name=QUERY_CR_NUM size=6>
+            <input type=SUBMIT name=whatever value="Go">
+        </PDM_FORM>
+    </span>
+</PDM_IF>
+</PDM_IF>
+
+<PDM_IF "$MenuFeatures" : "Change">
+<PDM_IF $ACCESS.change_mgr \> 0>
+    <span class=scbdtext>Zmiana</span></th>
+
+    <span class=scbdtext>
+<PDM_IF $ACCESS.FAC_chg \> 1>
+    <LI><PDM_LINK OP=CREATE_NEW FACTORY=chg>Nowa</PDM_LINK>
+</PDM_IF>
+<PDM_IF $ACCESS.FAC_chg_tpl \> 1>
+    <LI><PDM_LINK OP=CREATE_NEW FACTORY=chg use_template=1>Nowa z szablonu</PDM_LINK>
+</PDM_IF>
+    <LI><PDM_LINK OP=SEARCH FACTORY=chg>Wyszukaj</PDM_LINK>
+    <LI><PDM_LINK OP=SEARCH FACTORY=wf>Workflow Task Search</PDM_LINK>
+        <PDM_FORM OP="SEARCH" FACTORY="chg">
+            CO #
+            <input type=TEXT name=QBE.EQ.chg_ref_num size=6>
+            <input type=SUBMIT name=whatever value="Go">
+            <input type="hidden" name=SKIPLIST value=1>
+            <input type="hidden" name=HTMPL value="detail_chg_ro.htmpl">
+        </PDM_FORM>
+    </span>
+</PDM_IF>
+</PDM_IF>
+
+</PDM_IF>
+<script type="text/javascript">
+endScrollbar();
+</script>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: scoreboard.htmpl ASPEN.4 2010/12/08 14:56:15 saima01 Exp $
+</PDM_IF>

@@ -1,0 +1,38 @@
+<html lang="en"><PDM_IF 0>
+g_profile_browser.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+var ahdtop = parent.ahdtop;
+var ahdframeset = parent.ahdframeset;
+var cfgCAISD = "$CAisd";
+var cfgCgi = "$cgi";
+var cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+var in_content_frame = ( ahdframeset == ahdtop );
+var ahdframeset = ( in_content_frame ? window.ahdframeset : window );
+if (!in_content_frame)
+{
+    argPopupName = parent.argPopupName;
+    parent.ahdframeset = ahdframeset;
+}
+</SCRIPT>
+</HEAD>
+<body>
+<iframe style="width:100%;height:100%;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=g_profile_browser3.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME" NAME=gpbwindow_menuOK SCROLLING=no MARGINHEIGHT=2 MARGINWIDTH=0 FRAMEBORDER=1 title="Hidden frame - do not navigate here">This window requires iframe support</iframe>
+</body>
+</HTML>

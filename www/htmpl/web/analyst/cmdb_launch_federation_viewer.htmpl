@@ -1,0 +1,26 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_launch_federation_viewer.htmpl
+//
+// Purpose: File responsible for showing the CMDBf Viewer button in all CI detail forms.
+//
+//
+// 14-Aug-2009 tomjo02 SCO 26226 - CMDBf Federation Viewer - Initial version 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<script type="text/javascript">
+// Show the button for launching federation viewer with current CI and extension table name.
+<PDM_MACRO NAME=button  
+	id="btfedviewer" 
+	caption="CMDBf Viewer"
+	func="popup_window( 'Federation_Viewer_$args.persistent_id','SHOW_DETAIL', 0, 0, '', 'PERSID=$args.persistent_id', 'FACTORY=nr', 'prop.extension=$args.family.extension_name', 'HTMPL=cmdb_federation_viewer.htmpl')" 
+	disabled="yes" 
+	width=0 
+	hotkey_name="CMDBf_Viewer"  
+	tooltip="Launch Configuration Item Federation Viewer" >
+
+if ("$args.id" != "0")
+    ImgBtnEnableButton("btfedviewer", true);
+
+</script>
+

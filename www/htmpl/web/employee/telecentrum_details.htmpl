@@ -1,0 +1,93 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT>
+
+jq(window).resize(function() {
+	jq('#description').css('width', jq(window).width() - 20);
+	jq('#title').css('width', jq(window).width() - 350);
+}).trigger("resize");
+
+function GenObject(isClosed) {
+	if(parent.CategoryType) {
+		var ArgCategoryID = "PRESET=category:pcat:" + encodeURIComponent(parent.CategoryID) ;//"KEEP.category_set=" + parent.CategoryID;
+		var ArgCategorySym = ""; //"KEEP.category_key=" + parent.CategorySym;
+		//var ArgCategory = "PRESET_REL=category:pcat.persistent_id:ss_sym:" + parent.CategorySym;
+		var ArgUser = "PRESET=customer:" + encodeURIComponent(parent.user_name);
+		var ArgUser2 = "PRESET=requested_by:" + encodeURIComponent(cstID);
+		var ArgDescription = "PRESET=description:" + document.getElementById('description').value;
+		var ArgSummary = "PRESET=summary:" + document.getElementById('title').value;
+		var ArgAffected = "PRESET=affected_resource:" + encodeURIComponent(parent.Selected_Device); //"PRESER_REL=affected_resource:nr.id:id:" + parent.Selected_Device;
+		var ArgParent = "PRESET=parent:" + encodeURIComponent(parent.Selected_Application);
+		var ArgZLoc = "PRESET=zloc:" + encodeURIComponent(parent.Selected_Localization);
+		var ArgCallId = "PRESET=zcallid:" + encodeURIComponent(parent.callid);
+		var ArgGroup = "PRESET=group:" + encodeURIComponent(parent.CategoryGroup);
+		var ArgStatus = "PRESET_REL=status:crs_cr.code:sym:Open";
+		var ArgPhoneNum = "PRESET=zphone_number:" + encodeURIComponent(parent.phone_number);
+		var ArgClose = "KEEP.AutoClose=1";
+		var ArgHidden = "KEEP.Hidden=0";
+
+		if(isClosed) {
+			ArgStatus = "PRESET=status:DONE";
+			
+			if(parent.IsHR == 1) {
+				ArgGroup = "PRESET=group:1F85057E932B924FBF107E5B0EE27444";
+			}
+			else
+			{
+				ArgGroup = "PRESET=group:";
+			}
+				
+			ArgClose = "KEEP.SaveAndClose=1";
+			ArgHidden = "KEEP.Hidden=1";
+		}
+
+		if(isClosed) {
+			create_new_telecentrum_hidden(parent.CategoryType, 0, null, null, ArgCategoryID, ArgCategorySym, ArgUser, ArgUser2, ArgDescription, ArgSummary, ArgStatus, ArgAffected, ArgParent, ArgZLoc, ArgCallId, ArgGroup, ArgPhoneNum, ArgClose, ArgHidden);
+		} else {
+			create_new_telecentrum(parent.CategoryType, 0, null, null, ArgCategoryID, ArgCategorySym, ArgUser, ArgUser2, ArgDescription, ArgSummary, ArgStatus, ArgAffected, ArgParent, ArgZLoc, ArgCallId, ArgGroup, ArgPhoneNum, ArgClose, ArgHidden);
+		}
+	} else {
+		alert('Należy wybrać kategorię.');
+	}
+}
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>
+	<tr>
+		<td align='left' width='99%'><h2 style='margin: 0px; font-size: 11px;'>Informacje o zgłoszeniu</h2></td>
+		<td align='right' width='1%'></td>
+	</tr>
+</table>
+<table width="100%">
+	<tr>
+		<table>
+			<td valign="middle"><input id="title" type="text" name="title" tabindex="1" autocomplete="off" onfocus="return detailFocus(this);" onblur="return detailBlur(this);" title="Temat zgłoszenia" tabindex="100" style="width: 400px;" class=""></td>
+			<td class="labeltext"><SCRIPT>ImgBtnCreate("btnCreate", "Udzielono informacji", "javascript:GenObject(true);", true, 0, "Udzielono informacji");</SCRIPT></td>
+			<td><SCRIPT>ImgBtnCreate("btnCreate", "Zarejestruj zgłoszenie", "javascript:GenObject();", true, 0, "Zarejestruj zgłoszenie");</SCRIPT></td>
+			<td id="tdfiller" style="width:100%;"></td>
+		</table>
+	</tr>
+	<tr>
+		<td valign="middle"><table><tr><td><textarea id="description" tabindex="200" onfocus="return detailFocus(this);" onblur="return detailBlur(this);" rows="4" cols="80" title="Opis" name="Description" maxlength="4000" style="width: 100%;" class=""></textarea></td></tr></table></td>
+	</tr>
+</table>
+</BODY>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</HTML>
+
+<PDM_WSP>

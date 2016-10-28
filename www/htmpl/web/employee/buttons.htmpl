@@ -1,0 +1,99 @@
+<!-- <PDM_IF 0>
+@(#)\$Id: buttons.htmpl,v 1.4 2007/01/04 23:01:30 tuach01 Exp $
+buttons.htmpl
+WHEN PRESENTED:
+    As the buttons and links used for navigation in the left
+    frame of the customer web interface.
+</PDM_IF> -->
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="OP=menu">
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+cfgCAISD = "$CAisd";
+cfgCgi = "$cgi";
+cfgSID = "$SESSION.SID";
+cfgFID = "$prop.FID";
+cfgProductName = "$ProductName";
+cfgDateFormat = "$date_format";
+cfgProductID = "$ProductID";
+cfgUserType = "$prop.user_type";
+cfgGuestUser = "$prop.guest_user";
+reloadReq = false;
+function focusMe() {}
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/imgbutton.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/dynlayer.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fldrtree.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fid_gen.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF $DebugSource < 1>
+disable_right_click()
+</PDM_IF>
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class="bins">
+<CENTER>
+
+<BR>
+<SCRIPT LANGUAGE="JavaScript">
+ImgBtnCreate("btn001", "Logout[u]", "logout_all_windows()", true, 120);
+</SCRIPT>
+<HR WIDTH=215>
+<BASE TARGET=content>
+<SCRIPT LANGUAGE="JavaScript">
+ImgBtnCreate("btn002", "Announcements", "bin_form_np.htmpl", true, 210);
+</SCRIPT>
+<PDM_IF "$MenuFeatures" : "Request">
+<BR>
+<SCRIPT LANGUAGE="JavaScript">
+ImgBtnCreate("btn003", "New_Request", "CREATE_CR", true, 210);
+</SCRIPT>
+<PDM_IF "$prop.guest_user" != 1>
+<BR>
+<SCRIPT LANGUAGE="JavaScript">
+ImgBtnCreate("btn004", "My_Open_Requests", "upd_frame('SEARCH','FACTORY=cr', 'KEEP.where_clause=customer=U\'$cst.id\' and active=1')", true, 210);
+document.writeln('<BR>');
+ImgBtnCreate("btn006", "My_Open_Change_Orders", "upd_frame('SEARCH','FACTORY=chg', 'KEEP.where_clause=affected_contact=U\'$cst.id\' and active=1')", true, 210;
+</SCRIPT>
+</PDM_IF>
+<BR>
+<SCRIPT LANGUAGE="JavaScript">
+ImgBtnCreate("btn005", "Help", "help_on_form('$prop.user_type')", true, 210);
+</SCRIPT>
+<PDM_IF 0>
+<!-- Comment out for customer web so that customers cannot display random
+     requests but must go through the "My Open Requests" search, so that they
+     only get their own requests.  Change "0" to "1" in the above <PDM)_IF>
+     if you want to allow customers to access requests directly. -->
+<PDM_FORM>
+    <INPUT TYPE=hidden NAME=OP VALUE=QUERY_CR>
+    <SPAN class=boldlabeltext>Show Request #</SPAN>
+    <INPUT TYPE=TEXT NAME=QUERY_CR_NUM SIZE=8 onchange="submit()">
+</PDM_FORM>
+</PDM_IF>
+</PDM_IF>
+<HR WIDTH=215>
+<PDM_IF "$prop.guest_user" == 1>
+<H3>Welcome guest!</H3>
+<PDM_ELSE>
+<H3>
+Counts as of
+<BR>
+<SCRIPT LANGUAGE="JavaScript">
+document.write("<A class=scbdhead name=scoreboard_asof_date>" + date_to_string(Math.round( new Date().getTime() / 1000))) + "</A>")
+</SCRIPT>
+</H3>
+</CENTER>
+<BASE TARGET="_self">
+<PDM_SCOREBOARD TARGET=content>
+</PDM_IF>
+</BODY>
+</HTML>

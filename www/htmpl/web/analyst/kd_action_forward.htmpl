@@ -1,0 +1,248 @@
+<PDM_IF 0>
+$Id: kd_action_forward.htmpl,v 1.4 2007/01/04 23:11:51 tuach01 Exp $
+kd_action_forward.htmpl
+WHEN PRESENTED:
+	When we need to display a forward window for the document editor
+</PDM_IF>
+<html lang="en"><head>
+<script language="JavaScript">
+	var hdrTitle = "Forward Document ID: $args.KEEP.DOC_ID";
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="kd_action_forward.htmpl+KEEP.DOC_ID={KD}+KEEP.NEXT_ACTION_ID={CI_ACTIONS}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language=JavaScript>
+	var arrFields = new Array;
+	var nCount =0;
+	var defaultAssignee;
+	var defaultAssigneeID;
+	var nextTask; 
+	var nextStatus;
+	var bIsAdmin = 0;
+	var strWinName = "$args.KEEP.POPUP_NAME";
+	var w;
+	//Get the parent window reference
+	var sKDPersID = "KD:$args.KEEP.DOC_ID";
+    var edit_form = 1;
+    var doc = null;
+    var extraURL = "";
+    var sTenantName = "";
+	w = ahdtop.detailForms[sKDPersID].ahdframe;
+		
+	if (ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS"))
+	{
+		bIsAdmin = 1;
+	}
+	<PDM_LIST PREFIX=list FACTORY=CI_ACTIONS WHERE="id=$args.KEEP.NEXT_ACTION_ID and ANALYST_ID.delete_flag=0" ESC_STYLE=C>
+		<PDM_IF "$list.ANALYST_ID.delete_flag" == "0">
+			arrFields[nCount++] ='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.ANALYST_ID</PDM_FMT>';
+			<PDM_IF "$list.ANALYST_ID.first_name" != "">
+				arrFields[nCount++] ='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.ANALYST_ID.last_name, $list.ANALYST_ID.first_name</PDM_FMT>';
+			<PDM_ELSE>
+				arrFields[nCount++] ='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.ANALYST_ID.last_name</PDM_FMT>';		
+			</PDM_IF>
+		</PDM_IF>
+		
+		<PDM_IF "$list.ANALYST_ID.type" == "2308">
+			<PDM_LIST PREFIX=list3 FACTORY=grpmem WHERE="group=U'$list.ANALYST_ID.id' and  member.delete_flag=0" ESC_STYLE=C>
+				arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list3.member.id</PDM_FMT>';
+				<PDM_IF "$list3.member.first_name" != "">
+					arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list3.member.last_name, $list3.member.first_name</PDM_FMT>';
+				<PDM_ELSE>
+					arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list3.member.last_name</PDM_FMT>';
+				</PDM_IF>
+			</PDM_LIST>		
+		</PDM_IF>
+		
+		nextTask ='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.ACTION_TITLE</PDM_FMT>';
+		nextStatus ='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.STATUS_CURRENT_ID.STATUS</PDM_FMT>';
+	</PDM_LIST>
+	
+	<PDM_LIST PREFIX=list2 FACTORY=CI_ACTIONS_ALTERNATE WHERE="ACTION_ID=$args.KEEP.NEXT_ACTION_ID and CONTACT_ID.delete_flag=0" ESC_STYLE=C>	
+		arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list2.CONTACT_ID</PDM_FMT>';
+		<PDM_IF "$list2.CONTACT_ID.first_name" != "">
+			arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list2.CONTACT_ID.last_name, $list2.CONTACT_ID.first_name</PDM_FMT>';
+		<PDM_ELSE>
+			arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list2.CONTACT_ID.last_name</PDM_FMT>';
+		</PDM_IF>
+		<PDM_IF "$list2.CONTACT_ID.type" == "2308">
+			<PDM_LIST PREFIX=list4 FACTORY=grpmem WHERE="group=U'$list2.CONTACT_ID.id' and member.delete_flag=0" ESC_STYLE=C>
+				arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list4.member.id</PDM_FMT>';
+				<PDM_IF "$list4.member.first_name" != "">
+					arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list4.member.last_name, $list4.member.first_name</PDM_FMT>';
+				<PDM_ELSE>
+					arrFields[nCount++]='<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list4.member.last_name</PDM_FMT>';
+				</PDM_IF>
+			</PDM_LIST>		
+		</PDM_IF>
+	</PDM_LIST>
+</script>
+</head>
+<body onload="frmForwardOnLoad();" class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no >
+<script>
+function getHdrTitle() {
+  return nx_escape(w.hdrTitle);
+}
+function getNextTask() {
+  return nx_escape(nextTask);
+}
+function getNextStatus() {
+  return nx_escape(nextStatus);
+}
+function getExtraURL() {
+  if (extraURL !="") {
+    return extraURL;
+  }
+  return "";
+}
+function cancel() {
+  ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+function frmForwardOnLoad() {
+  passWinName(); //Pass the forward window name to document editor
+
+  if ( bIsAdmin == 1) {
+    
+<PDM_IF "$prop.MultiTenancy" == "on">
+      //Adding the tenant limitation to the list cnt page
+      <PDM_LIST PREFIX=kdMT factory="KD" WHERE="id=$args.KEEP.DOC_ID">
+        sTenantName = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>${kdMT.tenant.name:}</PDM_FMT>';
+      </PDM_LIST>
+      extraURL = "+KEEP.backfillFactory=KD+KEEP.objectTenant=$args.Tenant+KEEP.objectTenantName=" + nx_escape(sTenantName);
+    
+</PDM_IF>
+  }
+  
+  doc = document.main_form.elements;
+  if(bIsAdmin==0)
+  {
+	var arrSimple = new Array(); //This holds the array without duplicate assignees
+	var arrNameSorted = new Array(); //This holds the sorted assignee names
+	var bExist = 0;
+	
+	arrSimple[arrSimple.length] = arrFields[0];
+	arrSimple[arrSimple.length] = arrFields[1];
+	arrNameSorted[arrNameSorted.length] = arrFields[1];
+	
+	for ( var i = 0; i < arrFields.length - 1; i=i+2)
+	{
+		for ( var j = 0; j < arrSimple.length - 1; j=j+2)
+		{
+			if (arrFields[i] == arrSimple[j])
+			{
+				bExist = 1;
+				break;
+			}
+			else
+			{
+				bExist = 0;
+			}
+		}
+		if (bExist == 0)
+		{
+			arrSimple[arrSimple.length] = arrFields[i];
+			arrSimple[arrSimple.length] = arrFields[i+1];
+			arrNameSorted[arrNameSorted.length] = arrFields[i+1];
+		}
+	}
+	
+	arrNameSorted.sort(); //This make sure the assigne name is sorted in alphabetical order
+	for ( var i = 0; i < arrNameSorted.length; i++)
+	{
+		for ( var j = 0; j < arrSimple.length; j=j+2)
+		{
+			if (arrNameSorted[i] == arrSimple[j+1])
+			{
+				doc["SET.ASSIGNEE_ID"].options[doc["SET.ASSIGNEE_ID"].options.length] = new Option(arrNameSorted[i], arrSimple[j]);
+				break;
+			}
+		}
+	}
+  }
+  doc["SET.ASSIGNEE_ID"].value = arrFields[0];          // Note that this array was loaded above at the 
+  if(bIsAdmin==1)
+	doc["ASSIGNEE_ID_combo_name"].value = arrFields[1];   // beginning of the page with the PDM_LIST macro.  
+  argFactoryTenancy = 1;                                // Added here b/c the form does not match the standard.
+}
+function ok() {
+  if (action_in_progress()) {
+    return;
+  }
+  
+  ahdtop.saveKTAckMsgNum = 2225; // - %1 forwarded
+  
+  if (!checkLength()) {
+    return;
+  }
+  
+  var sAssignee;
+  if(bIsAdmin==1)
+	  sAssignee = doc["ASSIGNEE_ID_combo_name"].value;
+  else{
+	  var iIndex = doc["SET.ASSIGNEE_ID"].selectedIndex;
+	  sAssignee = doc["SET.ASSIGNEE_ID"][iIndex].text;
+  }
+  var sAssigneeID = doc["SET.ASSIGNEE_ID"].value;
+  var sComment = doc["SET.txtComment"].value;
+  
+  if ( sAssignee.length == 0 || sAssigneeID.length == 0 ) {
+    alertmsg("Please_select_an_assignee_before_"); // "Please select an assignee before forwarding this document."
+    if(bIsAdmin==1)
+	doc["ASSIGNEE_ID_combo_name"].focus();
+    else
+        doc["SET.ASSIGNEE_ID"].focus();
+    return;
+  }
+  
+  var res = confirm(msgtext("Are_you_sure_you_want_to_forwa", sAssignee)); // "Are you sure you want to forward this document to " + sAssignee + "?".
+  
+  if (res) {
+    w.Forward(sAssigneeID, sAssignee, sComment); // The Forward() is in the detail_KD.htmpl	
+  }
+}
+function checkLength() {	
+  if (doc["SET.txtComment"].value.length > 255) {
+    alertmsg("Comment_field_cannot_exceed_25"); // ("Comment field cannot exceed 255 characters.")
+    doc["SET.txtComment"].focus();
+    return false;
+  }
+  return true;
+}
+function passWinName() {
+  if ( typeof w.getWinName != "undefined" )
+    w.getWinName(strWinName, 1); //The getWinName() is in the detail_KD.js		
+}
+argFactoryTenancy = 0; //Added here b/c the form does not match the standard.
+<PDM_MACRO name=dtlForm button=false factory="USP_PROPERTIES">
+<PDM_MACRO name=button caption="OK[O]" disabled=defer func="ok()" hotkey_name="OK[O]" id=btnOK newrow="yes">
+<PDM_MACRO name=button caption="Cancel[a]" disabled=defer endrow="yes" func="cancel()" hotkey_name="Cancel[a]" id=btnCancel>
+argFactoryTenancy = 0;<PDM_IF 0>Added here b/c the form does not match the standard</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł" attr="n/a" fmtfunc=getHdrTitle inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Następna zadanie" attr="n/a" fmtfunc=getNextTask inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Następny status" attr="n/a" fmtfunc=getNextStatus inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+if(bIsAdmin==1)
+	
+<PDM_MACRO name=dtlLookup hdr="Następny przypisany" attr="ASSIGNEE_ID" common_name_attr="combo_name" extraurl="javascript:getExtraURL();" factory=agtgrp>
+else{
+	detailDropdown("Next Assignee","ASSIGNEE_ID","agt", 1, 20,
+               ":", "", "",
+                "yes::0", "", "",
+               "", "", "no", "","", "");	
+}
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="txtComment" maxlength=255 rows=5 size=50>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

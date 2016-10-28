@@ -1,0 +1,85 @@
+<PDM_IF 0>
+list_risk_svy_qtpl.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Risk Survey Questions
+INTENT:
+    Display the list of Risk Survey Questions
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Risk Survey Question Search";
+var hdrTitleList = "Risk Survey Question List";
+var autoRefreshWindows = new Object();
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("", "");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Risk Questions">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=risk_svy_qtpl>
+document.write('<INPUT TYPE=hidden NAME="KEEP.id_from_svydetail" VALUE="$args.KEEP.id_from_svydetail">');
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.owning_survey" VALUE="$args.KEEP.id_from_svydetail">');
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag default="Active">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+if ($args.KEEP.id_from_svydetail != 0)
+{ 
+ImgBtnHide("btnNew");// Hide Create New button 
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Add Question" func="add_risk_svy_qtpl('$args.KEEP.id_from_svydetail')" hotkey_name="Add Question" id=btn203>
+<PDM_MACRO name=btnEndRow>
+}
+var msgFoundNone = "No Risk survey questions found";
+var msgFound1 = "1 Risk survey question found";
+var msgFound = "%1 Risk survey questions found";
+var msgFoundMore = "%1 Risk survey questions found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Risk survey question";
+
+function get_response_text(evt_status)
+{
+	var ret_text="Unknown";
+
+	switch(evt_status)
+	{
+	case '0':
+		ret_text=msgtext("No");
+	break;
+	case '1':
+		ret_text=msgtext("Yes");
+	break;
+	}
+	rs.data(ret_text);
+}
+
+function get_response_textExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("No") + ",1," + msgtext("Yes") + ",OTHERWISE," + msgtext("Unknown");
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Pytanie" attr=text>
+<PDM_MACRO name=lsCol hdr="Wielokrotna odpowiedź" attr=mult_resp_flag exportfmt=get_response_textExp fmtfunc=get_response_text sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>;
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

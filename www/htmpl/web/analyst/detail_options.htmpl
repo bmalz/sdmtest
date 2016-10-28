@@ -1,0 +1,214 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+detail_sev.htmpl
+    When we need to display details of a Options Factory
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły opcji $args.sym"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizacja opcji $args.sym"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie nowej opcji $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function trim_value_and_save()
+{
+    var val_obj = document.main_form.elements["SET.value"];
+    if (typeof val_obj != "undefined")
+    {
+	var val = val_obj.value;
+	val = ltrim(val);
+	val = rtrim(val);
+	val_obj.value = val;
+    }
+    detailSave();
+}
+
+function check_and_save(val) { 
+document.main_form.elements["SET.error_msg"].value = '';
+	if(val == 'install')
+	document.main_form.elements["SET.action"].value = 1;
+	else if (val == 'deinstall')
+	document.main_form.elements["SET.action"].value = 2;	
+	trim_value_and_save();
+}
+
+function SaveBtn(){
+		var f = window.document.forms["main_form"];
+		// Set the value of the hidden field from "initial" to "final"
+		// when the drop-down is clicked. 
+		f.FROM_OPTIONS_SAVE_BTN.value="1";
+	trim_value_and_save();	
+}
+
+var validation_list_values = "$args.ui_validation_values";
+var ui_sep = "$args.ui_sep";
+var val_arr = new Array();
+
+// If ui_validation_values is set, we're a boolean, YesNo or list validation type
+if (validation_list_values.length > 1) {
+	val_arr = validation_list_values.split(ui_sep);
+}
+
+
+</script>
+
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Options" key="$args.sym">
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=options>
+<PDM_MACRO name=btnStartRow>
+if (  _dtl.edit )   
+{
+<PDM_MACRO name=button Caption="Zapisz[s]" Func="SaveBtn()" hotkey_name="Zapisz[s]" ID="btnsave" Width=0>
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="detailCancel()" hotkey_name="Anuluj[n]" ID="btncncl">
+<PDM_MACRO name=button Caption="Reset[r]" Func="check_reset();detailReset()" hotkey_name="Reset[r]" ID="btnReset">
+}
+else{
+if((('$args.action' == '1' || '$args.action' == '2') && '$args.error_msg' == '' ) ||('$args.FROM_OPTIONS_SAVE_BTN' == '1'))
+<PDM_MACRO name=button Caption="Odśwież" Func="refreshForm()" hotkey_name="Odśwież" ID="btnRefresh" Width=80>
+<PDM_IF "$UserAuth" \> 1>
+<PDM_MACRO name=button Caption="Edytuj[d]" Func="detailEdit()" hotkey_name="Edytuj[d]" ID="btnEdit">
+</PDM_IF>
+}
+if (  _dtl.edit )   
+{
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Instaluj" Func="check_and_save('install')" hotkey_name="Install" ID="btnInstall" Width=0>
+<PDM_MACRO name=button Caption="Odinstaluj" btnType="negative" Func="check_and_save('deinstall')" hotkey_name="Deinstall" ID="btnDeinstall" Width=0>
+}
+<PDM_MACRO name=button Caption="Pomoc" Func="load_options_help('$args.sym')" hotkey_name="Pomoc" ID="btnHelp" Width=0>
+
+if(('$args.action' == '1' || '$args.action' == '2') && '$args.error_msg' == '' )
+ImgBtnDisableButton("btnEdit");
+else
+ImgBtnEnableButton("btnEdit"); 
+
+if ("$args.action_status" == "Installed")
+ImgBtnDisableButton("btnInstall");
+else if ("$args.action_status" == "Not Installed")
+ImgBtnDisableButton("btnDeinstall"); 
+
+var deinstall_script ="$args.deinstall_script";
+if (deinstall_script.indexOf("-n") != -1)
+ImgBtnDisableButton("btnDeinstall");
+
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+docWriteln("<input type='hidden' name=\"FROM_OPTIONS_SAVE_BTN\" value=\"0\">");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Aplikacja" attr=app_name>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa opcji" attr=sym>
+<PDM_MACRO name=dtlStartRow>
+if ( _dtl.edit )   
+{
+<PDM_MACRO name=dtlReadonly hdr="Status akcji" attr=action_status>
+}
+else
+{
+if((('$args.action' == '1' || '$args.action' == '2') && '$args.error_msg' == '' )||('$args.FROM_OPTIONS_SAVE_BTN' == '1'))	
+detailTextboxReadonly( "Action Status","action_status", 1, "In Progress");
+else 
+<PDM_MACRO name=dtlReadonly hdr="Status akcji" attr=action_status colspan=2>
+}
+<PDM_MACRO name=dtlStartRow>
+if('$args.value_active'=='0')
+{
+<PDM_MACRO name=dtlReadonly hdr="Wartość opcji" attr=ui_value colspan=2>
+}
+else
+{
+
+	
+<PDM_IF "$args.validation" == "passwd">
+		if(_dtl.edit)
+		{		
+			
+<PDM_MACRO name=dtlEndTable>
+			docWriteln("<table cellpadding=1 cellspacing=5 width='90%'><tr valign='top'><th align='left' valign='baseline' class='labeltext'>Wartość opcji</th></tr>");
+			docWriteln("<tr><td align='left' valign='top'><input type=password SIZE =80" + detailNextID(true) +
+				"NAME=SET.value value='$args.value'>");
+			docWriteln("</td></tr></table>")
+
+		}
+		else
+		{
+			
+<PDM_MACRO name=dtlTextbox hdr="Wartość opcji" attr=value colspan=2 size=80>
+		}
+	
+	
+<PDM_ELIF "$args.validation" == "boolean" || "$args.validation" == "YesNo" || "$args.validation" : "^list">
+	
+	
+		// Display the i18n ui values
+		var call_arr = new Array("Option Value","value","options",1,20, 
+			true,"","$args.value",  
+			"no","","$args.ui_value",
+			"","","no","","","0");
+		
+		call_arr = call_arr.concat(val_arr);
+		detailDropdown.apply(self, call_arr); 
+		
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Wartość opcji" attr=value colspan=2 size=80>
+</PDM_IF>
+}	
+
+/* if ( _dtl.edit )   
+{
+<PDM_MACRO name=dtlStartRow>
+detailDropdown("Action","action","options",1,20, 
+true,"","$args.action",
+"no","","$args.action",
+"","","no","","","0",
+"None","0","install","1","deinstall","2"); 
+} */
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Wiadomość statusu akcji" attr=error_msg colspan=2>
+docWriteln("<input type='hidden' name=SET.error_msg value='$args.error_msg'>");
+docWriteln("<input type='hidden' name=SET.action>");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=2 rows=4 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+if ( ! _dtl.edit )   
+{
+if((('$args.action' == '1' || '$args.action' == '2') && '$args.error_msg' == '' ) ||('$args.FROM_OPTIONS_SAVE_BTN' == '1'))
+show_response(msgtext("Please_Hit_the_Refresh_Button_"));
+}
+</script>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP mode=edit>
+<PDM_IF 0>
+@(#)$Id: detail_options.htmpl ASPEN.1 2010/11/20 01:23:34 saima01 Exp $;
+</PDM_IF>

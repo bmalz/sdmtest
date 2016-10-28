@@ -1,0 +1,94 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2003 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  employee/std_body_site.htmpl  
+// Created: 02/04/2003
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains the definition for the menu bar of the employee
+//    interface.  Any employee HTMPL page should include this file:
+//
+//    You should place your customized version of std_body_site.htmpl in
+//    site/mods/htmpl/www/web/employee/std_body_site.htmpl
+////////////////////////////////////////////////////////////////////////////
+// $Id: std_body_site.htmpl,v 1.4 2006/11/20 22:48:14 taoyu02 Exp $
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="OP=menu">
+<SCRIPT>
+var for_role = 0;
+if (typeof ahdtop != "undefined" && 
+    typeof ahdtop.toolbarTab != "undefined" &&
+    typeof ahdtop.toolbarTab[0].role_menubar == "string")
+{
+    for_role = 1;
+}
+<!-- BEGIN employee/std_body_site.htmpl -->
+if (for_role)
+{	  
+	<PDM_IF "$args.KEEP.NoBar" != "1">
+	    document.writeln('<div id="linkmenu" style="padding-top: 1px; top: 0px; margin-top: 0px; background-color: white; width: 100%;"><table style="background-color: white;" width="100%" cellspacing="0" cellpadding="0">');
+	    document.writeln('<tr class="menulink">');
+	</PDM_IF>
+}
+else
+{
+    document.writeln('<table width="100%" cellspacing="0" cellpadding="0" >');
+    document.writeln('<tr class="welcomebanner">');
+}
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+<pdm_include file=wspicon.htmpl user_type="Employee">
+<SCRIPT>
+if (!for_role)
+{
+    document.writeln('<td valign="middle" width="56%">');
+    document.writeln('<span class="welcomebannerlabel gn_text_dot8">Logged in as:</span>');
+    <PDM_IF "$prop.guest_user" != "1">
+	document.writeln('<span class="welcomebannerlogin gn_text_dot8">$cst.first_name $cst.last_name</span>');
+    <PDM_ELSE>
+	document.writeln('<span class="welcomebannerlogin gn_text_dot8">Guest</span>');
+    </PDM_IF>
+    <PDM_IF "1" != "${args.KEEP.IsPopUp:0}">
+    <PDM_IF "$prop.portal_session" == "">	
+	document.write('&nbsp;<span class=welcomebannerlink>(</span><a href="JavaScript: logout_all_windows(1);" ');
+    	document.writeln('class=emp_menu><span>Logout</span></a><span class=welcomebannerlink>)</span>');
+    </PDM_IF>
+    </PDM_IF>
+    document.writeln('</td>');
+} else {
+	<PDM_IF "$args.KEEP.NoBar" != "1">
+		document.writeln("<td VALIGN='middle' align='left' style='padding-left: 10px; font-size: 10px; width: 60px;'>");
+		document.writeln("<a href='javascript:history.back()'><img style='border:0;' src='$CAisd/sitemods/img/back.png' width='12' height='12'> Powrót</a>");
+		document.writeln("</td>");
+		document.writeln("<td VALIGN='middle' align='left' style='padding-left: 10px; font-size: 10px; width: 50px;'>");
+		document.writeln("<a href='javascript:ShowServiceCatalog();'><img style='border:0;' src='$CAisd/sitemods/img/home.png' width='12' height='12'> Home</a>");
+		document.writeln("</td>");
+		document.writeln("<td VALIGN='middle' align='left' style='padding-left: 10px; font-size: 10px; width: 80px;'>");
+		document.writeln("<a href='javascript:ShowAnnouncments();');><img style='border:0;' src='$CAisd/sitemods/img/announcements.png' width='12' height='12'> Ogłoszenia</a>");
+		document.writeln("</td>");
+		document.writeln("<td VALIGN='middle' align='left' style='padding-left: 10px; font-size: 10px; width: 200px;'>");
+		document.writeln("<span style='color: grey;'>Usługi: <a href='javascript:OpenFavs();'><img style='border:0;' src='$CAisd/sitemods/img/favourite_enable.png' width='12' height='12'> Ulubione</a>  <a href='javascript:OpenPops();'><img style='border:0;' src='$CAisd/sitemods/img/popular.png' width='12' height='12'> Popularne</a>");
+		document.writeln("</td>");
+		document.writeln("<td valign='middle' align='right' style='padding-right: 10px;'></td>");
+	</PDM_IF>
+}
+document.writeln('</table></div>');
+</SCRIPT>
+<!-- END employee/std_body_site.htmpl -->

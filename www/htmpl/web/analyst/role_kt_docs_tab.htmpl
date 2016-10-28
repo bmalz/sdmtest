@@ -1,0 +1,443 @@
+<PDM_IF 0>
+role_kt_docs_tab.htmpl
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit factory=role preview="NBTAB=role_kt_docs_tab">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+</HEAD>
+<BODY >
+<PDM_INCLUDE FILE=std_body.htmpl filename="KT_Docs_Tab">
+
+<PDM_FORM name=main_form >
+<script>
+var status_ids="";
+var statuses_allowed="";
+var statuses_default="";
+var obj_allowed;
+var obj_default;
+function setStatusValues(obj)
+{
+	//if an "allowed" checkbox is selected, the default checkbox should be enabled
+	//if an "allowed" checkbox is unselected, the default checkbox should be disabled
+	var obj_name = obj.name;
+	if(obj_name.search("Allowed") != -1)
+	{
+		obj_default = document.getElementById(obj_name.split("Allowed").join("Default"));
+		if(typeof obj_default == "object" && obj_default != null)
+		{
+			if(obj.checked)
+			{
+				obj_default.disabled = false;				
+			}
+			else
+			{
+				obj_default.checked = false;
+				obj_default.disabled = true;
+			}
+		}			
+	}
+}
+function preSaveTrigger()
+{
+	SaveSelections();
+	var crsq_val = document.getElementById("SET." + ktPrefix + ".StoredQuery").value;
+	var crsq_desc_val = document.getElementById("SET." + ktPrefix + ".StoredQueryDesc").value;
+	if((crsq_val == "" && crsq_desc_val != "") ||(crsq_val != "" && crsq_desc_val == ""))
+	{
+		alertmsg("You_must_enter_a_value_for_both");
+		return false;
+		
+	}
+	return true;
+}
+function SaveSelections()
+{
+	var arrStatusIDs = status_ids.split(",");
+	statuses_allowed = "";
+	statuses_default = "";
+	//store all values in hidden inputs
+	for ( var i = 0; i < arrStatusIDs.length; i++)
+	{
+		obj_allowed = document.getElementById("cb" + arrStatusIDs[i] + "Allowed");
+		if(typeof obj_allowed == "object" && obj_allowed != null)
+		{
+			if(obj_allowed.checked)
+				statuses_allowed += "1,";
+			else
+				statuses_allowed += "0,";
+		}
+		obj_default =  document.getElementById("cb" + arrStatusIDs[i]  + "Default");
+		if(typeof obj_default == "object" && obj_default != null)
+		{
+			if(obj_default.checked)
+				statuses_default += "1,";
+			else
+				statuses_default += "0,";
+		}
+	}
+	document.getElementById('SET.' + ktPrefix + '.StatusesLength').value = arrStatusIDs.length;
+	document.getElementById('SET.' + ktPrefix + '.StatusIDs').value = status_ids;
+	document.getElementById('SET.' + ktPrefix + '.StatusesAllowed').value = statuses_allowed.slice(0, statuses_allowed.length-1);
+	document.getElementById('SET.' + ktPrefix + '.StatusesDefaults').value = statuses_default.slice(0, statuses_default.length-1);
+}
+window.onload = role_kt_docs_tab_load;
+function role_kt_docs_tab_load()
+{
+	var status_roles = "";
+	var status_defaults = "";
+	//	
+	//check if rows for statuses exist in KT_STATUS_ROLE and check appropriate checkboxes
+	<PDM_LIST PREFIX=stat_roles FACTORY=KT_STATUS_ROLE WHERE="ROLE_ID=$args.id">
+		status_roles += "$stat_roles.STATUS_ID" + ",";
+		status_defaults  += "$stat_roles.IS_DEF" + ",";
+	</PDM_LIST>
+	//remove trailing commas
+	status_roles = status_roles.slice(0, status_roles.length-1);
+	status_defaults = status_defaults.slice(0, status_defaults.length-1);
+	var arrStatusRoles = status_roles.split(",");
+	var arrStatusDefaults = status_defaults.split(",");
+	var obj_allowed;
+	var obj_default;
+	for ( var i = 0; i < arrStatusRoles.length; i++)
+	{
+		if(status_ids.search(arrStatusRoles[i])!= -1)
+		{
+			//if the row exists then it is allowed
+			obj_allowed = document.getElementById("cb" + arrStatusRoles[i] + "Allowed");
+			if(typeof obj_allowed == "object" && obj_allowed != null)
+			{
+				obj_allowed.checked = true;
+			}
+			//also check if default should be selected
+			if(arrStatusDefaults[i] == "1")
+			{
+				obj_default =  document.getElementById("cb" + arrStatusRoles[i]  + "Default");
+				if(typeof obj_default == "object" && obj_default != null)
+				{
+					obj_default.checked = true;
+				}
+			}
+		}
+	}
+	//for all statuses in CI_STATUSES with no corresponding record in KT_STATUS_ROLE, 
+	//the default checkboxes should be disabled
+	var arrStatusIDs = status_ids.split(",");
+	for ( var i = 0; i < arrStatusIDs.length; i++)
+	{
+		obj_allowed = document.getElementById("cb" + arrStatusIDs[i] + "Allowed");
+		if(typeof obj_allowed == "object" && obj_allowed != null)
+		{
+			if(!obj_allowed.checked)
+			{
+				obj_default =  document.getElementById("cb" + arrStatusIDs[i]  + "Default");
+				if(typeof obj_default == "object" && obj_default != null)
+				{
+					obj_default.checked = false;
+					obj_default.disabled = true;
+				}
+			}
+		}
+	}
+	//get default values for role's WC_PERSID & WC_DESCRIPTION
+	var role_persid_text = '';
+	var role_persid;
+	var role_descr = '';
+	//
+	<PDM_LIST PREFIX=usp_prop FACTORY=USP_PROPERTIES WHERE="PROPERTY_NAME='$args.id WC_PERSID'">
+		role_persid = "$usp_prop.PROPERTY_VALUE";
+		//use pdm_list to get name of crsq to display
+		//
+		<PDM_LIST FACTORY=crsq PREFIX=list WHERE="persistent_id='$usp_prop.PROPERTY_VALUE'">
+			role_persid_text = "$list.label";	
+		</PDM_LIST>
+	</PDM_LIST> 
+	if(role_persid_text != '')
+	{
+			var obj_crsq_input = document.getElementById("crsq_input");
+			if(typeof obj_crsq_input == "object" && obj_crsq_input != null)
+			{
+				obj_crsq_input.value = role_persid_text;
+			}
+			document.getElementById("SET." + ktPrefix + ".StoredQuery").value = role_persid;
+			//the "have stored query" checkbox is checked
+			var obj_defaultWC = document.getElementById("cbDefaultWC");
+			if(typeof obj_defaultWC == "object" && obj_defaultWC != null)
+			{
+				obj_defaultWC.checked = true;
+			}
+			
+	}
+	<PDM_LIST PREFIX=usp_prop FACTORY=USP_PROPERTIES WHERE="PROPERTY_NAME='$args.id WC_DESCR'">
+		role_descr = "$usp_prop.PROPERTY_VALUE";	
+	</PDM_LIST> 
+	if(role_descr != '')
+	{
+		var obj_txtDesc= document.getElementById("txtDesc");
+		if(typeof obj_txtDesc == "object" && obj_txtDesc != null)
+		{
+			obj_txtDesc.value = role_descr;
+		}	
+		document.getElementById("SET." + ktPrefix + ".StoredQueryDesc").value = role_descr;
+	}
+	
+	<PDM_IF "$prop.form_name_3" != "edit">
+		//if in read-only mode all form elements should be disabled
+		var arrStatusIDs = status_ids.split(",");
+		for ( var i = 0; i < arrStatusIDs.length; i++)
+		{
+			obj_allowed = document.getElementById("cb" + arrStatusIDs[i] + "Allowed");
+			if(typeof obj_allowed == "object" && obj_allowed != null)
+			{
+				obj_allowed.disabled = true;
+			}
+			obj_default =  document.getElementById("cb" + arrStatusIDs[i]  + "Default");
+			if(typeof obj_default == "object" && obj_default != null)
+			{
+				obj_default.disabled = true;
+			}			
+		}	
+		var obj_defaultWC = document.getElementById("cbDefaultWC");
+		if(typeof obj_defaultWC == "object" && obj_defaultWC != null)
+		{
+			obj_defaultWC.disabled = true;
+		}	
+		var obj_aLookup = document.getElementById("aLookup");
+		if(typeof obj_aLookup == "object" && obj_aLookup != null)
+		{
+			obj_aLookup.onclick=null;
+			obj_aLookup.disabled=true;
+		}
+		var obj_crsq_input = document.getElementById("crsq_input");
+		if(typeof obj_crsq_input == "object" && obj_crsq_input != null)
+		{
+			obj_crsq_input.disabled = true;
+		}
+		var obj_txtDesc= document.getElementById("txtDesc");
+		if(typeof obj_txtDesc == "object" && obj_txtDesc != null)
+		{
+			obj_txtDesc.disabled = true;
+			var obj_lblDescription=document.getElementById("lblDescription");
+			obj_lblDescription.disabled = true;
+		}
+	<PDM_ELSE>
+		var obj= document.getElementById("cbDefaultWC");
+		cbDefaultWC_onclick(obj);
+	</PDM_IF>
+	
+}	
+function backfill_event( form, field_name, value, persid, rel_attr, type )
+{
+	if (typeof field_name == "string" && field_name == "crsq_input")
+	{
+		document.getElementById("SET." + ktPrefix + ".StoredQuery").value = persid;
+	}
+}	
+function cbDefaultWC_onclick(obj)
+{
+	//if checked enable the elements
+	if(obj.checked)
+	{
+		var obj_aLookup = document.getElementById("aLookup");
+		if(typeof obj_aLookup == "object" && obj_aLookup != null)
+		{
+			obj_aLookup.disabled=false;
+			//obj_aLookup.onclick="search_crsq()";
+			
+		}
+		var obj_crsq_input = document.getElementById("crsq_input");
+		if(typeof obj_crsq_input == "object" && obj_crsq_input != null)
+		{
+			obj_crsq_input.disabled = false;
+		}
+		var obj_txtDesc= document.getElementById("txtDesc");
+		if(typeof obj_txtDesc == "object" && obj_txtDesc != null)
+		{
+			obj_txtDesc.disabled = false;
+		}
+		var obj_lblDescription=document.getElementById("lblDescription");
+		if(typeof obj_lblDescription == "object" && obj_lblDescription != null)
+		{
+			obj_lblDescription.disabled = false;
+		}
+	}
+	//if unchecked disable the related elements
+	else
+	{
+		var obj_aLookup = document.getElementById("aLookup");
+		if(typeof obj_aLookup == "object" && obj_aLookup != null)
+		{
+			obj_aLookup.disabled=true;
+			//obj_aLookup.onclick=null;
+		}
+		var obj_crsq_input = document.getElementById("crsq_input");
+		if(typeof obj_crsq_input == "object" && obj_crsq_input != null)
+		{
+			obj_crsq_input.disabled = true;
+			obj_crsq_input.value = "";
+			document.getElementById("SET." + ktPrefix + ".StoredQuery").value = "";
+		}
+		var obj_txtDesc= document.getElementById("txtDesc");
+		if(typeof obj_txtDesc == "object" && obj_txtDesc != null)
+		{
+			obj_txtDesc.disabled = true;
+			obj_txtDesc.value = "";
+			document.getElementById("SET." + ktPrefix + ".StoredQueryDesc").value = "";
+		}
+		var obj_lblDescription=document.getElementById("lblDescription");
+		if(typeof obj_lblDescription == "object" && obj_lblDescription != null)
+		{
+			obj_lblDescription.disabled = true;
+		}
+	}	
+}
+tab_banner("KT Document Visibility");
+</script>
+<TABLE width="90%" border="0" cellspacing="0" cellpadding="0">	
+	<TR><TD>
+		<TABLE align=left border="0" cellspacing="0" cellpadding="0">	
+			<TR>
+				<TD align=left nowrap>
+					<SPAN class="label">Knowledge Document Visibility</SPAN>
+				</TD>
+			</TR>	
+			<TR><TD>&nbsp;</TD></TR>
+			<TR>
+				<TD>
+					<PDM_OBJECT>
+						<TABLE align=left bgcolor="#FFFFFF" cellspacing="1" cellpadding="0" class="table"> 
+							<TR>
+								<TH width="60%" class="detailro" NOWRAP><span class="table_column_header_text">&nbsp;Status&nbsp;</span></TH>
+								<TH width="20%" class="detailro" NOWRAP><span class="table_column_header_text">&nbsp;Allowed&nbsp;</span></TH>
+								<TH width="20%" class="detailro" NOWRAP><span class="table_column_header_text">&nbsp;Default&nbsp;</span></th>
+							</TR>
+							<script>
+							var html="";
+							<PDM_LIST PREFIX=stat FACTORY=CI_STATUSES WHERE="id>0">
+								<PDM_IF "$stat.id" != "70">
+								status_ids += "$stat.id" + ",";
+								html += "<TR class='table_row'><TD width='60%' class='data' nowrap><DIV align='left'><label>" +
+										'<PDM_FMT ESC_STYLE=C>$stat.STATUS</PDM_FMT>' + "</label></DIV></TD><TD width='20%'" +
+										" class='data'><DIV align='center'><input type='checkbox' tabindex=" +_dtl.tabIndex++ + " id='cb" + 
+										"$stat.id" + "Allowed' name='cb" + "$stat.id" + "Allowed' class='data' onclick=setStatusValues(this) title=\"Set Allowed flag for " + '<PDM_FMT ESC_STYLE=C>$stat.STATUS</PDM_FMT>' + "\"></DIV>" + 
+										"</TD><TD width='20%' class='data'><DIV align='center'><input " +
+										" type='checkbox' tabindex=" + _dtl.tabIndex++ + " id='cb" + "$stat.id" + "Default' name='cb" + "$stat.id" + 
+										"Default' class='data' onclick=setStatusValues(this) title=\"Set Default flag for " + '<PDM_FMT ESC_STYLE=C>$stat.STATUS</PDM_FMT>' + "\"></DIV></TD></TR>";
+								</PDM_IF>		
+							</PDM_LIST>
+							status_ids += "0";
+							document.write(html);
+							</script>	
+							<TR class="table_row">
+								<TD width="60%" class="data" nowrap>
+									<DIV align="left">
+										<label>Published - before Start Date</label>
+									</DIV>
+								</TD>
+								<TD width="20%" class="data">
+									<DIV align="center">
+										<SCRIPT>	
+											document.writeln('<input type="checkbox" tabindex=' + _dtl.tabIndex++ + ' id="cb0Allowed" name="cb0Allowed" class="data" onclick=setStatusValues(this) title="Set Allowed flag for Published - before Start Date">');
+										</SCRIPT>
+									</DIV>
+								</TD>
+								<TD width="20%" class="data">
+									<DIV align="center">
+										<SCRIPT>
+											document.writeln('<input type="checkbox" tabindex=' + _dtl.tabIndex++ + ' id="cb0Default" name="cb0Default" class="data" onclick=setStatusValues(this) title="Set Default flag for Published - before Start Date">');
+										</SCRIPT>
+									</DIV>
+								</TD>
+								<script>
+									var html="<input type=hidden id='SET." + ktPrefix + ".StatusIDs' name='SET." + ktPrefix + ".StatusIDs'>" +
+									"<input type=hidden id='SET." + ktPrefix + ".StatusesAllowed' name='SET." + ktPrefix + ".StatusesAllowed'>" + 
+									"<input type=hidden id='SET." + ktPrefix + ".StatusesDefaults' name='SET." + ktPrefix + ".StatusesDefaults'>" +
+									"<input type=hidden id='SET." + ktPrefix + ".StatusesLength' name='SET." + ktPrefix + ".StatusesLength'>";
+									document.write(html);
+								</script>
+							</TR>
+						</TABLE>		
+				</TD>
+			</TR>
+			<TR><TD>&nbsp;</TD></TR>
+			<TR>
+				<TD align=left nowrap>
+					<SCRIPT>
+						document.writeln('<input type="checkbox" tabindex=' + _dtl.tabIndex++ + ' id="cbDefaultWC" name="cbDefaultWC" class="data" onclick="cbDefaultWC_onclick(this)"' + ' title="Have default criteria when searching Knowledge Documents">');
+					</SCRIPT>
+					<SPAN class="label">Have default criteria when searching Knowledge Documents</SPAN>
+				</TD>
+			</TR>
+			<TR><TD>&nbsp;</TD></TR>
+			<TR>
+				<TD>
+					<TABLE align=left>
+						<TR align=left valign=top>
+							<TD>
+								<SPAN class=labeltext>
+									<SCRIPT>
+									var sLookupHTML = "";
+										sLookupHTML = "<A class=sfLookup tabindex=" + _dtl.tabIndex++ + " id=aLookup name=aLookup title='Stored Query'" + 
+													  " href=\"javascript:void(0)\"  onClick=\"search_crsq()\" >";
+									if ( ahdtop.cstUsingScreenReader == '1' )
+									{
+										sLookupHTML += "<SPAN class=lookup style='font-size:1.0em;'>Stored Query</SPAN></A>";
+									}
+									else
+									{
+										sLookupHTML += "<IMG SRC=\"$CAisd/img/lookup.gif\" BORDER=0 ALT=\"Pop up stored query lookup form\">" +
+													   "<SPAN class=lookup style='font-size:1.0em;'>Stored Query</SPAN></A>";
+									}
+									sLookupHTML += "<br><input id=crsq_input tabindex=" + _dtl.tabIndex++ + " name=crsq_input type=text onchange=\"crsq_change(this); detailAutofill(this, 'crsq', '', 'label','','QBE.EQ.obj_type=KD+KEEP.HIDE_obj_type=1');\" class=clsPaneData style='font-size:1.0em;' size=18 title=\"Stored Query\">" +
+												   "<input type=hidden id='SET." + ktPrefix + ".StoredQuery' name='SET." + ktPrefix + ".StoredQuery'>" +
+												   "<input type=hidden id=KEY.crsq_input >";
+									docWriteln(sLookupHTML);
+									function search_crsq()
+									{	
+										var obj_aLookup= document.getElementById("aLookup");
+										if (obj_aLookup.disabled==false)
+											popup_search('crsq','crsq_input','main_form','QBE.EQ.obj_type=KD+KEEP.HIDE_obj_type=1');//Note KEEP.HIDE_obj_type is implemented in list_crsq.htmpl to dide object type selection
+									}
+									function crsq_change(obj)
+									{
+										if(obj.value == "")
+										{
+											//clear the hidden input that contains the persid
+											document.getElementById("SET." + ktPrefix + ".StoredQuery").value = "";
+										}
+									}
+								</SCRIPT>
+							</TD>	
+						</TR>
+						<TR><TD>&nbsp;</TD></TR>
+						<TR valign=top align=left>
+							<TD align=left>
+								<label class="label" id=lblDescription ><B>Description</B></label><BR>
+								<SCRIPT>
+								document.writeln('<input type="text" tabindex=' + _dtl.tabIndex++ + ' id="txtDesc" name="txtDesc" size=50 onchange="txtDesc_change()" title="Description">');
+									function txtDesc_change()
+									{
+										document.getElementById("SET." + ktPrefix + ".StoredQueryDesc").value = document.getElementById("txtDesc").value;
+									}
+									var html="<input type=hidden id='SET." + ktPrefix + ".StoredQueryDesc' name='SET." + ktPrefix + ".StoredQueryDesc'>";
+									document.write(html);
+								</SCRIPT>
+							</TD>
+						</TR>
+					</TABLE>
+				</PDM_OBJECT>	
+			</TR>
+		</TABLE>
+	</TD></TR>
+</TABLE>
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: role_kt_docs_tab.htmpl ASPEN.3 2012/02/27 11:04:08 siwst01 Exp $
+</PDM_IF>

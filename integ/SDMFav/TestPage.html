@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        function GetFile() {
+            var url = "http://localhost:55081/GenDocs.ashx?";
+            url += "OP=obiegowka";
+            url += "&NrHD=1234";
+            url += "&NrKomputera=PC789";
+            url += "&DataRozwiazaniaUmowy=10-11-12";
+            url += "&PKZP_status=OK";
+            url += "&PKZP_stan=true";
+            url += "&PKZP_stan_zadluzenia=777 zł";
+            url += "&PKZP_data=09-11-03";
+            url += "&PKZP_komentarz=Komentarz1";
+            url += "&ZFSS_status=OK";
+            url += "&ZFSS_stan=true";
+            url += "&ZFSS_stan_zadluzenia=5432";
+            url += "&ZFSS_data=09-03-10";
+            url += "&ZFSS_komentarz=Komentarz2";
+            url += "&BOM_status=OK";
+            url += "&BOM_stan=true";
+            url += "&BOM_stan2=true";
+            url += "&BOM_komentarz=Komentarz3";
+            url += "&BOZ_status=OK";
+            url += "&BOZ_stan=true";
+            url += "&BOZ_komentarz=Komentarz4";
+
+            window.open(url);
+        }
+
+        function GetCorrespondence() {
+            var url = "http://localhost:55081/GenDocs.ashx?";
+            url += "OP=korespondencja";
+            url += "&SelectedItem=400006";
+
+            window.open(url);
+        }
+
+        function GetExpertise() {
+            var url = "http://localhost:55081/GenDocs.ashx?";
+            url += "OP=ekspertyza";
+            url += "&Miejscowosc=Płock";
+            url += "&Pracownik=Sadistic Main Machine";
+            url += "&MPK=1234567";
+            url += "&NrHD=404";
+            url += "&PC_Num=Asus SuperLow Laptop X1000";
+            url += "&PC_SerialNum=H1KW12MMD75P13RD4L4J";
+            url += "&PC_Model=Model Super";
+            url += "&PC_CPU=Intel i7";
+            url += "&PC_RAM=4256";
+            url += "&PC_HDD=600";
+            url += "&WynikEkspertyzy=Wyniki pozytywne";
+            url += "&PropozycjaSerw=Inne";
+            url += "&PropozycjaSerwInne=Coś trzeba z tym zrobić";
+            url += "&SprzetZaplombowano=Yes";
+            url += "&BI_Uwagi=UWagi do ekspertyzy";
+
+            window.open(url);
+        }
+    </script>
+</head>
+<body>
+    <button type="button" onclick="GetFile()">Download Obiegowka</button><br />
+    <button type="button" onclick="GetCorrespondence()">Download Correspondence</button><br />
+    <button type="button" onclick="GetExpertise()">Download Expertise</button>
+</body>
+</html>

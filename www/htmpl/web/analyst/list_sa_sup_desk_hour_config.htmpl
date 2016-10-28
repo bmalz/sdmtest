@@ -1,0 +1,60 @@
+<PDM_IF 0>
+list_sa_queue_localized.htmpl
+WHEN PRESENTED:
+    When we need to display a list of SA Support Automation hours (sa_sup_desk_hour_config factory)
+INTENT:
+    Display the list of Support Automation hour configurations
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Support Automation Hours Confiuration Search";
+			var hdrTitleList = "Support Automation Hours";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=sfStart factory="sa_sup_desk_hour_config">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Etykieta" attr="label" size=50>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="active">
+<PDM_MACRO name=sfEnd>
+		</SCRIPT>
+		<PDM_FORM NAME="frmFID">
+		</PDM_FORM>
+		
+		
+<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+				var arrFields = new Array;
+				var nCount =0;
+  				var msgFoundNone = "No Support Automation Hours confiurations found";
+ 	 			var msgFound1 = "1 Support Automation Hours confiuration found";
+  				var msgFound = "%1 Support Automation Hours confiurations found";
+  				var msgFoundMore = "%1 Support Automation Hours confiurations found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired Support Automation Hours confiuration";
+  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Etykieta" attr="label" exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Status" attr="active" link="no">
+<PDM_MACRO name=lsCol hdr="Kalendarz" attr="workshift" link="no">
+<PDM_MACRO name=lsEnd>
+  			</script>
+		
+</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>
+<PDM_WSP>

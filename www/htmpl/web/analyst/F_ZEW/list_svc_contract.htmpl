@@ -1,0 +1,156 @@
+<PDM_IF 0>
+$Id: list_svc_contract.htmpl,v 1.2 2006/11/08 00:18:29 olsjo01 Exp $
+list_svc_contract.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Service Contracts.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+<PDM_IF "$args.KEEP.forOrgToKontr" == "1">	
+var hdrTitle = "Wyszukiwanie kontraktów";
+var hdrTitleList = "Lista kontraktów";
+<PDM_ELSE>
+var hdrTitle = "Wyszukiwanie kontraktów";
+var hdrTitleList = "Lista kontraktów";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var rptName = new Array("no", "no");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+
+function showServiceType(value)
+{
+	var service_type_name = "";
+	if(typeof st_name == "string" && st_name != "") {
+		service_type_name = st_name;
+	}
+	rs.data(service_type_name);
+	return;
+}
+
+<PDM_IF "$args.KEEP.forOrgToKontr" == "1">
+    var cfgCanCopy = false;
+
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.ORG_ID" != "0" && $ACCESS.FAC_org \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Aktualizuj kontrakty", "UpdateKontrEnv()", enableExtraBtn);
+    var argName = "";
+
+	if (typeof parent != "undefined" && typeof parent.argName == "string") {
+	   argName = parent.argName;
+	}
+    function UpdateKontrEnv() {
+        update_lrel("org", "org:$args.KEEP.ORG_ID", "svc_contract", "zsvc_contracts",  "Kontrakty", "Przypisane do organizacji", "");
+    }
+</PDM_IF>
+
+
+var imp_dir="$args.KEEP.imp_dir";
+var imp_lvl="$args.KEEP.imp_lvl";
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_IF "$args.KEEP.forOrgToKontr" == "1">
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/track_asset.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+</PDM_IF>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Service Contract">
+<script language="JavaScript">
+<PDM_IF "$args.KEEP.forNrToSvcContract" == "1" || "$args.KEEP.forGrpToSvcContract" == "1" || "$args.KEEP.forCntToSvcContract" == "1"  || "$args.KEEP.forOrgToKontr" == "1">
+<PDM_MACRO name=sfStart create=false factory=svc_contract>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=svc_contract>
+</PDM_IF>
+<PDM_IF "$args.KEEP.forNrToSvcContract" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.my_nr_maps.map_persid" value="$args.QBE.EQ.my_nr_maps.map_persid">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forGrpToSvcContract" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.my_grp_maps.map_persid" value="$args.QBE.EQ.my_grp_maps.map_persid">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forCntToSvcContract" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.my_cnt_maps.map_persid" value="$args.QBE.EQ.my_cnt_maps.map_persid">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forOrgToKontr" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.zorgs.org.id" value="$args.QBE.EQ.zorgs.org.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<input type="hidden" name="HTMPL" value="update_lrel_svc_contract.htmpl">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Numer kontraktu" attr=contract_num size=20>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var msgFoundNone = "Nie znaleziono usług";
+var msgFound1 = "Znaleziono 1 usługę";
+var msgFound = "Znaleziono %1 usług";
+var msgFoundMore = "Znaleziono %1 usług. Wyświetlane %2 z %3";
+var msgSelect = "Kliknij aby wybrać usługę";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="pdm_if '@{args.KEEP.forNrToSvcContract}' == '1'">
+<PDM_MACRO name=lsWrite text="<PDM_LIST PREFIX=gen_st LENGTH=1 FACTORY=sdsc_map WHERE=\"map_contract.id = @{list.id} AND map_persid = '@{args.QBE.EQ.my_nr_maps.map_persid}'\" ESC_STYLE=C>">
+<PDM_MACRO name=lsWrite text="var st_name = '<PDM_FMT ESC_STYLE=C>@{gen_st.map_sdsc.COMMON_NAME}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{args.KEEP.forGrpToSvcContract}' == '1'">
+<PDM_MACRO name=lsWrite text="<PDM_LIST PREFIX=gen_st LENGTH=1 FACTORY=sdsc_map WHERE=\"map_contract.id = @{list.id} AND map_persid = '@{args.QBE.EQ.my_grp_maps.map_persid}'\" ESC_STYLE=C>">
+<PDM_MACRO name=lsWrite text="var st_name = '<PDM_FMT ESC_STYLE=C>@{gen_st.map_sdsc.COMMON_NAME}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsWrite text="pdm_elif '@{args.KEEP.forCntToSvcContract}' == '1'">
+<PDM_MACRO name=lsWrite text="<PDM_LIST PREFIX=gen_st LENGTH=1 FACTORY=sdsc_map WHERE=\"map_contract.id = @{list.id} AND map_persid = '@{args.QBE.EQ.my_cnt_maps.map_persid}'\" ESC_STYLE=C>">
+<PDM_MACRO name=lsWrite text="var st_name = '<PDM_FMT ESC_STYLE=C>@{gen_st.map_sdsc.COMMON_NAME}</PDM_FMT>';">
+<PDM_MACRO name=lsWrite text="</PDM_LIST>">
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportFmt=ShowLink link=no>
+<PDM_MACRO name=lsCol hdr="Numer kontraktu" attr=contract_num>
+<PDM_MACRO name=lsCol hdr="Data wygaśnięcia" attr=expiration>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsWrite both=yes text="pdm_if '@{args.KEEP.forNrToSvcContract}' == '1' || '@{args.KEEP.forGrpToSvcContract}' == '1' || '@{args.KEEP.forCntToSvcContract}' == '1'">
+<PDM_MACRO name=lsCol hdr="Typ serwisowy" attr=id export=no fmtfunc=showServiceType sort=no>
+<PDM_MACRO name=lsWrite both=yes text="/pdm_if">
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<script>
+<PDM_IF 0>
+Call the function loadButtons() to either enable or disable the buttons on this form.
+window_type, delete_flag and non_global attributes of the window object are passed to
+this function to decide to either enable or disable the buttons.
+</PDM_IF>
+
+if(parent.propFormName3 == "edit" && "$args.KEEP.parentFac" == "window")
+{
+	loadButtons(parent.document.main_form.elements["SET.non_global"].value, parent.document.main_form.elements["SET.delete_flag"].value, parent.document.main_form.elements["SET.window_type"].value);
+}
+else if("$args.KEEP.parentFac" == "window")
+{
+	loadButtons("$args.KEEP.non_global", "$args.KEEP.delete_flag", "$args.KEEP.window_type");
+}
+</script>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

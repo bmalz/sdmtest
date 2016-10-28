@@ -1,0 +1,65 @@
+<PDM_IF 0>
+Purpose:
+   Detail form used to create/update a Federated CI Mapping from a CI to a MDR provider.
+
+History:
+   17-Feb-2009 tomjo02 SCO 21720 - Changes to correctly display CI and MDR provider in form header/title. 
+</PDM_IF>
+
+<html>
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Federated CI Mapping Detail From ${args.cmdb_asset_id.name} To ${args.mdr_provider_id.name}"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Federated CI Mapping From ${args.cmdb_asset_id.name} To ${args.mdr_provider_id.name}"</PDM_FMT>;
+<PDM_IF "${args.cmdb_asset_id.name}" != "" >
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Federated CI Mapping For ${args.cmdb_asset_id.name}"</PDM_FMT>;
+<PDM_ELSE>
+var hdrTitleNew = "Create New Federated CI Mapping";
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="ci_mdr_idmap">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Nazwa CI" attr="cmdb_asset_id" colspan=2 size=20>
+<PDM_MACRO name=dtlTextbox hdr="Federated Asset ID" attr="federated_asset_id" colspan=2 size=20>
+<PDM_MACRO name=dtlLookup hdr="Nazwa MDR" attr="mdr_provider_id" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" size=20>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP>

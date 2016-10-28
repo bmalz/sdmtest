@@ -1,0 +1,402 @@
+	<PDM_IF 0>
+@(#)$Id: kt_email_document.htmpl ANDERSON.3 2009/11/25 18:18:36 gurig01 Exp $
+WHEN PRESENTED:
+    when emailing a Knowledge Document
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+	<PDM_IF "$args.KEEP.ACTIVE_STATE" == "200">
+		var hdrTitle = "Email Forum";
+	<PDM_ELSE>
+		var hdrTitle = "Email Document";
+	</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl filename="Knowledge Document" header=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+	var _bBuildAlertMsg = true;//Ref in std_body
+	argPersistentID = "$args.persistent_id";
+	argActiveState = "$args.KEEP.ACTIVE_STATE";
+</script>
+</HEAD>
+<BODY border="0" topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0" onload="LoadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Email Document" logo=no>
+<FORM name=frm id=frm>
+<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0  class=page_header>
+	<TR>
+		<TD align=left width='99%'><h2 style="margin:0px;">Email Document</H2></TD>
+		<TD align=left width='1%'>
+			<DIV align=right>
+				<script type="text/javascript">
+                    ImgBtnSetDefaultTabIndex(100)
+					ImgBtnRow();
+					ImgBtnCreate("btnOK", "OK0", "ok()", "defer","", msgtext("OK0"));
+					ImgBtnCreate("btnCancel", "Cancel1", "cancel()", "defer", "", msgtext("Cancel1"));					
+					ImgBtnEndRow();
+				</script>
+			</DIV>
+		</TD>
+	</TR>
+</TABLE>
+<BR>
+<TABLE width="99%"  border="0" cellspacing="2" cellpadding="0" summary="Email document cover letter form">
+<TR>
+	<TH width=20% align=right><span class="label"><label for="txtYourName">Your Name</label></span></TH>
+	<TD width=80%><input type="text" id="txtYourName" name="txtYourName" size="64" value="$cst.combo_name"
+                         tabindex=10 onFocus="this.className='focusField';" onBlur="this.className='';"> 
+</TR>
+<TR>
+	<TH width=20% align=right><span class="label"><label for="txtYourEmail">Your Email</label></span></TH>
+	<TD width=80%><input type="text" id="txtYourEmail" name="txtYourEmail" size="64" value="$cst.email_address"
+                         tabindex=10 onFocus="this.className='focusField';" onBlur="this.className='';">
+</TR>
+<TR>
+    <TH width=20% align=right>
+    <A HREF='javascript:void(0)' class="lookup1em" tabindex=11 onclick="fill_name_fields(document.forms[0], 'cnt', 'CONTACT',true)">
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+    <SPAN class="requiredlabeltext">Send To Lookup (required)</SPAN></A>
+<PDM_ELSE>
+    <IMG WIDTH=12 HEIGHT=12 BORDER=0 STYLE="vertical-align:middle;horizontal-align:left" SRC=$CAisd/img/lookup.gif alt="Pop up lookup form">
+    <SPAN class="requiredlabeltext">Send To *</SPAN></A>
+</PDM_IF>
+    <INPUT TYPE=HIDDEN NAME=CONTACT_lname><INPUT TYPE=HIDDEN NAME=CONTACT_fname><INPUT TYPE=HIDDEN NAME=CONTACT_mname>
+    <INPUT TYPE=HIDDEN NAME=CONTACT_combo_name><INPUT TYPE=HIDDEN NAME=CONTACT>
+    </TH>
+	<TD width=80%><textarea id="txtEmailTo" name="txtEmailTo" rows="3" cols="64"
+        tabindex=10 onFocus="this.className='focusField';" onBlur="this.className='';"
+        title="Send to email address-Autofill;"></textarea></TD>
+</TR>
+<TR valign=top>
+	<TD width=20% align=right></TD>
+	<TD width=80%><SPAN class="data">Use semicolons (;) to separate entries</SPAN></TD>
+</TR>
+<TR>
+	<TH width=20% align=right><span class="label"><label for="txtSubject">Subject</label></span></TH>
+	<TD width=80%><input type="text" id="txtSubject" name="txtSubject" size="64"
+                         tabindex=11 onFocus="this.className='focusField';" onBlur="this.className='';"></TD>
+</TR>
+<TR>
+	<TH width=20% align=right><span class="label"><label for="txtMsg">Personal Message</label></span></TH>
+	<TD width=80%><textarea class="data" id="txtMsg" name="txtMsg" rows="5" cols="64"
+                            tabindex=11 onFocus="this.className='focusField';" onBlur="this.className='';"></textarea></TD>
+</TR>
+<PDM_IF "$args.KEEP.DOC_TYPE" == "1" && "$args.KEEP.ACTIVE_STATE" != "200">
+	<TR>
+		<TH width=20% align=right><span class="label">Send Document:</span></TH>
+		<TD width=80%>
+		<input type="radio" id="optEmail" name="optEmail" checked
+				title="Send document in HTML"
+				tabindex=11 onFocus="this.className='focusField';" onBlur="this.className='';">
+			<span class="data" style="cursor:arrow;" onclick="optEmail[0].click()">In HTML</span>
+		<input type="radio" id="optEmail" name="optEmail"
+				title="Send document link only"
+				tabindex=11 onFocus="this.className='focusField';" onBlur="this.className='';">
+			<span class="data" style="cursor:arrow;" onclick="optEmail[1].click()">Link Only</span>
+		</TD>
+	</TR>
+</PDM_IF>
+</TABLE>
+<script type="text/javascript">
+var arrID = new Array;
+var nCount = 0;
+var sID = "";
+var sEmail = "";
+var sDocHTML;
+var sMsgClick = "";
+if (argActiveState == "200")	// Forum
+{
+	sMsgClick = "Please click on the following link to see the forum.";
+}
+else
+{
+	sMsgClick = "Please click on the following link to see the knowledge document.";
+}
+
+function backfill_cnt_event( form_name, base_name, lname, fname, mname, cntID )
+{
+	var comboName;
+	if ( base_name == "CONTACT" )
+	{
+		if (trim(fname).length > 0)
+		{
+			comboName = lname + ", " + fname;
+			if (trim(mname).length > 0)
+			{
+				comboName = lname + ", " + fname + "," + mname; // Added to split first name and middle name with comma
+			}
+		}
+		else 
+		{
+			comboName = lname;
+		}
+				
+		document.frm.txtEmailTo.value = trim(document.frm.txtEmailTo.value);
+		if (document.frm.txtEmailTo.value.length != 0)
+		{
+			if (document.frm.txtEmailTo.value.charAt(document.frm.txtEmailTo.value.length-1) != ";")
+			{
+				document.frm.txtEmailTo.value = document.frm.txtEmailTo.value + ";" + comboName + ";";
+			}
+			else
+			{	
+				document.frm.txtEmailTo.value = document.frm.txtEmailTo.value + comboName + ";";
+			}
+		}
+		else
+		{
+			document.frm.txtEmailTo.value = document.frm.txtEmailTo.value + comboName + ";";
+		}
+		arrID[nCount++] = comboName;
+		arrID[nCount++] = cntID;	
+		
+		//This is to make sure Contact Search window can be open again
+		document.frm.CONTACT_lname.value = "";
+		document.frm.CONTACT_fname.value = "";            
+		document.frm.CONTACT_mname.value = "";   
+		document.frm.CONTACT_combo_name.value = "";         
+		document.frm.CONTACT.value = "";      
+	}
+}
+function GetList()
+{
+	var arrList = new Array;
+	arrList = document.frm.txtEmailTo.value.split(";");
+	sID = "";
+	sEmail = "";	
+ 	
+ 	if (trim(document.frm.txtEmailTo.value).length == 0)
+ 	{
+		AlertMsg = "";// Remove the previous error
+		showAlertMsg("Send to is required.");
+ 		document.frm.txtEmailTo.focus();
+ 		return 0;
+ 	}
+ 	
+ 	var bFound;
+ 	var tmpID;
+ 	for (var i = 0; i < arrList.length; i++)
+ 	{
+ 		arrList[i] = arrList[i].replace("\n", "");
+ 		arrList[i] = arrList[i].replace("\r", "");
+ 		arrList[i] = trim(arrList[i]);
+ 		for ( var j = 0; j < arrID.length; j=j+2)
+ 		{	
+ 			if (arrList[i] == arrID[j])
+ 			{
+ 				bFound = 1;
+ 				tmpID = arrID[j+1];
+ 				break;	
+ 			}
+ 			else
+ 			{
+ 				bFound = 0;
+ 			}
+ 		}
+ 		if (bFound == 1)
+ 		{
+ 			sID = sID + " " + "cnt:" + tmpID;
+ 		}
+ 	}
+}
+function trim(argvalue)
+{
+	var tmpstr = ltrim(argvalue);
+	return rtrim(tmpstr);
+}
+function ltrim(argvalue)
+{
+	while (1)
+	{
+		if (argvalue.substring(0, 1) != " ")
+			break;
+		argvalue = argvalue.substring(1, argvalue.length);
+	}
+	return argvalue;
+}
+function rtrim(argvalue)
+{
+	while (1)
+	{
+		if (argvalue.substring(argvalue.length - 1, argvalue.length) != " ")
+			break;
+		argvalue = argvalue.substring(0, argvalue.length - 1);
+	}
+	return argvalue;
+}
+function IsValidEmail(sEmail)
+{
+	//gurig01 11 Nov 2004 We decided don't check any email validation
+	return 1;
+/*
+    if (sEmail.search(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/) != -1)
+        return 1;
+    else
+        return 0;
+*/
+}
+function ok()
+{
+	var bIsLink = 1;
+	var randomNumber=Math.floor(Math.random()*101);
+	var currentTime;
+	currentTime = new Date();
+	randomNumber = randomNumber*(currentTime.getUTCMilliseconds() + currentTime.getUTCMinutes()*60*1000 + currentTime.getUTCHours()*60*60*1000 + currentTime.getUTCDay()*24*60*60*1000 + currentTime.getUTCDate()*24*60*60*1000);
+	
+	if (GetList() == 0)
+	{
+		return;
+	}
+	
+	if ("$args.KEEP.DOC_TYPE" == "1" && argActiveState != "200")	//If it is a knowledge document
+	{
+		if (document.frm.optEmail[0].checked == true)
+		{
+			bIsLink = 0;
+		}
+		else
+		{
+			bIsLink = 1;
+		}
+	}
+	
+	document.frmPost.SID.value = cfgSID;
+	document.frmPost.FID.value = fid_generator();
+	document.frmPost.OP.value = "KT_EMAIL_DOCUMENT";
+	document.frmPost.SENDER.value = document.frm.txtYourName.value;
+	document.frmPost.SENDER_EMAIL.value = document.frm.txtYourEmail.value;
+	document.frmPost.IS_LINK.value = bIsLink;
+	document.frmPost.KD_ID.value = "KD:$args.KEEP.DOC_ID";
+	document.frmPost.MSG_SUBJECT.value = document.frm.txtSubject.value;
+	document.frmPost.MSG_PERSONAL.value = document.frm.txtMsg.value;
+	document.frmPost.MSG_HTML.value = sDocHTML;
+	document.frmPost.CONTACT_ID_LIST.value = sID;
+	document.frmPost.ALL_MAIL_LIST.value = document.frm.txtEmailTo.value;
+	document.frmPost.EMAIL_ADDRESS_LIST.value = sEmail;
+	document.frmPost.MSG_CLICK.value = sMsgClick;
+	document.frmPost.SUBMIT_TIME.value = randomNumber;
+	document.frmPost.action = cfgCgi;
+	document.frmPost.target=ahdframeset.workframe.name;
+	document.frmPost.submit();
+}
+
+function KT_REPLY(sOP, msg)
+{
+	if(ahdframeset != ahdtop)//popup
+	{
+		setTimeout("ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close()", 500);
+	}
+	else
+	{
+		upd_frame('SHOW_DETAIL', 'PERSID=KD:' + '$args.KEEP.DOC_ID', 'HTMPL=kt_document_view.htmpl', 'opener=search_tools', 'open_mode=1');
+	}
+}
+function LoadActions()
+{
+	if ("$args.KEEP.DOC_TYPE" == "1" && argActiveState != "200")	//If it is a knowledge document
+	{
+		var w = ahdtop.AHD_Windows['$args.KEEP.OPENER'];
+		//Document is in the ahdtop
+		if (typeof w == "object" && w != null )
+        {
+			sDocHTML = w.ahdframe.GetBodyHTML();	//Document is opened as a separate window
+		}
+	    else if ( typeof ahdtop.ahdframeset.ahdframe.GetBodyHTML != "undefined" )
+		{
+			sDocHTML = ahdtop.ahdframeset.ahdframe.GetBodyHTML();
+		}
+		else
+		{
+			sDocHTML = "";
+		}
+	}
+	
+	var sTitle = "";
+	<PDM_LIST PREFIX=doc FACTORY="KD" WHERE="id=$args.KEEP.DOC_ID">
+		sTitle = '<PDM_FMT ESC_STYLE=C>$doc.TITLE</PDM_FMT>';
+	</PDM_LIST>
+	if (argActiveState == 200)	// Forum
+	{
+		document.frm.txtSubject.value = "Forum: " + sTitle;
+	}
+	else
+	{
+		document.frm.txtSubject.value = "Knowledge Document: " + sTitle;
+	}
+	
+	//If the Document opened from a ticket context, we need to add the affected end user as the default user
+	var lAffectedEndUserID = "0";
+	var sAffectedEndUserLastName = "";
+	var sAffectedEndUserFirstName = "";
+	var sAffectedEndUserMiddleName = "";
+	<PDM_IF "$args.SD_TICKET_FACTORY" == "cr">
+		<PDM_LIST PREFIX=listcr FACTORY="cr" WHERE="persistent_id='$args.SD_LAUNCHED'">
+			lAffectedEndUserID = "$listcr.customer";
+			<PDM_LIST PREFIX=listcrcnt FACTORY="cnt" WHERE="id=U'$listcr.customer'">
+				sAffectedEndUserLastName = '<PDM_FMT ESC_STYLE=C>$listcrcnt.last_name</PDM_FMT>';
+				sAffectedEndUserFirstName = '<PDM_FMT ESC_STYLE=C>$listcrcnt.first_name</PDM_FMT>';
+				sAffectedEndUserMiddleName = '<PDM_FMT ESC_STYLE=C>$listcrcnt.middle_name</PDM_FMT>';
+			</PDM_LIST>
+		</PDM_LIST>
+		
+	<PDM_ELIF "$args.SD_TICKET_FACTORY" == "iss">
+		<PDM_LIST PREFIX=listiss FACTORY="iss" WHERE="persistent_id='$args.SD_LAUNCHED'">
+			lAffectedEndUserID = "$listiss.requestor";
+			<PDM_LIST PREFIX=listisscnt FACTORY="cnt" WHERE="id=U'$listiss.requestor'">
+				sAffectedEndUserLastName = '<PDM_FMT ESC_STYLE=C>$listisscnt.last_name</PDM_FMT>';
+				sAffectedEndUserFirstName = '<PDM_FMT ESC_STYLE=C>$listisscnt.first_name</PDM_FMT>';
+				sAffectedEndUserMiddleName = '<PDM_FMT ESC_STYLE=C>$listisscnt.middle_name</PDM_FMT>';
+			</PDM_LIST>
+		</PDM_LIST>
+	</PDM_IF>
+	if (lAffectedEndUserID!= "0")
+	{
+		backfill_cnt_event("","CONTACT",sAffectedEndUserLastName, sAffectedEndUserFirstName, sAffectedEndUserMiddleName,lAffectedEndUserID);
+	}
+    var e = document.getElementById("txtYourName");
+    if ( e != null )
+      e.focus();
+}
+
+function cancel()
+{
+	if(ahdframeset != ahdtop)//popup
+	{
+		ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+	}
+	else
+	{
+		upd_frame('SHOW_DETAIL', 'PERSID=KD:' + '$args.KEEP.DOC_ID', 'HTMPL=kt_document_view.htmpl', 'opener=search_tools', 'open_mode=1');
+	}
+}  
+
+</script>
+</FORM>
+<FORM id=frmPost name=frmPost method=POST>
+	<INPUT type=hidden id=SID name=SID>
+	<INPUT type=hidden id=FID name=FID>
+	<INPUT type=hidden id=OP name=OP>
+	<INPUT type=hidden id=SENDER name=SENDER>
+	<INPUT type=hidden id=SENDER_EMAIL name=SENDER_EMAIL>
+	<INPUT type=hidden id=IS_LINK name=IS_LINK>
+	<INPUT type=hidden id=KD_ID name=KD_ID>
+	<INPUT type=hidden id=MSG_SUBJECT name=MSG_SUBJECT>
+	<INPUT type=hidden id=MSG_PERSONAL name=MSG_PERSONAL>
+	<INPUT type=hidden id=ALL_MAIL_LIST name=ALL_MAIL_LIST >
+	<INPUT type=hidden id=MSG_HTML name=MSG_HTML>
+	<INPUT type=hidden id=MSG_CLICK name=MSG_CLICK>
+	<INPUT type=hidden id=CONTACT_ID_LIST name=CONTACT_ID_LIST>
+	<INPUT type=hidden id=EMAIL_ADDRESS_LIST name=EMAIL_ADDRESS_LIST>
+	<INPUT type=hidden id=SUBMIT_TIME name=SUBMIT_TIME>
+	<INPUT type=hidden id=SD_LAUNCHED name=SD_LAUNCHED value="$args.SD_LAUNCHED">
+</FORM>
+</body>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

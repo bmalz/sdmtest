@@ -1,0 +1,69 @@
+<PDM_IF 0>
+preview_in.htmpl
+WHEN PRESENTED:
+   Mouseover Preview form for incidents.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Incydent $args.ref_num";
+var hdrTitleTempl = '$args.ref_num Incident Template <PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT> Detail';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</script>
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=cr>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zgłaszający" attr=customer>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja incydentu" attr=category colspan=2>
+<PDM_MACRO name=dtlReadonly attr=status>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Właściciel" attr=assignee>
+<PDM_MACRO name=dtlReadonly hdr="Grupa" attr=group colspan=2>
+<PDM_MACRO name=dtlReadonly hdr="Priorytet" attr=priority>
+<PDM_IF 0>
+	<PDM_MACRO name=dtlStartRow>
+	<PDM_MACRO name=dtlReadonly hdr="Numer MPK" attr="zmpk">
+	<PDM_MACRO name=dtlReadonly hdr="Jednostka konfiguracji" attr=affected_resource colspan=2>
+	<PDM_MACRO name=dtlReadonly hdr="Termin kontaktu" attr=call_back_date>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Temat" attr=summary colspan=4 keeplinks=yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Poziom obsługi wewn." attr=zsdsc>
+<PDM_MACRO name=dtlDateReadonly hdr="Termin realizacji wewn." attr="ztermin_realizacji">
+<PDM_MACRO name=dtlReadonly hdr="F-Z poziom obsługi" attr=zfzsdsac>
+<PDM_MACRO name=dtlDateReadonly hdr="F-Z termin realizacji" attr="zfztermin_realizacji">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rejestracji" attr=open_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data modyfikacji" attr=last_mod_dt>
+<PDM_MACRO name=dtlDateReadonly hdr="Data rozwiązania" attr=resolve_date>
+<PDM_MACRO name=dtlDateReadonly hdr="Data zamknięcia" attr=close_date>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: preview_in.htmpl ASPEN.0 2010/10/04 09:27:24 ralje02 Exp $
+</PDM_IF>
+
+<PDM_WSP>

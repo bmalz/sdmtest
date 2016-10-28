@@ -1,0 +1,101 @@
+<PDM_IF 0>
+list_act_type_assoc.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Activity Associations.
+</PDM_IF>
+
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie powiązań czynności";
+var hdrTitleList = "Lista powiązań czynności";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("act_assocsum.rpt", "act_assocdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Activity Association">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=act_type_assoc>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_IF $env.NX_KT == "Yes">
+	 	searchFilterDropdown("Object Type","ob_type","",
+		"Assistance Session","sa_notif",
+	 	"Change Order","chg",
+	 	"Configuration Item","nr",
+        "Contact","cnt",
+        "Issue","iss",
+	 	"Issue Workflow Task","iss_wf",
+		"Knowledge Document","KD",
+		"Knowledge Document Comment","O_COMMENTS",
+		"Knowledge Report Card","KT_REPORT_CARD",
+	 	"Managed Survey","mgs",
+	 	"Request/Incident/Problem","cr",
+	 	"Workflow Task","wf",
+		"Task","ztask",1);
+<PDM_ELSE>
+	 	searchFilterDropdown("Object Type","ob_type","",
+		"Assistance Session","sa_notif",
+	 	"Change Order","chg",
+	 	"Configuration Item","nr",
+        "Contact","cnt",
+        "Issue","iss",
+	 	"Issue Workflow Task","iss_wf",
+	 	"Managed Survey","mgs",
+	 	"Request/Incident/Problem","cr",
+	 	"Workflow Task","wf",
+		"Task","ztask",1);
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="Atrybut typu obiektu" attr=ob_type_attr size=20>
+<PDM_IF $env.NX_KT == "Yes">
+<PDM_MACRO name=sfDropdown hdr="Typ aktywności" attr=act_type factory=aty>
+<PDM_ELSE>
+searchFilterDropdown("Activity Type","act_type",""
+<PDM_LIST PREFIX=list FACTORY=aty  WHERE="(kd_flag <> 1 or kd_flag IS NULL) AND (kd_comment_flag <> 1 or kd_comment_flag IS NULL) AND (krc_flag <> 1 or krc_flag IS NULL) AND (mgs_flag <> 0 OR iss_flag <> 0 OR chg_flag <> 0 OR cr_flag <> 0 OR cnt_flag <> 0 OR ci_flag <> 0)" ESC_STYLE=JS2>,
+"$list.COMMON_NAME","$list.REL_ATTR"
+</PDM_LIST>);
+</PDM_IF>
+<PDM_MACRO name=sfTextbox hdr="" attr=id colspan=2 disabled=yes display_value="" qbe_condition="GE" size=20 value="1">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Activity Associations found";
+var msgFound1 = "1 Activity Association found";
+var msgFound = "%1 Activity Associations found";
+var msgFoundMore = "%1 Activity Associations found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Activity Association";
+function for_itil(value)
+{	
+	if(listobjtypecode == "cr")
+	value = "Request/Incident/Problem";
+rs.data(value);  
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var listobjtypecode = '@{list.ob_type:}';">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Typ obiektu" attr=ob_type fmtfunc=for_itil sort=no>
+<PDM_MACRO name=lsCol hdr="Atrybut typu obiektu" attr=ob_type_attr>
+<PDM_MACRO name=lsCol hdr="Typ aktywności" attr=act_type>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_act_type_assoc.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

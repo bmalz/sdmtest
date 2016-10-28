@@ -1,0 +1,40 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_ci_twa_ci_attr_tab.htmpl
+//
+// Purpose: Transaction Work Area (twa) Attributes tab that lists attributes for ci_twa_ci objects.
+//
+//
+// 05-Aug-2009 tomjo02 SCO 26513 - CI Reconciliation Management Support - Initial version  
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=cmdb_ci_twa_ci_attr_tab" factory=ci_twa_ci>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script>
+cfgDateFormat = "$date_format"
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cmdb.js"></script>
+</head>
+
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+
+// Generate the TWA attribute table.
+cmdbGenerateTWATable();
+
+</script>
+
+</PDM_FORM>
+</body>
+</html>

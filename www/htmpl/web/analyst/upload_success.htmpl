@@ -1,0 +1,91 @@
+<PDM_IF 0>
+upload_success.htmpl
+WHEN PRESENTED:
+    When document is successful attached.   
+INTENT:
+    Use a string passed from upload server machine to construct 
+    htmpl page and update the status on the attachment editable   
+    detail page.
+VARIABLES:
+    string      image       The location of the image directory as
+                            specified in the config file.
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview=no>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var success_string = "${args.KEEP.success_str:}";
+var start_pos=success_string.indexOf(": ");
+start_pos++;
+var end_pos=success_string.indexOf(",");
+var file_path=success_string.substring(start_pos,end_pos--);
+start_pos=success_string.lastIndexOf(": ");
+start_pos++;
+end_pos=success_string.lastIndexOf(",");
+var file_name=success_string.substring(start_pos,end_pos);
+file_name = file_name.replace(/%20/g," ");
+
+function save_and_close()
+{
+    var parent_win = window.opener;
+    if (!parent_win.closed)
+    {
+	parent_win.pdm_submit('main_form', 'UPDATE');
+    }
+    window.close();
+}
+var hdrTitle = "File Upload Result";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "${args.Error_Msg:}" == "">
+<body class="detailro" onload="window.opener.success(${args.FileSize:})">
+<PDM_ELSE>
+<body class="detailro" onload="window.opener.unsuccess()">
+</PDM_IF>
+<div>
+<script>
+document.writeln(generate_basic_form_header_html());
+</script>
+</div>	
+<PDM_INCLUDE FILE=std_body.htmpl filename="attmnt_success">
+<center>
+<script language="JavaScript">
+<PDM_MACRO NAME=dtlForm button=false>
+<PDM_MACRO NAME=button 
+    id="btn001" 
+    caption="Save and Close" 
+    func="save_and_close()" 
+    hotkey_name="Save and Close" 
+    newrow=yes >
+<PDM_MACRO NAME=dtlStart center=true>
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_IF "${args.Error_Msg:}" == "">
+	detailRowHdr("File Location", 2);
+	detailSetReadonlyRowData(file_path);
+	detailRowHdr("File Name", 2);
+	detailSetReadonlyRowData(file_name);
+	detailRowHdr("Status");
+	detailSetReadonlyRowData("Upload Successful");
+	detailWriteRow();
+<PDM_ELSE>
+	detailRowHdr("Error Message", 2);
+	detailSetReadonlyRowData("$args.Error_Msg");
+	detailRowHdr("Status");
+	detailSetReadonlyRowData("Upload Failed");
+	detailWriteRow();
+</PDM_IF>
+<PDM_MACRO NAME=dtlEndTable>
+</script>
+<PDM_MACRO NAME=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: upload_success.htmpl ASPEN.1 2010/11/12 15:19:01 tomjo02 Exp $
+</PDM_IF>

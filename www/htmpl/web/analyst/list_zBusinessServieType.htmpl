@@ -1,0 +1,62 @@
+<PDM_IF 0>
+list_zBusinessServiceType.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Change Impact
+</PDM_IF>
+<html lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie Typów Usług";
+var hdrTitleList = "Lista Typów Usług";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zBusinessServiceTypesum.rpt", "zBusinessServiceTypeedtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Change Impact">
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=sfStart factory=zBusinessServiceType>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=zBusinessServiceType>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Typ usługi" attr=sym>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono Typów Usług";
+  var msgFound1 = "Znaleziono 1 Typ Usługi";
+  var msgFound = "Znaleziono %1 Typów Usług";
+  var msgFoundMore = "Znaleziono %1 Typów Usług. Wyświetlane %2 z %3";
+  var msgSelect = "Kliknij aby wybrać rekord";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Typ usługi" attr=sym exportFmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_zBusinessServiceType.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,89 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	When we need to display a list of SLA Event Templates
+	This form is designed to be a deferred tab for detail_sdsc.htmpl.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+<PDM_IF "$args.QBE.EQ.object_type" == "cr">
+var hdrTitle = "Request Event Search";
+var hdrTitleList = "Request Event List";
+<PDM_ELIF "$args.QBE.EQ.object_type" == "chg">
+var hdrTitle = "Change Order Event Search";
+var hdrTitleList = "Change Order Event List";
+<PDM_ELIF "$args.QBE.EQ.object_type" == "wf">
+var hdrTitle = "Change Order Workflow Task Event Search";
+var hdrTitleList = "Change Order Workflow Task Event List";
+<PDM_ELIF "$args.QBE.EQ.object_type" == "iss">
+var hdrTitle = "Issue Event Search";
+var hdrTitleList = "Issue Event List";
+<PDM_ELIF "$args.QBE.EQ.object_type" == "iss_wf">
+var hdrTitle = "Issue Workflow Task Event Search";
+var hdrTitleList = "Issue Workflow Task Event List";
+<PDM_ELSE>
+var hdrTitle = "Event Search";
+var hdrTitleList = "Event List";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+<PDM_IF $args.KEEP.USERAUTH \> 1 >
+var cfgCanEdit = true;
+</PDM_IF>
+
+var enableExtraBtn = false;
+<PDM_IF "$args.KEEP.SDSC_ID" != "0" && "$args.QBE.EQ.object_type" != "" && "$args.KEEP.SDSC_CODE" != "" && $ACCESS.FAC_sdsc \> 1 && $args.KEEP.USERAUTH \> 1>
+    var enableExtraBtn = true;
+</PDM_IF>
+
+cfgExtraButton = new Array("Add_Service_Type_Event", "AddSlatpl()", enableExtraBtn);
+function AddSlatpl() {
+    add_slatpl("sdsc:$args.KEEP.SDSC_ID","$args.QBE.EQ.object_type","$args.KEEP.SDSC_CODE");
+}
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="SLA Event List">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=slatpl>
+document.write('<input type="hidden" name="QBE.EQ.object_type" value="$args.QBE.EQ.object_type">');
+document.write('<input type="hidden" name="QBE.EQ.service_type.id" value="$args.QBE.EQ.service_type.id">');
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+
+var msgFoundNone = "No events found";
+var msgFound1 = "1 event found";
+var msgFound = "%1 events found";
+var msgFoundMore = "%1 events found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired event";
+
+<PDM_IF "$args.KEEP.IS_EDIT" != "edit" && "$args.KEEP.SDSC_ID" != "0" && $ACCESS.FAC_sdsc \> 1 && $ACCESS.FAC_slatpl \> 1 && $args.KEEP.USERAUTH \> 1>
+function resultSetCustomContextAddMiddle(ctxMenu) {
+   ctxMenu.addItem(msgtext("Delete"),"delete_slatpl_sdsc('sdsc:$args.KEEP.SDSC_ID', self.activePersid)");
+}
+</PDM_IF>
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym link=yes>
+<PDM_MACRO name=lsCol hdr="Zdarzenie" attr=event>
+<PDM_MACRO name=lsCol hdr="Czas opóźnienia" attr=elapsed>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_slatpl.htmpl ASPEN.1 2011/10/19 17:59:26 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

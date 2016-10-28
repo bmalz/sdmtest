@@ -1,0 +1,442 @@
+<pdm_if 0>
+this page displays on the left side of the document viewer when opening
+a forum in view mode
+</pdm_if>
+<script>
+function highlightSearchTerms(searchFor, replaceWhat)
+{
+
+var searchText = searchFor ;
+
+  if (!searchText || typeof(searchText) == "undefined" || searchText == "") {
+		return replaceWhat; 
+  } else {
+		searchArray = searchText.split(" ");
+  }
+
+  var highlightStartTag = "";
+  var highlightEndTag = "";
+  
+  highlightStartTag = "<font class='gn_highlight_search'>";
+  highlightEndTag = "</font>";
+  
+  var matchBeginning = true; 
+  
+  var bodyText = replaceWhat; //document.body.innerHTML;
+  for (var i = 0; i < searchArray.length; i++) {
+	if (searchArray[i] != "")
+    bodyText = doHighlight(bodyText, searchArray[i], highlightStartTag, highlightEndTag, matchBeginning);
+  }
+ 
+ return bodyText;
+}
+
+function ShowProperty(sCaption, sValue)
+{
+	if (sValue != '')
+	{
+		docWriteln("<tr><td><div class='clsTextBlackXXsmall'>");
+		docWriteln(msgtext(sCaption) + " " + sValue);
+		docWriteln("</div></td></tr>");
+	}
+}
+
+//global arrays to store attachment info
+var m_arrGatewayPath = new Array;
+var m_arrServer = new Array;
+function Attachments()
+{
+	//this function returns document attachments as well as URL attachments
+	var strAttachmentsHTML = "";
+	<PDM_LIST FACTORY=attmnt PREFIX=list WHERE="KDS_ATTACHED.DOC_ID=$args.id AND status<>'EMBD_LINK'">
+		<pdm_if "$prop.disable_attachments" == "true">
+			strAttachmentsHTML += "$list.attmnt_name<br>";
+		<pdm_else>	
+			<pdm_if "$list.link_only" == "1">
+				strAttachmentsHTML += "<a class='clsAnchor' HREF='javascript:void(0)'" +
+					                  " onclick=link_onclick('$list.orig_file_name') >";
+			<pdm_else>
+				var nAttmntId = "$list.id";
+				m_arrGatewayPath[nAttmntId] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.repository.servlet_path</PDM_FMT>';		 
+				m_arrServer[nAttmntId] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.repository.server</PDM_FMT>';	
+				strAttachmentsHTML += "<a class='clsAnchor' HREF='javascript:void(0)'" 	+
+					                  " onclick=do_Download(" + nAttmntId + ")>";
+			</pdm_if>
+			strAttachmentsHTML += "<span class='clsAnchor'>" + "$list.attmnt_name</a></span><br>";
+		</pdm_if>		
+	</PDM_LIST>
+	return strAttachmentsHTML;
+}
+
+//open an attachment
+function do_Download(nAttmntId)
+{
+	Download(nAttmntId, m_arrGatewayPath[nAttmntId], m_arrServer[nAttmntId] , 0);
+	return;
+}
+//
+function link_onclick(strURL)
+{
+	var w = window.open(strURL);
+	check_popup_blocker(w); 
+	return false;
+}
+</script>
+<table class='page_header gn_container_no_border' cellSpacing=0 cellPadding=0 width="100%">
+	<tr height=25>
+		<td align=left>
+			<h2 class='gn_container_no_margin'><span id=spnHotKey>Forum</span></h2>
+		</td>
+	</tr>
+</table>
+<table cellSpacing=0 cellPadding=0 class='gn_container_no_border'>
+	<tr>
+	<td width="2%">&nbsp;&nbsp;</td>
+	<td width="98%">
+		<table cellSpacing=0 cellPadding=0 class='gn_container_no_border'>
+			<tr>
+				<td>
+					<span class='clsTextBlack'><b>
+						<script>
+							var sSubject = '<PDM_FMT disp_entities="no" ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+							sSubject = highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", sSubject);
+							docWrite(sSubject);
+						</script></b>
+					</span>
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+			<script>
+				ShowProperty('Submitted_By:', '$args.INITIATOR_ID.combo_name');
+				ShowProperty('Date_Logged:', date_to_string($args.CREATION_DATE));
+				ShowProperty('Category:', '$args.PRIMARY_INDEX.CAPTION');
+				ShowProperty('Status:', '$args.QA_STATUS.SYM');
+			</script>
+			<tr><td>&nbsp;</td></tr>
+			<tr>
+				<td vAlign=top><span class='clsTextNavyXXsmall'>
+					<h3 class='gn_container_no_margin'>Question:</h3></span>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span class='clsTextBlackXXsmall'>
+						<script>
+							var sQuestion = '<PDM_FMT disp_entities="no" ESC_STYLE=C>$args.PROBLEM</PDM_FMT>';
+							sQuestion = highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", sQuestion);
+							docWrite(sQuestion);
+						</script>
+					</span>
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+			<tr>
+				<td vAlign=top><span class='clsTextNavyXXsmall'>
+					<h3 class='gn_container_no_margin'>Attachments:</h3></span>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span class='clsTextBlackXXsmall'>
+						<script>
+							var sAttachments = '<PDM_FMT disp_entities="no" ESC_STYLE=C>$args.PROBLEM</PDM_FMT>';
+							sAttachments = Attachments();
+							docWrite(sAttachments);
+						</script>
+					</span>
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+			<tr>
+				<td vAlign=top><span class='clsTextNavyXXsmall'>
+					<h3 class='gn_container_no_margin'>Replies:</h3></span>
+					<span class='clsTextNavyXXsmall'>
+						<a href='javascript:OpenAllReplies()'>Open All</a>
+						&nbsp;
+						<a href='javascript:CollapseAllReplies()'>Collapse All</a>
+					</span>
+				</td>
+			</tr>
+			<tr><td><img src='images/shim.gif' width='0' height='4'></td></tr>
+			<tr>
+				<td><span class='clsTextBlackXXsmall'>
+				<script>
+				WriteResponses();
+				function WriteResponses()
+				{
+					var strResponsesHTML = "";
+					var bgClass = "clsResultsEven";
+					var strResponse = "";
+					var iCount = 1;
+					
+					strResponsesHTML += "<table width='100%' cellspacing=0 cellpadding=2 class='gn_container_no_border'>";
+					<PDM_LIST PREFIX=list FACTORY=LONG_TEXTS WHERE=REF_PERSID='KD:$args.id' ESC_STYLE=HTML ORDER_BY="RESP_DATE DESC">
+						var strReplyStatus = "";
+						if ("$list.RESP_TYPE" == "1")
+						{
+							strReplyStatus = msgtext("Answer:");
+						}
+						else if ("$list.RESP_TYPE" == "2")
+						{
+							strReplyStatus = msgtext("Clarification:");
+						}
+						else if ("$list.RESP_TYPE" == "3")
+						{
+							strReplyStatus = msgtext("Update_Status:");
+						}
+						strLastName = '<PDM_FMT ESC_STYLE=C>$list.AUTHOR_ID.last_name</PDM_FMT>';
+						strFirstName = '<PDM_FMT ESC_STYLE=C>$list.AUTHOR_ID.first_name</PDM_FMT>';
+						strMiddleName = '<PDM_FMT ESC_STYLE=C>$list.AUTHOR_ID.middle_name</PDM_FMT>';
+						strUserName = buildComboName(strLastName, strFirstName, strMiddleName);
+						strResponse = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$list.RESP_SHORT</PDM_FMT>');
+						strResponse = ReplaceRepIdToImgPath(strResponse);
+						strResponse	= strResponse.replace(/\n/g,"<br>");
+						strResponse = system_GetXMLSignIn(strResponse);
+						strResponse = system_BreakString(strResponse, 50);
+						strResponse = highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", strResponse);
+						strFullResponse = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$list.ACTUAL_TEXT</PDM_FMT>');
+						strFullResponse = ReplaceRepIdToImgPath(strFullResponse);
+						strFullResponse	= strFullResponse.replace(/\n/g,"<br>");
+						strFullResponse = system_GetXMLSignIn(strFullResponse);
+						strFullResponse = highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", strFullResponse);
+						strAttmntHTML = "";
+							
+						<PDM_LIST PREFIX=attmnt_list FACTORY=KD_ATTMNT WHERE="DOC_ID=$args.id AND LONG_TEXTS_ID=$list.id AND ATTMNT_ID.status<>'EMBD_LINK'">
+							strAttmntHTML = "<a href=\"javascript:DownloadFile($attmnt_list.ATTMNT_ID, " +
+										 "'$attmnt_list.ATTMNT_ID.repository.servlet_path', " +
+										 "'$attmnt_list.ATTMNT_ID.repository.server')\">" +
+										 "<img src='$CAisd/img/Attachment_16.png' style='border-style:none'>" + 
+										 "<span>$attmnt_list.ATTMNT_ID.attmnt_name</span>"
+										 "<a>";
+						</PDM_LIST>
+	
+						if (strUserName == "")
+							strUserName = "anonymous";
+											
+						var sActionInfo = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$list.ACTION_INFO</PDM_FMT>');
+						sActionInfo	= sActionInfo.replace(/&lt;BR&gt;/g,"<br>");
+
+						strResponsesHTML += "<tr class=" + bgClass + "><td colspan=3><img src='images/shim.gif' width='0' height='2'></td></tr>" +
+										"<tr class=" + bgClass + "><td></td><td><span class=clsTextBlackXsmall>$list.RESP_DATE</span></td></tr>" +
+										"<tr width=100% class=" + bgClass + " valign=top><td width='3%' valign=top>&nbsp;" + 
+										"<span id=spnShortReplySign" + iCount + " class='clsTextNavysmall' style='display:none'><a href='javascript:ChangeReplyView(" + iCount + ")'>+</a></span>" +
+										"<span id=spnFullReplySign" + iCount + " class='clsTextNavysmall'><a href='javascript:ChangeReplyView(" + iCount + ")'>-</a></span>" +
+										"</td><td width='99%'>" +
+										"<span id=spnShortReply" + iCount + " class='clsTextNavysmall' style='display:none'><b>" +
+										strReplyStatus + "</b> " + sActionInfo + strResponse + "</span>" + 
+										"<span id=spnFullReply" + iCount + " class='clsTextNavysmall'><b>" +
+										strReplyStatus + "</b> " + sActionInfo + strFullResponse + "</span>" + 
+										"</td></tr>";
+										
+						strResponsesHTML += "<tr class=" + bgClass + "><td></td><td>" + 
+										"<span class='clsTextNavysmall'><b>" + msgtext("By:") + "</b> " + 
+										strUserName + "</span></td></tr>";
+						
+						if (strAttmntHTML != "")
+						{
+							strResponsesHTML += "<tr class=" + bgClass + "><td></td><td>" + 
+										"<span class='clsTextNavysmall'>" + strAttmntHTML + "</span></td></tr>";
+						}						
+						
+						strResponsesHTML += "<tr class=" + bgClass + "><td colspan=3><img src='images/shim.gif' width='0' height='2'></td></tr>";
+
+						if (bgClass == "clsResultsEven")			
+							bgClass = "clsResultsOdd";
+						else	
+							bgClass = "clsResultsEven";
+						iCount++;	
+					</PDM_LIST>
+						
+					strResponsesHTML += "</table>";
+					docWrite(strResponsesHTML);
+				}
+				</script>
+				</span>
+				</td>
+			</tr>
+			<script>
+				if (ahdtop.CanUserPerformAction("ROLE_FORUM_ANSWER") && cfgUserAuth > 1 && "$env.NX_KT_DISALLOW_FORUMS" != "Yes")
+				{
+					docWriteln("<tr>");
+						docWriteln("<td vAlign=top>");
+							docWriteln("<span class='clsTextNavyXXsmall'>");
+								docWriteln("<a href='javascript:ReplyToQAThread()'>Reply</a>");
+							docWriteln("</span>");
+						docWriteln("</td>");
+					docWriteln("</tr>");
+				}
+			</script>
+			<tr><td>&nbsp;</td></tr>
+			<tr>
+				<td vAlign=top><span class='clsTextNavyXXsmall'>
+					<h3 class='gn_container_no_margin'>Related Tickets:</h3></span>
+				</td>
+			</tr>
+			<tr>
+				<td>
+				<div class='clsTextBlackXXsmall'>
+				<div>
+					<PDM_IF "$args.PARENT_CR" != "0" || "$args.PARENT_ISS" != "0">
+						This forum submitted from
+					</PDM_IF>
+					<a
+						<PDM_IF "$args.PARENT_CR" != "0">
+							href=javascript:ShowDetailPopup('$args.PARENT_CR')>
+							<PDM_IF "$args.PARENT_CR.type" == "I">
+								Incident # $args.PARENT_CR.ref_num
+							<PDM_ELIF "$args.PARENT_CR.type" == "P">
+								Problem # $args.PARENT_CR.ref_num
+							<PDM_ELSE>
+								Request # $args.PARENT_CR.ref_num
+							</PDM_IF>
+						<PDM_ELIF "$args.PARENT_ISS" != "0">
+							href=javascript:ShowDetailPopup('$args.PARENT_ISS')>
+							Issue # $args.PARENT_ISS.ref_num
+						</PDM_IF>
+					</a>
+				</div></div>
+				</td>
+			</tr>
+			<tr>
+				<td><span class='clsTextBlackXXsmall'>
+				<script>
+				function kdlinks(type,lKdID)
+				{
+					var sFactory;
+					var sWC1 = "";
+					if (type == 'REQ_SOLVED')
+					{
+						sFactory = "cr";
+						sWC1 = "ADDITIONAL_WHERE=(type = 'R' OR type = '' OR type IS NULL) AND (solved_by_kd.kd=" + lKdID + ")";
+					}
+					else if (type == 'ISS_SOLVED')
+					{
+						sFactory = "iss";
+						sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+					}
+					else if (type == 'IN_SOLVED')
+					{
+						sFactory = "in";
+						sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+					}
+					else if (type == 'PR_SOLVED')
+					{
+						sFactory = "pr";
+						sWC1 = "ADDITIONAL_WHERE=solved_by_kd.kd=" + lKdID;
+					}
+					else if (type == 'REQ_OPENED')
+					{
+						sFactory = 'cr';
+						sWC1 = "ADDITIONAL_WHERE=(type = 'R' OR type = '' OR type IS NULL) AND (created_from_kd.kd=" + lKdID + ")";
+					}
+					else if (type == 'ISS_OPENED')
+					{
+						sFactory = "iss";
+						sWC1 = "ADDITIONAL_WHERE=created_from_kd.kd=" + lKdID;
+					}
+					else if (type == 'IN_OPENED')
+					{
+						sFactory = "in";
+						sWC1 = "ADDITIONAL_WHERE=created_from_kd.kd=" + lKdID;
+					}
+					if (typeof ahdtop.ticket_role_menubar == "string" && ahdtop.ticket_role_menubar != "") {
+						popup_window('','SEARCH', 0, 0, '', 'FACTORY=' + sFactory, 'KEEP.IsPopUp=1', sWC1, "prop.role_menubar=" + ahdtop.ticket_role_menubar);
+					}
+					else {
+						popup_window('','SEARCH', 0, 0, '', 'FACTORY=' + sFactory, 'KEEP.IsPopUp=1', sWC1);
+					}
+				}
+				<PDM_IF "$env.NX_KT" != "Yes">
+				<PDM_ELIF "$args.opener" == "user_view">	
+				<PDM_ELIF "$prop.showObj" == "true">
+				<PDM_ELSE>
+					if (ahdtop.CanUserPerformAction("ROLE_RELATED_TICKET")) {			
+						var relatedTicketsHTML;
+						//relatedTicketsHTML = "&nbsp;This forum has been <br>&nbsp;used as a solution to <br>";
+						
+						//$prop.disable_related_tickets is passed from kt_document_view.htmpl
+						// and is used when users click the link from the email
+						if ("$prop.disable_related_tickets" == "true")
+						{
+						<PDM_IF 0>
+						We are using the REQ_SOLVED_CNT_SPL and not REQ_SOLVED_CNT and so on ...
+						as freeaccess spl has some code that assign REQ_SOLVED_CNT to REQ_SOLVED_CNT_SPL and so on ...
+						only for authorized users, so we will not cause extra database fetches when it's not needed.
+						</PDM_IF>
+							var num_req = "0";
+							var num_in = "0";
+							var num_pr = "0";
+							var num_iss = "0";
+
+							if ("$args.REQ_SOLVED_CNT_SPL" != "")
+								num_req = "$args.REQ_SOLVED_CNT_SPL"
+							if ("$args.IN_SOLVED_CNT_SPL" != "")
+								num_in = "$args.IN_SOLVED_CNT_SPL"
+							if ("$args.PR_SOLVED_CNT_SPL" != "")
+								num_pr = "$args.PR_SOLVED_CNT_SPL"
+							if ("$args.ISS_SOLVED_CNT_SPL" != "")
+								num_iss = "$args.ISS_SOLVED_CNT_SPL"
+									
+							relatedTicketsHTML = formatmsg("&nbsp;This forum has been <br>&nbsp;used as a solution to <br>, %1 requests, %2 incidents, %3 problems, and %4 issues.", num_req, num_in, num_pr, num_iss);								
+						}
+						else
+						{
+						<PDM_IF 0>
+						We are using the REQ_SOLVED_CNT_SPL and not REQ_SOLVED_CNT and so on ...
+						as freeaccess spl has some code that assign REQ_SOLVED_CNT to REQ_SOLVED_CNT_SPL and so on ...
+						only for authorized users, so we will not cause extra database fetches when it's not needed.
+						</PDM_IF>
+							
+							<PDM_IF '$args.REQ_SOLVED_CNT_SPL' != ''>
+								relatedTicketsHTML += "&nbsp;<a class='clsAnchor' href=javascript:kdlinks('REQ_SOLVED','$args.id')><span class='clsAnchor'>$args.REQ_SOLVED_CNT_SPL requests</span></a>";
+							<PDM_ELSE>
+								relatedTicketsHTML += "&nbsp;<a class='clsAnchor' href=javascript:kdlinks('REQ_SOLVED','$args.id')><span class='clsAnchor'>0 requests</span></a>";
+							</PDM_IF>
+							<PDM_IF '$args.IN_SOLVED_CNT_SPL' != ''>
+								relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('IN_SOLVED','$args.id')><span class='clsAnchor'>$args.IN_SOLVED_CNT_SPL incidents</span></a>";
+							<PDM_ELSE>
+								relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('IN_SOLVED','$args.id')><span class='clsAnchor'>0 incidents</span></a>";
+							</PDM_IF>
+							<PDM_IF '$args.PR_SOLVED_CNT_SPL' != ''>
+								relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('PR_SOLVED','$args.id')><span class='clsAnchor'>$args.PR_SOLVED_CNT_SPL problems</span></a>";
+							<PDM_ELSE>
+								relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('PR_SOLVED','$args.id')><span class='clsAnchor'>0 problems</span></a>";
+							</PDM_IF>
+							<PDM_IF '$args.ISS_SOLVED_CNT_SPL' != ''>
+								relatedTicketsHTML += " and <a class='clsAnchor' href=javascript:kdlinks('ISS_SOLVED','$args.id')><span class='clsAnchor'>$args.ISS_SOLVED_CNT_SPL issues</span></a>.<br>";
+							<PDM_ELSE>
+								relatedTicketsHTML += " and <a class='clsAnchor' href=javascript:kdlinks('ISS_SOLVED','$args.id')><span class='clsAnchor'>0 issues</span></a>.<br>";
+							</PDM_IF>
+						}
+						docWrite(relatedTicketsHTML);
+					}		
+				</PDM_IF>
+				</script>
+				</span>
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+			<tr>
+				<td vAlign=top><span class='clsTextNavyXXsmall'>
+					<h3 class='gn_container_no_margin'>More Properties:</h3></span>
+				</td>
+			</tr>
+			<script>
+			ShowProperty('Assignee:', '$args.ASSIGNEE_ID.combo_name');
+			ShowProperty('Priority:', '$args.SD_PRIORITY_ID.PRIORITY');
+			ShowProperty('Severity:', '$args.SD_SEVERITY_ID.sym');
+			ShowProperty('Impact:', '$args.SD_IMPACT_ID.sym');
+			ShowProperty('Urgency:', '$args.SD_URGENCY_ID.sym');
+			ShowProperty('Product:', '$args.SD_PRODUCT_ID.sym');
+			ShowProperty('Configuration_Item:', '$args.SD_ASSET_ID.name');
+			ShowProperty('Root_Cause:', '$args.SD_ROOTCAUSE_ID.sym');
+			<PDM_IF "$args.ACTIVE_STATE" != "300">
+				ShowProperty('Solution_Count:', '$args.SD_ACCEPTED_HITS');
+			</PDM_IF>
+			</script>
+			<tr><td>&nbsp;</td></tr>
+		</table>		
+	</td>
+	</tr>
+</table>	
+			

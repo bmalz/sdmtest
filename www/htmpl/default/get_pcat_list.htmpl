@@ -1,0 +1,107 @@
+<PDM_IF 0>
+20130920 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+function onLoadActions()
+{
+	var frm = "";
+	if ( !parent.product )
+	{
+		frm = parent.categories;
+	}
+	else { frm = parent.product; }
+	
+	if (typeof frm.SetCategoriesVariables == "function")
+    {
+		var tabAreas = [];
+		var tabCategories = [];
+		var hasCR = 0;
+		var hasIN = 0;
+
+		<PDM_IF '$args.CATEGORY' != "">
+			var ContractLength = '$args.CATEGORY'.split('.').length;
+		</PDM_IF>
+		
+		<PDM_IF "$args.NoSS" == "1">
+			<PDM_LIST PREFIX=list FACTORY=pcat WHERE="ss_sym like '$args.CATEGORY%' AND owning_contract IN ($args.UserOwningContracts) AND owning_contract.delete_flag = 0 AND delete_flag = 0" ORDER_BY="zsort ASC" ESC_STYLE="C">
+				<PDM_IF '$args.CATEGORY' != "">
+					if ("$list.ss_sym".split('.').length == ContractLength + 1) {
+						if ('$list.cr_flag' == 0 && '$list.in_flag' == 0) {
+							tabAreas.push(["$list.sym", "$list.zguidesc", '$list.zimage', "$list.ss_sym".substring('$args.CATEGORY'.length + 1, "$list.ss_sym".length), '$list.id', "$list.ss_sym", '$list.cr_flag', '$list.in_flag', '$list.zsc_url']);
+						} else {
+							if("$list.ss_sym".substring('$args.CATEGORY'.length, '$args.CATEGORY'.length + 1) == '.') {
+								tabCategories.push(["$list.sym", "$list.zguidesc", '$list.zimage', "$list.ss_sym".substring('$args.CATEGORY'.length + 1, "$list.ss_sym".length), '$list.id', "$list.ss_sym", '$list.cr_flag', '$list.in_flag', '$list.zsc_url', '$list.group.id']);
+								
+								if('$list.cr_flag' == 1)
+									hasCR = 1;
+								
+								if('$list.in_flag' == 1)
+									hasIN = 1;
+							}
+						}
+					}
+				<PDM_ELSE>
+					if ("$list.sym".split('.').length == 1) {
+						if ('$list.cr_flag' == 0 && '$list.in_flag' == 0) {
+							tabAreas.push(["$list.sym", "$list.zguidesc", '$list.zimage', "$list.ss_sym", '$list.id', "$list.ss_sym", '$list.cr_flag', '$list.in_flag', '$list.zsc_url']);
+							
+							if('$list.cr_flag' == 1)
+								hasCR = 1;
+							
+							if('$list.in_flag' == 1)
+								hasIN = 1;
+						}
+					}
+				</PDM_IF>
+			</PDM_LIST>
+		</PDM_ELSE>
+			<PDM_LIST PREFIX=list FACTORY=pcat WHERE="ss_sym like '$args.CATEGORY%' AND owning_contract IN ($args.UserOwningContracts) AND owning_contract.delete_flag = 0 AND delete_flag = 0 AND ss_include = 1" ORDER_BY="zsort ASC" ESC_STYLE="C">
+				<PDM_IF '$args.CATEGORY' != "">
+					if ("$list.ss_sym".split('.').length == ContractLength + 1) {
+						if ('$list.cr_flag' == 0 && '$list.in_flag' == 0) {
+							tabAreas.push(["$list.sym", "$list.zguidesc", '$list.zimage', "$list.ss_sym".substring('$args.CATEGORY'.length + 1, "$list.ss_sym".length), '$list.id', "$list.ss_sym", '$list.cr_flag', '$list.in_flag', '$list.zsc_url']);
+						} else {
+							if("$list.ss_sym".substring('$args.CATEGORY'.length, '$args.CATEGORY'.length + 1) == '.') {
+								tabCategories.push(["$list.sym", "$list.zguidesc", '$list.zimage', "$list.ss_sym".substring('$args.CATEGORY'.length + 1, "$list.ss_sym".length), '$list.id', "$list.ss_sym", '$list.cr_flag', '$list.in_flag', '$list.zsc_url', '$list.group.id']);
+
+								if('$list.cr_flag' == 1)
+									hasCR = 1;
+								
+								if('$list.in_flag' == 1)
+									hasIN = 1;
+							}
+						}
+					}
+				<PDM_ELSE>
+					if ("$list.sym".split('.').length == 1) {
+						if ('$list.cr_flag' == 0 && '$list.in_flag' == 0) {
+							tabAreas.push(["$list.sym", "$list.zguidesc", '$list.zimage', "$list.ss_sym", '$list.id', "$list.ss_sym", '$list.cr_flag', '$list.in_flag', '$list.zsc_url']);
+							
+							if('$list.cr_flag' == 1)
+								hasCR = 1;
+							
+							if('$list.in_flag' == 1)
+								hasIN = 1;
+						}
+					}
+				</PDM_IF>
+			</PDM_LIST>
+		</PDM_IF>
+		
+		frm.SetCategoriesVariables(tabAreas, tabCategories, hasCR, hasIN);
+    }
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="onLoadActions()">
+hidden frame, nothing to do here.
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

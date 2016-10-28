@@ -1,0 +1,55 @@
+// 20130917 mch @ e-xim
+
+cr::HR_set_default_status(...) {
+	string method;
+	method = "cr::HR_set_default_status";
+	logf(TRACE,"%s: Started for %s", method, ref_num);
+	//string status;
+	//string category;
+	int i, j;
+	for(i = 0; i < argc; i++)
+		logf(TRACE, "arg[%d]: %s", i, (string)argv[i]);
+	//status = argv[6];
+	//category = argv[9];
+	logf(TRACE,"%s: This category: %s", method, this.category.sym);
+	if(substr(this.category.sym, 0, 3) == "HR.") {
+		logf(TRACE,"%s: Category: %s", method, category.sym);
+		/*
+		object gl;
+		send_wait(0, top_object(), "get_co_group");
+			
+		gl = msg[0];
+		for(j = 0; j < 5; j++)
+			{
+				send_wait(1, gl, "checkout", cr_dob);
+				if ( msg_error() ) {
+					logf(TRACE, "%s: Checking out cr failed! will retry in %i s", method, j);
+					sleep(j);
+				}
+				else {
+					j=6;
+				}
+			}
+		if ( msg_error() ) {
+		logf(ERROR, "%s: Error on checkout cr: %s", method, (string)msg[0]);
+		return;
+		}
+		send_wait(1, cr_dob, "call_attr", "status", "set_val", "HR_OP", "SURE_SET");
+		if ( msg_error() ) {
+			logf(ERROR, "%s: Error on change status: %s", method, msg[0]);
+			return;
+		}
+		logf(TRACE, "%s: Status changed - no error", method);
+
+		send_wait(0, gl, "checkin");
+		if( msg_error() ) {
+			logf(ERROR, "%s: Error on save: %s", method, (string)msg[0]);
+
+			send_wait(0, gl, "uncheck");
+			return;
+		}
+		*/
+		this.status="HR_OP";
+		logf(TRACE, "%s: Saved, Finished", method);
+	}
+}

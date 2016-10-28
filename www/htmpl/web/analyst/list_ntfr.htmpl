@@ -1,0 +1,194 @@
+<PDM_IF 0>
+list_ntfr.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Notification Rules
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Wyszukiwanie reguł notyfikacji";
+var hdrTitleList = "Lista reguł notyfikacji";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("ntfrsum.rpt", "ntfrdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+<PDM_IF "$args.KEEP.forAtyTabList" == "1">
+    var cfgCanCopy = false;
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.ATY_ID" != "0" && "$args.KEEP.AllowLrelUpdt" == "1" && $ACCESS.FAC_aty \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    <PDM_IF "$args.KEEP.code" != "NF" >
+    cfgExtraButton = new Array("Update_Notification_Rules", "UpdateNotificationRules()", enableExtraBtn);
+    </PDM_IF>
+    function UpdateNotificationRules() {
+        parent.do_update_ntfr_lrel("$args.QBE.EQ.ntfr_macrolist.macro", "$args.KEEP.obj_type");
+    }
+</PDM_IF>
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Notification Rules">
+<script type="text/javascript">
+<PDM_IF "$args.KEEP.forAtyTabList" == "1">
+<PDM_MACRO name=sfStart create=false factory=ntfr>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=ntfr>
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<input type="hidden" name="HTMPL" value="update_lrel_ntfr.htmpl">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forAtyTabList" == "1">
+    document.write('<input type="hidden" name="QBE.EQ.ntfr_macrolist.macro" value="$args.QBE.EQ.ntfr_macrolist.macro">');
+</PDM_IF>
+function display_obj_type() {
+   
+<PDM_IF "$args.KEEP.obj_type" == "cr">
+      return "Request/Incident/Problem";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "chg">
+      return "Change Order";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "iss">
+      return "Issue";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "KD">
+      return "Knowledge Document";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "O_COMMENTS">
+      return "Knowledge Document Comment";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "KT_REPORT_CARD">
+      return "Knowledge Report Card";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "sa_notif">
+      return "Assistance Session";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "mgs">
+      return "Managed Survey";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "cnt">
+      return "Contact";
+   
+<PDM_ELIF "$args.KEEP.obj_type" == "nr">
+      return "Configuration Item";
+   
+</PDM_IF>
+}
+
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=60>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.ForATY" == "1" || "$args.KEEP.forAtyTabList" == "1">
+<PDM_MACRO name=sfLookup hdr="Warunek" attr=condition extraurl="ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND') AND (ob_type='$args.KEEP.obj_type') AND delete_flag=0" factory=macro>
+<PDM_MACRO name=sfTextbox hdr="Typ obiektu" attr="obj_type" disabled="yes" display_value="javascript:display_obj_type();" qbe_condition="EQ" value="$args.KEEP.obj_type">
+<PDM_ELSE>
+<PDM_MACRO name=sfLookup hdr="Warunek" attr=condition extraurl="ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND') AND (ob_type='cr' OR ob_type='chg' OR ob_type='iss' OR ob_type='cnt' OR ob_type='nr') AND delete_flag=0+KEEP.RESTRICT_FROM_NTFR=1" factory=macro>
+		searchFilterDropdown("Object Type","obj_type",""
+		,"Change Order","chg"
+		,"Issue","iss"
+		,"Knowledge Document","KD"
+		,"Knowledge Document Comment","O_COMMENTS"
+		,"Knowledge Report Card","KT_REPORT_CARD"
+		,"Assistance Session","sa_notif"
+		,"Managed Survey","mgs"
+		,"Request/Incident/Problem","cr"
+        ,"Contact","cnt"
+        ,"Configuration Item","nr"
+		,1);			
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script type="text/javascript">
+var msgFoundNone = "No Notification Rules found";
+var msgFound1 = "1 Notification Rule found";
+var msgFound = "%1 Notification Rules found";
+var msgFoundMore = "%1 Notification Rules found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Notification Rule";
+function for_itil(value)
+{
+	if(listobjtypecode == "cr")
+	value="Request/Incident/Problem";  
+rs.data(value);  
+}
+
+// Make condition a link
+function display_cond(value)
+{
+		var val_str = "";
+		if (cond_persid != "" && cond_persid.length != 0 )
+		{
+      val_str = "<a class=record href=\"javascript:showDetailWithPersid('" + 
+		  cond_persid + "')\">" + value + "&nbsp</a>";
+		}
+      rs.data(val_str);
+}
+function display_YN_value(value)
+{
+  if ( value == "1" )
+     value = "Yes";
+  else 
+     value = "No";
+  rs.data(value);     
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var cond_persid = '@{list.condition.persistent_id}';">
+<PDM_MACRO name=lsWrite text="var listobjtypecode = '@{list.obj_type:}';">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_IF "$args.KEEP.forAtyTabList" != "1">
+<PDM_MACRO name=lsCol hdr="Typ obiektu" attr=obj_type fmtfunc=for_itil sort=no>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_IF "$args.KEEP.forAtyTabList" == "1">
+<PDM_IF "$args.KEEP.obj_type" == "cr">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="cr_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "chg">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="chg_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "iss">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="iss_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "KD">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="kd_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "O_COMMENTS">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="kd_comment_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "KT_REPORT_CARD">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="krc_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "sa_notif">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="sa_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "mgs">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="mgs_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "cnt">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="cnt_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_ELIF "$args.KEEP.obj_type" == "nr">
+<PDM_MACRO name=lsCol hdr="Auto powiadomienie" attr="ci_notify_info.notify_flag" exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Warunek" attr=condition export=no fmtfunc=display_cond sort=no>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_IF 0>
+"@(#)$Id: list_ntfr.htmpl ASPEN.5 2012/03/15 19:35:03 maide01 Exp $";
+</PDM_IF>
+<PDM_WSP>

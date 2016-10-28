@@ -1,0 +1,95 @@
+<PDM_IF 0>
+list_mailbox_rule.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Mailbox Rules.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Mailbox Rules Search";
+var hdrTitleList = "Mailbox Rules";
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_IF $UserAuth \> 1>
+<table>
+	<th width=100% align=right>
+	<td width=100% align=right>
+	
+<PDM_IF $UserAuth \> 1>
+		<script>
+		// manually add our create button as we're displayed within a deferred tab
+		var cfgExtraButton; 
+		if((parent.name != "undefined" && parent.name == "cai_main")|| (typeof ahdtop == "object" && ahdtop != null && ahdtop.cstReducePopups &&  parent.name != "undefined" && parent.name == "frmAdmin")){
+					cfgExtraButton=new Array("Create_New", "add_mailbox_rule(parent.argPersistentID,parent.argName,parent.argID)");
+     			if ( parent.argID ==0)
+      		{
+     			ImgBtnDisableButton("btnExtra");
+    			}
+		}
+		</script>
+	
+</PDM_IF>
+	</td></table>
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="mailbox_rule">
+<SCRIPT LANGUAGE="JavaScript">
+
+if((parent.name != "undefined" && parent.name == "cai_main")|| (typeof ahdtop == "object" && ahdtop != null && ahdtop.cstReducePopups &&  parent.name != "undefined" && parent.name == "frmAdmin")){
+<PDM_MACRO name=sfStart button=false factory=mailbox_rule>
+}
+else {
+<PDM_MACRO name=sfStart factory=mailbox_rule>	
+}
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Skrzynka e-mail" attr="mailbox">
+<PDM_MACRO name=sfDropdown hdr="Filtrq" attr="filter_type">
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Akcja" attr="action_operation">
+<PDM_MACRO name=sfDropdown hdr="Obiekt akcji" attr="action_object">
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Mailbox Rules found";
+var msgFound1 = "1 Mailbox Rule found";
+var msgFound = "%1 Mailbox Rules found";
+var msgFoundMore = "%1 Mailbox Rules found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Mailbox rule";
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsWrite both=yes text="if (!(typeof parent._dtl == \"object\" && typeof parent._dtl.edit != \"undefined\" && !parent._dtl.edit)){">
+<PDM_MACRO name=lsCol hdr="Skrzynka e-mail" attr=mailbox sort="mailbox ASC, sequence ASC">
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsCol hdr="Filtrq" attr=filter_type>
+<PDM_MACRO name=lsCol hdr="Filter String" attr=filter_string>
+<PDM_MACRO name=lsCol hdr="Akcja" attr=action_operation>
+<PDM_MACRO name=lsCol hdr="Obiekt akcji" attr=action_object>
+<PDM_MACRO name=lsCol hdr="Odpowiedź" attr=reply_method>
+<PDM_MACRO name=lsEnd>	
+	
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_mailbox_rule.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

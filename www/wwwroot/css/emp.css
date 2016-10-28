@@ -1,0 +1,244 @@
+/***************************************************************************
+ *         Copyright (C) 1999 Computer Associates International, Inc
+ * as an unpublished work. This notice does not imply unrestricted or public
+ * access to these materials which are a trade secret of Computer Associates
+ * International or its subsidiaries or affiliates (together referred to as
+ * CA), and which may not be reproduced, used, sold or
+ * transferred to any third party without CA's prior written consent.
+ *
+ *                         All Rights Reserved.
+ *
+ *                       RESTRICTED RIGHTS LEGEND
+ * Use, duplication, or disclosure by the Government is subject to
+ * restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+ * Technical Data and Computer Software clause at DFARS 252.227-7013.
+ ***************************************************************************
+ * Module:  emp.css
+ * Created: 08/23/02
+ ***************************************************************************
+ * Description:
+ *
+ * This file contains styles used only by the employee interface
+ *
+ ***************************************************************************
+ * emp.css ASPEN.4 2011/02/03 15:35:21
+ */
+
+/***************************************************************************
+ * These are redefinitions to CA UI standard styles (defined in castyles.css)
+ * for ServicePlus
+ ***************************************************************************/
+.page_section_header_center
+{
+	BACKGROUND-COLOR: #DD3126;
+	BACKGROUND-IMAGE: url("");
+}
+
+.page_section_header_left
+{
+	BACKGROUND-COLOR: #DD3126;
+	BACKGROUND-IMAGE: url("");
+}
+
+.page_section_header_right
+{
+	BACKGROUND-COLOR: #DD3126;
+	BACKGROUND-IMAGE: url("");
+}
+
+.page_section_header_text
+{
+	COLOR: #ffffff;
+	FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif;
+	FONT-SIZE: 0.8em;
+	FONT-WEIGHT: bold;
+	PADDING-BOTTOM: 2px;
+	PADDING-LEFT: 6px;
+	PADDING-RIGHT: 2px;
+	PADDING-TOP: 2px;
+	TEXT-ALIGN: left;
+	VERTICAL-ALIGN: middle;
+    MARGIN: 0px;
+}
+
+.portlet_title
+{
+	COLOR: #333333;
+	FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif;
+	FONT-SIZE: 85%;
+	FONT-WEIGHT: bold;
+	PADDING-LEFT: 5px;
+	TEXT-ALIGN: left;
+	VERTICAL-ALIGN: middle;
+}
+
+/***************************************************************************
+ * End of CA UI standard redefinitions
+ ***************************************************************************/
+a,a:link,a:active,a:visited,a:hover
+{
+	FONT-FAMILY: verdana, arial, helvetica;
+	FONT-WEIGHT: bold;
+	TEXT-DECORATION: none;
+}
+
+a.hfocus:link,a.hfocus:active,a.hfocus:visited,a.hfocus:hover
+{
+	FONT-FAMILY: verdana, arial, helvetica;
+	FONT-WEIGHT: bold;
+	TEXT-DECORATION: none;
+	COLOR: #FFFFFF;
+}
+
+a.emp,a.emp_large,a.emp:link,a.emp_large:link,a.emp:visited,a.emp_large:visited
+{
+	COLOR: #DD3126;
+	FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif;
+	FONT-SIZE: 80%;
+	FONT-WEIGHT: bold;
+	TEXT-DECORATION: none;
+}
+
+a.emp:active,a.emp:hover
+{
+	COLOR: #DD3126;
+	text-decoration:underline;
+}
+
+a.emp_large,a.emp_large:link,a.emp_large:visited
+{
+	FONT-SIZE: medium;
+}
+
+a.emp_menu,a.emp_menu:link,a.emp_menu:visited,span.emp_menu
+{
+	COLOR: #ffffff;
+    FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif;
+	FONT-SIZE: 0.8em;
+	FONT-WEIGHT: bold;
+	TEXT-DECORATION: none;
+}
+
+a.emp_menu:active,a.emp_menu:hover
+{
+	COLOR: #ffffff;
+    FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif;
+	FONT-SIZE: 0.8em;
+	FONT-WEIGHT: bold;
+	TEXT-DECORATION: none;
+}
+
+a.results0,a.results0:link,a.results0:visited,
+a.results1,a.results1:link,a.results1:visited
+{
+	COLOR: #DD3126;
+	FONT-WEIGHT: bold;
+	text-decoration:none;
+}
+
+a.results0:hover,a.results0:active,
+a.results1:hover,a.results1:active
+{
+	COLOR: #006682;
+}
+
+tr.results, tr.results0, tr.results1
+{
+  font-size: 0.8em;
+}
+
+body,td,span.emp
+{
+	FONT-FAMILY: verdana, arial, helvetica;
+}
+
+body.emp
+{
+	BACKGROUND-COLOR: #FFFFFF;
+	FONT: 1.0em Verdana, Arial, Helvetica, sans-serif;
+}
+
+form.emp
+{
+	MARGIN-BOTTOM: 5px;
+	MARGIN-LEFT: 0px;
+	MARGIN-RIGHT: 0px;
+	MARGIN-TOP: 5px;
+}
+
+form.hidden
+{
+	DISPLAY: none;
+}
+
+span.emp
+{
+	FONT-WEIGHT: bold;
+}
+
+table.emp
+{
+	BORDER-COLOR: #adb1bc;
+	BORDER-STYLE: solid;
+	BORDER-WIDTH: 1px;
+}
+
+td.emp_dark
+{
+	BACKGROUND-COLOR: #006682;
+	COLOR: #ffffff;
+}
+
+td.emp_data,span.emp
+{
+	COLOR: #006682;
+}
+
+td.emp_light
+{
+	BACKGROUND-COLOR: #00a1cf;
+	COLOR: #ffffff;
+}
+
+td.emp_white
+{
+	BACKGROUND-COLOR: #ffffff;
+}
+
+td.result
+{
+	COLOR: green;
+	FONT-SIZE: 0.8em;
+	FONT-WEIGHT: bold;
+}
+
+td.section
+{
+	BORDER-COLOR: #adb1bc;
+	BORDER-STYLE: solid;
+	BORDER-WIDTH: 1px;
+}
+
+th.emp
+{
+	COLOR: #006682;
+	FONT-SIZE: medium;
+	TEXT-ALIGN: left;
+}
+
+td.hdrLeft
+{
+    background-image: url(/CAisd/img/table_header_left.png);
+}
+
+td.hdrCenter
+{
+    background-image: url(/CAisd/img/table_header_center.png); 
+    background-color: #DD3126;
+}
+
+td.hdrRight
+{ 
+    background-image: url(/CAisd/img/table_header_right.png);
+}
+

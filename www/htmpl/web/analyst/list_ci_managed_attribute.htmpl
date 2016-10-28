@@ -1,0 +1,76 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show a list of the CI attributes managed by CACF
+//
+// History:
+//    10/05/2011 Initial Version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Managed Attribute Search";
+var hdrTitleList = "Managed Attribute List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("ci_managed_attributesum.rpt", "zmanagedattribtesdtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUA<PDM_MACRO name=dtlStartRow>
+GE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="ci_managed_attribute">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa atrybutu" attr="attribute_name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Etykieta atrybutu" attr="attribute_label" size=20>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="description" size=20>
+<PDM_MACRO name=sfDropdown hdr="Początkowy status weryfikacji" attr="initial_status">
+<PDM_MACRO name=sfDropdown hdr="Aktywne?" attr="delete_flag">
+<PDM_IF "ci_managed_attribute" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Managed Attributes found";
+  var msgFound1 = "1 Managed Attribute found";
+  var msgFound = "%1 Managed Attribute found";
+  var msgFoundMore = "%1 Managed Attributes found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Managed Attribute";
+  
+<PDM_MACRO name=lsStart>
+ 
+  ImgBtnHideButton("btnEdit");
+
+<PDM_MACRO name=lsCol hdr="Nazwa atrybutu" attr="attribute_name" link="yes">
+<PDM_MACRO name=lsCol hdr="Etykieta atrybutu" attr="attribute_label">
+<PDM_MACRO name=lsCol hdr="Początkowy status weryfikacji" attr="initial_status">
+<PDM_MACRO name=lsCol hdr="Opis" attr="description">
+<PDM_MACRO name=lsCol hdr="Aktywne?" attr="delete_flag">
+<PDM_MACRO name=lsEnd>
+  </script>	
+
+</PDM_IF>
+
+
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

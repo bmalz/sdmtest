@@ -1,0 +1,25 @@
+<PDM_IF 0>
+20130823 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl"><HEAD>
+</HEAD>
+<BODY>
+<SCRIPT>
+	if (typeof GetOwningContractId == "function")
+	{
+	    GetOwningContractId("$args.owning_contract.id");
+	}
+
+	if (typeof GetFZId == "function") 
+	{
+		GetFZId('$args.owning_contract.zfz.name');
+	}
+
+	if (typeof GetChgFlag == "function")
+	{
+		GetChgFlag("$args.zchg_flag");
+	}
+</SCRIPT>
+hidden frame, nothing to do here.
+</BODY>
+</HTML>

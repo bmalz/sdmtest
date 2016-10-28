@@ -1,0 +1,74 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+	var hdrTitle = "Associated Special Handling Search";
+	var hdrTitleList = "Associated Special Handling List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+	var autoRefreshWindows = new Object();
+	cfgCanView = false;
+	cfgCanEdit = false;
+	cfgCanDelete = !("$args.KEEP.edit" == "edit");
+	if(cfgCanDelete) {
+	    cfgExtraButton = new Array("Update Special Handling Membership", "UpdateSpecialHandling()"); // E.G. (for managing the "special_handling" to "cnt" LREL table, "contact_handling")
+	}
+	function UpdateSpecialHandling() {
+        update_with_lrel_style("cnt", "cnt:$args.KEEP.code", "special_handling", "cnthandling_list", "Special Handling", "$args.combo_name Special Handlings", "", "KEEP.forCntToSh=1");
+	}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory="contact_handling">
+	document.write('<INPUT TYPE=hidden NAME="QBE.EQ.contact.id" VALUE="$args.QBE.EQ.contact.id">');
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.special_handling.delete_flag" VALUE="$args.QBE.EQ.special_handling.delete_flag">');
+    document.write('<INPUT TYPE=hidden NAME="KEEP.code" VALUE="$args.KEEP.code">');
+    document.write('<INPUT TYPE=hidden NAME="KEEP.edit" VALUE="$args.KEEP.edit">');
+    
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Kontakt" attr="contact">
+<PDM_MACRO name=sfLookup hdr="Wyjątkowe traktowanie" attr="special_handling">
+<PDM_IF "contact_handling" : "^z.*$">
+	document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+	
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+	var msgFoundNone = "No Contact Handlings found";
+	var msgFound1 = "1 Contact Handling found";
+	var msgFound = "%1 Contact Handlings found";
+	var msgFoundMore = "%1 Contact Handlings found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Contact Handling";
+	
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="special_handling.sym">
+<PDM_MACRO name=lsCol hdr="Ikona" attr="special_handling.alert_icon_url">
+<PDM_MACRO name=lsCol hdr="Eskalacja" attr="special_handling.escalate_urgency">
+<PDM_MACRO name=lsCol hdr="Auto wyświetlanie uwag" attr="special_handling.autodisplay_notes">
+<PDM_MACRO name=lsCol hdr="Tekst ostzeżenia" attr="special_handling.alert_text">
+<PDM_MACRO name=lsCol hdr="Opis" attr="special_handling.description">
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,92 @@
+<PDM_IF 0>
+list_sa_tool_join.htmpl
+WHEN PRESENTED:
+    When we need to display a list of SA Tools (sa_tool factory)
+INTENT:
+    Display the list of SA Tools
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Tool Search";
+			var hdrTitleList = "Tool List";
+			var cfgCanEdit = true;
+			
+function display_tool_detail_by_name(tool_name) {
+	var features="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",gobutton=no"+
+		",status=no";
+
+	var str_url =  cfgCgi +
+			"?SID=" + cfgSID + 
+			"+FID=" + cfgFID +
+			"+OP=SEARCH" +
+			"+FACTORY=sa_tool" +
+			"+SKIPLIST=1" +
+			"+QBE.IN.toolName="+ nx_escape(tool_name) +
+			"+KEEP.IsPopUp=1+KEEP.DISPLAY_TAB_OBJ=1";
+						
+	preparePopup(str_url, "Tool", features, width=(popupWidth(MEDIUM_POPUP)), height=popupHeight(MEDIUM_POPUP), '');
+
+	return;
+}
+
+
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+				
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_IF $UserAuth \> 1>
+			<table>
+				<th width=100% align=right>
+				<td width=100% align=right>
+				<PDM_IF $UserAuth \> 1>
+					<script>
+					// manually add our create button as we're displayed within a deferred tab
+					ImgBtnRow();
+					ImgBtnCreate("btnAddQ", "Update_Tools", "updateTool()", true, 0);
+					ImgBtnEndRow();
+					</script>
+				</PDM_IF>
+				</td></table>
+		</PDM_IF>
+
+	<pdm_form id = "frmQ">
+	</pdm_form>
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		
+		
+		
+		<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+  				var msgFoundNone = "No tools found";
+ 	 			var msgFound1 = "1 tool found";
+  				var msgFound = "%1 tools found";
+  				var msgFoundMore = "%1 tools found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired tool";
+  				<pdm_macro name=lsStart>
+  					
+  					<pdm_macro name=lsCol hdr="Nazwa" attr="toolID.toolName"  exportfmt=ShowLink link=yes>
+  					
+  				<pdm_macro name=lsEnd>
+  			
+  			
+rs.setLinkOnclick(function(){display_tool_detail_by_name(self.rs.records[self.activeRow].linktext)});
+
+   ctxMenu = void(0);
+  			</script>
+		</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>

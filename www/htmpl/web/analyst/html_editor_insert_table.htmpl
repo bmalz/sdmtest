@@ -1,0 +1,150 @@
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+var hdrTitle = "Insert Table";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/editor_popup.js"></script>
+
+<script type="text/javascript">
+
+function Init() {
+  document.getElementById("f_rows").focus();
+};
+
+function onOK() {
+  var required = {
+    "f_rows": "You must enter a number of rows",
+    "f_cols": "You must enter a number of columns"
+  };
+  for (var i in required) {
+    var el = document.getElementById(i);
+    if (!el.value) {
+      alert(required[i]);
+      el.focus();
+      return false;
+    }
+  }
+  var fields = ["f_rows", "f_cols", "f_width", "f_unit",
+                "f_align", "f_border", "f_spacing", "f_padding"];
+  var param = new Object();
+  for (var i in fields) {
+    var id = fields[i];
+    var el = document.getElementById(id);
+    param[id] = el.value;
+  }
+  __dlg_close(param);
+  return false;
+};
+
+function onCancel() {
+  __dlg_close(null);
+  return false;
+};
+
+</script>
+</head>
+
+<body onload="Init()">
+<PDM_INCLUDE FILE="std_body.htmpl">
+<TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>
+<TR>
+<TD align=left width='99%'>Insert Table</TD>
+<TD align=right width='1%'>
+	<SCRIPT>
+		ImgBtnRow();
+		ImgBtnCreate("bnOk", "OK", "onOK()", "defer", 120);
+		ImgBtnCreate("bnCancel","Cancel[n]","onCancel();",true,get_local_int(1));
+		ImgBtnEndRow();
+	</SCRIPT>	  
+</TD>
+</TR>
+</TABLE>
+<form action="" method="get" id=form1 name=form1>
+<table cellspacing=4px; style="margin:3px">
+  <tbody>
+  <tr>
+	<th align=left class=labeltext>Rows:</th>
+    <td><input type="text" name="rows" id="f_rows" size="5" title="Number of rows" value="2" /></td>
+  </tr>
+  <tr>
+	<th align=left class=labeltext>Cols:</th>
+    <td><input type="text" name="cols" id="f_cols" size="5" title="Number of columns" value="4" /></td>
+    <td></td>
+    <th align=right class=labeltext>Width:</th>
+    <td><input type="text" name="width" id="f_width" size="5" title="Width of the table" value="100" /></td>
+    <td><select size="1" name="unit" id="f_unit" title="Width unit">
+      <option value="%" selected="1"  >Percent</option>
+      <option value="px"              >Pixels</option>
+      <option value="em"              >Em</option>
+    </select></td>
+  </tr>
+  </tbody>
+</table>
+
+<p>
+<table width="100%" style="padding: 0px; margin: 0px">
+  <tbody>
+  <tr>
+  <td>
+<fieldset style="padding: 0px; margin: 0px">
+<legend class=labeltext>Layout</legend>
+
+<table style="padding: 0px; margin: 0px">
+  <tbody>
+  <tr>
+	<th align=left class=labeltext>Alignment:</th>
+	<td>
+		<select size="1" name="align" id="f_align"
+		title="Positioning of this image">
+		<option value="" selected="1"                >Not set</option>
+		<option value="left"                         >Left</option>
+		<option value="right"                        >Right</option>
+		<option value="texttop"                      >Texttop</option>
+		<option value="absmiddle"                    >Absmiddle</option>
+		<option value="baseline"                     >Baseline</option>
+		<option value="absbottom"                    >Absbottom</option>
+		<option value="bottom"                       >Bottom</option>
+		<option value="middle"                       >Middle</option>
+		<option value="top"                          >Top</option>
+		</select>
+    </td>
+  </tr>
+	<th align=left class=labeltext>Border&nbsp;thickness:</th>
+	<td>
+		<input type="text" name="border" id="f_border" size="5" value="1" title="Leave empty for no border" />
+    </td>
+  </tr>  
+  </tbody>
+</table>
+</fieldset>
+</td>
+<td>
+<fieldset style="padding: 0px; margin: 0px">
+<legend class=labeltext>Spacing</legend>
+
+<table style="padding: 0px; margin: 0px">
+  <tbody>
+  <tr>
+	<th align=left class=labeltext>Cell&nbsp;spacing:</th>
+	<td>
+		<input type="text" name="spacing" id="f_spacing" size="5" value="1" title="Space between adjacent cells" />
+    </td>
+  </tr>
+	<th align=left class=labeltext>Cell&nbsp;padding:</th>
+	<td>
+		<input type="text" name="border" id="f_padding" size="5" value="1" title="Space between content and border in cell" />
+    </td>
+  </tr>  
+  </tbody>
+</table>
+</fieldset>
+</td>
+</tr>
+</tbody>
+</table>
+</form>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

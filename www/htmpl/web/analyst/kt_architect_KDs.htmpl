@@ -1,0 +1,23 @@
+<PDM_IF 0>
+$Id: kt_architect_KDs.htmpl,v 1.2 2006/11/08 00:53:01 olsjo01 Exp $
+kt_architect_KDs.htmpl
+WHEN PRESENTED:
+	When we need to display a placeholder for the knowledge document list
+</PDM_IF>
+<html lang="en"><HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+	var hdrTitle = "Architect";
+</SCRIPT>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script language=javascript>
+</script>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

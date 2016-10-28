@@ -1,0 +1,71 @@
+<PDM_IF 0>
+detail_ctimer.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Timer Setup
+INTENT:
+    Display the detail info for Timer Setup
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+	var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Timer Setup Detail"</PDM_FMT>;
+	var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Timer Setup"</PDM_FMT>;
+	var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Timer Setup $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+</SCRIPT>
+
+</HEAD>
+
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Timer Setup" key="$args.id">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=ctimer>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Czas trwania progu (hh:mm:ss)" attr=threshold>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>          
+detailDropdown("Color","color","ctimer",1,20, 
+false,"","$args.color",
+"no","$args.color","$args.color",
+"","","no","","","",
+"Cyan","Cyan","Green","Green","Magenta","Magenta","Orange","Orange","Red","Red","Yellow","Yellow");
+
+<PDM_MACRO name=dtlCheckbox hdr="Biiip?" attr=beep off=No on=Yes>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Przypomnienie" attr=text colspan=3 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_ctimer.htmpl ASPEN.2 2012/06/12 14:46:17 debbi01 Exp $;
+</PDM_IF>
+<PDM_WSP>

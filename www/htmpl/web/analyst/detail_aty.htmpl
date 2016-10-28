@@ -1,0 +1,843 @@
+<PDM_IF 0>
+detail_aty.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Activity Notification
+INTENT:
+    Display the detail info for the Activity Notification
+</PDM_IF>
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły Activity Notification $args.sym"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowanie Update Activity $args.sym"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie Activity Notification $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" type="text/css" href="$CAisd/css/KT_Styles.css"> 
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/nr_ops.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+cfgMachineName = "$SESSION.MachineName";
+argPersistentID = "$args.persistent_id";
+cfgCAISD = "$CAisd";
+cfgCgi = "$cgi";
+cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+cfgDateFormat = "$date_format";
+cfgAccessNotify = "$ACCESS.notify";
+argID = "$args.id";
+cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+argSearchSqlClause = "id = $args.id";
+var isKTInst = "$env.NX_KT";   //LS is KT installed?
+var isEdit = 0;
+
+var tenantFldNum;
+var groupFldNum;
+var single_tenant_fld;
+var tenant_group_fld;
+
+
+<PDM_IF 0>
+// Do not show Copy menu for Manual Notify activity notification
+</PDM_IF>
+<PDM_IF "$args.code" != "NF">
+function copy_from_parent()
+{}
+</PDM_IF>
+function GetSkeletonId(){
+	if ("$args.KEEP.obj_type" == "Knowledge Document Comments")
+		return '-0$args.kd_comment_notify_info.id';		
+	else
+		return '-0$args.kd_notify_info.id';
+}
+//This returns the mode of the current detail_aty
+//so that it can be used for the Email tab
+function getEdit()
+{
+	if (propFormName3 == "edit")
+	{
+		isEdit = 1;
+	}
+	return isEdit;
+}
+function check_and_save(call_made_from_btn)
+{
+	var cbx_cr_flag,cbx_chg_flag,cbx_iss_flag,cbx_mgs_flag,cbx_kd_flag, cbx_kd_comment_flag;
+	var cbx_krc_flag, cbx_sa_notif_flag, cbx_cnt_flag, cbx_ci_flag, cbx_ztask_flag;
+
+	if (window.document.main_form.elements["CBX.cr_flag"].checked)
+	cbx_cr_flag=1;
+	else
+	    cbx_cr_flag=0;
+
+	if (window.document.main_form.elements["CBX.chg_flag"].checked)
+	cbx_chg_flag=1;
+	else
+	cbx_chg_flag=0;
+
+	if (window.document.main_form.elements["CBX.iss_flag"].checked)
+	cbx_iss_flag=1;
+	else
+	cbx_iss_flag=0;
+
+	if (window.document.main_form.elements["CBX.mgs_flag"].checked)
+	cbx_mgs_flag=1;
+	else
+	cbx_mgs_flag=0;
+
+	if (isKTInst == "Yes") { 
+		if (window.document.main_form.elements["CBX.kd_flag"].checked)
+			cbx_kd_flag=1;
+		else 
+			cbx_kd_flag=0;
+
+		if (window.document.main_form.elements["CBX.kd_comment_flag"].checked)
+			cbx_kd_comment_flag=1;
+		else 
+			cbx_kd_comment_flag=0;
+
+		if (window.document.main_form.elements["CBX.krc_flag"].checked)
+			cbx_krc_flag=1;
+		else 
+			cbx_krc_flag=0;
+
+		if (window.document.main_form.elements["CBX.sa_notif_flag"].checked)
+			cbx_sa_notif_flag=1;
+		else 
+			cbx_sa_notif_flag=0;
+	}
+	else 	{
+		//No KT but save the value to avoid nulls
+		cbx_kd_flag=0;
+		cbx_kd_comment_flag = 0;
+		cbx_krc_flag=0;
+		cbx_sa_notif_flag=0;
+	}
+
+    if (window.document.main_form.elements["CBX.cnt_flag"].checked)
+	cbx_cnt_flag=1;
+	else
+	cbx_cnt_flag=0;
+
+   if (window.document.main_form.elements["CBX.ztask_flag"].checked)
+	cbx_ztask_flag=1;
+	else
+	cbx_ztask_flag=0;
+
+    if (window.document.main_form.elements["CBX.ci_flag"].checked)
+	cbx_ci_flag=1;
+	else
+	cbx_ci_flag=0;
+
+	if (call_made_from_btn=="Yes")
+	{
+		if (cbx_cr_flag == 0 && cbx_chg_flag == 0 && cbx_iss_flag == 0 && cbx_mgs_flag == 0 && 
+			cbx_kd_flag == 0 && cbx_kd_comment_flag == 0 && 
+			cbx_krc_flag == 0 && cbx_sa_notif_flag == 0 && cbx_cnt_flag == 0 && cbx_ci_flag == 0 && cbx_ztask_flag == 0)
+		{
+			show_response(msgtext("You_must_check_atleast_one_box"));
+		}
+		else
+		{
+			if (cbx_cr_flag == 0)
+			{
+				document.main_form.elements["SET.cr_flag"].value = 0;
+			}
+			if (cbx_chg_flag == 0)
+			{
+				document.main_form.elements["SET.chg_flag"].value = 0;
+			}
+			if (cbx_iss_flag == 0)
+			{
+				document.main_form.elements["SET.iss_flag"].value = 0;
+			}
+			if (cbx_mgs_flag == 0)
+			{
+				document.main_form.elements["SET.mgs_flag"].value = 0;
+			}
+			if (cbx_kd_flag == 0)
+			{
+				document.main_form.elements["SET.kd_flag"].value = 0;
+			}
+			if (cbx_kd_comment_flag == 0)
+			{
+				document.main_form.elements["SET.kd_comment_flag"].value = 0;
+			}
+			if (cbx_krc_flag == 0)
+			{
+				document.main_form.elements["SET.krc_flag"].value = 0;
+			}
+			if (cbx_sa_notif_flag == 0)
+			{
+				document.main_form.elements["SET.sa_notif_flag"].value = 0;
+			}
+            if (cbx_cnt_flag == 0)
+			{
+				document.main_form.elements["SET.cnt_flag"].value = 0;
+			}
+            if (cbx_ci_flag == 0)
+			{
+				document.main_form.elements["SET.ci_flag"].value = 0;
+			}
+			if (cbx_ztask_flag == 0)
+			{
+				document.main_form.elements["SET.ztask_flag"].value = 0;
+			}
+			detailSave();
+		}
+	}
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+   cancel_any_lrel_update();
+}
+
+function objtype_click(select_obj) { 
+		var f = window.document.forms["main_form"];
+		// Set the value of the hidden field from "initial" to "final"
+		// when the drop-down is clicked. 
+		f.SAVE_AND_REFRESH_TO_EDIT.value="final";
+		detailSave();
+		}
+
+function objtype_click_on_ReadOnly(select_obj) { 
+var val=select_obj.value;
+		url=cfgCgi + "?SID=" + cfgSID +
+		"+FID=" + cfgFID +
+		 "+OP=SHOW_DETAIL+KEEP.obj_type="+nx_escape(val)+
+		  "+FACTORY=aty" +
+		 "+PERSID=" + argPersistentID; 		
+	location.href = url;
+}
+		
+function KT_REPLY(sOP, msg)
+{	//The KT_REPLY is used to receive the delete message
+	if(sOP == "KT_NOTIFICATION_DELETE")
+	{
+		var iRet = msg[0];
+		if (iRet == 0)
+		{
+			var iframe = window.frames["tabEmails_iframe"];
+			iframe.window.location = iframe.window.location;
+		}
+		else
+		{
+			alert("Notification was not successfully deleted");
+		}
+	}	
+}
+// relTickVal 0 = None, 1 = All, 2 = Single Tenant, 3 = Tenant Group
+function relatedTicket_click( select_obj ) { 
+   var relTickVal=select_obj.value;
+
+   // Find the single_tenant field 
+   if ( typeof single_tenant_fld == "undefined" )
+	single_tenant_fld = findFieldAndLabelFromTable("single_tenant",1);
+ 
+  // Find the tenant group field and its label
+   if ( typeof tenant_group_fld == "undefined" )
+	tenant_group_fld = findFieldAndLabelFromTable("tenant_group",1);
+
+   if (relTickVal == 2)
+   {
+      if ( single_tenant_fld != null && tenant_group_fld != null )
+      {
+         single_tenant_fld[0].style.display = "block";
+         single_tenant_fld[1].style.display = "block";
+         tenant_group_fld[0].style.display = "none";
+         tenant_group_fld[1].style.display = "none";
+         _dtl.fieldToValidate[tenantFldNum].is_required = 1;
+         _dtl.fieldToValidate[groupFldNum].is_required = 0;
+      }
+   }
+   else if (relTickVal == 3) {
+      if ( single_tenant_fld != null && tenant_group_fld != null )
+      {
+         single_tenant_fld[0].style.display = "none";
+         single_tenant_fld[1].style.display = "none";
+         tenant_group_fld[0].style.display = "block";
+         tenant_group_fld[1].style.display = "block";
+         _dtl.fieldToValidate[tenantFldNum].is_required = 0;
+         _dtl.fieldToValidate[groupFldNum].is_required = 1;
+      }
+   }
+   else {
+      if ( single_tenant_fld != null && tenant_group_fld != null )
+      {
+         single_tenant_fld[0].style.display = "none";
+         single_tenant_fld[1].style.display = "none";
+         tenant_group_fld[0].style.display = "none";
+         tenant_group_fld[1].style.display = "none";
+         _dtl.fieldToValidate[tenantFldNum].is_required = 0;
+         _dtl.fieldToValidate[groupFldNum].is_required = 0;
+      }
+   }
+}
+
+function do_update_ntfr_lrel(notif_macro, type) {
+   update_lrel_aty("macro", notif_macro, "ntfr", "att_ntfrlist",  
+                   "Notification Rules Available", "Notification Rules Selected", 
+                    "","$args.persistent_id", type, "$args.KEEP.obj_type");
+}
+</script>
+
+</head>
+
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Activity Notification" key="$args.sym">
+<center>
+
+<!-- Note: Set the SAVE_AND_REFRESH_TO_EDIT to "initial"
+	   When the dropdown is clicked the value of this hidden field is
+	    changed to "final". This hidden field is send to freeaccess.spl on pdm_submit
+-->
+<!-- Note: It looks like if you use detailSetEventHandler(),the default  eventhandlers
+	   of your element get over written by the one in detailSetEventHandler(), hence in my
+	   onClick eventhandlers in the detailSetEventHandler() i am also providing the default onClick 
+	   event handler "detailSetCbxFlag(this)"  who's implementation is in detail_form.js -->
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" == "initial">
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=aty>;
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Zapisz i kontynuuj" func="check_and_save('Yes')" hotkey_name="Zapisz i kontynuuj" id="btn001" width=0>
+<PDM_MACRO name=button caption="Anuluj[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Anuluj[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Resetuj[r]" func="pdm_reset()" hotkey_name="Resetuj[r]" id="btn004" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+docWriteln("<input type='hidden' name=SAVE_AND_REFRESH_TO_EDIT value=\"initial\">");
+docWriteln("<input type='hidden' name=ATY_INITIAL value=\"initial\">");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_MACRO name=dtlStartRow>    
+detailRowHdr("Activity Valid for");
+<PDM_MACRO name=dtlStartRow>
+detailSetEventHandler("onClick=check_and_save(\"No\");detailSetCbxFlag(this)");
+<PDM_MACRO name=dtlCheckbox hdr="Wnioski/Incydenty/Problemy" attr=cr_flag>
+detailSetEventHandler("onClick=check_and_save(\"No\");detailSetCbxFlag(this)");
+<PDM_MACRO name=dtlCheckbox hdr="Zmiany" attr=chg_flag>
+detailSetEventHandler("onClick=check_and_save(\"No\");detailSetCbxFlag(this)");
+<PDM_MACRO name=dtlCheckbox hdr="Issues" attr=iss_flag>
+detailSetEventHandler("onClick=check_and_save(\"No\");detailSetCbxFlag(this)");
+<PDM_MACRO name=dtlCheckbox hdr="Ankiety zarządzane" attr=mgs_flag>
+<PDM_MACRO name=dtlStartRow>
+detailSetEventHandler("onClick=check_and_save(\"No\");detailSetCbxFlag(this)");
+<PDM_MACRO name=dtlCheckbox hdr="Dokumenty bazy wiedzy" attr=kd_flag>
+<PDM_MACRO name=dtlCheckbox hdr="Komentarze dokumentów bazy wiedzy" attr=kd_comment_flag>
+<PDM_MACRO name=dtlCheckbox hdr="Karta raportowa bazy wiedzy" attr="krc_flag">
+<PDM_MACRO name=dtlCheckbox hdr="Sesja wsparcia" attr="sa_notif_flag">
+<PDM_MACRO name=dtlStartRow>
+detailSetEventHandler("onClick=check_and_save(\"No\");detailSetCbxFlag(this)");
+<PDM_MACRO name=dtlCheckbox hdr="Kontakty" attr="cnt_flag">
+detailSetEventHandler("onClick=check_and_save(\"No\");detailSetCbxFlag(this)");
+<PDM_MACRO name=dtlCheckbox hdr="Elementy konfiguracji" attr="ci_flag">
+<PDM_MACRO name=dtlCheckbox hdr="Zadania" attr="ztask_flag">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_ELSE>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=aty>
+<PDM_MACRO name=dtlStart>
+docWriteln("<input type='hidden' name=SAVE_AND_REFRESH_TO_EDIT value=\"initial\">");
+docWriteln("<input type='hidden' name=ATY_INITIAL value=\"final\">");
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+</PDM_IF>
+<PDM_IF "$args.code" != "REL_TICKET">
+<PDM_MACRO name=dtlCheckbox hdr="Wewnętrzny" attr=internal off=No on=Yes>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag lookup=no>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=delete_flag colspan=2 lookup=no>
+<PDM_MACRO name=dtlStartRow>
+	detailRowHdr("The activity causing the Related Ticket Activity sets the Internal flag",4);
+	detailSetRowData("");
+	detailWriteRow();
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_IF "$args.code" != "REL_TICKET">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.MultiTenancy" != "off">
+
+detailRowHdr("Related Ticket Activity Settings", 4);
+detailSetRowData("");
+detailWriteRow();
+
+<PDM_MACRO name=dtlStartRow>
+var c_rel_ticket;
+c_rel_ticket = "";
+switch ( "$args.rel_ticket" ) {
+	case "0" : 
+		c_rel_ticket = "None";
+		break; 
+	case "1" : 
+		c_rel_ticket = "All Tenants";
+		break;
+	case "2" :
+		c_rel_ticket = "Single Tenant";
+		break;
+	case "3" :
+		c_rel_ticket = "Tenant Group";
+		break;
+	default : 
+		c_rel_ticket = "None";
+		break; 
+}
+
+<PDM_IF "$prop.form_name_3" == "edit" >
+detailSetEventHandler("onChange='relatedTicket_click(this)'");
+detailDropdown("Related Ticket Activity", "rel_ticket", "aty", 1, 20, 
+               true, "", "$args.rel_ticket",
+               "no", "$args.rel_ticket", c_rel_ticket,
+               "", "", "no", "", "", 0,
+               "None", "0", 
+               "All Tenants", "1", 
+               "Single Tenant", "2", 
+               "Tenant Group", "3");
+
+// These two dtlLookup calls are tied to the following lines that gets the fieldToValidate index.
+// If the dtlLookup is moved on the form, you must move its corresponding "_dtl.fieldToValidate.length - 1"
+// line.  These two fields must be marked with make_required="yes".
+        
+<PDM_MACRO name=dtlLookup hdr="Single Tenant" attr=single_tenant make_required="yes" size=20>
+        tenantFldNum = _dtl.fieldToValidate.length - 1;
+        
+<PDM_MACRO name=dtlLookup hdr="Tenant Group" attr=tenant_group make_required="yes">
+        groupFldNum = _dtl.fieldToValidate.length - 1;
+
+        
+<PDM_MACRO name=dtlStartRow>
+
+
+        // When going from readonly to edit mode, show the Single Tenant field,
+        // the Tenant Group field or neither.
+        
+        if ( typeof single_tenant_fld == "undefined" )
+			single_tenant_fld = findFieldAndLabelFromTable("single_tenant",1);
+
+		// Find the tenant group field and its label
+		if ( typeof tenant_group_fld == "undefined" )
+			tenant_group_fld = findFieldAndLabelFromTable("tenant_group",1);
+			
+        if ("$args.rel_ticket" == "2") 
+        {
+          if ( single_tenant_fld != null && tenant_group_fld != null )
+		  {
+			 single_tenant_fld[0].style.display = "block";
+			 single_tenant_fld[1].style.display = "block";
+			 tenant_group_fld[0].style.display = "none";
+			 tenant_group_fld[1].style.display = "none";
+			 _dtl.fieldToValidate[tenantFldNum].is_required = 1;
+			 _dtl.fieldToValidate[groupFldNum].is_required = 0;
+		  }
+        }
+        else if ("$args.rel_ticket" == "3") 
+        {
+		  if ( single_tenant_fld != null && tenant_group_fld != null )
+		  {
+			 single_tenant_fld[0].style.display = "none";
+			 single_tenant_fld[1].style.display = "none";
+			 tenant_group_fld[0].style.display = "block";
+			 tenant_group_fld[1].style.display = "block";
+			 _dtl.fieldToValidate[tenantFldNum].is_required = 0;
+			 _dtl.fieldToValidate[groupFldNum].is_required = 1;
+		  }
+        }
+        else 
+        {
+          if ( single_tenant_fld != null && tenant_group_fld != null )
+		  {
+			 single_tenant_fld[0].style.display = "none";
+			 single_tenant_fld[1].style.display = "none";
+			 tenant_group_fld[0].style.display = "none";
+			 tenant_group_fld[1].style.display = "none";
+			 _dtl.fieldToValidate[tenantFldNum].is_required = 0;
+			 _dtl.fieldToValidate[groupFldNum].is_required = 0;
+		  }
+        }
+
+
+
+
+    
+<PDM_ELSE>
+        function rta_value(value)
+        {
+            var rtaReturn = "";
+            if ( value == 1 ) {
+                rtaReturn = "All Tenants";
+            }
+            else if ( value == 2 ) {
+                rtaReturn = "Single Tenant";
+            }
+            else if ( value == 3 ) {
+                rtaReturn = "Tenant Group";
+            }
+            else {
+                rtaReturn = "None";
+            }
+            return(rtaReturn);     
+        }
+        
+<PDM_IF "$args.rel_ticket" == "2" || "$args.rel_ticket" == "3">
+<PDM_MACRO name=dtlReadonly hdr="Czynność powiązanego zgłoszenia" attr=rel_ticket colspan=1 fmtfunc=rta_value>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Czynność powiązanego zgłoszenia" attr=rel_ticket colspan=4 fmtfunc=rta_value>
+</PDM_IF>
+<PDM_IF "$args.rel_ticket" == "3">
+<PDM_MACRO name=dtlLookupReadonly hdr="Tenant Group" attr=tenant_group colspan=3>
+<PDM_ELIF "$args.rel_ticket" == "2">
+<PDM_MACRO name=dtlLookupReadonly hdr="Single Tenant" attr=single_tenant colspan=3>
+</PDM_IF>
+</PDM_IF>
+<PDM_ELSE>
+<PDM_MACRO name=dtlCheckbox hdr="Czynność powiązanego zgłoszenia" attr="rel_ticket" colspan=4 off="No" on="Yes">
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("Activity Valid for",4);
+detailSetRowData("");
+detailWriteRow();
+<PDM_MACRO name=dtlStartRow>
+
+switch ( "$args.cr_flag.sym"){
+	case "YES" : 
+		cr_cbox = "YES";
+		break;
+	default :
+		cr_cbox = "NO";
+		break;
+	}
+detailTextboxReadonly("Requests/Incidents/Problems","cr_flag.sym",1,cr_cbox);
+switch ( "$args.chg_flag.sym"){
+	case "YES" : 
+		chg_cbox = "YES";
+		break;
+	default :
+		chg_cbox = "NO";
+		break;
+	}
+detailTextboxReadonly("Change Orders","chg_flag.sym",1,chg_cbox);
+switch ( "$args.iss_flag.sym"){
+	case "YES" : 
+		iss_cbox = "YES";
+		break;
+	default :
+		iss_cbox = "NO";
+		break;
+	}
+detailTextboxReadonly("Issues","iss_flag.sym",1,iss_cbox);
+switch ( "$args.mgs_flag.sym"){
+	case "YES" : 
+		mgs_cbox = "YES";
+		break;
+	default :
+		mgs_cbox = "NO";
+		break;
+	}
+detailTextboxReadonly("Managed Surveys","mgs_flag.sym",1,mgs_cbox);
+
+switch ( "$args.kd_flag.sym"){
+	case "YES" : 
+		kd_cbox = "YES";
+		break;
+	default :
+		kd_cbox = "NO";
+		break;
+	}
+
+switch ( "$args.kd_comment_flag.sym"){
+	case "YES" : 
+		kdComment_cbox = "YES";
+		break;
+	default :
+		kdComment_cbox = "NO";
+		break;
+	}
+
+switch ( "$args.krc_flag.sym"){
+	case "YES"  : 
+		krc_cbox = "YES";
+		break;
+	default :
+		krc_cbox = "NO";
+		break;
+	}
+
+switch ( "$args.sa_notif_flag.sym"){
+	case "YES"  : 
+		sa_notif_cbox = "YES";
+		break;
+	default :
+		sa_notif_cbox = "NO";
+		break;
+	}
+
+<PDM_MACRO name=dtlStartRow>
+if (isKTInst == "Yes") 	
+{
+	detailTextboxReadonly("Knowledge Documents","kd_flag.sym",1,kd_cbox);
+	detailTextboxReadonly("Knowledge Document Comments","kd_comment_flag.sym",1,kdComment_cbox);
+	detailTextboxReadonly("Knowledge Report Card","krc_flag.sym",1,krc_cbox);
+	detailTextboxReadonly("Assistance Session","sa_notif_flag.sym",1,sa_notif_cbox);
+}
+
+<PDM_MACRO name=dtlStartRow>
+switch ( "$args.cnt_flag.sym"){
+	case "YES" : 
+		cnt_cbox = "YES";
+		break;
+	default :
+		cnt_cbox = "NO";
+		break;
+	}
+detailTextboxReadonly("Contacts","cnt_flag.sym",1,cnt_cbox);
+switch ( "$args.ci_flag.sym"){
+	case "YES" : 
+		ci_cbox = "YES";
+		break;
+	default :
+		ci_cbox = "NO";
+		break;
+	}
+detailTextboxReadonly("Configuration Items","ci_flag.sym",1,ci_cbox);
+switch ( "$args.ztask_flag.sym"){
+	case "YES" : 
+		ztask_cbox = "YES";
+		break;
+	default :
+		ztask_cbox = "NO";
+		break;
+	}
+detailTextboxReadonly("Task ","ztask_flag.sym",2,ztask_cbox);
+detailEndRow();
+
+switch ( "$args.KEEP.obj_type" ) { 
+	case "Requests/Incidents/Problems" :			
+			cobj_type = "Requests/Incidents/Problems";
+		break;	
+	case "Requests" : 
+		cobj_type = "Requests";
+		break;
+	case "Issues" :
+		cobj_type = "Issues";
+		break;
+	case "Change Orders" :
+		cobj_type = "Change Orders";
+		break;
+	case "Managed Surveys" :
+		cobj_type = "Managed Surveys";
+		break;
+	 case "Knowledge Documents" :
+	 	cobj_type = "Knowledge Documents";
+	 	break;
+	 case "Knowledge Document Comments" :
+	 	cobj_type = "Knowledge Document Comments";
+	 	break;
+	 case "Knowledge Report Card" :
+	 	cobj_type = "Knowledge Report Card";
+	 	break;
+	 case "Assistance Session" :
+	 	cobj_type = "Assistance Session";
+	 	break;
+     case "Contacts" :
+		cobj_type = "Contacts";
+		break;
+     case "Configuration Items" :
+		cobj_type = "Configuration Items";
+		break;
+	case "Task":
+	cobj_type = "Task";
+	break;
+	default:	
+		cobj_type = "Requests/Incidents/Problems";
+		break;
+         }
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+if ( _dtl.edit )   
+{
+detailSetEventHandler("onChange='objtype_click(this)'");
+	if (isKTInst == "Yes") 	
+			detailDropdown("Object Type","KEEP.obj_type","aty",1,40, 
+			false,"","$args.KEEP.obj_type",
+			"no","","$args.KEEP.obj_type",
+			"","","no","","","Requests/Incidents/Problems",
+			"Requests/Incidents/Problems","Requests/Incidents/Problems","Issues","Issues","Change Orders","Change Orders","Managed Surveys","Managed Surveys","Knowledge Documents","Knowledge Documents","Knowledge Document Comments","Knowledge Document Comments",
+			"Knowledge Report Card","Knowledge Report Card","Assistance Session","Assistance Session","Contacts","Contacts","Configuration Items","Configuration Items", "Task","Task"); 
+	else
+			detailDropdown("Object Type","KEEP.obj_type","aty",1,40, 
+			false,"","$args.KEEP.obj_type",
+			"no","","$args.KEEP.obj_type",
+			"","","no","","","Requests/Incidents/Problems",
+			"Requests/Incidents/Problems","Requests/Incidents/Problems","Issues","Issues","Change Orders","Change Orders","Managed Surveys","Managed Surveys","Contacts","Contacts","Configuration Items","Configuration Items","Task","Task"); 
+
+}
+else
+{
+_dtl.eventHandler="onChange='objtype_click_on_ReadOnly(this)'";
+	if (isKTInst == "Yes") 	
+			detailDropdownEdit("Object Type","KEEP.obj_type","aty",1,40, 
+			false,"","$args.KEEP.obj_type",
+			"no","","$args.KEEP.obj_type",
+			"","","no","","","Requests/Incidents/Problems",
+			"Requests/Incidents/Problems","Requests/Incidents/Problems","Issues","Issues","Change Orders","Change Orders","Managed Surveys","Managed Surveys","Knowledge Documents","Knowledge Documents","Knowledge Document Comments","Knowledge Document Comments",
+			"Knowledge Report Card","Knowledge Report Card","Assistance Session","Assistance Session","Contacts","Contacts","Configuration Items","Configuration Items","Task","Task"); 
+	else
+			detailDropdownEdit("Object Type","KEEP.obj_type","aty",1,40, 
+			false,"","$args.KEEP.obj_type",
+			"no","","$args.KEEP.obj_type",
+			"","","no","","","Requests/Incidents/Problems",
+			"Requests/Incidents/Problems","Requests/Incidents/Problems","Issues","Issues","Change Orders","Change Orders","Managed Surveys","Managed Surveys","Contacts","Contacts","Configuration Items","Configuration Items","Task","Task"); 
+
+}
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt" colspan=3>
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt" colspan=4>
+</PDM_IF>
+
+if(cobj_type == "Knowledge Documents")
+{
+	var _kdflg = "$args.kd_flag.sym";
+	if( _kdflg == "YES")
+	{
+			var value_type = "$args.kd_external";
+			if (! _dtl.edit )   
+			{			
+				if(value_type == "0")
+					value_type = "KD Approval Process Subscribers";
+				else if(value_type == "1") 			
+					value_type = "Document Subscribers";
+				else 
+					value_type = "Everyone";
+			}
+			detailDropdown("Notification Recipients Type","kd_external","aty",1,40, 
+			true,"",value_type,
+			"no","",value_type,
+			"","","no","","","Everyone",
+			"Everyone","2","Document Subscribers","1","KD Approval Process Subscribers","0"); 
+	}
+}
+detailEndRow();
+
+<PDM_IF "$args.KEEP.MO_PREVIEW_MODE" != "1">
+docWriteln("<table cellpadding=1 cellspacing=5 width='90%'>");
+docWriteln("<tr valign='top'>");
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'></th>");
+docWriteln("</tr>");
+docWriteln("<tr valign='top'>");
+if ("$args.KEEP.obj_type" == "" || "$args.KEEP.obj_type" == "Requests" || "$args.KEEP.obj_type" == "Requests/Incidents/Problems")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Requests/Incidents/Problems Tabs</th>");
+else if ("$args.KEEP.obj_type" == "Change Orders")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Change Order Tabs</th>");
+else if("$args.KEEP.obj_type" == "Issues")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Issue Tabs</th>");
+else if("$args.KEEP.obj_type" == "Managed Surveys")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Managed Survey Tabs</th>");
+else if("$args.KEEP.obj_type" == "Knowledge Documents")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Knowledge Document Tabs</th>");
+else if("$args.KEEP.obj_type" == "Knowledge Document Comments")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Knowledge Document Comments Tabs</th>");
+else if("$args.KEEP.obj_type" == "Knowledge Report Card")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Knowledge Report Card Tabs</th>");
+else if("$args.KEEP.obj_type" == "Assistance Session")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Assistance Session Tabs</th>");
+else if ("$args.KEEP.obj_type" == "Contacts")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Contact Tabs</th>");
+else if ("$args.KEEP.obj_type" == "Configuration Items")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Configuration Item Tabs</th>");
+else if ("$args.KEEP.obj_type" == "Task")
+docWriteln("<th colspan=5 align='middle' valign='baseline' class='detailro'>Task Tabs</th>");
+docWriteln("</tr>");
+docWriteln("</table>");
+</PDM_IF>
+</script>
+</PDM_IF>
+
+<script type="text/javascript">
+
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_IF "$Context" != "initial">
+<PDM_MACRO name=startNotebook hdr="aty_nb">
+<PDM_IF "$args.KEEP.obj_type" == "Requests" || "$args.KEEP.obj_type" == "" || "$args.KEEP.obj_type" == "Requests/Incidents/Problems">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_cr_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.cr_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=cr+KEEP.AllowLrelUpdt=$args.cr_flag+KEEP.code=$args.code">
+<PDM_MACRO name=TAB title="Survey" file="aty_cr_svy_tab.htmpl">
+<PDM_MACRO name=TAB title="Events" file="aty_evt_tab.htmpl">
+<PDM_IF "$args.code" == "NF">
+<PDM_MACRO name=TAB title="Object Contact Recipients" height=300 id=nf_cr_ntfl_tab src="OP=SEARCH+FACTORY=ntfl+QBE.EQ.cr_nf_list.aty_srel.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forNFAtyList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=cr+KEEP.noCreateBtn=1">
+<PDM_MACRO name=TAB title="Contact Recipients" height=300 id=nf_cr_cnt_tab src="OP=SEARCH+FACTORY=cnt+QBE.EQ.cr_nf_list.aty_srel.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forNFAtyList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=cr+KEEP.noCreateBtn=1">
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.obj_type" == "Change Orders">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_chg_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.chg_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=chg+KEEP.AllowLrelUpdt=$args.chg_flag">
+<PDM_MACRO name=TAB title="Survey" file="aty_chg_svy_tab.htmpl">
+<PDM_MACRO name=TAB title="Events" file="aty_evt_tab.htmpl">
+<PDM_IF "$args.code" == "NF">
+<PDM_MACRO name=TAB title="Object Contact Recipients" height=300 id=nf_chg_ntfl_tab src="OP=SEARCH+FACTORY=ntfl+QBE.EQ.chg_nf_list.aty_srel.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forNFAtyList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=chg+KEEP.noCreateBtn=1">
+<PDM_MACRO name=TAB title="Contact Recipients" height=300 id=nf_chg_cnt_tab src="OP=SEARCH+FACTORY=cnt+QBE.EQ.chg_nf_list.aty_srel.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forNFAtyList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=chg+KEEP.noCreateBtn=1">
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.obj_type" == "Issues">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_iss_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.iss_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=iss+KEEP.AllowLrelUpdt=$args.iss_flag">
+<PDM_MACRO name=TAB title="Survey" file="aty_iss_svy_tab.htmpl">
+<PDM_MACRO name=TAB title="Events" file="aty_evt_tab.htmpl">
+<PDM_IF "$args.code" == "NF">
+<PDM_MACRO name=TAB title="Object Contact Recipients" height=300 id=nf_iss_ntfl_tab src="OP=SEARCH+FACTORY=ntfl+QBE.EQ.iss_nf_list.aty_srel.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forNFAtyList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=iss+KEEP.noCreateBtn=1">
+<PDM_MACRO name=TAB title="Contact Recipients" height=300 id=nf_iss_cnt_tab src="OP=SEARCH+FACTORY=cnt+QBE.EQ.iss_nf_list.aty_srel.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forNFAtyList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=iss+KEEP.noCreateBtn=1">
+</PDM_IF>
+<PDM_ELIF "$args.KEEP.obj_type" == "Managed Surveys">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_mgs_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.mgs_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=mgs+KEEP.AllowLrelUpdt=$args.mgs_flag">
+<PDM_MACRO name=TAB title="Events" file="aty_evt_tab.htmpl">
+<PDM_ELIF "$args.KEEP.obj_type" == "Knowledge Documents">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_kd_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.kd_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=KD+KEEP.AllowLrelUpdt=$args.kd_flag">
+<PDM_MACRO name=TAB title="Emails" height=200 id=tabEmails src="OP=SEARCH+FACTORY=NOTIFICATION+QBE.EQ.DOC_ID=-$args.kd_notify_info.id+QBE.GE.NTF_LEVEL=0">
+<PDM_ELIF "$args.KEEP.obj_type" == "Knowledge Document Comments">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_kdComment_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.kd_comment_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=O_COMMENTS+KEEP.AllowLrelUpdt=$args.kd_comment_flag">
+<PDM_MACRO name=TAB title="Emails" height=200 id=tabEmails src="OP=SEARCH+FACTORY=NOTIFICATION+QBE.EQ.DOC_ID=-$args.kd_comment_notify_info.id+QBE.GE.NTF_LEVEL=0">
+<PDM_ELIF "$args.KEEP.obj_type" == "Knowledge Report Card">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_krc_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.krc_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=KT_REPORT_CARD+KEEP.AllowLrelUpdt=$args.krc_flag">
+<PDM_ELIF "$args.KEEP.obj_type" == "Assistance Session">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_santf_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.sa_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=sa_notif+KEEP.AllowLrelUpdt=$args.sa_notif_flag">
+<PDM_ELIF "$args.KEEP.obj_type" == "Contacts">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_cnt_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.cnt_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=cnt+KEEP.AllowLrelUpdt=$args.cnt_flag">
+<PDM_MACRO name=TAB title="Events" file="aty_evt_tab.htmpl">
+<PDM_ELIF "$args.KEEP.obj_type" == "Configuration Items">
+<PDM_MACRO name=TAB title="Notification Rules" height=300 id=aty_ci_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.ci_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=nr+KEEP.AllowLrelUpdt=$args.ci_flag">
+<PDM_MACRO name=tab title="Events" file="aty_evt_tab.htmpl">
+<PDM_ELIF "$args.KEEP.obj_type" == "Task">
+<PDM_MACRO name=tab title="Notification Rules" height=300 id=aty_ztask_ntfr_tab src="OP=SEARCH+FACTORY=ntfr+QBE.EQ.ntfr_macrolist.macro=$args.ztask_notify_info+QBE.EQ.delete_flag=0+KEEP.forAtyTabList=1+KEEP.ATY_ID=$args.id+KEEP.obj_type=ztask+KEEP.AllowLrelUpdt=$args.ztask_flag">
+<PDM_MACRO name=TAB title="Events" file="aty_evt_tab.htmpl">
+</PDM_IF>
+<PDM_MACRO name=endNotebook>
+</PDM_IF>
+
+<script type="text/javascript">
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_aty.htmpl ASPEN.11 2012/03/15 19:36:07 maide01 Exp $;
+</PDM_IF>
+<PDM_WSP>

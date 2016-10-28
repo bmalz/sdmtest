@@ -1,0 +1,89 @@
+<PDM_IF 0>
+$Id: kt_architect_javascript.htmpl,v 1.1 2006/11/02 22:49:45 olsjo01 Exp $
+	WHEN PRESENTED:
+	    JavaScript code for the kt_architect form.
+</PDM_IF>
+
+<script type="text/javascript">
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+
+var m_CurrentIndex = 1;
+var m_CurrentRelationalPath = "1";
+var m_CurrentIndexPath = "TOP";
+var m_bShowDetails = true;
+var m_lTreeId = 0;
+var m_sSearchWhereClause = "";
+
+var ahdframeset = window;
+function frameset_loaded()
+{
+   ahdframe = window.frmKDs;
+   ahdframeset.ahdframe = ahdframe;
+}
+<pdm_include file=menubar_architect.htmpl>
+cfgUserType = "analyst";
+//
+function setCurrentIndex(IndexId)
+{
+	m_CurrentIndex = IndexId;
+}
+//
+function getCurrentIndex()
+{
+	return m_CurrentIndex;
+}
+//
+function setCurrentIndexPath(sIndexPath)
+{
+	m_CurrentIndexPath = sIndexPath;
+}
+//
+function getCurrentIndexPath()
+{
+	return m_CurrentIndexPath;
+}
+// 
+function setCurrentRelationalPath(sRelationalIDs)
+{
+	m_CurrentRelationalPath = sRelationalIDs;
+}
+function getCurrentRelationalPath()
+{
+	return m_CurrentRelationalPath;
+}
+//
+function getShowDetails()
+{
+	return m_bShowDetails;
+}
+//
+function setTreeId(lTreeID)
+{
+	m_lTreeId = lTreeID;
+}
+//
+function getTreeId()
+{
+	return m_lTreeId;
+}
+//
+function setSearchWhereClause(sWhere)
+{
+	m_sSearchWhereClause = sWhere;
+}
+//
+function getSearchWhereClause()
+{
+	return m_sSearchWhereClause;
+}
+
+var ahdframeset = window;
+function frameset_loaded()
+{
+   ahdframe = window.frmKDs;
+   ahdframeset.ahdframe = ahdframe;
+}
+<pdm_include file=menubar_architect.htmpl>
+cfgUserType = "analyst";
+</script>
+

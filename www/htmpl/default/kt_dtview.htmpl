@@ -1,0 +1,89 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no NoRClickMenu=1>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+
+var NODE_ID=0;
+var NODE_SHORT_DESC=1;
+var NODE_TYPE=2;
+var LINK_ID=3;
+var DISPLAYED_TEXT=4;
+var RESPLINKID1=5
+var RESPLINKID2=6
+var RESPLINKID3=7
+var RESPLINKID4=8
+var RESPLINKID5=9
+var RESPLINKID6=10
+var RESPLINKID7=11
+var RESPONSE1=12
+var RESPONSE2=13
+var RESPONSE3=14
+var RESPONSE4=15
+var RESPONSE5=16
+var RESPONSE6=17
+var RESPONSE7=18
+
+function frameset_loaded()
+{
+   if (window.name == "cai_main")
+   {
+       var ahdframeset = window;
+   }    
+   else
+   {
+		var ahdframeset = ahdtop;    		
+   }
+   var ahdframe = window.frmDTUserNode;
+   ahdframeset.ahdframe = ahdframe;   
+   
+   // if this is the first time through or the user selected a different Knowledge Tree, initialized the array holding the tree
+   if (typeof window.ahdframeset.arrNodes == 'undefined' || window.ahdframeset.arrNodes == null || window.ahdframeset.arrNodes[0][NODE_ID] != "$args.FIRST_NODE_ID")
+   {
+		var lNode = 0;
+		window.ahdframeset.arrNodes = new Array();
+		window.ahdframeset.lNodesCount = 0;
+		<PDM_LIST FACTORY=ES_NODES PREFIX=node WHERE="ROOT_ID=$args.FIRST_NODE_ID">
+			window.ahdframeset.arrNodes[lNode] = new Array();
+			window.ahdframeset.arrNodes[lNode][NODE_ID]			= $node.NODE_ID;
+			window.ahdframeset.arrNodes[lNode][NODE_SHORT_DESC]	= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.NODE_SHORT_DESC</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][NODE_TYPE]		= $node.NODE_TYPE;
+			window.ahdframeset.arrNodes[lNode][LINK_ID]			= $node.LINK_ID;
+			window.ahdframeset.arrNodes[lNode][DISPLAYED_TEXT]	= '<PDM_FMT PAD=NO ESC_STYLE=C KEEPTAGS=YES>$node.DISPLAYED_TEXT</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][RESPLINKID1]		= $node.RESPLINKID1;
+			window.ahdframeset.arrNodes[lNode][RESPLINKID2]		= $node.RESPLINKID2;
+			window.ahdframeset.arrNodes[lNode][RESPLINKID3]		= $node.RESPLINKID3;
+			window.ahdframeset.arrNodes[lNode][RESPLINKID4]		= $node.RESPLINKID4;
+			window.ahdframeset.arrNodes[lNode][RESPLINKID5]		= $node.RESPLINKID5;
+			window.ahdframeset.arrNodes[lNode][RESPLINKID6]		= $node.RESPLINKID6;
+			window.ahdframeset.arrNodes[lNode][RESPLINKID7]		= $node.RESPLINKID7;
+			window.ahdframeset.arrNodes[lNode][RESPONSE1]		= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.RESPONSE1</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][RESPONSE2]		= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.RESPONSE2</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][RESPONSE3]		= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.RESPONSE3</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][RESPONSE4]		= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.RESPONSE4</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][RESPONSE5]		= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.RESPONSE5</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][RESPONSE6]		= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.RESPONSE6</PDM_FMT>';
+			window.ahdframeset.arrNodes[lNode][RESPONSE7]		= '<PDM_FMT PAD=NO ESC_STYLE=C>$node.RESPONSE7</PDM_FMT>';
+			window.ahdframeset.lNodesCount = ++lNode;
+		</PDM_LIST>
+   }
+
+   var url = '$cgi?OP=SHOW_DETAIL+SID=$args.SID+FID=$args.FID+PERSID=KD:$args.DOC_ID+HTMPL=kt_document_view.htmpl+BUID=$args.BUID+Frameset=1+opener=$args.opener+simple_list=$args.simple_list+OpenMode=$args.opener+TreeID=$args.TreeID+KEEP.TreeID=$args.KEEP.TreeID+KEEP.cstReducePopups=$args.KEEP.cstReducePopups+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME+event_log_on=1+disable_solution_survey=$args.disable_solution_survey+disable_comment=$args.disable_comment+event_log_sd_persid=$args.SD_LAUNCHED' +
+   '+SD_LAUNCHED=$args.SD_LAUNCHED+LAUNCHED_ITIL=$args.LAUNCHED_ITIL+TICKET_FACTORY=$args.TICKET_FACTORY' +
+   '+SOLUTION_OF=$args.SOLUTION_OF+SOLUTION_OF_ID=$args.SOLUTION_OF_ID' +
+   '+event_log_type=DT_NAVIGATE+event_log_textdata1=$args.PATH_IDS+NODE_ID=$args.NODE_ID<PDM_IF "$args.KEEP.QBE.IN.ebr_search_text" != "">+KEEP.QBE.IN.ebr_search_text=<PDM_FMT ESC_STYLE=JS2>$args.KEEP.QBE.IN.ebr_search_text</PDM_FMT></PDM_IF>+KEEP.DOMSET=$args.KEEP.DOMSET+KEEP.QBE.EQ.ebr_search_type=$args.KEEP.QBE.EQ.ebr_search_type+KEEP.QBE.EQ.ebr_match_type=$args.KEEP.QBE.EQ.ebr_match_type+KEEP.QBE.EQ.ebr_search_in=$args.KEEP.QBE.EQ.ebr_search_in+KEEP.QBE.EQ.ebr_fuzziness=$args.KEEP.QBE.EQ.ebr_fuzziness+KEEP.QBE.EQ.ebr_primary_order=$args.KEEP.QBE.EQ.ebr_primary_order+KEEP.QBE.EQ.ebr_order_direction=$args.KEEP.QBE.EQ.ebr_order_direction+KEEP.cur_sort_key=$args.KEEP.cur_sort_key+KEEP.categoryID=$args.KEEP.categoryID+KEEP.relationalID=$args.KEEP.relationalID+KEEP.categoryPath=<PDM_FMT ESC_STYLE=JS2>$args.KEEP.categoryPath</PDM_FMT>+KEEP.initial_ebr=$args.KEEP.initial_ebr+KEEP.ADDITIONAL_WHERE=<PDM_FMT ESC_STYLE=JS2>$args.KEEP.ADDITIONAL_WHERE</PDM_FMT>+KEEP.ebr_parsed_search_text=' + gpb_escape('$args.KEEP.ebr_parsed_search_text');
+   frmDTUserNode.location.href = url;
+}
+<PDM_IF "$args.KEEP.POPUP_NAME" != "">
+	<pdm_include file=menubar_kt_popup.htmpl>
+</PDM_IF>
+</script>
+</HEAD>
+<FRAMESET id=frmMainFrameset name=frmMainFrameset COLS="0,*" FRAMEBORDER=YES BORDER=1 FRAMESPACING="0" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0" onLoad="frameset_loaded()">
+	<FRAME id=frmDTUserLst name=frmDTUserList src="$CAisd/html/empty.html" SCROLLING=no marginheight=0 marginwidth=0 FRAMEBORDER=YES BORDER=2 title="Entire Decision Tree">
+	<!--PLEASE DO NOT CHANGE THE SINGLE QUOTE TO DOUBLE QUOTE FOR THE FOLLOWING SRC-->
+	<FRAME id=frmDTUserNode name=frmDTUserNode src="$CAisd/html/empty.html" <PDM_IF "$args.KEEP.SCROLLING" == "1">SCROLLING=auto<PDM_ELSE>SCROLLING=$SESSION.scrolling</PDM_IF> marginheight=0 marginwidth=0 FRAMEBORDER=YES BORDER=2 title="Current Tree Node"></FRAMESET>
+</FRAMESET>
+</HTML>

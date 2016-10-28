@@ -1,0 +1,61 @@
+<PDM_IF 0>
+
+@(#)$Id: SupportAutomation_main.htmpl ASPEN.1 2011/10/18 17:53:05 visan03 Exp $;
+
+WHEN PRESENTED:
+	Development Support Automation page for launching SA clients 
+INTENT:
+	Development Support Automation page for launching SA clients
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Support Automation";
+var hdrTitleList = "Support Automation";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+
+<script type="text/javascript">
+	
+	
+	
+	ImgBtnRow();
+	
+var sb_url=ahdtop.cfgNX_SUPPORTAUTOMATION_URL+"/jsp/assistanceSession/forceLogin.jsp?BOPSID=%bopsid&roleID="+ahdtop.cfgCurrentRoleID+"&routeID=1";
+
+
+ImgBtnCreate("btnSB","Support_Automation_Client",
+"popup_window('','LINK_WITH_BOPSID',0,0,'ahdmenu=no,register=no,resizable=yes,menubar=yes,toolbar=yes,location=yes,scrollbars=yes,status=yes,SHARE_SESSION=0','URL="+sb_url+"')",true,0);
+
+var sb_url_webchat=ahdtop.cfgNX_SUPPORTAUTOMATION_URL+"/jsp/assistanceSession/forceLogin.jsp?BOPSID=%bopsid&roleID="+ahdtop.cfgCurrentRoleID+"&routeID=1&webChatClient=true";
+
+
+ImgBtnCreate("btnSB","Support_Automation_With_Webchat",
+"popup_window('','LINK_WITH_BOPSID',0,0,'ahdmenu=no,register=no,resizable=yes,menubar=yes,toolbar=yes,location=yes,scrollbars=yes,status=yes,SHARE_SESSION=0','URL="+sb_url_webchat+"')",true,0);
+
+
+var sb_url_selfserve=ahdtop.cfgNX_SUPPORTAUTOMATION_URL+"/jsp/selfserve/processScriptRequestOwnWindow.jsp?BOPSID=%bopsid&scriptID=100000&lID=-1&timezoneOffset=1";
+
+ImgBtnCreate("btnSB","Self_Serve_Script",
+"popup_window('','LINK_WITH_BOPSID',0,0,'ahdmenu=no,register=no,resizable=yes,menubar=yes,toolbar=yes,location=yes,scrollbars=yes,status=yes,SHARE_SESSION=0','URL="+sb_url_selfserve+"')",true,0);
+
+	ImgBtnEndRow();
+	</script>
+
+
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>
+

@@ -1,0 +1,15 @@
+<PDM_IF 0>
+$Id: detail_no_contract_sdsc.htmpl,v 1.1 2006/11/01 17:34:55 olsjo01 Exp $
+detail_no_contract_sdsc.htmpl
+WHEN PRESENTED:
+	When we need to display a Service Types detail from the 'no_contract_sdsc' factory.
+	The only special thing about this factory is its row restrictions, so we just simply
+	reroute to the default form.
+</PDM_IF>
+
+
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=detail_sdsc.htmpl>
+
+
+

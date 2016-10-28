@@ -1,0 +1,139 @@
+<PDM_IF 0>
+list_macro.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Macros.
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwanie Makr";
+var hdrTitleList = "Lista Makr";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("macrosum.rpt", "macrodtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Macro">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=macro>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_macro.htmpl>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+// This part gets hit when you click on the "Update Action On True/False" button on the "Action Infomation tab" on an event detail screen and bhvtpl_todo_tab.htmpl screen.
+var hold_obj_type = '$args.KEEP.obj_type';
+var hold_obj_type_text;
+if(hold_obj_type == 'cr')
+{
+	hold_obj_type_text = 'Request/Incident/Problem';
+}		
+else if(hold_obj_type == 'chg')
+       hold_obj_type_text = 'Change Order';
+else if(hold_obj_type == 'iss')
+       hold_obj_type_text = 'Issue';
+else if(hold_obj_type == 'iss_wf')
+       hold_obj_type_text = 'Issue Workflow Task'
+else if(hold_obj_type == 'KD')
+       hold_obj_type_text = 'Knowledge Document';
+else if(hold_obj_type == 'KT_REPORT_CARD')
+       hold_obj_type_text = 'Knowledge Report Card';
+else if(hold_obj_type == 'sa_notif')
+       hold_obj_type_text = 'Assistance Session';
+else if(hold_obj_type == 'wf')
+       hold_obj_type_text = 'Workflow Task';
+else if(hold_obj_type == 'mgs')
+       hold_obj_type_text = 'Managed Survey';
+else if(hold_obj_type == 'cnt')
+       hold_obj_type_text = 'Contact';
+else if(hold_obj_type == 'nr')
+       hold_obj_type_text = 'Configuration Item';
+else if(hold_obj_type == 'ztask')
+       hold_obj_type_text = 'Task';
+
+//searchFilterTextDisabled("Type", "type", 20, "ACT", "Action", "EQ");
+//show all macros except for "condition" and "site-defined cond"
+searchFilterDropdown("Type","type","","noempty",
+                     "Action","(type LIKE 'ACT')",
+                     "Attach Event","(type LIKE 'BHVEVTATTACH')",
+                     
+<PDM_IF "$env.NX_CAWF_PM_LOCATION" != "" && "$env.NX_CAWF_PM_URL" != "">
+                         "Execute CA Workflow Action","(type LIKE 'CAWF')",
+                     
+</PDM_IF>
+<PDM_IF "$env.NX_CAEXTWF_ENDPOINT" != "" >
+                         "Execute IT PAM Action","(type LIKE 'ITPAM')",
+										 
+</PDM_IF>
+                     "Execute Remote Reference","(type LIKE 'BHVEXEC_RRF')",
+                     "Multiple Notification","(type LIKE 'BHVNOTIFY_MANY')"
+);
+	
+searchFilterTextDisabled("Object Type", "ob_type", 20,hold_obj_type, hold_obj_type_text, "EQ");
+<PDM_ELSE>
+		// This part of the code gets hit when the "condition" lookup field is clicked on from bhvtpl_todo_tab.htmpl,evt_config_info.htmpl,list_ntfr.htmpl
+		// and detail_ntfr.htmpl. The condition field sets the additional where clause on this screen as part of   extraURL argument in the lookup statement 
+		// so dont show "Type" and "Object Type" fields
+		
+<PDM_IF "$args.KEEP.RESTRICT_FROM_NTFR" != "1" && "$args.KEEP.RESTRICT_FROM_BHVTPL" != "1" && "$args.KEEP.RESTRICT_FROM_EVT" != "1">
+				document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE=" (type != \'INTERNAL\')">');
+				
+<PDM_MACRO name=sfLookup hdr="Typ" attr=type extraurl="QBE.EQ.delete_flag=0">
+				 	searchFilterDropdown("Object Type","ob_type","","Change Order","chg","Issue","iss",
+				 	"Issue Workflow Task","iss_wf",
+				 	"Knowledge Document","KD",
+				 	"Knowledge Document Comment","O_COMMENTS",
+					"Knowledge Report Card","KT_REPORT_CARD",
+				 	"Assistance Session","sa_notif",
+				 	"Managed Survey","mgs",
+				 	"Request/Incident/Problem","cr",
+                    "Workflow Task","wf",
+                    "Contact","cnt",
+					"Configuration Item","nr",
+					"Task","ztask",1);
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Macros found";
+var msgFound1 = "1 Macro found";
+var msgFound = "%1 Macros found";
+var msgFoundMore = "%1 Macros found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Macro";
+function for_itil(value)
+{	
+	if(listobjtypecode == "cr")
+	value = "Request/Incident/Problem";
+rs.data(value);  
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var listobjtypecode = '@{list.ob_type:}';">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Typ" attr=type>
+<PDM_MACRO name=lsCol hdr="Typ obiektu" attr=ob_type fmtfunc=for_itil sort=no>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_macro.htmpl ASPEN.4 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

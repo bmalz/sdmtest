@@ -1,0 +1,39 @@
+<html lang="en"><PDM_IF 0>
+$Id: profile_browser3.htmpl,v 1.2 2006/11/08 00:22:29 olsjo01 Exp $
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+    object dobref      A cnt object (contact) that is to displayed
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_browser.htmpl+PERSID={cnt:}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+var ahdtop = parent.ahdtop;
+var ahdframeset = parent.ahdframeset;
+var cfgCAISD = "$CAisd";
+var cfgCgi = "$cgi";
+var cfgSID = "$prop.SID";
+var cfgFID = "$prop.FID";
+var in_content_frame = ( ahdframeset == ahdtop );
+var ahdframeset = ( in_content_frame ? window.ahdframeset : window );
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+if (!in_content_frame)
+{
+    argPopupName = parent.argPopupName;
+    parent.ahdframeset = ahdframeset;
+}
+
+<PDM_INCLUDE FILE=profile_browser_frameset.htmpl>
+
+</SCRIPT>
+</HTML>

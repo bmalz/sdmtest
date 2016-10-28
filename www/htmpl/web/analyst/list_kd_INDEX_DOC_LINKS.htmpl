@@ -1,0 +1,148 @@
+<PDM_IF 0>
+$Id: list_kd_INDEX_DOC_LINKS.htmpl,v 1.3 2006/11/09 18:06:00 kubtr01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of Document or Category.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+<PDM_IF '$args.KEEP.SKELETONS_VIEW'>
+	var hdrTitle = "Document Search";
+	var hdrTitleList = "Document List";
+<PDM_ELSE>
+	var hdrTitle = "Category Search";
+	var hdrTitleList = "Category List";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+</script>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kd_tabs.js"></script>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list">
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<script type="text/javascript">
+var arrFields = new Array;
+var tCount = 0;
+var nCount =0;
+var nAttrCount=0;
+<PDM_IF "$args.KEEP.SKELETONS_VIEW" == "1" || "$args.KEEP.HTMLEditor" == 1>
+	var msgFoundNone = "No Documents found";
+	var msgFound1 = "1 Document found";
+	var msgFound = "%1 Documents found";
+	var msgFoundMore = "%1 Documents found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Document";
+	var msgSelectAlg = "Click to select desired Document and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired Document template";
+	nAttrCount = 4;
+<PDM_ELSE>
+	nAttrCount = 4;
+	var msgFoundNone = "No Category Links found";
+	var msgFound1 = "1 Category Link found";
+	var msgFound = "%1 Category Links found";
+	var msgFoundMore = "%1 Category Links found.  Displaying %2 through %3";
+	var msgSelect = "Click to select desired Category Link";
+	var msgSelectAlg = "Click to select desired Category Link and add a %1 activity log";
+	var msgSelectTempl = "Click to select desired Category Link template";
+	var nPrimaryIndex = 0;
+	if ( typeof parent.parent.GetPrimaryIndex != "undefined" )
+      nPrimaryIndex = parent.parent.GetPrimaryIndex();
+</PDM_IF>
+
+//Note: This function is used for list macro
+function IncludeLink(value)
+{
+	if ("$args.KEEP.IS_EDIT" == "edit")
+	{
+		rs.showDataWithLink("", value);
+	}
+	else
+	{
+		rs.data(value);
+	}
+}
+
+var tenantSort = "no"; // Turn off sorting for tenant
+
+<PDM_MACRO name=lsStart search_type=GET_DOB>
+<PDM_MACRO name=lsWrite both=yes text="if ('@args.KEEP.SKELETONS_VIEW' == '1' || '@args.KEEP.HTMLEditor' == '1') {">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.DOC_ID}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT ESC_STYLE=C>@{list.DOC_ID.TITLE}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT ESC_STYLE=C>@{list.DOC_ID.DOC_TYPE_ID}</PDM_FMT>'">
+<PDM_MACRO name=lsCol hdr="ID" attr=DOC_ID.id export=no fmtfunc=IncludeLink sort=no>
+<PDM_MACRO name=lsCol hdr="Tytuł" attr=DOC_ID.TITLE sort=no>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="else {">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.id}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.INDEX_ID}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>@{list.INDEX_ID.CAPTION}</PDM_FMT>'">
+<PDM_MACRO name=lsWrite text="arrFields[nCount++] = '<PDM_FMT ESC_STYLE=C>@{list.INDEX_ID.INDEX_PATH}</PDM_FMT>'">
+<PDM_MACRO name=lsCol hdr="Nazwa klasyfikacji" attr=INDEX_ID.CAPTION exportfmt=ShowLink link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Ścieżka klasyfikacji" attr=INDEX_ID.INDEX_PATH sort=no>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsEnd factory=INDEX_DOC_LINKS>
+<PDM_IF '$args.KEEP.SKELETONS_VIEW'>
+	rs.fitSmallWin=true;	//only document needs it
+</PDM_IF>
+
+//rs.overrideMenu=true;
+
+
+<PDM_IF "$args.KEEP.SKELETONS_VIEW" == "1">
+	var ctxMenu=new ContextMenu("idMenuTabCategory");
+	rs.setLinkOnclick(function(){ViewDocument(self.activeRow);});
+	ctxMenu.addItem("View", "ViewDocument(self.activeRow);");
+	ctxMenu.addItem("Link this Document as See Also", "InnerAddDocLink(self.activeRow);");
+	ctxMenu.addItem("Link this Document as Parent", "InnerAddDocLink(self.activeRow,1);"); 	// 1 means as parent
+	ctxMenu.addItem("Link this Document as Child", "InnerAddDocLink(self.activeRow,2);"); // 2 means as child
+	ctxMenu.finish();
+	//
+	//Added to allow right click context menu on tenanted documents
+	//RO Context menu is here as its overrides menu in resultset.js that changes the context menu if multi-tenency is on
+	var ctxMenuRO = new ContextMenu("idMenuTabCategoryRo");
+	ctxMenuRO.addItem("View", "ViewDocument(self.activeRow);");
+	ctxMenuRO.addItem("Link this Document as See Also", "InnerAddDocLink(self.activeRow);");
+	ctxMenuRO.addItem("Link this Document as Parent", "InnerAddDocLink(self.activeRow,1);");// 1 means as parent
+	ctxMenuRO.addItem("Link this Document as Child", "InnerAddDocLink(self.activeRow,2);"); // 2 means as child
+	ctxMenuRO.finish();
+<PDM_ELIF "$args.KEEP.HTMLEditor" == "1">	
+	var ctxMenu=new ContextMenu("idMenuTabCategory");
+	rs.setLinkOnclick(function(){InsertDocLink(self.activePersid,self.activeRow);});
+	ctxMenu.addItem("Insert Document Link", "InsertDocLink(self.activePersid)");
+	ctxMenu.finish();
+	//
+	//Added to allow right click context menu on tenanted documents
+	//RO Context menu is here as its overrides menu in resultset.js that changes the context menu if multi-tenency is on
+	var ctxMenuRO = new ContextMenu("idMenuTabCategoryRo");
+	ctxMenuRO.addItem("Insert Document Link", "InsertDocLink(self.activePersid)");
+	ctxMenuRO.finish();
+<PDM_ELSE>
+<PDM_IF "$args.KEEP.IS_EDIT" == "edit">
+		var ctxMenu=new ContextMenu("idMenuTabCategory");
+		rs.setLinkOnclick(function(){ViewCategory(self.activeRow);});
+		ctxMenu.addItem("Set as Primary Category", "InnerSetPrimaryIndex(self.activeRow);");
+		ctxMenu.addItem("Remove this Category", "InnerRemoveCategoryLink(self.activePersid,self.activeRow)");
+		ctxMenu.finish();
+	
+</PDM_IF>
+</PDM_IF>
+
+
+</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

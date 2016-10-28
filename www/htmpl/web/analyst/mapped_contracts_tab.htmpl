@@ -1,0 +1,61 @@
+<PDM_IF 0>
+mapped_contracts_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a list of map_sdsc objects associated with a reference object
+INTENT:
+    Display a notebook page for associated service contracts
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit factory=cnt preview="NBTAB=mapped_contracts_tab">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT type="text/javascript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO2">
+<SCRIPT>
+tab_banner("Service Contracts");
+</SCRIPT>
+<PDM_IF $ACCESS.FAC_sdsc_map \> 0>
+
+<TABLE ID=tbl4012 CLASS=tab summary="Service Contract List">
+<TR><th scope=col ALIGN=CENTER COLSPAN=2 class=detailro>Associated Contracts</TH>
+</TR>
+<TR>
+<th scope=col ALIGN=LEFT class=detailro>Contract Name</TH>
+<th scope=col ALIGN=LEFT class=detailro>Service Type</TH>
+<PDM_LIST FACTORY=sdsc_map PREFIX=list WHERE="map_persid = '$prop.factory:$args.id'" ESC_STYLE=JS2>
+	<TR>
+	<TD VALIGN=TOP class=detailroTab>
+	<script type="text/javascript">
+		docWriteln("<A" + detailNextID(true) +
+           " HREF=\"javascript:showDetailWithPersid('$list.map_contract.persistent_id')\">$list.map_contract.COMMON_NAME</A>");
+	</script>
+	</TD>
+	<TD VALIGN=TOP class=detailroTab>$list.map_sdsc.COMMON_NAME</TD>
+</PDM_LIST>
+</table>
+</pdm_if>
+
+</PDM_FORM>
+
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: mapped_contracts_tab.htmpl ANDERSON.1 2009/07/16 19:52:54 bansu06 Exp $
+</PDM_IF>

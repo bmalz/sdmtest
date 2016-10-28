@@ -1,0 +1,66 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Federated CI Mapping Search";
+var hdrTitleList = "Federated CI Mapping List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="ci_mdr_idmap">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart factory="ci_mdr_idmap">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa CI" attr="cmdb_asset_id.name" size=20>
+<PDM_MACRO name=sfTextbox hdr="Federated Asset ID" attr="federated_asset_id" size=20>
+<PDM_MACRO name=sfLookup hdr="MDR" attr="mdr_provider_id">
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_IF "ci_mdr_idmap" : "^z.*$">
+document.writeln('<input type="hidden" id="ADDL_WHERE_HARDCODE" name="ADDL_WHERE_HARDCODE" value="id IS NOT NULL">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Lokalizacja" attr="cmdb_asset_id.location.name" factory=loc>
+<PDM_MACRO name=sfLookup hdr="Klasa" attr="cmdb_asset_id.class.type" factory=grc>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="MDR Hostname" attr="mdr_provider_id.hostname">
+<PDM_MACRO name=sfTextbox hdr="Klasa MDR" attr="mdr_provider_id.mdr_class">
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "No Federated CI's found";
+  var msgFound1 = "1 Federated CI found";
+  var msgFound = "%1 federated CI's found";
+  var msgFoundMore = "%1 Federated CI's found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Federated CI";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Federated Asset ID" attr=federated_asset_id exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa CI" attr=cmdb_asset_id justify=left link=no>
+<PDM_MACRO name=lsCol hdr="MDR Provider" attr=mdr_provider_id justify=left link=no>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag justify=left>
+<PDM_MACRO name=lsCol hdr="Opis" attr=cmdb_asset_id.description justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+
+<PDM_WSP>

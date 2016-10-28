@@ -1,0 +1,167 @@
+<PDM_IF0>
+detail_sa_queue.htmpl WHEN PRESENTED: When we need to display details of
+a SA Queue (sa_queue factory) INTENT: Display details of a SA Queue
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+		var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Queue Detail"</PDM_FMT>;
+		var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Queue ${args.COMMON_NAME}"</PDM_FMT>;
+		var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Queue ${args.COMMON_NAME}"</PDM_FMT>;
+	</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+		var escalationTimeoutFldNum;
+		var escalationTargetQueueFldNum;
+
+		argPersistentID = "$args.persistent_id";
+
+		function preSaveTrigger()
+		{
+			frmMain=document.forms["main_form"].elements;
+			
+			var isDefault = frmMain["SET.isDefault"];
+			var isActive = frmMain["SET.isActive"];
+			
+			
+			if (isDefault!=undefined && isDefault.value == 1 && isActive.value == 0) {
+				alert("Default queue must be set to active!");
+				return false;
+			}
+			
+			var enableAutoEsc = frmMain["SET.enableAutoEscalation"];
+			
+			if (enableAutoEsc.value == 1) {	// checked auto-escalation checkbox
+				var escTimeout = frmMain["SET.escalationTimeout"];
+				var escTargetQueue = frmMain["SET.escalationTargetQueue"];
+				
+				if (escTimeout.value != "" && (escTimeout.value < 1 || escTimeout.value > 99999)) {
+					alert("Timeout is out of bounds (1-99999)!");
+					return false;
+				}
+				
+				return true; 				
+			}
+			else {
+				frmMain["SET.escalationTimeout"].value = "";
+				frmMain["SET.escalationTargetQueue"].value = "";
+				document.main_form.elements["KEY.escalationTargetQueue"].value = "";
+   				return true;
+   			}
+		}
+		
+		//handles displaying of fields related to Auto-transfer according to users auto-transfer checkbox
+		function autoTransferFields (value)
+		{ 
+			<PDM_IF "$prop.form_name_3" == "ro" >
+				return;
+			</PDM_IF>
+			
+			if ( typeof value == "undefined" ) {
+				value = document.main_form.elements["CBX.enableAutoEscalation"].checked;
+			}
+		
+			if (value) {
+				document.main_form.elements["SET.enableAutoEscalation"].value = 1;
+			}
+			else {
+				document.main_form.elements["SET.enableAutoEscalation"].value = 0;
+			}
+			
+			if ( typeof escalationTimeoutFld == "undefined" )
+      			escalationTimeoutFld = findFieldAndLabelFromTable("escalationTimeout",1);
+		
+		 	if ( typeof escalationTargetQueuetFld == "undefined" )
+      			escalationTargetQueuetFld = findFieldAndLabelFromTable("escalationTargetQueue",1);
+		
+			if (value == false)
+			{
+				escalationTimeoutFld[0].style.display = "none";
+				escalationTimeoutFld[1].style.display = "none";
+				
+				escalationTargetQueuetFld[0].style.display = "none";
+				escalationTargetQueuetFld[1].style.display = "none";
+				//make the fields not required
+				_dtl.fieldToValidate[escalationTimeoutFldNum].is_required = 0;
+         			_dtl.fieldToValidate[escalationTargetQueueFldNum].is_required = 0;
+			}
+			else {
+				escalationTimeoutFld[0].style.display = "";
+				escalationTimeoutFld[1].style.display = "";
+
+				escalationTargetQueuetFld[0].style.display = "";
+				escalationTargetQueuetFld[1].style.display = "";
+				//make the fields required
+				_dtl.fieldToValidate[escalationTimeoutFldNum].is_required = 1;
+         			_dtl.fieldToValidate[escalationTargetQueueFldNum].is_required = 1;
+			}
+		}
+		
+		function unloadActions()
+		{
+   			if ( _dtl.edit )
+      			unload_check();
+		}
+	</SCRIPT>
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()" onLoad="autoTransferFields()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER><SCRIPT LANGUAGE="JavaScript">
+		
+<PDM_MACRO name=dtlForm factory="sa_queue">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa kolejki" attr="queueName" colspan="3" size="100">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa wyświetlana użytkownika końcowego" attr="customerDisplayName" colspan="3" size="100">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "${args.isDefault}" != "1">
+<PDM_MACRO name=dtlCheckbox hdr="Domyślnie" attr="isDefault">
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="isActive">
+<PDM_ELSE>
+<PDM_MACRO name=dtlCheckboxReadonly hdr="Domyślnie" attr="isDefault">
+<PDM_MACRO name=dtlReadonly hdr="Status" attr="isActive">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Default Chat Preset" attr="responseID" autofill="no" colspan=2 factory="sa_chat_preset" list_display="$list.categoryID.groupName -> $list.responseName" list_orderby="categoryID" rel_attr_name="REL_ATTR" use_list_display=1 whereclause="responseType=0 OR responseType=1">
+<PDM_MACRO name=dtlLookup hdr="Queue Hours" attr="workshift" factory="wrkshft" make_required="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Issue Category" attr="isscat_rel" factory="isscat">
+<PDM_MACRO name=dtlLookup hdr="Incident/Request Area" attr="pcat_rel" factory="pcat">
+<PDM_MACRO name=dtlStartExpRow label="Auto Transfer" colspan="4" exp_rows="1" form_name="detail_escalation">
+<PDM_MACRO name=dtlCheckbox hdr="Auto-transfer users" attr="enableAutoEscalation" evt="onClick='autoTransferFields(this.checked)'">
+<PDM_IF "$prop.form_name_3" == "edit" || "$args.enableAutoEscalation" == "1">
+<PDM_MACRO name=dtlTextbox hdr="Timeout (in seconds)" attr="escalationTimeout" make_required="yes" size="4">
+					escalationTimeoutFldNum = _dtl.fieldToValidate.length - 1;
+					
+<PDM_MACRO name=dtlLookup hdr="Docelowa kolejka" attr="escalationTargetQueue" factory="sa_queue_active" make_required="yes">								
+					escalationTargetQueueFldNum = _dtl.fieldToValidate.length - 1;								
+				
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+	</SCRIPT>
+
+  
+<PDM_MACRO name=startNotebook hdr=sa_queue_nb>
+<PDM_MACRO name=TAB title="End User Display Name Localization" height=300 src="OP=SEARCH+FACTORY=sa_queue_localized+QBE.EQ.delete_flag=0+QBE.EQ.queueID=$args.id+QBE.EQ.localizationID.enabled=1+QBE.NE.localizationID.is_default=1+KEEP.PAGE_CREATE_MODE=$args.id">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+  <PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+
+<PDM_WSP>

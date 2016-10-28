@@ -1,0 +1,326 @@
+<PDM_IF 0>
+detail_cialg.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single CI Activity Log
+INTENT:
+    Display the detail info for the CI Activity Log
+VARIABLES:
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="detail_cialg.htmpl+PERSID={cialg:}+FACTORY=cialg+OP=UPDATE" factory=cialg>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script language="JavaScript">
+<PDM_IF "$prop.form_name_3" == "edit" && "$args.ACTIVITY_LOG_TYPE" != "">
+var form_title = "Create New Activity for Configuration Item";
+<PDM_ELIF "$prop.form_name_3" == "ro">
+var form_title = "Display Activity for Configuration Item $args.ci_id.name";
+<PDM_ELSE>
+var form_title = "Update Activity for Configuration Item $args.ci_id.name";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl wm=no>
+<script language="JavaScript">
+var alg_factory = "cialg";
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argRefNum = "$args.ref_num";
+var argID = "$args.id";
+var hiddenSubmit = 1;
+if("$env.NX_OPEN_SUBMIT_FORM_ON_TICKET" == "1")
+	hiddenSubmit = 0;
+</script>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_submit_kd.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript">
+
+var w_name = get_popup_window_name("ci_window");
+
+function loadActions()
+{
+   if ( _dtl.edit )
+      load_from_scratchpad("0");
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+var form_vars = new Array();
+        
+function save_and_submit_knowledge() {
+
+
+<PDM_IF "$args.ACTIVITY_LOG_TYPE" == "">
+	var parentID = "$args.ci_id.id";
+<PDM_ELSE>
+	var parentID = "$args.id";
+</PDM_IF>
+	
+	//	Now we go looking for all detail instances of 
+	//	the owning ticket
+	var dtlWin = void(0);
+	if ( typeof ahdtop == "object" && ahdtop != null ) {
+		for ( var window_name in ahdtop.AHD_Windows ) {
+			var ahdwin = ahdtop.AHD_Windows[window_name];
+			
+			if ( typeof ahdwin == "object" &&
+               typeof ahdwin.closed == "boolean" &&
+               ! ahdwin.closed ) {
+               
+				var cai_main = ahdwin.cai_main;
+				if ( typeof cai_main != "object" || cai_main == null )
+					cai_main = ahdwin.content;
+                
+				if ( typeof cai_main == "object" &&
+                  cai_main != null &&
+                  typeof cai_main.argID != "undefined" &&
+                  cai_main.argID == parentID &&
+                  typeof cai_main.top.workframe == "object" ) 
+				{
+				
+					cai_main.top.workframe.SkipInitialFocus = 1;  
+					ahdwin.top.workframe.SkipInitialFocus = 1; 
+				} 
+			}
+		}  // FOR loop end	
+	} 
+	
+<PDM_IF "$prop.form_name_3" == "ro" || "$args.ACTIVITY_LOG_TYPE" == "">
+	document.main_form.elements["SET.submit_knowledge"].value = hiddenSubmit;
+<PDM_ELSE>
+	document.main_form.elements["SET.cialg.submit_knowledge"].value = hiddenSubmit;
+</PDM_IF>
+	if(hiddenSubmit)
+	{
+		if (_dtl.edit)
+		{
+			detailSave();
+		}	
+		else
+		{
+			var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+"+OP=ALG_SUBMIT_KD"+
+			"+alg_factory=cialg+cialg_id=" +$args.id;
+			var divsubmitKD = document.getElementById("divsubmitKD");	
+			divsubmitKD.innerHTML = "<iframe id='submitKD' name='submitKD' title='Hidden frame - do not navigate here' src='" + url + "'></iframe>";	
+			set_action_in_progress(ACTN_SAVE);
+		}
+		return;
+	}
+	
+	if (_dtl.edit) {	
+	    form_vars["RESOLUTION"] =
+<PDM_IF "$args.ACTIVITY_LOG_TYPE" == "">
+              document.main_form.elements["SET.description"].value;
+<PDM_ELSE>
+              document.main_form.elements["SET.cialg.description"].value;
+</PDM_IF>
+	}
+
+ahdtop.SetSolutionText(form_vars["RESOLUTION"],form_vars["SD_OBJECT_PERSID"]);
+	// Get the latest from the parent CI, which should
+	//	be our opener.  This is necessary to get the latest
+	//	values from the editable ticket.  Combo boxes require
+	//	special handling - see below.
+	if (null != top.opener && !top.opener.closed)
+	{
+	    if (typeof top.opener._dtl != "undefined" && top.opener._dtl.edit)
+	    {
+		
+		var func = top.opener.detailValueOf;
+		form_vars["SD_CATEGORY"] = func("KEY.category"); 
+		form_vars["PRODUCT"] = func("KEY.product"); 
+		form_vars["SD_PRODUCT_ID"] = func("SET.product"); 
+		form_vars["SD_ROOTCAUSE"] = func("KEY.rootcause"); 
+		form_vars["SD_ROOTCAUSE_ID"] = func("SET.rootcause"); 
+		form_vars["PROBLEM"] = func("SET.description"); 
+		form_vars["SUMMARY"] = func("SET.summary"); 
+	
+		// If parent was editable, we might've been passed some 
+		//	unique, non-id values so we can lookup their ids for KT.
+		//	These attributes are usually SRELs represented by a SELECT
+		//	element, which doesn't store their ids.
+		//	See logSolution() in menubar.js
+		// note: pdm_if seems to have trouble with the string "0" in 
+		//	comparisons...
+		{
+			<PDM_IF "$args.KEEP.pri_enum" : "[0-9]+">
+			    form_vars["SD_PRIORITY_ID"] = "$args.KEEP.pri_enum";
+			<pdm_else>
+			    form_vars["SD_PRIORITY_ID"] = "";
+			</pdm_if>
+			
+			<PDM_IF "$args.KEEP.imp_enum" : "[0-9]+">
+			    form_vars["SD_IMPACT_ID"] = "$args.KEEP.imp_enum";
+			<pdm_else>
+			    form_vars["SD_IMPACT_ID"] = "";
+			</pdm_if>
+		}
+	    }
+	
+	var features="directories=no"+
+		",location=no"+
+		",height=" + popupHeight(LARGE_POPUP) +
+		",width=" + popupWidth(LARGE_POPUP)+
+		",status=no";
+		
+ahdtop.SetProblemText(form_vars["PROBLEM"],form_vars["SD_OBJECT_PERSID"]);	    
+<PDM_IF "$prop.form_name_3" == "ro">
+	    popup_window(
+<PDM_ELSE>
+	    top.opener.popup_window(
+</PDM_IF>  
+				    "", "CREATE_NEW", popupWidth(LARGE_POPUP), popupHeight(MEDIUM_POPUP), 
+				    features, "FACTORY=KD",
+				    addSubmitKnowledgePreSet(form_vars, "SD_OBJECT_PERSID", true),
+				    addSubmitKnowledgePreSet(form_vars, "SUMMARY", true),
+				    addSubmitKnowledgePreSet(form_vars, "SD_CATEGORY", true),
+				    addSubmitKnowledgePreSet(form_vars, "SD_ASSET_ID", true),
+				    addSubmitKnowledgePreSet(form_vars, "SD_PRODUCT_ID", true),
+				    addSubmitKnowledgePreSet(form_vars, "SD_ROOTCAUSE_ID", true),
+				    addSubmitKnowledgePreSet(form_vars, "SD_PRIORITY_ID", true),
+				    addSubmitKnowledgePreSet(form_vars, "SD_IMPACT_ID", true));
+	
+	/*	if(action_in_progress())
+		{
+			return;
+		}
+		else
+		{
+			set_action_in_progress(ACTN_SAVE);
+		}*/
+	}
+	else 
+	{
+	    alertmsg("Unable_to_submit_the_knowledge");
+	}
+	
+	
+	if (_dtl.edit)
+	    detailSave();
+}
+
+function KT_REPLY(sOP,msg)
+{
+	set_action_in_progress(ACTN_COMPLETE);
+	if (msg[0] == "ERROR")
+	{
+		alert (msg[1]);
+	}
+	else
+	{
+		alert ("Knowledge Document Created.");
+	}
+}
+
+var canUpdate = 1;
+
+<PDM_IF "$prop.form_name_3" == "ro" || "$args.ACTIVITY_LOG_TYPE" == "">
+	<pdm_if "$env.NX_EDIT_INACTIVE" == "No" && $args.ci_id.active == 0>
+		canUpdate = 0;
+	</pdm_if>
+<pdm_else>
+	<pdm_if "$env.NX_EDIT_INACTIVE" == "No" && $args.active == 0>
+		canUpdate = 0;
+	</pdm_if>
+</pdm_if>
+
+</script>
+</head>
+<body class="detailro" onload="loadActions()" onunload="unloadActions()">
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="CI Activity">
+<center>
+
+<script language="JavaScript">
+
+<PDM_IF "$prop.form_name_3" == "ro" || "$args.ACTIVITY_LOG_TYPE" == "">
+<!-- Existing activity log - factory is cialg -->
+ahdframeset.top_splash.next_persid = "$args.ci_id";
+<PDM_MACRO name=dtlForm factory=cialg>
+<PDM_MACRO name=dtlStart>
+if ( _dtl.edit )
+   docWriteln("<input type='hidden' name='HTMPL' value='show_main_detail.htmpl'>");
+docWriteln("<input type='hidden' name='KEEP.IsModified' value='1'>");
+
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Typ aktywności" attr=type>
+// We can't use MACRO here because when parsing HTMPL under ci, the variable
+// $args.analyst.COMMON_NAME gets changed to $args.analyst. It ends up showing 
+// UUID on the screen.  
+detailRowHdr("Analyst");
+detailSetReadonlyRowData("assignee","$args.analyst.combo_name");
+<PDM_IF "$prop.view_internal" == "1">
+<PDM_MACRO name=dtlCheckbox hdr="Wewnętrzne?" attr=internal off="No" on="Yes">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Systemowy znacznik czasu" attr=system_time>
+<PDM_IF "$prop.form_name_3" == "edit" && "$env.NX_ACTIVITY_LOG_SECURITY" == "WRITE_NEW">
+<PDM_MACRO name=dtlDateReadonly hdr="Data czynności" attr=time_stamp>
+<PDM_MACRO name=dtlReadonly hdr="Czas spędzony" attr=time_spent>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa MDR" attr=mdr_name>
+<PDM_MACRO name=dtlReadonly hdr="Klasa MDR" attr=mdr_class>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis użytkownika" attr=description>
+<PDM_ELSE>
+<PDM_MACRO name=dtlDate hdr="Data czynności" attr=time_stamp>
+<PDM_MACRO name=dtlTextbox hdr="Czas spędzony" attr=time_spent evt="onBlur='validate_duration_ts(this)'" maxlength=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa MDR" attr=mdr_name>
+<PDM_MACRO name=dtlReadonly hdr="Klasa MDR" attr=mdr_class>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=description colspan=3 keeplinks=yes rows=8 size=80 spellchk=no>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis systemu" attr=action_desc colspan=3>
+<PDM_ELSE>
+<!-- New activity log - factory is cialg -->
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+editing = 0;
+<PDM_MACRO name=dtlForm factory=cialg>
+
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+
+<PDM_MACRO name=dtlStart>
+docWriteln("<input type='hidden' name='HTMPL' value='show_main_detail.htmpl'>");
+docWriteln("<input type='hidden' name='SET.cialg.ci_id' value='$args.cialg.ci_id'>");
+docWriteln("<input type='hidden' name='SET.cialg.analyst' value='$cst.id'>");
+docWriteln("<input type='hidden' name='SET.cialg.type' value='$args.ACTIVITY_LOG_TYPE'>");
+
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("Activity Type");
+<PDM_LIST PREFIX=list FACTORY=aty DOMSET="MLIST_STATIC" WHERE="code='$args.ACTIVITY_LOG_TYPE'">
+detailSetReadonlyRowData("aty_sym","$list.sym");
+</PDM_LIST>
+detailRowHdr("Analyst");
+detailSetReadonlyRowData("cst_combo_name","$cst.combo_name");
+<PDM_IF "$prop.view_internal" == "1">
+<PDM_MACRO name=dtlCheckbox hdr="Wewnętrzne?" attr=cialg.internal off="No" on="Yes">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDateReadonly hdr="Znacznik czasu" attr=cialg.system_time>
+<PDM_MACRO name=dtlDate hdr="Data czynności" attr=cialg.time_stamp>
+<PDM_MACRO name=dtlTextbox hdr="Czas spędzony" attr=cialg.time_spent evt="onBlur='validate_duration_ts(this)'" maxlength=100>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=cialg.description colspan=3 keeplinks=yes rows=8 size=80 spellchk=no>
+</PDM_IF>
+
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+<div style="display:none" id="divsubmitKD"></div>
+</body>
+</html>

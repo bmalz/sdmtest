@@ -1,0 +1,64 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	When we need to display a list of Workflow Templates
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Workflow Template Search";
+var hdrTitleList = "Workflow Template List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Workflow Template">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart button=false export=no factory=wftpl>
+document.write('<input type="hidden" name="QBE.EQ.object_type" value="$args.QBE.EQ.object_type">');
+document.write('<input type="hidden" name="QBE.EQ.object_attrval" value="$args.QBE.EQ.object_attrval">');
+
+<PDM_MACRO name=sfEnd>
+
+var msgFoundNone = "No workflow templates found";
+var msgFound1 = "1 workflow template found";
+var msgFound = "%1 workflow templates found";
+var msgFoundMore = "%1 workflow templates found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired workflow template";
+
+<PDM_IF "$args.KEEP.IS_EDIT" != "edit">
+function resultSetCustomContextAddMiddle(ctxMenu) {
+   
+<PDM_IF "$args.QBE.EQ.object_type" == "chg">
+      ctxMenu.addItem(msgtext("Delete"),"delete_wftpl_chgcat('chgcat:'+'QBE.EQ.object_attrval', self.activePersid)");
+   
+<PDM_ELIF "$args.QBE.EQ.object_type" == "iss">
+      ctxMenu.addItem(msgtext("Delete"),"delete_wftpl_isscat('isscat:'+'QBE.EQ.object_attrval', self.activePersid)");
+   
+</PDM_IF>
+}
+</PDM_IF>
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Kolejność" attr=sequence link=yes>
+<PDM_MACRO name=lsCol hdr="Zadanie" attr=task>
+<PDM_MACRO name=lsCol hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP mode=edit>
+
+<PDM_IF 0>
+@(#)$Id: list_wftpl.htmpl ASPEN.3 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>

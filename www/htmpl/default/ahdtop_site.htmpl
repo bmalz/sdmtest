@@ -1,0 +1,14 @@
+<!-- <PDM_IF 0>
+@(#)\$Id: ahdtop_site.htmpl,v 1.1 2006/11/01 18:00:42 olsjo01 Exp $
+This file modifies variables created in ahdtop or creates new ones.
+Access to these variables is available from the ahdtop object in all forms.
+
+You should place your customized version of ahdtop_site.htmpl in
+site/mods/htmpl/www/web/default/ahdtop_site.htmpl
+</PDM_IF> -->
+<PDM_PRAGMA RELEASE=110>
+<!-- Start of ahdtop_site.htmpl -->
+<script type="text/javascript">
+</script>
+<script type="text/javascript" src="$CAisd/scripts/msg_cat_site.js"></script>
+<!-- End of ahdtop_site.htmpl -->

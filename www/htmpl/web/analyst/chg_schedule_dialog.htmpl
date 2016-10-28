@@ -1,0 +1,333 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<html lang="en"><head>
+<link rel="stylesheet" type="text/css" href="$CAisd/css/schedule.css">
+<link rel="stylesheet" type="text/css" href="$CAisd/css/searchfilter.css">
+<style type="text/css">
+</style>
+
+
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+	var hdrTitle = "Scheduling Dialog"; 
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl> 
+<PDM_INCLUDE FILE=list_chgsched_config.htmpl> 
+<script type="text/javascript" src="$CAisd/scripts/date_chooser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/schedule_dialog.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/val_type.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/wf_visible.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/webtab.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/timer.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/comboname.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+	startScrollbar(false,true);
+	var gridDate = new Date();
+	gridDate.setTime($gridDate * 1000);
+
+	var schedActiveView ;  //1 For Daily View, 7 for weekly View
+	schedActiveView = $viewType;
+
+	var chgPersId ;
+	chgPersId = '$chgPersID';
+
+	var chgRefNum ;
+	chgRefNum = '$chgRefNum';
+
+	var maxCICount ;
+	maxCICount = $args.maxCICount;
+	
+	var cisToBeAttached;
+	cisToBeAttached = maxCICount;
+	
+	var userInputDate ;
+	userInputDate = '$userInputDate';
+
+	var userInputDuration ;
+	userInputDuration = '$userInputDuration';
+
+	var totalCICount = $args.ciCount;
+
+	if(schedActiveView == 7)
+	{
+	totalNumColumns = totalNumColumnsWeekView;
+
+	}
+	else
+	{
+	totalNumColumns = totalNumColumnsDayView;
+	}
+
+	//if(userInputDate == "")
+	//{
+	//userInputDate = $gridDate;
+	//}
+
+
+	var cellClick;
+	cellClick = '$cellClick';
+
+	var isEdit = ahdframeset.opener.isEditForm;
+
+	var isMaxMsg = "";
+	isMaxMsg= '$AlertMsg';
+
+	propFactory = "chg";
+
+function display_all()
+{
+    var d1 = document.getElementById("schedDiv");
+    var d2 = document.getElementById("HeaderDiv");
+    var d3 = document.getElementById("ScriptDiv");
+    if (typeof d1 == "object" && d1 != null)
+	d1.style.display = "block";
+    if (typeof d2 == "object" && d2 != null)
+	d2.style.display = "block";
+    if (typeof d3 == "object" && d3 != null)
+	d3.style.display = "block";
+}
+
+</script>
+<!--    
+//************************DATA STORAGE CHANGE ORDER********************************************//
+//var schedCIObjectArray = new Array();  ---- This is the Master array which contains details of all rows.
+//Each object of this array is of type  SchedCIObject( configItem ).
+//schedCIObjectArray[this.configItem] = new SchedCIObject(this.configItem);
+//Each object of SchedCIObject contains the name of CI and the associated events in an array.
+//Each event of SchedCIObject is of type schedChgOrder
+
+
+
+//************************MAIN TABLE DISPLAY LOGIC********************************************//
+//tableCellObject(rowName,colNum) ---- Each cell is a object.
+//Properties of this object are rowNum, colNum, startTicks,endTicks, ChangeOrder
+//Events are of type tableCellChgOrderObject()
+//tableCellObjectArray[rowObject] = new Array();
+-->
+</head>
+			
+
+ 
+<body class="detailro" onload="display_all();javascript:fillScheduleStartDate()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+
+<script>
+
+function add_button_to_tab_banner()
+{
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="View Schedule" hotkey_name="View Schedule" id="btn001" width=0 disabled="defer"
+    func="clickViewSchedule(document.main_form.stDate.value)">
+<PDM_MACRO NAME=button caption="Update Schedule" hotkey_name="Update Schedule" id="btn002" width=0 disabled="defer"
+    func="clickUpdateSchedule(document.main_form.stDate.value,document.main_form.stDuration.value)">
+<PDM_MACRO NAME=button caption="Cancel" hotkey_name="Cancel" id="btncncl" btnType="negative" width=0 disabled="defer"
+    func="clickCancel()">
+<PDM_MACRO NAME=btnEndRow>
+}
+
+
+<PDM_MACRO NAME=tabBanner title="Schedule for Change Order $chgRefNum" add_btns=isEdit show_bar=false>
+	build_alertmsg();
+	if(isMaxMsg == 'Y')
+	{
+		show_response(msgMaxCI);
+	}
+	var _dtl = new DetailForm("chg","" , "", false,"skip");
+	setTempKeyDownHandler(detailKeyDown);
+
+</script>
+
+<!--  Table to create header starts here -->
+<table width="100%">
+	<tr >
+	<td align="right">
+	<img src= '/CAisd/img/day_cal.jpg' style='vertical-align: middle'  height=15 width=16 onClick= javascript:dayViewButton() />
+	<a href='javascript:dayViewButton()' class=r5_datalink>
+	<script> document.write(dayLink) </script>
+	</a>
+
+	<img src= '/CAisd/img/week_cal.jpg' style='vertical-align: middle'  height=15 width=16 onClick= javascript:weekViewButton() />
+	<a href='javascript:weekViewButton()' class=r5_datalink>
+	<script> document.write(msgtext("Week")) </script>
+	</a>
+	</td>
+	</tr>
+</table>
+
+<!--  Table to create header ends here -->
+
+<PDM_FORM name=main_form>
+
+<table id="Table1" width="100%">
+	<tr>
+	<td align="center">
+
+		<script>
+			var tableEditStr;
+			var tableViewStr;
+			tableViewStr = "<table width='100%'>";
+			tableEditStr = "<table width='40%'>";
+			if(isEdit)
+			{
+			document.write(tableEditStr);
+			}
+			else
+			{
+			document.write(tableViewStr);
+			}
+
+		</script>
+		<tr>
+		<script>
+			
+			// For Schedule Start Date (edit) 
+			var hdrtext = "Schedule Start Date";
+			var titletext = msgtext("Pop_up_%1_calendar_helper",hdrtext); // Pop up %1 calendar lookup
+			var editStr = "<th align='left' valign='baseline' ";  
+			if ( !ahdtop.cstUsingScreenReader )
+			    editStr += "nowrap";
+			editStr += "><a href='javascript:void(0)' class='lookup1em' " + 
+				   "onClick=\"popup_date_helper('main_form','stDate',12222000);\" " + 
+				   "id=\"dflnk_1_1\" onfocus=\"changeFieldFocus(this);\"" +
+				   " onblur=\"changeFieldBlur(this);\" tabindex=-1 ";
+
+			var lbltext = hdrtext;
+			if ( ahdtop.cstUsingScreenReader ) 
+			{
+			    lbltext = msgtext("%1_Lookup0",hdrtext); // "%1 Lookup" 
+			    editStr += 'title="' + msgtext("%1_-_to_navigate_to_edit_field",titletext) + '">';
+			    // %1 - press down arrow to navigate to edit field
+			}
+			else 
+			{
+			    editStr += 'title="' + titletext + '" onMouseOver="window.status=\'' +
+				       msgtext("Popup_search_window_for_%1",hdrtext.toLowerCase()).replace(/&#39;/g, "'").replace(/\'/g,"\\\'") +
+				       '\';return true" ' +
+				       'onMouseOut="window.status=window.defaultStatus;return true">';
+			    editStr += '<img class="gn_container_no_border" style="vertical-align:middle" src="' +
+				       get_IMG_path("IMG_lookup_cal") + '" alt="' +
+			    	       msgtext("Pop_up_%1_calendar_helper",hdrtext) + '">&nbsp;'; // Pop up calendar helper
+			}
+			editStr += "<span class='lookup' scope='col'>" + lbltext + "</span></a>";
+			editStr += "</th>";
+			
+			// For Duration (edit)
+			var editStrDuration = "<th align='left' valign='baseline' class='labeltext' scope='col'>Duration</th>";
+			// For Schedule Start Date (readonly)    
+			var viewStr = "<th align='left' valign='baseline' class='detailro' scope='col'>Schedule Start Date</th>" ;
+			
+			// For Duration (readonly)
+			var viewStrDuration = "<th align='left' valign='baseline' class='detailro' scope='col'>Duration</th>";
+
+
+			if(isEdit)
+			{
+			document.write(editStr);
+			document.write(editStrDuration);
+			}
+			else
+			{
+			document.write(viewStr);
+			document.write(viewStrDuration);
+			}
+			document.writeln("<th></th><th></th><th></th>");
+		</script>
+		</tr>
+		<tr>
+		<script>
+
+			// For Schedule Start Date (edit) 
+			var titleStr = "Schedule Start Date";
+			var editStrDate = "<td align='left' valign='top' ><input type=text  name=stDate id='df_1_1'  onblur=\"javascript:changeFieldBlur(this);\" onfocus=\"javascript:changeFieldFocus(this);\"";
+			if ( ahdtop.cstUsingScreenReader )
+			{
+			    editStrDate += ' title="' + 
+					   msgtext("%1_-_autofill;_up_arrow_for_lo", titleStr) + '"';
+			} 
+
+			editStrDate += "></td>";
+
+			// For Schedule Start Date (readonly) 
+			var viewStrDate;
+			if ( ahdtop.cstUsingScreenReader )
+			{
+			    viewStrDate = "<td align='left' valign='top'><input type=text  name=stDate id='stDate'" + 
+					  " readonly title=\"" + titleStr + 
+					  "\" size=20 gn_disabled_text'></td>";
+			}
+			else 
+			{
+			    viewStrDate = "<td align='left' width='50%' class='detailro' id='stDate'></td>" ;
+			}
+
+			titleStr = "Duration";
+			
+			// For Duration (edit) 
+			editStrDuration = "<td align='left' valign='top' >" + 
+					  "<input type=text name=stDuration id='Textbox3'  onblur=\"javascript:changeFieldBlur(this);\" onfocus=\"javascript:changeFieldFocus(this);\" onchange=\"javascript:validate_duration_ts(this);\"" + 
+					   " title=" + titleStr + "></td>";
+
+			// For Duration (readonly)
+			if ( ahdtop.cstUsingScreenReader )
+			{
+			    viewStrDuration = "<td align='left' valign='top' ><input type=text  name=stDuration id='stDuration'" + 
+					  " readonly title=\"" + titleStr + 
+					  "\" size=20 gn_disabled_text'></td>";
+			}
+			else 
+			{
+			    viewStrDuration = "<td align='left' width='50%' class='detailro' id='stDuration'></td>" ;
+			}    
+
+			if(isEdit)
+			{
+			document.write(editStrDate);
+			document.write(editStrDuration);
+			}
+			else
+			{
+			document.write(viewStrDate);
+			document.write(viewStrDuration);
+			}
+		</script>			
+		
+		</tr>
+		</table>	
+		</td>
+		</tr>
+		</table>
+<br>
+
+<div id="schedDiv" style="display:none"></div>
+<div id="HeaderDiv" style="display:none"></div>
+<div id="ScriptDiv" style="display:none"></div>
+<script type="text/javascript">
+loadMWs('', '', '');
+loadBWs('', '', '');
+$inputJavascript
+drawTable();
+</script>
+
+</PDM_FORM>		
+<script type="text/javascript">
+//var endTimeTest = new Date();
+//alert((endTimeTest.getTime() - dateTimerStart.getTime())/1000);
+</script>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+
+

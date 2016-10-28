@@ -1,0 +1,164 @@
+<PDM_IF 0>
+@(#)$Id: html_editor_tabs.htmpl ASPEN.3 2011/05/19 07:04:31 laivi02 Exp $
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/html_editor.js"></script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script>
+var currMode=0;
+function ChangeMode(bMode)
+{
+	if(bMode == currMode)
+		return;
+		
+	var html = parent.ahdframe.editor.getHTML();
+	if(!checkTags(html))
+		return;		
+		
+	currMode = bMode;
+	delay_tabClick(bMode);
+	parent.ahdframe.exec_cmd('htmlmode');
+	//bMode==1 is htmlmode
+	if (bMode == 1)
+	{
+		parent.ahdframe.activateDropdown();
+	}
+}
+
+function delay_tabClick(id)
+{
+	var tabLeft, tabMiddle, tabRight, tabHref;
+
+	document.getElementById("tableft" + id).className = "tab_selected_left tab_below_content_sel_left";
+	document.getElementById("tableft" + id ).style.backgroundImage="url('$CAisd/img/portal_tab_selected_center.png')";
+	
+	document.getElementById("tabmiddle" + id ).className="tab_selected_center tab_below_content_sel_cent";
+	document.getElementById("tabmiddle" + id ).style.backgroundImage="url('$CAisd/img/portal_tab_selected_center.png')";
+		
+	document.getElementById("tabright" + id ).className="tab_selected_right tab_below_content_sel_right";
+	document.getElementById("tabright" + id ).style.backgroundImage="url('$CAisd/img/portal_tab_selected_center.png')";
+	
+
+		
+	document.getElementById("tabhref" + id).className="tab_selected_text";
+
+   if(id == 0)
+		id = 1;
+	else
+		id = 0;
+   
+	document.getElementById("tableft" + id).className = "tab_unselected_left tab_below_content_unsel_left";
+	document.getElementById("tableft" + id ).style.backgroundImage="url('$CAisd/img/portal_tab_unselected_center.png')";
+	
+	document.getElementById("tabmiddle" + id ).className="tab_unselected_center tab_below_content_unsel_cent";
+	document.getElementById("tabmiddle" + id ).style.backgroundImage="url('$CAisd/img/portal_tab_unselected_center.png')";
+		
+	document.getElementById("tabright" + id ).className="tab_unselected_right tab_below_content_unsel_right";
+	document.getElementById("tabright" + id ).style.backgroundImage="url('$CAisd/img/portal_tab_unselected_center.png')";
+	
+	document.getElementById("tabhref" + id).className="tab_unselected_text";
+	
+}
+
+function bnOk_onclick()
+{
+	var html = parent.ahdframe.editor.getHTML();
+	if(!checkTags(html))
+		return;
+		
+	parent.ahdframe.clickedOnOK = true;
+	html = parent.ahdframe.editor.stripBaseURL(html);
+	html = parent.ahdframe.restoreCR(html);  // Call this after calling stripBaseURL
+	html = AddTargetToAnchors(html);
+	if(("$prop.browser" == "IE")&&(html.substr(0, 11)== "<P><HR></P>"))
+	{
+		var temphtml=html.substr(11);
+		html="<HR>"+temphtml;
+	}
+	top.opener.SetHTML(html,"$args.fieldName","$args.divId");
+	top.close();
+}
+
+function bnCancel_onclick()
+{
+	top.close();
+}
+</script>
+</head>
+<BODY >
+<DIV style="top:0;left:5;position:absolute;padding:0;">
+<TABLE  cellSpacing=0 cellPadding=0 align=left class=gn_container_no_border>
+<TBODY>
+<TR vAlign=bottom>
+	<TD align=middle valign=top>
+		<TABLE cellSpacing=0 cellPadding=0 class=gn_container_no_border>
+			<TBODY>
+				<TR>
+					<TD class='tab_selected_left tab_below_content_sel_left' id=tableft0 style="BACKGROUND-IMAGE: url($CAisd/img/portal_tab_selected_center.png)" vAlign=top noWrap HEIGHT=0 width=0 height=24>
+						<IMG height=8 alt="" src="$CAisd/img/space1x1.gif" class=gn_container_no_border>
+					</TD>
+					<TD class='tab_selected_center tab_below_content_sel_cent' id=tabmiddle0 style="BACKGROUND-IMAGE: url($CAisd/img/portal_tab_selected_center.png)" noWrap align=middle width=117>
+						<A class=tab_selected_text id=tabhref0 onblur=window.status=window.defaultStatus; onfocus='window.status="Knowledge Architect main form";' href="javascript:ChangeMode(0);">Design</A>
+					</TD>
+					<TD class='tab_selected_right tab_below_content_sel_right' id=tabright0 style="BACKGROUND-IMAGE: url($CAisd/img/portal_tab_selected_center.png)" vAlign=top noWrap width=0 height=24>
+						<IMG height=8 alt="" src="$CAisd/img/space1x1.gif" class=gn_container_no_border>
+					</TD>
+				</TR>
+			</TBODY>
+		</TABLE>
+	</TD>
+	<TD align=middle>
+		<TABLE cellSpacing=0 cellPadding=0 class=gn_container_no_border>
+			<TBODY>
+				<TR>
+					<TD>
+					</TD>
+				</TR>
+			</TBODY>
+		</TABLE>	
+	</TD>	
+	<TD align=middle valign=top>
+		<TABLE cellSpacing=0 cellPadding=0 class=gn_container_no_border>
+		<TBODY>
+			<TR>
+				<TD class='tab_unselected_left tab_below_content_unsel_left' id=tableft1 style="BACKGROUND-IMAGE: url($CAisd/img/portal_tab_unselected_center.png)" vAlign=top noWrap HEIGHT=0 width=0 height=24>
+					<IMG height=8 alt="" src="$CAisd/img/space1x1.gif" class=gn_container_no_border>
+				</TD>
+				<TD class='tab_unselected_center tab_below_content_unsel_cent' id=tabmiddle1 style="BACKGROUND-IMAGE: url($CAisd/img/portal_tab_unselected_center.png)" noWrap align=middle width=117>
+					<A class=tab_unselected_text id=tabhref1 onblur=window.status=window.defaultStatus; onfocus='window.status="Service Desk main form";' href="javascript:ChangeMode(1)">Source</A>
+				</TD>
+				<TD class='tab_unselected_right tab_below_content_unsel_right' id=tabright1 style="BACKGROUND-IMAGE: url($CAisd/img/portal_tab_unselected_center.png)" vAlign=top noWrap width=5 height=24>
+					<IMG height=8 alt="" src="$CAisd/img/space1x1.gif" class=gn_container_no_border>
+				</TD>
+			</TR>
+		</TBODY>
+		</TABLE>
+	</TD>
+	<TD align=middle>
+		<TABLE cellSpacing=0 cellPadding=0 class=gn_container_no_border>
+			<TBODY>
+				<TR>
+					<TD width=120>
+					</TD>
+				</TR>
+			</TBODY>
+		</TABLE>	
+	</TD>
+	<TD align=middle>
+	<SCRIPT>
+		ImgBtnRow();
+		ImgBtnCreate("bnOk", "OK0", "bnOk_onclick()", "defer", 120);
+		ImgBtnCreate("bnCancel","Cancel[n]","bnCancel_onclick()",true,get_local_int(1));
+		ImgBtnEndRow();
+	</SCRIPT>
+	</TD>		
+	</TR>
+</TBODY>
+</TABLE>
+</DIV>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+

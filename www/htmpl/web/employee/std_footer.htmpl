@@ -1,0 +1,78 @@
+<PDM_IF 0>
+***************************************************************************
+* DO NOT MODIFY THIS FILE!  This file is not migrated for new releases or
+* Service Packs, and your modifications can be lost.  You can use the file
+* std_footer_site.htmpl for site modifications.
+***************************************************************************
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2003 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  std_head.htmpl 
+// Created: 08/09/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//    This file contains JavaScript and other HTML that
+//    appears in the <head>...</head> section of every page.
+////////////////////////////////////////////////////////////////////////////
+//
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<script type="text/javascript" src="$CAisd/scripts/autosuggest.js"></script>
+<!-- BEGIN employee/std_footer.htmpl -->
+<script type="text/javascript">
+if (typeof std_footer_setup != "undefined")
+    std_footer_setup();
+var AlertMsg = '<PDM_FMT ESC_STYLE=C PAD=NO>${AlertMsg:}</PDM_FMT>';
+    
+if ( typeof ImgBtnEnableDeferred != "undefined" )
+   ImgBtnEnableDeferred();
+<PDM_IF "1" == "${args.KEEP.IsPopUp:0}">
+// Need to put in some smarts to do an uncheck if this is an editable detail
+<PDM_ELSE>
+var edit_form = 0;
+var links = document.links;
+if (links.length > 0)
+{
+    for (var index in links)
+    {
+        if ( typeof links[index].href == "string" &&
+             links[index].href.indexOf("CANCEL") > 0 ) {
+           edit_form = 1;
+           break;
+        }
+    }
+}
+<PDM_IF "0" == "${args.id:0}">
+var editing = 0;
+<PDM_ELSE>
+var editing = 1;
+</PDM_IF>  
+</PDM_IF>
+
+// If Auto-Suggest feature is turned ON and the screen reader mode if OFF then,
+// Call code to append AutoSuggest code to each lookup on the form
+// appendAutoSuggestCode() defined in default/autosuggest.js
+if(ahdtop.propAutoSuggestStatus == "ON" && ahdtop.cstUsingScreenReader != true)
+	appendAutoSuggestCode();
+
+</script>
+<PDM_INCLUDE FILE="std_footer_site.htmpl">
+<!-- END employee/std_footer.htmpl -->
+<PDM_IF 0>
+@(#)$Id: std_footer.htmpl ASPEN.15 2011/02/17 18:05:18 pstso01 Exp $
+</PDM_IF>

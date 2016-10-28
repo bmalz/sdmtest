@@ -1,0 +1,123 @@
+<PDM_IF 0>
+list_ci_descendants.htmpl
+WHEN PRESENTED:
+	When we need to display a list of CIs that are descendant from a given CI.
+	
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+<PDM_IF "$args.imp_expl_form_title" != "">
+var hdrTitle = "$args.imp_expl_form_title";
+var hdrTitleList = "$args.imp_expl_form_title";
+<PDM_ELSE>
+var hdrTitle = "Impact Explorer";
+var hdrTitleList = "Impact Explorer";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var rptName = new Array("no", "no");
+var cfgCanEdit = false;
+var cfgListAll = "${LIST_ALL:}";
+var tenantSort = "no"; //By default all tenant columns are sortable. This variable is needed to make the
+						//tenant column not sortable
+
+var level_array = new Array();
+function LevelArraySetup(inStr)
+{
+	var temp_arr = inStr.split("@!@");
+
+	for (var i=0; i < temp_arr.length; i++)
+	{
+		var id_level_node = temp_arr[i].split("_");
+		var node_persid = id_level_node[0];
+		var node_level = id_level_node[1];
+
+		level_array[i] = new Array(2);
+		level_array[i][0] = node_persid;
+		level_array[i][1] = node_level;
+	}
+}
+
+function find_level (value)
+{
+	var level = 999;
+
+	for (var i=0; i < level_array.length; i++)
+	{
+		if (level_array[i][0] == value)
+		{
+			level = level_array[i][1];
+		}
+	}
+	rs.data(level);
+}
+
+var loadCnt = 0;
+function screen_reader_message()
+{
+	if (loadCnt > 0) return;
+	if ( typeof searchAckPopupMsg == "string" ) {
+		var cmd = 'alert("' + searchAckPopupMsg.replace(/"/g,'\\"') + '");';
+		window.setTimeout(cmd, 10);
+	}
+	loadCnt++;
+}
+
+</script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/comboname.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+
+</head>
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+	<body class="list" onload="screen_reader_message()">
+<PDM_ELSE>
+	<body class="list">
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+<PDM_MACRO name=tabBanner title="CI Descendants List" add_btns=false show_bar=false>
+var msgFoundNone = "No CIs found";
+var msgFound1 = "1 CI found";
+var msgFound = "%1 CIs found";
+var msgFoundMore = "%1 CIs found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired CI";
+
+LevelArraySetup("$args.ID_LEVEL_STR");
+
+<PDM_MACRO name=lsStart search_type=GET_DOB>
+<PDM_MACRO name=lsCol hdr="Poziom" attr=persistent_id fmtfunc=find_level sort=no>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportfmt=ShowLink link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Klasa" attr=class.type sort=no>
+<PDM_MACRO name=lsCol hdr="Rodzina" attr=family sort=no>
+<PDM_MACRO name=lsCol hdr="Kontakt" attr=resource_contact sort=no>
+<PDM_MACRO name=lsCol hdr="Ostatnia zmiana" attr=last_mod sort=no>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag sort=no>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+<PDM_MACRO name=lsCol hdr="#Wniosków" attr=assoc_reqs display_attr=length justify=right sort=no>
+<PDM_MACRO name=lsCol hdr="#Incydentów" attr=assoc_in display_attr=length justify=right sort=no>
+<PDM_MACRO name=lsCol hdr="#Problemów" attr=assoc_pr display_attr=length justify=right sort=no>
+<PDM_MACRO name=lsCol hdr="#Zmian" attr=chgnr display_attr=length justify=right sort=no>
+<PDM_MACRO name=lsCol hdr="#Iss" attr=issnr display_attr=length justify=right sort=no>
+</PDM_IF>
+<PDM_MACRO name=lsEnd factory=nr>
+
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_WSP>
+<PDM_IF 0>
+@(#)$Id: list_ci_descendants.htmpl ASPEN.4 2011/10/19 17:59:26 visan03 Exp $;
+</PDM_IF>

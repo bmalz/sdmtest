@@ -1,0 +1,48 @@
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Global Quick Profile Jump";
+var form_title = "Jump To System";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<TITLE>profile_menu.htmpl</TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=scbd>
+<SCRIPT>
+var caption = "Jump to System";
+var caption_loc = "Jump to System";
+if (!nonLatinFlag)
+    caption_loc = caption;
+var actKey = registerActionKey( "j", caption_loc, focusById, "sysjump0" ); 
+document.writeln("<TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>");
+document.writeln("<TR>");
+document.writeln("<TD align=left width='99%'><h2 style='margin:0px;'>" + fmtLabelWithActkey(caption, actKey) + "</h2></TD>");
+document.writeln("<TD align=right width='1%'></td></tr></table>");
+var show_header=0;
+</script>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no menubar=no>
+<SCRIPT LANGUAGE="JavaScript">
+insertTabToFrameLink('scratchpad');
+document.write('<TABLE ALIGN=LEFT>');
+document.write('<TBODY ALIGN=LEFT>');
+var jumpid = 0;
+<PDM_LIST ESC_STYLE=js prefix=list factory=g_srvrs where="delete_flag=0" >
+document.write('<TR ALIGN=LEFT><TD ALIGN=LEFT><TH ALIGN=LEFT>');
+var proto="$list.web_protocol";
+var web_srvr="$list.web_server";
+var web_port="$list.web_server_port";
+var web_url=nx_unescape("$list.web_url");
+var gsrvrname="$list.global_name";
+var href="<SPAN class=bodytext><A id='sysjump" + (jumpid++) + "' HREF=\"javascript:void(0)\" onClick='gpb_jump_remote(\"" + proto + "\",\"" + web_srvr + "\",\"" + 
+	web_url + "\", \"" + gsrvrname + "\", \"" + web_port + "\")'>$list.sym</A></SPAN>";
+document.write("<TR ALIGN=LEFT><TD ALIGN=LEFT><TH ALIGN=LEFT>" + href + "</TD></TR></TH>");
+document.write("</TD></TR></TH>");
+</PDM_LIST>
+document.write("</TBODY>");
+document.write("</TABLE>");
+insertTabToFrameLink('page','scratchpad');
+</SCRIPT>
+</BODY>
+</HTML>

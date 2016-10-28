@@ -1,0 +1,172 @@
+<PDM_IF 0>
+@(#)$Id: menubar_html_editor.htmpl ANDERSON.2 2009/11/17 10:56:20 siwst01 Exp $;
+WHEN PRESENTED:
+
+////////////////////////////////////////////////////////////////////////
+// HTML Editor Menubar
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_WSP preview="html_editor_frames.htmpl+prop.menubar=html_editor">
+
+<PDM_MACRO name=startMenubar>
+<PDM_MACRO name=menubarItem label="Edit" id=mEdit variable=__mEdit>
+<PDM_MACRO name=menubarItem label="Format" id=mFormat variable=__mFormat>
+<PDM_MACRO name=menubarItem label="Insert" id=mInsert variable=__mInsert>
+<PDM_MACRO name=menubarItem label="Table" id=mTable variable=__mTable>
+<PDM_MACRO name=menubarItem label="Window" id=mWindow>
+<PDM_MACRO name=menubarItem label="Help" id=mHelp>
+<PDM_MACRO name=endMenubar>
+
+////////////////////////////////////////////////////////////////////////
+// HTML Editor "Edit" Menu
+////////////////////////////////////////////////////////////////////////
+
+<PDM_MACRO name=startMenu parentid=mEdit>
+<PDM_MACRO name=menuItem label="Cut" function="exec_cmd('cut')" id=idCut>
+<PDM_MACRO name=menuItem label="Copy" function="exec_cmd('copy')" id=idCopy>
+<PDM_MACRO name=menuItem label="Paste" function="exec_cmd('paste')" id=idPaste>
+<PDM_MACRO name=menuItem label="Undo" function="exec_cmd('undo')" id=idUndo>
+<PDM_MACRO name=menuItem label="Redo" function="exec_cmd('redo')" id=idRedo>
+<PDM_MACRO name=endMenu>
+
+////////////////////////////////////////////////////////////////////////
+// HTML Editor "Format" Menu
+////////////////////////////////////////////////////////////////////////
+
+<PDM_MACRO name=startMenu parentid=mFormat>
+<PDM_MACRO name=menuItem label="Subscript" function="exec_cmd('subscript')">
+<PDM_MACRO name=menuItem label="Superscript" function="exec_cmd('superscript')">
+<PDM_MACRO name=menuItem label="Justify_Left" function="exec_cmd('justifyleft')">
+<PDM_MACRO name=menuItem label="Justify_Center" function="exec_cmd('justifycenter')">
+<PDM_MACRO name=menuItem label="Justify_Right" function="exec_cmd('justifyright')">
+<PDM_MACRO name=menuItem label="Justify_Full" function="exec_cmd('justifyfull')">
+<PDM_MACRO name=menuItem label="Direction_Left_to_Right" function="exec_cmd('lefttoright')">
+<PDM_MACRO name=menuItem label="Direction_Right_to_Left" function="exec_cmd('righttoleft')">
+<PDM_MACRO name=endMenu>
+
+////////////////////////////////////////////////////////////////////////
+// HTML Editor "Insert" Menu
+////////////////////////////////////////////////////////////////////////
+
+<PDM_MACRO name=startMenu parentid=mInsert>
+<PDM_MACRO name=menuItem label="New_Line" function="InsertActions('newline')">
+<PDM_MACRO name=menuItem label="Horizontal_Rule" function="exec_cmd('inserthorizontalrule')">
+<PDM_MACRO name=menuItem label="URL_Link" function="InsertActions('createlink')">
+if(typeof w.toolbarMode != "undefined" && w.toolbarMode != "noimg") 
+{  
+<PDM_MACRO name=menuItem label="Image" function="InsertActions('InsertImg')">
+<PDM_MACRO name=menuItem label="Image_From_Library" function="InsertActions('InsertImgLibrary')">
+}
+<PDM_OBJECT>
+if(typeof w.toolbarMode != "undefined" &&
+  w.toolbarMode == "kd" || w.toolbarMode == "tmpl") 
+{  
+<PDM_MACRO name=menuItem label="Document_Link" function="InsertActions('InsertDocLink')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.toolbarMode != "undefined" &&
+  w.toolbarMode == "kd" || w.toolbarMode == "tmpl") 
+{  
+<PDM_MACRO name=menuItem label="New_Ticket_Link" function="InsertActions('InsertTicket')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.toolbarMode != "undefined" &&
+  w.toolbarMode == "kd" || w.toolbarMode == "tmpl") 
+{  
+<PDM_MACRO name=menuItem label="New_Change_Order_Link" function="InsertActions('InsertCHORD')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if(typeof w.toolbarMode != "undefined" &&
+  w.toolbarMode == "kd" || w.toolbarMode == "tmpl") 
+{  
+<PDM_MACRO name=menuItem label="Action_Content" function="OpenActionContentList('InsertActContent')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+
+////////////////////////////////////////////////////////////////////////
+// HTML Editor "Table" Menu
+////////////////////////////////////////////////////////////////////////
+
+<PDM_MACRO name=startMenu parentid=mTable>
+<PDM_MACRO name=menuItem label="Insert_Table" function="InsertActions('insert-table')" id=insert-table>
+<PDM_MACRO name=menuItem label="Table_Properties" function="table_operations('table-prop')" id=table-prop>
+<PDM_MACRO name=menuItem label="Insert_Row_Above" function=";table_operations('row-insert-above')" id=row-insert-above>
+<PDM_MACRO name=menuItem label="Insert_Row_Below" function="table_operations('row-insert-under')" id=row-insert-under>
+<PDM_MACRO name=menuItem label="Delete_Row" function="table_operations('row-delete')" id=row-delete>
+<PDM_MACRO name=menuItem label="Split_Row" function="table_operations('row-split')" id=row-split>
+<PDM_MACRO name=menuItem label="Insert_Column_Above" function="table_operations('col-insert-before')" id=col-insert-before>
+<PDM_MACRO name=menuItem label="Insert_Column_Below" function="table_operations('col-insert-after')" id=col-insert-after>
+<PDM_MACRO name=menuItem label="Delete_Column" function="table_operations('col-delete')" id=col-delete>
+<PDM_MACRO name=menuItem label="Split_Column" function="table_operations('col-split')" id=col-split>
+<PDM_MACRO name=menuItem label="Insert_Cell_Above" function="table_operations('cell-insert-before')" id=cell-insert-before>
+<PDM_MACRO name=menuItem label="Insert_Cell_Below" function="table_operations('cell-insert-after')" id=cell-insert-after>
+<PDM_MACRO name=menuItem label="Delete_Cell" function="table_operations('cell-delete')" id=cell-delete>
+<PDM_MACRO name=menuItem label="Split_Cell" function="table_operations('cell-split')" id=cell-split>
+<PDM_MACRO name=menuItem label="Merge_Cell" function="table_operations('cell-merge')" id=cell-merge>
+<PDM_MACRO name=menuItem label="Cell_Properties" function="table_operations('cell-prop')" id=cell-prop>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Administration "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop ) {
+  if ( ! ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Main_Page" function="focus_main_window()">
+  }
+  else {
+<PDM_MACRO name=menuItem label="View_Log_Reader..." function="focus_main_window()">
+  }
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Decision Tree Builder "Help" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+
+<PDM_OBJECT>
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+<PDM_MACRO name=menuItem label="Support..." function="popupWithURL('http://ca.com/index.html', 1, 1)">
+
+<PDM_OBJECT>
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+
+
+
+ 

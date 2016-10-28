@@ -1,0 +1,37 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_metadata_trailer.htmpl
+//
+// Purpose: Provides the trailer definition of the getCMDBMetaData() function used
+//          by Versioning feature for metadata.
+//
+//
+// 10-Jun-2009 tomjo02 SCO 23497 CMDB r12.1 Reconciliation PES 05629 - Initial version
+// 22-Jul-2009 tomjo02 SCO 26226 CMDBf Federation Viewer support, added cmdbAttrDataType 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Enable function footer, array declarations for Versioning and invocation of the 
+// getCMDBMetaData() routine. This logic is disabled for Transaction Work Area (twa) 
+// feature since the function definition processes additional attributes and
+// returns different array results. See cmdb_metadata_twa.htmpl for more details.
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$prop.twa_setup" == "">
+
+var result;
+
+result = [i, who, longDate, what, intDate, mdr, attribute, newvalue, oldvalue, cmdbCategory, 
+         cmdbHeading, cmdbCommon, cmdbCurrentValue, cmdbAttrHelp, cmdbDBColumn,
+         cmdbAttrDataType];
+return result;
+
+}
+
+
+// store all cmdb  log data in the cmdbVersionData variable on the page with the pdm_list
+var cmdbMetaData = getCMDBMetaData();
+
+</PDM_IF>
+

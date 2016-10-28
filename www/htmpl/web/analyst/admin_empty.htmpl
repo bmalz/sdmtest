@@ -1,0 +1,26 @@
+<PDM_IF 0>
+admin_empty.htmpl
+WHEN PRESENTED:
+    A possible form to show empty Screen on the right side of the admin tree when a 
+    node has no resource attached to it.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var form_title = "";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="main_form">
+</PDM_FORM>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+
+</HTML>
+<PDM_IF 0>
+@(#)$Id: admin_empty.htmpl,v 1.2 2006/11/07 23:46:56 olsjo01 Exp $;
+</PDM_IF>

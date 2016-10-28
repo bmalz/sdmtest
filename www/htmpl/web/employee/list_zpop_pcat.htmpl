@@ -1,0 +1,79 @@
+		
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<script>
+var hdrTitleList = "Lista ulubionych usług";
+
+function loadActions()
+{
+	parent.frames[0].window.document.getElementById('titleText').innerHTML = "POPULARNE";
+}
+</script>	
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+</HEAD>
+<BODY CLASS=emp onload="loadActions();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var out = "";
+out = '<form action="' + cfgCgi + '" method=POST name=fltrFormSubmit>\n' +
+                        '<input type=hidden name=OP value=STORE_URL>\n' +
+			'<input type=hidden name="URLID">\n' +
+			'<input type=hidden name="URL">\n' +
+			'<input TYPE=hidden name="SID">\n' +
+			'<input TYPE=hidden name="FID">\n' +
+			'</FORM>\n';
+document.writeln(out);
+var zpop_pcatHTML = "";
+var zpop_pcatCount = 0;
+		
+	zpop_pcatHTML += '<table class="ResultTable">';
+	
+	<PDM_LIST PREFIX=list FACTORY=zpop_pcat WHERE="org.id = U'$cst.organization.id' AND delete_flag = 0" ORDER_BY = "pcat.ss_sym">
+		zpop_pcatHTML += '<tr>';
+		zpop_pcatHTML += '<td style="width: 8px;">';
+		zpop_pcatHTML += '</td>';
+
+		var cats = '$list.pcat.ss_sym'.split('.');
+		var catstr = "";
+
+		if ("$list.pcat.cr_flag" == "1" || "$list.pcat.in_flag" == "1") {
+			cats.pop();
+			zpop_pcatHTML += '<td onclick="javascript:OpenContract(\'' + cats.join('.') + '\');">';
+		} else {
+			zpop_pcatHTML += '<td onclick="javascript:OpenContract(\'' + '$list.pcat.ss_sym' + '\');">';
+		}
+		
+		var cats = '$list.pcat.ss_sym'.split('.');
+		var catstr = "";
+		
+		for (i=0; i<cats.length; i++) {
+			if (i == cats.length - 1) {
+				catstr += '<span style="color:red; font-weight:bold;">' + cats[i] + '</span>';
+			} else {
+				catstr += '<span style="color:grey;">' + cats[i] + ' > </span>';
+			}
+		}
+		zpop_pcatHTML += catstr;
+		zpop_pcatHTML += '</td>';
+		zpop_pcatHTML += '</td>';
+		zpop_pcatCount++;
+	</PDM_LIST>
+	zpop_pcatHTML += "</table>";
+	if (zpop_pcatCount > 0)
+		document.writeln(zpop_pcatHTML);
+</SCRIPT>
+</PDM_IF>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

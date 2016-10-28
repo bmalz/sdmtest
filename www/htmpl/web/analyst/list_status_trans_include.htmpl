@@ -1,0 +1,300 @@
+<PDM_IF 0>
+list_status_trans_include.htmpl
+WHEN PRESENTED:
+	Contain reusable js and htmpl codes for Status Transition, section 1
+	Input properties:
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="NBTAB=list_status_trans_include" factory=cr_trans>
+<!-- BEGIN ($args.KEEP.FACT, $args.KEEP.PERSID, $args.FACTORY) -->
+
+var CLASS_NORMAL = "";
+var CLASS_UPDATED = "updated";
+
+var master_lst = new Object();
+var master_orig = new Object();
+var tenant_lst = new Array();
+tenant_lst[0] = "Public"; //msgtext("Public");  //the public tenant, always exist, cannot be empty
+
+//common function to generate the checkboxes from the master_lst and tenant_lst
+//value:    the checkbox value
+//attr:     the attribute in master_lst (allowed, default and comment
+//prefix:   the prefix used in building the checkbox (A_, D_ and C_)
+function doCbx(value, attr, prefix, bLabel)
+{
+    var tstr, label, obj, ck;
+    var str = "";
+    for(var i = 0; i < tenant_lst.length; i++) {
+        tstr = tenant_lst[i];
+        if ( typeof master_lst[tstr] == "object" ) {
+            if ( typeof master_lst[tstr][value] == "object" ) {
+                obj = master_lst[tstr][value];
+                ck = obj[attr] ? "checked" : "";
+                label = obj["tenant"];      // or if empty uses the msgtext("Public")?
+                if (i > 0 && str.length > 0)
+                    str += "<br/>";  //need a break between cbx except the first one
+                str += "<input type=checkbox name=" + attr + " value=" + value + " id=" + prefix+i+"_"+value + 
+                        " " + ck + " onclick='handleCB(this);'>";
+                if (typeof bLabel == "boolean" && bLabel)
+                    str += "<lable>" + label + "</label>";
+            }
+        }
+    }
+    return str;
+}
+function selectCbx1(value)
+{
+    var str = doCbx(value, "allowed", "A_", true);
+    rs.data( str );
+}
+function selectCbx2(value)
+{
+    var str = doCbx(value, "default", "D_");
+    rs.data( str );
+}
+function selectCbx3(value)
+{
+    var str = doCbx(value, "comment", "C_");
+    rs.data( str );
+}
+
+function handleCB(cb)
+{
+	var nstr = cb.id.split("_");
+	var tgt = nstr[2];
+    var tstr = tenant_lst[nstr[1]];
+
+    master_lst[tstr][tgt][cb.name] = cb.checked ? 1 : 0;
+    MarkCB(cb);
+    if (cb.name == "default" && cb.checked) {
+        for (var x in master_lst[tstr]) {
+            if ( x != tgt && master_lst[tstr][x].tenant == master_lst[tstr][tgt].tenant ) {
+                var da_cbx = document.getElementById("D_"+nstr[1]+"_"+x);
+                if ( da_cbx != null && da_cbx.checked == true) {
+                    da_cbx.checked = false;
+                    master_lst[tstr][x]["default"] = 0;
+                    MarkCB(da_cbx);
+                }
+            }
+        }
+    }
+    if (cb.name == "allowed") {
+        if (cb.checked == true) {
+            document.getElementById("D_"+nstr[1]+"_"+tgt).disabled = false;
+            document.getElementById("C_"+nstr[1]+"_"+tgt).disabled = false;
+        } else {
+            document.getElementById("D_"+nstr[1]+"_"+tgt).disabled = true;
+            document.getElementById("C_"+nstr[1]+"_"+tgt).disabled = true;
+        }
+    }
+}
+function MarkCB(cb) {
+	var nstr = cb.id.split("_");
+    var tgt = nstr[2];
+    var tstr = tenant_lst[nstr[1]];
+    if(master_lst[tstr][tgt][cb.name] != master_orig[tstr][tgt][cb.name]) { // if the original and current values of the checkbox are not the same
+        cb.parentNode.className=CLASS_UPDATED; // indicate the change
+    }
+    else {
+        cb.parentNode.className=CLASS_NORMAL; // indicate no change has occurred
+    }
+}
+
+function get_tenant_idx(t)
+{
+    if (t == "")
+        return tenant_lst[0];           //default is public
+    else {
+        for(i=1; i<tenant_lst.length; i++) {
+            if (t == tenant_lst[i])
+                return tenant_lst[i];   //exist already
+        }
+        tenant_lst.push(t);
+        return t;                       //new
+    }
+}
+function load_info()
+{
+    var tstr;
+<PDM_LIST PREFIX=list WHERE="delete_flag=0" FACTORY=$args.FACTORY ESC_STYLE=C>
+    tstr = <PDM_IF "$prop.MultiTenancy" != "off"> "$list.tenant.name" <PDM_ELSE> "" </PDM_IF>;
+    tstr = get_tenant_idx(tstr);
+    if (typeof master_lst[tstr] != "object") // list.tenant == "$list.tenant" prop.MultiTenancy == "$prop.MultiTenancy"
+        master_lst[tstr] = new Object();
+    if (typeof master_lst[tstr]["$list.id"] != "object")
+        master_lst[tstr]["$list.id"] = new Object();
+    master_lst[tstr]["$list.id"]["id"] = $list.id;
+    master_lst[tstr]["$list.id"]["allowed"] = 0;
+    master_lst[tstr]["$list.id"]["default"] = 0;
+    master_lst[tstr]["$list.id"]["comment"] = 0;
+    master_lst[tstr]["$list.id"]["tenant"] = "";
+    if (typeof master_orig[tstr] != "object")
+        master_orig[tstr] = new Object();
+    if (typeof master_orig[tstr]["$list.id"] != "object")
+        master_orig[tstr]["$list.id"] = new Object();
+    master_orig[tstr]["$list.id"]["id"] = master_lst[tstr]["$list.id"]["id"];
+    master_orig[tstr]["$list.id"]["allowed"] = master_lst[tstr]["$list.id"]["allowed"];
+    master_orig[tstr]["$list.id"]["default"] = master_lst[tstr]["$list.id"]["default"];
+    master_orig[tstr]["$list.id"]["comment"] = master_lst[tstr]["$list.id"]["comment"];
+    master_orig[tstr]["$list.id"]["tenant"] = master_lst[tstr]["$list.id"]["tenant"];
+</PDM_LIST>
+<PDM_IF "$args.KEEP.PERSID" != "">
+  <PDM_LIST PREFIX=list WHERE="delete_flag=0 AND status.persistent_id='$args.KEEP.PERSID'" FACTORY=$args.KEEP.FACT ESC_STYLE=C>
+    tstr = <PDM_IF "$prop.MultiTenancy" != "off"> "$list.tenant.name" <PDM_ELSE> "" </PDM_IF>;
+    tstr = get_tenant_idx(tstr);
+    if (typeof master_lst[tstr] != "object")
+        master_lst[tstr] = new Object();
+    if (typeof master_lst[tstr]["$list.new_status.id"] != "object")
+        master_lst[tstr]["$list.new_status.id"] = new Object();
+    master_lst[tstr]["$list.new_status.id"]["id"] = $list.new_status.id;
+    master_lst[tstr]["$list.new_status.id"].allowed = 1;
+    master_lst[tstr]["$list.new_status.id"]["default"] = <PDM_IF "$list.is_default" == "1"> 1 <PDM_ELSE> 0 </PDM_IF>;
+    master_lst[tstr]["$list.new_status.id"].comment = <PDM_IF "$list.must_comment" == "1"> 1 <PDM_ELSE> 0 </PDM_IF>;
+    master_lst[tstr]["$list.new_status.id"]["tenant"] = <PDM_IF "$prop.MultiTenancy" != "off"> "$list.tenant.name" <PDM_ELSE> "" </PDM_IF>;
+    master_lst[tstr]["$list.new_status.id"]["trans_id"] = $list.id; //the id for the existing status transition
+    if (typeof master_orig[tstr] != "object")
+        master_orig[tstr] = new Object();
+    if (typeof master_orig[tstr]["$list.new_status.id"] != "object")
+        master_orig[tstr]["$list.new_status.id"] = new Object();
+    master_orig[tstr]["$list.new_status.id"]["id"] = master_lst[tstr]["$list.new_status.id"]["id"];
+    master_orig[tstr]["$list.new_status.id"]["allowed"] = master_lst[tstr]["$list.new_status.id"]["allowed"];
+    master_orig[tstr]["$list.new_status.id"]["default"] = master_lst[tstr]["$list.new_status.id"]["default"];
+    master_orig[tstr]["$list.new_status.id"]["comment"] = master_lst[tstr]["$list.new_status.id"]["comment"];
+    master_orig[tstr]["$list.new_status.id"]["tenant"] = master_lst[tstr]["$list.new_status.id"]["tenant"];
+  </PDM_LIST>
+<PDM_ELSE>
+  <PDM_LIST PREFIX=list WHERE="delete_flag=0 AND status IS NULL" FACTORY=$args.KEEP.FACT ESC_STYLE=C>
+    tstr = <PDM_IF "$prop.MultiTenancy" != "off"> "$list.tenant.name" <PDM_ELSE> "" </PDM_IF>;
+    tstr = get_tenant_idx(tstr);
+    if (typeof master_lst[tstr] != "object")
+        master_lst[tstr] = new Object();
+    if (typeof master_lst[tstr]["$list.new_status.id"] != "object")
+        master_lst[tstr]["$list.new_status.id"] = new Object();
+    master_lst[tstr]["$list.new_status.id"]["id"] = $list.new_status.id;
+    master_lst[tstr]["$list.new_status.id"].allowed = 1;
+    master_lst[tstr]["$list.new_status.id"]["default"] = <PDM_IF "$list.is_default" == "1"> 1 <PDM_ELSE> 0 </PDM_IF>;
+    master_lst[tstr]["$list.new_status.id"].comment = <PDM_IF "$list.must_comment" == "1"> 1 <PDM_ELSE> 0 </PDM_IF>;
+    master_lst[tstr]["$list.new_status.id"]["tenant"] = <PDM_IF "$prop.MultiTenancy" != "off"> "$list.tenant.name" <PDM_ELSE> "" </PDM_IF>;
+    master_lst[tstr]["$list.new_status.id"]["trans_id"] = $list.id; //the id for the existing status transition
+    if (typeof master_orig[tstr] != "object")
+        master_orig[tstr] = new Object();
+    if (typeof master_orig[tstr]["$list.new_status.id"] != "object")
+        master_orig[tstr]["$list.new_status.id"] = new Object();
+    master_orig[tstr]["$list.new_status.id"]["id"] = master_lst[tstr]["$list.new_status.id"]["id"];
+    master_orig[tstr]["$list.new_status.id"]["allowed"] = master_lst[tstr]["$list.new_status.id"]["allowed"];
+    master_orig[tstr]["$list.new_status.id"]["default"] = master_lst[tstr]["$list.new_status.id"]["default"];
+    master_orig[tstr]["$list.new_status.id"]["comment"] = master_lst[tstr]["$list.new_status.id"]["comment"];
+    master_orig[tstr]["$list.new_status.id"]["tenant"] = master_lst[tstr]["$list.new_status.id"]["tenant"];
+  </PDM_LIST>
+</PDM_IF>
+}
+function doSave() {
+    var allowed_str = "";
+    var disallowed_str = "";
+    var default_str = "";
+    var comment_str = "";
+    var tstr;
+    for(var i = 0; i < tenant_lst.length; i++) {
+        tstr = tenant_lst[i];
+        for(var x in master_lst[tstr]) {
+            if (master_lst[tstr][x].allowed == 1) {
+                if (allowed_str.length > 0)
+                    allowed_str += ",";
+                allowed_str += master_lst[tstr][x].id + "," + master_lst[tstr][x]["default"] + "," + master_lst[tstr][x].comment + ",";
+                allowed_str += (typeof master_lst[tstr][x].trans_id == "number") ? master_lst[tstr][x].trans_id : 0;
+                
+            } else {
+                if (disallowed_str.length > 0)
+                    disallowed_str += ",";
+                disallowed_str += master_lst[tstr][x].id + ",";
+                disallowed_str += (typeof master_lst[tstr][x].trans_id == "number") ? master_lst[tstr][x].trans_id : 0;
+            }
+        }
+    }
+
+    var query_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" +
+        "+OP=UPDTRANS+FACTORY=$args.KEEP.FACT+PERSID=$args.KEEP.PERSID" + 
+        "+ALLOWED=" + allowed_str + "+DISALLOWED=" + disallowed_str;
+
+    set_action_in_progress(ACTN_UPD_TRANS);
+    var doc = GetResponseViaUrl(query_str);
+    set_action_in_progress(ACTN_COMPLETE);
+ 
+    if ( typeof doc!="undefined" && doc.substring(0,2)=="OK" ) {
+        ahdtop.savedShowMsg = "Transition_update_successful";
+        if (ahdframeset == ahdtop) {
+            var url = cfgCgi + "?SID=$prop.SID+FID=$prop.FID";
+            if ( "$args.KEEP.PERSID" == "" ) {
+                url += "+OP=SEARCH+FACTORY=$args.KEEP.FACT+QBE.EQ.delete_flag=0";
+            } else {
+                url += "+OP=SHOW_DETAIL+FACTORY=$args.FACTORY+PERSID=$args.KEEP.PERSID";
+            }
+            replace_page(url,window);
+        } else {
+            top.opener.doSearch();
+            window.parent.close();
+        }
+    } else {
+        show_response(msgtext("Transition_update_failed"));
+    }
+}
+function doCancel() {
+    if ( ahdframeset == ahdtop ) { //the page is in main window, there is no window to close (avoid popups?)
+        window.history.back();
+    } else {
+        window.parent.close();
+    }
+}
+
+function doReset() 
+{ 
+    var cbx;
+    var ena;
+    var tstr;
+    for(var i = 0; i < tenant_lst.length; i++) {
+        tstr = tenant_lst[i];
+        for(var x in master_orig[tstr]) {
+            //allowed column
+            cbx = document.getElementById("A_"+i+"_"+x);
+            if (cbx != null) {
+                cbx.checked = master_orig[tstr][x].allowed==0 ? false : true;
+                master_lst[tstr][x].allowed = master_orig[tstr][x].allowed;
+                MarkCB(cbx);
+                if (cbx.checked == true)
+                    ena = true;
+                else
+                    ena = false;
+            }
+            //default column
+            cbx = document.getElementById("D_"+i+"_"+x);
+            if (cbx != null) {
+                cbx.checked = master_orig[tstr][x]["default"]==0 ? false : true;
+                master_lst[tstr][x]["default"] = master_orig[tstr][x]["default"];
+                MarkCB(cbx);
+                if (ena) {
+                    cbx.disabled = false;
+                } else {
+                    cbx.disabled = true;
+                }
+            }
+            //comment column
+            cbx = document.getElementById("C_"+i+"_"+x);
+            if (cbx != null) {
+                cbx.checked = master_orig[tstr][x].comment==0 ? false : true;
+                master_lst[tstr][x].comment = master_orig[tstr][x].comment;
+                MarkCB(cbx);
+                if (ena) {
+                    cbx.disabled = false;
+                } else {
+                    cbx.disabled = true;
+                }
+            }
+        }
+    }
+}
+var cfgExtraButtonBefore;
+cfgExtraButtonBefore=new Array( "Save", "doSave()", 
+                                "Cancel", "doCancel()", 
+                                "Reset", "doReset()" );
+load_info();
+<!-- END -->

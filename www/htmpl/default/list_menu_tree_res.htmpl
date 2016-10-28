@@ -1,0 +1,69 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a menu_tree_res objects.
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Menu Tree Resource Search";
+var hdrTitleList = "Menu Tree Resource List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript">
+var rptName = new Array("menu_tree_ressum.rpt", "menu_tree_resdtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Menu Tree Resourcee">
+<script type="text/javascript">
+
+<PDM_MACRO name=sfStart create=true factory=menu_tree_res>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="name" size=20>
+<PDM_IF "$args.KEEP.RESTRICT_INACTIVE_RESOURCE" == "1">
+<PDM_MACRO name=sfTextbox hdr="Status" attr="delete_flag" disabled=yes display_value="Active" qbe_condition="EQ" value="0">
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="delete_flag">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="description" colspan=2 size=40>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Zasób" attr="resource" colspan=2 size=40>
+<PDM_IF "$env.NX_KT" != "Yes">
+document.writeln("<input type='hidden' id='ADDL_WHERE_HARDCODE' name='ADDL_WHERE_HARDCODE' value='type=0'>");
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script type="text/javascript">
+  var msgFoundNone = "No Menu Tree Resource found";
+  var msgFound1 = "1 Menu Tree Resource found";
+  var msgFound = "%1 Menu Trees Resource found";
+  var msgFoundMore = "%1 Menu Trees Resource found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Menu Tree Resource";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportfmt=ShowLink justify=left link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description justify=left>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_menu_tree_res.htmpl ASPEN.2 2011/10/24 11:35:50 visan03 Exp $;
+</PDM_IF>
+
+<PDM_WSP>

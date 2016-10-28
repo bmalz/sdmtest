@@ -1,0 +1,13 @@
+<PDM_IF 0>
+detail_net_conx.htmpl
+Purpose:
+    Display the detail of a Network.Controller CI.
+    See cmdb_detail.htmpl for  more details.
+
+History:
+       22-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<PDM_INCLUDE FILE="cmdb_detail.htmpl"   extension="net_conx">
+
+<PDM_WSP where="family.extension_name='net_conx'" factory=nr design=no>

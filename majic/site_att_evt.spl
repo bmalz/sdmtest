@@ -1,0 +1,61 @@
+void ztask.status::site_att_cr_evt(...)
+{
+	logf(SIGNIFICANT, "USER MOD: ztask.status::site_att_cr_evt");
+   
+	string method;
+	method = "ztask.status::site_att_cr_evt";
+
+	logf(TRACE, "%s: Started for %d ", method, id);
+
+	//check symbol of event
+	string event_sym;
+	event_sym="Task Status Update Rejected";
+	int evt_id;
+	evt_id = (int)expand(format("&{'%s' = evt.sym->id}", event_sym));
+	if ( is_null(evt_id) || (evt_id = 0) ) {
+		logf(ERROR, "%s: Symbol of event  '%s' is not recognized.", method, event_sym);
+		return;
+	}
+	
+	logf(TRACE, "%s: Event sym '%s' verified. ", method, event_sym);
+
+	send_wait(0, top_object(), "call_attr", "evt", "new_attached_event", (object)NULL,
+			format("ztask:%d",id), event_sym, (duration) 1,
+			(date) NULL, "", 0, 0, (string)NULL);
+	if (msg_error()) {
+		logf(ERROR, "%s: error returned by new_attached_event: %s", method, (string)msg[0]);
+		return;
+	}
+
+		logf(TRACE, "%s: Attach event called ", method);
+		object attevt;
+		attevt = msg[0];
+		send_wait(0, attevt, "call_attr", "id", "get_val");
+		int attevt_id;
+		attevt_id = msg[0];
+		logf(TRACE, "%s: Finished. Attached event id = %d", method, attevt_id);
+		
+	//////////////2nd event///////////
+	event_sym="Task Status Update Approved";
+	evt_id = (int)expand(format("&{'%s' = evt.sym->id}", event_sym));
+	if ( is_null(evt_id) || (evt_id = 0) ) {
+		logf(ERROR, "%s: Symbol of event  '%s' is not recognized.", method, event_sym);
+		return;
+	}
+	
+	logf(TRACE, "%s: Event sym '%s' verified. ", method, event_sym);
+
+	send_wait(0, top_object(), "call_attr", "evt", "new_attached_event", (object)NULL,
+			format("ztask:%d",id), event_sym, (duration) 1,
+			(date) NULL, "", 0, 0, (string)NULL);
+	if (msg_error()) {
+		logf(ERROR, "%s: error returned by new_attached_event: %s", method, (string)msg[0]);
+		return;
+	}
+
+		logf(TRACE, "%s: Attach event called ", method);
+		attevt = msg[0];
+		send_wait(0, attevt, "call_attr", "id", "get_val");
+		attevt_id = msg[0];
+		logf(TRACE, "%s: Finished. Attached event id = %d", method, attevt_id);
+}

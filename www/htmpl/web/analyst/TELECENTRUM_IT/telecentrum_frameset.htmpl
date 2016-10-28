@@ -1,0 +1,127 @@
+<html lang="pl"><PDM_IF 0>
+201307 bmalz @ e-xim
+	
+	Address with parameter:
+		http://pkn-sdm1/CAisd/pdmweb.exe?OP=JUST_GRONK_IT+HTMPL=telecentrum_frameset.htmpl+USERID=user
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<script type="text/javascript">
+<!--
+if (_browser.supportsDOM < 2 || (_browser.isIE && _browser.version.major == 5 && _browser.version.minor < 5))
+    window.location.replace("$cgi?SID=$SESSION.SID+FID=5+PDA=Yes+OP=MENU");
+//-->
+</script>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/report.js"></SCRIPT>
+<title>$prop.FormTitle</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script type="text/javascript">
+var ahdframeset = ahdtop;    
+var ahdframe;
+
+var FromGoBtn = "${args.KEEP.FromGoBtn:}";
+in_persid = "$args.PERSID";
+var globalsd="$args.GLOBALSD";
+var propRoleMenubar = "$prop.role_menubar";
+
+var user_name = '$args.USERID';
+var callid = '$args.KEEP.CALLID';
+var phone_number = '$args.PHONENUMBER';
+
+var Owning_Contract = "";
+var user_id;
+<PDM_IF '$args.UID' == ''>
+	<PDM_LIST PREFIX=list FACTORY=cnt WHERE="userid = '$args.USERID'">
+		user_id = '$list.id';
+		
+		var Contracts = new Array();
+		<PDM_LIST PREFIX=list2 FACTORY=zlrel_org_kontr WHERE="org.id = U'$list.organization.id'">
+			Contracts.push("$list2.kontr.id");
+		</PDM_LIST>
+		
+		Owning_Contract = Contracts.join();
+	</PDM_LIST>
+<PDM_ELSE>
+	user_id = '$args.UID';
+	<PDM_LIST PREFIX=list FACTORY=cnt WHERE="id = U'$args.UID'">
+		user_name = "$list.id";
+		var Contracts = new Array();
+		<PDM_LIST PREFIX=list2 FACTORY=zlrel_org_kontr WHERE="org.id = U'$list.organization.id'">
+			Contracts.push("$list2.kontr.id");
+		</PDM_LIST>
+		
+		Owning_Contract = Contracts.join();
+	</PDM_LIST>
+</PDM_IF>
+
+var Selected_Device = "";
+var Selected_Application = "";
+var Selected_Localization = "";
+
+var scratchpad_category = "";
+var CategoryID = "";
+var CategoryType = "";
+var CategorySym = "";
+var CategoryGroup = "";
+
+var TopCategory = "Informatyka";
+var IsHR = "0";
+var IsIT = "1";
+var isADM = "0";
+
+function frameset_loaded()
+{
+    // If cai_main is defined, save it in ahdframe, 
+    // otherwise, the HTMPL page needs to figure out 
+    // how to set ahdframe.
+    if (typeof window.cai_main != "undefined")
+    {
+	ahdframe = window.cai_main;
+	ahdframeset.ahdframe = ahdframe;
+	if (typeof parent.ahdframe == "object")
+	    parent.ahdframe = ahdframe;
+	if (typeof parent.ahdframeset == "object")
+	    parent.ahdframeset.ahdframe = ahdframe;
+    }
+}
+</script>
+
+<SCRIPT>
+	var out;
+		if(user_id) {
+			out  = '<FRAMESET ROWS="*,150,1" FRAMEBORDER=1 framespacing="1" border="1">';
+			out += '<FRAMESET COLS="300, *">';
+			out += '	<FRAMESET ROWS="220,*">';
+			out += '		<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_user.htmpl+KEEP.ShowEdit=1+USERID=' + user_id + '" NAME=user>';
+			out += '		<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_devices.htmpl+USERID=' + user_id + '" NAME=devices>';
+			out += '	</FRAMESET>';
+			out += '	<FRAMESET ROWS="120,*">';
+			out += '		<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_user_details.htmpl+KEEP.area=Informatyka+USERID=' + user_id + '" NAME=user_details>';
+			out += '		<FRAME style="border: 1px #8B939A solid;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_categories.htmpl+Owning_Contract=' + Owning_Contract + '+CONTRACT=Informatyka" NAME=categories>';
+			out += '	</FRAMESET>';
+			out += '</FRAMESET>';
+			out += '<FRAMESET ROWS="120,30">';
+			out += '	<FRAME style="border: 0px;" noresize="noresize" frameborder="0" framespacing="0" border="0" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_details.htmpl" NAME=details>';
+			out += '	<FRAME style="border: 0px;" noresize="noresize" frameborder="0" framespacing="0" border="0" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=telecentrum_buttons.htmpl" NAME=buttons>';
+			out += '</FRAMESET>';
+			out += "<FRAME SRC='" + ahdtop.cfgCAISD +"/html/empty.html' NAME=tworkframe NORESIZE=NORESIZE MARGINHEIGHT=0 MARGINWIDTH=0 FRAMEBORDER=NO BORDER=0 title=\"Hidden frame - do not navigate here\">";
+			out += '</FRAMESET>';
+		} else {
+			out = '<div style="padding:50px; width: 100%; text-align: center;">Nie znaleziono użytkownika o loginie <b>"$args.USERID"</b></div>';
+		}
+</SCRIPT>
+</HEAD> 
+<SCRIPT>
+	document.writeln(out);
+	
+	if (typeof(ahdtop.product.frames[0].frames[0]) == "undefined") {
+		ahdtop.product.frames[0].location.href = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=menubar_tele.htmpl+PHONENUMBER=$args.PHONENUMBER+CanReturn=1+KEEP.CALLID=$args.KEEP.CALLID";
+	} else {
+		ahdtop.product.frames[0].frames[0].location.href = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=1+HTMPL=menubar_tele.htmpl+PHONENUMBER=$args.PHONENUMBER+CanReturn=1+KEEP.CALLID=$args.KEEP.CALLID";
+	}
+</SCRIPT>
+</HTML>
+<PDM_WSP>

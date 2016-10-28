@@ -1,0 +1,79 @@
+<PDM_IF 0>
+role_web_interface_tab.htmpl
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=role_web_interface_tab" factory=role>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+tab_banner("Web Interface");
+
+function interfaceChanged(intf)
+{
+	// unset our current help_view values (SET & KEY)
+	var f=document.main_form.elements["SET.help_view"];
+	f.value = "";
+	f=document.main_form.elements["KEY.help_view"];
+	f.value = "";
+}
+
+function modify_search_extra(factory, backfill_field, backfill_form,is_3_field_contact, backfill_attr)
+{
+	if (factory == "help_set" && backfill_field == "KEY.help_view")
+	{
+		// Modify where clause for lookup for help_set just in time
+		var intf_tp = document.main_form.elements["SET.interface_type"];
+		var extra = "KEEP.RESTRICT_SEARCH=1+ADDITIONAL_WHERE=(interface_type=" + intf_tp.value +
+			 " AND delete_flag=0 AND (last_publish_date IS NOT NULL OR internal = 1))";
+		return extra;
+	}
+}
+
+<PDM_MACRO name=dtlStartRow>         
+var c_interface_type;
+switch ( "$args.interface_type" ) {
+	case "0" : 
+		c_interface_type = "None";
+		break; 
+	case "1" : 
+		c_interface_type = "Employee";
+		break;
+	case "2" :
+		c_interface_type = "Customer";
+		break;
+	case "3" :
+		c_interface_type = "Analyst";
+		break;		
+         }
+detailSetEventHandler("onChange='interfaceChanged(this)'");
+detailDropdown("Web User Interface Type","interface_type","role",2,20, 
+true,"","$args.interface_type",
+"no","$args.interface_type",c_interface_type,
+"","","no","","","0",
+"None","0","Employee","1","Customer","2","Analyst","3");
+
+<PDM_MACRO name=dtlTextbox hdr="Web Initial Form" attr=initial_form colspan=2 size=40>
+<PDM_MACRO name=dtlLookup hdr="Help View" attr="help_view" colspan=2 link="yes" size=40>
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("");
+detailSetRowData("");
+detailWriteRow();
+
+
+
+
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: role_web_interface_tab.htmpl FWr1.6 2008/10/5 15:35:11 lilel01 Exp $
+</PDM_IF>

@@ -1,0 +1,8 @@
+<PDM_IF 0>
+@(#)$Id: menubar_no.htmpl,v 1.1 2006/11/01 17:38:22 olsjo01 Exp $
+WHEN PRESENTED:
+    An empty form included when the menubar=no argument is used on the
+    pdm_include for std_body.htmpl.
+</PDM_IF>
+
+<pdm_wsp preview=no>

@@ -1,0 +1,44 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	The HTMPL interface that displays the hierarchical Knowledge category tree 
+	in the Knowledge tab - part of the overall FAQ/Search Tools interface
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="Javascript">
+	var hdrTitle = "Knowledge Category Tree Search";
+	var hdrTitleList = "Knowledge Category Tree Search";	
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY onload="InitTree();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="Javascript">
+function CatTreeOnClick(category, categoryPath, categoryPathCaption)
+{														
+	// Calculate the current category caption from the category path string
+	var categoryCaption;
+	var pos = categoryPathCaption.lastIndexOf(">");
+	if (pos >= 0)
+		categoryCaption = categoryPathCaption.substring(pos+1);
+	else
+		categoryCaption = "Top";		
+	
+	var persid = "KCAT:" + category;
+	<PDM_IF $args.KEEP.backfill_relid == "1">
+		//returning the Relational IDs instead of the ID for the advanced filter on list_KD.htmpl
+		category = categoryPath;
+	</PDM_IF>
+	backfill(categoryPathCaption, persid, category);
+}
+</SCRIPT>
+<PDM_MACRO NAME=kt_Categories_Tree height="100%" width="100%" ParentTenant="$args.ParentTenant" UseTenant="$args.UseTenant">
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+

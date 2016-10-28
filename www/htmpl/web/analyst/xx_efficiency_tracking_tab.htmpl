@@ -1,0 +1,34 @@
+<PDM_IF 0>
+xx_efficiency_tracking_tab.htmpl
+WHEN PRESENTED:
+    On the incident detail form, when the "Show Efficiency Tracking tab on Incident detail forms" option is installed
+INTENT:
+    Display a notebook page for some efficiency tracking parameters
+</PDM_IF>
+<html lang="en">
+<HEAD>
+    <PDM_PRAGMA RELEASE=110>
+    <PDM_WSP mode=edit preview="NBTAB=xx_efficiency_tracking_tab" factory=cr>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+    <PDM_INCLUDE FILE=std_body.htmpl filename="">
+    <PDM_FORM NAME="frmDTLRO">
+    <SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=tabBanner title="Efficiency Tracking">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Resolvable at a Lower Level" attr=resolvable_at_lower off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Incorrectly Assigned" attr=incorrectly_assigned off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Remote Control Used" attr=remote_control_used off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlEndTable>
+    </SCRIPT>
+    </PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: xx_efficiency_tracking_tab.htmpl ASPEN.1 2010/10/26 14:40:01 saima01 Exp $
+</PDM_IF>

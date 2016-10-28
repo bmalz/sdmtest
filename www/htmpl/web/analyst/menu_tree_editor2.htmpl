@@ -1,0 +1,27 @@
+<html lang="en"><PDM_IF 0>
+$Id: menu_tree_editor2.htmpl,v 1.0 2006/11/14 21:16:02 jenji01 Exp $
+WHEN PRESENTED:
+	From the detail_menu_tree_name.htmpl when using Customize Menu.
+	Loads the menu_tree.htmpl in the left pane and uses the right pane 
+	for the node functionality.
+</PDM_IF>
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var ahdframeset = parent.ahdframeset;
+</SCRIPT>
+</HEAD>
+<body>
+<SCRIPT>
+document.write('<iframe style="width:100%;height:100%;" SRC="$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=$args.FID');
+document.write('+HTMPL=menu_tree_editor3.htmpl+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME+menu_name=' + 
+	       nx_escape("$args.menu_name") + '+KEEP.ALLOW_MENU_TREE_EDIT=$args.KEEP.ALLOW_MENU_TREE_EDIT" ');
+document.write('NAME=menu_tree_menuOK SCROLLING=no MARGINHEIGHT=2 MARGINWIDTH=0 FRAMEBORDER=1 ');
+document.write('title="Hidden frame - do not navigate here">');
+document.writeln('This window requires iframe support</iframe>');
+</SCRIPT>
+</body>
+</HTML>

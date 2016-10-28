@@ -1,0 +1,192 @@
+<PDM_IF 0>
+@(#)$Id: keit_tmpl_export_filter_tab.htmpl ASPEN.1 2011/01/25 11:17:08 laivi02 Exp $
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=keit_tmpl_export_filter_tab" factory=KEIT_TEMPLATES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript">
+	var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+<BODY>
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="Export Filter">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT>
+	tab_banner("Export Filter");
+</SCRIPT>
+<PDM_OBJECT>
+<SCRIPT LANGUAGE="JavaScript">
+// Global variables
+var g_keitCatSelectID = "sf_3_2";	// The ID of the category filter list box
+var arrCatsValue = new Array();		// IDs
+var arrCatsText = new Array();		// Captions
+
+var g_keitClearCatsLinkID = "sf_3_4";
+</SCRIPT>
+
+<TABLE width="90%"><TR><TD>
+<PDM_IF "$prop.form_name_3" == "edit"> 
+<TABLE>
+	<TR vAlign=top>
+		<TH vAlign=baseline align=left colSpan=1>
+			<SCRIPT>
+			document.write("<A class=\"\" tabindex=" + _dtl.tabIndex++); 
+			document.write(" id=sf_3_0"); 
+			document.write(" name=sflnk_3_0");
+			document.write(" onblurAAA=\"searchFilterBlur('sf_3_0')\""); 
+			document.write(" onmouseover='window.status=\"Popup search window for category\";return true'"); 
+			document.write(" onfocusAAA=\"searchFilterFocus('sf_3_0')\""); 
+			document.write(" onclick=\"KeitOpenCatTree()\""); 
+			document.write(" onmouseout=\"window.status=window.defaultStatus;return true\""); 
+			document.writeln(" href=\"javascript:void(0)\">");
+			</SCRIPT>
+				<INPUT type=hidden name=keitCatBackfill ID="Hidden3">
+				<IMG style="VERTICAL-ALIGN: middle" height=12 alt="Pop up %1 lookup form" src="/CAisd/img/lookup.gif" width=12 border=0>
+				<SPAN class=lookup>Category</SPAN>
+			</A>
+		</TH>
+	</TR>
+	<TR>
+		<TABLE cellSpacing=0 cellPadding=2 border=0 ID="Table1">
+			<TBODY>
+			<TR>
+				<TD colSpan=2>
+				<SCRIPT>
+				document.write("<SELECT id=sf_3_2 name=sf_3_2 onblurAAA=\"searchFilterBlur('sf_3_2')\""); 
+				document.write(" onfocusAAA=\"searchFilterFocus('sf_3_2')\" title=Category"); 
+				document.writeln(" class=\"gn_container_white_background gn_width_370px\" size=5 tabindex=" + _dtl.tabIndex++ + ">");
+							if ("$args.id" == "0")
+							{
+//alert("new template mode");
+								strExportedCatIDs = ""; 
+								strExportedCatCaps = "";
+							}
+							else
+							{
+//alert("edit mode");
+								strExportedCatIDs = "$args.CAT_LIST";
+								strExportedCatCaps = "$args.KEEP.CAT_CAP_LIST";
+							}	
+							if (strExportedCatIDs != "" && strExportedCatCaps != "")
+							{
+								arrCatsValue = strExportedCatIDs.split(strSep);
+								arrCatsText = strExportedCatCaps.split(",");
+
+								for (var i = 0; i < arrCatsText.length; i++)
+								{
+									strOption = "<OPTION VALUE=" + arrCatsValue[i] + ">" + 
+												arrCatsText[i] + "</OPTION>";
+									document.writeln(strOption);
+								}
+							}
+						</SCRIPT>
+					</SELECT>
+				</TD>
+			</TR>
+			<TR>
+				<TD align=left>
+					<SCRIPT>
+						var text = '<A class=sfLookup id=' + g_keitClearCatsLinkID;
+						text += ' onblurAAA="searchFilterBlur(';
+						text += "'" + g_keitClearCatsLinkID + "'" + ')"'; 
+						text += ' onfocusAAA="searchFilterFocus('
+						text += "'" + g_keitClearCatsLinkID + "'" + ')"'; 
+						text += ' href="javascript:KeitRemoveListItem(';
+						text += "'" + g_keitCatSelectID + "'" + ',arrCatsValue, arrCatsText)"'; 
+						text += ' name=' + g_keitClearCatsLinkID;
+						text += ' tabindex=' + _dtl.tabIndex++;
+						text += '>';
+						text += '<SPAN class=lookup>Remove Category</SPAN>';
+						text += '</A>';
+						document.write(text);
+					</SCRIPT>
+				</TD>
+				<TD align=right>
+					<SCRIPT>
+					document.write("<A class=sfLookup id=sf_3_6 name=sflnk_3_6");
+					document.write(" onblurAAA=\"searchFilterBlur('sf_3_6')\""); 
+					document.write(" onfocusAAA=\"searchFilterFocus('sf_3_6')\"");
+					document.writeln(" href=\"javascript:KeitClearListByID('sf_3_2')\" tabindex=" + _dtl.tabIndex++ + ">");
+					</SCRIPT>
+						<SPAN class=lookup>Clear Categories</SPAN>
+					</A>
+				</TD>	
+			</TR>
+			</TBODY>
+		</TABLE>
+	</TR>
+</TABLE>
+</PDM_OBJECT>
+<PDM_ELSE>
+<TABLE>
+	<TR vAlign=top>
+		<TH vAlign=baseline align=left colSpan=1>
+			<SPAN class=lookupnolink>Category</SPAN>
+		</TH>
+	</TR>
+	<TR>
+		<TABLE cellSpacing=0 cellPadding=2 border=0 ID="Table1">
+			<TBODY>
+			<TR>
+				<TD colSpan=2>
+					<SCRIPT>
+					document.write("<SELECT id=sf_3_2 name=sf_3_2");
+					document.write(" onblurAAA=\"searchFilterBlur('sf_3_2')\""); 
+					document.write(" onfocusAAA=\"searchFilterFocus('sf_3_2')\""); 
+					document.write(" title=Category class=\"gn_container_white_background gn_width_500px\"");
+					document.writeln(" size=5 tabindex=" + _dtl.tabIndex++ + " multiple disabled>");
+							//alert("view mode");
+							strExportedCatIDs = "$args.CAT_LIST";
+							strExportedCatCaps = "$args.KEEP.CAT_CAP_LIST";
+
+							if (strExportedCatIDs != "" && strExportedCatCaps != "")
+							{
+								arrCatsValue = strExportedCatIDs.split(strSep);
+								arrCatsText = strExportedCatCaps.split(",");
+								for (var i = 0; i < arrCatsText.length; i++)
+								{
+									strOption = "<OPTION VALUE=" + arrCatsValue[i] + ">" + 
+												arrCatsText[i] + "</OPTION>";
+									document.writeln(strOption);
+								}
+							}
+						</SCRIPT>
+					</SELECT>
+				</TD>
+			</TR>
+			</TBODY>
+		</TABLE>
+	</TR>
+</TABLE>
+</PDM_IF>
+</TD></TR></TABLE>
+
+<SCRIPT>
+	
+<PDM_IF 0>
+<PDM_MACRO name=dtlLookup hdr="Dodaj klasyfikację" attr="CAT_LIST" extraurl="HTMPL=list_KCAT_QA.htmpl+QBE.EQ.ALLOW_QA=1" factory=KCAT size=80>
+</PDM_IF>
+<PDM_IF 0>
+		Use the NX_KT environment variable to see if full-blown Knowledge Tools is installed.
+		If it is Yes, then display the category filter
+	
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zawrzyj podrzędne klasyfikacje" attr="EXP_SUB_CAT" off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zawrzyj wtórne klasyfikacje" attr="EXP_SEC_CAT" off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zawrzyj wszystkie powiązane dokumenty w wybranej klasyfikacji" attr="EXP_ALL_DOCS" off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Dodatkowy filtr" attr="EXP_FILTER" rows=1 size=80>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+</PDM_FORM>
+
+</BODY>
+</HTML>

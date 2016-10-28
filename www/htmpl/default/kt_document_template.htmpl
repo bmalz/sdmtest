@@ -1,0 +1,685 @@
+<!--  analyst/kt_document_template.htmpl -->
+ <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_document_template.js"></SCRIPT>
+
+ <SCRIPT LANGUAGE="JavaScript">
+////////////////////////////////////////////////////////////////
+//highlightSearchTerms()
+//searchFor - keywords that has to be highlighted
+//replaceWhat - text to look in
+//
+//I would rather do this more elegent solution:if we need to change whole 
+//document body
+//function hl(w) {
+//if (document.body && document.body.createTextRange) {
+//var rng = document.body.createTextRange( );
+//while(rng.findText(w,1,2)) {
+//rng.pasteHTML("<span class=hl>" + rng.text + "</span>");
+//rng.collapse(false);
+//}
+//But Mozilla does not support this DOM properties
+////////////////////////////////////////////////////////////////
+
+// cahche the attmnt used by this document
+<PDM_MACRO NAME=dtlHTMLEditBox attr=res_cache preview=cache_only>
+<PDM_MACRO NAME=dtlHTMLEditBox attr=templ_cache preview=cache_only persid="CI_DOC_TEMPLATES:$args.DOC_TEMPLATE_ID">
+
+<pdm_set doc_parent="">
+function SeeAlso()
+{
+	var strSeeAlsoHTML = "";
+	<PDM_LIST FACTORY=CI_DOC_LINKS PREFIX=list WHERE="DOC_ID1.ACTIVE_STATE >= 0 AND DOC_ID2.ACTIVE_STATE >= 0 AND (DOC_ID1 = $args.id OR DOC_ID2 = $args.id) AND (parent_child = 0 OR parent_child IS NULL)">
+		if (($list.DOC_ID1.ACTIVE_STATE == 0 && $list.DOC_ID2.ACTIVE_STATE == 0) || $args.ACTIVE_STATE > 0 || ahdtop.m_bAllowViewNonPublished)
+		{
+			<pdm_if "$prop.disable_kd_links" == "true">
+				<PDM_IF "$args.id" == "$list.DOC_ID1">
+					<PDM_IF "$prop.MultiTenancy" != "off" >
+						<PDM_IF "$list.DOC_ID2.tenant.name" != "">
+								strSeeAlsoHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "&nbsp;(tenant&nbsp;$list.DOC_ID2.tenant.name)<br>";
+						<PDM_ELSE>
+							strSeeAlsoHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "<br>";
+						</PDM_IF>	
+					<PDM_ELSE>
+						strSeeAlsoHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "<br>";
+					</PDM_IF>	
+				<PDM_ELSE>
+					<PDM_IF "$prop.MultiTenancy" != "off" > 
+						<PDM_IF" $list.DOC_ID1.tenant.name" != "">
+							strSeeAlsoHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + "&nbsp;(tenant&nbsp;$list.DOC_ID1.tenant.name)<br>";
+						<PDM_ELSE>
+							strSeeAlsoHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + "<br>";
+						</PDM_IF>
+					<PDM_ELSE>
+							strSeeAlsoHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + "<br>";
+					</PDM_IF>
+				</PDM_IF>
+			<pdm_else>
+				<PDM_IF "$args.id" == "$list.DOC_ID1">
+					<PDM_IF "$prop.MultiTenancy" != "off" >
+						<PDM_IF "$list.DOC_ID2.tenant.name" != "">
+							strSeeAlsoHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+								" onclick='OpenDocLink($list.DOC_ID2)'>" +
+								"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+								"</span></a>&nbsp;(tenant&nbsp;$list.DOC_ID2.tenant.name)<br>";
+						<PDM_ELSE>
+								strSeeAlsoHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+									" onclick='OpenDocLink($list.DOC_ID2)'>" +
+									"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+									"</span></a><br>";
+						</PDM_IF>
+					<PDM_ELSE>
+						strSeeAlsoHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+									" onclick='OpenDocLink($list.DOC_ID2)'>" +
+									"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+									"</span></a><br>";
+					</PDM_IF>
+				<PDM_ELSE>
+					<PDM_IF "$prop.MultiTenancy" != "off">
+						<PDM_IF "$list.DOC_ID1.tenant.name" != "">
+							strSeeAlsoHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+								" onclick='OpenDocLink($list.DOC_ID1)'>" + "<span class='clsAnchor'>" +
+								'<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + 
+								"</span></a>&nbsp;(tenant&nbsp;$list.DOC_ID1.tenant.name)<br>";
+						<PDM_ELSE>
+							strSeeAlsoHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+								" onclick='OpenDocLink($list.DOC_ID1)'>" + "<span class='clsAnchor'>" +
+								'<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + 
+								"</span></a><br>";
+						</PDM_IF>
+					<PDM_ELSE>
+						strSeeAlsoHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+							" onclick='OpenDocLink($list.DOC_ID1)'>" + "<span class='clsAnchor'>" +
+							'<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + 
+							"</span></a><br>";
+					</PDM_IF>
+				</PDM_IF>
+			</pdm_if>			  
+		}
+	</PDM_LIST>
+	return strSeeAlsoHTML;
+}
+//Display Documents linked as Parent
+function SeeParent()
+{ 
+	var strSeeParentHTML = "";
+	<PDM_LIST FACTORY=CI_DOC_LINKS PREFIX=list WHERE="DOC_ID1.ACTIVE_STATE >= 0 AND DOC_ID2.ACTIVE_STATE >= 0 AND (DOC_ID2 = $args.id) AND (parent_child = 1)">
+		if (($list.DOC_ID1.ACTIVE_STATE == 0 && $list.DOC_ID2.ACTIVE_STATE == 0) || $args.ACTIVE_STATE > 0 || ahdtop.m_bAllowViewNonPublished)
+		{
+			<pdm_if "$prop.disable_kd_links" == "true">
+				<PDM_IF "$args.id" == "$list.DOC_ID2">
+					<PDM_IF "$prop.MultiTenancy" != "off" >
+						 <PDM_IF "$list.DOC_ID1.tenant.name" != "">
+							strSeeParentHTML +=  '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + "&nbsp;(tenant&nbsp;$list.DOC_ID1.tenant.name)<br>";
+						<PDM_ELSE>
+							strSeeParentHTML +=  '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + "<br>";
+						</PDM_IF>
+					<PDM_ELSE>
+							strSeeParentHTML +=  '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' + "<br>";
+					</PDM_IF>
+				</PDM_IF>
+				<pdm_set doc_parent="$list.DOC_ID1">
+			<pdm_else>
+				<PDM_IF "$args.id" == "$list.DOC_ID2">
+					<PDM_IF "$prop.MultiTenancy" != "off"> 
+						<PDM_IF "$list.DOC_ID1.tenant.name" != "">
+							strSeeParentHTML +=  "<a class='clsAnchor' HREF='javascript:void(0)'" +
+								" onclick='OpenDocLink($list.DOC_ID1)'>" +
+								"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' +
+								"</span></a>&nbsp;(tenant&nbsp;$list.DOC_ID1.tenant.name)<br>";
+						<PDM_ELSE>
+							strSeeParentHTML +=  "<a class='clsAnchor' HREF='javascript:void(0)'" +
+										" onclick='OpenDocLink($list.DOC_ID1)'>" +
+										"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' +
+										"</span></a><br>";
+						</PDM_IF>					
+					<PDM_ELSE>
+						strSeeParentHTML +=  "<a class='clsAnchor' HREF='javascript:void(0)'" +
+									" onclick='OpenDocLink($list.DOC_ID1)'>" +
+									"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID1.TITLE</PDM_FMT>' +
+									"</span></a><br>";
+					</PDM_IF>					
+				</PDM_IF>
+				<pdm_set doc_parent="$list.DOC_ID1">
+			</pdm_if>	
+					  
+		}
+	</PDM_LIST>
+	return strSeeParentHTML;
+}
+//Display Documents linked as Children
+function SeeChildren()
+{
+	var strSeeChildrenHTML = "";
+	<PDM_LIST FACTORY=CI_DOC_LINKS PREFIX=list WHERE="DOC_ID1.ACTIVE_STATE >= 0 AND DOC_ID2.ACTIVE_STATE >= 0 AND (DOC_ID1 = $args.id) AND (parent_child = 1)">
+		
+		if (($list.DOC_ID1.ACTIVE_STATE == 0 && $list.DOC_ID2.ACTIVE_STATE == 0) || $args.ACTIVE_STATE > 0 || ahdtop.m_bAllowViewNonPublished)
+		{
+			<pdm_if "$prop.disable_kd_links" == "true">
+				<PDM_IF "$args.id" == "$list.DOC_ID1">
+					<PDM_IF "$prop.MultiTenancy" != "off" > 
+						<PDM_IF "$list.DOC_ID2.tenant.name" != "">
+							strSeeChildrenHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "&nbsp;(tenant&nbsp;$list.DOC_ID2.tenant.name)<br>";
+						<PDM_ELSE>
+							strSeeChildrenHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "<br>";
+						</PDM_IF>
+					<PDM_ELSE>
+						strSeeChildrenHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "<br>";
+					</PDM_IF>
+
+				</PDM_IF>
+			<pdm_else>
+				<PDM_IF "$args.id" == "$list.DOC_ID1">
+					<PDM_IF "$prop.MultiTenancy" != "off"> 
+						<PDM_IF "$list.DOC_ID2.tenant.name" != "">
+							strSeeChildrenHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+									" onclick='OpenDocLink($list.DOC_ID2)'>" +
+									"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+									"</span></a>&nbsp;(tenant&nbsp;$list.DOC_ID2.tenant.name)<br>";
+						<PDM_ELSE>
+							strSeeChildrenHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+									" onclick='OpenDocLink($list.DOC_ID2)'>" +
+									"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+									"</span></a><br>";
+						</PDM_IF>
+					<PDM_ELSE>
+						strSeeChildrenHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+								" onclick='OpenDocLink($list.DOC_ID2)'>" +
+								"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+								"</span></a><br>";
+					</PDM_IF>
+
+				</PDM_IF>
+			</pdm_if>			  
+		}
+	</PDM_LIST>
+	return strSeeChildrenHTML;
+}
+
+//Display Documents with common parent
+function SeeRelated()
+{	
+	var strSeeRelatedHTML = "";
+	<PDM_IF "$doc_parent" != "">
+	
+		<PDM_LIST FACTORY=CI_DOC_LINKS PREFIX=list WHERE="DOC_ID1 = $doc_parent AND DOC_ID1.ACTIVE_STATE >= 0 AND DOC_ID2.ACTIVE_STATE >= 0 AND (parent_child = 1)">
+			
+			if ((($list.DOC_ID1.ACTIVE_STATE == 0 && $list.DOC_ID2.ACTIVE_STATE == 0) || $args.ACTIVE_STATE > 0 || ahdtop.m_bAllowViewNonPublished) )
+			{
+				<pdm_if "$prop.disable_kd_links" == "true">
+					<PDM_IF "$args.id" != "$list.DOC_ID2">
+						<PDM_IF "$prop.MultiTenancy" != "off" >
+							<PDM_IF "$list.DOC_ID2.tenant.name" != "">
+								strSeeRelatedHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "&nbsp;(tenant&nbsp;$list.DOC_ID2.tenant.name)<br>";
+							<PDM_ELSE>
+								strSeeRelatedHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "<br>";
+							</PDM_IF>
+						<PDM_ELSE>
+							strSeeRelatedHTML += "&bull;&nbsp;" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' + "<br>";
+						</PDM_IF>
+
+					</PDM_IF>
+				<pdm_else>
+					<PDM_IF "$args.id" != "$list.DOC_ID2">
+						<PDM_IF "$prop.MultiTenancy" != "off" > 
+							<PDM_IF "$list.DOC_ID1.tenant.name" != "">
+								strSeeRelatedHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+										" onclick='OpenDocLink($list.DOC_ID2)'>" +
+										"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+										"</span></a>&nbsp;(tenant&nbsp;$list.DOC_ID1.tenant.name)<br>";
+							<PDM_ELSE>
+								strSeeRelatedHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+									" onclick='OpenDocLink($list.DOC_ID2)'>" +
+									"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+									"</span></a><br>";
+							</PDM_IF>
+						<PDM_ELSE>
+							strSeeRelatedHTML += "&bull;&nbsp;" + "<a class='clsAnchor' HREF='javascript:void(0)'" +
+								" onclick='OpenDocLink($list.DOC_ID2)'>" +
+								"<span class='clsAnchor'>" + '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.DOC_ID2.TITLE</PDM_FMT>' +
+								"</span></a><br>";
+						</PDM_IF>
+					</PDM_IF>
+				</pdm_if>			  
+			}
+		</PDM_LIST>
+	</PDM_IF>
+	return strSeeRelatedHTML;
+}
+
+function ShowAllComments()
+{
+	var features="directories=no"+
+			",location=no"+
+			",menubar=no"+
+			",status=no";	
+	popup_window('KD_Comments:$args.id', 'SEARCH', -1, -1, features, 'FACTORY=O_COMMENTS', 'QBE.EQ.DOC_ID=$args.id', 'SkeletonId=$args.id', 'QBE.EQ.FLG_TYPE.SHOW_AS_COMMENT=1', 'opener=kt_document_template', 'doc_title=<PDM_FMT ESC_STYLE=C>$args.TITLE</PDM_FMT>');	
+}
+function Comments()
+{
+	var strCommentsHTML = "";
+	var bgClass = "clsResultsEvenNormal";
+	var strUserName = "";
+	var strCommentLinkHTML = "";
+	var iCount = 1;
+	
+	strCommentsHTML += "<table class=generic_table>";
+	<PDM_LIST FACTORY=O_COMMENTS PREFIX=list WHERE="DOC_ID=$args.id AND FLG_TYPE.SHOW_AS_COMMENT=1" LENGTH=26>
+		if(iCount<26)
+		{
+			strUserName = '<PDM_FMT ESC_STYLE=C>$list.USER_NAME</PDM_FMT>';
+			var strComment = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$list.COMMENT_TEXT</PDM_FMT>');
+			strComment	= strComment.replace(/\n/g,"<BR>");			
+			strComment = system_BreakString(strComment, 50);
+			 
+			if (strUserName == "")
+				strUserName = "anonymous";
+			strCommentsHTML = strCommentsHTML + 
+							"<tr class=" + bgClass + "><td style='width: 2%; padding: 0px;'><span class=clsTextBlackBoldXsmall>" + iCount + ".</span></td><td style='width: 33%; padding: 0px;'><span class=clsTextBlackBoldXsmall>" +
+							strUserName + "</span></td><td style='width: 33%; padding: 0px; white-space: nowrap;'>&nbsp;";
+							
+			if ("$prop.disable_comment_links" == "true")
+			{
+				strCommentsHTML += "<span class=clsTextBlackXsmall>$list.EMAIL_ADDRESS</span>";
+			}
+			else
+			{
+				strCommentsHTML += "<a class=clsTextBlueAnchorXsmall href=mailto:$list.EMAIL_ADDRESS><span class=clsTextBlueAnchorXsmall><PDM_FMT ESC_STYLE=C>$list.EMAIL_ADDRESS</PDM_FMT></span></a>";
+			}
+							
+			strCommentsHTML+= "&nbsp;</td><td style='width: 33%; padding: 0px; text-align: right;'><span class=clsTextBlackXsmall>" +
+							'$list.COMMENT_TIMESTAMP' +
+							"&nbsp;&nbsp;</span></td><td style='width: 1%; padding: 0px;'>&nbsp;</td></tr>"+
+							"<tr width=100% class=" + bgClass + "><td style='width: 2%; padding: 0px;'>&nbsp;</td><td style='width: 99%; padding: 0px;' colspan=3><span class=clsTextNavyXsmall>" +
+							"<i>" + strComment +"</i></span></td><td style='width: 1%; padding: 0px;'>&nbsp;</td></tr>"; 
+			
+			if (bgClass == "clsResultsEvenNormal")			
+				bgClass = "clsResultsOddNormal";
+			else	
+				bgClass = "clsResultsEvenNormal";
+			iCount++;
+		}	
+	</PDM_LIST>
+		
+	strCommentsHTML = strCommentsHTML + "</table>";
+	if(iCount>25)
+	{
+		var strCommentLinkHTML = "<table class=generic_table style='font-size:1.0em;'>" +
+							"<tr><td style='width: 100%; padding: 0px; white-space: nowrap;'><span class=clsTextBlackXsmall>Displaying last 25 comments. ";
+		
+		if ("$prop.disable_comment_links" != "true")
+		{
+			strCommentLinkHTML += " Click <a class=clsTextBlueAnchorXsmall HREF='javascript:void(0)' onclick='ShowAllComments()'>here</a> to see all comments.</span>";	
+		}
+	
+		strCommentLinkHTML += "</td></tr>" + "</table>";
+		
+		strCommentsHTML = 	strCommentLinkHTML + strCommentsHTML + strCommentLinkHTML;
+	}
+	
+	return strCommentsHTML;
+}
+//
+//global arrays to store attachment info
+var m_arrGatewayPath = new Array;
+var m_arrServer = new Array;
+function Attachments()
+{
+	//this function returns document attachments as well as URL attachments
+	var strAttachmentsHTML = "";
+	<PDM_LIST FACTORY=attmnt PREFIX=list WHERE="KDS_ATTACHED.DOC_ID=$args.id AND status<>'EMBD_LINK'">
+		<pdm_if "$prop.disable_attachments" == "true">
+			strAttachmentsHTML += "$list.attmnt_name<br>";
+		<pdm_else>	
+			<pdm_if "$list.link_only" == "1">
+				strAttachmentsHTML += "<a class='clsAnchor' HREF='javascript:void(0)'" +
+					                  " onclick=link_onclick('$list.orig_file_name') >";
+			<pdm_else>
+				var nAttmntId = "$list.id";
+				m_arrGatewayPath[nAttmntId] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.repository.servlet_path</PDM_FMT>';		 
+				m_arrServer[nAttmntId] = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$list.repository.server</PDM_FMT>';	
+				strAttachmentsHTML += "<a class='clsAnchor' HREF='javascript:void(0)'" 	+
+					                  " onclick=do_Download(" + nAttmntId + ")>";
+			</pdm_if>
+			strAttachmentsHTML += "<span class='clsAnchor'>" + "$list.attmnt_name</a></span><br>";
+		</pdm_if>		
+	</PDM_LIST>
+	return strAttachmentsHTML;
+}
+//
+
+//global var to store category paths instead
+//of passing paths in js function 
+//(because of special character issues)
+var m_arrCatPaths = new Array;
+
+function Categories()
+{
+	//related categories need to display in two modes:
+	// 1. each category as a link when the tree is available (regular 1B)
+	// 2. just text, no link when no tree is available (from an SD scoreboard query)
+	//should use $prop.disable_kcat_links
+	var strPathHTML = "";
+	<PDM_LIST SOURCE=args.DOC_LINKS PREFIX=list>
+		<pdm_if "$prop.disable_kcat_links" == "true" || "$args.opener" == "simple">
+			strPathHTML = strPathHTML + '<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$list.INDEX_ID.INDEX_PATH</PDM_FMT>' + "<BR>";
+		<pdm_else>
+			var sRelationalID = "$list.INDEX_ID.RELATIONAL_ID";
+			var arrRelationalIDs = sRelationalID.split("-");
+			var sIndexPath = '<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$list.INDEX_ID.INDEX_PATH</PDM_FMT>';
+			var arrIndexPath = sIndexPath.split(">");
+			for (var i=0; i<arrRelationalIDs.length; i++)
+			{
+				//create relational id for specific category
+				var nodeRelationalID = "";
+				var nodePath = "";
+				var max = i;
+				for (var j=0; j<max+1; j++)
+				{
+					nodeRelationalID += arrRelationalIDs[j];
+					nodePath += arrIndexPath[j];
+					if(j != max)	
+					{			 
+						nodeRelationalID += "-";
+						nodePath += "> ";
+					}	
+				}
+			m_arrCatPaths[i] = nodePath;
+			var bTreeMode = false;
+			if ((typeof ahdtop.kt_catTreeWindow == "object") && (ahdtop.kt_catTreeWindow != null)) {
+				if ((typeof ahdtop.kt_catTreeWindow[m_TreeID] == "object") && (ahdtop.kt_catTreeWindow[m_TreeID] != null))
+					bTreeMode = true;
+			}
+			if(ahdtop.cstReducePopups != 1) //avoid popups is not set..
+			{
+				if (top.opener != null)
+				{
+					if (typeof top.opener == "object" && typeof top.opener.ahdframeset == "object")
+					{
+						if ((typeof top.opener.ahdframeset.kt_catTreeWindow == "object") && (top.opener.ahdframeset.kt_catTreeWindow != null)) {
+							if ((typeof top.opener.ahdframeset.kt_catTreeWindow[m_TreeID] == "object") && (top.opener.ahdframeset.kt_catTreeWindow[m_TreeID] != null))
+								bTreeMode = true;
+						}	
+					}
+				}
+			}			
+			if (bTreeMode) {
+				strPathHTML += "<a class='clsAnchor' HREF='javascript:void(0)' onclick=GoToCategory('" + 
+								nodeRelationalID + "'," + i + ")><span class='clsAnchor'>" + arrIndexPath[i] + "</span></a>";
+			}			
+			else {
+				strPathHTML += "<span class=clsTextBlack>" + arrIndexPath[i] + "</span>";
+			}
+			if(i != arrRelationalIDs.length-1)				 
+				strPathHTML += "> ";
+			}
+			strPathHTML += "<br>";
+		</pdm_if>
+	</PDM_LIST>
+	return strPathHTML;
+}
+
+//
+function GetShowResolutionHTML()
+{
+var html = "";
+html = 	"<script>ImgBtnCreate('showResolution','Display','ShowResolution()',true);<\/\script>";
+return html;
+}
+//
+	//substitute values in template
+	var sDocument = '<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.KD_TEMPLATE_HTML</PDM_FMT>';
+	if (ReplaceRepIdToImgPath(sDocument)!=null)
+		sDocument = ReplaceRepIdToImgPath(sDocument);
+    var arrDocument = sDocument.split("{TAG_TITLE}");
+    var sTitle = '<PDM_FMT disp_entities="NO" ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+    sDocument = arrDocument.join(highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", sTitle));
+	// Summary 
+	var arrDocument = sDocument.split("{TAG_SUMMARY}");
+	var sSummary = nx_unescape('<PDM_FMT disp_entities="NO" ESC_STYLE=JS2>$args.SUMMARY</PDM_FMT>');
+	sSummary = sSummary.replace(/\n/g,"<BR>");
+	sDocument = arrDocument.join(highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", sSummary));
+	//
+	//Problem
+	var arrDocument = sDocument.split("{TAG_PROBLEM}");
+	var sProblem = nx_unescape('<PDM_FMT disp_entities="NO" ESC_STYLE=JS2>$args.PROBLEM</PDM_FMT>');
+	sProblem = sProblem.replace(/\n/g,"<BR>");
+	sDocument = arrDocument.join(highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", sProblem));
+    //
+	var arrDocument = sDocument.split("{TAG_SUMMARY}");
+	sDocument = arrDocument.join(highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", '<PDM_FMT ESC_STYLE=C>$args.SUMMARY</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_PROBLEM}");
+	sDocument = arrDocument.join(highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", '<PDM_FMT ESC_STYLE=C>$args.PROBLEM</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_RESOLUTION}");	
+	<PDM_IF $prop.ShowDocumentView == "1">
+		sDocument = arrDocument.join(GetShowResolutionHTML());
+	<PDM_ELSE>
+		<PDM_IF "$env.NX_KT" == "Yes">
+			var resolution = '<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.RESOLUTION</PDM_FMT>';
+		<PDM_ELSE>
+			var resolution = nx_unescape('<PDM_FMT KEEPTAGS=YES disp_entities="NO" ESC_STYLE=JS2>$args.RESOLUTION</PDM_FMT>');
+			resolution = resolution.replace(/\n/g,"<BR>");
+		</PDM_IF>
+		if (ReplaceRepIdToImgPath(resolution)!=null)
+			resolution = ReplaceRepIdToImgPath(resolution);
+		sDocument = arrDocument.join(highlightSearchTerms("$args.KEEP.ebr_parsed_search_text", resolution));
+	</PDM_IF>
+
+	var arrDocument = sDocument.split("{TAG_DOC_ID}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.id</PDM_FMT>'));	
+	var arrDocument = sDocument.split("{TAG_USER_DEF_ID}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.USER_DEF_ID</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_CREATION_DATE}");
+	sDocument = arrDocument.join((date_to_string("$args.CREATION_DATE_INT_DATE",0,0,"no")));
+	var arrDocument = sDocument.split("{TAG_MODIFY_DATE}");
+	sDocument = arrDocument.join((date_to_string("$args.MODIFY_DATE_INT_DATE",0,0,"no")));	
+	var arrDocument = sDocument.split("{TAG_START_DATE}");
+	sDocument = arrDocument.join((date_to_string("$args.START_DATE_INT_DATE",0,0,"no")));
+	var arrDocument = sDocument.split("{TAG_EXPIRATION_DATE}");
+	sDocument = arrDocument.join((date_to_string("$args.EXPIRATION_DATE_INT_DATE",0,0,"no")));
+	var arrDocument = sDocument.split("{TAG_REVIEW_DATE}");
+	sDocument = arrDocument.join((date_to_string("$args.REVIEW_DATE_INT_DATE",0,0,"no")));
+	var arrDocument = sDocument.split("{TAG_LAST_ACCEPTED_DATE}");
+	sDocument = arrDocument.join((date_to_string("$args.LAST_ACCEPTED_DATE_INT_DATE",0,0,"no")));	
+	var arrDocument = sDocument.split("{TAG_PUBLISHED_DATE}");
+	sDocument = arrDocument.join((date_to_string("$args.PUBLISHED_DATE_INT_DATE",0,0,"no")));	
+	
+	var arrDocument = sDocument.split("{TAG_AUTHOR}");	
+	<PDM_IF "$args.AUTHOR_ID" != "0">
+		<PDM_IF "$args.AUTHOR_ID.first_name" != "">
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.AUTHOR_ID.combo_name</PDM_FMT>'));
+		<PDM_ELSE>
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.AUTHOR_ID.last_name</PDM_FMT>'));
+		</PDM_IF>
+	<PDM_ELSE>
+		sDocument = arrDocument.join("");		
+	</PDM_IF>
+	
+	var arrDocument = sDocument.split("{TAG_OWNER}");
+	<PDM_IF "$args.OWNER_ID" != "0">
+		<PDM_IF "$args.OWNER_ID.first_name" != "">
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.OWNER_ID.combo_name</PDM_FMT>'));
+		<PDM_ELSE>
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.OWNER_ID.last_name</PDM_FMT>'));
+		</PDM_IF>
+	<PDM_ELSE>
+		sDocument = arrDocument.join("");			
+	</PDM_IF>
+	
+	var arrDocument = sDocument.split("{TAG_SUBJECT_EXPERT}");
+	<PDM_IF "$args.SUBJECT_EXPERT_ID" != "0">
+		<PDM_IF "$args.SUBJECT_EXPERT_ID.first_name" != "">
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SUBJECT_EXPERT_ID.combo_name</PDM_FMT>'));
+		<PDM_ELSE>
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SUBJECT_EXPERT_ID.last_name</PDM_FMT>'));
+		</PDM_IF>
+	<PDM_ELSE>
+		sDocument = arrDocument.join("");			
+	</PDM_IF>
+	
+	var arrDocument = sDocument.split("{TAG_INITIATOR}");
+	<PDM_IF "$args.INITIATOR_ID" != "0">
+		<PDM_IF "$args.INITIATOR_ID.first_name" != "">
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.INITIATOR_ID.combo_name</PDM_FMT>'));
+		<PDM_ELSE>
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.INITIATOR_ID.last_name</PDM_FMT>'));
+		</PDM_IF>
+	<PDM_ELSE>
+		sDocument = arrDocument.join("");			
+	</PDM_IF>
+	
+	var arrDocument = sDocument.split("{TAG_ASSIGNEE}");
+	<PDM_IF "$args.ASSIGNEE_ID" != "0">
+		<PDM_IF "$args.ASSIGNEE_ID.first_name" != "">
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.ASSIGNEE_ID.combo_name</PDM_FMT>'));
+		<PDM_ELSE>
+			sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.ASSIGNEE_ID.last_name</PDM_FMT>'));
+		</PDM_IF>
+	<PDM_ELSE>
+		sDocument = arrDocument.join("");			
+	</PDM_IF>
+	
+	var arrDocument = sDocument.split("{TAG_PRIORITY}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.PRIORITY_ID.PRIORITY</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_SD_PRODUCT}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_PRODUCT_ID.sym</PDM_FMT>'));	
+	var arrDocument = sDocument.split("{TAG_SD_ASSET}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_ASSET_ID.name</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_SD_ROOTCAUSE}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_ROOTCAUSE_ID.sym</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_SD_PRIORITY}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_PRIORITY_ID.sym</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_SD_SEVERITY}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_SEVERITY_ID.sym</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_SD_IMPACT}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_IMPACT_ID.sym</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_SD_URGENCY}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_URGENCY_ID.sym</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_SD_ACCEPTED_HITS}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.SD_ACCEPTED_HITS</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_CREATED_VIA}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CREATED_VIA</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_PRIMARY_INDEX}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.PRIMARY_INDEX.CAPTION</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_CURRENT_ACTION}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CURRENT_ACTION_ID.ACTION_TITLE</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_DOC_TEMPLATE}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.DOC_TEMPLATE_ID.TEMPLATE_NAME</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_WF_TEMPLATE}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.WF_TEMPLATE.WF_NAME</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_DOC_VERSION}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.DOC_VERSION</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_BU_RESULT}");
+	sDocument = arrDocument.join(convertFAQRating($args.BU_RESULT));
+	var arrDocument = sDocument.split("{TAG_STATUS}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.STATUS_ID.STATUS</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_DOC_TYPE}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.DOC_TYPE_ID.DOC_TYPE_TXT</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_HITS}");
+	sDocument = arrDocument.join("$args.HITS");
+	var arrDocument = sDocument.split("{TAG_USER_SLV_COUNT}");
+	sDocument = arrDocument.join("$args.USER_SLV_CNT");
+	var arrDocument = sDocument.split("{TAG_VOTE_COUNT}");
+	sDocument = arrDocument.join("$args.VOTE_COUNT");
+	var arrDocument = sDocument.split("{TAG_AVG_RATING}");
+	sDocument = arrDocument.join(getAvgRatingText($args.AVG_RATING,$args.VOTE_COUNT));
+	var arrDocument = sDocument.split("{TAG_CUSTOM_1}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CUSTOM1</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_CUSTOM_2}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CUSTOM2</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_CUSTOM_3}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CUSTOM3</PDM_FMT>'));	
+	var arrDocument = sDocument.split("{TAG_CUSTOM_4}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CUSTOM4</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_CUSTOM_5}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CUSTOM5</PDM_FMT>'));
+	var arrDocument = sDocument.split("{TAG_CUSTOM_NUM1}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CUSTOM_NUM1</PDM_FMT>'));	
+	var arrDocument = sDocument.split("{TAG_CUSTOM_NUM2}");
+	sDocument = arrDocument.join(('<PDM_FMT KEEPTAGS=YES ESC_STYLE=C>$args.CUSTOM_NUM2</PDM_FMT>'));	
+	
+	var arrDocument = sDocument.split("{TAG_PARENT}");
+	sDocument = arrDocument.join(SeeParent());
+	//related contains all related knowledge under the parent
+	var arrDocument = sDocument.split("{TAG_RELATED}");
+	sDocument = arrDocument.join(SeeChildren() + SeeRelated() + SeeAlso());
+	var arrDocument = sDocument.split("{TAG_CHILD}");
+	sDocument = arrDocument.join(SeeChildren() );
+	var arrDocument = sDocument.split("{TAG_BROTHER}");
+	sDocument = arrDocument.join(SeeRelated());
+	var arrDocument = sDocument.split("{TAG_SEE_ALSO}");
+	sDocument = arrDocument.join(SeeAlso());
+	//attachments can contain both url links and attached files
+	var arrDocument = sDocument.split("{TAG_ATTACHMENTS}");
+	sDocument = arrDocument.join(Attachments());
+	var arrDocument = sDocument.split("{TAG_CATEGORIES}");
+	sDocument = arrDocument.join(Categories());
+	
+	// check admin setting for view comments
+	var arrDocument = sDocument.split("{TAG_COMMENTS}");
+	<PDM_IF $prop.VIEW_COMMENTS == "1">
+		sDocument = arrDocument.join(Comments());
+	<PDM_ELSE>	
+		sDocument = arrDocument.join("");
+	</PDM_IF>	
+	
+	
+	<PDM_IF "$env.NX_KT" != "Yes">
+		var arrDocument = sDocument.split("{TAG_RELATED_TICKETS}");	
+		sDocument = arrDocument.join("");
+	<PDM_ELIF "$prop.showObj" == "true">
+		var arrDocument = sDocument.split("{TAG_RELATED_TICKETS}");
+		sDocument = arrDocument.join("");
+	<PDM_ELSE>
+		
+		var arrDocument = sDocument.split("{TAG_RELATED_TICKETS}");	
+		
+		if (ahdtop.CanUserPerformAction("ROLE_RELATED_TICKET")) {			
+			var relatedTicketsHTML;
+			relatedTicketsHTML = "&nbsp;This document has been used as a solution to <br>";
+			
+			//$prop.disable_related_tickets is passed from kt_document_view.htmpl
+			// and is used when users click the link from the email
+			if ("$prop.disable_related_tickets" == "true")
+			{
+			   <PDM_IF 0>
+			   We are using the REQ_SOLVED_CNT_SPL and not REQ_SOLVED_CNT and so on ...
+			   as freeaccess spl has some code that assign REQ_SOLVED_CNT to REQ_SOLVED_CNT_SPL and so on ...
+			   only for authorized users, so we will not cause extra database fetches when it's not needed.
+			   </PDM_IF>
+				relatedTicketsHTML += "&nbsp;$args.REQ_SOLVED_CNT_SPL requests";
+				relatedTicketsHTML += ", $args.IN_SOLVED_CNT_SPL incidents";
+				relatedTicketsHTML += ", $args.PR_SOLVED_CNT_SPL problems";
+				relatedTicketsHTML += " and $args.ISS_SOLVED_CNT_SPL issues.<BR>";
+				relatedTicketsHTML += "<BR>";
+				relatedTicketsHTML += "&nbsp;This document has been used to open <br>";
+				relatedTicketsHTML += "&nbsp;$args.REQ_OPENED_CNT_SPL requests";	
+				relatedTicketsHTML += ", $args.IN_OPENED_CNT_SPL incidents";
+				relatedTicketsHTML += " and $args.ISS_OPENED_CNT_SPL issues.<BR>";
+			}
+			else
+			{
+			  <PDM_IF 0>
+			   We are using the REQ_SOLVED_CNT_SPL and not REQ_SOLVED_CNT and so on ...
+			   as freeaccess spl has some code that assign REQ_SOLVED_CNT to REQ_SOLVED_CNT_SPL and so on ...
+			   only for authorized users, so we will not cause extra database fetches when it's not needed.
+			   </PDM_IF>
+				relatedTicketsHTML += "&nbsp;<a class='clsAnchor' href=javascript:kdlinks('REQ_SOLVED','$args.id');><span class='clsAnchor'>$args.REQ_SOLVED_CNT_SPL requests</span></a>";
+				relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('IN_SOLVED','$args.id')><span class='clsAnchor'>$args.IN_SOLVED_CNT_SPL incidents</span></a>";
+				relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('PR_SOLVED','$args.id')><span class='clsAnchor'>$args.PR_SOLVED_CNT_SPL problems</span></a>";
+				relatedTicketsHTML += " and <a class='clsAnchor' href=javascript:kdlinks('ISS_SOLVED','$args.id')><span class='clsAnchor'>$args.ISS_SOLVED_CNT_SPL issues</span></a>.<BR>";
+				relatedTicketsHTML += "<BR>";
+				relatedTicketsHTML += "&nbsp;This document has been used to open <br>";
+				relatedTicketsHTML += "&nbsp;<a class='clsAnchor' href=javascript:kdlinks('REQ_OPENED','$args.id')><span class='clsAnchor'>$args.REQ_OPENED_CNT_SPL requests</span></a>";	
+				relatedTicketsHTML += ", <a class='clsAnchor' href=javascript:kdlinks('IN_OPENED','$args.id')><span class='clsAnchor'>$args.IN_OPENED_CNT_SPL incidents</span></a>";
+				relatedTicketsHTML += " and <a class='clsAnchor' href=javascript:kdlinks('ISS_OPENED','$args.id')><span class='clsAnchor'>$args.ISS_OPENED_CNT_SPL issues</span></a>.<BR>";
+			}
+			sDocument = arrDocument.join(relatedTicketsHTML);			
+		}
+		else {
+			sDocument = arrDocument.join("");
+		}		
+	</PDM_IF>
+	document.write (sDocument);	
+
+</SCRIPT>
+		
+<!-- END analyst/kt_document_template.htmpl -->

@@ -1,0 +1,1 @@
+﻿<%@ WebService Language="C#" CodeBehind="SDMFavService.asmx.cs" Class="SDMFavService.SDMFav" %>

@@ -1,0 +1,510 @@
+<PDM_IF 0>
+edit_prop_dyn.htmpl
+WHEN PRESENTED:
+    When we need to dynamically display properties on 
+    a single Chg or Cr editable form.
+INTENT:
+    Display properties for Chg or Cr editable form.
+Note:
+The PDM_FORM tag is required for a dynamically loaded  
+htpml file, because one of the hidden input field 
+generated from PDM_FORM is FID and FID is used to save 
+current editing state in the spel code. 
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+function layer_load()
+{
+ <PDM_IF "$prop.browser" == "NS">
+    window.reset_vals();
+ <PDM_ELSE>
+    parent.reset_vals();
+ </PDM_IF>
+}
+</script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onload="layer_load()">
+<script type="text/javascript">
+activateActionKeys();
+</script>
+<PDM_IF "$prop.browser" != "NS">
+<div>
+<span id="new_prop_layer">
+</PDM_IF>
+<PDM_FORM NAME="prop_layer">
+<PDM_IF "$prop.browser" == "NS">
+<script>
+document.writeln(window.NS_table());
+</script>
+</PDM_IF>
+<PDM_IF "$Debug">
+<p>
+BEGIN Properties tab
+</PDM_IF>
+<input type="hidden" name=new_category value=<PDM_FMT ESC_STYLE=JS2>"$args.category.sym"</PDM_FMT>>
+
+<input type="hidden" name=assignee_lname_new value="$args.assignee.last_name">
+<input type="hidden" name=assignee_fname_new value="$args.assignee.first_name">
+<input type="hidden" name=assignee_mname_new value="$args.assignee.middle_name">
+<input type="hidden" name=group_lname_new value="$args.group.last_name">
+<PDM_IF "$ProductID" != "cs">
+<PDM_IF "$args.producer_id" == "chg">
+<input type="hidden" name="SET.organization_new" value="$args.organization">
+<input type="hidden" name="KEY.organization_new" value="$args.organization.name">
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$args.SEARCH_STATUS_category" != "">
+<input type="hidden" name=do_popup value="1">
+<PDM_ELSE>
+<input type="hidden" name=do_popup value="0">
+<PDM_IF 0>
+<!-- Apologies on the inelegance of this properties thingie.  Requirements
+    changed at the last minutes...
+     Unfortunately, we cannot just use a nice list like the read-only
+     version of this same form.  So you get 23 properties out of the box
+     (prop0 through prop22), and you can add more if you need 'em.
+     -->
+</PDM_IF>
+<PDM_IF "" != "$args.prop0.id">
+<table id="tbl001">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop0.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop0.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop0.value value="$args.prop0.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop1.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop1.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop1.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop1.value value="$args.prop1.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop2.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop2.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop2.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop2.value value="$args.prop2.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop3.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop3.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop3.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop3.value value="$args.prop3.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop4.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop4.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop4.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop4.value value="$args.prop4.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop5.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop5.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop5.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop5.value value="$args.prop5.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop6.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop6.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop6.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop6.value value="$args.prop6.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop7.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop7.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop7.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop7.value value="$args.prop7.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop8.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop8.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop8.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop8.value value="$args.prop8.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop9.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop9.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop9.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop9.value value="$args.prop9.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop10.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop10.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop10.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop10.value value="$args.prop10.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop11.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop11.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop11.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop11.value value="$args.prop11.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop12.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop12.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop12.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop12.value value="$args.prop12.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop13.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop13.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop13.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop13.value value="$args.prop13.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop14.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop14.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop14.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop14.value value="$args.prop14.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop15.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop15.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop15.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop15.value value="$args.prop15.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop16.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop16.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop16.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop16.value value="$args.prop16.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop17.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop17.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop17.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop17.value value="$args.prop17.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop18.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop18.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop18.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop18.value value="$args.prop18.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop19.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop19.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop19.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop19.value value="$args.prop19.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop20.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop20.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop20.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop20.value value="$args.prop20.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop21.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop21.required>
+<span  class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop21.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop21.value value="$args.prop21.value">
+</td>
+</tr>
+<PDM_IF "" != "$args.prop22.id">
+<tr>
+<td valign="top">
+<PDM_IF 0 != $args.prop22.required>
+<span class="requiredlabeltext">
+<PDM_ELSE>
+<span class="labeltext">
+</PDM_IF>
+$args.prop22.label
+</span>
+</td>
+<td valign="top">
+<input name=SET.prop22.value value="$args.prop22.value">
+</td>
+</tr>
+</PDM_IF>
+<!-- prop22 -->
+</PDM_IF>
+<!-- prop21 -->
+</PDM_IF>
+<!-- prop20 -->
+</PDM_IF>
+<!-- prop19 -->
+</PDM_IF>
+<!-- prop18 -->
+</PDM_IF>
+<!-- prop17 -->
+</PDM_IF>
+<!-- prop16 -->
+</PDM_IF>
+<!-- prop15 -->
+</PDM_IF>
+<!-- prop14 -->
+</PDM_IF>
+<!-- prop13 -->
+</PDM_IF>
+<!-- prop12 -->
+</PDM_IF>
+<!-- prop11 -->
+</PDM_IF>
+<!-- prop10 -->
+</PDM_IF>
+<!-- prop9 -->
+</PDM_IF>
+<!-- prop8 -->
+</PDM_IF>
+<!-- prop7 -->
+</PDM_IF>
+<!-- prop6 -->
+</PDM_IF>
+<!-- prop5 -->
+</PDM_IF>
+<!-- prop4 -->
+</PDM_IF>
+<!-- prop3 -->
+</PDM_IF>
+<!-- prop2 -->
+</PDM_IF>
+<!-- prop1 -->
+</table>
+</PDM_IF>
+<!-- prop0 -->
+<PDM_IF "$Debug">
+<br>
+END Properties tab
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.browser" == "NS">
+<script>
+<PDM_MACRO NAME=btnStartRow>
+document.writeln("<br><center>");
+<PDM_MACRO NAME=button caption="Save[s]" hotkey_name="Save[s]" id="btn012" width=120
+    func="make_string_for_submit();pdm_submit('main_form','UPDATE')">
+<PDM_MACRO NAME=button caption="Cancel[n]" hotkey_name="Cancel[n]" id="btncncl" btnType="negative" width=120
+    func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')">
+<PDM_MACRO NAME=button caption="Reset[r]" hotkey_name="Reset[r]" id="btn014" width=120
+    func="window.do_reset()">
+<PDM_IF "$args.producer_id" == "cr">
+<PDM_IF ${dob.customer:0} != 0>
+<PDM_MACRO NAME=button caption="Quick Profile[q]" hotkey_name="Quick Profile[q]" id="PROFILE_BROWSER2" width=0
+    func="edit_profile_browser('$dob.customer.persistent_id', 'main_form', 'affected_resource')">
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$args.producer_id" == "chg">
+<PDM_IF ${dob.requestor:0} != 0>
+<PDM_MACRO NAME=button caption="Quick Profile[q]" hotkey_name="Quick Profile[q]" id="PROFILE_BROWSER2" width=0
+    func="edit_profile_browser('$dob.requestor.persistent_id')">
+</PDM_IF>
+</PDM_IF>
+document.writeln("<img src=$CAisd/img/bar.gif width=90% HEIGHT=4 ALT=''>");
+document.writeln("</center>");
+document.writeln(window.NS_table_end());
+<PDM_MACRO NAME=btnEndRow>
+</script>
+</PDM_IF>
+</PDM_FORM>
+<PDM_IF "$prop.browser" != "NS">
+</span>
+</div>
+</PDM_IF>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: edit_prop_dyn.htmpl ASPEN.1 2010/11/18 13:40:12 saima01 Exp $
+</PDM_IF>

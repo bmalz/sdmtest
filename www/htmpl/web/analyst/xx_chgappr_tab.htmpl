@@ -1,0 +1,96 @@
+<PDM_IF 0>
+xx_chgappr_tab.htmpl
+WHEN PRESENTED:
+    When we need to display details of Change Order.
+INTENT:
+    Display notebook page for Change Order details.
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_WSP mode=edit preview="NBTAB=xx_chgappr_tab" factory=chg>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<html lang="en"><BODY class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl filename="CAB Console">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+var object_type = "$args.FACTORY";
+function showObject()
+{
+    var chghtml;
+	if(object_type == 'chg')
+	{
+    chghtml = "<A class=record HREF=\"javascript:showDetailWithPersid('$args.persistent_id')\">$args.chg_ref_num</A>\n";
+    } 
+	else if(object_type == 'wf')
+	{
+	chghtml = "<A class=record HREF=\"javascript:showDetailWithPersid('$args.chg.persistent_id')\">$args.chg.chg_ref_num</A>\n";
+	}
+	return(chghtml);
+}
+<PDM_MACRO name=tabBanner title="Change Order details" add_btns=true>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_IF "$args.FACTORY" == "chg">
+<PDM_MACRO name=dtlReadonly hdr="Numer zmiany" attr="chg_ref_num" fmtfunc=showObject hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Streszcznie zmiany" attr=summary colspan=2 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zgłaszający" attr=requestor hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr=category.sym hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=status hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Priorytet" attr=priority hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Data otwarcia" attr=open_date hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Grupa" attr=group hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Ryzyko" attr="risk" hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="CAB" attr="cab" hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Akceptacja CAB" attr="cab_approval" hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Schedule Start Date" attr=sched_start_date hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Schedule End Date" attr=sched_end_date hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Schedule Duration" attr=sched_duration hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis zmiany" attr=description colspan=3 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Plan implementacji" attr=effort colspan=3 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Usprawiedliwienie biznesowe" attr=justification colspan=3 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Plan wycofania" attr=backout_plan colspan=3 hdrclass=detailro>
+</PDM_IF>
+<PDM_IF "$args.FACTORY" == "wf">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Numer zmiany" attr="chg.chg_ref_num" fmtfunc=showObject hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Streszcznie zmiany" attr=chg.summary colspan=2 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Zgłaszający" attr=chg.requestor hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr=chg.category.sym hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=chg.status hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Priorytet" attr=chg.priority hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Data otwarcia" attr=chg.open_date hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Grupa" attr=chg.group hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Ryzyko" attr="chg.risk" hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="CAB" attr="chg.cab" hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Akceptacja CAB" attr="chg.cab_approval" hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Schedule Start Date" attr=chg.sched_start_date hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Schedule End Date" attr=chg.sched_end_date hdrclass=detailro>
+<PDM_MACRO name=dtlReadonly hdr="Schedule Duration" attr=chg.sched_duration hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Opis zmiany" attr=chg.description colspan=3 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Plan implementacji" attr=chg.effort colspan=3 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Usprawiedliwienie biznesowe" attr=chg.justification colspan=3 hdrclass=detailro>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Plan wycofania" attr=chg.backout_plan colspan=3 hdrclass=detailro>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+</PDM_FORM>
+</BODY>
+</HTML>

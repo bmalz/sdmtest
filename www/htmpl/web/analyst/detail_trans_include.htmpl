@@ -1,0 +1,40 @@
+<PDM_IF 0>
+detail_trans_include.htmpl
+WHEN PRESENTED:
+	Common code shared by all detail form for Status Transition.
+	Input properties:
+        transStatus: factory for the status objects for the transition (crs_cr, crs_in, crs_pr, chgstat, issstat)
+        transFactory: factory for the transition (cr_trans, in_trans, pr_trans, chg_trans or iss_trans
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="NBTAB=detail_trans_include" factory=cr_trans>
+<!-- BEGIN -->
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+factoryDisplayName = "$prop.transDisplayName";
+<PDM_MACRO name=dtlForm factory=$prop.transFactory>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Ze statusu" attr=status factory=$prop.transStatus>
+<PDM_MACRO name=dtlReadonly hdr=" " attr=status.description>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Do statusu" attr=new_status factory=$prop.transStatus>
+<PDM_MACRO name=dtlReadonly hdr=" " attr=new_status.description>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Domyślne przejście" attr=is_default off="No" on="Yes">
+<PDM_MACRO name=dtlCheckbox hdr="Wymaga komentarza" attr=must_comment off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Warunek" attr=condition>
+<PDM_IF "$prop.transFactory" == "in_trans" || "$prop.transFactory" == "cr_trans">
+<PDM_MACRO name=dtlLookup attr=t_type>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Wiadomość błędu warunku" attr=condition_error colspan=3 rows=2 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=3 rows=4 size=80>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+<PDM_MACRO name=dtlEnd>
+<!-- END -->

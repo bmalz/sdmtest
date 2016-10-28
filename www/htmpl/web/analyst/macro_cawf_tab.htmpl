@@ -1,0 +1,36 @@
+<PDM_IF 0>
+macro_cawf_tab.htmpl
+
+INTENT:
+	Display a Workflow notebook page for CA workflow macro.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<BODY class=detailro OnUnload="cancel_any_lrel_update()" onLoad="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<BODY class=detailro OnUnload="cancel_any_lrel_update()" >
+</PDM_IF><PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+
+// CA Workflow view.....
+tab_banner("Workflow", true);
+docWriteln(link);
+
+</SCRIPT>
+</PDM_FORM>
+
+</BODY>
+</HTML>

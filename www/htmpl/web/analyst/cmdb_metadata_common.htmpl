@@ -1,0 +1,219 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_metadata_common.htmpl
+//
+// Purpose: Provides the metadata macro definitions for common nr object attributes 
+//          availible across all CMDB families. Used by the Versioning and
+//          Transaction Work Area (twa) features for storing metadata.
+//
+//
+// 17-Jan-2008 bersa02 Added common CI attribute, bm_status.
+// 28-Jan-2008 mckpe04 Added common CI attribute, standard_ci.
+// 21-Feb-2008 mckpe04 Changed use .sym for delete_flag,
+// 21-Apr-2008 mckpe04 Added space before reconciliation to force it to sort to top of list
+// 18-Jul-2008 bersa02 Added is_asset, is_ci for CMDB-UAPM integration phase 1
+// 01-Aug-2008 tomjo02 Updated is_asset, is_ci to use sym (YES/NO) for CMDB-UAPM integration phase 1
+// 11-Sep-2008 sahpr01 Added 5 new attributes for r12(creation_date,creation_user,version_number,last_mod_by,tenant)
+// 23-Feb-2009 aliab01 SCO 21488, added help attribute for r12.1 release
+// 10-Jun-2009 tomjo02 SCO 23497 CMDB r12.1 Reconciliation PES 05629 - added twa object support.
+// 30-Jul-2009 tomjo02 SCO 26514 - added superseded_by and not_ambiguous for reconciliation support.
+// 27-Oct-2009 tomjo02 SCO 29544 - Changed 'Not Ambiguous' flag label to 'Exclude Ambiguity' 
+// 02-Nov-2010 tomjo02 SCO 35745 - Corrected value display for Backup Services, Billing, Disaster Recovery, Network Operations, Support 1, Support 2, Support 3 and Service Type attributes.
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// Enable macro invocation for common attributes for Versioning all the time (twa_step =="")
+// or only when twa_setup mode is "process_metadata_common".
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_IF "$prop.twa_setup" == "" || "$prop.twa_setup" == "process_metadata_common" >
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new common attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" common="YES" attr="***ATTRIBUTE***" dbcolumn="resource_name" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***ATTRIBUTE*** => nr object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+        ***HELP***      => Brief description of the attribute. 
+
+// ************************************************************************
+</PDM_IF>
+
+////////////////////////////////////////////////////////
+//category="" file="detail_nr.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation"    common="YES"     attr="name"        dbcolumn="resource_name"      heading="Name"           standardcivalue=${args.standard_ci.0.name} currentcivalue=${args.name} help="The name of the resource">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="class"        dbcolumn="resource_class"     heading="Class"          standardcivalue=${args.standard_ci.0.class.type} currentcivalue=${args.class.type} help="The name of the class">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="family"        dbcolumn="resource_family"   heading="Family"         standardcivalue=${args.standard_ci.0.family.sym} currentcivalue=${args.family.sym} help="The name of the family">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="delete_flag"   dbcolumn="inactive"          heading="Active?"        standardcivalue=${args.standard_ci.0.delete_flag.sym} currentcivalue=${args.delete_flag.sym} help="Active|FALSE|0 (zero)|No: CI is active and displays in display lists (the default). Inactive|TRUE|1 (one)|Yes: CI is not active and does not appear in display lists">
+
+
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation"    common="YES"     attr="serial_number" heading="Serial Number"  standardcivalue=${args.standard_ci.0.serial_number} currentcivalue=${args.serial_number}  help="Serial number">
+
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation"    common="YES"     attr="asset_num"    dbcolumn="resource_tag"  heading="Alt CI ID"      standardcivalue=${args.standard_ci.0.asset_num} currentcivalue=${args.asset_num} help="Alternate resource identifier, for example, an alternate ID located on sticker placed on a computer">
+
+<PDM_IF "$prop.Extension"=="entsrvx" || "$prop.Extension"=="enttx" || "$prop.Extension"=="app_extx" || "$prop.Extension"=="dat_basx" || "$prop.Extension"=="app_inhx" || "$prop.Extension"=="opsysx">
+   <PDM_MACRO name=cmdbMetadata category=" Reconciliation"    common="YES"     attr="system_name"   dbcolumn="host_name"    heading="System Name"      standardcivalue=${args.standard_ci.0.system_name} currentcivalue=${args.system_name} help="Computer name. (hardware only)">
+<PDM_ELSE>
+   <PDM_MACRO name=cmdbMetadata category=" Reconciliation"    common="YES"     attr="system_name"   dbcolumn="host_name"    heading="Host Name"      standardcivalue=${args.standard_ci.0.system_name} currentcivalue=${args.system_name} help="Computer name. (hardware only)">
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation"    common="YES"     attr="dns_name"                               heading="DNS Name"       standardcivalue=${args.standard_ci.0.dns_name} currentcivalue=${args.dns_name}  help="The name by which this device is know in the domain name server">
+
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation"    common="YES"     attr="mac_address"                            heading="MAC Address"    standardcivalue=${args.standard_ci.0.mac_address} currentcivalue=${args.mac_address}  help="MAC address. (hardware only)">
+
+<PDM_MACRO name=cmdbMetadata category="Attributes"     common="YES"     attr="description"      dbcolumn="resource_description"   heading="Notes"          standardcivalue=${args.standard_ci.0.description} currentcivalue=${args.description} help="Longer name or description of the resource">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="standard_ci"  dbcolumn="baseline_uuid"          heading="Standard CI"          standardcivalue=${args.standard_ci.0.standard_ci.0.name} currentcivalue=${args.standard_ci.0.name}  help="Standard configuration for comparison">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="is_asset" dbcolumn="is_asset"     heading="Asset?" standardcivalue=${args.standard_ci.0.is_asset.sym} currentcivalue=${args.is_asset.sym}  help="Boolean flag that can be set to categorize an Asset">
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="is_ci"    dbcolumn="is_ci"        heading="CI?"    standardcivalue=${args.standard_ci.0.is_ci.sym} currentcivalue=${args.is_ci.sym}  help="Boolean flag that can be set to categorize a CI">
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+//new attributes for r12 (creation_date,creation_user,version_number,last_mod_by,tenant)
+////////////////////////////////////////////////////////////////////////////////////////
+
+<PDM_MACRO name=cmdbMetadata category="Classification"    common="YES"     attr="creation_date"        dbcolumn="creation_date"      heading="Creation date"       standardcivalue=${args.standard_ci.0.creation_date}  currentcivalue=${args.creation_date} help="A timestamp (pdmtime), indicating the date and time this CI was created">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"    common="YES"     attr="creation_user"        dbcolumn="creation_user"      heading="Created by"          standardcivalue=${args.standard_ci.0.creation_user}  currentcivalue=${args.creation_user} help="The userid of the contact who created this CI">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"    common="YES"     attr="version_number"       dbcolumn="version_number"     heading="Version number"      standardcivalue=${args.standard_ci.0.version_number} currentcivalue=${args.version_number} help="The internal version indicator">
+
+<PDM_MACRO name=cmdbMetadata category="Classification"    common="YES"     attr="last_mod_by"          dbcolumn="last_update_user"   heading="Last changed by"     standardcivalue=${args.standard_ci.0.last_mod_by}    currentcivalue=${args.last_mod_by} help="The userid of the contact who last modified this CI">
+
+<PDM_IF "$prop.MultiTenancy" == "on">
+<PDM_MACRO name=cmdbMetadata category="Classification"    common="YES"     attr="tenant"               dbcolumn="tenant"          heading="Tenant"              standardcivalue=${args.standard_ci.0.tenant.name}         currentcivalue=${args.tenant.name} help="Specifies the tenant assignment for the CI">
+</PDM_IF>
+
+////////////////////////////////////////////////////////////////////////////////////////
+//new attributes for r12.5 (superseded_by, not_ambiguous)
+////////////////////////////////////////////////////////////////////////////////////////
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="superseded_by"  dbcolumn="superseded_by"   heading="Superseded By" standardcivalue=${args.standard_ci.0.superseded_by.0.name} currentcivalue=${args.superseded_by.0.name}  help="To correct reconciliation inconsistencies, the superseded by field redirects updates to this target CI">
+<PDM_MACRO name=cmdbMetadata category="Classification"     common="YES"     attr="not_ambiguous"  dbcolumn="not_ambiguous"   heading="Exclude Ambiguity" standardcivalue=${args.standard_ci.0.not_ambiguous.sym}             currentcivalue=${args.not_ambiguous.sym}    help="YES (1): Removes the CI from consideration by ambiguity management. The CI is considered to be uniquely identified regardless of the identifying attributes of other CIs. The ambiguity index of this CI is zero. NO (0): (default) This CI is eligible for ambiguity management. The ambiguity index of this CI is determined by the uniqueness of its identifying attributes. The identifying attributes of this CI are considered when evaluating the ambiguity index of other CIs.">
+
+///////////////////////////////////////////////////////////
+//category="Inventory" file="nr_inv_tab.htmpl"
+///////////////////////////////////////////////////////////
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="alarm_id"     dbcolumn="ip_address"          heading="IP Address"                          standardcivalue=${args.standard_ci.0.alarm_id} currentcivalue=${args.alarm_id} help="IP address. (hardware only)">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="model"         dbcolumn="model_uuid"         heading="Model"                               standardcivalue=${args.standard_ci.0.model.sym} currentcivalue=${args.model.sym} help="In the object, this is the model name for the CI">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="manufacturer"  dbcolumn="manufacturer_uuid"   heading="Manufacturer"                        standardcivalue=${args.standard_ci.0.manufacturer.sym} currentcivalue=${args.manufacturer.sym}  help="In the object, this is the name of the company who manufactured the CI">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="license_number"  dbcolumn="license_information" heading="License Number"                      standardcivalue=${args.standard_ci.0.license_number} currentcivalue=${args.license_number} help="License Information">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="acquire_date"                                    heading="Acquire Date"                        standardcivalue=${args.standard_ci.0.acquire_date} currentcivalue=${args.acquire_date} help="Date resource was acquired">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="install_date"    dbcolumn="installation_date"    heading="Installation Date"                   standardcivalue=${args.standard_ci.0.install_date} currentcivalue=${args.install_date}  help="Date resource was installed in organization or network">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="expiration_date"  dbcolumn="nr_exp_dt"            heading="Expiration Date"                     standardcivalue=${args.standard_ci.0.expiration_date} currentcivalue=${args.expiration_date}  help="Date license, lease, and so on, expires">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="warranty_start"   dbcolumn="nr_wrty_st_dt"        heading="Warranty Start Date"                 standardcivalue=${args.standard_ci.0.warranty_start} currentcivalue=${args.warranty_start} help="Warranty start date">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="warranty_end"   dbcolumn="nr_wrty_end_dt"         heading="Warranty End Date"                   standardcivalue=${args.standard_ci.0.warranty_end} currentcivalue=${args.warranty_end} help="Warranty end date">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="product_version"                 heading="Product Version"                     standardcivalue=${args.standard_ci.0.product_version} currentcivalue=${args.product_version} help="Product release">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="financial_num"    dbcolumn="nr_financial_id"      heading="Financial Reference"                 standardcivalue=${args.standard_ci.0.financial_num} currentcivalue=${args.financial_num} help="Financial number">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="asset_count"   dbcolumn="resource_quantity"       heading="Quantity"                            standardcivalue=${args.standard_ci.0.asset_count} currentcivalue=${args.asset_count} help="Resource quantity">
+
+<PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="lifecycle_status"   dbcolumn="lifecycle_status"       heading="Asset Lifecycle Status" standardcivalue=${args.standard_ci.0.lifecycle_status} currentcivalue=${args.lifecycle_status} help="Lifecycle status identifies the status of an asset in the lifecycle.  The lifecycle typically spans request, ordered, receipt, active, available/warehoused, disposed.">
+
+//////////////////////////////////////////////////////////
+//category="Service" file="nr_serv_tab.htmpl"
+///////////////////////////////////////////////////////////
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="service_type"  dbcolumn="nr_service_type"       heading="Service Type"                        standardcivalue=${args.standard_ci.0.service_type.sym} currentcivalue=${args.service_type.sym} help="Service type of an asset">
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="expense_code"  dbcolumn="cost_center"           heading="Cost Center"                         standardcivalue=${args.standard_ci.0.expense_code.name} currentcivalue=${args.expense_code.name} help="Cost center of the CI">
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="service_org"   dbcolumn="responsible_org_uuid"    heading="Responsible Organization"            standardcivalue=${args.standard_ci.0.service_org.name} currentcivalue=${args.service_org.name} help="Name of the organization ultimately responsible for the resource">
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="repair_org"    dbcolumn="maintenance_org_uuid"    heading="Maintenance Organization"            standardcivalue=${args.standard_ci.0.repair_org.name} currentcivalue=${args.repair_org.name} help="Name of the organization responsible for maintenance of the CI">
+
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="priority"    dbcolumn="nr_pr_id"                  heading="Priority"                            standardcivalue=${args.standard_ci.0.priority.sym} currentcivalue=${args.priority.sym} help="Enumerated value for this entry, it specifies ordering in lists and relative values">
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="supplier"    dbcolumn="supply_vendor_uuid"   heading="Supply Vendor"                       standardcivalue=${args.standard_ci.0.supplier.sym} currentcivalue=${args.supplier.sym} help="Name of the vendor responsible for supplying the CI">
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="vendor_restore"  dbcolumn="responsible_vendor_uuid" heading="Responsible Vendor"                  standardcivalue=${args.standard_ci.0.vendor_restore.sym} currentcivalue=${args.vendor_restore.sym}  help="Name of the company ultimately responsible for the resource">
+
+<PDM_MACRO name=cmdbMetadata  category="Service"           common="YES"     attr="vendor_repair"   dbcolumn="maintenance_vendor_uuid"  heading="Maintenance Vendor"                  standardcivalue=${args.standard_ci.0.vendor_repair.sym} currentcivalue=${args.vendor_repair.sym} help="Name of the vendor providing maintenance for the CI">
+
+
+//////////////////////////////////////////////////////////
+//category="Location" file="nr_loc_tab.htmpl"
+///////////////////////////////////////////////////////////
+
+
+<PDM_MACRO name=cmdbMetadata  category="Location"          common="YES"     attr="location"   dbcolumn="location_uuid"      heading="Location"                            standardcivalue=${args.standard_ci.0.location.name} currentcivalue=${args.location.name} help="Name of the location">
+
+<PDM_MACRO name=cmdbMetadata  category="Location"          common="YES"     attr="loc_floor"   dbcolumn="floor_location"    heading="Floor"                               standardcivalue=${args.standard_ci.0.loc_floor} currentcivalue=${args.loc_floor} help="Floor location">
+
+<PDM_MACRO name=cmdbMetadata  category="Location"          common="YES"     attr="loc_room"  dbcolumn="room_location"       heading="Room Location"                       standardcivalue=${args.standard_ci.0.loc_room} currentcivalue=${args.loc_room} help="Room location">
+
+<PDM_MACRO name=cmdbMetadata  category="Location"          common="YES"     attr="loc_cabinet"  dbcolumn="cabinet_location"  heading="Cabinet Location"                    standardcivalue=${args.standard_ci.0.loc_cabinet} currentcivalue=${args.loc_cabinet} help="Cabinet location">
+
+<PDM_MACRO name=cmdbMetadata  category="Location"          common="YES"     attr="loc_shelf"  dbcolumn="shelf_location"      heading="Shelf Location"                      standardcivalue=${args.standard_ci.0.loc_shelf} currentcivalue=${args.loc_shelf} help="Shelf location">
+
+<PDM_MACRO name=cmdbMetadata  category="Location"          common="YES"     attr="loc_slot"  dbcolumn="slot_location"        heading="Slot Location"                       standardcivalue=${args.standard_ci.0.loc_slot} currentcivalue=${args.loc_slot} help="Slot location">
+
+
+//////////////////////////////////////////////////////////
+//category="Contacts" file="nr_contact_tab.htmpl"
+///////////////////////////////////////////////////////////
+
+<PDM_MACRO name=cmdbMetadata  category="Contacts"          common="YES"     attr="resource_contact"  dbcolumn="resource_contact_uuid"   heading="Contact"                            standardcivalue=${args.standard_ci.0.resource_contact.combo_name} currentcivalue=${args.resource_contact.combo_name} help="Name of the contact responsible for the CI">
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Common CI Attribute, bm_status, is displayed in all Attributes tabs when CMDB is installed
+// STANDALONE. Otherwise it is displayed in the Impact Analyzer tab under a different heading.
+/////////////////////////////////////////////////////////////////////////////////////////
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=cmdbMetadata category="Attributes" common="YES"    attr="bm_status"    dbcolumn="nr_bms"    heading="Operational Status"  standardcivalue=${args.standard_ci.0.bm_status.sym} currentcivalue=${args.standard_ci.0.bm_status.sym} help="Operational status">
+
+<PDM_ELSE>
+<PDM_MACRO name=cmdbMetadata category="Attributes" common="YES"    attr="bm_status"    dbcolumn="nr_bms"      heading="Change Impact Analyzer Status" standardcivalue=${args.standard_ci.0.bm_status.sym} currentcivalue=${args.standard_ci.0.bm_status.sym} help="Operational status">
+
+</PDM_IF>
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// The status attribute is labelled differently in some families
+// Prevent duplicate attributes from being defined by placing all definitions
+// for all common attributes here
+/////////////////////////////////////////////////////////////////////////////////////////
+
+<PDM_IF "$prop.Extension"=="cntx" || "$prop.Extension"=="locx" || "$prop.Extension"=="orgx">
+   <PDM_MACRO name=cmdbMetadata  category="Attributes"        common="YES"     attr="status"      dbcolumn="resource_status"   heading="Configured Status"      standardcivalue=${args.standard_ci.0.status.sym} currentcivalue=${args.status.sym} help="Status indicator for the CI">
+<PDM_ELSE>
+   <PDM_MACRO name=cmdbMetadata  category="Inventory"         common="YES"     attr="status"      dbcolumn="resource_status"   heading="Service Status"              standardcivalue=${args.standard_ci.0.status.sym} currentcivalue=${args.status.sym} help="Status indicator for the CI">
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata  category="Contacts"         common="YES"     attr="billing_contact_uuid"                dbcolumn="billing_contact_uuid"   heading="Billing"                       standardcivalue=${args.standard_ci.0.billing_contact_uuid.combo_name} currentcivalue=${args.billing_contact_uuid.combo_name} help="Name of the contact responsible for billing">
+<PDM_MACRO name=cmdbMetadata  category="Contacts"         common="YES"     attr="support_contact1_uuid"               dbcolumn="support_contact1_uuid"   heading="Support 1"                    standardcivalue=${args.standard_ci.0.support_contact1_uuid.combo_name} currentcivalue=${args.support_contact1_uuid.combo_name} help="Name of the first contact responsible for support services">
+<PDM_MACRO name=cmdbMetadata  category="Contacts"         common="YES"     attr="support_contact2_uuid"               dbcolumn="support_contact2_uuid"   heading="Support 2"                    standardcivalue=${args.standard_ci.0.support_contact2_uuid.combo_name} currentcivalue=${args.support_contact2_uuid.combo_name} help="Name of the second contact responsible for support services">
+<PDM_MACRO name=cmdbMetadata  category="Contacts"         common="YES"     attr="support_contact3_uuid"               dbcolumn="support_contact3_uuid"   heading="Support 3"                    standardcivalue=${args.standard_ci.0.support_contact3_uuid.combo_name} currentcivalue=${args.support_contact3_uuid.combo_name} help="Name of the third contact responsible for support services">
+<PDM_MACRO name=cmdbMetadata  category="Contacts"         common="YES"     attr="disaster_recovery_contact_uuid"      dbcolumn="disaster_recovery_contact_uuid"   heading="Disaster Recovery"   standardcivalue=${args.standard_ci.0.disaster_recovery_contact_uuid.combo_name} currentcivalue=${args.disaster_recovery_contact_uuid.combo_name} help="Name of the contact responsible for disaster recovery services">
+<PDM_MACRO name=cmdbMetadata  category="Contacts"         common="YES"     attr="backup_services_contact_uuid"        dbcolumn="backup_services_contact_uuid"   heading="Backup Services"       standardcivalue=${args.standard_ci.0.backup_services_contact_uuid.combo_name} currentcivalue=${args.backup_services_contact_uuid.combo_name} help="Name of the contact responsible for backup services">
+<PDM_MACRO name=cmdbMetadata  category="Contacts"         common="YES"     attr="network_contact_uuid"                dbcolumn="network_contact_uuid"   heading="Network Operations"            standardcivalue=${args.standard_ci.0.network_contact_uuid.combo_name} currentcivalue=${args.network_contact_uuid.combo_name} help="Name of the contact responsible for network operations">
+
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// End of PDM_IF is in twa_setup mode test
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+</PDM_IF>
+

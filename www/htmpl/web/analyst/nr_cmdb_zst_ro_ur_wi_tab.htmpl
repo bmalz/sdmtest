@@ -1,0 +1,140 @@
+<PDM_IF 0>
+DESCRIPTION:
+    Display the Attributes tab for the CI detail page, which is invoked by the detail_***EXTENSION***.htmpl form.
+    The steps below assume use of the Web Screen Painter (WSP)
+    
+PROCEDURE:
+    Step 1: To add an attribute, drag a control from the WSP Tool palette to the form area.
+    Step 2: Associate the control with a particular attribute by clicking on the attribute value and selecting an attribute name.
+            Note: All attributes must originate fron either the nr object or a single extension table.
+    Step 3: Repeat steps 1-2 for each attribute to be added to the form.
+    Step 4: Change the preview URL from "detail_xx.htmpl" to "detail_***EXTENSION***.htmpl",  where ***EXTENSION*** is the extension table name. 
+    Step 5: Save this file as nr_cmdb_***EXTENSION***_tab.htmpl,  where ***EXTENSION*** is the extension table name.
+    
+    After this file is saved, you must create cmdb_metadata_***EXTENSION***.htmpl
+    using the template file cmdb_metadata.template as a basis.
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_zst_ro_ur_wi.htmpl" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+var smr_edititem = "";
+var smr_edititemid = ""; 
+var smr_edititem_label = "";
+var smr_ro_field = "";
+
+function toggleIpAddressBox(val) {
+	if(val) {
+		smr_edititem.show();
+		smr_edititem_label.show();
+	}
+	else {
+		smr_edititem.hide();
+		smr_edititem_label.hide();
+	}
+}
+
+jq(document).ready(function() {
+	
+	smr_ro_field = jq('td[pdmqa="assoc_zst_ro_ur_wi.adres_ip"]');
+
+	if(_dtl.edit)
+	{
+		smr_edititem = jq('input[pdmqa="assoc_zst_ro_ur_wi.adres_ip"]');
+		smr_edititemid = smr_edititem.attr('id');
+		smr_edititem_label = jq('label[for="' + smr_edititemid + '"]');
+
+		if($args.assoc_zst_ro_ur_wi.lan == 0) {
+			toggleIpAddressBox(false);
+		}
+		else {
+			toggleIpAddressBox(true);
+		}
+	}
+	else {
+		if($args.assoc_zst_ro_ur_wi.lan == 0) {
+			smr_ro_field.parent().hide();
+			smr_ro_field.parent().prev().hide();
+		}
+	}
+});
+
+function custom_toggleIpAddressField(opt)
+{
+	if(opt.value == 0) // nie
+	{
+		toggleIpAddressBox(false);
+	}
+	else
+	{
+		toggleIpAddressBox(true);
+	}
+}
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+tab_banner("Attributes",true)
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Jednostka organizacyjna" attr="org_bought_for_uuid">
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr="zlokalizacja">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Numer OT" attr="znumer_ot" maxlength="255">
+<PDM_MACRO name=dtlTextbox hdr="Wartość początkowa" attr="zvalue_start">
+<PDM_MACRO name=dtlTextbox hdr="Wartość netto" attr="zvalue_net">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nr protokołu likwidacji" attr="zliquidation_protocol_nr">
+<PDM_MACRO name=dtlDropdown hdr="Rodzaj drukarki" attr="assoc_zst_ro_ur_wi.rodzaj_drukarki" lookup="no">
+<PDM_MACRO name=dtlDropdown hdr="Rodzaj wydruku" attr="assoc_zst_ro_ur_wi.rodzaj_wydruku" lookup="no">
+<PDM_MACRO name=dtlStartRow>
+detailDropdown("Funkcja skanera", "assoc_zst_ro_ur_wi.skaner", "", 1, 20, true, "", "$args.assoc_zst_ro_ur_wi.skaner", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+detailDropdown("Funkcja ksera", "assoc_zst_ro_ur_wi.ksero", "", 1, 20, true, "", "$args.assoc_zst_ro_ur_wi.ksero", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+detailDropdown("Funkcja faksu", "assoc_zst_ro_ur_wi.faks", "", 1, 20, true, "", "$args.assoc_zst_ro_ur_wi.faks", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+
+<PDM_MACRO name=dtlStartRow>
+
+detailDropdown("Port USB", "assoc_zst_ro_ur_wi.usb", "", 1, 20, true, "", "$args.assoc_zst_ro_ur_wi.usb", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+detailDropdown("Port LPT", "assoc_zst_ro_ur_wi.lpt", "", 1, 20, true, "", "$args.assoc_zst_ro_ur_wi.lpt", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+{
+detailSetEventHandler("onChange=\"custom_toggleIpAddressField(this)\"  ");
+detailDropdown("Port LAN", "assoc_zst_ro_ur_wi.lan", "", 1, 20, true, "", "$args.assoc_zst_ro_ur_wi.lan", "yes:0:0", "sym", "", "", "", "no", "0", "", "0",
+ "Tak", "1", "Nie", "0");
+}
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Adres IP" attr="assoc_zst_ro_ur_wi.adres_ip" id="custom_adres_ip">
+<PDM_MACRO name=dtlStartRow>
+
+if(_dtl.edit)
+	detailTextbox("Link do opisu","assoc_zst_ro_ur_wi.management_url",3,1,69, "0","1000",'$args.assoc_zst_ro_ur_wi.management_url',"no","no", "", "2","no", "");
+else
+	detailTextboxReadonly("Link do opisu","assoc_zst_ro_ur_wi.management_url",3,'<a href="$args.assoc_zst_ro_ur_wi.management_url" target="_blank">$args.assoc_zst_ro_ur_wi.management_url</a>', "",void(0), void(0), void(0), "", "", "no");
+
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr="zdescription_long" colspan="3" maxlength="1000" rows="8" size="69">
+
+
+<PDM_MACRO NAME=dtlEndTable>
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+

@@ -1,0 +1,78 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When canceling a rework version using the local object of KD_TASK
+INTENT:
+    Cancel a reowrok version 
+    Note that the KD Task is a local object. 
+    Means no records are created in the database and the object used to create standard detail pages
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Cancel Rework Version";
+var hdrTitleUpd = "Cancel Rework Version";
+var hdrTitleNew = "Cancel Rework Version";
+
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+_bHideTenantSelection = true;//Inherit the tenant from the containing KD - SCO 6350
+ahdframeset.top_splash.next_persid = "KD:$args.KD";
+var m_bAdminMode = ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS");
+var m_ofrom;
+function PageLoad()
+{
+	m_ofrom = document.forms["main_form"];//Ref the detail form
+}
+function KT_REPLY(sOP,msg)
+{
+}
+function preSaveTrigger()
+{
+	return true;
+}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+</head>
+<body class=detailro onUnload="unloadActions()" onLoad="PageLoad()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="KD_TASK">
+<PDM_MACRO name=dtlStart>
+</script>
+<input type=hidden value="$args.WF_REJECT_TO_ID" name="SET.WF_REJECT_TO_ID">
+<script language="JavaScript">
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł dokumentu" attr="KD.TITLE" inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Rework Version Status" attr="KD.VER_CROSS_REF_ID.STATUS_ID.STATUS" inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="WF_COMMENT" rows=3 size=105>
+	docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+<PDM_MACRO name=dtlEndTable>
+</script>
+</center>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

@@ -1,0 +1,62 @@
+<PDM_IF 0>
+@(#)$Id: kt_dtbuilder.htmpl ASPEN.4 2011/11/02 17:50:44 vwwsr01 Exp $
+WHEN PRESENTED:
+    Decision Tree Builder popup displayed when the user presses
+    "Design Tree" on the KD detail for a decision tree
+</PDM_IF>
+
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head_include.htmpl>
+<SCRIPT>
+// Used by inner frames to determine if they are inside a popup or not
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+var strRootID = "$args.DTRootID";
+var strRootName;
+var strTreeID = "$args.DTDocID";
+var strStatusID = "$args.KEEP.CURRENT_STATUS";
+var strWinName = "$args.KEEP.POPUP_NAME";
+var ahdframeset = ( window.name == "cai_main" ? window : ahdtop );
+var ahdframe;
+var w;
+var m_sReadOnlyMode = "$args.RO";
+//Get the parent window reference
+var sKDPersID = "KD:$args.DTDocID";
+w = ahdtop.detailForms[sKDPersID].ahdframe;
+if ( typeof jq == "undefined" )
+{
+    // Initialize the global jQuery variable if not already set
+    jq = jQuery.noConflict();
+}
+
+if ( typeof w == "object" && w != null )
+{
+	<PDM_IF "$args.RO" != "1"><PDM_IF 0>Not needed when presenting read only node</PDM_IF>
+		w.getWinName(strWinName);//pass this win name to document editor(detail_KD.js)		
+	</PDM_IF>
+	strRootName = w.hdrTitle; //get the title of the document editor(detail_KD.htmpl)
+}
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_dtbuilder.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</head>
+<frameset id=frmMainFrameset name=frmMainFrameset rows="28,22,*,1"<PDM_IF "$prop.browser" != "IE"> > <PDM_ELSE> frameborder="0" framespacing="0"> </PDM_IF>
+  <frame name=banner src="$CAisd/html/kt_dtbuilder_banner.html"
+         scrolling=no noresize frameborder=0 marginheight=0 marginwidth=0
+         title="C A logo - read only">
+  <frame id='menubar' name=menubar src="$CAisd/html/menubar.html" 
+         scrolling=no marginheight=0 marginwidth=0 frameborder=no border=0
+         title="Menu bar">
+<PDM_IF "$SESSION.usingScreenReader" == "1">
+  <PDM_INCLUDE FILE=kt_dtbuilder_frameset.htmpl DTDocID=$args.DTDocID Tenant=$args.Tenant>
+<PDM_ELSE>
+  <frame NAME=ktdtbldr_window frameborder=no border=0
+         src="$cgi?OP=DISPLAY_FORM+SID=$args.SID+FID=$args.FID+HTMPL=kt_dtbuilder2.htmpl+DTDocID=$args.DTDocID+Tenant=$args.Tenant+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME+KEEP.IsPopUp=$args.KEEP.IsPopUp"
+         style="border:0px" scrolling=NO marginheight=0 marginwidth=0
+         title="Hidden frame - do not navigate here">
+</PDM_IF>
+</frameset>
+</html>

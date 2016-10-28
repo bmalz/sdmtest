@@ -1,0 +1,85 @@
+<PDM_IF 0>
+$Id: list_chgstat.htmpl,v 1.2 2006/11/08 00:14:03 olsjo01 Exp $
+list_chgstat.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Change Statuss.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF "$args.KEEP.FACT" != "">
+<PDM_INCLUDE FILE=list_status_trans_include.htmpl>
+<PDM_IF "$args.KEEP.PERSID" != "">
+var hdrTitle = "Update Change Order Status Transition Search";
+var hdrTitleList = "Update Change Order Status Transitions";
+<PDM_ELSE>
+var hdrTitle = "Initial Change Order Status Transition Search";
+var hdrTitleList = "Initial Change Order Status Transitions";
+</PDM_IF>
+<PDM_ELSE>
+var hdrTitle = "Wyszukiwanie statusów Zmiany";
+var hdrTitleList = "Lista statusów Zmiany";
+</PDM_IF>
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("chgstatsum.rpt", "chgstatdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+var cfgDefaultStatus = "${args.DEFAULT_STATUS:}";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_IF "$args.KEEP.FACT" != "">
+<PDM_MACRO name=sfStart create=false factory=chgstat>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart factory=chgstat>
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Aktywny" attr=delete_flag>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=30>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code size=20>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "Brak kodu statusu";
+var msgFound1 = "Znaleziony 1 status ";
+var msgFound = "Znaleziono %1 statusów";
+var msgFoundMore = "Znaleziono %1 statusów.  Wyświetlanie %2 z %3";
+var msgSelect = "Click to select desired change order status";
+
+<PDM_IF "$args.KEEP.FACT" != "">
+<PDM_INCLUDE FILE=list_status_trans_include2.htmpl>
+doReset();
+<PDM_ELSE>
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportFmt=ShowLink link=yes startrow="no">
+<PDM_MACRO name=lsCol hdr="Kod" attr=code startrow="no">
+<PDM_MACRO name=lsCol hdr="Opis" attr=description startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag.sym startrow="no">
+<PDM_MACRO name=lsEnd>
+</PDM_IF>
+
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+Note: Because of other PDM_INCLUDE, the PDM_WSP tag must be the last to ensure the correct factory is used
+</PDM_IF>
+<PDM_WSP mode=list factory=chgstat>

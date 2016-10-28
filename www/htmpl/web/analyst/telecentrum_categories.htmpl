@@ -1,0 +1,496 @@
+<PDM_IF 0>
+$Id: empty.htmpl,v 1.1 2003/01/17 00:02:02 zimjo03 Exp $
+</PDM_IF>
+<PDM_IF 0>
+	This is an empty HTMPL file.
+	If window.name == "workframe", next_workframe() is called.
+</PDM_IF>
+<html>
+	<head>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<PDM_INCLUDE FILE="std_head.htmpl">
+		<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+		<script LANGUAGE="JavaScript" SRC="$CAisd/scripts/fid_gen.js"></script>
+		<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+		<link rel="stylesheet" type="text/css" href="/CAisd/sitemods/css/analyst_styles.css">
+		<script type="text/javascript">
+		<!--
+			if (window.name == "workframe")
+				next_workframe();
+		//-->
+		
+		var CatID;
+		var CatName;
+		
+		function OpenContractTC(ContractName)
+		{
+			CatName = ContractName;
+			jq("#CategoriesArea").html("");
+			jq("#LoadingContent").show();
+
+			var fid = fid_generator();
+			var url = ahdtop.cfgCgi + "?SID=" + ahdtop.cfgSID + "+FID=" + fid + "+OP=DISPLAY_FORM+HTMPL=telecentrum_categories.htmpl+CONTRACT=" + encodeURIComponent(ContractName);
+			url += "+Owning_Contract=$args.Owning_Contract";
+
+			if (ahdframeset.name != "mainFrameSet") {
+			   display_new_page(url,parent.tworkframe);
+			}
+		}
+		
+		function SetCType(Type, Id, Sym, Group, thisobj) {
+			parent.CategoryID = Id;
+			parent.CategoryType = Type;
+			parent.CategorySym = Sym;
+			parent.CategoryGroup = Group;
+			
+			SetCategoryLabel();
+
+			var SymSplitted = Sym.split('.');
+			parent.details.document.getElementById("title").value = SymSplitted[SymSplitted.length-2] + " " + SymSplitted[SymSplitted.length-1];
+
+			ChangeLiStyles();
+			//RefreshScratchpad(); // 20131011 bmalz @ e-xim
+		}
+
+		function ChangeLiStyles() {
+			jq('li').each(function() {
+				jq('a', this).attr("style", "border-bottom: 0px; color: gray;");
+			});
+
+			jq('#cat_' + parent.CategoryID).attr("style", "border-bottom: 1px dotted red;");
+		}
+
+		function SetCategoryLabel() {
+			if (parent.CategoryType != "" && parent.CategorySym != "") {
+				var TypeDesc;
+				if(parent.CategoryType == 'in')
+					TypeDesc = "Zgłoszenie";
+
+				if(parent.CategoryType == 'cr')
+					TypeDesc = "Wniosek";
+
+				document.getElementById('SelectedCat').innerHTML = '(' + TypeDesc + ') ' + parent.CategorySym;
+				document.getElementById('CategoryRow').style.display = "";
+			} else {
+				document.getElementById('SelectedCat').innerHTML = "";
+				document.getElementById('CategoryRow').style.display = "none";
+			}
+		}
+		
+		jq(document).ready(function () {
+			var Contracts = new Array();
+
+			var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+				"+OP=DISPLAY_FORM+HTMPL=get_pcat_list.htmpl"+
+				"+CATEGORY=" + encodeURIComponent("$args.CONTRACT") +
+				"+UserOwningContracts=$args.Owning_Contract" +
+				"+NoSS=1";
+
+			if (ahdframeset.name != "mainFrameSet") {
+			   display_new_page(url,parent.tworkframe);
+			}
+		});
+
+		jq(window).resize(function() {
+			if(typeof(tabAreas) != "undefined" && typeof(tabCategories) != "undefined" && !IsSearch) {
+				buildBoxes();
+			}
+		}).trigger("resize");
+		
+		function CheckPcatObject() {
+			if ('$args.CONTRACT' != "") {
+				var i = 0;
+				var temp = "";
+				var flag;
+				<PDM_LIST PREFIX=list FACTORY=pcat WHERE="ss_sym = '$args.CONTRACT'">
+					i++;
+					if ('$list.in_flag' == 0 && '$list.cr_flag' == 0)
+						flag = true;
+					CatID = '$list.id';
+					temp = '$list.sym';
+				</PDM_LIST>
+
+				if (i > 0) {
+					if (flag)
+						return 'Area';
+					else
+						return 'Exist';
+				} else {
+					return 'NotExist';
+				}
+			} else {
+				return 'Exist'
+			}
+		}
+
+		var tabAreas = [];
+		var tabCategories = [];
+		var hasCR = 0;
+		var hasIN = 0;
+		
+		function SetCategoriesVariables(tabAreas, tabCategories, hasCR, hasIN) {
+			this.tabAreas = tabAreas;
+			this.tabCategories = tabCategories;
+			this.hasCR = hasCR;
+			this.hasIN = hasIN;
+			
+			buildBoxes();
+		}
+		
+		function buildBoxes() {
+			IsSearch = true;
+			var PcatObj = CheckPcatObject();
+			if (PcatObj == 'Exist' || PcatObj == 'Area') {
+				var out = "";
+				var HasSelectedArea = false;
+				var ContractName = '$args.CONTRACT';
+				var UserDetails = "&exim_FirstName=$cst.first_name&exim_MiddleName=$cst.middle_name&exim_LastName=$cst.last_name&exim_persistent_id=$cst.persistent_id";
+				var i = 0;
+				
+				// Opis wartości tabCategories[]
+				// 0 - nazwa analityka
+				// 1 - opis
+				// 2 - ikona
+				// 3 - nazwa dla użytkownika (końcowa)
+				// 4 - identyfikator
+				// 5 - nazwa dla użytkownika
+				// 6 - flaga Request
+				// 7 - flaga Incident
+				// 8 - URL
+				// 9 - id podpiętej grupy
+
+				var cols = 2;
+				var windowwidth = Math.floor(jq(window).width() * 0.97);
+				var boxwidth = Math.floor((windowwidth - 3*26 - 3*23) / cols);
+				
+				out += '<div style="width: 100%;"><table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed;overflow-x:auto;width:' + windowwidth + 'px;">';
+			
+				// Create boxes of Areas
+				for (i = 0; i < tabAreas.length; i++) {			
+					//Set image
+					if (tabAreas[i][2] == '') {
+						zimage = 'noimage.png';
+					} else {
+						zimage = tabAreas[i][2];
+					}
+					
+					var col_num = (i+1) - Math.floor((i+1)/cols)*cols;
+
+					if (col_num == 0)
+						col_num = cols;
+
+					var gencol;
+					var widthprecent = (1/cols) * 100;
+
+					// Top row
+					if(col_num == 1) {
+						if ((tabAreas.length - i) > cols) {
+							gencol = cols;
+						} else {
+							gencol = tabAreas.length - i;
+						}
+						
+						for (var j=0; j<gencol; j++) {
+							out += '<td style="width:23px;"><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+							out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);width:' + boxwidth + 'px;"></td>';
+							out += '<td style="width:23px;"><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+						}
+
+						for (var j=0; j<(cols-gencol); j++) {
+							out += '<td style="width:23px;"><div style="width: 26px;" /></td><td style="width:' + boxwidth + 'px;"></td><td style="width:26px;"><div style="width: 23px;" /></td>';
+						}
+						
+						out += '</tr>';
+						out += '<tr>';
+					}
+					
+					// Middle row
+					if (i <= tabAreas.length - 1) {
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>';
+						out += '<td valign="middle" style="overflow:auto; width: ' + widthprecent + '%;">';
+						out += '<table class="contractContent" style="width: 100%;">';
+						out += '<tr>';
+						out += '<td valign="middle"><a href="javascript:OpenContractTC(\'' + tabAreas[i][5] + '\')"><img width="20" height="20" border="0" src="$CAisd/sitemods/img/Employee/Icons/' + zimage + '"></a></td>';
+						out += '<td width="100%" valign="middle">';
+						out += '<span class="contractContentTitle"><a href="javascript:OpenContractTC(\'' + tabAreas[i][5] + '\')">' + tabAreas[i][3] + '</a></span>';
+						out += '</td>';
+						out += '</tr>';
+						out += '</table>';
+						out += '</td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+					}
+					
+					if(i == tabAreas.length - 1) {
+						for (var j=0; j<(cols-gencol); j++) {
+							out += '<td></td><td style="width: 50%;"></td><td></td>';
+						}
+					}
+					
+					// Bottom row
+					if(col_num == gencol) {
+						out += '</tr>';
+						out += '<tr>';
+
+						for (var j=0; j<gencol; j++) {
+							out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+							out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+							out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+						}
+
+						for (var j=0; j<(cols-col_num); j++) {
+							out += '<td></td><td></td><td></td>';
+						}
+
+						out += '</tr>';
+					}
+				}
+
+				out += '</table>'
+				out += '</div>';
+
+				for (i=0; i<tabCategories.length; i++) {
+					if(tabCategories[i][6] == 1) {
+						if (parent.CategoryID == tabCategories[i][4]) {
+							HasSelectedArea = true;
+						}
+					}
+				}
+
+				// Create boxes of Categories
+				if (tabCategories.length > 0) {
+					out += '<div style="table-layout:fixed;overflow-x:auto;width:' + windowwidth + 'px;">';
+					out += '<table border="0" cellpadding="0" cellspacing="0">';
+					
+					if(hasCR == 1) {
+						out += '<tr>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);width:' + boxwidth + 'px;"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+					} else {
+						out += '<tr>';
+						out += '<td style="width: 26px; height:23px;"><div style="width: 26px;" /></td>';
+						out += '<td style="width:' + boxwidth + 'px;"></td>';
+						out += '<td style="width: 23px; height: 23px;"><div style="width: 23px;" /></td>';
+					}
+					
+					if(hasIN == 1) {
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);width:' + boxwidth + 'px;"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+					} else {
+						out += '<td style="width: 26px; height: 23px;"><div style="width: 26px;" /></td>';
+						out += '<td style="width:' + boxwidth + 'px;"></td>';
+						out += '<td style="width: 23px; height: 23px;"><div style="width: 23px;" /></td>';
+					}
+					
+					out += '</tr>';
+					
+					if(hasCR == 1) {
+						out += '<tr>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); width:26px;"></td>';
+						out += '<td valign="top" style="overflow:auto; width: 50%;">';
+						out += '<table class="contractContent" style="width: 100%;">';
+						out += '<tr>';
+						out += '<td valign="top"><img border="0" width="20" height="20" src="$CAisd/sitemods/img/Employee/Icons/shop.gif"></td>';
+						out += '<td width="100%" valign="top">';
+						out += '<p class="contractContentTitle">Wnioskuj o usługę</p>';
+						out += '<ul class="contractContentCategory">';
+						for (i=0; i<tabCategories.length; i++) {
+								if(tabCategories[i][6] == 1) {
+									if(tabCategories[i][8] != "") {
+										var target = "";
+										if (tabCategories[i][8].indexOf("javascript:") == -1) {
+											target = 'target="_blank"';
+										}
+										out += '<li><a href="' + tabCategories[i][8].replace("__eximuser", UserDetails) + '" ' + target + '>' + tabCategories[i][3] + '</a></li>';
+									} else if (parent.CategoryID != tabCategories[i][4]) {
+										if (HasSelectedArea) {
+											out += '<li><a id="cat_' + tabCategories[i][4] + '" style="border-bottom: 0px; color: gray;" href="javascript:SetCType(\'cr\', ' + tabCategories[i][4] + ', \'' + tabCategories[i][0] + '\', \'' + tabCategories[i][9] + '\'); ">' + tabCategories[i][3] + '</a></li>';
+										} else {
+											out += '<li><a id="cat_' + tabCategories[i][4] + '" href="javascript:SetCType(\'cr\', ' + tabCategories[i][4] + ', \'' + tabCategories[i][0] + '\', \'' + tabCategories[i][9] + '\'); ">' + tabCategories[i][3] + '</a></li>';
+										}
+									} else {
+										out += '<li><a id="cat_' + tabCategories[i][4] + '" style="border-bottom: 1px dotted red;" href="javascript:SetCType(\'cr\', ' + tabCategories[i][4] + ', \'' + tabCategories[i][0] + '\', \'' + tabCategories[i][9] + '\'); ">' + tabCategories[i][3] + '</a></li>';
+									}
+								}
+							}
+						out += '</ul>';
+						out += '</td>';
+						out += '</tr>';
+						out += '</table>';
+						out += '</td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+					} else {
+						out += '<tr>';
+						out += '<td></td>';
+						out += '<td style="width: 50%;"></td>';
+						out += '<td></td>';
+					}
+					
+					if(hasIN == 1) {
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>';
+						out += '<td valign="top" style="overflow:auto; width: 50%;">';
+						out += '<table class="contractContent">';
+						out += '<tr>';
+						out += '<td valign="middle"><img border="0" width="20" height="20" src="$CAisd/sitemods/img/Employee/Icons/HELP.gif"></td>';
+						out += '<td width="100%" valign="top">';
+						out += '<p class="contractContentTitle">Zgłoszenie awarii</p>';
+						out += '<ul class="contractContentCategory">';
+						for (i=0; i<tabCategories.length; i++) {
+								if(tabCategories[i][7] == 1) {
+									if (parent.CategoryID != tabCategories[i][4]) {
+										if (HasSelectedArea) {
+											out += '<li><a id="cat_' + tabCategories[i][4] + '" style="border-bottom: 0px; color: gray;" href="javascript:SetCType(\'in\', ' + tabCategories[i][4] + ', \'' + tabCategories[i][0] + '\', \'' + tabCategories[i][9] + '\'); ">' + tabCategories[i][3] + '</a></li>';
+										} else {
+											out += '<li><a id="cat_' + tabCategories[i][4] + '" href="javascript:SetCType(\'in\', ' + tabCategories[i][4] + ', \'' + tabCategories[i][0] + '\', \'' + tabCategories[i][9] + '\'); ">' + tabCategories[i][3] + '</a></li>';
+										}
+									} else {
+										out += '<li><a id="cat_' + tabCategories[i][4] + '" style="border-bottom: 1px dotted red;" href="javascript:SetCType(\'in\', ' + tabCategories[i][4] + ', \'' + tabCategories[i][0] + '\', \'' + tabCategories[i][9] + '\'); ">' + tabCategories[i][3] + '</a></li>';
+									}
+								}
+							}
+						out += '</ul>';
+						out += '</td>';
+						out += '</tr>';
+						out += '</table>';
+						out += '</td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+						out += '</tr>';
+					} else {
+						out += '<td></td>';
+						out += '<td style="width: 50%;"></td>';
+						out += '<td></td>';
+						out += '</tr>';
+					}
+					
+					if(hasCR == 1) {
+						out += '<tr>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+					} else {
+						out += '<tr>';
+						out += '<td></td>';
+						out += '<td></td>';
+						out += '<td></td>';
+					}
+					
+					if(hasIN == 1) {
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+					} else {
+						out += '<td></td>';
+						out += '<td></td>';
+						out += '<td></td>';
+					}
+					
+					out += '</tr>';
+					out += '</table>'
+					out += '</div>';
+				}
+			} else {
+				out += 'Obiekt nie istnieje';
+			}
+
+			jq("#CategoriesArea").html(out);
+			jq("#LoadingContent").hide();
+		}
+
+		function SearchCategory() {
+			var phrase = jq('#SearchBox').val();
+
+			if(phrase != "") {
+				jq("#CategoriesArea").html("");
+				jq("#LoadingContent").show();
+
+				var fid = fid_generator();
+				var url = ahdtop.cfgCgi + "?SID=" + ahdtop.cfgSID + "+FID=" + fid + "+OP=DISPLAY_FORM+HTMPL=get_pcat_search.htmpl+phrase=" + encodeURIComponent(phrase);
+				url += "+Owning_Contract=$args.Owning_Contract";
+
+				if (ahdframeset.name != "mainFrameSet") {
+				   display_new_page(url,parent.tworkframe);
+				}
+
+				return false;
+			} else {
+				return false;
+			}
+		}
+
+		var IsSearch = false;
+		function PrintFindCategory(tabCategory) {
+			IsSearch = true;
+			var out = "";
+
+			if (tabCategory.length > 0) {
+				out += '<table id="application" class="ResultTable" style="width: 100%">';
+
+				for (var i = 0; i < tabCategory.length; i++) {
+					out += '<tr class="TelecentrumData">';
+					if (tabCategory[i][5] != "")
+						out += '<td style="font-weight: bold; padding-left: 5px;"><a href="javascript:SetCType(\'' + tabCategory[i][5] + '\', ' + tabCategory[i][4] + ', \'' + tabCategory[i][1] + '\', \'' + tabCategory[i][6] + '\');">' + tabCategory[i][3] + '</a></td>';
+					else
+						out += '<td style="font-weight: bold; padding-left: 5px;"><a href="javascript:OpenContractTC(\'' + tabCategory[i][0] + '\');">' + tabCategory[i][3] + '</a></td>';
+					out += '<td>' + tabCategory[i][2] + '</td>';
+					out += '</tr>';
+				}
+
+				out += '</table>';
+			} else {
+				out += "<div class='labeltext' style='width:100%; text-align:center; margin-top: 10px;'>Brak wyników dla szukanej frazy.</div>";
+			}
+
+			jq("#CategoriesArea").html(out);
+			jq("#LoadingContent").hide();
+		}
+		
+		function BackCategory() {
+			var CategorySplited = CatName.split('.');
+			if (CategorySplited.length > 1) {
+				var PrevCategory = CatName.substring(0, CatName.length - CategorySplited[CategorySplited.length-1].length - 1);
+				OpenContractTC(PrevCategory);
+			} else {
+				if(parent.TopCategory != "") {
+					OpenContractTC(parent.TopCategory);
+				} else {
+					OpenContractTC('');
+				}
+			}
+		}
+		</script>
+	</head>
+	<body>
+		<input type="hidden" name="category_contract" value="">
+		<input type="hidden" name="user_contract" value="400001">
+		<input type="hidden" name="org_id" value="CB9F564C687A024BB789D3714F222E24">
+
+		<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>
+		<tr>
+		<td align='left' width='99%'><h2 style='margin: 0px; font-size: 11px;'><form onsubmit="return SearchCategory();">Kategorie <input style="margin-left: 20px;" type="text" id="SearchBox" name="string" title="Szukaj" onfocus="this.className='focusField';" onblur="this.className='';"></form></h2></td>
+		<td align='right' width='1%'>
+		</td>
+		<script>
+		if (parent.CategorySym == "") {
+			document.write("<tr id='CategoryRow' style='display:none;'><td colspan=2 style='font-size:10px; font-weight:normal;'>Wybrana kategoria: <span id='SelectedCat' style='color:#DD3126;'>" + parent.CategorySym + "</td></tr>");
+		} else {
+			var TypeDesc;
+			if(parent.CategoryType == 'in')
+				TypeDesc = "Zgłoszenie";
+
+			if(parent.CategoryType == 'cr')
+				TypeDesc = "Wniosek";
+
+			document.write("<tr id='CategoryRow'><td colspan=2 style='font-size:10px; font-weight:normal;'>Wybrana kategoria: <span id='SelectedCat' style='color:#DD3126;'>" +  '(' + TypeDesc + ') ' + parent.CategorySym + "</td></tr>");
+		}
+		</script>
+		</tr>
+		</table>	
+		<div id="LoadingContent" style="width: 100%; text-align:center; padding: 20px; font-size: 10px; color: gray;"><img src="$CAisd/sitemods/img/favourite_loading.gif"><br />Ładuje kategorie...</div>
+		<div id="CategoriesArea"></div>
+		<div style="position: absolute; right: 4px; top: 4px; text-align: right; font-size: 11px;"><a href="javascript:BackCategory();">Powrót</a></div>
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</body>
+</html>

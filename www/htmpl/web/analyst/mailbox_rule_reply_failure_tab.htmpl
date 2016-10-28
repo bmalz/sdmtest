@@ -1,0 +1,26 @@
+<PDM_IF 0>
+mailbox_rule_reply_failure_tab.htmpl
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=mailbox_rule_reply_tab" factory=mailbox_rule>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tekst niepowodzenia" attr=reply_failure_text colspan=6 rows=4 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlHTMLEditBox hdr="HTML niepowodzenia" attr=reply_failure_html colspan=6 escape=JS2 preview=yes rows=4 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: mailbox_rule_reply_failure_tab.htmpl ANDERSON.3 2009/05/01 15:32:58 gadab01 Exp $
+</PDM_IF>

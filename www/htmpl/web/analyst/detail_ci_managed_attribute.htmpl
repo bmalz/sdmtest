@@ -1,0 +1,84 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Purpose: 
+//    Show the details of an attribute managed by CACF
+//
+// History:
+//    10/05/2011 Initial Version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<html lang="en">
+
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Managed Attribute Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"${args.COMMON_NAME} Update Managed Attribute"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Managed Attribute ${args.COMMON_NAME}"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+
+<script language="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</head>
+
+<body class=detailro onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl menubar=sd>
+<CENTER>
+
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm factory="ci_managed_attribute">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa atrybutu" attr="attribute_name" size=20>
+<PDM_MACRO name=dtlTextbox hdr="Etykieta atrybutu" attr="attribute_label" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne?" attr="delete_flag" make_required="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Początkowy status weryfikacji" attr="initial_status" make_required="yes" whereclause="delete_flag=0 AND isinitial=1">
+<PDM_MACRO name=dtlCheckbox hdr="Wrażliwy na wielkość liter (Case Sensitive)" attr="case_sensitive" colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=3 size=120>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_MACRO name=startNotebook hdr=ci_managed_attribute_nb>
+<PDM_IF $args.id == 0>
+        <PDM_SET args.no_dp_option="+NO_DP=yes">
+    
+<PDM_ELSE>
+        <PDM_SET args.no_dp_option="">
+    
+</PDM_IF>
+    <PDM_SET args.prop_tab_banner="prop.tab_banner=Managed Attribute History">
+    
+<PDM_MACRO name=TAB title="Managed Attribute History" height=455 id=cmdb_versioning src="OP=SHOW_DETAIL+HTMPL=cmdb_versioning_tab.htmpl+FACTORY=ci_managed_attribute+PERSID=$args.persistent_id+prop.datafilename_suffix=obj+$args.no_dp_option+$args.prop_tab_banner">
+<PDM_MACRO name=endNotebook>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_ci_managed_attribute.htmpl ASPEN.10 2012/03/24 16:53:07 tomjo02 Exp $;
+</PDM_IF>
+<PDM_WSP>

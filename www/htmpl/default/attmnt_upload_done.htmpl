@@ -1,0 +1,20 @@
+<PDM_IF 0>
+$Id: attmnt_upload_done.htmpl,v 1.2 2006/11/08 01:09:54 olsjo01 Exp $
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_upload.js"></SCRIPT>
+<script>
+var nErrorCode = '$args.ErrorCode';
+var sError = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.Error_Msg</PDM_FMT>';
+var sFileSize = '$args.FileSize';
+var sTest = '$args.Test';
+</script>
+</HEAD>
+<BODY class="gn_container_white_background" onload="attmnt_upload_done();">
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

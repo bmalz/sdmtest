@@ -1,0 +1,62 @@
+<PDM_IF 0>
+chg_relreq_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Call Req
+INTENT:
+    Display a notebook page for cr related request.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=chg_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=chg_relchg_tab" factory=chg>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+   
+<PDM_IF "$args.id" != "0" && "$args.category.children_ok" == 1 && $UserAuth \> 1>
+<PDM_MACRO name=button Caption="Aktualizuj powiązane Zmiany[*Q]" EndRow=yes Func="update_child('chg', '$args.persistent_id', 'children', 'chg', 'parent', 'Change Orders', 'Change Order $args.chg_ref_num<BR>Children')" hotkey_name="Aktualizuj powiązane Zmiany[*Q]" ID=UPDATE_CHILD NewRow=yes>
+</PDM_IF>
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=tabBanner title="Lista powiązanych Zmian" add_btns=true>
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=dtlLookup hdr="Zmiana nadrzędna" attr=parent extraURL="KEEP.PARENT_SEARCH=$args.persistent_id">
+<PDM_MACRO name=dtlReadonly hdr="Status" attr=parent.status>
+<PDM_MACRO name=dtlReadonly hdr="Opis" attr=parent.summary>
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_IF "$args.children.length" == "0" && "$args.category.children_ok" != "1">
+<PDM_MACRO name=dtlShowtext dataclass="detailro gn_content_center" value="Klasyfikacja nie dopuszcza podrzędnych Zmian">
+<PDM_ELSE>
+<PDM_MACRO name=tabList brbefore="yes" btntitle="Wczytywanie listy Zmain." src="OP=SEARCH+FACTORY=chg+QBE.EQ.parent.id=$dob.id+KEEP.forChgChildList=1">
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: chg_relchg_tab.htmpl ASPEN.5 2011/03/31 09:20:21 ralje02 Exp $
+</PDM_IF>

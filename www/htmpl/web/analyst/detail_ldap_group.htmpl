@@ -1,0 +1,78 @@
+<PDM_IF 0>
+detail_ldap_group.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single LDAP group entry
+INTENT:
+    Display the detail info for the LDAP Group entry
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  ldap args	The LDAP group object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm
+/opt/CApdm/bopcfg/majic/writer.maj:OBJECT ldap_group {.maj for the
+                        definition of attributes for 'OBJECT ldap'
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "LDAP Group Detail";
+var hdrTitleUpd = "Update LDAP Group";
+var hdrTitleNew = "Create New LDAP Group";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+argID = "$args.id";
+cfgCgiReportScript = '<PDM_FMT PAD=NO ESC_STYLE=C>$SESSION.CGIREPORT_SCRIPT</PDM_FMT>';
+rptName = new Array("ldapgroupsum.rpt", "ldapgroupdtl.rpt");
+argSearchSqlClause = "id = $args.id";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+profile_reset_if_necessary("$args.persistent_id")
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=ldap_group>
+if (_dtl.edit)
+{
+    var _p = window.parent;
+    if ( typeof _p.opener == "object" &&
+         _p.opener != null && 
+	!_p.opener.closed ) {
+       var opPar = _p.opener;
+       if (opPar.name != "AHDtop")
+	    opPar = opPar.parent;
+       if ( typeof opPar.cfgCAISD == "string" &&
+            typeof opPar.closePopup == "number" ) {
+	  var w_name = popup_window_name("profile_browser");
+	  if ( opPar.name == w_name )
+	     opPar.closePopup = 1;
+       }
+    }
+}
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=name>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Członkowie" attr=members>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,106 @@
+<PDM_IF 0>
+nr_cmdb_har_serx_tab.htmpl
+WHEN PRESENTED:
+    Display Hardware.Server family attributes of the selected CI
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+
+History:
+       24-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_har_serx.htmpl" where="family.extension_name='har_serx'" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Attributes" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr=bm_status factory=bms lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Pamięć zainstalowana" attr=assoc_har_serx.phys_mem>
+<PDM_MACRO name=dtlTextbox hdr="Pojemność pamięci" attr=assoc_har_serx.mem_capacity>
+<PDM_MACRO name=dtlTextbox hdr="Pojemność dysku" attr=assoc_har_serx.hard_drive_capacity>
+<PDM_MACRO name=dtlTextbox hdr="Typ procesora" attr=assoc_har_serx.proc_type>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Prędkość procesora" attr=assoc_har_serx.proc_speed>
+<PDM_MACRO name=dtlTextbox hdr="Typ dysku" attr=assoc_har_serx.disk_type>
+<PDM_MACRO name=dtlTextbox hdr="Typ CD Romu" attr=assoc_har_serx.cd_rom_type>
+<PDM_MACRO name=dtlTextbox hdr="Karta sieciowa" attr=assoc_har_serx.net_card>
+<PDM_MACRO name=dtlTextbox hdr="Model monitora" attr=assoc_har_serx.monitor>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Drukarka" attr=assoc_har_serx.printer>
+<PDM_MACRO name=dtlTextbox hdr="Technologia" attr=assoc_har_serx.technology>
+<PDM_MACRO name=dtlTextbox hdr="Pojemność procesora" attr=assoc_har_serx.number_slot_proc>
+<PDM_MACRO name=dtlTextbox hdr="Ilość dostępnych procesorów" attr=assoc_har_serx.number_proc_inst>
+<PDM_MACRO name=dtlTextbox hdr="Cache procesora" attr=assoc_har_serx.mem_cache_proc>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ilość slotów pamięci" attr=assoc_har_serx.slot_total_mem>
+<PDM_MACRO name=dtlTextbox hdr="Ilość użytych slotów pamięci" attr=assoc_har_serx.slot_mem_used>
+<PDM_MACRO name=dtlTextbox hdr="Typ połączenia sieciowego" attr=assoc_har_serx.type_net_conn>
+<PDM_MACRO name=dtlTextbox hdr="Ilość kart sieciowych" attr=assoc_har_serx.number_net_card>
+<PDM_MACRO name=dtlTextbox hdr="Ilość portów sieciowych" attr=assoc_har_serx.number_net_port>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ilość połączeń sieciowych" attr=assoc_har_serx.number_net_port_conn>
+<PDM_MACRO name=dtlTextbox hdr="Wersja BIOS" attr=assoc_har_serx.bios_ver>
+<PDM_MACRO name=dtlTextbox hdr="MIPS" attr=assoc_har_serx.number_mips>
+<PDM_MACRO name=dtlTextbox hdr="Rola" attr=assoc_har_serx.role>
+<PDM_MACRO name=dtlTextbox hdr="Typ serwera" attr=assoc_har_serx.server_type>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rozmiar SWAP" attr=assoc_har_serx.swap_size>
+<PDM_MACRO name=dtlTextbox hdr="Security Patch Level" attr=assoc_har_serx.security_patch_level>
+<PDM_MACRO name=dtlDate hdr="Active Date" attr=assoc_har_serx.active_date>
+<PDM_MACRO name=dtlDate hdr="Data wycofania" attr=assoc_har_serx.retire_date>
+<PDM_MACRO name=dtlTextbox hdr="Priorytet CI" attr=assoc_har_serx.ci_priority maxlength=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="SLA" attr=assoc_har_serx.SLA>
+<PDM_MACRO name=dtlTextbox hdr="Dzierżawiony czy w posiadaniu?" attr=assoc_har_serx.leased_or_owned_status>
+<PDM_MACRO name=dtlTextbox hdr="Kod projektu" attr=assoc_har_serx.proj_code>
+<PDM_MACRO name=dtlTextbox hdr="Numer kontraktu" attr=assoc_har_serx.contract_number>
+<PDM_MACRO name=dtlDate hdr="Data początku dzierżawy" attr=assoc_har_serx.lease_effective_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data końca dzierżawy" attr=assoc_har_serx.lease_termination_date>
+<PDM_MACRO name=dtlDate hdr="Data odnowienia dzierżawy" attr=assoc_har_serx.lease_renewal_date>
+<PDM_MACRO name=dtlTextbox hdr="Miesięczny koszt dzierżawy" attr=assoc_har_serx.lease_cost_per_month>
+<PDM_IF "$env.NX_CMDB_PURCHASEAMT" == "INT">
+<PDM_MACRO name=dtlTextbox hdr="Zakupiona ilość" attr=assoc_har_serx.purchase_amount>
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Zakupiona ilość" attr=assoc_har_serx.purchase_amountc>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Typ utrzymania" attr=assoc_har_serx.mtce_type>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Okres utrzymania" attr=assoc_har_serx.maintenance_period>
+<PDM_MACRO name=dtlTextbox hdr="Numer kontraktu utrzymania" attr=assoc_har_serx.mtce_contract_number>
+<PDM_MACRO name=dtlTextbox hdr="Opłata utrzymaniowa" attr=assoc_har_serx.maintenance_fee>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(Number)$Id: nr_cmdb_har_serx_tab.htmpl,v 1.1 2006/03/06 18:55:12 poibr01 Exp $
+</PDM_IF>

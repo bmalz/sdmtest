@@ -1,0 +1,106 @@
+<PDM_IF 0>
+detail_cmth.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Time Span
+INTENT:
+    Display the detail info for Time Span
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły okresu czasu $args.sym "</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowanie okresu czasu $args.sym "</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie okresu czasu $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Time Span" key="$args.sym">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=tspan>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
+<PDM_MACRO name=dtlTextbox hdr="Okres czasu" attr=sym>
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Nazwa" attr=sym>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=desc colspan=4 rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlStartRow>
+docWriteln("<TABLE cellpadding=1 cellspacing=5 WIDTH='90%'>");
+docWriteln("<TR VALIGN=TOP>")
+docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro>Czas Starty</TH>");
+docWriteln("</TR>");
+docWriteln("</TABLE>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rok" attr=start_year title="Początek roku">
+<PDM_MACRO name=dtlTextbox hdr="Miesiąc" attr=start_month title="Początek miesiąca">
+<PDM_MACRO name=dtlTextbox hdr="Dzień" attr=start_day title="Początek dnia">
+<PDM_MACRO name=dtlTextbox hdr="Godzina" attr=start_hour title="Początek  godziny">
+<PDM_MACRO name=dtlTextbox hdr="Minuta" attr=start_minute title="Początek minuty">
+<PDM_MACRO name=dtlStartRow>
+docWriteln("<TABLE cellpadding=1 cellspacing=5 WIDTH='90%'>");
+docWriteln("<TR VALIGN=TOP>")
+docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro>Czas zatrzymania </TH>");
+docWriteln("</TR>");
+docWriteln("</TABLE>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rok" attr=end_year title="Koniec roku">
+<PDM_MACRO name=dtlTextbox hdr="Miesiąc" attr=end_month title="Koniec  miesiąca">
+<PDM_MACRO name=dtlTextbox hdr="Dzień" attr=end_day title="Koniec  dnia">
+<PDM_MACRO name=dtlTextbox hdr="Godzina" attr=end_hour title="Koniec godziny">
+<PDM_MACRO name=dtlTextbox hdr="Minuta" attr=end_minute title="Koniec minuty">
+<PDM_MACRO name=dtlStartRow>
+docWriteln("<TABLE cellpadding=1 cellspacing=5 WIDTH='90%'>");
+docWriteln("<TR VALIGN=TOP>")
+docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro>Triger </TH>");
+docWriteln("</TR>");
+docWriteln("</TABLE>");
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Rok" attr=trigger_year title="Triger roku">
+<PDM_MACRO name=dtlTextbox hdr="Miesiąc" attr=trigger_month title="Triger miesiąca">
+<PDM_MACRO name=dtlTextbox hdr="Dzień" attr=trigger_day title="Triger dnia">
+<PDM_MACRO name=dtlTextbox hdr="Godzina" attr=trigger_hour title="Triger godziny">
+<PDM_MACRO name=dtlTextbox hdr="Minuta" attr=trigger_minute title="Triger minuty">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_tspan.htmpl ANDERSON.2 2009/06/16 15:38:14 bihtu01 Exp $;
+</PDM_IF>
+<PDM_WSP>

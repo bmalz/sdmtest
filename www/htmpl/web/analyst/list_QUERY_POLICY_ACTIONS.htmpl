@@ -1,0 +1,103 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	When we need to display a list actions for an automated policy.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Policy Actions";
+var hdrTitleList = "Policy Actions List";
+function AddAction()
+{
+	popup_search('macro','backfill_field','backfill_form', "QBE.EQ.ob_type=KD+QBE.EQ.type=ACT" );
+}
+function ViewAction(active_row)
+{
+	showDetailWithPersid(arrMacroPersids[active_row]);
+}
+function DeleteAction(active_row)
+{
+	var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+	"+OP=KT_DELETE_POLICY_ACTION"+
+	"+DELETE_DB_ID="+arrDB_IDs[active_row];
+	ahdframeset.workframe.location.href=url;
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></SCRIPT>
+</HEAD>
+<BODY leftmargin=0 topmargin=0 CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="query_actions" header=no menubar=no>
+<FORM name=backfill_form id=backfill_form>
+	<input type=hidden name=backfill_field id=backfill_field>
+</FORM>
+<SCRIPT LANGUAGE="JavaScript">
+	var arrFields = new Array;
+	var arrPredefined = new Array;
+	var nCount = 0;
+	var msgFoundNone = "No policy actions found";
+	var msgFound1 = "1 policy action found";
+	var msgFound = "%1 policy actions found";
+	var msgFoundMore = "%1 policy actions found.  Displaying %2 through %3";
+	var arrDB_IDs = new Array();
+	var arrMacroPersids = new Array();
+	var ID_counter = 0;
+	// Declared in detail_QUERY_POLICY.htmpl. Used for Mouseover Preview.
+	var arrMacrosByQPid = parent.arrMacrosByQPid;
+	
+	startScrollbar(true);
+	document.write("<TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>");
+	document.write("<TR>");
+	document.write("<TD align=left width='99%'>Action Information</TD>");
+	document.write("<TD align=left width='1%'>");
+	document.write("<DIV align=right>");
+	ImgBtnRow();
+	ImgBtnCreate("btnAddAction", "Add_Action", "AddAction();");
+	ImgBtnEndRow();
+	document.write("</DIV>");
+	document.write("</TD>");
+	document.write("</TR>");
+	document.write("</TABLE>");		
+	
+	
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="arrMacrosByQPid['@{list.id}']='@{list.EXEC_MACRO.id}'">
+<PDM_MACRO name=lsWrite text="arrMacroPersids[ID_counter]='@{list.EXEC_MACRO}'">
+<PDM_MACRO name=lsWrite text="arrDB_IDs[ID_counter]='@{list.id}'">
+<PDM_MACRO name=lsWrite text="ID_counter++;">
+<PDM_MACRO name=lsCol hdr="Akcja" attr=EXEC_MACRO.sym exportfmt=ShowLink link=yes width=80>
+<PDM_MACRO name=lsEnd factory=QUERY_POLICY_ACTIONS>
+	
+	rs.setLinkOnclick(function(){ViewAction(self.activeRow)});
+	//rs.overrideMenu=true;
+
+	var ctxMenu=new ContextMenu("idMenuActions");
+	ctxMenu.addItem("View", "ViewAction(self.activeRow);");
+	ctxMenu.addItem("Delete", "DeleteAction(self.activeRow);");
+	ctxMenu.finish();
+	
+	//for some reason when this function is with the other js functions above
+	//it is not in the scope and doesn't execute
+	function backfill_event( form, field_name, value, persid, rel_attr, type )
+	{
+		var url=cfgCgi+"?SID="+cfgSID+"+FID="+fid_generator()+
+		"+OP=KT_ADD_POLICY_ACTION"+
+		"+POLICY_ID=$args.QBE.EQ.POLICY"+
+		"+MACRO_PERSID="+persid;
+		ahdframeset.workframe.location.href=url;
+	}
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_QUERY_POLICY_ACTIONS.htmpl ASPEN.2 2011/01/05 09:56:58 ralje02 Exp $
+</PDM_IF>
+<PDM_WSP>

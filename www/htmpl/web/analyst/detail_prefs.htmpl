@@ -1,0 +1,242 @@
+<PDM_IF 0>
+detail_prefs.htmpl
+WHEN PRESENTED:
+    When we need to display and edit user preferences
+INTENT:
+    Display and update the user's current preferences.  
+    User preferences are attributes in the contact record itemized in the
+    NX_WEB_PREF_ATTRS option.  Users can use this form to update their
+    preferences regardless of normal security retrictions on contact
+    record updates.  If you modify this form to display different
+    attributes (for example, to allow a customer to update a PIN), be sure
+    to update the NX_PREF_ATTRS option appropriately.
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.combo_name Preferences"</PDM_FMT>;
+var hdrTitleUpd = hdrTitle;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+var orig_value = new Object();
+function prefsSave()
+{
+   var f = document.main_form;
+
+   if ( orig_value["tour"] != f.tour.checked ) {
+      if ( f.tour.checked )
+      {
+	 ahdtop.cstSuppressTour = 2;
+         prefsSet("WEB_SUPPRESS_TOUR", 2);
+      }
+      else
+      {
+	 ahdtop.cstSuppressTour = 0;
+         prefsSet("WEB_SUPPRESS_TOUR", 0);
+      }
+   }
+
+   var prefs = 0;
+   if ( f.reducePopups.checked )
+      prefs = 1;
+   if ( ! f.keepLR.checked )
+      prefs += 2;
+   if ( prefs != ahdtop.cstPrefs ) {
+      ahdtop.cstPrefs = prefs;
+      ahdtop.cstReducePopups = prefs & 0x0001;
+      ahdtop.cstCloseLogRdr  = prefs & 0x0002;
+      prefsSet("WEB_PREFERENCES", prefs);
+   }
+
+   if ( orig_value["preservePopup1"] != f.preservePopup1.checked ) {
+      ahdtop.cstPopup1[0] = 0;
+      ahdtop.cstPopup1[1] = 0;
+      if ( f.preservePopup1.checked ) {
+         ahdtop.cstPopup1[0] = popupHeight();
+         ahdtop.cstPopup1[1] = popupWidth();
+      }
+      prefsSet("WEB_POPUP1_HEIGHT", ahdtop.cstPopup1[0]);
+      prefsSet("WEB_POPUP1_WIDTH", ahdtop.cstPopup1[1]);
+   }
+
+   if ( orig_value["preservePopup2"] != f.preservePopup2.checked ) {
+      ahdtop.cstPopup2[0] = 0;
+      ahdtop.cstPopup2[1] = 0;
+      if ( f.preservePopup2.checked ) {
+         ahdtop.cstPopup2[0] = popupHeightSmall();
+         ahdtop.cstPopup2[1] = popupWidthSmall();
+      }
+      prefsSet("WEB_POPUP2_HEIGHT", ahdtop.cstPopup2[0]);
+      prefsSet("WEB_POPUP2_WIDTH", ahdtop.cstPopup2[1]);
+   }
+
+   for ( var i = 0; i < f.elements.length; i++ ) {
+      var e = f.elements[i];
+      if ( e.name != "SET.id" &&
+           e.name != "SET.pref_attrs" &&
+           e.name != "SET.pref_vals" &&
+           e.name != "SET.pref_cnt_attrs" &&
+           e.name != "SET.pref_cnt_vals" &&
+           e.name.match(/SET\.(.*)/) ) {
+         var value;
+         if ( e.type != "select-one" )
+            value = e.value;
+         else
+            value = e.options[e.selectedIndex].value;
+         prefsCntSet(RegExp.\$1, value);
+      }
+   }
+
+   detailSave("SET_PREFS");
+}
+
+function prefsSet( name, value )
+{
+   if ( typeof value != "string" )
+      var svalue = value.toString();
+   else if ( value.indexOf("'") == -1 )
+      var svalue = "'" + value + "'";
+   else
+      var svalue = "\"" + value + "\"";
+   var f = document.main_form;
+   var pref_attrs = f.elements["SET.pref_attrs"];
+   var pref_vals = f.elements["SET.pref_vals"];
+   if ( pref_attrs.value.length == 0 ) {
+      pref_attrs.value = name;
+      pref_vals.value = svalue;
+   }
+   else {
+      pref_attrs.value += "," + name;
+      pref_vals.value += "," + svalue;
+   }
+}
+
+function prefsCntSet( name, value )
+{
+   if ( typeof value != "string" )
+      var svalue = value.toString();
+   else if ( value.indexOf("'") == -1 )
+      var svalue = "'" + value + "'";
+   else
+      var svalue = "\"" + value + "\"";
+   var f = document.main_form;
+   var pref_cnt_attrs = f.elements["SET.pref_cnt_attrs"];
+   var pref_cnt_vals = f.elements["SET.pref_cnt_vals"];
+   if ( pref_cnt_attrs.value.length == 0 ) {
+      pref_cnt_attrs.value = name;
+      pref_cnt_vals.value = svalue;
+   }
+   else {
+      pref_cnt_attrs.value += "," + name;
+      pref_cnt_vals.value += "," + svalue;
+   }
+}
+
+function prefsCbx( name, hdr, checked, help )
+{
+   detailStartRow();
+   var html = "<td align='left' valign='top'>" +
+              "<input type=checkbox" + detailNextID(true) +
+              " value=1 name=" + name;
+   if ( checked ) {
+      html += " checked='checked'";
+      orig_value[name] = true;
+   }
+   else {
+      orig_value[name] = false;
+   }
+   html += "></td>\n";
+   html += "<td align='left' class='title3text'>" + hdr + "</td>\n";
+   if ( arguments.length > 3 ) {
+      html += "<td align='left' class='labeltext'>";
+      for ( var i = 3; i < arguments.length; i++ )
+         html += arguments[i];
+      html += "</td>";
+   }
+   html += "</tr>";
+   docWriteln(html);
+}
+
+function prefsClose()
+{
+   if ( window.name != "content" )
+      parent.close();
+   else
+      upd_frame('bin_form_np.htmpl');
+}
+</script>
+
+</head>
+
+<body class="detailro">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=cnt>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Save[s]" func="prefsSave()" hotkey_name="Save[s]" id="btn001" width=120>
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="prefsClose()" hotkey_name="Cancel[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="check_reset();detailReset()" hotkey_name="Reset[r]" id="btn003" width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+var html = "<input type='hidden' name=SET.pref_attrs>" +
+         "<input type='hidden' name=SET.pref_vals>" +
+	 "<input type='hidden' name=SET.pref_cnt_attrs>" +
+         "<input type='hidden' name=SET.pref_cnt_vals>" +
+         "<input type='hidden' name=FACTORY value='cnt'>" +
+         "<input type='hidden' name=PERSID value='" + argPersistentID + "'>" +
+         "<input type='hidden' name=HTMPL value='detail_prefs_edit.htmpl'>";
+docWriteln(html);
+<PDM_IF "$prop.Tour" != "">
+prefsCbx("tour", "Suppress Tour", ahdtop.cstSuppressTour,
+   "Suppress the tour page shown immediately after login.");
+</PDM_IF>
+prefsCbx("reducePopups", "Avoid Popups", ahdtop.cstReducePopups,
+   "Reduce the number of popups by displaying new forms on the ",
+   "main page whenever possible.");
+prefsCbx("keepLR", "Keep Log Reader Window", ! ahdtop.cstCloseLogRdr,
+   "Keep the Log Reader window open after Close All Popups or Logoff.");
+prefsCbx("preservePopup1", "Preserve Large Popup Size",
+   ahdtop.cstPopup1[0] != 0,
+   "Save the size of large popup windows after resize (use same size for ",
+   "new large popup windows).  Large popups are used for most popups,.",
+   "including this window and all detail form popups.");
+prefsCbx("preservePopup2", "Preserve Small Popup Size",
+   ahdtop.cstPopup2[0] != 0,
+   "Save the size of small popup windows after resize (use same size for ",
+   "new small popup windows).  Small popups are used for popups from ",
+   "the Activities menu and for some selection lists.");
+<PDM_MACRO name=dtlEndTable>
+</script>
+<center>
+<h2>Contact Information</h2>
+</center>
+<script type="text/javascript">
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Telefon" attr=phone_number>
+<PDM_MACRO name=dtlTextbox hdr="Dodatkowy telefon" attr=alt_phone>
+<PDM_MACRO name=dtlTextbox hdr="Numer pagera" attr=beeper_phone>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Faks" attr=fax_phone>
+<PDM_MACRO name=dtlTextbox hdr="e-mail" attr=email_address colspan=2 size=35>
+
+if ( _dtl.maxCol == 0 )
+   _dtl.maxCol = 1;
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

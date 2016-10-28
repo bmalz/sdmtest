@@ -1,0 +1,27 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_metadata_twa_attrs.htmpl
+//
+// Purpose: Transaction Work Area (twa) internal use only CMDB attributes 
+//
+//
+// 11-Jun-2009 tomjo02 SCO 23497 CMDB r12.1 Reconciliation PES 05629 - Initial version
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////
+// Below are attributes displayed in the ci_twa_ci detail form that are not defined in 
+// the predefined CMDB metadata. 
+// Add leading space to category name to match common Reconciliation attributes.
+////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation" attr="mdr_name" heading="MDR Name" help="The name of the Management Data Repository associated with the CI">
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation" attr="mdr_class" heading="MDR Class" help="The class name of the Management Data Repository associated with the CI">
+<PDM_MACRO name=cmdbMetadata category=" Reconciliation" attr="federated_asset_id" heading="Federated Asset ID" help="The Management Data Repository identifier for the CI">
+
+<PDM_MACRO name=cmdbMetadata category="Classification" attr="tgt_delete_flag" heading="Active?" help="Indicates if a CI is active or not">
+<PDM_MACRO name=cmdbMetadata category="Classification" attr="milestone" heading="Milestone" help="Specifies the label associated with a milestone that is displayed in the CMDB Versioning tab">
+<PDM_IF "$prop.MultiTenancy" == "on">
+<PDM_MACRO name=cmdbMetadata category="Classification" attr="tgt_tenant" heading="Tenant" help="Specifies the tenant assignment for the CI">
+</PDM_IF>

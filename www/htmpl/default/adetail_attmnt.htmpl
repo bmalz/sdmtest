@@ -1,0 +1,221 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2005 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  detail_attmnt.htmpl
+// Created: 12/14/05
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////
+//"@(#)$Id: detail_attmnt.htmpl ASPEN.1 2010/11/16 16:04:37 saima01 Exp $";
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Szczegóły załącznika";
+var hdrTitleUpd = "Edytuj Załącznik";
+var hdrTitleNew = "Utwórz Załącznik";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var argPersistentID = "$args.persistent_id";
+var argHumantouchLog = "$args.KEEP.humantouch_log";
+var propTimeout = "$prop.Timeout";
+<PDM_IF "$args.KEEP.attmnt_for_edit" == "1">
+window.resizeTo(520,560);
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+document.writeln(generate_logo_product_name_html());
+</PDM_IF>
+
+function window_onload()
+{
+	if(typeof parent.SetGLtype == "function")
+		parent.SetGLtype( "${args.KEEP.GLType:}" );
+
+	if(typeof parent.SetAttmntId == "function")
+		parent.SetAttmntId("$args.id");
+}
+</script>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_lib.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/attmnt_upload.js"></script>
+</head>
+
+<PDM_IF "$prop.form_name_3" == "ro">
+<body onload="window_onload();">
+<PDM_ELSE>
+<body class="editform" onunload="unload_check();stop_timer()">
+</PDM_IF>
+<script type="text/javascript">
+var maxSize=new Array("SET.description","Description",1000);
+</script>
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_IF "$args.KEEP.attmnt_for_edit" == "0">
+		<PDM_INCLUDE FILE=std_body.htmpl filename="attmnt_ro" header=no>
+	
+</PDM_IF>
+<PDM_ELSE>
+<PDM_IF "$args.KEEP.attmnt_for_edit" == "0">
+		<PDM_INCLUDE FILE=std_body.htmpl filename="Attachment">
+	
+</PDM_IF>
+</PDM_IF>
+
+<!-- <form name="upload_form"  enctype="multipart/form-data" method="POST" 
+      action="$CAisd/scripts/web_upload.pl"> -->
+<center>
+
+<script type="text/javascript">
+<PDM_IF $args.id>
+<PDM_MACRO name=dtlForm factory=attmnt>
+<PDM_ELSE>
+<PDM_MACRO name=dtlForm factory=attmnt onsubmit="return check_submit() && submit_attmnt()">
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+</script>
+<PDM_IF $args.id>
+<input type="hidden" name="SET.id"  value="$args.id">
+<PDM_ELSE>
+<input type="hidden" name="SET.link_only" value="0">
+<input type="hidden" name="KEEP.parent_persid" value="$args.NEXT_PERSID">
+<input type="hidden" name="KEEP.lrel_name" value="attachments">
+<input type="hidden" name="SET.orig_file_name" value="5">
+<input type="hidden" id="file_name" name="SET.file_name" value="">
+<input type="hidden" id="rel_file_path" name="SET.rel_file_path" value="${args.rel_file_path:}" >
+<input type="hidden" id="file_type" name="SET.file_type" value="${args.file_type:}">
+<input type="hidden" id="file_size" name="SET.file_size" value="${args.file_size:}">
+<input type="hidden" id="zip_flag" name="SET.zip_flag" value="${args.zip_flag:}">
+<input type="hidden" name="SET.attmnt_name" value="k$args.attmnt_name">
+<input type="hidden" name="SET.description" value="$args.description">
+<input type="hidden" id="SET_status" name="SET.status" value="">
+<input type="hidden" name="SET.usertype" value="CUST">
+</PDM_IF>
+<script type="text/javascript">
+           var selected = 0;
+           var sProhibitedExt = "";
+           var SET_repository = "";
+           var SET_doc_rep_serv = "";
+           var SET_doc_rep_cgi = "";
+           var SET_doc_rep_upload = "";
+           var SET_doc_rep_protocol = "";
+           var SET_doc_rep_filesz = "";
+           var SET_doc_rep_relattr = "";
+           
+<PDM_LIST PREFIX=list FACTORY=doc_rep WHERE="id>0" esc_style=c>
+	if ($list.default_rep && $list.repository_type == 0)
+	{  
+		//For MT, need to: 
+		//1. Check for empty tenant or ticket tenant
+		//2. if this is the default tenant repository move on and overide the existing vale that is probably the default public repository
+		var bSkip = false;
+		
+<PDM_IF "$prop.MultiTenancy" != "off">
+			if ("${list.tenant:}" != argTenantId)//Doc rep not from current tenant
+			{
+				bSkip = true;
+				if ( "${list.tenant:}" == "" & !selected )//No Value found yet, use the overall default if available
+				{
+					bSkip = false;
+				}
+			}
+		
+</PDM_IF>
+		if (!bSkip)
+		{
+			SET_repository = "$list.persistent_id";
+			SET_doc_rep_serv = "$list.server";
+			SET_doc_rep_cgi = "$list.servlet_path";
+			SET_doc_rep_upload = "$list.upload_path";
+			SET_doc_rep_protocol = "servlet";
+			SET_doc_rep_filesz = "$list.file_limit_size";
+			SET_doc_rep_relattr = "$list.persistent_id";
+		    
+			selected = 1;
+			sProhibitedExt = "${list.prohibited_file_ext:}";
+		}
+	}
+</PDM_LIST>    
+if (selected)
+{
+    document.write('<input type="hidden" name="SET.repository" >');
+    document.write('<input type="hidden" name="SET.doc_rep_serv" >');          	
+    document.write('<input type="hidden" name="SET.doc_rep_cgi" >');
+    document.write('<input type="hidden" name="SET.doc_rep_upload" >');
+    document.write('<input type="hidden" name="SET.doc_rep_protocol" >');
+    document.write('<input type="hidden" name="SET.doc_rep_filesz" >');
+    document.write('<input type="hidden" name="SET.doc_rep_relattr" >');           
+}
+else
+{
+    var eles = window.document.forms["main_form"].elements;
+    eles["SET.repository"] = "doc_rep:1002";
+    eles["SET.doc_rep_serv"] = "PKN-SDM1";
+    eles["SET.doc_rep_cgi"] = "http://PKN-SDM1:8080/CAisd/UploadServlet";
+    eles["SET.doc_rep_upload"] = "D:/CA/SDM/site/attachments/default/servicedesk/files";
+    eles["SET.doc_rep_protocol"] = "servlet";
+    eles["SET.doc_rep_filesz"] = "0";
+    eles["SET.doc_rep_relattr"] = "doc_rep:1002";
+}
+</script>
+<br>
+<span class="title3text">Użyj <B>Szukaj plik</B> aby wyszukać i dodać załącznik.</span>
+<br><br>
+<script type="text/javascript">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Odszukaj plik" Func="do_upload_file()" hotkey_name="Locate File" ID="upload" Width=120>
+<PDM_MACRO name=btnEndRow>
+function do_upload_file()
+{
+cst_upload_file($dob.id);
+}
+</script>
+<br>
+<span class="title3text">lub<br>
+Aby podać odnośnik internetowy (URL) wpisz go poniżej i naciśnij przycisk 'Zapisz'.</span>
+<br><br>
+<table id="tbl001">
+<tr>
+<th align="center" valign="top" class="labeltext"><label for="URL">Strona internetowa</label></th>
+</tr>
+<tr>
+<td>
+<PDM_IF $args.id>
+<span class="bodytext">$args.orig_file_name</span>
+<PDM_ELSE>
+<input text id="URL" name="URL" size="60" value="" onblur="cst_URL_on_blur(this.value)" onfocus="URL_got_focus(this)">
+</PDM_IF>
+</td>
+</tr>
+</table>
+<PDM_MACRO name=dtlEnd>
+
+</form>
+<center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</center>
+</body>
+</html>
+<PDM_WSP>

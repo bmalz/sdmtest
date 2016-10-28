@@ -1,0 +1,767 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  employee/home.htmpl
+// Created: 08/09/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//   This is the default page that get loaded into the employee interface.
+//   It should contain a means of navigating to the various features
+//   that are accessible by internal employees.
+////////////////////////////////////////////////////////////////////////////
+// $Id: home.htmpl,v 1.8 2007/01/04 23:01:39 tuach01 Exp $
+//
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="home.htmpl">
+<html lang="pl">	<HEAD>
+<script>
+var form_title;
+if ('$args.CONTRACT' == "") {
+	form_title = "Strona główna";
+} else {
+	form_title = '$args.CONTRACT'.split('.').pop();
+}
+</script>
+<PDM_INCLUDE FILE="std_head.htmpl">
+		<script language="JavaScript" src="$CAisd/scripts/cst_fldrtree.js"></script>		
+		<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>	
+		<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>	
+		<script language="JavaScript" src="$CAisd/scripts/GUI_urlbuilder.js"></script>
+		<script language="JavaScript" src="$CAisd/scripts/GUI_favs.js"></script>
+		<script>
+        //Need to start the suggest knowledge object even it is turned off, b/c of the scenario: "User searched for knowledge, opened document and exit"
+		if(typeof ahdtop == "object" && typeof ahdtop.ticketObj == "object")
+			ahdtop.ticketObj.isActive=1;  
+		function has_knowledge_been_checked(itilinfo)
+		{
+		if(ahdtop.checked_knowledge == false)
+		prompt_for_knowledge(itilinfo); 
+		else 
+		prompt_for_knowledge_backfill(null,itilinfo);
+		}
+		
+		function get_url_for_catalog()
+		{
+			var url="$env.NX_CATALOG_SERVER/usm/wpf?Node=iclaunchpad.pad";
+			<PDM_IF "$env.NX_USE_EIAM_AUTHENTICATION" == "Yes" && "$env.NX_EIAM_HOSTNAME" != "">
+				fetch_artifact();
+				if(artifact != ""){
+					artifact=nx_escape(artifact);
+					url += "&username=$cst.userid&eiamArtifact=" + artifact;
+				}
+			</PDM_IF>
+			popupWithURL(url,1,1);
+		}
+		
+		function call_sb_direct()
+     		{
+			var url=ahdtop.cfgCgi+
+						"?SID="+ahdtop.cfgSID+
+						"+FID="+fid_generator().toString()+
+						"+OP=CREATE_NEW" +
+						"+FACTORY=sa_user_route" +
+						"+PRESET=launch_type:3" +
+						"+PRESET=queue_id:100004" + //direct session queue
+						"+KEEP.IsPopUp=1" + 
+						"+HTMPL=detail_sa_user_route_join_session.htmpl" ;
+			
+			if (typeof sa_direct_session_code_computed != "undefined") {
+				url += "+PRESET=direct_session_code:" + sa_direct_session_code_computed; 
+			}			
+						
+			var strFeatures="directories=no"+
+						",location=no"+
+						",menubar=no"+
+						",status=no";
+			
+			preparePopup(url, "join_session", strFeatures, 550, 220, '');     		
+       		}  
+
+			function Cnote(date, text,type) { this.date = date; this.text = text; this.type=type; }
+			var arr_cnote = new Array();
+<PDM_IF "$prop.guest_user" != 1>
+//Employee User
+	<PDM_IF $cst.location == "" && $cst.organization == "" >
+    		<PDM_IF $prop.view_internal == 1> 
+  			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+		</PDM_IF>
+	<PDM_ELIF $cst.location == "" && $cst.organization != "" >
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+   		</PDM_IF>
+   	<PDM_ELIF $cst.location != "" && $cst.organization == "" >
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+   		</PDM_IF>
+   	<PDM_ELSE>
+  
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+   		</PDM_IF>
+   	</PDM_IF>	  		
+<PDM_ELSE>
+// Guest User
+	<PDM_LIST PREFIX=list FACTORY=cnote LENGTH=5 WHERE="active=1 AND (organization IS NULL AND location IS NULL)" DOMSET=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+		arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+	</PDM_LIST>
+</PDM_IF>  
+           	var sa_direct_session_code_computed;
+
+			
+            /* Init announcements should determine the height of the announcements table cell
+             * and set the div height to be EXACTLY that.
+             * Then
+             */
+            function ResizeCnoteCells()
+            {
+                var cell = document.getElementById("idCnoteCell");
+                var div = document.getElementById("idCnoteDiv");
+                var head = document.getElementById("idCnoteHead");
+                var body = document.getElementById("idCnoteBody");
+                //var tail = document.getElementById("idCnoteTail");
+                
+                // Commented out - We want the "Announcements and Top Solutions" section to have as much room as neccessary
+                //body.style.height = String(cell.offsetHeight - head.offsetHeight /*- tail.offsetHeight*/) + "px";
+                //div.style.height = String(cell.offsetHeight) + "px";
+            }
+            
+            function InitAnnouncements()
+            {
+				remove_exceeding_kds();
+				if (ahdtop.isSupportAutomationEnabled() && ahdtop.m_s_sa_role_id != "") {
+					check_sa_waiting_analyst();
+				}
+				
+                ResizeCnoteCells();
+                var body = document.getElementById("idCnoteBody");
+
+                for (var i = 0; i < arr_cnote.length; i++)
+                {
+                    var p = document.createElement("p");
+                   // p.style.fontSize = "0.8em";
+                    var dateText = date_to_string(arr_cnote[i].date, false);
+                    if (arr_cnote[i].type == 1) {
+                       p.className = "advisory";
+                       dateText += ahdtop.cfgIndAdvisory;
+                    }
+                    else if (arr_cnote[i].type == 2) {
+                       p.className = "emergency";
+                       dateText += ahdtop.cfgIndEmergency;
+                    }
+                    var b = document.createElement("b");
+        
+                    b.appendChild(document.createTextNode(dateText));
+                    p.appendChild(b);
+                    p.appendChild(document.createElement("br"));
+
+                    var exp = new RegExp(".*", "g");
+                    exp.multiline = true;
+                    var result = arr_cnote[i].text.match(exp);
+                    for (var j = 0; j < result.length; j++)
+                    {
+                        if (result[j].length > 0)
+                        {
+                            if (j > 0)
+                                p.appendChild(document.createElement("br"));
+                            if (result[j].match(/<*>/i))
+                            {
+                                var span = document.createElement("span");
+                                span.innerHTML = result[j];
+                                p.appendChild(span);
+                            }
+                            else 
+                                p.appendChild(document.createTextNode(result[j]));
+                        }
+                    }
+
+                    body.appendChild(p);
+                }
+                var e = document.getElementById("ebrsearch");
+                if ( e != null )
+                  e.focus();
+			}
+			
+			
+			
+			/////////////////////////////////////////////////////////////////////
+			// FUNCTION do_soln_search_from_button
+			//		Perform a keyword search by hitting the GO button
+			/////////////////////////////////////////////////////////////////////
+			function do_soln_search_from_button()
+			{
+				var keywordForm = document.forms['keywordSearch'];
+				var ebr_search_text = keywordForm.elements["QBE.IN.ebr_search_text"].value;
+				
+				if (ebr_search_text.length == 0) {
+				// Force the user to enter something
+					alertmsg("Please_enter_a_keyword_to_proc");
+					return false;					
+				}
+				else {
+					keywordForm.elements["DOMSET"].value = "KD_list_ebr_RELEVANCE";
+					keywordForm.elements["KEEP.cur_sort_key"].disabled = true;
+					keywordForm.elements["QBE.IN.ebr_search_text"].value = ebr_search_text;
+					keywordForm.elements["KEEP.categoryID"].value = "-1";
+					keywordForm.elements["KEEP.relationalID"].value = "1";
+					keywordForm.elements["KEEP.categoryPath"].value = "All";
+					
+					submit_keywordSearch_form();
+				}																																							
+			}
+			
+			
+			/////////////////////////////////////////////////////////////////////
+			// FUNCTION do_soln_search
+			//		Perform a keyword search
+			/////////////////////////////////////////////////////////////////////
+			function do_soln_search()
+			{
+				var keywordForm = document.forms['keywordSearch'];
+				var ebr_search_text = keywordForm.elements["QBE.IN.ebr_search_text"].value;
+				
+				if (ebr_search_text.length == 0) {
+					<PDM_IF "$env.NX_KT" == "Yes">		
+						keywordForm.elements["DOMSET"].value = "KD_list_web_BU_RESULT_DESC_blc";
+						keywordForm.elements["KEEP.initial_ebr"].value = "0";
+						
+						var addlWhere = "ACTIVE_STATE=0";//Since we do not want to fire index_doc)links query when selecting KDs under top
+						keywordForm.elements["ADDITIONAL_WHERE"].value = addlWhere;					
+						keywordForm.elements["KEEP.categoryID"].value = "1";
+						
+						// Disable ebr-related fields if we are not executing an ebr search
+						for ( i = keywordForm.elements.length - 1; i > 0; i-- ) {
+							var e = keywordForm.elements[i];
+							if ( e.name.match(/ebr_/)) {
+								e.disabled = true;
+							}
+						}
+						
+						keywordForm.elements["KEEP.relationalID"].value = "1";
+						keywordForm.elements["KEEP.categoryPath"].value = "All";
+					</PDM_IF>					
+				}
+				else {
+					keywordForm.elements["DOMSET"].value = "KD_list_ebr_RELEVANCE";
+					keywordForm.elements["KEEP.cur_sort_key"].disabled = true;
+					keywordForm.elements["QBE.IN.ebr_search_text"].value = ebr_search_text;
+					keywordForm.elements["KEEP.categoryID"].value = "-1";
+					keywordForm.elements["KEEP.relationalID"].value = "1";
+					keywordForm.elements["KEEP.categoryPath"].value = "All";
+				}																											
+								
+				submit_keywordSearch_form();
+			}
+			
+			function OpenDocumentViewer(doc_id)
+			{
+				// Open document in the main screen
+				var fid = fid_generator();
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid + "+OP=SHOW_DETAIL+PERSID=KD:" + doc_id + "+HTMPL=kt_document_view.htmpl+opener=simple+open_mode=0+KEEP.SCROLLING=1";
+				url += "+KEEP.DOMSET=KD_list_web_BU_RESULT_DESC";
+				url += "+KEEP.cur_sort_key=BU_RESULT";
+				url += "+KEEP.initial_ebr=0";
+				document.location.href = url;	
+			}
+			
+			function viewBookmarks() {
+				var form = document.forms["keywordSearch"];
+				form.elements["DOMSET"].value = "KD_list_web_BU_RESULT_DESC";
+				form.elements["KEEP.initial_ebr"].value = "0";
+				form.elements["KEEP.from_bookmark"].value = "1";
+				form.elements["ADDITIONAL_WHERE"].value = "BM_LINKS.USER_ID=U'$cst.id' and ACTIVE_STATE=0";
+				
+				// Disable ebr-related fields if we are not executing an ebr search
+				for ( i = form.elements.length - 1; i > 0; i-- ) {
+					var e = form.elements[i];
+					if ( e.name.match(/ebr_/)) {
+						e.disabled = true;
+					}
+				}
+				
+				submit_keywordSearch_form();
+			}
+			
+			function submit_keywordSearch_form() {
+				var fid = fid_generator();
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid;
+				var form = document.forms["keywordSearch"];
+				var search_text = "";
+				for (var i=0; i < form.elements.length; i++)
+				{
+					var element = form.elements[i];
+					if (!element.disabled)
+					{
+						var name = element.name;
+						var value = element.value;
+						url += "+" + name + "=" + nx_escape(value);
+					}
+					else if (element.name == "QBE.IN.ebr_search_text")
+					{
+						element.disabled = false;
+					}
+					if(element.name == "QBE.IN.ebr_search_text")
+					{
+						search_text = element.value;	
+					}
+				}
+				if (form.elements["KEEP.categoryID"].value == "1")
+				{
+					url += "+QBE.EQ.ebr_kcat_id=1+QBE.EQ.ebr_faq_query=1";
+				}
+				if (form.elements["KEEP.from_bookmark"].value != "1")
+				{
+					url += "+QBE.EQ.ebr_add_blc=1";
+				}
+				document.location.href = url;	
+				ahdtop.GetMyRecentSearches();
+				if(search_text.length > 0)
+					ahdtop.UpdateMyRecentSearches(search_text); 
+			}			
+			
+	    /////////////////////////////////////////////////////////////////////
+            // FUNCTION check_sa_waiting_analyst
+            //        Check whether an analyst is waiting for this user
+            /////////////////////////////////////////////////////////////////////   
+            function check_sa_waiting_analyst() {
+				var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			   	"+OP=SA_CHECK_WAITING_ANALYST+interface=emp+end_user="+ahdtop.cstID;
+
+				AsyncAjaxCall(sURL, callback_sa_waiting_analyst);
+            }
+
+            function callback_sa_waiting_analyst (req) {
+                                var resp = req.responseText;
+
+				if (resp != "" && !resp.match(/NULL/)) {
+					sa_direct_session_code_computed = resp;
+					document.getElementById("tr_join_analyst").style.display="block";
+					show_response (msgtext("SA_Analyst_Waiting"));
+				}
+            }
+
+            function remove_exceeding_kds()
+            {
+				var tblKDs = document.getElementById("tblKDs");
+				var lFirstKDRow = "$env.NX_SD" != "Yes" ? 0 : 1;
+				if (typeof tblKDs == "object")
+				{
+					var sRow_Ids = ",";
+					var lRow=lFirstKDRow;
+					// Remove duplicated KDs
+					while (lRow < tblKDs.rows.length)
+					{
+						var sRowId = tblKDs.rows[lRow].id;
+						if (sRow_Ids.indexOf("," + sRowId + ",") != -1)	// if duplicated row
+						{
+							tblKDs.deleteRow(lRow);		// delete duplicated row
+						}
+						else
+						{
+							sRow_Ids += sRowId + ",";	// add an id to the list
+							lRow++;
+						}
+					}
+				
+					// remove exceeding KDs
+					while (tblKDs.rows.length > $prop.TOP_SOLUTION_COUNT + lFirstKDRow)
+					{
+						tblKDs.deleteRow(tblKDs.rows.length-1);
+					}
+				}
+            }
+		</script>
+		<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+		<script language="JavaScript">
+			function CheckPcatObject() {
+				if ('$args.CONTRACT' != "") {
+					var i = 0;
+					var temp = "";
+					var flag;
+					<PDM_LIST PREFIX=list FACTORY=pcat WHERE="ss_sym = '$args.CONTRACT'">
+						i++;
+						if ('$list.in_flag' == 0 && '$list.cr_flag' == 0)
+							flag = true;
+						temp = '$list.sym';
+					</PDM_LIST>
+	
+					if (i > 0) {
+						if (flag)
+							return 'Area';
+						else
+							return 'Exist';
+					} else {
+						return 'NotExist';
+					}
+				} else {
+					return 'Exist'
+				}
+			}
+			
+			function SetTopBar() {
+				parent.frames[0].window.document.getElementById('titleText').innerHTML = "$args.CONTRACT".split('.')[0].toUpperCase();
+				parent.frames[0].window.document.getElementById('UserInfoDiv').innerHTML = '<p class="UserInfoItem" style="font-size: 12px; font-weight: bold;">$cst.last_name $cst.first_name</p><p class="UserInfoItem">$cst.organization.name</p><p class="UserInfoItem">$cst.location.address1</p><p class="UserInfoItem">$cst.phone_number</p><p class="UserInfoItem">$cst.email_address</p>';
+				parent.frames[0].window.document.getElementById('UserInfoDiv').style.visibility = "visible";
+			}
+
+			function GetFavs() {
+				var myFavs = new Array();
+				var i = 0;
+				<PDM_LIST PREFIX=list FACTORY=zfav_pcat WHERE="cnt.id = U'$cst.id' AND pcat.sym like '$args.CONTRACT%' AND delete_flag = 0">
+					myFavs[i] = '$list.pcat.ss_sym';
+					i++;
+				</PDM_LIST>
+
+				return myFavs;
+			}
+		</script>
+
+	<script type="text/javascript">
+		//window.onresize = doResize;
+
+        jq(document).ready(function () {
+			//doResize();
+
+            jq("img.contractContentTitle").click(function () {
+                jq(this).attr("src", "$CAisd/sitemods/img/favourite_loading.gif");
+
+				if(jq(this).attr("favService") == "false") {
+					AddAsFavourite('$cst.id', jq(this).attr("entity_id"));
+				} else {
+					RemoveFromFavourite('$cst.id', jq(this).attr("entity_id"));
+				}	
+            });
+        });
+
+	function doResize() {
+		jq('.divcat').each(function () {
+        	jq(this).css("height", jq(this).parent().css("height"));
+			jq(this).css("max-height", jq(this).parent().css("height"));
+        });
+	};
+	
+	function endSaveProduct(xmlHttpRequest, status)
+	{
+		alert(xmlHttpRequest + '\r\n' + status);
+	}
+	
+	function buidBoxes() {
+		var PcatObj = CheckPcatObject();
+		if (PcatObj == 'Exist' || PcatObj == 'Area') {
+			var out = "";
+			var ContractLength = '$args.CONTRACT'.split('.').length;
+			var ContractName = '$args.CONTRACT';
+			var tab = [];
+			var i = 0;
+			var zimage;
+			var zfavs = GetFavs();
+			var zfavimg;
+			var zfav;	
+			var zfavdesc;
+			
+			// Opis wartości tab[]
+			// 0 - nazwa analityka
+			// 1 - opis
+			// 2 - ikona
+			// 3 - nazwa dla użytkownika (końcowa)
+			// 4 - identyfikator
+			// 5 - nazwa dla użytkownika
+			// 6 - flaga Request
+			// 7 - flaga Incident
+			// 8 - service catalog url
+			
+			<PDM_LIST PREFIX=list FACTORY=pcat WHERE="ss_sym like '$args.CONTRACT%' AND delete_flag = 0" ORDER_BY="zsort ASC">
+				<PDM_IF '$list.owning_contract' == '$cst.organization.owning_contract'>
+					<PDM_IF '$args.CONTRACT' != "">
+						if ('$list.ss_sym'.split('.').length == ContractLength + 1) {
+							tab[i] = ['$list.sym', '$list.zguidesc', '$list.zimage', '$list.ss_sym'.substring('$args.CONTRACT'.length + 1, '$list.ss_sym'.length), '$list.id', '$list.ss_sym', '$list.cr_flag', '$list.in_flag', '$list.zsc_url'];
+							i++;
+						}
+					<PDM_ELSE>
+						if ('$list.sym'.split('.').length == 1){
+							tab[i] = ['$list.sym', '$list.zguidesc', '$list.zimage', '$list.ss_sym', '$list.id', '$list.ss_sym', '$list.cr_flag', '$list.in_flag', '$list.zsc_url'];
+							i++;
+						}
+					</PDM_IF>
+				</PDM_IF>
+			</PDM_LIST>
+			
+			out += '<div style="width: 100%;"><table border="0" cellpadding="0" cellspacing="0">';
+
+			if (PcatObj == 'Area' || i == 0) {
+				out += '<tr>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+				out += '</tr>';
+				out += '<tr>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); width:26px;"></td>';
+				out += '<td valign="top" style="width: 50%;">';
+				out += '<table class="contractContent" style="width: 100%;">';
+				out += '<tr>';
+				out += '<td width="100%" valign="top">';
+				out += '<p class="contractContentTitle"><a href="javascript:NewRequest(\'' + ContractName + '\')">Wnioskuj o usługę</a></p>';
+				out += 'W tym miejscu można dokonąć zamówienia usługi.<br />';
+				out += '<ul class="contractContentCategory">';
+				for (i=0; i<tab.length; i++) {
+					if(tab[i][6] == 1) {
+						if(tab[i][8] != "") {
+							out += '<li><a href="' + tab[i][8] + '" target="_blank">' + tab[i][3] + '</a></li>';
+						} else {
+							out += '<li><a href="javascript:NewRequest(\'' + tab[i][5] + '\')">' + tab[i][3] + '</a></li>';
+						}
+					}
+				}
+				out += '</ul>';
+				out += '</td>';
+				out += '<td valign="top"><a href="javascript:NewRequest(\'' + ContractName + '\')"><img border="0" src="$CAisd/sitemods/img/Employee/Icons/shop.gif"></a></td>';
+				out += '</tr>';
+				out += '</table>';
+				out += '</td>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>';
+				out += '<td valign="top" style="width: 50%;">';
+				out += '<table class="contractContent">';
+				out += '<tr>';
+				out += '<td valign="middle"><a href="javascript:NewIncident(\'' + ContractName + '\')"><img border="0" src="$CAisd/sitemods/img/Employee/Icons/HELP.gif"><a></td>';
+				out += '<td width="100%" valign="top">';
+				out += '<p class="contractContentTitle"><a href="javascript:NewIncident(\'' + ContractName + '\')">Zgłoszenie awarii</a></p>';
+				out += 'W tym miejscu można zgłosić niepoprawne dziłanie usługi lub jej awarię.<br />';
+				out += '<ul class="contractContentCategory">';
+				for (i=0; i<tab.length; i++) {
+					if(tab[i][7] == 1) {
+						if(tab[i][8] != "") {
+							out += '<li><a href="' + tab[i][8] + '" target="_blank">' + tab[i][3] + '</a></li>';
+						} else {
+							out += '<li><a class="contractContentCategory" href="javascript:NewIncident(\'' + tab[i][5] + '\')">' + tab[i][3] + '</a></li>';
+						}
+					}
+				}
+				out += '</ul>';
+				out += '</td>';
+				out += '</tr>';
+				out += '</table>';
+				out += '</td>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+				out += '</tr>';
+				out += '<tr>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+				out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+				out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+				out += '</tr>';
+				out += '</table>'
+				out += '</div>';
+			} else {
+				for (i=0; i<tab.length; i++) {
+
+					//Set image
+					if(tab[i][2] == '') {
+						zimage = 'noimage.png';
+					} else {
+						zimage = tab[i][2];
+					}
+
+					//Set fav icon and state
+					if(jq.inArray(tab[i][0], zfavs) > -1) {
+						zfavimg = "favourite_enable.png";
+						zfav = "true";
+						zfavdesc = "Usuń z ulubionych";
+					} else {
+						zfavimg = "favourite_disable.png";
+						zfav = "false";
+						zfavdesc = "Dodaj do ulubionych";
+					}
+
+					if ((i+1)%2 == 1) {
+						out += '<tr>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+
+						if(i != tab.length-1) {
+							out += '<td><img src="$CAisd/sitemods/img/Employee/box_01.gif" width="26" height="23" alt=""></td>';
+							out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_02.gif);"></td>';
+							out += '<td><img src="$CAisd/sitemods/img/Employee/box_03.gif" width="23" height="23" alt=""></td>';
+						} else {
+							out += '<td></td><td></td><td></td>';
+						}
+
+						out += '</tr>';
+						out += '<tr>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); max-width: 26px; width: 26px;"></td>';
+						out += '<td valign="middle" style="width: 50%;">';
+						out += '<table class="contractContent" style="width: 100%;">';
+						out += '<tr>';
+						out += '<td width="100%" valign="middle">';
+						out += '<p class="contractContentTitle"><a href="#"><img entity_id="' + tab[i][4] + '" favService="' + zfav + '" class="contractContentTitle" src="$CAisd/sitemods/img/' + zfavimg + '" alt="' + zfavdesc + '"></a><a href="javascript:OpenContract(\'' + tab[i][5] + '\')">' + tab[i][3] + '</a></p>';
+						out += tab[i][1] + '<br />';
+						out += '</td>';
+						out += '<td valign="middle"><a href="javascript:OpenContract(\'' + tab[i][5] + '\')"><img border="0" src="$CAisd/sitemods/img/Employee/Icons/' + zimage + '"></a></td>';
+						out += '</tr>';
+						out += '</table>';
+						out += '</td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); max-width: 26px; width: 26px;"></td>';
+
+						if(i == tab.length-1) {
+							out += '<td></td><td style="width: 50%;"></td><td></td>';
+							out += '</tr>';
+							out += '<tr>';
+							out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+							out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+							out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+							out += '<td></td><td></td><td></td>';
+							out += '</tr>';
+						}
+					} else {
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_04.gif); width:26px;"></td>';
+						out += '<td valign="middle" style="width: 50%;">';
+						out += '<table class="contractContent">';
+						out += '<tr>';
+						out += '<td valign="middle"><a href="javascript:OpenContract(\'' + tab[i][5] + '\')"><img border="0" src="$CAisd/sitemods/img/Employee/Icons/' + zimage + '"></a></td>';
+						out += '<td width="100%" valign="middle">';
+						out += '<p class="contractContentTitle"><a href="#"><img entity_id="' + tab[i][4] + '" favService="' + zfav + '" class="contractContentTitle" src="$CAisd/sitemods/img/' + zfavimg + '" alt="' + zfavdesc + '"></a><a href="javascript:OpenContract(\'' + tab[i][5] + '\')">' + tab[i][3] + '</a></p>';
+						out += tab[i][1] + '<br />';
+						out += '</td>';
+						out += '</tr>';
+						out += '</table>';
+						out += '</td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_06.gif); width:26px;"></td>';
+						out += '</tr>';
+						out += '<tr>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_07.gif" width="26" height="22" alt="" /></td>';
+						out += '<td style="background-image: url($CAisd/sitemods/img/Employee/box_08.gif);"></td>';
+						out += '<td><img src="$CAisd/sitemods/img/Employee/box_09.gif" width="23" height="22" alt="" /></td>';
+						out += '</tr>';
+					}					
+				}
+				
+				out += '</table>'
+				out += '</div>';
+			}
+		} else {
+			out += 'Obiekt nie istnieje';
+		}
+		return out;
+	}
+    </script>
+	</head>
+	
+	<body class=emp onunload="return close_knowledge_window();" onload="SetTopBar();">
+	 <PDM_INCLUDE FILE=self_service_include.htmpl status=0>
+<PDM_INCLUDE FILE="std_body.htmpl">
+<center>
+	<table width="100%" cellpadding=0 cellspacing=0 style="margin-top:15px;">
+		<tr>
+			<PDM_IF "$args.CONTRACT" != "">
+			<td class="scoreboardCell" valign="top" align="left">
+				<div class="scoreboardCellElement"><PDM_SCOREBOARD></div>
+				<hr align="left" class="scoreboardCell">
+				<br /><a href="javascript:OpenFavs()">Ulubione usługi</a><br />
+				<a href="javascript:OpenPops()">Popularne usługi</a>
+			</td>
+			</PDM_IF>
+			<td valign="top" align="left">
+				<PDM_IF "$args.CONTRACT" != ""><table style="width: 100%" align="center"><PDM_ELSE><table style="width: 80%" align="center"></PDM_IF>
+					<PDM_IF "$args.CONTRACT" != "">
+					<tr>
+						<td style="padding-bottom: 10px; padding-left: 20px; font-size: 11px;">
+							<script>
+								var ContractPath = '$args.CONTRACT'.split('.');
+								var tempContractPath = ContractPath[0]; 
+								
+								var fid = fid_generator();
+								var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid + "+OP=DISPLAY_FORM+HTMPL=home.htmpl";
+								document.write('Jesteś w: <a href=' + url + '>Strona główna</a>');
+								
+								for (i=0; i<ContractPath.length; i++) {
+									if (i == ContractPath.length - 1) {
+										document.write(' > ' + ContractPath[i]);
+									} else {
+										if (i == 0) {
+											document.write(' > ' + '<a href="javascript:OpenContract(\'' + ContractPath[i] + '\')">' + ContractPath[i] + '</a>');
+										} else {
+											tempContractPath = tempContractPath + '.' + ContractPath[i];
+											document.write(' > ' + '<a href="javascript:OpenContract(\'' + tempContractPath + '\')">' + ContractPath[i] + '</a>');
+										}
+									}
+								}
+							</script>
+						</td>
+						<td align="right" style="padding-bottom: 10px; padding-right: 20px; font-size: 11px;">
+							
+						</td>
+					</tr>
+					</PDM_IF>
+					<tr>
+						<td colspan="2">
+							<div id="LoadingContent">Ładuje dane...</div>
+							<script>
+								document.write(buidBoxes());
+								document.getElementById('LoadingContent').style.visibility = "hidden";
+							</script>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</center>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+<SCRIPT>
+//Reset suggest knowledge when getting to home.htmpl for any reason
+if ( typeof ahdtop.ticketObj != "undefined" )
+	ahdtop.ticketObj.resetTicket();
+</SCRIPT>
+	</body>
+	
+</html>

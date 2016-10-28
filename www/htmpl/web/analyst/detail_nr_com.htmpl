@@ -1,0 +1,98 @@
+<PDM_IF 0>
+detail_nr_com_ro.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Asset Log
+INTENT:
+    Display the detail info for the Asset Log
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  nr_com  args	The Asset Log object we are displaying.
+                        See nr.maj for the
+                        definition of attributes for 'OBJECT nr_com'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+History:
+2008-aug-18 mckpe04 added cmdb support for milestones
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Configuration Item Log Detail";
+var hdrTitleUpd = "Update Configuration Item Log";
+var hdrTitleNew = "Create New Configuration Item Log";
+<PDM_IF "$env.NX_CMDB" != "">
+var hdrTitle = "Configuration Item Milestone Detail";
+var hdrTitleUpd = "Update Configuration Item Milestone";
+var hdrTitleNew = "Create New Configuration Item Milestone";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script language="JavaScript">
+
+argPersistentID = "$args.persistent_id";
+_bHideTenantSelection = true; // Make tenant read-only, always use tenant specified in parent asset object 
+
+function unloadActions()
+{
+  if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</head>
+
+
+<body class="detailro"  onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script language="JavaScript">
+ahdframeset.top_splash.next_persid = "$args.asset_id.persistent_id";
+<PDM_MACRO name=dtlForm factory=nr_com>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$prop.form_name_3" == "edit">
+docWriteln("<input type='hidden' name='HTMPL' value='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+{
+    _dtl.next_persid = 'show_main_detail.htmpl';
+}
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_MACRO name=dtlReadonly hdr="Wysłany przez" attr=writer_name>
+<PDM_MACRO name=dtlReadonly hdr="Data" attr=log_date>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Log" attr=log colspan=4 keeplinks=yes rows=6 size=60 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+
+if (!_dtl.edit && ('<PDM_FMT ESC_STYLE=C>$args.log</PDM_FMT>' == 'Field Updated')) {	
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Atrybut" attr=attr_name>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nowa wartość" attr=new_value colspan=4 keeplinks=yes rows=8 size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Stara wartość" attr=old_value colspan=4 keeplinks=yes rows=8 size=40>
+<PDM_MACRO name=dtlEndTable>	
+	document.write("</PDM_IF>");
+}
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+
+</html>
+<PDM_WSP>

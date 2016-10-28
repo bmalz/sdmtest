@@ -1,0 +1,200 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Ambiguous Configuration Item Search";
+var hdrTitleList = "Ambiguous Configuration Item List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var rptName = new Array("nrasum.rpt", "nradtl.rpt");
+var cfgCanEdit = true;
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/webtab.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cmdb_reconciliation.js"></script>
+
+</head>
+
+<body class="list">
+
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+
+
+<PDM_IF "${current:n/a}" != "n/a">
+<PDM_FORM NAME="frmAmbiCI">
+  <script language="JavaScript">
+
+function add_button_to_tab_banner()
+{
+    var bShowButton = false;
+    var btnDisabled = "yes";
+    var checkboxEnabled;
+    var checkedStatus;
+	var cmdbIsEditingAllowed = true;
+	var cmdbCINotAmbiguous_local = "$args.KEEP.NOT_AMBIGUOUS";
+    // Only show the button if not in edit mode.
+	if ( typeof parent.edit_form != "undefined" && parent.edit_form == 1 ) 
+    {
+        bShowButton = true;
+    }
+    else
+    {
+        bShowButton = false;
+    }
+    if ( bShowButton && "$args.KEEP.SUPERSEDED_BY" == "")
+    {
+        btnDisabled = "no";
+    }
+    else
+    {
+        btnDisabled = "yes";
+    }
+    // Showing controls on the CI detail form Reconciliation tab
+    if ( '$args.KEEP.NRA_PERSID' == "0" )
+    {
+         // Disable button if creating the CI for the first time 
+         // or no CIs are listed 
+         // or Superseded By field is set (disallow supersede operation)
+         btnDisabled = "yes";
+    }
+	if ( typeof parent.edit_form != "undefined" && parent.edit_form == 1 ) 
+    {
+        checkboxEnabled = "";
+    }
+    else
+    {
+        checkboxEnabled = "disabled";
+    }
+    if ( '$args.KEEP.NOT_AMBIGUOUS' == "1" )
+    {
+         checkedStatus = "checked ";
+    }
+    else
+    {
+        checkedStatus = "unchecked " 
+    }
+    checkedStatus += checkboxEnabled;
+		        // Create table row showing the "Exclude Ambiguity" checkbox (not_ambiguous flag) and Supersede buttons on tab header.
+    docWriteln( "<table id='cmdbReconcilationCtrlsTbl'><tbody><tr>" );
+        
+        // Create checkbox using similar method define in detailCheckboxEdit() routine but using format such that the checkbox
+        // is always shown and label is to the right of the checkbox. Use tab index of 500 to be same as the supersede button so
+        // tabing from checkbox goes directly to supersede button. Note that ImgBtnCreate() doe snot allow you to set tab index.
+    		//var checkboxHtml =  "<input type=hidden name=SET.not_ambiguous VALUE='" + cmdbCINotAmbiguous_local + "'> " +
+            var checkboxHtml =  "<nobr><input id='cmdb_notAmbiguous' type='checkbox' " + checkedStatus + 
+                    " onclick='ahdframe.detailSetCbxFlag(this);' name='CBX.not_ambiguous' tabindex='"+ getTabIndex() + "' value='1' pdmqa='not_ambiguous' >" +
+                     "<label class='labeltext' ><b>" + "Exclude Ambiguity" + "</b></label></nobr>";
+   		docWriteln( "<td title='" + "Exclude Ambiguity" + "'>" + checkboxHtml + "</td>");
+        
+        if ( bShowButton )
+        {
+            // Create the button.
+            docWriteln( "<td>" );
+		<PDM_MACRO NAME=button                     
+			id="btn_supersede"                            
+			caption="Supersede"  
+			func="allSelectedCIs()"     
+			disabled=btnDisabled
+			hotkey_name="Supersede"
+			tooltip="Supersede selected CIs" >                           
+            docWriteln( "</td>" );
+        }
+        
+        // Close up the checkbox and button table.
+        docWriteln( "</tr><tbody></table>" ); 
+	
+}
+function allSelectedCIs()
+{
+	var no_of_boxes = 0;
+	var txt = ""
+	var nraCheckBox = document.getElementsByName("nraCheckBox");
+	if(typeof nraCheckBox != "undefined") 
+	{
+		if(typeof nraCheckBox.length != "undefined")
+			no_of_boxes = nraCheckBox.length;
+		else
+			no_of_boxes = 1;
+	}
+	else {		
+		return;
+	}
+
+	for (i = 0; i < no_of_boxes; i++) 
+	{
+ 		if (nraCheckBox[i].checked) 
+		{
+			txt = txt + nraCheckBox[i].value + ":"
+		}
+	}
+
+	ahdframe.AlertMsg = "";
+	if(txt != "") {
+		supersedeCIs_fromCIDetail(txt, '$args.KEEP.NRA_PERSID');
+		ahdframe.showAlertMsg( "Supersede operation successful - The selected CIs are superseded by the current CI");
+	}
+	else
+		ahdframe.showAlertMsg("Please select one or more CIs before clicking Supersede");
+}
+function fmtType(value)
+{
+	if ( typeof parent.edit_form != "undefined" && parent.edit_form == 1 && "$args.KEEP.SUPERSEDED_BY" == "") {
+		rs.data('<input type=checkbox NAME="nraCheckBox" VALUE=' + nra_id + ' ENABLED><br>');		
+	}
+}
+
+  var msgFoundNone = "No Ambiguous Configuration Items found";
+  var msgFound1 = "1 Ambiguous Configuration Item found";
+  var msgFound = "%1 Ambiguous Configuration Items found";
+  var msgFoundMore = "%1 Ambiguous Configuration Items found.  Displaying %2 through %3";
+  var msgSelect = "Click to select desired Ambiguous Configuration Item";
+  tab_banner("Reconciliation Management",true, false);
+</script>
+
+
+
+<script language="JavaScript">
+var tenantSort = "no"; //By default all tenant columns are sortable. This variable is needed to make the
+						//tenant column not sortable
+
+<PDM_MACRO NAME=lsStart>
+<pdm_macro name=lsWrite text="var nra_id = \"@{list.id:}\";">
+	if ( typeof parent.edit_form != "undefined" && parent.edit_form == 1 && "$args.KEEP.SUPERSEDED_BY" == "") {
+		<PDM_MACRO NAME=lsCol hdr=" " attr=persistent_id sort="no" justify=left fmtfunc=fmtType>
+	}
+	<PDM_MACRO NAME=lsCol hdr="Nazwa" attr=name sort="no" export=no exportfmt="ShowLink" link=yes justify=left>
+	<PDM_MACRO NAME=lsCol hdr="MAC adres" attr=mac_address sort="no" justify=left>
+	<PDM_MACRO NAME=lsCol hdr="Numer seryjny" attr=serial_number sort="no" justify=left>
+	<PDM_MACRO NAME=lsCol hdr="Alternatywne ID CI" attr=asset_num sort="no" justify=left>
+	<PDM_MACRO NAME=lsCol hdr="Nazwa hosta" attr=system_name sort="no" justify=left>
+	<PDM_MACRO NAME=lsCol hdr="Nazwa DNS" attr=dns_name sort="no" justify=left>
+	<PDM_MACRO NAME=lsCol hdr="Klasa" attr=class sort="no" justify=left>
+	<PDM_MACRO NAME=lsCol hdr="#Wniosków" attr=assoc_reqs sort="no" justify=right display_attr=length>
+	<PDM_MACRO NAME=lsCol hdr="#Incydentów" attr=assoc_in sort="no" justify=right display_attr=length>
+	<PDM_MACRO NAME=lsCol hdr="#Problemów" attr=assoc_pr sort="no" justify=right display_attr=length>
+	<PDM_MACRO NAME=lsCol hdr="#Zmian" attr=chgnr sort="no" justify=right display_attr=length>
+	<PDM_MACRO NAME=lsCol hdr="#Iss" attr=issnr sort="no" justify=right display_attr=length>
+<PDM_MACRO NAME=lsEnd>
+
+if (typeof self.nra_id == "undefined" && typeof parent.edit_form != "undefined" && parent.edit_form == 1) {
+		ImgBtnDisableButton("btn_supersede");	
+}
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</PDM_FORM>
+</html>
+
+<PDM_WSP>

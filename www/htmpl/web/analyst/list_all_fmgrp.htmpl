@@ -1,0 +1,94 @@
+<PDM_IF 0>
+list_all_fmgrp.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Form Groups
+INTENT:
+    Display the list of Form Group
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object Form Group_list list The list object containing the Form Group
+                        See $NX_ROOT/bopcfg/majic/base.maj for the
+                        definition of attributes for 'OBJECT Form Group'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Form Group Search";
+var hdrTitleList = "Form Group List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("no", "no");
+var cfgCanEdit = false;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Form Group">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=all_fmgrp>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Form Groups found";
+var msgFound1 = "1 Form Group found";
+var msgFound = "%1 Form Groups found";
+var msgFoundMore = "%1 Form Groups found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Form Group";
+
+var m_editItem;
+function resultSetCustomContextAddMiddle(ctxMenu) {
+   m_editItem = ctxMenu.addItem(msgtext("Edit"),"showEdit(self.activePersid)");
+// Removed menu item to refresh the form group in the form_server, as it is no longer used.
+}
+
+var fg_ids = new Array();
+var ID_counter=0;
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="fg_ids[ID_counter]=\"@{list.id}\";">
+<PDM_MACRO name=lsWrite text="ID_counter++;">
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+
+
+function updateCtxMenuItems(row)
+{
+	// Hide the "Edit" context menu item for the DEFAULT form group.
+	if (fg_ids[row] == "2504") {
+		ctxMenu.hideItem(m_editItem);
+	}
+	else {
+		ctxMenu.showItem(m_editItem);
+	}
+}
+
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_all_fmgrp.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

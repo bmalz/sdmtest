@@ -1,0 +1,821 @@
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  cst_cat.js
+// Created: 09/24/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//   This file contains JavaScript code for Property and CategorySink objects.
+//   These objects facilitate the use of categories on (currently)
+//   issues.
+//
+////////////////////////////////////////////////////////////////////////////
+// $Id: cst_cat.js,v 1.19 2007/01/04 23:19:05 tuach01 Exp $
+// $Header: cst_cat.js ANDERSON.1 2009/05/28 16:13:51 ralje02  Exp $
+
+
+
+// eventProxy is for browsers that don't support the DOM2 EventListener and EventTarget interfaces.
+function eventProxy(e)
+{
+	sink.handleEvent(e);
+}
+
+// Before passing control to check_cst_submit, let's check the properties first.
+function cst_check_props_before_submit(is_guest)
+{
+	document.forms["main_form"].change_category.value = "0";
+	var msg = "";
+	if (typeof sink.properties == "object")
+	{
+		for (var e = 0; e < sink.properties.length; e++)
+		{
+			if (sink.properties[e].required == true && sink.properties[e].element.value == "")
+				msg += "- " + sink.properties[e].label + "\n";
+		}
+
+		if (msg.length > 0)
+		{
+			var subtext;
+			if (cfgUserType == "customer")
+				subtext = msgtext("issue");
+			else if (cfgUserType == "employee")
+				subtext = msgtext("request");
+
+			alert(msgtext("Before_saving_this_%1,_please_", subtext, msg));
+			return false;
+		}
+	}
+
+	return check_cst_submit(is_guest);	
+}
+
+// Netscape 4 layers require us to have two forms: one for the issue / request, and one for area / category properties.
+// So, if we're NS 4, during a submit, we need to loop through the property fields, squish them into a single string
+// and shove the string into a hidden field in the main form.
+function make_string_for_submit()
+{
+	if (_browser.supportsLayers)
+	{
+		var prop_layer = document.layers["prop_layer"];
+		if (typeof prop_layer == "object" && prop_layer != null)
+		{
+			var prop_form = prop_layer.document.forms["prop_form"];
+			if (typeof prop_form == "object" && prop_form != null)
+			{
+				var tmpstr = "";
+				for (var e = 0; e < prop_form.elements.length; e++)
+				{
+					if (prop_form.elements[e].value.length > 0)
+					{
+						if (tmpstr.length > 0)
+							tmpstr += "&";
+
+						tmpstr += prop_form.elements[e].name + "=" + prop_form.elements[e].value;
+					}
+				}
+
+				var main_form = document.forms["main_form"];
+				if (typeof main_form == "object" && main_form != null)
+					main_form.elements["INPUT_FIELDS_TO_PARSE"].value = tmpstr;
+			}
+		}
+	}
+}
+
+// Global variable.  This variable should be defined by the caller.
+var sink = void(0);
+var original_sink_properties = void(0);
+
+// Property constructor
+// 20131018 bmalz @ e-xim : Added desc
+function Property(id, required, label, value, sample, desc, isCalendar, isTime, isSection, isTextArea, InputWidth, isLookup, LookupFactory, isHTML, targetObj, targetObjvalue, isNumber, type, options)
+{
+	this.required = required;
+	this.id = id;
+	this.label = label;
+	this.value = value;
+	this.sample = sample;
+	this.type = type;
+	this.options = options;
+	this.isCalendar = isCalendar;
+	this.isTime = isTime;
+  this.desc = desc;
+  this.isSection = isSection;
+  this.isTextArea = isTextArea;
+  this.InputWidth = InputWidth;
+  this.isLookup = isLookup;
+  this.LookupFactory = LookupFactory;
+  this.isHTML = isHTML;
+  this.targetObj = targetObj;
+  this.targetObjvalue = targetObjvalue;
+  this.isNumber = isNumber;
+}
+
+// Default values for the various Property attributes.
+Property.prototype.id = "";
+Property.prototype.required = false;
+Property.prototype.label = "";
+Property.prototype.value = "";
+Property.prototype.sample = "";
+Property.prototype.element = void(0);
+Property.prototype.type = "";
+Property.prototype.options = "";
+// 20130927 bmalz @ e-xim
+Property.prototype.isCalendar = "";
+Property.prototype.isTime = "";
+// 20131018 bmalz @ e-xim
+Property.prototype.desc = "";
+// 20131028 bmalz @ e-xim
+Property.prototype.isSection = "";
+// 20131029 bmalz @ e-xim
+Property.prototype.isTextArea = "";
+// 20131030 bmalz @ e-xim
+Property.prototype.InputWidth = "";
+// 20131105 bmalz @ e-xim
+Property.prototype.isLookup = "";
+Property.prototype.LookupFactory = "";
+// 20131106 bmalz @ e-xim
+Property.prototype.isHTML = "";
+Property.prototype.targetObj = "";
+Property.prototype.targetObjvalue = "";
+// 20131108
+Property.prototype.isNumber = "";
+
+// CategorySink constructor
+function CategorySink(factory, form)
+{
+	this.factory = factory;
+	this.form = form;
+	this.SID = form.elements["SID"].value;
+	this.FID = form.elements["FID"].value;
+	
+	this.properies = void(0);
+	this.original_properties = null;
+	this.in_progress = 0;
+}
+
+// Default values for the various CategorySink attributes.
+CategorySink.prototype.factory = "";
+CategorySink.prototype.form = void(0);
+CategorySink.prototype.element = void(0);
+CategorySink.prototype.properties = void(0);
+
+// CategorySink.handleEvent
+// See the W3C DOM-Level 2 spec.  This method allows us
+// to use the addEventHandler method as documented in the spec.
+// With this function, a CategorySink object can be used
+// where an EventListener interface is expected.
+CategorySink.prototype.handleEvent = function(evt)
+{
+	this.in_progress = 1;
+	// Disable the category drop-down so we can avoid the category being changed before
+	// the list of properties is ready.
+	var elem = this.form.elements["SET.category"];
+	var elementNameValue;
+	if (typeof elem == "object" && elem != null && elem.value.length>0)	{
+		elementNameValue = "+SET.category=";
+		if (elem.type == "select")
+			elementNameValue += elem.options[elem.selectedIndex].value;
+		else
+			elementNameValue += elem.value;
+	}
+	else
+	{
+		elem = this.form.elements["KEY.category"];
+		if (typeof elem == "object" && elem != null && typeof elem.value != "undefined") {
+			var esc_elem_value = nx_escape(elem.value);
+			var modified_elem_value = esc_elem_value.replace(/\+/,"%2B"); // replace + with %2B
+			elementNameValue = "+KEY.category=" + modified_elem_value;
+		}
+	}
+
+	// Make the properties disappear...
+	if (_browser.supportsLayers) 
+		document.layers["prop_layer"].visibility = "hide";
+	else
+		document.getElementById("tblProperties").style.display = "none";
+
+	// Load the properties into the workframe and set a callback function.
+	var url = cfgCgi +
+ "?SID=" + this.SID +
+ "+FID=" + this.FID +
+ "+OP=UPDATE" +
+ "+change_category=1" +
+ "+IS_NOT_SAVE=1" +
+ "+FACTORY=" + this.factory +
+ elementNameValue +
+ "+HTMPL=load_properties.htmpl" +
+ "+SELF_SERVICE=1" +
+ "+SERVICE_CST=" + cstID +
+ "+IS_HIER=1";
+
+ ahdframeset.workframe.document.location.replace(url);
+}
+
+// CategorySink.updateFID
+// This function sets the active FID for the form.
+CategorySink.prototype.updateFID = function(fid)
+{
+	this.form.elements["FID"].value = fid;
+}
+
+// CategorySink.clearProperties
+// This function clears the properties stored in the CategorySink
+// and also releases the rows in the properties table.
+CategorySink.prototype.clearProperties = function()
+{
+	if (_browser.supportsLayers == false)
+	{
+		// Clean up the table.
+		var t = document.getElementById("tblProperties");
+		for (var e = t.rows.length; e > 0; e--)
+			t.deleteRow(0);
+
+    var t = document.getElementById("tblPropertiesPanel");
+    for (var e = t.rows.length; e > 0; e--)
+      t.deleteRow(0);
+
+    if ( typeof this.properties == "object" &&
+      this.original_properties == null )
+      this.original_properties = this.properties;
+  }
+
+  this.properties = new Array();
+}
+
+// CategorySink.addProperty
+// This function adds a property to the list of properties held
+// in the CategorySink.
+CategorySink.prototype.addProperty = function(id, required, label, value, sample, desc, type, options, isCalendar, isTime, isSection, isTextArea, InputWidth, isLookup, LookupFactory, isHTML, targetObj, targetObjvalue, isNumber)
+{
+  // alert("1: " + id + " 2: " + required+ " 3: " + label+ " 4: " + value+ " 5: " + sample+ " 6: " + desc+ " 7: " + type+ " 8: " + options+ " 9: " + isCalendar+ " 10: " + isTime+ " 11: " + isSection+ " 12: " + isTextArea+ " 13: " + InputWidth+ " 14: " + isLookup+ " 15: " + LookupFactory+ " 16: " + isHTML+ " 17: Target / " + targetObj+ " 18: Value / " + targetObjvalue);
+  rxLt = new RegExp("&lt;", "gi");
+  rxGt = new RegExp("&gt;", "gi");
+  label = nx_unescape(label.replace(rxLt,"<").replace(rxGt,">"));
+  value = nx_unescape(value.replace(rxLt,"<").replace(rxGt,">"));
+  sample = nx_unescape(sample.replace(rxLt,"<").replace(rxGt,">"));
+//    options = nx_unescape(options.replace(rxLt,"<").replace(rxGt,">"));
+var p = new Property(id, required, label, value, sample, desc, type, options, isCalendar, isTime, isSection, isTextArea, InputWidth, isLookup, LookupFactory, isHTML, targetObj, targetObjvalue, isNumber);
+this.properties[this.properties.length] = p;
+}
+
+// CategorySink.showProperties
+// This function runs through the list of properties in the CategorySink,
+// creates rows in the properties table for them, and makes the table
+// visible.
+CategorySink.prototype.showProperties = function()
+{
+  var disabledElements = [];
+  var e;
+
+  if (_browser.supportsLayers)
+  {
+    var layer = document.layers["prop_layer"];
+
+    var out = "<form name='prop_form'><table>";
+
+    for (e = 0; e < this.properties.length; e++)
+      out += "<tr>" +
+    "<td class='" + (this.properties[e].required == true ? "required" : "") + "labeltext'>" +
+    this.properties[e].label +
+    "</td>" +
+    "<td><input type='text' name='SET.prop" + String(e) + ".value'></td>" +
+    "<td>" + this.properties[e].sample + "</td>" +
+    "</tr>";
+
+    out += "</table></form>";
+
+    layer.document.write(out);
+    layer.document.close();
+
+    // Populate the element attribute of the Property object...
+    var prop_layer = document.layers["prop_layer"];
+    var prop_form = prop_layer.document.forms["prop_form"];
+    for (e = 0; e < this.properties.length; e++)
+    {
+      var id = "SET.prop" + String(e) + ".value";
+      prop_form.elements[id].value = this.properties[e].value;
+      this.properties[e].element = prop_form.elements[id];
+    }
+
+    layer.visibility = "show";
+  }
+  else
+  {
+    // var t = document.getElementById("tblPropertiesPanel");
+    // t.setAttribute("width", "100%");
+    var tb = document.createElement("TBODY");
+
+    if(jq('#tblPropertiesPanel').find('TBODY').length == 0) {
+      t.appendChild(tb);
+    }
+    else 
+    {
+      tb = jq('#tblPropertiesPanel').find('TBODY').get(0);
+    }
+
+    var tr, td, i, s, o, img, a;
+    for (e = 0; e < this.properties.length; e++)
+    {
+      var prop = this.properties[e];
+      detailNextID(true);
+
+      tr = document.createElement("tr");
+      tb.appendChild(tr);
+      td = document.createElement("td");
+      td.setAttribute("align", "left");
+      tr.appendChild(td);
+      var label = prop.label;
+      detailSetValidate( msgtext("Property_%1",label), prop.required, 240, "", true );
+      if ( ! prop.required ) {
+        //td.className = "labeltext";
+      } else {
+        //td.className = "requiredlabeltext";
+        label += ahdtop.cfgIndRequired;
+      }
+
+      if(prop.isHTML == "1") {
+        var cols = 2;
+        if (typeof prop.sample == "string" && prop.sample.length > 0) cols = 3;
+
+        var ntr = document.createElement("tr");
+        var ntd = document.createElement("td");
+        ntd.setAttribute("width", "100%");
+        ntd.setAttribute("colSpan", cols);
+
+        ntd.innerHTML = prop.desc;
+
+        ntr.appendChild(ntd);
+        tb.appendChild(ntr);
+  
+      } else if (prop.isSection == "1") {
+        var cols = 2;
+        if (typeof prop.sample == "string" && prop.sample.length > 0) cols = 3;
+
+        var ntr = document.createElement("tr");
+        var ntd = document.createElement("td");
+        ntd.setAttribute("width", "100%");
+        ntd.setAttribute("colSpan", cols);
+
+        ntd.innerHTML = '<table cellspacing="0" class="dtl_page_hdr_container" style="cursor: default; width: 100%;"><tbody><tr><td style="width:4px;height:22px;" class="page_section_header_left dtl_page_hdr_container" style="cursor: default;"><img src="/CAisd/img/spacer.png" style="width:4px;height:22px" alt=""></td><td class="page_section_header_center dtl_page_hdr_container" style="cursor: default;"><span class="page_section_header_text_hs" style="display:block; cursor: default;">' + prop.label + '</span></td><td style="width:4px;height:22px" class="page_section_header_right dtl_page_hdr_container"  style="cursor: default;"><img src="/CAisd/img/spacer.png" style="width:4px;height:22px" alt=""></td></tr></tbody></table>';
+
+        ntr.appendChild(ntd);
+        tb.appendChild(ntr);
+
+      } else {
+// 20131028 bmalz @ e-xim {
+        
+        var labelDiv = document.createElement("div");
+        if(!prop.required)
+          labelDiv.className = "labeltext";
+        else
+          labelDiv.className = "requiredlabeltext";
+        labelDiv.appendChild(document.createTextNode(label));
+        td.appendChild(labelDiv);
+
+        var newDiv = document.createElement("div");
+        var newTable = document.createElement("table");
+        var newTableBody = document.createElement("tbody")
+        var newRow = document.createElement("tr");
+        var newCol = document.createElement("td");
+        newDiv.appendChild(newTable);
+        newTable.appendChild(newTableBody);
+        newTableBody.appendChild(newRow);
+        newRow.appendChild(newCol);
+        newCol.setAttribute("align", "left");
+
+        td.appendChild(newDiv);
+        
+
+        if ( typeof prop.type == "string" && prop.type == "SELECT" ) 
+        {
+          s = document.createElement("select");
+          s.name = "SET.prop" + String(e) + ".value";
+          s.id = _dtl.currID;
+          s.tabIndex = _dtl.tabIndex;
+
+          var option_data = prop.options.split("@,@");
+          var j, k;
+          k = 0;
+          s.options[k]= new Option( "<" + msgtext("empty") + ">", "", false, false);
+          k++;
+          // Will now go through all values in dropdown list
+          for ( j = 1; j < option_data.length; j += 2 )
+          {
+            // If this is first time creating and there is a default value set 
+            // in validation rule, we will set the selection to default value. 
+            // Otherwise, the dropdown value will be set to database value
+            if ( option_data[j-1] == "1" && ( prop.value == "" || prop.value == null ) && (!prop.required))
+            { 
+              s.options[k] = new Option( option_data[j], option_data[j], true, true);
+              s.selectedIndex = k; 
+            }
+            else
+            {
+              if ( prop.value == option_data[j] )
+              {
+                s.options[k] = new Option( option_data[j], option_data[j], true, true);
+                s.selectedIndex = k; 
+              }
+              else
+                s.options[k] = new Option( option_data[j], option_data[j], false, false);
+            }
+            k++;
+          }
+          prop.element = s;
+          s.title = label;
+
+          var onChg;
+          if(prop.targetObj != "" && prop.targetObjvalue != "") {
+            onChg = 'ChangeObjectState(this, "' + prop.targetObj + '", "' + prop.targetObjvalue + '", "SELECT");';
+            disabledElements.push(prop.targetObj);
+          }
+
+          s.onchange = new Function(onChg);
+          // var jq_s = jq(s);
+          // jq_s.change(function() {
+          //   if(jq(this).val() != prop.targetObjvalue) {
+          //     jq("[name=" + prop.targetObj + "]").attr("disabled", true);
+          //   } else {
+          //     jq("[name=" + prop.targetObj + "]").attr("disabled", false);
+          //   }
+          // });
+
+          newCol.appendChild(s);
+        }
+        else
+        {
+          // This section is for both CHECKBOX and free form text
+
+          // Now start CHECKBOX processing
+          if ( typeof prop.type == "string" && prop.type == "CHECKBOX" )
+          {
+            i = document.createElement("input");
+            i.id = _dtl.currID;
+            i.tabIndex = _dtl.tabIndex;
+            i.onfocus = propertyFocus;
+            i.onblur = propertyBlur;
+            i.setAttribute('type','checkbox');
+            i.name = "PCB." + String(e) + ".value";                
+            newCol.appendChild(i);
+
+            var checked = "";
+            o = document.createElement("input");
+            o.name = "SET.prop" + String(e) + ".value";
+            o.id = "SET.prop" + String(e) + ".value";
+            o.type = "hidden"; 
+            newCol.appendChild(o);
+
+            if ( prop.value == "" || prop.value == null )
+            {
+              prop.value = "No";   // default to No if there is no value
+
+              // i.setAttribute('checked','true');
+              o.value = prop.value;
+              // label += checked;                  
+            }
+            else
+            {
+              if ( prop.value.toLowerCase() == "yes" )
+              {
+                i.setAttribute('checked','true');
+                label += checked;
+              }
+              else
+              {
+                i.checked = false;
+              }
+              o.value = prop.value; 
+            }
+
+            var onC = "detailSetPcbFlag(this)";
+            if(prop.targetObj != "" && prop.targetObjvalue != "") {
+              onC = 'ChangeObjectState(this, "' + prop.targetObj + '", "' + prop.targetObjvalue + '", "CHECKBOX");';
+              disabledElements.push(prop.targetObj);
+            }
+
+            i.onclick = new Function(onC);
+
+
+          }
+          else
+          {
+            if(prop.isLookup == "1") {
+              var LookupString;
+              if(prop.LookupFactory == "cnt") {
+                LookupString = "<table><tr style=\"vertical-align:top!important\"><td style=\"font-family:Verdana, Arial, helvetica, sans-serif;color:#333333;font-size: 0.6em;\" ><input type=\"radio\" name=\"prop" + String(e) +".userrb\" value=\"lookup\" checked onclick=\"SetDisplay('prop" + String(e) + ".customuserboxname','none');SetDisplay('prop" + String(e) + ".value_combo_name','inline');SetDisplay('prop" + String(e) + ".value_lookup_name','inline');ClearUserData('prop" + String(e) + ".customuserboxid','SET.prop" + String(e) + ".value');\">Użytkownik SDM</input></td></tr><tr><td><a id=\"prop" + String(e) + ".value_lookup_name\" name=\"prop" + String(e) + ".value_lookup_name\" href=\"javascript:lookForUserCstCat('prop" + String(e) + ".value', 'main_form', 'cnt','' )\" title=\"Wybierz użytkownika\"><img class=\"dtl_img_attr\" src=\"/CAisd/img/lookup.gif\" alt=\"Wybierz  \" style=\"margin-left:10px;\"><span class=\"lookup\">Wybierz użytkownika</span></a></td></tr>";
+                LookupString += "<tr><td><input id=\"prop" + String(e) + ".value_ID_combo_name\" name=\"prop" + String(e) + ".value_combo_name\" type=\"text\" size=\"18\" onchange=\"cleanUser('prop" + String(e) + ".value'); if (this.value != '') {lookForUserCstCat('" + _dtl.currID + "', 'main_form', 'cnt','');}\" style=\"margin-left:10px;\"><input type=\"hidden\" id=\"SET.prop" + String(e) + ".value\" name=\"SET.prop" + String(e) + ".value\"><input type=\"hidden\" id=\"KEY.prop" + String(e) + ".value\" name=\"KEY.prop" + String(e) + ".value\"><input type=\"hidden\" id=\"prop" + String(e) + ".value_lname\" name=\"prop" + String(e) + ".value_lname\"><input type=\"hidden\" id=\"prop" + String(e) + ".value_fname\" name=\"prop" + String(e) + ".value_fname\"><input type=\"hidden\" id=\"prop" + String(e) + ".value_mname\" name=\"prop" + String(e) + ".value_mname\"></td></tr><tr><td style=\"font-family:Verdana, Arial, helvetica, sans-serif;color:#333333;font-size: 0.6em;\"><input type=\"radio\" name=\"prop" + String(e) +".userrb\" value=\"notlookup\" onclick=\"SetDisplay('prop" + String(e) + ".value_combo_name','none');SetDisplay('prop" + String(e) + ".value_lookup_name','none');SetDisplay('prop" + String(e) + ".customuserboxname','inline');SetChecked('prop" + String(e) + ".customuserboxname','false');ClearUserData('prop" + String(e) + ".value_ID_combo_name','SET.prop" + String(e) + ".value');\">Użytkownik dowolny</input><td></tr><tr><td><textarea rows=\"3\" cols=\"50\" id=\"prop" + String(e) + ".customuserboxid\" name=\"prop" + String(e) + ".customuserboxname\" style=\"display:none;margin-left:10px;\" onchange=\"SetUserData('prop" + String(e) + ".customuserboxid','SET.prop" + String(e) + ".value');\" ></textarea></td></tr></table>";
+              } else {
+                LookupString = "<table><tr><td><a id=\"link_" + _dtl.currID + "\" tabindex=\"-1\" onfocus=\"return detailFocus(this);\" onblur=\"return detailBlur(this);\" href=\"javascript:void(0)\" onclick=\"popup_search('" + prop.LookupFactory + "','SET.prop" + String(e) + ".value','main_form', '',0,'name')\" title='Pokaż okno wyboru' onmouseover=\"window.status='Otwórz okno wyboru';return true\" onmouseout=\"window.status=window.defaultStatus;return true\"><img class=\"dtl_img_attr\" src=\"/CAisd/img/lookup.gif\" alt=\"Pokaż okno wyboru\">&nbsp;<span class=\"lookup\" id=\"req_" + _dtl.currID + "\" scope=\"col\"><label for=\"df_11_0\">Wybierz element</label></span></a></td></tr>";
+                LookupString += "<tr><td><input id=\"" + _dtl.currID + "\" pdmqa=\"" + String(e) + "\" tabindex=\"" + _dtl.tabIndex + "\" onfocus=\"return detailFocus(this);\" onblur=\"detailBlur(this);\" onchange=\"detailAutofill(this,'" + prop.LookupFactory + "',false,'name',false,'');\" type=\"text\" value size=\"20\" name=\"SET.prop" + String(e) + ".value\" autocomplete=\"off\" role=\"textbox\" aria-autocomplete=\"list\" aria-haspopup=\"true\"></td></tr></table>";
+              }
+
+              i = document.createElement("span");
+              i.innerHTML = LookupString;
+              newCol.appendChild(i);
+            } else {
+              // 20131029 bmalz @ e-xim
+              if(prop.isTextArea == '1') {
+                i = document.createElement("textarea");
+                i.rows = "4";
+
+                if(prop.InputWidth != "") {
+                  i.cols = prop.InputWidth;
+                } else {
+                  i.cols = "80";
+                }
+                
+                i.id = _dtl.currID;
+                i.tabIndex = _dtl.tabIndex;
+                i.onfocus = propertyFocus;
+                i.onblur = propertyBlur;
+                i.name = "SET.prop" + String(e) + ".value";
+                i.value = prop.value;
+                td.appendChild(i);
+              } else {
+                var inputstring;
+                if(prop.InputWidth != "")
+                {
+                  if(!prop.isNumber) {
+                    inputstring = '<input id="' + _dtl.currID + '" tabindex="' + _dtl.tabIndex + '" name="SET.prop' + String(e) + '.value" title="'+ prop.value + '" size="' + prop.InputWidth + '">';
+                  }
+                  else {
+                    inputstring = "<input id=\"" + _dtl.currID + "\" tabindex=\"" + _dtl.tabIndex + "\" name=\"SET.prop" + String(e) + ".value\" title=\""+ prop.value + "\" size=\"" + prop.InputWidth + "\" onchange=\"validateNumber('" + _dtl.currID + "');\">";
+                  }
+                }
+                else 
+                {
+                  if(!prop.isNumber) {
+                    inputstring = '<input id="' + _dtl.currID + '" tabindex="' + _dtl.tabIndex + '" name="SET.prop' + String(e) + '.value" title="'+ prop.value + '">';
+                  }
+                  else {
+                    inputstring = "<input id=\"" + _dtl.currID + "\" tabindex=\"" + _dtl.tabIndex + "\" name=\"SET.prop" + String(e) + ".value\" title=\""+ prop.value + "\" onchange=\"validateNumber('" + _dtl.currID + "');\">";
+
+                  }
+                }
+
+
+                i = document.createElement("span");
+                i.innerHTML = inputstring;
+
+                newCol.appendChild(i);
+              }
+
+              // 20130927 bmalz @ e-xim
+              if(prop.isCalendar == '1') {
+                var hasTime = "";
+
+                if (prop.isTime == 0)
+                  hasTime = ",'no'";
+
+                a = document.createElement("a");
+                a.setAttribute("href", "javascript:popup_date_helper('main_form','SET.prop" + String(e) + ".value'" + hasTime + ");");
+                a.setAttribute("style", "border: 0px;");
+
+                var imgCalendar = '<img src="/CAisd/sitemods/img/calendar.png" style="border: 0px; padding-left: 3px;">';
+
+                var span = document.createElement("span");
+                span.innerHTML = imgCalendar;
+
+                a.appendChild(span);
+                newCol.appendChild(a);
+              }
+            }
+          }
+          prop.element = i;
+          i.title = label;
+        }
+
+        if (typeof prop.sample == "string" && prop.sample.length > 0 && prop.isHTML != "1")
+        {
+          // 20130830 bmalz @ e-xim : Added <
+          //tr = document.createElement("tr");
+          //tb.appendChild(tr);
+          // >
+
+          // Extra blank spaces follows the input field on MAC, so put  
+          // the example together with the input field to work around 
+          // the problem.
+          if (!_browser.isMAC)
+          {
+/*            td = document.createElement("td");
+            newCol.appendChild(td);
+            td.align = "left";  // 20130830 bmalz @ e-xim : Changed from "right"
+            td.className="labeltext";*/
+          }
+            td = document.createElement("td");
+            newCol.appendChild(td);
+            td.align = "left"; 
+            td.className="labeltext";
+            var txt = "(np. " + String(prop.sample) + ")"; // 20130830 bmalz @ e-xim : Changed from "i.e."
+            td.appendChild(document.createTextNode(txt));
+        } else if (_browser.isMAC) {
+          td.appendChild(document.createTextNode(" "));
+        }
+
+          // 20131018 bmalz @ e-xim
+          if(typeof prop.desc == "string" && prop.desc.length > 0  && prop.isHTML != "1")
+          {
+            var cols = 3;
+
+            var ntr = document.createElement("tr");
+            var ntd = document.createElement("td");
+            ntd.setAttribute("colSpan", cols);
+            ntd.innerHTML = prop.desc;
+            ntr.appendChild(ntd);
+            tb.appendChild(ntr);
+          }
+        }
+
+        //t.style.display = "";
+    }
+
+    this.in_progress = 0;
+
+    for(var i=0; i<disabledElements.length; i++) {
+      jq('*[name="' + disabledElements[i] + '"]').attr("disabled", true);
+    }
+
+  	// 20130909 bmalz @ e-xim
+  	if (typeof SendForChgFlag == 'function')
+  		SendForChgFlag();
+  }
+}
+
+function ChangeObjectState(thisobj, obj, objvalue, type)
+{
+  if(type == "CHECKBOX") {
+    SetDisability(String(thisobj.checked), obj, String(objvalue));
+    detailSetPcbFlag(thisobj);
+  } else if (type == "SELECT") {
+    SetDisability(String(thisobj.value), obj, String(objvalue));
+  }
+}
+
+
+function validateNumber(inputId)
+{
+  if(typeof document.getElementById(inputId) != "undefined") {
+    var value = document.getElementById(inputId).value;
+    if(isNaN(value))
+    {
+      detailReportValidation(document.getElementById(inputId), 1, "Niepoprawny format liczby");
+    }
+    else
+    {
+      detailReportValidation(document.getElementById(inputId), 0);
+    }
+  }
+}
+
+
+// function test(event)
+// {
+//     var charCode = (event.which) ? event.which : event.keyCode;
+//     var input = document.getElementById(event.srcElement.id);
+//     if(charCode > 31 && (charCode < 48 || charCode > 57))
+//     {
+//         if(input.value.length < 1)
+//         {
+//           input.value = 'aaaa';
+//           event.cancel = true;
+//         }
+//         else
+//         {
+
+//         }
+//     }
+//     else
+//     {
+
+//     }
+    
+// }
+
+function SetDisplay(obj, value)
+{
+  jq('*[name="' + obj + '"]').css("display", value);
+}
+
+function SetChecked(radiobtn, value)
+{
+  jq('*[name="' + radiobtn + '"]').attr('checked',value);
+}
+
+function ClearUserData(field, hiddenInput)
+{
+  var f = document.getElementById(field);
+  f.value = '';
+  var p = document.getElementById(hiddenInput);
+  p.value = '';
+}
+
+function SetUserData(field, hiddenInput)
+{
+  var f = document.getElementById(field);
+  var p = document.getElementById(hiddenInput);
+  p.value = f.value;
+}
+
+function SetDisability(source, target, value) {
+  if(source != value) {
+    jq('*[name="' + target + '"]').attr("disabled", true);
+  } else {
+    jq('*[name="' + target + '"]').attr("disabled", false);
+  }
+}
+
+function lookForUserCstCat( lookupName, frameName, factory, extraURL )
+  {
+    var e = document.getElementById(lookupName + "_lookup_name");
+    if (e != null && !e.disabled)
+    {
+      fill_name_fields( document.forms[frameName], factory, lookupName, true, extraURL );
+    }
+  }
+
+function propertyFocus()
+{
+  detailFocus(this);
+}
+
+function propertyBlur()
+{
+  detailBlur(this);
+}
+
+// CategorySink.resetProperties()
+//    Reset properties to their original value
+CategorySink.prototype.resetProperties = function()
+{
+ this.clearProperties();
+   // if ( this.original_properties != null )
+   //    this.properties = this.original_properties;
+   this.showProperties();
+ }
+
+ function save_requested(form_name, op, action, replace)
+ {
+
+  if (typeof sink != "undefined" && 
+   sink.in_progress)
+  {
+   alertmsg("Currently_adding_property_fiel");
+   return;
+ }
+ make_string_for_submit();
+ pdm_submit(form_name, op, action, replace);
+}
+
+CategorySink.prototype.show_error = function(err_msg)
+{
+  var am_obj = document.getElementById("alertmsg");
+  if ( typeof err_msg == "string" && err_msg.length > 0 ) {
+   var e = document.getElementById("alertmsgText");
+   if ( typeof e == "object" && e != null ) {
+    e.innerHTML = err_msg;
+    am_obj.style.display = "block";
+    adjScrollDivHeight();
+    alert(err_msg);
+    var elem = this.form.elements["SET.category"];
+    if ((typeof elem == "object") && 
+      (elem.type != "select"))
+      elem.value = "";
+  }
+}
+else
+{
+	am_obj.style.display = "none";
+  adjScrollDivHeight();
+} 
+
+}
+
+// Update the category field on the form
+CategorySink.prototype.update_ss_cat_field = function(cat_sym, cat_rel_attr)
+{
+	var elem_set_cat = this.form.elements["SET.category"];
+	if (typeof elem_set_cat == "object")
+	{
+		elem_set_cat.value = cat_rel_attr;
+	}
+
+	var elem_key_cat = this.form.elements["KEY.category"];
+	if (typeof elem_key_cat == "object")
+	{
+		elem_key_cat.value = cat_sym;
+	}
+}

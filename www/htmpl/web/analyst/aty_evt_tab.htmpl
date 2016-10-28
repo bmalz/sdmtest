@@ -1,0 +1,164 @@
+<PDM_IF 0>
+aty_evt_tab.htmpl
+INTENT:
+    Display Events notebook page for Activity Notification page.
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=aty_evt_tab+KEEP.obj_type=$args.KEEP.obj_type" factory=aty>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+
+<script type="text/javascript">
+var hold_obj_type_text = '$args.KEEP.obj_type';
+var hold_obj_type;
+var evt_list;
+var event_flag=false;
+
+//
+// This function converts the string value of '1' or the boolean value of 'true' to 
+// the integer value of 1 and returns the value. Any other value is converted to 0 and 
+// returned. Although this could be dynamically done in JavaScript, we explicitly perform  
+// it to ensure we preserve previous code functionality. This is a fix for SCO27957.
+//
+function convert_to_integer(flag)
+{
+    if(flag == '1' || flag == true)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+if(hold_obj_type_text == '')
+	hold_obj_type_text = 'Requests/Incidents/Problems';
+if(hold_obj_type_text == 'Requests' || hold_obj_type_text == 'Requests/Incidents/Problems')
+{
+    hold_obj_type = 'cr';
+    evt_list = 'cr_events';
+    event_flag = convert_to_integer('$args.cr_flag.enum');
+}
+else if(hold_obj_type_text == 'Change Orders')
+{
+    hold_obj_type = 'chg';
+    evt_list = 'chg_events';
+    event_flag = convert_to_integer('$args.chg_flag.enum');
+}
+else if(hold_obj_type_text == 'Configuration Items')
+{
+    hold_obj_type = 'nr';
+    evt_list = 'ci_events';
+    event_flag = convert_to_integer('$args.ci_flag.enum');
+}
+else if(hold_obj_type_text == 'Contacts')
+{
+    hold_obj_type = 'cnt';
+    evt_list = 'cnt_events';
+    event_flag = convert_to_integer('$args.cnt_flag.enum');
+}
+else if(hold_obj_type_text == 'Issues')
+{
+    hold_obj_type = 'iss';
+    evt_list = 'iss_events';
+    event_flag = convert_to_integer('$args.iss_flag.enum');
+}
+else if(hold_obj_type_text == 'Managed Surveys')
+{
+    hold_obj_type = 'mgs';
+    evt_list = 'mgs_events';
+    event_flag = convert_to_integer('$args.mgs_flag.enum');
+}
+else if(hold_obj_type_text == 'Task')
+{
+    hold_obj_type = 'ztask';
+    evt_list = 'ztask_events';
+    event_flag = convert_to_integer('$args.ztask_flag.enum');
+}
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+   
+<PDM_MACRO name=btnStartRow>
+   if(event_flag) {
+      
+<PDM_MACRO name=button caption="Update Events" func="do_update_lrel_aty_evt()" hotkey_name="Update Events" id=UPDATE_LREL>
+   }
+   else {
+      
+<PDM_MACRO name=button caption="Update Events" disabled="yes" func="do_update_lrel_aty_evt()" hotkey_name="Update Events" id=UPDATE_LREL>
+   }
+   
+<PDM_MACRO name=btnEndRow>
+}
+function do_update_lrel_aty_evt() {
+   update_lrel_aty_evt('aty', '$args.persistent_id', 'evt', evt_list,  
+                       'Events Available', 'Events Selected', 
+                       '', hold_obj_type, hold_obj_type_text)
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=tabBanner title="Events" add_btns=true show_bar=false> 
+
+if(hold_obj_type == 'cr')
+{
+   
+<PDM_MACRO name=dtlStartRow class="tab">
+<PDM_MACRO name=tabList btntitle="Load Event List." height=300 src="OP=SEARCH+FACTORY=evt+QBE.EQ.cr_notifs.aty.code=$args.code+QBE.EQ.delete_flag=0+KEEP.forAtyEvtList=1+KEEP.noCreateBtn=1+KEEP.evt_obj_type=cr">
+}
+else if(hold_obj_type == 'chg')
+{
+   
+<PDM_MACRO name=dtlStartRow class="tab">
+<PDM_MACRO name=tabList btntitle="Load Event List." height=300 src="OP=SEARCH+FACTORY=evt+QBE.EQ.chg_notifs.aty.code=$args.code+QBE.EQ.delete_flag=0+KEEP.forAtyEvtList=1+KEEP.noCreateBtn=1+KEEP.evt_obj_type=chg">
+}
+else if(hold_obj_type == 'nr')
+{
+   
+<PDM_MACRO name=dtlStartRow class="tab">
+<PDM_MACRO name=tabList btntitle="Load Event List." height=300 src="OP=SEARCH+FACTORY=evt+QBE.EQ.ci_notifs.aty.code=$args.code+QBE.EQ.delete_flag=0+KEEP.forAtyEvtList=1+KEEP.noCreateBtn=1+KEEP.evt_obj_type=nr">
+}
+else if(hold_obj_type == 'cnt')
+{
+   
+<PDM_MACRO name=dtlStartRow class="tab">
+<PDM_MACRO name=tabList btntitle="Load Event List." height=300 src="OP=SEARCH+FACTORY=evt+QBE.EQ.cnt_notifs.aty.code=$args.code+QBE.EQ.delete_flag=0+KEEP.forAtyEvtList=1+KEEP.noCreateBtn=1+KEEP.evt_obj_type=cnt">
+
+}
+else if(hold_obj_type == 'iss')
+{
+   
+<PDM_MACRO name=dtlStartRow class="tab">
+<PDM_MACRO name=tabList btntitle="Load Event List." height=300 src="OP=SEARCH+FACTORY=evt+QBE.EQ.iss_notifs.aty.code=$args.code+QBE.EQ.delete_flag=0+KEEP.forAtyEvtList=1+KEEP.noCreateBtn=1+KEEP.evt_obj_type=iss">
+}
+else if(hold_obj_type == 'ztask')
+{
+   
+<PDM_MACRO name=dtlStartRow class="tab">
+<PDM_MACRO name=tabList btntitle="Load Event List." height=300 src="OP=SEARCH+FACTORY=evt+QBE.EQ.iss_notifs.aty.code=$args.code+QBE.EQ.delete_flag=0+KEEP.forAtyEvtList=1+KEEP.noCreateBtn=1+KEEP.evt_obj_type=ztask">
+}
+else if(hold_obj_type == 'mgs')
+{
+   
+<PDM_MACRO name=dtlStartRow class="tab">
+<PDM_MACRO name=tabList btntitle="Load Event List." height=300 src="OP=SEARCH+FACTORY=evt+QBE.EQ.mgs_notifs.aty.code=$args.code+QBE.EQ.delete_flag=0+KEEP.forAtyEvtList=1+KEEP.noCreateBtn=1+KEEP.evt_obj_type=mgs">
+}
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+"@(#)$Id: aty_evt_tab.htmpl ASPEN.1 2010/11/18 10:01:57 ralje02 Exp $";
+</PDM_IF>

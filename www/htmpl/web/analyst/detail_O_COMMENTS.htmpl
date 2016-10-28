@@ -1,0 +1,186 @@
+<PDM_IF 0>
+detail_O_COMMENTS.htmpl
+WHEN PRESENTED:
+    When we need to display a list of comment in Knowledge Document Editor
+INTENT:
+    Display the list of comment in Knowledge Document Editor
+VARIABLES:
+    
+    object  O_COMMENTS  args	The Comments object we are displaying.
+                        See $NX_ROOT/site/mods/majic/kt.mod : OBJECT O_COMMENTS
+						for the definition of attributes for 'OBJECT o_comments'
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.id" == "0">
+	var hdrTitleNew = "Create New Comment for Document $args.DOC_ID";
+<PDM_ELSE>
+	<PDM_IF "$prop.form_name_3" == "edit">
+		var hdrTitle = "Update Comment for Document $args.DOC_ID";
+		var hdrTitleUpd = "Update Comment for Document $args.DOC_ID";
+	<PDM_ELSE>
+		var hdrTitle = "View Comment for Document $args.DOC_ID";
+	</PDM_IF>
+</PDM_IF>
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+var argID = "$args.id";
+var sOpener = "$args.KEEP.OPENER";
+function HideShowFormElements()
+{
+	<PDM_IF "$env.NX_KT" != "Yes">
+	    return;
+	</PDM_IF>
+	var e = document.getElementById("df_1_0");
+	if (e)
+	{
+		//disable form elements if comment has no followup
+		<PDM_LIST PREFIX=list FACTORY=KT_FLG_TYPE WHERE="delete_flag=0">
+			var sFlagSym = "$list.SYM";
+			var bHasFollowUp = "$list.FOLLOW_UP";
+			var vTableHeaders = document.body.getElementsByTagName("TH");
+			if(sFlagSym == e.options[e.selectedIndex].text && bHasFollowUp == 0)
+			{
+				//assignee anchor
+				document.getElementById("dflnk_2_0").style.display = "none";
+				//assignee
+				document.getElementById("df_2_0").style.display = "none";
+				//target date anchor
+				document.getElementById("dflnk_2_1").style.display = "none";
+				//target date
+				document.getElementById("df_2_1").style.display = "none";
+				//reply
+				document.getElementById("df_4_0").style.display = "none";
+				for(var i=0; i<vTableHeaders.length;i++)
+				{
+					if(vTableHeaders[i].innerHTML == "Reply&nbsp;&nbsp;&nbsp;")
+					{
+						vTableHeaders[i].style.display = "none";
+					}	
+				}
+				return;
+			}
+			else
+			{
+				//assignee anchor
+				document.getElementById("dflnk_2_0").style.display = "";
+				//assignee
+				document.getElementById("df_2_0").style.display = "";
+				//target date anchor
+				document.getElementById("dflnk_2_1").style.display = "";
+				//target date
+				document.getElementById("df_2_1").style.display = "";
+				//reply
+				document.getElementById("df_4_0").style.display = "";
+				for(var i=0; i<vTableHeaders.length;i++)
+				{
+					if(vTableHeaders[i].innerHTML == "Reply&nbsp;&nbsp;&nbsp;")
+					{
+						vTableHeaders[i].style.display = "";
+					}	
+					
+				}
+				return;
+			}
+		</PDM_LIST>	
+	}
+}
+
+function window_onload()
+{
+	// Current status should be chosen by default in the selection
+	var slctStatus = document.getElementsByName("SET.FLG_STATUS")[0];
+	if ( typeof slctStatus == "object" )
+	{
+		slctStatus.value = $args.FLG_STATUS;
+	}
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/timer.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attevts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT>
+_bHideTenantSelection = true;//Inherit the tenant from the KD / User
+
+function setTenants()
+{
+	<PDM_IF "$prop.MultiTenancy" != "off">
+		detailSetTenant( "", '${cst.userid.tenant:}', '<PDM_FMT ESC_STYLE=C>${cst.userid.tenant.name:}</PDM_FMT>' );
+	</PDM_IF>
+}
+
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload();setTenants();">
+<CENTER>
+<PDM_INCLUDE FILE=std_body.htmpl filename="o_comments" header=no>
+<SCRIPT>
+<PDM_MACRO name=dtlForm factory=O_COMMENTS>
+<PDM_MACRO name=dtlStart>
+<PDM_IF DOC_ID.id > 0>
+		
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="ID dokumentu" attr=DOC_ID.id>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł dokumentu" attr=DOC_ID.TITLE>
+</PDM_IF>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.id" == "0">
+			detailSetEventHandler("onChange='HideShowFormElements()'");
+			
+<PDM_MACRO name=dtlDropdown hdr="Typ komentarza" attr=FLG_TYPE factory="KT_FLG_TYPE" lookup="no" make_required="yes" whereclause="delete_flag=0">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ komentarza" attr=FLG_TYPE>
+</PDM_IF>
+<PDM_IF "$args.FLG_TYPE.FOLLOW_UP" == "1" && "$args.id" != "0">
+<PDM_IF "$prop.form_name_3" == "edit">
+				detailDropdown("Status", "FLG_STATUS","KT_FLG_STATUS", 1, 20,
+				true, "", "2", "no", "", "",
+				"", "", "no", "","",""
+					<PDM_LIST PREFIX=list WHERE="id=2 OR id=3" FACTORY=KT_FLG_STATUS>
+					<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);
+			
+<PDM_ELSE>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr=FLG_STATUS>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$args.FLG_TYPE.FOLLOW_UP" == "1" || "$args.id" == "0">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Przypisany" attr="ASSIGNEE" factory="cnt">
+<PDM_MACRO name=dtlDate hdr="Data docelowa" attr=DEADLINE_DATE>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr=COMMENT_TEXT colspan=3 rows=3 size=75>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_IF "$args.FLG_TYPE.FOLLOW_UP" == "1" || "$args.id" == "0">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Odpowiedź" attr=CLOSE_DESC colspan=3 rows=3 size=75>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

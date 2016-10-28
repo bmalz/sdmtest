@@ -1,0 +1,635 @@
+<PDM_IF 0>
+wfdef.htmpl
+WHEN PRESENTED:
+    When we need to display a list of workflow definitions from CA Workflow
+INTENT:
+    Display the info of all workflow definitions 
+VARIABLES:
+    Array	defArr			string array contains info of a list of workflow definition      
+                        	returned by PDM_RPC.
+	string	cawf_defid		the definition id.             
+	string	cawf_defname	the definition name.             
+	string	description		the description.             
+	string	active			the active flag(Y/N).             
+	Date	dateEffective 	the effective date.             
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<pdm_wsp preview=no>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<script LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"CA Workflow Definition List"</PDM_FMT>;
+var hdrTitleList = "CA Workflow Definition List";
+//var window_name = get_next_window_name();
+</script>
+
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/backfill.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/resultset.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+var colHeading = new Array;
+
+colHeading [0] = "Name";
+colHeading [1] = "Definition ID";
+colHeading [2] = "Description";
+colHeading [3] = "Active";
+colHeading [4] = "Effective Date";
+colHeading [5] = "Expiration Date";
+colHeading [6] = "In Use";
+
+for (var i = 0; i < colHeading.length; i++)
+{
+    colHeading[i] = colHeading[i].replace(/&#39;/g, "'");
+}
+
+var cawf_defid;
+var cawf_defname;
+var msgFound1 = "1 definition found";
+var msgFoundNone = "No definitions found";
+var propFormName = "wfdef.htmpl";
+
+</SCRIPT>
+</HEAD>
+<body CLASS="list" onload="build_W3C_body()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Workflow Definition" >
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<!-- 'msg_error' is a response from INVOKE_SOAP op -->
+<pdm_if "$args.msg_error" == "0">
+<script>
+
+var ahdtop = get_ahdtop(true);
+var argBackfillField = '${args.KEEP.backfill_field:}';
+var argBackfillForm = '${args.KEEP.backfill_form:}';
+
+//web service results returned from PDM_RPC
+$args.MSG_0
+
+var defnArray = new Array;
+var dateEffective;
+var dateExpire;
+var active;
+var description
+var _chgFlag = null;
+
+var i, j;
+var inuse;
+j = defArr.length;
+
+
+for (i=0; i<j; i++)
+{
+var defObj = defArr[i];
+var verStuff = defObj.version;
+
+var date0 = verStuff["version-expiration"];
+
+if(date0 != 0)
+	dateExpire = date_to_string(parseInt(verStuff["version-expiration"]/1000,10), false);
+else
+	dateExpire = "";
+		
+dateEffective = date_to_string(parseInt(verStuff["version-effective"]/1000,10), false);  
+
+inuse = defObj.inuse;
+if(inuse == "null")
+	inuse = "";
+
+defnArray [i] = new Array(defObj.name,defObj.attributes.id,defObj.description,verStuff["version-active"],
+	dateEffective,dateExpire,inuse);
+}
+
+recordCount = defnArray.length;
+
+var _id;
+var _rawId = null;
+var _pages = 0;
+var _chgFlag = null;
+var _cellZero = null;
+var _tableStyle="align:center;width:100%";
+var pagelength = 10;  
+var colLength = colHeading.length;
+var highlightedRow;
+var current_page=0;
+var _current_table;
+var	last_page=parseInt(recordCount/pagelength,10) - 1;
+var remainder = recordCount%pagelength;
+if(remainder > 0) last_page += 1;
+
+cfgRecordCount = recordCount;
+cfgLength = pagelength;
+cfgTotal = last_page;
+cfgStart = 0;
+cfgCurrent = 1;
+
+document.onmousedown = buttonDown;
+
+function build_W3C_body() {
+
+	var listDiv = document.getElementById('wfListDiv');
+	buildDataTable(listDiv, defnArray, _tableStyle, colHeading, pagelength, 0);
+	buildEndTable(listDiv, _tableStyle);
+
+}
+
+
+function highlightRow(event) {
+
+	if (typeof event == "undefined") return;
+
+	tmp = (ahdtop._browser.isNS) ? event.target.getAttribute("id") : event.srcElement.id;
+	
+	var oldHighlightRow = highlightedRow;
+	
+	if(tmp.substring(0,1) == "_" || ! tmp) return;
+	
+	
+	for(j = 0; j < colLength ; j++) {
+		i = parseInt(highlightedRow,10);
+		if(i%2 == 1){
+			document.getElementById(i+''+j).className = "results";
+		}
+		else{
+			var elem=document.getElementById(i+''+j);
+			if(elem != undefined){
+				document.getElementById(i+''+j).className = "results";
+			}
+		}
+	}
+	
+	if(tmp == "up")
+		buttonColor(tmp,"cdfff6","blue", "wf_sel_button");
+	if(tmp == "down")
+		buttonColor(tmp,"cdfff6","blue", "wf_sel_button");
+	if(parseInt(tmp,10) >= 0) {
+		buttonColor(tmp,"#DDDDDD","black", "wf_sel_cell");
+		//table.style.backgroundColor="black";
+		getRowNumber(tmp);
+		for(j = 0; j < colLength ; j++) {
+			i = parseInt(highlightedRow,10);  
+			document.getElementById(i+''+j).className = "resultsSel results";
+		}
+	}
+	
+}
+
+function buttonDown(e) {
+
+	if( ((ahdtop._browser.isNS) ? e.which : event.button) != 1) {
+		return true;
+	}
+	
+	tmp = (ahdtop._browser.isNS) ? e.target.getAttribute("id") : event.srcElement.id;
+	if(! tmp){
+		if (ahdtop._browser.isNS) {
+			
+					if ((navigator.userAgent.toLowerCase().indexOf("macintosh"))<0)
+						{						
+						 disable_right_click_handler(e);
+						}
+
+		} else {
+			disable_right_click_handler(event);
+		}
+		return true;
+	}
+	
+	if(parseInt(tmp,10) || tmp == "00") {	
+		if (ahdtop._browser.isNS) {
+			highlightRow(e); 
+		} else {
+			highlightRow(event); 
+		}
+	}
+	
+}
+
+// Performs the backfill.
+function doSelection(rowId) {
+
+	if(parseInt(rowId,10) || rowId == "00") {	
+		getRowValue(rowId);
+		changeRow();
+	}
+
+}
+
+function buttonColor(id,backColor,fontColor, className) {
+	document.getElementById(id).className = className;
+} 
+
+function scrollDown() {
+
+	if ( (pagelength * (current_page+1)) > recordCount ) {
+		return;
+	}
+	
+	current_page++;
+	var countText = buildCountHeading();
+	document.getElementById("_count01").innerHTML=countText;
+	document.getElementById("_count02").innerHTML=countText;
+
+	var listDiv = document.getElementById('wfListDiv');
+	buildDataTable(listDiv, defnArray, _tableStyle, colHeading, pagelength, current_page);
+	return;
+	
+} 
+
+function scrollUp() {
+
+	if (current_page > 0) {
+		current_page--;
+	    var listDiv = document.getElementById('wfListDiv');
+		buildDataTable(listDiv, defnArray, _tableStyle, colHeading, pagelength, current_page);
+		var countText = buildCountHeading();
+		document.getElementById("_count01").innerHTML=countText;
+		document.getElementById("_count02").innerHTML=countText;	
+	}
+
+	return;
+}
+
+function listAll() {
+
+	current_page = 0;
+	pagelength = recordCount + 1;
+	var listDiv = document.getElementById('wfListDiv');
+	buildDataTable(listDiv, defnArray, _tableStyle, colHeading, pagelength, current_page);
+	var countText = buildCountHeading();
+	document.getElementById("_count01").innerHTML=countText;
+	document.getElementById("_count02").innerHTML=countText;
+
+}
+
+function scrollBottom() {
+	
+	if (current_page != last_page) {
+		current_page = last_page;
+	    var listDiv = document.getElementById('wfListDiv');
+		buildDataTable(listDiv, defnArray, _tableStyle, colHeading, pagelength, current_page);
+		var countText = buildCountHeading();
+		document.getElementById("_count01").innerHTML=countText;
+		document.getElementById("_count02").innerHTML=countText;	
+	}
+} 
+
+function scrollTop() {
+
+	if (current_page > 0) {
+		current_page = 0;
+	    var listDiv = document.getElementById('wfListDiv');
+		buildDataTable(listDiv, defnArray, _tableStyle, colHeading, pagelength, current_page);
+		var countText = buildCountHeading();
+		document.getElementById("_count01").innerHTML=countText;
+		document.getElementById("_count02").innerHTML=countText;	
+	}
+
+}
+
+
+function buildDataTable(appendToId, defnArray, style, header, pagelength, pageNum) {
+
+	table = document.createElement("TABLE");
+	table.className = "table";
+	table.setAttribute("WIDTH","100%");
+    table.summary = "C A workflow definition list";
+	t = style.split(";");
+	for(i = 0; i < t.length;) {
+		f = t[i++].split(":");
+		x = "table."+f[0]+"='"+f[1]+"'";
+		eval(x);
+	}
+	var row_count = 0
+	tablebody = document.createElement("TBODY");
+	row = document.createElement("TR");
+		
+	for(var i = 0; i < header.length; i++) {
+		cell = document.createElement("TH");
+		cell.className = "results";
+        cell.scope = "col";
+		//set header row properties
+		if(i == 3)
+		{
+			cell.setAttribute("width","5%");
+		}
+		else 
+		{
+			cell.setAttribute("width","18%");
+		}
+		cell.appendChild(document.createTextNode(header[i]));
+		row.appendChild(cell);
+	}
+	tablebody.appendChild(row);
+	
+	
+	var startIdx = pagelength * pageNum;
+
+	var end;
+	if ((startIdx + pagelength) > recordCount) {
+		end = recordCount;
+	} else {
+		end = startIdx + pagelength;
+	}
+		
+	for (var i = startIdx; i < end; i++) {
+	
+		row = document.createElement("TR");
+        row.className = "results" + (i % 2);
+		for (j = 0; j < header.length; j++) {
+		
+			cell = document.createElement("TD");
+			cell.setAttribute("id",i+''+j);
+			cell.setAttribute("VALIGN","TOP");
+			cell.className = "results";
+				
+			var txt = defnArray[i][j];
+			var aChild;
+			
+			if (0 == j) {
+				// It's the first column - make the text a link
+				var myid = i+''+j;
+				
+				aChild = document.createElement("A");
+				aChild.setAttribute("href", "javascript:doSelection('" + myid + "');");
+				aChild.appendChild(document.createTextNode(txt));
+				
+			} else {
+				aChild = document.createTextNode(txt);
+			}
+			
+			cell.appendChild(aChild);
+			row.appendChild(cell);
+		}
+		
+		tablebody.appendChild(row);
+	}
+	
+	table.appendChild(tablebody);
+	
+	if (typeof _current_table != "undefined" && _current_table != null) {
+		appendToId.replaceChild(table, _current_table);
+	} else {
+		appendToId.appendChild(table);
+	}
+	_current_table = table;
+	
+	_chgFlag = null;
+}
+
+function changeRow() {
+	if(! _id) return;
+	p = (_pages * pagelength);
+	_cellZero = document.getElementById(_id+0).firstChild.nodeValue;
+	for(i = 0; i < document.form0.length; i++) {
+		if(document.getElementById(_id+i).firstChild.nodeValue != document.form0.elements[i].value && i > 0) {
+			_chgFlag=true;
+		}		
+	}
+         
+        var win;
+        
+        if( typeof window.parent == "object")
+           win=window.parent;
+        else
+           win=window;
+       
+        var parent=win.opener;
+
+        if(parent.propFormName == "detail_macro.htmpl")
+        {
+             argBackfillField="SET.usr_string1";
+             backfill(cawf_defid,"","");
+             argBackfillField = "SET.cawf_defname";
+             backfill(cawf_defname,"","");
+	     argBackfillField = "SET.cawf_desc";
+	     backfill(description,"","");
+	     argBackfillField = "SET.cawf_active";
+	     backfill(active,"","");
+
+        }
+        else
+        {
+	     backfill(cawf_defid,"","");
+	     argBackfillField = "SET.cawf_defname";
+	     backfill(cawf_defname,"","");
+	     argBackfillField = "SET.cawf_desc";
+	     backfill(description,"","");
+	     argBackfillField = "SET.cawf_active";
+	     backfill(active,"","");
+        }
+	_id = 0;
+	window.close();
+}
+
+function getRowNumber(x) {
+	_rawId = x;
+	_id = x.substring(0,x.length-1);
+	highlightedRow = _id;
+}
+
+
+function getRowValue(x) {
+	
+	if (typeof x == "number") {
+		x = '' + x;
+	}
+	_rawId = x;
+	_id = x.substring(0,x.length-1);
+	for(i = 0; i < document.form0.length; i++) {
+	
+		if (0 == i) {
+			// a bit hokey; this is an anchor element - see buildDataTable() 
+			document.form0.elements[i].value = document.getElementById(_id+i).firstChild.firstChild.nodeValue;
+		} else {
+			document.form0.elements[i].value = document.getElementById(_id+i).firstChild.nodeValue;
+		}
+	}
+	
+	
+	cawf_defid = document.form0.elements[1].value;
+	cawf_defname = document.form0.elements[0].value;
+	description = document.form0.elements[2].value;
+	active = document.form0.elements[3].value;
+	dateEffective = document.form0.elements[4].value;
+}
+
+var actKeyTop = "";
+var actKeyUp = "";
+var actKeyDown = "";
+var actKeyBottom = "";
+var actKeyListAll = "";
+function buildCountHeading(){
+	
+	var msg = '<span class=table_navigation_text>';
+	if (recordCount <= pagelength) {
+		msg += msgtext("%1_Records_Found", '' + recordCount);
+	} else {
+
+		var begin = pagelength * current_page + 1;
+		var end = pagelength * (current_page + 1);
+		
+		if (end >= recordCount) {
+			end = recordCount;	
+		}
+		
+		msg += msgtext("%1-%2_of_%3", '' + begin, '' + end, '' + recordCount);
+	}
+	msg += '</span>';
+	
+    var linkClass = "table_navigation_arrows";
+    var top = ""; // Top
+	var prev = ""; // Prev
+	var next = ""; // Next
+	var bottom = ""; // Bottom
+    var listall = "";  
+
+  	if ( end <= recordCount && recordCount > pagelength )
+	{	
+		if (begin > 1)
+		{
+            if ( ahdtop.cstUsingScreenReader ) {
+              top = msgtext("Top"); // "Top"
+              prev = msgtext("Prev"); // "Prev"
+              linkClass = "table_navigation_listall";
+            }
+            else {
+              top = "<u>(</u>&laquo;"; // "<<"
+              prev = "<u>&#139;</u>"; // "<"
+              if ( actKeyTop == "" )
+                actKeyTop = registerActionKey("(", "(", scrollTop);
+              if ( actKeyUp == "" )
+                actKeyUp = registerActionKey("<", "<", scrollUp);
+            }
+			top = '<a class=' + linkClass + ' title="' +
+                  msgtext("Top") + // "Top"
+                  '" href="JavaScript:scrollTop(0);">\n' + top + "</a>\n";
+			prev = '<a class=' + linkClass + ' title="' +
+                   msgtext("Prev") + // "Prev"
+                   '" href="JavaScript:scrollUp();">\n' + prev + "</a>\n";
+		}
+	
+		if (end < recordCount)
+		{
+            if ( ahdtop.cstUsingScreenReader ) {
+              next = msgtext("Next"); // "Next"
+              linkClass = "table_navigation_listall";
+            }
+            else {
+              next = "<u>&#155;</u>"; // ">"<U>
+              if ( actKeyDown == "" )
+                actKeyDown = registerActionKey(">", ">", scrollDown);
+            }
+			next = '<a class=' + linkClass + ' title="' +
+                   msgtext("Next") + // "next"
+                   '" href="JavaScript:scrollDown();">\n' + next + "</a>\n";
+            if ( ahdtop.cstUsingScreenReader )
+              bottom = msgtext("Bottom"); // "Bottom"
+            else {
+              bottom = "&raquo;<u>)</u>"; // ">>"
+              if ( actKeyBottom == "" )
+                actKeyBottom = registerActionKey(")", ")", scrollBottom);
+            }
+            bottom = '<a class=' + linkClass + ' title="' +
+                     msgtext("Bottom") + // "Bottom"
+                     '" href="JavaScript:scrollBottom();">\n' + bottom + "</a>\n";
+		}
+        if ( actKeyListAll == "" )
+	{
+	  var caption = msgtext("List_All");
+	  var caption_loc = "List All";
+	  if (!nonLatinFlag)
+	    caption_loc = caption;
+          actKeyListAll = registerActionKey("L", caption_loc, listAll);
+	}
+        listall = fmtLabelWithActkey( msgtext("List_All"), actKeyListAll ); 
+        listall = '<a class=table_navigation_listall title="' +
+                  msgtext("List_All") + // "List All"
+                  '" href="JavaScript:listAll();">\n' +
+                  listall + "</a>\n";
+	}
+
+   	
+	msg = top + prev + " " + msg + " " + next + bottom + " " + listall;
+	
+	return msg;
+}
+
+function buildEndTable(appendToId, style) {
+	table = document.createElement("TABLE");
+	table.setAttribute("WIDTH","100%");
+	
+	t = style.split(";");
+	for(i = 0; i < t.length;) {
+		f = t[i++].split(":");
+		x = "table."+f[0]+"='"+f[1]+"'";
+		eval(x);
+	}
+	var tablebody = document.createElement("TBODY");
+	row = document.createElement("TR");
+	cell = document.createElement("TD");
+	cell.setAttribute("id","_count02");
+	cell.setAttribute("align","right");
+	cell.setAttribute("class","table_navigation");
+	cell.innerHTML = buildCountHeading();
+	row.appendChild(cell);
+	tablebody.appendChild(row);
+	table.appendChild(tablebody);
+	appendToId.appendChild(table);
+}
+
+   // CA UI standard table header 
+   var out  = "<table width='100%' cellspacing='0' cellpadding='0' class=page_header>";
+   out += "<tr>";
+   out += "<h2 class=page_header style='margin:0px;'>" + form_title + "</h2>";
+   out += "</tr>";
+   out += "</table>";
+   docWriteln(out );
+
+
+//display table headings
+	
+   	docWriteln("<TABLE WIDTH='100%' CELLPADDING=0 CELLSPACING=0>");
+	docWriteln("<TR>");
+	docWriteln('<TD ID="_count01" ALIGN=RIGHT class="table_navigation"> ');
+	docWriteln(buildCountHeading());
+  	docWriteln("</TD>");
+	docWriteln("</TR>");
+   	docWriteln("</TABLE>");   	
+
+//display selected row elements
+
+	document.write('<center>');
+	document.write('<form name="form0">');
+	document.write('<input type="hidden" name="Name" value="">');
+	document.write('<input type="hidden" name="ID" value="">');
+	document.write('<input type="hidden" name="Description" value="">');
+	document.write('<input type="hidden" name="Active" value="">');
+	document.write('<input type="hidden" name="Effective" value="">');
+	document.write('<input type="hidden" name="Expiration" value="">');
+	document.write('<input type="hidden" name="InUse" value="">');
+	document.write('</form>');
+	document.write('</center>');
+    document.write("<div id='wfListDiv'></div>");
+
+</script>
+<pdm_else>
+<script>show_response(msgtext("There_is_a_problem_accessing_C", '<PDM_FMT PAD=NO ESC_STYLE=C>$args.ERROR_MSG</pdm_fmt>'));</script>
+</pdm_if>
+
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: wfdef.htmpl ASPEN.3 2012/04/03 17:30:10 pitva01 Exp $
+</PDM_IF>

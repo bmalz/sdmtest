@@ -1,0 +1,13 @@
+<PDM_IF 0>
+detail_tel_othx.htmpl
+Purpose:
+    Display the detail of a Telecom.Other CI.
+    See cmdb_detail.htmpl for  more details.
+
+History:
+       22-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<PDM_INCLUDE FILE="cmdb_detail.htmpl"   extension="tel_othx">
+
+<PDM_WSP where="family.extension_name='tel_othx'" factory=nr design=no>

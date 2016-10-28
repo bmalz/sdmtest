@@ -1,0 +1,155 @@
+<PDM_IF 0>
+help_about_prod.htmpl
+WHEN PRESENTED:
+    When the user requests help about the application
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+
+<script LANGUAGE="JavaScript" src="$CAisd/scripts/window_manager.js"></script>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<title>About CA Service Desk Manager</title>
+<script LANGUAGE="JavaScript">
+var cfgCAISD = "$CAisd";
+var propBusy = "$prop.busy";
+var propFormRelease = "$prop.release" - 0;
+if (propFormRelease < 60)
+    propBusy= "no";
+std_head_setup(propBusy,"$args.KEEP.ForLrel");
+</script>
+<PDM_INCLUDE FILE=ahdtop.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/imgbutton.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/window_manager.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script>
+disable_right_click();
+activateActionKeys();
+var propFormName = "$prop.form_name";
+var propFormName1 = "$prop.form_name_1";
+var propFormName3 = "$prop.form_name_3";
+function unload_and_close_win()
+{
+    window.close();
+}
+
+function si_click(op)
+{
+    var si_info = document.getElementById("si_info");
+    var si_down = document.getElementById("si_down");
+    var si_up = document.getElementById("si_up");
+    if ((typeof si_info == "undefined") ||
+	(typeof si_down == "undefined") ||
+	(typeof si_up == "undefined"))
+    {
+	alert("unable to find si object");
+	return;
+    }
+    if (op == "down")
+    {
+	si_down.style.display = "none";
+	si_up.style.display = "block";
+	si_info.style.display = "block";
+    }
+    else
+    if (op == "up")
+    {
+	si_down.style.display = "block";
+	si_up.style.display = "none";
+	si_info.style.display = "none";
+    }
+}
+</script>
+</head>
+
+
+<PDM_IF $args.KEEP.tabId == "1">
+	<body class="table" style='padding: 5px; font-size: 1.1em;'>
+	    <span class="label">Release: </span><span class="data">r12.7<br><br></span>
+	    <span class="label">Version: </span><span class="data">'asp-871'<br><br></span>
+	    <span class="label">This product is licensed to: </span><span class="data">$prop.LIC_ORG<br><br></span>
+	    <span class="label">SITE ID: </span><span class="data">$prop.LIC_SITEID<br><br></span>
+	    <span class="data">All trademarks, trade names, service marks and logos referenced herein belong to their respective companies.<br><br></span>
+	    <span class="data">Warning: This computer program is protected by copyright law and international treaties. Unauthorized reproduction or distribution of this program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.<br><br></span>
+	
+<PDM_ELIF $args.KEEP.tabId == "2">
+	<body class="table" style='padding: 5px; font-size: 1.1em;'>
+	    <SPAN class=data>Contact Technical Support<BR>for assistance at </SPAN><A TARGET=support title="Contact C A technical support" HREF="http://ca.com/supportconnect"><SPAN class=datalink>http://ca.com/supportconnect</SPAN></A><SPAN class=data>.<BR><BR></SPAN>
+	    <SPAN class=data>For telephone assistance,<BR></SPAN><SPAN class=data>call +1 800 225-5224 (U.S. and Canada)<BR>or +1 303 262-8300 (International).<BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR></SPAN>
+<PDM_ELIF $args.KEEP.tabId == "3">
+	<body class="table" style='padding: 5px; font-size: 1.1em;'>
+		<span class="data">
+			<script language="JavaScript">
+			document.writeln("The Sentry Spelling-Checker Engine Copyright &copy 2000 Wintertree Software Inc.");
+			document.writeln(formatmsg("<br>This product includes code licensed from %1", "RSA Security, Inc."));
+			document.writeln(formatmsg("<br>Some portions licensed from %1 are available at %2<br>", "IBM", "http://oss.software.ibm.com/icu4j/"));
+			</script>
+		</span>
+<PDM_ELIF $args.KEEP.tabId == "4">
+	<body class="table" style='padding: 5px; font-size: 1.1em;'>
+		<span class="data">&nbsp;</span>
+<PDM_ELSE>
+	<body>
+<div>
+<table class="gn_width_100pct gn_container_no_border" cellspacing="0" cellpadding="0">
+<tr>
+    <td width="100%">
+	<script language="JavaScript">
+		  document.writeln(generate_basic_form_header_html());
+	</script>
+    </td>
+</tr>
+</table>
+</div>
+<script type="text/javascript">
+	<PDM_MACRO NAME=dtlForm skiphdr=yes>
+	<PDM_MACRO NAME=dtlStart>
+</script>
+	<PDM_MACRO name=startNotebook hdr="about_nb">
+
+
+	<PDM_MACRO name=TAB title="Product Specifications"  ID=prodspecs SRC="OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=help_about.htmpl+KEEP.tabId=1" height=200>
+	
+	<PDM_MACRO name=TAB title="Technical Support"  ID=techsupp SRC="OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=help_about.htmpl+KEEP.tabId=2" height=200>
+	
+	<PDM_MACRO name=TAB title="Third Party Notices"  ID=tpnotices SRC="OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=help_about.htmpl+KEEP.tabId=3" height=200>
+	
+	<PDM_MACRO name=TAB title="System Information"  ID=sysinfo SRC="OP=DISPLAY_FORM+SID=$SESSION.SID+FID=123+HTMPL=help_about.htmpl+KEEP.tabId=4" height=200>
+
+
+	<PDM_MACRO name=endNotebook>
+	<PDM_MACRO NAME=dtlEnd>
+    <table cellspacing="0" cellpadding="0" width="90%" class="page_header gn_container_no_border">
+	<tr height="25">
+	    <td align="left" width="99%"></td>
+	    <td align="right" width="1%">
+		<script language="JavaScript">
+		<PDM_MACRO NAME=button caption="Close" id=btn001 func="unload_and_close_win()" 
+                           hotkey_name="Close" width=70 EndRow=yes NewRow=yes>
+		</script>
+	    </td>
+	</tr>
+    </table>
+<img src="$CAisd/img/blue.png" width="90%" height="1" class="gn_container_no_border" alt="">
+<div align="center">
+<table width="99%" cellspacing="0" cellpadding="0" class="gn_container_no_border">
+  <tr>
+    <td width="72%" valign="middle" nowrap align="center">
+      <div align="left"><span class="footer_text">Copyright &copy; $env.NX_COPYRIGHT_YEAR CA. All rights reserved.</span></div>
+    </td>
+  </tr>
+</table>
+</div>
+</PDM_IF>
+
+<script>
+<PDM_IF "$prop.DebugSource" != "1">
+disable_right_click()
+</PDM_IF>
+	show_tab_src(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	When we need to display a list of Behavior Templates
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Behavior Template Search";
+var hdrTitleList = "Behavior Template List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var cfgCanView = false;
+var cfgCanEdit = false;
+var argTaskNameHTML = "";
+var argTaskNameShowBhvtpl = "";
+if (typeof parent != "undefined") {
+   if (typeof parent.argTaskNameHTML == "string") {
+      argTaskNameHTML = parent.argTaskNameHTML;
+   }
+   if (typeof parent.argTaskNameShowBhvtpl == "string") {
+      argTaskNameShowBhvtpl = parent.argTaskNameShowBhvtpl;
+   }
+}
+var enableExtraBtn = false;
+<PDM_IF "$args.KEEP.WFTPL_ID" != "0" && $ACCESS.FAC_wftpl \> 1 && $ACCESS.FAC_bhvtpl \> 1>
+    enableExtraBtn = true;
+</PDM_IF>
+cfgExtraButton = new Array("Add_Behavior", "AddBehavior()", enableExtraBtn);
+function AddBehavior() {
+   add_bhvtpl_wftpl("wftpl:$args.KEEP.WFTPL_ID" , argTaskNameHTML ,"$args.KEEP.WFTPL_TYPE");
+}
+
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/nr_ops.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Behavior Template">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart button=false export=no factory=bhvtpl>
+document.write('<input type="hidden" name="QBE.EQ.context_type" value="$args.QBE.EQ.context_type">');
+document.write('<input type="hidden" name="QBE.EQ.object_id" value="$args.QBE.EQ.object_id">');
+
+<PDM_MACRO name=sfEnd>
+
+var msgFoundNone = "No behavior templates found";
+var msgFound1 = "1 behavior template found";
+var msgFound = "%1 behavior templates found";
+var msgFoundMore = "%1 behavior templates found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired behavior template";
+
+function doView(persid) {
+   showDetailWithPersidKeep(persid, 'tsk_name', nx_escape(argTaskNameShowBhvtpl));
+}
+
+function resultSetCustomContextAddBegin(ctxMenu) {
+<PDM_IF $ACCESS.FAC_bhvtpl \> 0>
+   ctxMenu.addItem(msgtext("View"),"doView(self.activePersid)" );
+</PDM_IF>
+<PDM_IF "$args.KEEP.IS_EDIT" != "edit" && $ACCESS.FAC_wftpl \> 1 && $ACCESS.FAC_bhvtpl \> 1>
+   ctxMenu.addItem(msgtext("Delete"),"delete_wftplbhvtpl('wftpl:$args.KEEP.WFTPL_ID', self.activePersid)");
+</PDM_IF>
+}
+
+function showBhvtplStatus(value)
+{
+    var val_str = "<a class='record' href=\"javascript:showDetailWithPersidKeep('" + 
+		  bhvtpl_persid + "', 'tsk_name', nx_escape(argTaskNameHTML))\">" + value + "&nbsp</a>";
+    rs.data(val_str);
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="bhvtpl_persid = '@{list.persistent_id}';">
+<PDM_MACRO name=lsCol hdr="Status" attr=context_common_name fmtfunc=showBhvtplStatus link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Warunek" attr=macro_condition>
+<PDM_MACRO name=lsCol hdr="Warunek przejścia" attr=transition_test>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_bhvtpl.htmpl ASPEN.2 2011/10/19 17:59:26 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

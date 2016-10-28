@@ -1,0 +1,161 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of the notification rule
+</PDM_IF>
+
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Szczegóły Notification Rule $args.sym"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Aktualizowanie Notification Rule $args.sym"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Tworzenie Notification Rule $args.sym"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>   
+<script type="text/javascript" src="$CAisd/scripts/date_helper.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+var pass_val_to_menubar ="$args.obj_type";
+function copy_from_parent()
+{}
+var autoRefreshWindows = new Object();
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+
+   cancel_any_lrel_update();
+}
+</script>
+
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Notification Rule" key="$args.sym">
+<center>
+<script type="text/javascript">
+
+// create new form. Hidden field STAY_EDIT is used to stay on the edit screen after hitting save&continue
+// button on the create new
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" == "initial">
+<PDM_MACRO name=dtlForm button=false factory=ntfr>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button Caption="Zapisz i kontynuuj" Func="detailSave()" hotkey_name="Zapisz i kontynuuj" ID="btn001" Width=0>
+<PDM_MACRO name=button Caption="Anuluj[n]" btnType="negative" Func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Anuluj[n]" ID="btncncl" Width=120>
+<PDM_MACRO name=button Caption="Resetuj[r]" Func="pdm_reset()" hotkey_name="Resetuj[r]" ID="btn004" Width=120>
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+	docWriteln("<input type='hidden' name=\"STAY_EDIT\" value=\"1\">");
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Znak" attr="sym" size=80>	
+	detailDropdown("Typ obiektu","obj_type","ntfr_prod_list",1,20, 
+		"1","","$args.obj_type","yes","name","","","","no","0","","",
+		"Request/Incident/Problem","cr",
+		"Change Order","chg",
+		"Issue","iss",
+		"Knowledge Document","KD",
+		"Knowledge Document Comment","O_COMMENTS",
+		"Knowledge Report Card","KT_REPORT_CARD",
+		"Assistance Session","sa_notif",
+        "Contact","cnt",
+        "Configuration Item","nr",
+		"Task","ztask"
+);
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlEndTable>
+<PDM_ELSE>	// edit form presented after create new screen. RO form also uses the code below
+<PDM_MACRO name=dtlForm factory=ntfr>
+<PDM_MACRO name=dtlStart>
+	docWriteln("<input type='hidden' name=\"STAY_EDIT\" value=\"0\">");	
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Znak" attr="sym" size=80>
+<PDM_IF "$args.obj_type" == "cr">
+		detailTextboxReadonly("Object Type","obj_type",1,
+							  "Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=obj_type>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF $args.default_rule == 1>
+<PDM_MACRO name=dtlReadonly hdr="Warunek" attr=condition>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="Warunek" attr=condition extraurl="ADDITIONAL_WHERE=(type='COND_SITE' OR type='COND') AND (ob_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1" size=60>
+</PDM_IF>
+	if ("$args.obj_type" == "cr")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=cr_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>   
+	else if ("$args.obj_type" == "chg")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=chg_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>    
+	else if ("$args.obj_type" == "iss")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=iss_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>    
+	else if ("$args.obj_type" == "KD")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=kd_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>      
+	else if ("$args.obj_type" == "mgs")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=mgs_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>  
+	else if ("$args.obj_type" == "O_COMMENTS")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=kd_comment_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>  	
+	else if ("$args.obj_type" == "KT_REPORT_CARD")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=krc_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>  	
+	else if ("$args.obj_type" == "sa_notif")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=sa_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>  	
+    else if ("$args.obj_type" == "cnt")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=cnt_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>
+    else if ("$args.obj_type" == "nr")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=ci_notify_info colspan=2 extraurl="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>
+ else if ("$args.obj_type" == "ztask")
+	
+<PDM_MACRO name=dtlLookup hdr="Szablon wiadomości" attr=ztask_notify_info colspan=2 extraURL="ADDITIONAL_WHERE=(obj_type='$args.obj_type')+KEEP.RESTRICT_FROM_NTFR=1+KEEP.obj_type=$args.obj_type+KEEP.obj_type_sym=$args.obj_type.name" make_required="yes" size=60>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</PDM_IF>
+
+
+</script>
+
+<PDM_IF "$Context" != "initial">
+<PDM_MACRO name=startNotebook hdr="ntfr_nb">
+<PDM_MACRO name=TAB title="Object Contacts" height=300 id=ntfr_ntfl src="OP=SEARCH+FACTORY=ntfl+QBE.EQ.att_ntfrlist.ntfr.id=$dob.id+KEEP.forNtfrToNtfl=1+KEEP.NTFR_PERSID=$args.persistent_id+KEEP.NTFR_ID=$args.id+QBE.EQ.delete_flag=0+KEEP.obj_type=$args.obj_type">
+<PDM_MACRO name=TAB title="Contacts" height=300 id=ntfr_cnt src="OP=SEARCH+FACTORY=cnt+QBE.EQ.att_ntfrlist.ntfr.id=$dob.id+KEEP.forNtfrToCnt=1+KEEP.NTFR_PERSID=$args.persistent_id+KEEP.NTFR_ID=$args.id+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=TAB title="Contact Types" height=300 id=ntfr_ctp src="OP=SEARCH+FACTORY=ctp+QBE.EQ.att_ntfrlist.ntfr.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forNtfrToCtp=1+KEEP.NTFR_PERSID=$args.persistent_id+KEEP.NTFR_ID=$args.id">
+<PDM_MACRO name=TAB title="Related Activity Notifications" src="OP=SEARCH+HTMPL=ntfr_aty_tab.htmpl+FACTORY=lrel_ntfr_macrolist_att_ntfrlist+QBE.EQ.ntfr=$args.id+KEEP.DISPLAY_FROM=$args.obj_type">
+<PDM_MACRO name=endNotebook>
+</PDM_IF>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP mode=edit>
+
+<PDM_IF 0>
+"@(#)$Id: detail_ntfr.htmpl ASPEN.6 2010/11/17 23:42:16 saima01 Exp $";
+</PDM_IF>

@@ -1,0 +1,86 @@
+<PDM_IF 0>
+list_sa_security_group_localized.htmpl
+WHEN PRESENTED:
+    When we need to display a list of SA Security Localized Levels  (sa_security_group_localized factory)
+INTENT:
+    Display the list of Localized Security Levels
+</PDM_IF>
+<HTML lang="en">
+	<HEAD>
+		<PDM_PRAGMA RELEASE=110>
+		<PDM_INCLUDE FILE=styles.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			var hdrTitle = "Localized Privacy Levels Search";
+			var hdrTitleList = "Localized Privacy Levels";
+			var cfgCanEdit = true;
+		</SCRIPT>
+		<PDM_INCLUDE FILE=std_head.htmpl >
+		<PDM_INCLUDE FILE=std_list_include.htmpl>
+		<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"/>
+
+	</HEAD>
+	<BODY CLASS="list">
+		<PDM_INCLUDE FILE=std_body.htmpl>
+		<SCRIPT LANGUAGE="JavaScript">
+			
+<PDM_MACRO name=sfStart button=false create=false factory="sa_security_group_loc">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Lokalizacja" attr="localizationID" size=40>
+<PDM_MACRO name=sfTextbox hdr="Nazwa lokalizowana" attr="groupName">
+<PDM_MACRO name=sfTextbox hdr="Opis lokalizowany" attr="description">
+<PDM_MACRO name=sfEnd>
+			var edit_field_count = 0;
+		</SCRIPT>
+		<PDM_FORM NAME="frmFID">
+		</PDM_FORM>
+		
+		
+<PDM_IF "$args.KEEP.PAGE_CREATE_MODE" == 0 >
+	
+    	<TABLE align=center cellpading=0>
+          <TH class=labeltext>Privacy Level needs to be saved before Localized strings can be set</TH>
+      </TABLE>
+
+		
+</PDM_IF>
+<PDM_IF "${current:n/a}" != "n/a">
+  			<script language="JavaScript">
+  			  <pdm_jscript file=list_edit.js>
+
+				  startListEdit(__search_filter);
+				  listEditStartRow();
+				  listEditReadonly("localizationID");
+				  listEditField("groupName");
+				  listEditField("description");
+				  listEditEndRow();
+				  endListEdit();
+
+  				var msgFoundNone = "No Enabled Localizations found";
+ 	 			var msgFound1 = "1 Localized Privacy Level found";
+  				var msgFound = "%1 Localized Privacy Levels found";
+  				var msgFoundMore = "%1 Localized Privacy Levels found.  Displaying %2 through %3";
+  				var msgSelect = "Click to select desired Localized Privacy Level";
+  				
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Lokalizacja" attr="localizationID" exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Nazwa lokalizowana" attr="groupName" link="no">
+<PDM_MACRO name=lsCol hdr="Opis lokalizowany" attr="description" link="no">
+<PDM_MACRO name=lsEnd>
+
+                                ctxMenu = void(0);
+  				
+  				
+<PDM_IF "$args.KEEP.PAGE_CREATE_MODE" == 0 >			
+  				  ImgBtnEnableButton("btnEdit", false);
+  	      
+</PDM_IF>
+  			</script>
+		
+</PDM_IF>
+		
+		
+		
+		<PDM_INCLUDE FILE="std_footer.htmpl">
+	</BODY>
+</HTML>
+<PDM_WSP>

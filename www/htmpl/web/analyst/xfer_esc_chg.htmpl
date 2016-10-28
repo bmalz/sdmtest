@@ -1,0 +1,143 @@
+<PDM_IF 0>
+xfer_esc_chg.htmpl
+WHEN PRESENTED:
+    When the app needs input to create an activity log for Transfer or Escalate.  
+INTENT:
+    Capture user input for a new Activity Log, create an Activity Log and
+    update Change Order when submitted.
+VARIABLES:
+                            See $NX_ROOT/bopcfg/majic/cm.maj for the
+                            definition of attributes for 'OBJECT chgalg'
+    int   	logged_in   A flag to say we have a user login object.
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "ESC" == "$args.chgalg.type">
+form_title = "Escalate Change $args.chg_ref_num";
+<PDM_ELSE>
+form_title = "Transfer Change $args.chg_ref_num";
+var escalate_title = "Escalate Change $args.chg_ref_num";
+function switch_to_escalate()
+{
+   detailSwitchToEsc(document.main_form.elements["SET.chgalg.type"]);
+}
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var alg_factory = "chgalg";
+var edit_form = 1;
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var cfgDateFormat = "$date_format";
+var argChgRefNum = "$args.chg_ref_num";
+var argID = "$args.id";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var resp_sym = new Array();
+var resp_ids = new Array();
+resp_sym[0] = "";
+resp_ids[0] = "";
+resp_field="SET.chgalg.description";
+resp_persid='$args.persistent_id';
+
+<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND chg_flag=1">
+resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+resp_ids[resp_ids.length] = '$list.id';
+</PDM_LIST>
+
+function backfill_cnt_event( form_name, base_name, lname, fname, mname,
+                             cntID, caller_type )
+{
+   detailCntBackfill( form_name, base_name, lname, fname, mname,
+                      cntID, caller_type );
+   detailXferEscBackfill( base_name, lname, fname, mname, cntID, caller_type );
+}
+</SCRIPT>
+</HEAD>
+<BODY onload="load_from_scratchpad('0')" onUnload="unload_check()" class=editform>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+if ( typeof parent.opener == "object" && parent.opener != null &&
+     typeof parent.opener._dtl == "object" )
+    parent.opener._dtl.tabReloadOnSave = "";
+<PDM_MACRO name=dtlForm factory=chg>
+<PDM_MACRO name=dtlStart>
+docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+docWriteln("<INPUT TYPE=hidden NAME=KEEP.IsModified VALUE='1'>");
+docWriteln("<INPUT TYPE=hidden NAME=SET.chgalg.type VALUE='$args.chgalg.type'>");
+// dpc 07/14/04 13549591
+docWriteln("<INPUT TYPE=hidden NAME=SET.organization VALUE='$args.organization'>");
+
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Numer zmiany" attr=chg_ref_num>
+<PDM_MACRO name=dtlReadonly hdr="Streszcznie zmiany" attr=summary colspan=3>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Current Priority" attr=priority>
+<PDM_MACRO name=dtlReadonly hdr="Current Group" attr=group>
+<PDM_MACRO name=dtlReadonly hdr="Current Assignee" attr=assignee>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="New Priority" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
+var prio_id = _dtl.currID;
+
+
+<PDM_IF "$env.NX_REQUIRE_CHANGE_GROUP" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="New Group" attr=group make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="New Group" attr=group>
+</PDM_IF>
+<PDM_IF "$env.NX_REQUIRE_CHANGE_ASSIGNEE" == "Yes">
+<PDM_MACRO name=dtlLookup hdr="New Assignee" attr=assignee make_required=yes>
+<PDM_ELSE>
+<PDM_MACRO name=dtlLookup hdr="New Assignee" attr=assignee>
+</PDM_IF>
+var assignee_id = _dtl.currID;
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Czas spędzony" attr=chgalg.time_spent evt="onBlur='validate_duration_ts(this)'" maxlength=100>
+<PDM_MACRO name=dtlDate hdr="Data czynności" attr=chgalg.time_stamp>
+<PDM_MACRO name=dtlDateReadonly hdr="Znacznik czasu" attr=chgalg.system_time>
+<PDM_IF "$prop.view_internal" == "1">
+<PDM_MACRO name=dtlCheckbox hdr="Wewnętrzne?" attr=chgalg.internal>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis użytkownika" attr=chgalg.description colspan=4 rows=8 size=80 spellchk=no>
+
+if (resp_ids.length > 1)
+{
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź personalizowana" attr="n/a" evt="onBlur='add_response(selectedIndex)' onChange='reset_resp_on_blur_flag()'" factory="response" list_display="$list.sym" rel_attr_name="id" use_list_display=1 whereclause="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND chg_flag=1">
+}
+
+</SCRIPT>
+<PDM_MACRO name=dtlEnd>
+<SCRIPT>
+<PDM_IF "TR" == "$args.chgalg.type">
+var prioElements = detailHideElements(prio_id, 2, assignee_id);
+</PDM_IF>
+</SCRIPT>
+</PDM_FORM>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: xfer_esc_chg.htmpl ASPEN.3 2012/05/01 14:57:04 pitva01 Exp $
+</PDM_IF>
+
+<PDM_WSP>

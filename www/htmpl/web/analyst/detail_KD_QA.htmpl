@@ -1,0 +1,367 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var docTitle = '<PDM_FMT ESC_STYLE=C>$args.TITLE</PDM_FMT>';
+if(docTitle.length > 50)
+	var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>...';
+else	
+	var hdrTitle = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>';
+var hdrTitleNew = "Create New Forum";
+if (docTitle.length > 50)
+	var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT>... Update Forum';
+else
+	var hdrTitleUpd = '<PDM_FMT ESC_STYLE=C WIDTH=50>$args.TITLE</PDM_FMT> Update Forum';
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/cst_cat.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/upload.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/kt_system.js"></script>
+<script type="text/javascript">
+var cfgFocusOnTabDisabled = true;
+argPersistentID = "$args.persistent_id";
+factoryDisplayName = "Forum";//Need to be here so all alert msg will use it
+var m_opener = "$args.KEEP.opener";
+if (m_opener == null || m_opener == "")
+	m_opener = "$args.opener";
+var m_nSkeletonId="$args.id";
+ahdframeset.nSkeletonId='$args.id';
+var isEdit = 0;
+var doc;
+function loadActions()
+{
+	doc = document.forms["main_form"].elements;
+	convertFAQRating();
+}
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+
+function convertFAQRating()
+{
+	var iBuResult = "$args.BU_RESULT";
+	//in case of regional settings is different
+	iBuResult = iBuResult.replace("," , ".");
+	if ( !isNaN(iBuResult ))
+	{
+		iBuResult = Math.round(iBuResult);
+		var sFaqRating = document.getElementById("faq_rating");
+		if ( sFaqRating != null ) {
+          if ( sFaqRating.tagName == "INPUT" )
+            sFaqRating.value = iBuResult;
+          else
+            sFaqRating.innerHTML = iBuResult;
+        }
+	}
+	return;
+}
+
+function DocumentUserView()
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			"+OP=SHOW_DETAIL+PERSID=KD:$args.id+HTMPL=kt_document_view.htmpl" +
+			"+open_mode=$args.open_mode";
+	document.location.href = url;
+}
+
+function OpenDoc()
+{	
+	if ("$prop.form_name_3" == "edit")
+	{
+		if(confirm(msgtext("Changes_made_to_this_document_need_to_be_saved_first")))
+		{
+			var f = window.document.forms["main_form"];
+			f.elements["HTMPL"].value = "kt_document_view_init.htmpl";
+			f.elements["opener"].value = m_opener;
+			f.elements["open_mode"].value = "$args.open_mode";
+			detailSave();
+		}
+	
+	}
+	else
+	{
+		OpenDocumentViewer("$args.id", 2, m_opener, undefined, undefined, "true", "true", "true", "false", "RELOAD_WIN=1", "+KEEP.OPENER=" + argPopupName, "+BUID=$args.KEEP.BUID");
+	}
+}
+
+//This is to help some tabs to know the status of Document Editor
+function getEdit()
+{
+	if (propFormName3 == "edit")
+	{
+		isEdit = 1;
+	}
+	return isEdit;
+}
+function GetSkeletonId()
+{
+	return m_nSkeletonId;
+}
+
+function RefreshAttachmentLinks()
+{
+	var iframe = window.frames["tabAttachments_iframe"]
+	iframe.LoadAttachments(m_nSkeletonId);
+}
+
+function RefreshNotificationList()
+{
+	var iframe = window.frames["tabNotifications_iframe"];
+	iframe.window.location = iframe.window.location;
+}
+
+function KT_REPLY(sOP,msg)
+{
+	ahdframeset.workframe.location.href = "$CAisd/html/empty.html";
+	if(sOP == "KT_NOTIFICATION_DELETE")
+	{
+		var iRet = msg[0];
+		if (iRet == 0)
+		{
+			RefreshNotificationList();
+		}
+		else
+		{
+			alertmsg("An_error_occured_while_trying_5");//("An error occured while trying to delete this notification.");
+		}
+	}
+	else if(sOP == "KT_ATTACHMENT_LINK_DELETE")
+	{
+		var iRet = msg[0];
+		if (iRet == 0)
+		{
+			RefreshAttachmentLinks();
+		}
+		else
+		{
+			alertmsg("An_error_occured_while_trying_6");//("An error occured while trying to delete this attachment link.");
+		}
+	}
+	else if(sOP == "KT_ATTACHMENT_LINK_ADD")
+	{
+		var iRet = msg[0];
+		if (iRet == 0)
+		{
+			RefreshAttachmentLinks();
+		}
+		else if (iRet == 1)
+		{
+			// Failed to link this file.
+			alert(msg[1]);
+		}
+		else
+		{
+			// The file attachment already linked to this document.
+			alert(msg[1]);
+
+		}
+	}
+	else if(sOP == "KT_URL_LINK_ADD")
+	{
+		var iRet = msg[0];
+		if (iRet == 0)
+		{
+			RefreshAttachmentLinks();
+		}
+		else
+		{
+			alert(msg[1]);
+		}
+	}
+	else
+	{
+		alert ("Unexpected call to KT_REPLY (detail_KD_QA.htmpl) with op code of:" + sOP);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//FUNCTIONS used for Content tab
+///////////////////////////////////////////////////////////////////////////////
+var sTitle=msgtext("-TITLE-");
+var sQuestion=msgtext("-QUESTION-");
+var sLeftSpace = "\t\t\t\t";
+var sRightSpace = "\t \t  \t   \t    ";
+
+function SpellCheckContent()
+{
+	doc['HIDDEN_SPELL'].value = ""; //initialize
+	ImgBtnDisableButton("btnSpellcheck");
+
+	if (doc['SET.TITLE'] != null)
+	{
+		if (trim(doc['SET.TITLE'].value).length > 0)
+		{
+			doc['SET.TITLE'].disabled=true;
+			doc['HIDDEN_SPELL'].value += sLeftSpace + sTitle + sRightSpace + "<br>";
+			doc['HIDDEN_SPELL'].value += doc['SET.TITLE'].value;
+		}
+	}
+	if (doc['SET.PROBLEM'] != null)
+	{
+		if (trim(doc['SET.PROBLEM'].value).length > 0)
+		{
+			doc['SET.PROBLEM'].disabled = true;
+			doc['HIDDEN_SPELL'].value += "<br>" + sLeftSpace + sQuestion + sRightSpace + "<br>";
+			doc['HIDDEN_SPELL'].value += doc['SET.PROBLEM'].value;
+		}
+	}
+	// Check for response from popup_spellchecker, call OnAfterSpellCheck if there were problems
+	if ( ! popup_spellchecker('spell_form','main_form','HIDDEN_SPELL') )
+		OnAfterSpellCheck();
+}
+function OnAfterSpellCheck()
+{
+	//Important:Do not localize <br>, this is html tag
+	var tmpTitle = sLeftSpace + sTitle + sRightSpace + "<br>";
+	var tmpQuestion = "<br>" + sLeftSpace + sQuestion + sRightSpace + "<br>";
+	var iStartPos = 0, iEndPos = 0;
+	var iTitle = 0, iQuestion = 0;
+
+	if (doc['SET.TITLE'] != null)
+	{
+		if (trim(doc['SET.TITLE'].value).length > 0)
+		{
+			iStartPos = doc['HIDDEN_SPELL'].value.indexOf(tmpTitle) + tmpTitle.length;
+			iEndPos = doc['HIDDEN_SPELL'].value.indexOf(tmpQuestion);
+			if (iEndPos == -1)
+			{
+				iEndPos = doc['HIDDEN_SPELL'].value.length;
+			}
+			doc['SET.TITLE'].value = doc['HIDDEN_SPELL'].value.substring(iStartPos, iEndPos)
+			doc['SET.TITLE'].disabled = false;
+			iTitle = 1;
+		}
+	}
+	if (doc['SET.PROBLEM'] != null)
+	{
+		if (trim(doc['SET.PROBLEM'].value).length > 0)
+		{
+			iStartPos = doc['HIDDEN_SPELL'].value.indexOf(tmpQuestion) + tmpQuestion.length;
+			iEndPos = doc['HIDDEN_SPELL'].value.length;
+			doc['SET.PROBLEM'].value = doc['HIDDEN_SPELL'].value.substring(iStartPos, iEndPos);
+			doc['SET.PROBLEM'].disabled = false;
+			iQuestion = 1;
+		}
+	}
+	if ( iTitle == 1)
+	{
+		doc['SET.TITLE'].focus();
+	}
+	else if (iQuestion == 1)
+	{
+		doc['SET.PROBLEM'].focus();
+	}
+	ImgBtnEnableButton("btnSpellcheck");
+}
+
+//*****************************************************************************
+//Function trim used for trim the space
+//*****************************************************************************
+function trim(argvalue)
+{
+	while (1)
+	{
+		if (argvalue.substring(0, 1) != " ")
+			break;
+		argvalue = argvalue.substring(1, argvalue.length);
+	}
+	return argvalue;
+}
+
+function setTenants()
+{
+	<PDM_IF "$prop.MultiTenancy" != "off">
+		detailSetTenantFromPresetField( "PRIMARY_INDEX", '${args.PRIMARY_INDEX.tenant:}', '<PDM_FMT ESC_STYLE=C>${args.PRIMARY_INDEX.tenant.name:}</PDM_FMT>' );
+	</PDM_IF>
+}
+
+</script>
+
+</head>
+
+<body class="detailro" onload="loadActions();setTenants();" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl >
+
+<PDM_IF "$args.id" == "0">
+	<script type="text/javascript">
+	
+<PDM_MACRO name=dtlForm factory="KD_QA" saveclose=true>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$prop.form_name_3" == "edit">	
+		ImgBtnSetDefaultTabIndex(_dtl.tabIndex+10);
+        ImgBtnRow();
+		ImgBtnCreate("btnSpellcheck","Spell_Check_All_Fields","SpellCheckContent()",true,
+                     0,msgtext("Check_spelling_of_Title_Summary_Problem_Resolution_and_Notes_fields"));
+		ImgBtnEndRow();
+	
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr="PRIMARY_INDEX.INDEX_PATH">
+<PDM_MACRO name=dtlReadonly hdr="Zgłaszający" attr="INITIATOR_ID">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr="QA_STATUS">
+<PDM_MACRO name=dtlDropdown hdr="Priorytet" attr="SD_PRIORITY_ID" lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł" attr="TITLE" colspan=2 make_required="yes" size=90>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Pytanie" attr="PROBLEM" colspan=2 make_required="yes" rows=3 size=90>
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	<input type="hidden" name="SET.ACTIVE_STATE" value="200">
+	<input type="hidden" name="HIDDEN_SPELL" id="HIDDEN_SPELL">	
+	<input type="hidden" name="STAY_EDIT" value="1">
+	
+<PDM_MACRO name=dtlEnd>
+<PDM_ELSE>
+	<script type="text/javascript">
+	
+<PDM_MACRO name=dtlForm factory="KD_QA" saveclose=true>
+<PDM_MACRO name=button caption="User View[U]" disabled="defer" func="OpenDoc()" hotkey_name="User View[U]" id="btnView">
+<PDM_MACRO name=btnEndRow>
+<PDM_MACRO name=dtlStart>
+	detailCloseForm();  // Nothings on the form before the notebook
+	</script>
+	
+	<input type="hidden" name="HTMPL">
+	<input type="hidden" name="open_mode" value="2">
+	<input type="hidden" name=PERSID value="KD:$args.id">
+	<input type="hidden" name=BUID value="$args.KEEP.BUID">
+	<input type="hidden" name=opener>	
+		
+	<center>
+	
+<PDM_MACRO name=startNotebook hdr="skeletons_nb">
+<PDM_MACRO name=TAB title="Content" file="kd_qa_content_tab.htmpl" id=tabProp>
+<PDM_MACRO name=TAB title="Attributes" file="kd_qa_attributes_tab.htmpl" id=tabAttributes>
+<PDM_MACRO name=TAB title="Attachments" height=500 id=tabAttachments src="OP=DISPLAY_FORM+HTMPL=kd_attachments_tab.htmpl+SkeletonId=$args.id+ParentTenant=$args.tenant+KEEP.IS_EDIT=$prop.form_name_3">
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=TAB title="Notifications" height=500 id=tabNotifications src="OP=SEARCH+FACTORY=NOTIFICATION+QBE.EQ.DOC_ID=$args.id+SkeletonId=$args.id">
+</PDM_IF>
+<PDM_MACRO name=TAB title="History" height=500 id=tabHistory src="OP=SEARCH+FACTORY=O_EVENTS+QBE.EQ.ENTITY_ID=$args.id">
+<PDM_MACRO name=endNotebook>
+	</center>
+	
+<PDM_MACRO name=dtlEnd>
+</PDM_IF>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

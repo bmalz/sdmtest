@@ -1,0 +1,200 @@
+<PDM_IF 0>
+@(#)$Id: tenant_include.htmpl ASPEN.1 2010/11/17 01:48:45 saima01 Exp $
+
+Common Tenant related HTMPL code.
+</PDM_IF>
+<script type="text/javascript">
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<PDM_IF "$prop.MultiTenancy" == "off"> 
+var argFactoryTenancy = '0';
+<PDM_ELIF "$prop.MultiTenancy" == "setup" && "$cst.tenant" != "$prop.SERVICE_PROVIDER_UUID" && "$prop.SERVICE_PROVIDER_UUID" != "00">
+var argFactoryTenancy = '0';
+<PDM_ELIF "$prop.MultiTenancy" == "setup" && "$ACCESS.admin" != "2">
+var argFactoryTenancy = '0';
+<PDM_ELSE>
+var argFactoryTenancy = '$args.TENANCY';
+var argTenant = '<PDM_FMT PAD=NO ESC_STYLE=C>${args.tenant.name:}</PDM_FMT>';
+var argTenantId = '${args.tenant:}';
+var argKeepTenantWc = "${args.KEEP.tenantWc:}";
+var argKeepTenantFieldWC = "${args.KEEP.TenantFieldWC:}";
+var argGlobalTenant = false; // Set in detail_form.js
+<PDM_IF "$prop.form_name_1" == "list">
+<PDM_IF "$args.TENANCY" == "2" && "${args.PUBLIC_ROW_COUNT:0}" != "0">
+var argPublicRowCount = $args.PUBLIC_ROW_COUNT;
+</PDM_IF>
+</PDM_IF>
+var cfgAccessTenantAdmin = '$INTERFACE.tn_admin';
+var cfgAccessTenantRestriction = '$ACCESS.Tenant_Restriction';
+var cfgAccessTenantGroup = '$ACCESS.Tenant_Group';
+var cfgAccessSingleTenant = '$ACCESS.Single_Tenant';
+var cfgAccessUpdateModify = '$ACCESS.Update_Global';
+var propSelListCacheMax = "$prop.SelListCacheMax";
+var argHideTenantSelection = '${args.HIDE_TENANT_SEL:}';//Need when hiding the tenant selection for a new form - when it's copied from parent object (using its SREL) - SCO 6350
+<PDM_IF "$prop.MultiTenancy" != "setup"> 
+  <PDM_IF "$UserAuth" \> "1" && "$prop.form_name_1" != "list">
+    <PDM_IF "${args.tenant:}" == "" || "${args.tenant:}" == "00">
+      <PDM_IF "$ACCESS.Update_Global" == "0" &&
+              "${args.id:}" != "0">
+        cfgUserAuth = 1;
+        <PDM_SET UserAuth="1">
+      </PDM_IF>
+    <PDM_ELSE>
+      <PDM_SET UserAuth=PdmCanUpdateTenant($args.tenant)>
+      cfgUserAuth = $UserAuth;
+      if ( cfgUserAuth < 2 && 
+           typeof edit_form == "number" )
+        edit_form = 0;
+    </PDM_IF>
+  </PDM_IF>
+</PDM_IF>
+
+// Change to the tenant logo if available
+
+var argTenantLogo = '${args.tenant.logo:}';
+var argTenantLogoAlt = '<PDM_FMT PAD=NO ESC_STYLE=C>${args.tenant.name:}</PDM_FMT>';
+var logoImg;
+try {
+  if ( typeof argTenantLogo == "string" && argTenantLogo.length > 0 ) {
+    logoImg = parent.gobtn.document.getElementById("logoImg");
+    if ( logoImg != null ) {
+      logoImg.src = argTenantLogo;
+      logoImg.alt = argTenantLogoAlt;
+    }
+  }
+}
+catch(logoImg) {}
+
+propSelListCacheMax = (propSelListCacheMax.length > 0 ? propSelListCacheMax - 0 : 10);
+<PDM_IF "$prop.form_name_3" == "edit">
+       <PDM_IF "$ACCESS.Tenant_Write_Restriction" == "0">
+	  var cfgTenantSelections = "$args.tenant_SELECTIONS";
+
+	  <PDM_IF "$args.KEEP.tenantWc" != "" >
+	      var cfgTenantFieldLookupWc="KEEP.TenantFieldWC=$args.KEEP.tenantWc"; 
+
+	      function getTenantSelections()
+	      {
+	          var groupMembers = [''<PDM_LIST PREFIX=list WHERE="$args.KEEP.tenantWc" FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+		  if ( groupMembers.length <= propSelListCacheMax * 2 ) 
+		  {
+		     cfgTenantSelections="";
+		     for ( var i in groupMembers)
+		        cfgTenantSelections+=groupMembers[i]+"@,@";
+		  }
+	      }
+	  </PDM_IF>
+
+       <PDM_ELIF "$ACCESS.Tenant_Write_Restriction" == "2">
+
+          <PDM_IF "$args.KEEP.tenantWc" != "" >
+	        var cfgTenantSelections = "";
+	        var cfgTenantFieldLookupWc="KEEP.TenantFieldWC=( tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Write_UUID' ) AND ( $args.KEEP.tenantWc )"
+
+	        function getTenantSelections()
+	        {
+                    var groupMembers = [''<PDM_LIST PREFIX=list WHERE="( tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Write_UUID' ) AND ( $args.KEEP.tenantWc )" FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+		    if ( groupMembers.length <= propSelListCacheMax * 2 ) 
+		    {
+		       cfgTenantSelections="";
+		       for ( var i in groupMembers)
+		          cfgTenantSelections+=groupMembers[i]+"@,@";
+		    }
+	        }
+          </PDM_IF>
+	  
+      </PDM_IF>
+// Set argTenantIsPreset so showTenantField() does not display the tenant field as a list.
+var argTenantIsPreset = ("$args.KEEP.TenantIsPreset" == "1") ? true : false;
+<PDM_ELSE>
+     <PDM_IF "$args.KEEP.ForLrel" == "1" && "$args.KEEP.ForQrel" == "1" > // for BREL, QREL side by side search form. tenant field depends on subtenat_group and access group
+          <PDM_IF  "$ACCESS.Tenant_Write_Restriction" == "0">   // All tenant
+          var cfgTenantSelections = "$args.tenant_SELECTIONS";
+          function searchFilterTenantList()
+          {
+              <PDM_IF "$args.KEEP.objectTenant" != "" && "$args.KEEP.objectTenant" != "00" && "$args.KEEP.objectTenant" != "n/a" && "$args.KEEP.subtenant_group" != "" && "args.KEEP.supertenant_group" != "00" >
+                   <PDM_SET tenant_wc="tenant.[tenant_id]groups.tenant_group IN U'$args.KEEP.subtenant_group'">
+                   var groupMembers = [''<PDM_LIST PREFIX=list WHERE="$tenant_wc" FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+                   if ( groupMembers.length > propSelListCacheMax * 2 ) {
+                        searchFilterLookup("Tenant", "tenant", "tenant", 1, "name", "KEEP.TenantFieldWC="+"$tenant_wc");
+                   }
+                   else {
+                        searchFilterDropdown("Tenant", "tenant", "", groupMembers);
+                   }
+              <PDM_ELSE>
+                  <pdm_macro name=sfDropdown hdr="Tenant" attr=tenant factory=tenant>
+              </PDM_IF>
+          }
+          <PDM_ELIF  "$ACCESS.Tenant_Write_Restriction" == "2"> // tenant group
+                  function searchFilterTenantList()
+                  {
+                       <PDM_IF "$args.KEEP.objectTenant" != "" && "$args.KEEP.objectTenant" != "00" && "$args.KEEP.objectTenant" != "n/a" && "$args.KEEP.subtenant_group" != "" && "args.KEEP.subtenant_group" != "00" >
+                               //parent form tenant field has tenant value, also tenant has subtenant_group
+                               <PDM_SET tenant_wc="( tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Write_UUID' ) AND (tenant.[tenant_id]groups.tenant_group IN U'$args.KEEP.subtenant_group' ) ">
+                               var groupMembers = [''<PDM_LIST PREFIX=list WHERE="$tenant_wc" FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+                       <PDM_ELSE> 
+                              <PDM_SET tenant_wc="tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Write_UUID'">
+                              var groupMembers = [''<PDM_LIST PREFIX=list WHERE="$tenant_wc" FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+                       </PDM_IF>
+                       if ( groupMembers.length > propSelListCacheMax * 2 ) {
+                              searchFilterLookup("Tenant", "tenant", "tenant", 1, "name", "KEEP.TenantFieldWC="+"$tenant_wc");
+                       }
+                       else {
+                             searchFilterDropdown("Tenant", "tenant", "", groupMembers);
+                      }
+                 }
+          <PDM_ELSE> // single tenant
+                 function searchFilterTenantList()
+                 {
+                       // Handles the case of a Single Tenant. In this case we do not need to show the search 
+                       // filter. Without this empty function we get an 'Object expected' error when we call this 
+                       // section of the code on a Single Tenant.
+                 }
+          </PDM_IF>
+     <PDM_ELIF "$ACCESS.Tenant_Restriction" == "0">
+         var cfgTenantSelections = "$args.tenant_SELECTIONS";
+         function searchFilterTenantList()
+         {
+              <PDM_IF "$args.KEEP.tenantWc" != "" >
+                   var groupMembers = [''<PDM_LIST PREFIX=list WHERE="$args.KEEP.tenantWc" FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+                   if ( groupMembers.length > propSelListCacheMax * 2 ) {
+                        searchFilterLookup("Tenant", "tenant", "tenant", 1, "name", "KEEP.TenantFieldWC=$args.KEEP.tenantWc");
+                   }
+                   else {
+                        searchFilterDropdown("Tenant", "tenant", "", groupMembers);
+                   }
+              <PDM_ELSE>
+                  <pdm_macro name=sfDropdown hdr="Tenant" attr=tenant factory=tenant>
+              </PDM_IF>
+         }
+     <PDM_ELIF "$ACCESS.Tenant_Restriction" == "2">
+         function searchFilterTenantList()
+         {
+           <PDM_IF "$args.KEEP.tenantWc" != "" >
+                //parent form tenant field has tenant value, also tenant has supertenant_group
+                var groupMembers = [''<PDM_LIST PREFIX=list WHERE="( tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Group' ) AND ( $args.KEEP.tenantWc ) " FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+           <PDM_ELSE> 
+                var groupMembers = [''<PDM_LIST PREFIX=list WHERE="tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Group'" FACTORY=tenant>,'<PDM_FMT ESC_STYLE=C>$list.name</PDM_FMT>','$list.id'</PDM_LIST>];
+           </PDM_IF>
+	   if ( groupMembers.length > propSelListCacheMax * 2 ) {
+	        <PDM_IF "$args.KEEP.tenantWc" != "" >
+		    searchFilterLookup("Tenant", "tenant", "tenant", 1, "name", "KEEP.TenantFieldWC=( tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Group' ) AND ( $args.KEEP.tenantWc ) ");
+		<PDM_ELSE>
+		    searchFilterLookup("Tenant", "tenant", "tenant", 1, "name", "KEEP.TenantFieldWC=tenant.[tenant_id]groups.tenant_group IN U'$ACCESS.Tenant_Group'");
+		</PDM_IF>
+           }
+           else {
+                searchFilterDropdown("Tenant", "tenant", "", groupMembers);
+           }
+        }
+     <PDM_ELSE>
+          function searchFilterTenantList()
+          {
+             // Handles the case of a Single Tenant. In this case we do not need to show the search 
+             // filter. Without this empty function we get an 'Object expected' error when we call this 
+             // section of the code on a Single Tenant.
+          }
+    </PDM_IF>
+</PDM_IF>
+</PDM_IF>
+</script>

@@ -1,0 +1,53 @@
+<PDM_IF 0>
+$Id: kt_solution_survey_popup.htmpl,v 1.3 2006/12/12 13:37:31 raies01 Exp $
+	WHEN PRESENTED:
+	    As the Solution Survey popup window
+</PDM_IF>
+<html lang="en"><HEAD>
+<script language=javascript>
+</script>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+	var docTitle = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.doc_title</PDM_FMT>';
+	var hdrTitle = "Solution Survey: " + docTitle;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl filename="Solution Survey">
+<DIV id=divHead name=divHead>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/castyles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_system.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/kt_reply.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/toolbar.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+
+</DIV>
+<script type="text/javascript">
+	argPersistentID = "$args.persistent_id";
+
+	function window_onload()
+	{
+		slCommentType_onchange();		
+	}
+</script>	
+</HEAD>
+<BODY id=docBody onload="window_onload()">
+
+<TABLE class=page_header_main>
+	<TR>
+		<TD class=page_header_title_container>'<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.doc_title</PDM_FMT>'</TD>
+	</TR>
+</TABLE>
+<table class=generic_table>
+	<tr>	
+		<td id='colDocProperties' valign=top style='width: 160px; padding: 0px;'>	
+			<PDM_INCLUDE FILE=kt_comment_box.htmpl disable="false" kt_survey_popup="true">
+		</td>
+		<td style='width: 100%; padding: 0px;'>&nbsp;</td>
+	</tr>
+</table>			
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>

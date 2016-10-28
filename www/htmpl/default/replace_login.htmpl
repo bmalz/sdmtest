@@ -1,0 +1,19 @@
+<PDM_IF 0>
+replace_login.htmpl
+WHEN PRESENTED:
+    Use this form to replace the login request, so user can not 
+    use the back button to bypass authentication.  
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+</head>
+<body>
+<script type="text/javascript">
+var url = "$cgi?SID=$SESSION.SID+FID=$prop.FID+OP=REPLACE_LOGIN+HTMPL=post_menu.htmpl"; 
+window.location.replace(url);
+</script>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: replace_login.htmpl ASPEN.1 2010/11/16 23:00:30 saima01 Exp $;
+</PDM_IF>

@@ -1,0 +1,91 @@
+<PDM_IF 0>
+list_attr_control.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Dependent Attribute Control (issue, change order, request, incident, problem)
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="NBTAB=list_attr_control" factory=attr_control>
+<html lang="en">
+<HEAD>
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_IF "$args.KEEP.OBJ" == "iss">
+var hdrTitle = "Issue Attribute Control Search";
+var hdrTitleList = "Issue Attribute Control List";
+<PDM_ELIF "$args.KEEP.OBJ" == "chg">
+var hdrTitle = "Change Order Attribute Control Search";
+var hdrTitleList = "Change Order Attribute Control List";
+<PDM_ELIF "$args.KEEP.OBJ" == "in">
+var hdrTitle = "Incident Attribute Control Search";
+var hdrTitleList = "Incident Attribute Control List";
+<PDM_ELIF "$args.KEEP.OBJ" == "pr">
+var hdrTitle = "Problem Attribute Control Search";
+var hdrTitleList = "Problem Attribute Control List";
+<PDM_ELSE>
+var hdrTitle = "Request Attribute Control Search";
+var hdrTitleList = "Request Attribute Control List";
+</PDM_IF>
+</SCRIPT>
+
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list" >
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+var autoRefreshWindows = new Object();
+
+<PDM_MACRO name=sfStart create=true extracreateurl="KEEP.l_objname=$args.KEEP.OBJ+KEEP.l_attrname=status+KEEP.l_valstr=$args.KEEP.SCODE" factory=attr_control>
+document.write('<INPUT TYPE=hidden NAME="KEEP.OBJ" VALUE="$args.KEEP.OBJ">');			
+document.write('<INPUT TYPE=hidden NAME="KEEP.SCODE" VALUE="$args.KEEP.SCODE">');			
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.control.objname" VALUE="$args.QBE.EQ.control.objname">');			
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.control.value_string" VALUE="$args.QBE.EQ.control.value_string">');			
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Atrybut" attr=attrname size=20>
+searchFilterDropdown("Required","required","","No","0","Yes","1");
+searchFilterDropdown("Locked","locked","","No","0","Yes","1");
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone, msgFound1, msgFound, msgFoundMore, msgSelect;
+msgFoundNone = "No attribute control found";
+msgFound1    = "1 attribute control found";
+msgFound     = "%1 attribute controls found";
+msgFoundMore = "%1 attribute controls found.  Displaying %2 through %3";
+msgSelect    = "Click to select desired attribute control";
+
+function display_field_value(value)
+{
+  if ( value == "1" )
+     value = "Yes";
+  else 
+     value = "No";
+  rs.data(value);     
+}
+
+function display_field_valueExp()
+{
+	return "LIST_LOOKUP: 1," + msgtext("Yes") + ",OTHERWISE," + msgtext("No");
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Atrybut" attr=attrname exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Wymagany" attr=required exportfmt=display_field_valueExp fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Zablokowany" attr=locked exportfmt=display_field_valueExp fmtfunc=display_field_value sort=no>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

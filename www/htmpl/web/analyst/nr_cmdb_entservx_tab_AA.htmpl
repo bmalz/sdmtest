@@ -1,0 +1,100 @@
+<PDM_IF 0>
+nr_cmdb_entservx_tab.htmpl
+WHEN PRESENTED:
+    Display Enterprise Service family attributes of the selected CI
+INTENT:
+    Display a notebook page for nr inventory.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+
+History:
+       24-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<html lang="pl">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_entservx.htmpl" where="family.extension_name='entservx'" factory=nr>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<style type="text/css">
+	.exim_head {
+	background-color: #dfe3e9;
+	color: #333333;
+	font-weight: bold;
+	font-size: 0.7em;
+	vertical-align: middle;
+	}
+</style>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+<script language="JavaScript">
+
+// added by cmdb for mdr support
+<PDM_INCLUDE FILE=cmdb_mdr_buttons.htmpl filename="">
+<PDM_MACRO name=tabBanner title="Atrybuty" add_btns=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$env.NX_CMDB" == "STANDALONE">
+<PDM_MACRO name=dtlDropdown hdr="Status operacyjny" attr=bm_status factory=bms lookup=no>
+<PDM_MACRO name=dtlStartRow>
+</PDM_IF>
+<PDM_MACRO name=dtlTextbox hdr="Portfolio" attr=assoc_entservx.portfolio>
+<PDM_MACRO name=dtlTextbox hdr="Kategoria serwisowa" attr=assoc_entservx.category>
+<PDM_MACRO name=dtlTextbox hdr="Wersja serwisowa" attr=assoc_entservx.version>
+<PDM_MACRO name=dtlTextbox hdr="Menadżer serwisu" attr=assoc_entservx.service_manager>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Obszar" attr=assoc_entservx.site>
+<PDM_MACRO name=dtlTextbox hdr="Właściciel biznesowy" attr=assoc_entservx.business_owner>
+<PDM_MACRO name=dtlTextbox hdr="Jednostka biznesowa" attr=assoc_entservx.business_unit>
+<PDM_MACRO name=dtlTextbox hdr="Kontakty biznesowe" attr=assoc_entservx.business_contacts>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Escalation Contacts" attr=assoc_entservx.escalation_contacts>
+<PDM_MACRO name=dtlTextbox hdr="Stan cyklu życia usługi" attr=assoc_entservx.lifecycle_state>
+<PDM_MACRO name=dtlTextbox hdr="Status cyklu życia usługi" attr=assoc_entservx.lifecycle_status>
+<PDM_MACRO name=dtlTextbox hdr="Kod opłaty" attr=assoc_entservx.charge_code>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Wpływ biznesowy" attr=assoc_entservx.business_impact>
+<PDM_MACRO name=dtlTextbox hdr="Priorytet biznesowy" attr=assoc_entservx.business_priority>
+<PDM_MACRO name=dtlTextbox hdr="Ryzyko biznesowe" attr=assoc_entservx.business_risk>
+<PDM_MACRO name=dtlTextbox hdr="Cobit Objective" attr=assoc_entservx.cobit_objective>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Service Goal" attr=assoc_entservx.service_goal>
+<PDM_MACRO name=dtlTextbox hdr="Service Alignment" attr=assoc_entservx.service_alignment>
+<PDM_MACRO name=dtlTextbox hdr="SLA" attr=assoc_entservx.SLA>
+<PDM_MACRO name=dtlTextbox hdr="Godziny serwisowe" attr=assoc_entservx.service_hours>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlShowtext colspan="2" dataclass="exim_head" value="Cykl życia Usługi" >
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data rozpoczęcia projektowania" attr=assoc_entservx.design_start_date>
+<PDM_MACRO name=dtlDate hdr="Data zakończenia projektowania" attr=assoc_entservx.design_end_date>
+<PDM_MACRO name=dtlDate hdr="Data rozpoczęcia wdrażania" attr=assoc_entservx.transition_start_date>
+<PDM_MACRO name=dtlDate hdr="Data zakończenia wdrażania" attr=assoc_entservx.transition_end_date>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Data rozpoczęcia utrzymywania Usługi" attr=assoc_entservx.operation_start_date>
+<PDM_MACRO name=dtlDate hdr="Data zakończenia utrzymywania Usługi" attr=assoc_entservx.operation_end_date>
+<PDM_MACRO name=dtlDate hdr="Początek dostępności Usługi" attr=assoc_entservx.availability_start>
+<PDM_MACRO name=dtlDate hdr="Koniec dostępności Usługi" attr=assoc_entservx.availability_end>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDate hdr="Początek niedostępności Usługi" attr=assoc_entservx.unavailability_start>
+<PDM_MACRO name=dtlDate hdr="Koniec niedostępniości Usługi" attr=assoc_entservx.unavailability_end>
+
+<PDM_MACRO name=dtlEndTable>
+
+</script>
+</PDM_FORM>
+</body>
+</html>

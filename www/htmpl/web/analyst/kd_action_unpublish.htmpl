@@ -1,0 +1,568 @@
+<PDM_IF 0>
+$Id: kd_action_unpublish.htmpl,v 1.4 2007/01/04 23:11:53 tuach01 Exp $
+kd_action_unpublish.htmpl
+WHEN PRESENTED:
+	When we need to display an unpublish window for the document editor
+</PDM_IF>
+<html lang="en"><HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+	var hdrTitle = "Unpublish Document ID: $args.KEEP.DOC_ID";
+</SCRIPT>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general preview="kd_action_unpublish.htmpl+KEEP.DOC_ID={KD}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT>
+	var bIsAdmin = 0;
+	var bIsSelected = 0;
+	var bIsRetire = 0;
+	var iKeepIndex = 0;
+	var iFinalActionID;
+	var iFinalStatusID;
+	var iActionOrder = 0;
+	var arrFields = new Array;
+	var arrFields2 = new Array; //Use to store who created KD
+	var arrRetire = new Array;
+	var iDefaultID;
+	var sDefaultTask;
+	var nCount = 0;
+	var iCount = 0;
+	var jCount = 0;
+	var strWinName = "$args.KEEP.POPUP_NAME";
+	var doc;
+	var w;
+	//Get the parent window reference
+	var sKDPersID = "KD:$args.KEEP.DOC_ID";
+	w = ahdtop.detailForms[sKDPersID].ahdframe;
+	
+	if (ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS"))
+	{
+		bIsAdmin = 1;
+	}
+	<PDM_LIST PREFIX=list FACTORY=CI_ACTIONS WHERE="WF_TEMPLATE_ID=$args.KEEP.TEMPLATE_ID" ESC_STYLE=C>
+		arrFields[nCount++]='$list.id';
+		arrFields[nCount++]='$list.ACTION_TITLE';
+			
+		<PDM_IF "$list.UNPUBLISH " == "1">
+			iDefaultID = "$list.id";
+			sDefaultTask = "$list.ACTION_TITLE";
+			iActionOrder = "$list.ACTION_ORDER";
+			arrRetire[jCount++] = 1;
+		<PDM_ELSE>
+			arrRetire[jCount++] = 0;
+		</PDM_IF>		
+			
+			arrFields[nCount++] = "$list.ACTION_ORDER";
+			arrFields[nCount++] = "$list.STATUS_CURRENT_ID";
+	</PDM_LIST>
+</SCRIPT>
+</HEAD>
+<BODY onLoad=frmUnpublishOnLoad();>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no >
+<FORM id=frm name=frm>
+<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0  class=page_header>
+	<TR>
+		<TD align=left width='99%'><SCRIPT>document.write(hdrTitle)</SCRIPT>
+		</TD>
+		<TD align=left width='1%'>
+			<DIV align=right>
+				<SCRIPT>
+                    ImgBtnSetDefaultTabIndex(101);
+					ImgBtnRow();
+					ImgBtnCreate("btnOK", "OK0", "ok()", "defer", "");
+					if (ahdtop.CanUserPerformAction("ROLE_WORKFLOW_BYPASS"))
+					{
+						ImgBtnCreate("btnRetire", "Retire", "retire()");
+					}
+					ImgBtnCreate("btnCancel", "Cancel1", "cancel()", "defer", "");
+					ImgBtnEndRow();
+                    ImgBtnSetDefaultTabIndex();
+				</SCRIPT>
+			</DIV>
+		</TD>
+	</TR>
+</TABLE>
+<DIV class=content>
+	<table width="95%"  border="0" cellspacing="2" cellpadding="0" style="font-size:1.3em;margin-top:20px;">
+		<tr>
+		<td class="label" tabindex=100 id=actionTitle>Title: <span class=data style="font-size:0.9em;"><SCRIPT>document.write(w.hdrTitle)</SCRIPT></span></td>
+		</tr>
+		<tr>
+		<td class="label" tabindex=100>Current Status: <span class="data" style="font-size:0.9em;"><PDM_FMT STYLE=C>$args.KEEP.CURRENT_STATUS</PDM_FMT></span></td>
+		</tr>
+	</table>
+	<BR>
+	<DIV style='display:none' id='divPreviousTasks' name='divPreviousTasks'>	
+		<TABLE width="95%" align=center border="0" cellspacing="0" cellpadding="0">
+			<TR>
+				<TD width="4" height="22" class="page_section_header_left"><IMG src="$CAisd/img/spacer.png" width="4" height="22" alt=""></TD>
+				<TD class="page_section_header_center"><SPAN  class="page_section_header_text" >Previous Tasks</SPAN></TD>
+				<TD width="4" height="22" class="page_section_header_right"><SPAN class="page_section_header_right"><IMG src="$CAisd/img/spacer.png" width="4" height="22" alt=""></SPAN></TD>
+			</TR>
+		</TABLE>
+		<TABLE width="95%" align=center border="0" cellspacing="0" cellpadding="0">
+				<TR>
+					<TD>
+						<DIV name='divTaskListSection' id='divTaskListSection' style='overflow:auto;height:140;width:100%'>
+							<table width="100%" bgcolor="#FFFFFF" cellspacing="1" cellpadding="0" class="table">
+							<tr>
+							<td width="60%" class="table_column_header_background"><span class="table_column_header_text">Task Name</span></td>
+							<td width="20%" class="table_column_header_background"><span class="table_column_header_text">Default Assignee</span></td>
+							<td width="20%" class="table_column_header_background"><span class="table_column_header_text">Date</span></td>
+							</tr>
+							</table>
+							<DIV name='divTaskList' id='divTaskList'>
+							</DIV>
+						</DIV>
+					</TD>
+				</TR>	
+		</TABLE>
+	</DIV>
+	<DIV style='display:none' id='divUnpublish' name='divUnpublish' style='margin-top:-15;height:200'>	
+		<BR>
+		<TABLE cellSpacing=0 cellPadding=0 width="100%" border=0>
+			<TR width="100%">
+				<TD noWrap>
+					&nbsp;
+					<SPAN class='label' id='prevTaskCaption' name='prevTaskCaption'>Previous Task</SPAN>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					&nbsp;
+					<SPAN class='data' id='prevTask' name='prevTask'></SPAN> 
+				</TD>
+			</TR>
+			<TR>
+				<TD noWrap>
+					&nbsp;
+					<SPAN id='assigneeHdr' name='assigneeHdr'></SPAN> 
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					<DIV id='divAssignee' name='divAssignee'>
+					&nbsp;
+					<SELECT id='slctAssignee' name='slctAssignee' title="Assignee" tabindex=100>
+					</SELECT>
+					</DIV>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					&nbsp;
+					<SPAN class='label'>Comment</SPAN>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					&nbsp;
+				    <TEXTAREA id=txtComment name=txtComment cols=50 rows=5 tabindex=100 onFocus="this.className='focusField';" onBlur="this.className='';"></TEXTAREA>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</DIV>
+<SCRIPT>
+function ok()
+{	
+    ahdtop.saveKTAckMsgNum = 2227; // - %1 unpublished
+	if (!checkLength())
+	{
+		return;
+	}
+	
+	if (bIsSelected != 1)
+	{
+		alertmsg("Please_select_a_task_before_un");//("Please select a task before unpublishing this document.");
+		return;
+	}
+	if (bIsRetire == 1)
+	{
+		retire();
+		return;
+	}
+	var iIndex = doc["slctAssignee"].selectedIndex;
+	if (doc["slctAssignee"].length != 0 && doc["slctAssignee"][iIndex].value != -999)
+	{
+		var sAssigneeID = doc["slctAssignee"][iIndex].value;
+		var sAssigneeName = doc["slctAssignee"][iIndex].text;
+	}
+	else
+	{
+		alertmsg("Please_add_an_assignee_before_");//("Please add an assignee before unpublishing this document.");
+		return;
+	}
+	var sComment = doc["txtComment"].value;
+	//"Are you sure you want to unpublish this document and assign it to " + sAssigneeName + "?";	//<JH>
+	var res=confirm(msgtext("Are_you_sure_you_want_to_unpub", sAssigneeName));
+	
+	if(res)
+	{
+		if (action_in_progress())
+		{
+			return;
+		}
+		
+		var url= cfgCgi+"?SID=" + cfgSID + "+FID=" + fid_generator() + 
+			"+OP=KD_WF_ACTION" + 
+			"+KD_ID=$args.KEEP.DOC_ID" +
+			"+WF_ACTION=wf_unpublish" +
+			"+WF_COMMENT=" + nx_escape(sComment) + 
+			"+WF_CONTACT_ID=" + sAssigneeID +
+			"+WF_REJECT_TO_ID=" + iFinalActionID;
+		ahdframeset.workframe.location.href = url;		
+		set_action_in_progress(ACTN_FILLFORM);
+	}	
+}
+function cancel()
+{
+	ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+function checkLength()
+{	
+	if (doc["txtComment"].value.length > 255)
+	{
+		alertmsg("Comment_field_cannot_exceed_25");//("Comment field cannot exceed 255 characters.");
+		doc["txtComment"].focus();
+		return false;
+	}
+	return true;
+}
+
+function KT_REPLY(sOP,msg)
+{	
+	var sClass;
+	var m = 0;
+	var k = arrFields.length - 1;
+	var iActionID = 0;
+	if (sOP == "KD_WF_ACTION")
+	{
+		if (msg[0] == "") //All is OK
+		{
+			set_action_in_progress(ACTN_COMPLETE);
+			switchToDetail( "KD", $args.KEEP.DOC_ID, true);
+			top.close();
+		}
+		else
+		{
+			alert (msg[0]);
+			set_action_in_progress(ACTN_COMPLETE);
+		}
+	}
+	else if (sOP == "KT_ACTION_UNPUBLISH")
+	{
+		var tableHTML = "<table width='100%' align=center cellspacing='1' cellpadding='0' class='table'>";
+		
+		//msg[0] contains the total number of records and it should always be 14 * n
+		//then from msg[1] to msg[14] has the actual header and data, odd number is header and
+		//the even number is data, we can use the for-loop to find out the data and each time
+		//increment by 14. msg[0] > 14 means there are at least 2 actions so that we need to 
+		//show the data as a table
+		for( var k=1; k<=msg[0]; k++)
+		{
+			//alert(msg[k]);
+		}
+		for (var i = 1; i<= msg[0]; i=i+14)
+		{	
+			if ((m%2) == 1)
+			{
+				sClass = "table_banded_row";
+			}
+			else
+			{
+				sClass = "table_row";
+			}
+			if ( (msg[0] > 14) && (bIsAdmin == 1))
+			{	
+				document.getElementById("divUnpublish").style.display="none";
+				document.getElementById("divPreviousTasks").style.display="";
+				tableHTML = tableHTML + "";
+
+				tableHTML = tableHTML + "<TR class=" + sClass + " onclick='OnRowClick(this)'><TD width='60%'>&nbsp;<a class='datalink' href='javascript:void(0)' tabindex=100 onclick='ShowUnpublishTask(\"" + msg[i+1] + "\" ,\"" + msg[i+3] + "\" ,\"" + msg[i+7] + "\" ,\"" + msg[i+9] + "\", \"" + arrFields[k] + "\")'>" + msg[i+3]+ "</a></TD>";
+				tableHTML = tableHTML + "<TD class=data width='20%'>&nbsp;" + msg[i+9]+ "</TD>"; 
+				tableHTML = tableHTML + "<TD class=data width='20%'>&nbsp;" + msg[i+11]+ "</TD></TR>"; 
+				m++;
+				k=k-4;
+			}
+			else
+			{	//This is for no admin or there is only one task
+								
+				//check if default task is to retire
+				if (!checkDefaultTask())
+				{
+					document.getElementById("divUnpublish").style.display="";
+					document.getElementById("prevTaskCaption").innerHTML = "Next Task"; 
+					document.getElementById("prevTask").innerHTML =	"Retire this Document";
+					document.getElementById("divAssignee").style.display="none";
+					document.getElementById("divPreviousTasks").style.display="none";
+					bIsSelected = 1;
+					bIsRetire = 1;
+					return;
+				}
+				else
+				{	
+					for ( var i = 1; i<=msg[0]; i=i+14)
+					{
+						if (iDefaultID == msg[i+1] || <PDM_IF $env.NX_KT == "Yes">false<PDM_ELSE>true</PDM_IF>)
+						{
+							iActionID = msg[i+1];
+							iFinalActionID = msg[i+1];
+							document.getElementById("prevTask").innerHTML  = msg[i+3];
+							//Only if the wf_user_id and wf_user_name is not blank, we add it in the list
+							//Normally this is not supposed to happen, but for the sake of sample(bad) data
+							//we check it to make sure the dropdown box looks good
+							if (msg[i+9] != "" && msg[i+7] != "")
+							{
+								document.frm.slctAssignee.options[iKeepIndex++] = new Option(msg[i+9], msg[i+7]);
+							}
+						}
+					}
+				}
+				
+				for ( var j = 0 ; j < arrFields.length; j = j + 4)
+				{
+					if (iActionID == arrFields[j])
+					{
+						iFinalStatusID = arrFields[j+3];
+						
+						//arrFields[j+2] stores the ORDER of the task
+						if (arrFields[j+2] == 1) 
+						{
+							//if it is the first task
+                            var text = "<a href='javascript:void(0)' onclick='fill_name_fields(document.forms[0], \"agtgrp\", \"CONTACT\",true)' tabindex=100>";
+                            if ( ahdtop.cstUsingScreenReader )
+                              text += "<span class=lookup>" + msgtext("%1_Lookup",msgtext("Assignee")) + "</span></a>"; // Lookup assignee
+                            else
+                              text += "<img width=12 Height=12 border=0 style='vertical-align:middle;horizontal-align:left' src='" +
+                                      '$CAisd' + "/img/lookup.gif' alt='Pop up assignee lookup form'>&nbsp" +
+                                      "<span class=lookup>" + msgtext("Assignee") + "</span></a>"; // Assignee
+                            text += "<input type=hidden name=CONTACT_lname>" +
+                                    "<input type=hidden name=CONTACT_fname>" +
+                                    "<input type=hidden NAME=CONTACT_mname>" +
+                                    "<input type=hidden NAME=CONTACT_combo_name>" +
+                                    "<input type=hidden NAME=CONTACT>";
+                            document.getElementById("assigneeHdr").innerHTML = text;
+						}
+						else
+						{
+							document.getElementById("assigneeHdr").innerHTML = "<SPAN class=label>" + msgtext("Assignee") + "</SPAN>"; // Assignee
+						}
+					}
+				}
+						
+				var url=cfgCgi+
+					"?SID="+cfgSID+
+					"+FID="+fid_generator()+
+					"+KEEP.ACTION_ID=" + msg[i+1] +
+					"+OP=KT_GET_ASSIGNEE";
+				ahdframeset.workframe.location.href = url;
+				
+				document.getElementById("divUnpublish").style.display="";
+				document.getElementById("divPreviousTasks").style.display="none";
+				bIsSelected = 1;
+				break;
+			}
+		}
+		if (bIsAdmin == 1)
+		{
+			document.getElementById("divTaskList").innerHTML = tableHTML + "</TABLE>";
+		}
+	}
+	else if (sOP == "KT_GET_ASSIGNEE")
+	{
+		var sList = msg[0];
+		if (sList.length > 0)
+		{
+			var assigneeList = sList.split(":") 
+			var defaultAssignee = assigneeList[0]; //Get ID from the first record
+			
+			for (var i = 0; i < assigneeList.length - 1; i=i+2)
+			{
+				if ((assigneeList[i] !=  defaultAssignee) )
+				{
+					document.frm.slctAssignee.options[iKeepIndex++] = new Option( assigneeList[i+1], assigneeList[i]);
+				}
+			}
+		}
+		//When having no selection in the assignee drop down add the current user instead
+		if ( document.frm.slctAssignee.options.length == 0 )
+		{
+			var sAnalystName = ahdtop.cstLastName;
+			if ( ahdtop.cstFirstName != "" )
+				sAnalystName = sAnalystName + ", " + ahdtop.cstFirstName;
+			//
+			document.frm.slctAssignee.options[0] = new Option( sAnalystName, ahdtop.cstID);
+		}			
+	}
+	else 
+	{
+		alert ("Unexpected call to KT_REPLY (kd_action_unpublish.htmpl) with op code of:" + sOP);
+	}
+}
+function frmUnpublishOnLoad()
+{	
+	passWinName(); //Pass the unpublish window name to document editor
+	doc = document.frm.elements;
+	
+	var url=cfgCgi+
+		"?SID="+cfgSID+
+		"+FID="+fid_generator()+
+		"+KEEP.DOC_ID=" + $args.KEEP.DOC_ID +
+		"+OP=KT_ACTION_UNPUBLISH";
+	ahdframeset.workframe.location.href = url;
+	if (w.IsInEditMode())
+	{
+		//Back to RO to avoid locking
+		w.detailCancel();
+	}
+
+    // Set initial focus
+    var e;
+    if ( ahdtop.cstUsingScreenReader )
+      e = document.getElementById("actionTitle");
+    else
+      e = document.getElementById("slctAssignee");
+    try { e.focus() }
+    catch(e) {};
+}
+
+function OnRowClick(objRow)
+{
+
+}
+
+function ShowUnpublishTask(actionID, actionName, userID, userName, statusID)
+{
+	bIsSelected = 1;
+	iFinalActionID = actionID;
+	iFinalStatusID = statusID;
+	
+    var text = "<a href='javascript:void(0)' onclick='fill_name_fields(document.forms[0], \"agtgrp\", \"CONTACT\",true)' tabindex=100>";
+    if ( ahdtop.cstUsingScreenReader )
+      text += "<span class=lookup>" + msgtext("%1_Lookup",msgtext("Assignee")) + "</span></a>"; // Lookup assignee
+    else
+      text += "<img width=12 Height=12 border=0 style='vertical-align:middle;horizontal-align:left' src='" +
+              '$CAisd' + "/img/lookup.gif' alt='Pop up assignee lookup form'>&nbsp" +
+              "<span class=lookup>" + msgtext("Assignee") + "</span></a>"; // Assignee
+    text += "<input type=hidden name=CONTACT_lname>" +
+            "<input type=hidden name=CONTACT_fname>" +
+            "<input type=hidden NAME=CONTACT_mname>" +
+            "<input type=hidden NAME=CONTACT_combo_name>" +
+            "<input type=hidden NAME=CONTACT>";
+    document.getElementById("assigneeHdr").innerHTML = text;
+	
+	if ((userName.length !=0) && (userID.length != 0 ))
+	{
+		document.frm.slctAssignee.options[iKeepIndex++] = new Option( userName, userID);
+	}
+	
+	document.getElementById("prevTask").innerHTML = actionName;
+	document.getElementById("divTaskList").style.display="none";
+	document.getElementById("divPreviousTasks").style.display="none";
+	document.getElementById("divUnpublish").style.display="";
+	
+	var url=cfgCgi+
+		"?SID="+cfgSID+
+		"+FID="+fid_generator()+
+		"+KEEP.ACTION_ID=" + actionID +
+		"+OP=KT_GET_ASSIGNEE";
+	ahdframeset.workframe.location.href = url;
+}
+function backfill_cnt_event( form_name, base_name, lname, fname, mname, cntID )
+{
+	var comboName;
+
+	if ( base_name == "CONTACT" )
+	{
+		if (fname.length > 0)
+		{
+			comboName = lname + ", " + fname;
+		}
+		else
+		{
+			comboName = lname;
+		}
+		
+		var bInList = 0;
+		for ( var i = 0; i < document.frm.slctAssignee.length; i++)
+		{
+			if (document.frm.slctAssignee.options[i].value == cntID)
+			{
+				bInList = 1;
+				document.frm.slctAssignee.options[i].selected = true;
+				break;		
+			}
+			else
+			{
+				bInList = 0;
+			}
+		}
+		
+		if (bInList == 0)
+		{
+			document.frm.slctAssignee.options[document.frm.slctAssignee.length] = new Option( comboName, cntID);
+			document.frm.slctAssignee.options[document.frm.slctAssignee.length - 1].selected = true;   
+		}
+		
+		
+		//This is to make sure Contact Search window can be open again
+		document.frm.CONTACT_lname.value = "";
+		document.frm.CONTACT_fname.value = "";            
+		document.frm.CONTACT_mname.value = "";   
+		document.frm.CONTACT_combo_name.value = "";         
+		document.frm.CONTACT.value = "";      
+	}
+}
+function retire()
+{
+	if (!checkLength())
+	{
+		return;
+	}
+	
+	var res=confirm(msgtext("Are_you_sure_you_want_to_retir"));//"Are you sure you want to retire this document?";
+	
+	if(res)
+	{
+		//w.Retire("","","");
+		if (action_in_progress())
+		{
+			return;
+		}
+		
+		var url= cfgCgi+"?SID=" + cfgSID + "+FID=" + fid_generator() + 
+			"+OP=KD_WF_ACTION" + 
+			"+KD_ID=$args.KEEP.DOC_ID" +
+			"+WF_ACTION=retire";
+		ahdframeset.workframe.location.href = url;		
+		set_action_in_progress(ACTN_FILLFORM);
+		
+	}
+}
+function passWinName()
+{
+	if (typeof w.getWinName !="undefined")
+	{
+		w.getWinName(strWinName, 3); //The getWinName() is in the detail_KD.js
+	}
+}
+function checkDefaultTask()
+{
+	var hasDefault = 0;
+	for( var i = 0; i < arrRetire.length; i++)
+	{
+		if (arrRetire[i] == 1	)
+		{
+			hasDefault = 1;
+			break;
+		}
+	}
+	return hasDefault;
+}
+</SCRIPT>
+</FORM>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>

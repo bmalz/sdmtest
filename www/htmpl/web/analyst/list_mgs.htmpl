@@ -1,0 +1,75 @@
+<PDM_IF 0>
+list_mgs.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Managed Surveys
+INTENT:
+    Display the list of Managed Surveys
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object mgs_list list The list object containing the Managed Survey
+                        See $NX_ROOT/bopcfg/majic/bop.maj for the
+                        definition of attributes for 'OBJECT mgs'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Managed Survey Search";
+var hdrTitleList = "Managed Survey List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+//XJZ need to load proper report templates.
+var rptName = new Array("", "");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=mgs>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description colspan=2 size=40>
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr=active>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Powiązana ankieta" attr=tplid>
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=assignee>
+<PDM_MACRO name=sfLookup hdr="Status" attr=status>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No managed survey found";
+var msgFound1 = "1 managed survey found";
+var msgFound = "%1 managed surveys found";
+var msgFoundMore = "%1 managed surveys found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired managed survey";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwaz powiązanej ankiety" attr=sym exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=50>
+<PDM_MACRO name=lsCol hdr="Przypisany" attr=assignee.combo_name>
+<PDM_MACRO name=lsCol hdr="Status" attr=status>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_mgs.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,26 @@
+<PDM_IF 0>
+20131111 bmalz @ e-xim
+</PDM_IF>
+<html lang="pl">
+<HEAD></HEAD>
+<BODY>
+<SCRIPT>
+	if(typeof GetUserItems == "function") {
+		var type;
+		var items = [];
+		<PDM_LIST PREFIX=list FACTORY=cr WHERE="customer.id = U'$args.id' AND category.sym like '$args.KEEP.area%'" LENGTH="20" SORT="ref_num DESC" ESC=HTML>
+			if('$list.type' == 'R') {
+				type = "Wniosek";
+			} else if ('$list.type' == 'I') {
+				type = "Incydent";
+			}
+
+			items.push(['$list.id', '$list.category.ss_sym', '$list.category.sym', '$list.type', '$list.category.id', '$list.category.group', '$list.ref_num', type, '$list.summary', '$list.status.sym']);
+		</PDM_LIST>
+
+		GetUserItems(items);
+	}
+</SCRIPT>
+hidden frame, nothing to do here.
+</BODY>
+</HTML>

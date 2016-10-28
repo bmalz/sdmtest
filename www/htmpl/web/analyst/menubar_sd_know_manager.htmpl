@@ -1,0 +1,543 @@
+<PDM_IF 0>
+@(#)$Id: menubar_sd_know_manager.htmpl ASPEN.1 2010/05/04 14:12:07 bohda01 Exp $
+WHEN PRESENTED:
+    Build the Service Desk tab menubar for a Knowledge Manager.
+
+////////////////////////////////////////////////////////////////////////
+// Service Desk Menubar - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_WSP preview="OP=menu+NBTAB=sd">
+
+<PDM_MACRO name=startMenubar>
+var main_frame = ahdframe;
+if(typeof ahdframe.parent["cai_main"] != "undefined")
+	main_frame = ahdframe.parent["cai_main"];
+
+var isPreR60 = ( typeof w.propFormRelease != "number" || w.propFormRelease < 60 );
+var isPostR60 = ! isPreR60;
+var isTicketDetail;
+if ( isPreR60 )
+   isTicketDetail = ( w.propFormName1 == "detail_cr_ro.htmpl" ||
+                      w.propFormName1 == "detail_chg_ro.htmpl" );
+else
+   isTicketDetail = ( w.propFormName1 == "detail" &&
+                        ( w.propFactory == "cr" ||
+                          w.propFactory == "chg" ||
+                          w.propFactory == "iss" ) );
+var hasModifyAuth = (0 + w.cfgUserAuth > 1 );
+var isCreatingNew = ( isNaN(w.argID) || w.argID == 0 );
+var factory;
+if ( isPreR60 ) {
+  if ( w.propFormName == "detail_chg_ro.htmpl" )
+    factory = "chg";
+  else if ( w.propFormName == "detail_cr_ro.htmpl" )
+    factory = "cr";
+}
+else {
+  if ( w.propFormName1 == "detail" &&
+       typeof w.alg_factory != "string" && // exclude all act log forms too
+       ( w.propFactory == "cr" ||
+         w.propFactory == "chg" ||
+         w.propFactory == "iss" ) )
+    factory = w.propFactory;
+} 
+
+if ( ! ahdtop.isLogReader )
+{
+
+<PDM_MACRO name=menubarItem label="File" id=mFile>
+<PDM_MACRO name=menubarItem label="View" id=mView>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+if ( hasModifyAuth && isTicketDetail ) {
+<PDM_MACRO name=menubarItem label="Activities" id=mActivities>
+}
+</PDM_IF> 
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+// Add Action menu only when we are not creating new and ticket is active
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+if ( hasModifyAuth && isTicketDetail && ! isCreatingNew ) {
+<PDM_MACRO name=menubarItem label="Actions" id=mAction>
+}
+}
+</PDM_IF> 
+</PDM_OBJECT>
+
+<PDM_MACRO name=menubarItem label="Search" hotkey=e id=mSearch>
+
+<PDM_OBJECT>
+if ( ( w.propFormName1 == "list" ||
+       ( w.propFormName1 == "detail" &&
+         w.propFormName3 == "ro" ) ) &&
+     typeof w.rptName != "undefined" && w.rptName[0] != "no" &&
+     w.rptName[0] != "" ) {
+  if ( typeof w.argSaveSqlClause == "string" && 
+      ! w.argSearchSqlClause.length &&
+      w.argSaveSqlClause.length )
+    w.argSearchSqlClause = w.argSaveSqlClause;
+
+  if ( typeof w.argSearchSqlClause == "string" &&
+      w.argSearchSqlClause.length > 0 ) {
+    
+<PDM_MACRO name=menubarItem label="Reports" hotkey=o id=mReports>
+  }
+}
+</PDM_OBJECT>
+
+} 
+
+<PDM_MACRO name=menubarItem label="Window" id=mWindow>
+
+<PDM_OBJECT>
+if ( ! ahdtop.isLogReader )
+{
+<PDM_MACRO name=menubarItem label="Help" id=mHelp>
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenubar>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "File" menu - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+if ( ! ahdtop.isLogReader )
+{
+<PDM_MACRO name=startMenu parentid=mFile>
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset == ahdtop &&
+     $ACCESS.FAC_crsq > 0 ) {
+<PDM_MACRO name=menuItem label="Customize_Scoreboard..." function="customize_scoreboard()" hotkey=e>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup != "" ) {
+<PDM_MACRO name=menuItem label="Restore_Main_Form..." function="view_scoreboard()" hotkey=e>
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( typeof w.ahdframe._dtl == "object" &&
+     parseInt(w.cfgUserAuth) > 1 &&
+	( ( $ACCESS.FAC_cr >= 2 &&
+	    typeof w.ahdframe.copy_from_cr != "undefined" ) ||
+	( $ACCESS.FAC_chg >= 2  &&
+	    typeof w.ahdframe.copy_from_chg != "undefined" ) ||
+	( $ACCESS.FAC_iss >= 2  &&
+	    typeof w.ahdframe.copy_from_iss != "undefined" ) )  &&
+	w.ahdframeset.ahdframe._dtl.edit==false) {
+    
+<PDM_MACRO name=menuItem label="Copy" function="make_copy()">
+}		
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItemLocal label="Print_Form..." function="JavaScript: CAisdPrint();" hotkey=n>
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "View" menu - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mView>
+
+var factory;
+if ( typeof w.propFormRelease == "undefined" || 
+     w.propFormRelease < 60 ) {
+  if ( w.propFormName == "detail_chg_ro.htmpl" )
+    factory = "chg";
+  else if ( w.propFormName == "detail_cr_ro.htmpl" )
+    factory = "cr";
+}
+else {
+  if ( w.propFormName1 == "detail" &&
+       typeof w.alg_factory != "string" && // exclude all act log forms too
+       ( w.propFactory == "cr" ||
+         w.propFactory == "chg" ||
+         w.propFactory == "iss" ) )
+    factory = w.propFactory;
+} 
+
+<PDM_OBJECT>
+if ( $ACCESS.FAC_cnote > 0 ) {
+<PDM_MACRO name=menuItem label="Announcements" function="upd_specific_frame('sd','bin_form_np.htmpl')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Preferences..." function="ahdtop.showPreferences()">
+
+<PDM_OBJECT>
+if (!(typeof w.ahdframeset.ahdframe._dtl == "object" &&
+	   w.ahdframeset.ahdframe._dtl.edit==true)) {            
+<PDM_MACRO name=menuItemLocal label="Refresh" function="JavaScript:refreshForm()">
+</PDM_OBJECT>
+
+}
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "Activities" menu - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mActivities>
+
+var main_frame = ahdframe;
+var factory = "";
+
+if(typeof ahdframe.parent["cai_main"] != "undefined")
+	main_frame = ahdframe.parent["cai_main"];
+
+if ( typeof w.propFormRelease == "undefined" || 
+     w.propFormRelease < 60 ) {
+  if ( w.propFormName == "detail_chg_ro.htmpl" )
+    factory = "chg";
+  else if ( w.propFormName == "detail_cr_ro.htmpl" )
+    factory = "cr";
+}
+else if ( w.propFormName1 == "detail" &&
+           ( w.propFactory == "cr" ||
+             w.propFactory == "chg" ||
+             w.propFactory == "iss" ) )
+  factory = w.propFactory;
+
+var query_str = w.cfgCgi + "?SID=" + w.cfgSID + "+FID=" +
+                w.fid_generator() + "+FACTORY=" + factory +
+                "+PERSID=" + w.argPersistentID;
+var query_str1 = query_str + "+OP=UPDATE+ACTIVITY_LOG_TYPE=";
+var query_str2;
+
+var htmpl_str, alg_edit_htmpl = "";
+if ( factory == "chg" )
+  alg_edit_htmpl = "+HTMPL=detail_chgalg_edit.htmpl";
+else if ( factory == "cr" )
+  alg_edit_htmpl = "+HTMPL=detail_alg_edit.htmpl";
+else if ( factory == "iss" )
+  alg_edit_htmpl = "+HTMPL=detail_issalg_edit.htmpl";
+
+<PDM_OBJECT>
+htmpl_str = "+HTMPL=";
+if ( factory == "cr" )   // SDT 19319 - Added for ITIL vertical
+  htmpl_str += "request_status_change.htmpl";
+else if ( factory == "chg" )
+  htmpl_str += "order_status_change.htmpl";
+else if ( factory == "iss" )
+  htmpl_str += "issue_status_change.htmpl";
+<PDM_MACRO name=menuItemLocal label="Update_Status..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"ST\" + htmpl_str +\"','status')">
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+<PDM_MACRO name=menuItemLocal label="Callback..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"CB\" + alg_edit_htmpl + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+<PDM_MACRO name=menuItemLocal label="Research..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"RS\" + alg_edit_htmpl + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+<PDM_MACRO name=menuItemLocal label="Log_Comment..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"LOG\" + alg_edit_htmpl + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+// Make this only for issue and cr (which includes ITIL in and pr)
+if ( factory == "iss" || 
+     factory == "cr" ) {
+<PDM_MACRO name=menuItemLocal label="Solution..." function="JavaScript: logSolution('\" + query_str + alg_edit_htmpl + \"+OP=UPDATE')">
+  }
+}
+</PDM_OBJECT>
+  				  
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+htmpl_str = "+HTMPL="
+if ( factory == "chg" )
+  htmpl_str += "xfer_esc_chg.htmpl";
+else if (factory == "cr")
+  htmpl_str += "xfer_esc_cr.htmpl";
+else if (factory == "iss")
+  htmpl_str += "xfer_esc_iss.htmpl";
+<PDM_MACRO name=menuItemLocal label="Transfer..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"TR\" + htmpl_str + \"','xfer')">
+}
+</PDM_OBJECT>
+					  
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+htmpl_str = "+HTMPL="
+if ( factory == "chg" )
+  htmpl_str += "xfer_esc_chg.htmpl";
+else if (factory == "cr")
+  htmpl_str += "xfer_esc_cr.htmpl";
+else if (factory == "iss")
+  htmpl_str += "xfer_esc_iss.htmpl";
+<PDM_MACRO name=menuItemLocal label="Escalate..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"ESC\" + htmpl_str + \"','xfer')">
+}
+</PDM_OBJECT>
+					  
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+// SDT 19319 - Added for ITIL vertical					  
+var nf_str = '+HTMPL=nf.htmpl+ACTIVITY_LOG_TYPE=NF';
+<PDM_MACRO name=menuItemLocal label="Manual_Notify..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"NF+HTMPL=nf.htmpl\" + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+if ( factory == "chg" ) {
+<PDM_MACRO name=menuItemLocal label="Update_Schedule..." function="JavaScript: popupActivityWithURL('\" + query_str1 + \"UPD_SCHED+HTMPL=upd_chg_sched.htmpl\" + \"','upd_sched')">
+}
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+  if ( factory == "cr" &&
+       w.argID != "0" &&
+       typeof w.argChange == "string" &&
+       ( w.argChange == "0" || w.argChange == "" ) ) {
+query_str2 = query_str + "+SET.id=" + w.argID;
+<PDM_MACRO name=menuItemLocal label="Attach_to_Existing_Change_Orde" function="JavaScript: popupActivityWithURL('\" + query_str2 + \"+ATTACH_CHANGE=1\" + \"','chg')">
+}
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ("$env.NX_EDIT_INACTIVE" != "No" || (typeof main_frame.argActive != "undefined" && main_frame.argActive == "1"))
+{
+  if ( factory == "cr" &&
+       w.argID != "0" &&
+       typeof w.argChange == "string" &&
+       w.argChange != "0" &&
+       w.argChange != "" ) {
+query_str2 = query_str + "+SET.id=" + w.argID;
+<PDM_MACRO name=menuItemLocal label="Detach_Change_Order..." function="JavaScript: popupActivityWithURL('\" + query_str2 + \"+DETACH_CHANGE=1\" + \"','chg')">
+}
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+	if (ahdtop.canDisplayLiveAssistanceLink()) {
+		if ( isNaN(w.argID) == false && w.argID != 0 )
+		{
+			
+<PDM_MACRO name=menuItem label="Live_Assistance" function="JavaScript: ahdtop.inviteEndUser('\" + w.argPersistentID + \"')">
+		}
+	}
+</PDM_IF> 
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "Action" menu - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mAction>
+
+var factory = "";
+if ( typeof w.propFormRelease == "undefined" || 
+     w.propFormRelease < 60 ) {
+  if ( w.propFormName == "detail_chg_ro.htmpl" )
+    factory = "chg";
+  else if ( w.propFormName == "detail_cr_ro.htmpl" )
+    factory = "cr";
+}
+else if ( w.propFormName1 == "detail" &&
+           ( w.propFactory == "cr" ||
+             w.propFactory == "chg" ||
+             w.propFactory == "iss" ) )
+  factory = w.propFactory;
+
+var query_str = w.cfgCgi +  "?SID=" + w.cfgSID +
+                "+FID=" + w.fid_generator() +
+                "+FACTORY=" + factory +
+                "+SET.id=" + w.argID +  
+                "+PERSID=" + w.argPersistentID;
+
+<PDM_OBJECT>
+if ( factory == "chg" ) {
+<PDM_MACRO name=menuItemLocal label="Accumulate_Change_Order..." function="JavaScript: invokeMenuItem('\" + query_str + \"+ACCUMULATE=1\" + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( factory == "chg" ) {
+<PDM_MACRO name=menuItemLocal label="Expedite_Change_Order..." function="JavaScript: invokeMenuItem('\" + query_str + \"+EXPEDITE=1\" + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if (factory == "iss" ) {
+<PDM_MACRO name=menuItemLocal label="Accumulate_Issue..." function="JavaScript: invokeMenuItem('\" + query_str + \"+ACCUMULATE=1\" + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if (factory == "iss" ) {
+<PDM_MACRO name=menuItemLocal label="Expedite_Issue..." function="JavaScript: invokeMenuItem('\" + query_str + \"+EXPEDITE=1\" + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( typeof w.ahdframeset.ahdframe._dtl == "object" &&
+     w.ahdframeset.ahdframe._dtl.edit==false) {     
+<PDM_MACRO name=menuItemLocal label="Close_All_Children..." function="JavaScript: invokeMenuItem('\" + query_str + \"+CLOSE_ALL_CHILD=1\" + \"')">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_MACRO name=menuItemLocal label="Attach_Service_Type_Event..." function="JavaScript: invokeMenuItem('\" + query_str + \"+FTYPE=xx+ATTACH_STYPE_EVENT=1\" + \"')">
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "Search" menu - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mSearch>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+if ( $ACCESS.FAC_in > 0 ) {
+<PDM_MACRO name=menuItem label="Incidents" function="upd_specific_frame('sd','search_in.htmpl')">
+}
+</PDM_IF>
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+if ( $ACCESS.FAC_pr > 0 ) {
+<PDM_MACRO name=menuItem label="Problems" function="upd_specific_frame('sd','search_pr.htmpl')">
+}
+</PDM_IF>
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+if ( $ACCESS.FAC_cr > 0 ) {
+<PDM_MACRO name=menuItem label="Requests" function="upd_specific_frame('sd','search_cr.htmpl')">
+<PDM_IF "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+<PDM_MACRO name=menuItem label="Requests_by_Keywords" function="upd_specific_frame('sd','list_cr_kt.htmpl')">
+</PDM_IF>
+}
+</PDM_IF>
+</PDM_OBJECT>
+	
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE">
+if ( $ACCESS.FAC_chg > 0 ) {
+<PDM_MACRO name=menuItem label="Change_Orders" function="upd_specific_frame('sd','search_chg.htmpl')">
+}
+</PDM_IF>
+</PDM_OBJECT>
+  
+<PDM_OBJECT>
+<PDM_IF "$env.NX_CMDB" != "STANDALONE" "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+if ( $ACCESS.FAC_iss > 0 ) {
+<PDM_MACRO name=menuItem label="Issues" function="upd_specific_frame('sd','search_iss.htmpl')">
+<PDM_IF "$env.NX_EBR_VERSION" == "SEARCH_ENGINE">
+<PDM_MACRO name=menuItem label="Issues_by_Keywords" function="upd_specific_frame('sd','list_iss_kt.htmpl')">
+</PDM_IF>
+}
+</PDM_IF>
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "Reports" menu - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mReports>
+<PDM_MACRO name=menuItem label="Summary..." function="ahdtop.popup_report('\" + w.rptName[0] + \"','\" + nx_escape(w.argSearchSqlClause.replace(/'/g,'\\\\\\'')) + \"','\" + w.propFormName1 + \"')">
+<PDM_MACRO name=menuItem label="Detail..." function="ahdtop.popup_report('\" + w.rptName[1] + \"','\" + nx_escape(w.argSearchSqlClause.replace(/'/g,'\\\\\\'')) + \"','\" + w.propFormName1 + \"')">
+<PDM_MACRO name=endMenu>
+}
+
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "Window" menu
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=startMenu parentid=mWindow>
+<PDM_MACRO name=menuItem label="Close_All_Popups" function="menubar_close_all_windows()">
+<PDM_MACRO name=menuItem label="List_All_Windows..." function="popup_window_list()">
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+     ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Log_Reader..." function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_OBJECT>
+if ( ahdtop.propInitialPopup == "" &&
+     w.ahdframeset != ahdtop &&
+     ! ahdtop.isLogReader ) {
+<PDM_MACRO name=menuItem label="View_Main_Page" function="focus_main_window()">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////
+// Service Desk "Help" menu - Knowledge Manager
+////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+if ( ! ahdtop.isLogReader )
+{
+<PDM_MACRO name=startMenu parentid=mHelp>
+<PDM_MACRO name=menuItem label="Help..." function="help_on_form('')">
+
+<PDM_OBJECT>
+if ( typeof w.propFormName == "string" &&
+     w.propFormName != "power_user_tips.htmpl" &&
+     w.propFormName != "screen_reader_usage.htmpl" ) {
+<PDM_MACRO name=menuItem label="Help_on_This_Window..." function="help_on_form('\"+w.propFormName+\"')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=menuItem label="Power_User_Tips..." function="popup_window('','power_user_tips.htmpl')">
+<PDM_MACRO name=menuItem label="Screen_Reader_Usage..." function="popup_window('','screen_reader_usage.htmpl')">
+
+<PDM_OBJECT>
+if( w._browser.isIE ) {
+<PDM_MACRO name=menuItemLocal label="About..." function="JavaScript: popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+else {
+<PDM_MACRO name=menuItem label="About..." function="popup_window('about','help_about.htmpl', 800, 455, 'ahdmenu=no')">
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=endMenu>
+}
+

@@ -1,0 +1,307 @@
+<PDM_IF 0>
+@(#)$Id: html_editor_create_ticket.htmpl ASPEN.5 2012/02/06 11:41:32 kumka02 Exp $
+</PDM_IF>
+<html lang="en"><head>
+<pdm_pragma release=110> 
+<pdm_include file=styles.htmpl> 
+<script>
+var hdrTitle = "Create a Ticket Link";
+</script>
+<pdm_include file=std_head.htmpl busy=yes> 
+<script>
+	var tenent = "$args.Tenant";
+	if(tenent == "")
+		tenent = "00";
+	
+	var addWC = "";
+	if(ahdtop.cfgMultiTenancy != "off")
+		addWC = "ADDITIONAL_WHERE=" + ("(tenant IS NULL OR tenant=U'" + tenent + "')");
+	
+	var m_bRO = false;
+	function Onload ()
+	{
+		<PDM_IF "$args.CRTemplate" != "">
+			m_bRO = true;
+			<PDM_LIST PREFIX=crList FACTORY=cr WHERE="persistent_id='$args.CRTemplate'" ESC_STYLE=C>
+				document.forms['frm_main'].elements['KEY.crTemplate'].value = '$crList.template_name';
+			</PDM_LIST>
+			document.forms['frm_main'].elements['SET.crTemplate'].value = '$args.CRTemplate';
+			document.forms['frm_main'].check_cr_template.checked = true;
+		</PDM_IF>
+		<PDM_IF "$args.crdocvalues" != "">
+			document.forms['frm_main'].check_cr_values.checked = true;
+		</PDM_IF>
+
+		<PDM_IF "$args.ISSTemplate" != "">
+			m_bRO = true;
+			<PDM_LIST PREFIX=issList FACTORY=iss WHERE="persistent_id='$args.ISSTemplate'" ESC_STYLE=C>
+				document.forms['frm_main'].elements['KEY.IssTemplate'].value = '$issList.template_name';
+			</PDM_LIST>
+			document.forms['frm_main'].elements['SET.IssTemplate'].value = '$args.ISSTemplate';
+			document.forms['frm_main'].check_iss_template.checked = true;
+		</PDM_IF>
+		<PDM_IF "$args.issdocvalues" != "">
+			document.forms['frm_main'].check_iss_values.checked = true;
+		</PDM_IF>
+		<PDM_IF "$args.LinkText" != "">
+			m_bRO = true;
+			document.forms['frm_main'].elements['LinkText'].value = '$args.LinkText';
+		</PDM_IF>
+		<PDM_IF "$args.itilcrfactory" != "">
+			m_bRO = true;
+			if ("$args.itilcrfactory" == "in")
+			{
+				document.forms['frm_main'].radio_itil_cr[0].checked = true;
+			}
+			else
+			{
+				document.forms['frm_main'].radio_itil_cr[1].checked = true;
+			}
+		</PDM_IF>
+		if (m_bRO)
+		{
+			for (var i = 0; i < document.forms['frm_main'].elements.length; i++)
+			{
+				document.forms['frm_main'].elements[i].disabled = true;
+			}
+		}
+	}
+
+	function LookForCrTemplate()
+	{
+		if (m_bRO)
+		{
+			return;
+		}
+		var sTemplateFactory = "cr";
+		if (document.forms['frm_main'].radio_itil_cr[0].checked)
+		{
+			var sTemplateFactory = "in";
+		}		
+		if (sTemplateFactory == "cr")
+		{
+			if(ahdtop.cfgMultiTenancy != "off")
+				addWC = "ADDITIONAL_WHERE=" + ("(tenant IS NULL OR tenant=U'" + tenent + "')") + " AND (type='R' OR type='' OR type IS NULL)";
+			else
+				addWC = "ADDITIONAL_WHERE=(type='R')";
+		}
+		else if (sTemplateFactory == "in")
+		{
+			if(ahdtop.cfgMultiTenancy != "off")
+				addWC = "ADDITIONAL_WHERE=" + ("(tenant IS NULL OR tenant=U'" + tenent + "')") + " AND (type='I')";
+			else
+				addWC = "ADDITIONAL_WHERE=(type='I')";
+		}	
+		document.forms['frm_main'].check_cr_template.checked = true;
+		popup_window('','CREATE_NEW', 0, 0, '', 'FACTORY=' + sTemplateFactory, 'KEEP.IsPopUp=1', 'use_template=1',
+			'QBE.EQ.template_name.delete_flag=0','KEEP.domset_name=template_list', addWC,
+			'KEEP.backfill_form=frm_main','KEEP.backfill_field=KEY.crTemplate','KEEP.backfill_attr=template_name');
+	}
+
+	function LookForIssTemplate()
+	{
+		if (m_bRO)
+		{
+			return;
+		}	
+		addWC = "";
+		if(ahdtop.cfgMultiTenancy != "off")
+			addWC = "ADDITIONAL_WHERE=" + ("(tenant IS NULL OR tenant=U'" + tenent + "')");
+		document.forms['frm_main'].check_iss_template.checked = true;
+		popup_window('','CREATE_NEW', 0, 0, '', 'FACTORY=iss', 'KEEP.IsPopUp=1', 'use_template=1',
+			'QBE.EQ.template_name.delete_flag=0','KEEP.domset_name=template_list', addWC, 
+			'KEEP.backfill_form=frm_main','KEEP.backfill_field=KEY.IssTemplate','KEEP.backfill_attr=template_name');
+	}
+	function radio_itil_cr_click()
+	{
+		document.forms['frm_main'].elements['SET.crTemplate'].value = "";
+		document.forms['frm_main'].elements['KEY.crTemplate'].value = "";
+		document.forms['frm_main'].check_cr_values.checked = false;
+		document.forms['frm_main'].check_cr_template.checked = false;
+	}
+	function reset()
+	{
+		if (!m_bRO)
+		{
+			document.forms['frm_main'].elements['LinkText'].value = "";
+			document.forms['frm_main'].elements['radio_itil_cr'][0].checked = true;
+			document.forms['frm_main'].elements['check_cr_values'].checked = false;
+			document.forms['frm_main'].elements['check_cr_template'].checked = false;
+			document.forms['frm_main'].elements['KEY.crTemplate'].value = "";
+			document.forms['frm_main'].elements['SET.crTemplate'].value = "";
+			document.forms['frm_main'].elements['check_iss_values'].checked = false;
+			document.forms['frm_main'].elements['check_iss_template'].checked = false;
+			document.forms['frm_main'].elements['KEY.IssTemplate'].value = "";
+			document.forms['frm_main'].elements['SET.IssTemplate'].value = "";
+		}
+	}
+	function Save()
+	{
+		if (!m_bRO)
+		{
+			var sCRTemplate = "";
+			var sIssTemplate = "";
+			var bDocumntValuesForCr = "0";
+			var bDocumntValuesForIss = "0";
+			var sLinkText = document.forms['frm_main'].elements['LinkText'].value;
+			//Make sure link text is not empty
+			if (sLinkText == "")
+			{
+				alert (msgtext("link_text_is_empty"));//link text is empty
+				return;
+			}
+			//Make sure that if template is selected for request there is a template
+			if (document.forms['frm_main'].check_cr_template.checked)
+			{
+				sCRTemplate = document.forms['frm_main'].elements['SET.crTemplate'].value;
+				if (sCRTemplate == "")
+				{
+					alert (msgtext("No_template_selected_for_reque"));//no template seleted for requests
+					return;
+				}
+			}
+			if (document.forms['frm_main'].check_cr_values.checked)
+			{
+				bDocumntValuesForCr = "1";
+			}
+			//Make sure that if template is selected fro iss there is a template
+			if (document.forms['frm_main'].check_iss_template.checked)
+			{
+				sIssTemplate = document.forms['frm_main'].elements['SET.IssTemplate'].value;
+				if (sIssTemplate == "")
+				{
+					alert (msgtext("No_template_selected_for_issue"))//no template seleted for issues
+					return;
+				}
+			}
+			if (document.forms['frm_main'].check_iss_values.checked)
+			{
+				bDocumntValuesForIss = "1";
+			}
+			var sCR_ITIL_Factory = "cr";
+			if (document.forms['frm_main'].radio_itil_cr[0].checked)
+			{
+				sCR_ITIL_Factory = "in";
+			}
+			
+			var strLink = "<a kt_doc_custom_attr='create_ticket_link' " + 
+			"crtemplate='" + sCRTemplate + "' " + 
+			"isstemplate='" + sIssTemplate + "' " + 
+			"crdocvalues='" + bDocumntValuesForCr + "' " +
+			"issdocvalues='" + bDocumntValuesForIss + "' " +
+			"itilcrfactory='" + sCR_ITIL_Factory + "' " +
+			"linktext='" + sLinkText + "' " + 
+			"href=javascript:CreateTicketFromLink('" + sCRTemplate + "'," + 
+			"'" + bDocumntValuesForCr + "','" + 
+			sIssTemplate + "'," + 
+			"'" + bDocumntValuesForIss + "'," + 
+			"'" + sCR_ITIL_Factory + "'" + 
+			")>" + 
+			sLinkText + "</a>";
+			//
+			top.opener.InsertDocLink(strLink);
+		}
+		top.close();
+	}
+</script>
+<script type="text/javascript" src=$CAisd/scripts/sitemods.js></script>
+</head>
+
+<body onload=Onload() class=detailro>
+<pdm_include file=std_body.htmpl header=no menubar=no>
+   <TABLE cellSpacing=0 cellPadding=0 width='100%' class=page_header>
+   <TR>
+   <TD align=left width='99%'><h2 style="margin:0px;">Create a Ticket Link</h2></TD>
+   <TD align=right width='1%'>
+	<SCRIPT>
+	ImgBtnRow();
+	ImgBtnCreate("btnSave", "Save[S]", "Save()", "defer", 120);
+	ImgBtnCreate("btncncl","Cancel[n]","top.close()",true,get_local_int[1]);
+	ImgBtnCreate("btncncl","Reset[R]","reset()",true,get_local_int[1]);
+	ImgBtnEndRow();
+	</SCRIPT>   
+   </TD>
+	</TR>
+	</TABLE>
+<span class='labeltext'>This page allows you to define a link that creates an issue or request.</span>
+<HR width="95%">
+<form name=frm_main>
+	<table>
+	<tr>
+	<TH class=labeltext>Link Text:</th><td><input type=text name=LinkText></td>
+	</tr>
+	</table>
+	<HR width="95%">
+	<b class='labeltext'>When the user's preferred document is request,</b>
+	<table>
+	<tr>
+	<th class=labeltext align=left>
+		<INPUT type=radio name="radio_itil_cr" id="radio_itil_cr" value=1 onclick="radio_itil_cr_click()" checked title="create an incident">
+		<span onclick="document.forms['frm_main'].radio_itil_cr[0].checked = true;" style="cursor:pointer;">create an incident</span>
+	</th>
+    </tr>
+    <tr>
+	<th class=labeltext align=left>
+		<INPUT type=radio name="radio_itil_cr" id="radio_itil_cr" value=2 onclick="radio_itil_cr_click()" title="create a request">
+		<span onclick="document.forms['frm_main'].radio_itil_cr[1].checked = true;" style="cursor:pointer;">create a request</span>
+	</th>		
+	</tr>
+    </table>
+	<table>
+	<tr>
+    <th class=labeltext>based on:</th>
+    
+	<TH class=labeltext>
+		<INPUT type=checkbox name="check_cr_values" id="check_cr_values" value=1 title="Create request or incident based on the document's values">
+		<span onclick="document.forms['frm_main'].check_cr_values.checked = true;" style="cursor:pointer;">the document's values</span>	
+	</th>
+	<TH class=labeltext>
+	<INPUT type=checkbox name="check_cr_template" id="check_cr_template" value=2 title="Create request or incident based on a template">
+	<span onclick="document.forms['frm_main'].check_cr_template.checked = true;" style="cursor:pointer;">the</span>
+	</th>
+	<TH class=labeltext>
+	<A class=sfLookup href="javascript:LookForCrTemplate()"> 
+ <PDM_IF "$SESSION.usingScreenReader" == "1">
+	<SPAN class=lookup1em>Request Template Lookup</SPAN></A>
+ <PDM_ELSE>
+	<IMG style="VERTICAL-ALIGN: middle" class=gn_container_no_border src="/CAisd/img/lookup.gif" alt="Pop up request or incident template lookup form">
+	<SPAN class=lookup1em>Template</SPAN></A>
+ </PDM_IF>
+	</th>
+	<TH class=labeltext>
+	<input type=text class=font_normal name=KEY.crTemplate onclick="LookForCrTemplate()" title="Request or incident template">
+	<input type=hidden name=SET.crTemplate>
+	</th>
+	</tr>
+	</table>
+	<HR width="95%">
+
+	<b class='labeltext'>When the user's preferred document is issue, create an issue</b>
+	<table>
+	<tr>
+    <th class=labeltext>based on:</th>
+	<TH class=labeltext>
+		<INPUT type=checkbox name="check_iss_values" id="check_iss_values" value=1 title="Create issue based on the document's values"><span onclick="check_iss_values.checked = true;" style="cursor:pointer;">the document's values</span>
+	</th>
+	<TH class=labeltext>
+	<INPUT type=checkbox name="check_iss_template" id="check_iss_template" value=2 title="Create issue based on a template"><span onclick="check_iss_template.checked = true;" style="cursor:pointer;">the</span>
+	</th>
+	<TH class=labeltext>
+	<A class=sfLookup href="javascript:LookForIssTemplate()" title="Issue template lookup"> 
+ <PDM_IF "$SESSION.usingScreenReader" == "1">
+	<SPAN class=lookup1em>Issue Template Lookup:</SPAN></A>
+ <PDM_ELSE>
+	<IMG class=gn_container_no_border style="VERTICAL-ALIGN: middle" src="/CAisd/img/lookup.gif" alt="Pop up issue template lookup form">
+	<SPAN class=lookup1em>Template:</SPAN></A>
+ </PDM_IF>
+	</th>
+	<TH class=labeltext>
+	<input type=text class=font_normal name=KEY.IssTemplate onclick="LookForIssTemplate()" title="Issue template">
+	<input type=hidden name=SET.IssTemplate>
+	</th>
+	</tr>
+	</table>
+</form>
+<pdm_include file=std_footer.htmpl>
+</body>
+</html>

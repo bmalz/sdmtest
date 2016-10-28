@@ -1,0 +1,143 @@
+////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 1995 Computer Associates International, Inc
+//
+// Copyright (C) 1991 - 1993 NetWorx, Incorporated.  All Rights Reserved.
+//
+// Copyright (C) 1994, 1995 Legent Software, Inc., as an
+// unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Legent
+// Corporation or its subsidiaries or affiliates (together referred to
+// as "LEGENT"), and which may not be reproduced, used, sold or
+// transferred to any third party without LEGENT's prior written consent.
+//
+// All Rights Reserved.
+//
+// RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:      force_unique_userid.mod 
+// Created:     25-sep-2002
+////////////////////////////////////////////////////////////////////////////
+
+//  Dummy function, just so RCS Id is embedded in compiled spell file...
+string force_unique_userid_spl_RCSID() { return "@(#)$Id: force_unique_userid.spl ASPEN.1 2011/05/20 14:46:02 saima01 Exp $"; }
+
+// Set interpreter option that all variables must be explicitly declared
+#define SYNTAX STRICT
+
+//////////////////////////////////////////////////////////////////////////////////
+// cnt.userid::validate_userid()
+// Description: This is a trigger to check the uniqueness of the userid
+//
+//
+// Input
+//   userid   contact's userid 
+//
+// Reply
+//   If userid not unique display message and not saved
+//
+////////////////////////////////////////////////////////////////////////
+
+cnt.userid::validate_userid( ... )
+{
+	int del_flag;
+	del_flag = 0;
+	string new_val;
+	string old_val;
+	string ignore_case;
+	old_val = (string) argv[2];	
+	new_val = (string) argv[3];	
+
+	string userid_escaped ;
+	userid_escaped = gsub(new_val, "'", "''");
+	
+	ignore_case = getenv("NX_IGNORE_SECURITY_CASE");
+	if ( !is_null(ignore_case) && downcase(ignore_case) == "yes" ) {
+        if ( !is_null(old_val) && old_val!="" )
+	        old_val = downcase(old_val);
+        if ( !is_null(new_val) && new_val!="" )
+		    new_val = downcase(new_val);
+	}
+	logf(TRACE, "old_val='%s' new_val='%s' userid_escaped='%s'", old_val, new_val, userid_escaped);
+
+	if(!is_null(new_val) && new_val!="") {
+	
+		if ( old_val != new_val) {
+			send_wait(0,top_object(),"call_attr","cnt",
+				"sync_fetch","RLIST_DYNAMIC", format("userid LIKE '%s'",userid_escaped), -1,0);
+	
+			if (msg_error()) {
+				logf(ERROR, "Error getting during sync_fetch of userid: %s", msg[0]);
+			}
+	
+			int domset_size;
+			domset_size = msg[1];
+	
+			logf(TRACE,"found %d UserID's that matches '%s'", domset_size, new_val);
+	
+			if (domset_size != 0){
+	
+				logf(TRACE, "'%s' UserID already exists", new_val);
+	
+				set_error(1);
+				set_return_data(find_msg(5, 910));
+			}	
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// cnt.userid::validate_delete_flag()
+// Description: This is a trigger to check the uniqueness of the userid
+//
+//
+// Input
+//   delete_flag   contact's delete_flag 
+//
+// Reply
+//   If userid not unique display message and not saved
+//
+////////////////////////////////////////////////////////////////////////
+
+cnt.delete_flag::validate_delete_flag( ... )
+{
+	int del_flag;
+	del_flag = 0;
+	string new_val;
+	string old_val;
+	old_val = (string) argv[2];	
+	new_val = (string) argv[3];	
+	
+	string userid_escaped ;
+	userid_escaped = gsub(this.userid, "'", "''");
+	
+	logf(TRACE, "old_val='%i' new_val='%i' userid='%s' userid_escaped='%s'", old_val, new_val, this.userid, userid_escaped);
+
+	if(!is_null(this.delete_flag)) {
+	
+		if ( old_val != new_val) {
+			send_wait(0,top_object(),"call_attr","cnt",
+				"sync_fetch","RLIST_DYNAMIC", format("userid LIKE '%s'",userid_escaped), -1,0);
+	
+			if (msg_error()) {
+				logf(ERROR, "Error getting during sync_fetch of userid: %s", msg[0]);
+			}
+	
+			int domset_size;
+			domset_size = msg[1];
+	
+			logf(TRACE,"found %d UserID's that matches '%s'", domset_size, userid_escaped);
+	
+			if (domset_size != 0){
+	
+				logf(TRACE, "'%s' UserID already exists", userid_escaped);
+	
+				set_error(1);
+				set_return_data(find_msg(5, 910));
+			}	
+		}
+	}
+
+}

@@ -1,0 +1,92 @@
+<PDM_IF 0>
+upload_success.htmpl
+WHEN PRESENTED:
+    When document is successful attached.   
+INTENT:
+    Use a string passed from upload server machine to construct 
+    htmpl page and update the status on the attachment editable   
+    detail page.
+VARIABLES:
+    string      image       The location of the image directory as
+                            specified in the config file.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = "Wynik wczytywania pliku";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript">
+var success_string = "${args.KEEP.success_str:}";
+function save_and_close()
+{
+    var parent_win = window.opener;
+    if (!parent_win.closed)
+    {
+	parent_win.pdm_submit('main_form', 'UPDATE');
+    }
+    window.close();
+}
+function cancel_parent_and_close()
+{
+    var win_mother = window.opener;
+    var button_one = win_mother.document.getElementsByName("imgBtn1_button");
+    if (!win_mother.closed)
+    {
+      button_one[0].click();   
+    }
+    window.close();
+}
+
+</script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="detailro" onload="window.opener.success(${args.FileSize:})">
+<div>
+<script>
+document.writeln(generate_basic_form_header_html());
+</script>
+</div>	
+<center>
+<script type="text/javascript">
+<PDM_MACRO NAME=dtlForm button=false>
+<PDM_IF $args.ErrorCode == 0>
+<PDM_MACRO NAME=button 
+    id="btn001" 
+    caption="Zapisz i Zamknij" 
+    func="save_and_close()" 
+    hotkey_name="Zapisz i Zamknij" 
+    NewRow=yes EndRow=yes>
+<PDM_ELSE>
+var f=window.opener.document.main_form;
+if(typeof f.elements["SET.attmnt_name"]=="object")
+f.elements["SET.attmnt_name"].value="";
+<PDM_MACRO NAME=button 
+    id="btn001" 
+    caption="Zamknij" 
+    func="cancel_parent_and_close()" 
+    hotkey_name="Zamknij" 
+    newrow=yes >
+</PDM_IF>
+<PDM_MACRO NAME=dtlStart center=true>
+<PDM_MACRO NAME=dtlStartRow>
+detailRowHdr("Status");
+<PDM_IF $args.ErrorCode == 0>
+detailSetRowData("Plik wgrany. W celu zapisania wybierz przycisk <span style='color: red'>Zapisz i Zamknij</span>.");
+<PDM_ELSE>
+var escaped_error = unescape('<PDM_FMT ESC_STYLE=JS2>$args.Error_Msg</PDM_FMT>');
+detailSetRowData("Błąd wgrywania pliku- " + escaped_error);
+</PDM_IF>
+detailWriteRow();
+<PDM_MACRO NAME=dtlEndTable>
+</script>
+<PDM_MACRO NAME=dtlEnd>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: upload_success.htmpl ASPEN.2 2010/11/18 09:32:59 saima01 Exp $
+</PDM_IF>

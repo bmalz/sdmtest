@@ -1,0 +1,48 @@
+<PDM_IF 0>
+session_refused.htmpl
+WHEN PRESENTED:
+    When a user attempts to show menu_frames as other than the first
+    form in a session.
+INTENT:
+    To tell him to go through log
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript">
+	var ahdtop = window;
+	window.name = "AHDtop";
+	var usdImg = new Array();
+	usdImg["circleca"] = "$CAisd/img/circleca.png";
+	var cfgProductName = "$ProductName";
+</script>
+
+<title>$ProductName Odrzucona Sesja</title>
+</head>
+<body>
+<center>
+<script type="text/javascript">
+document.writeln(generate_logo_product_name_html());
+</script>
+<H1>Odrzucona Sesja $ProductName</H1>
+</center>
+Zamierzasz wyświetlić formularz aplikacji HelpDesk lecz twoja sesja
+jest już aktywna w innym oknie przeglądarki (możliwe że na innym komputerze). Są dwie możliwości dlaczego wodzisz tą wiadomość:
+            <OL>
+            <LI>
+			Zamierzasz przenieść sesję z jednego okna przeglądarki do drugiego.
+			Ze względów bezpieczeństwa musisz zalogować się ponownie i rozpocząć nową sesję.
+			Kliknij <A HREF=$cgi>tutaj</A> aby zalogować się ponownie.
+            </LI><BR><BR>
+            <LI>Wybrałeś(aś) Plik->Nowy w menu przeglądarki i przeglądarka próbowała
+			zainicjować nowe okno z kopią twojej sesji. Może być tylko jedno główne okno dla każdej sesji.
+			Kliknij <A HREF=$cgi>tutaj</A> aby zalogować się na drugą sesję w tym oknie.
+            </LI>
+            </OL>
+			Jeśli uważasz że otrzymałeś tą stronę w wyniku błędu skontaktuj się administratorem aplikacji HelpDesk.
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: session_refused.htmpl ASPEN.1 2010/11/17 00:22:41 saima01 Exp $
+</PDM_IF>

@@ -1,0 +1,110 @@
+<PDM_IF 0>
+$Id: wspicon.htmpl,v 1.2 2006/11/10 17:46:37 ralje02 Exp $
+
+WHEN PRESENTED:
+   To insert the WSP icon into the welcome banner of a WSP preview session. 
+
+   Note to localizers:
+     Line 45 of this file is:
+
+        ahdtop.replaceAll("Save","noSave");
+
+     This changes every occurrence of the word "Save" in msg_cat.js
+     to "noSave".  This is intended to provide visual feedback reminding
+     the user that he or she is in a readonly preview session and cannot
+     update the database.  This line should be modified for the target
+     language, and if necessary, repeated with different literals in
+     order to achieve the same effect on all locale-dependent variations
+     of the word "Save".
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview=no>
+<pdm_if "$prop.WSPHOST" != "">
+<pdm_if "$prop.user_type" == "PDA">
+<center>
+<table class=wspicon_container>
+<tr>
+</pdm_if>
+<script type="text/javascript">
+var wsp_for_role = 0;
+if (typeof ahdtop != "undefined" && 
+    typeof ahdtop.toolbarTab != "undefined" &&
+    typeof ahdtop.toolbarTab[0].role_menubar == "string")
+{
+    wsp_for_role = 1;
+}
+var access = "$ACCESS.wsp" - 0;
+if (!wsp_for_role)
+{
+var td = "<td class='";
+var img = "<img src='$CAisd/img/painter.gif' height=16 width=16 alt='";
+if ( access & 0x04 )
+  td += "wspicon_cell_updates_allowed'>" + img + // Yellow - updates allowed
+    "Web Screen Painter Preview Session ($prop.user_type) - Update Access";
+else {
+  td += "wspicon_cell_updates_rejected'>" + img + // Red - updates rejected
+    "Web Screen Painter Preview Session ($prop.user_type) - Readonly";
+}
+td += "'>";
+document.writeln(td);
+}
+<pdm_if "$prop.user_type" != "PDA">
+if ( !(access & 0x04) )
+{
+  if ( typeof ahdtop.wspReplaceAllDone != "boolean" ) {
+    ahdtop.wspReplaceAllDone = true;
+
+    // Localizers: The following lines should be modified as appropriate
+    //             for the locale - see "Note to Localizers" above.
+
+    ahdtop.msgReplaceAll("Save","noSave");
+
+    // End of code requiring localization
+  }
+}
+</pdm_if>
+</script>
+<pdm_if "$prop.user_type" == "PDA">
+</tr></table></center>
+</pdm_if>
+<pdm_if 0> <!-- Suppress applet due to Sun Java plugin install issues -->
+<pdm_if "${args.KEEP.POPUP_NAME:}" == "">
+  <object 
+    id="WSPapplet"
+    classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
+    codebase="http://java.sun.com/products/plugin/autodl/jinstall-1_4_2-windows-i586.cab#Version=1,4,2,0"
+    width=1 height=1>
+    <param name=code value="WSPapplet">
+    <param name=codebase value="$CAisd">
+    <param name=archive value="WSPapplet.jar,slump.jar,log4j-1.2.8.jar">
+    <param name=type value="application/x-java-applet;version=1.4.2">
+    <param name=scriptable value="true">
+    <param name=SID value="$prop.SID">
+    <param name=USER value="$cst.userid">
+    <param name=WSPHOST value="$prop.WSPHOST">
+    <param name=WSPROOT value="$prop.WSPROOT">
+    <param name=WSPACCESS value="$ACCESS.wsp">
+  </object>
+<pdm_else>
+  <embed 
+    id="WSPapplet"
+    type="application/x-java-applet;version=1.4.2"
+    pluginspage="http://java.sun.com/products/plugin/index.html#download"
+    alt="Web Screen Painter"
+    code="WSPapplet"
+    codebase="$CAisd"
+    archive="WSPapplet.jar,slump.jar,log4j-1.2.8.jar"
+    width=1
+    height=1
+    scriptable="true"
+    mayscript
+    SID="$prop.SID"
+    USER="$cst.userid"
+    WSPHOST="$prop.WSPHOST"
+    WSPROOT="$prop.WSPROOT"
+    WSPACCESS="$ACCESS.wsp"
+  </embed>
+</pdm_if>
+</pdm_if>
+</td>
+</pdm_if>

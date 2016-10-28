@@ -1,0 +1,85 @@
+<PDM_IF 0>
+list_tskstat.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Task Status.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Wyszukiwanie statusów zadań";
+var hdrTitleList = "Lista statusów zadań";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var rptName = new Array("tskstatsum.rpt", "tskstatdtl.rpt");
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+
+<PDM_IF "$args.KEEP.forTsktytoTskstat" == "1">
+    var cfgCanCopy = false;
+    var enableExtraBtn = false;
+    <PDM_IF "$args.KEEP.TSKTY_ID" != "0" && $ACCESS.FAC_tskty \> 1>
+        var enableExtraBtn = true;
+    </PDM_IF>
+    cfgExtraButton = new Array("Update_Status_Codes", "UpdateStatusCodes()", enableExtraBtn);
+
+    function UpdateStatusCodes() {
+        update_lrel("tskty", "tskty:$args.KEEP.TSKTY_ID", "tskstat", "status_codes",  
+            "Kody Statusów", "Valid Task Status Codes", "");
+    }
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<PDM_IF "$args.KEEP.forTsktytoTskstat" == "1">
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+</PDM_IF>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Task Status">
+<script language="JavaScript">
+<PDM_IF $ACCESS.FAC_tskstat \> 1 && "$args.KEEP.noCreateBtn" != "1">
+<PDM_MACRO name=sfStart factory=tskstat>
+<PDM_ELSE>
+<PDM_MACRO name=sfStart create=false factory=tskstat>
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_tskstat.htmpl>');
+</PDM_IF>
+<PDM_IF "$args.KEEP.forTsktytoTskstat" == "1">
+document.write('<input type="hidden" name="QBE.EQ.tsktypes.tskty.id" value="$args.QBE.EQ.tsktypes.tskty.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=sym size=20>
+<PDM_MACRO name=sfTextbox hdr="Kod" attr=code size=20>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr=description size=40>
+<PDM_MACRO name=sfEnd>
+</script>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var msgFoundNone = "Nie znaleziono statusów zadań";
+var msgFound1 = "Znaleziono status zadania";
+var msgFound = "Znaleziono %1 statusów zadania";
+var msgFoundMore = "Znaleziono %1 statusów zadania. Wyświetlane %2 z %3";
+var msgSelect = "Kliknij aby wybrać rekord";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=sym exportFmt=ShowLink link=yes sort="sym ASC, tenant ASC">
+<PDM_MACRO name=lsCol hdr="Kod" attr=code>
+<PDM_MACRO name=lsCol hdr="Opis" attr=description width=100>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</script>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_tskstat.htmpl ASPEN.2 2011/10/19 17:59:26 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

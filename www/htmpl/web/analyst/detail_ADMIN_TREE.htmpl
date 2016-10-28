@@ -1,0 +1,315 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When adding, modifying or viewing a node on the admin tree
+INTENT:
+    Adding, editing or viewing a node on the admin tree
+VARIABLES:
+    object  ADMIN_TREE  args	The ADMIN_TREE object we are displaying.
+
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.CAPTION</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.CAPTION</PDM_FMT>';
+var hdrTitleNew = "Create New Node";
+<PDM_IF "$env.NX_SD" == "Yes">
+	var bSDInstalled = 1;
+<PDM_ELSE>
+	var bSDInstalled = 0;
+</PDM_IF>
+
+<PDM_IF "$env.NX_KT" == "Yes">
+	var bKTInstalled = 1;
+<PDM_ELSE>
+	var bKTInstalled = 0;
+</PDM_IF>
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/upload.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/timer.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attevts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/tree_edit.js"></SCRIPT>
+<SCRIPT>
+var iType;
+var sCaption;
+var sKSCaption;
+var admin_tree_orig_onsubmit = void(0);
+
+function loadActions()
+{	
+	//Getting the caller KT tree MacroID in the array.
+	var strHref = location.href;
+	var j = strHref.search("KTMacrolArrayNumber");
+	if (j>0)
+	{
+		j = j + "KTMacrolArrayNumber".length + 1;
+		var lNumber = strHref.substr(j,1);
+		parent.KTMacroNumber = lNumber;
+	}
+	else
+	{
+		parent.KTMacroNumber = 0;
+	}
+	
+	if ("$prop.form_name_3" == "edit")
+	{
+		if ('<PDM_FMT PAD=NO ESC_STYLE=C>$args.CAPTION</PDM_FMT>' == "")
+		{
+			parent.bEditing_New = true;
+		}
+		else
+		{
+			parent.bEditing_New = false;
+		}
+				
+		if ("$args.id" == "0")
+		{
+			document.forms[0].elements["CBX.SD_ADMIN"].checked = true;
+			document.forms[0].elements["SET.SD_ADMIN"].value = 1;
+			document.forms[0].elements["CBX.KT_ADMIN"].checked = true;
+			document.forms[0].elements["SET.KT_ADMIN"].value = 1;
+			document.forms[0].elements["CBX.KT_MANAGER"].checked = true;
+			document.forms[0].elements["SET.KT_MANAGER"].value = 1;
+		}
+		else
+		{
+			if ("$args.SD_ADMIN" == "1")
+			{
+				document.forms[0].elements["CBX.SD_ADMIN"].checked = true;
+				document.forms[0].elements["SET.SD_ADMIN"].value = 1;
+			}
+			if ("$args.KT_ADMIN" == "1")
+			{
+				document.forms[0].elements["CBX.KT_ADMIN"].checked = true;
+				document.forms[0].elements["SET.KT_ADMIN"].value = 1;
+			}
+			if ("$args.KT_MANAGER" == "1")
+			{
+				document.forms[0].elements["CBX.KT_MANAGER"].checked = true;
+				document.forms[0].elements["SET.KT_MANAGER"].value = 1;
+			}
+		
+			if (iType == 1)
+			{	
+				sCaption = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.CAPTION</PDM_FMT>';
+			}
+			else if ( iType == 2)
+			{
+				sKSCaption = "$args.KT_KS_CAPTION";
+			}
+		}
+	}
+	else
+	{
+		if (typeof parent.bEditing_New != 'undefined')
+		{
+			//Getting a reference to the tree macro and sending it a message to update the tree with the changes
+			if (ahdtop.cstReducePopups == 1) // if popups are blocked
+			ahdframeset.kt_catTreeWindow[parent.KTMacroNumber].KTCatTree.UpdateTree($args.id,parent.bEditing_New,'<PDM_FMT PAD=NO ESC_STYLE=C KEEPTAGS=YES>$args.CAPTION</PDM_FMT>',$args.PARENT_ID,$args.HAS_CHILDREN,'$args.RESOURCE');
+			else
+			top.opener.ahdframeset.kt_catTreeWindow[parent.KTMacroNumber].KTCatTree.UpdateTree($args.id,parent.bEditing_New,'<PDM_FMT PAD=NO ESC_STYLE=C KEEPTAGS=YES>$args.CAPTION</PDM_FMT>',$args.PARENT_ID,$args.HAS_CHILDREN,'$args.RESOURCE');
+		}
+	}
+}
+function checkBeforeSave()
+{
+	var sNodeName;
+	var bSDAdminChecked;
+	var bKTAdminChecked;
+	var bKTManagerChecked;
+	if (document.forms[0].elements["CBX.SD_ADMIN"].checked == true)
+	{
+		document.forms[0].elements["SET.SD_ADMIN"].value = 1;
+		bSDAdminChecked = 1;
+	}
+	else
+	{
+		document.forms[0].elements["SET.SD_ADMIN"].value = 0;
+		bSDAdminChecked = 0;
+	}
+	
+	if (document.forms[0].elements["CBX.KT_ADMIN"].checked == true)
+	{
+		document.forms[0].elements["SET.KT_ADMIN"].value = 1;
+		bKTAdminChecked = 1;
+	}
+	else
+	{
+		document.forms[0].elements["SET.KT_ADMIN"].value = 0;
+		bKTAdminChecked = 0
+	}
+	
+	if (document.forms[0].elements["CBX.KT_MANAGER"].checked == true)
+	{
+		document.forms[0].elements["SET.KT_MANAGER"].value = 1;
+		bKTManagerChecked = 1;
+	}
+	else
+	{
+		document.forms[0].elements["SET.KT_MANAGER"].value = 0;
+		bKTManagerChecked = 0;
+	}
+	//Check if the node name is empty
+	var cap_obj;
+	if (iType != 2)
+	{
+		cap_obj = document.forms[0].elements["SET.CAPTION"];
+		sNodeName = trim(cap_obj.value);
+	}
+	else
+	{
+		cap_obj = document.forms[0].elements["SET.KT_KS_CAPTION"];
+		sNodeName = trim(cap_obj.value);
+	}
+	if (sNodeName.length == 0)
+	{
+		alert("Please enter a node name.");
+		if (iType != 2)
+		{
+			document.forms[0].elements["SET.CAPTION"].focus();
+		}
+		else
+		{
+			document.forms[0].elements["SET.KT_KS_CAPTION"].focus();
+		}
+		return;
+	}
+	if (!check_caption(cap_obj))
+	    return false;
+	
+	if ( (bSDAdminChecked == 0) && (bKTAdminChecked == 0) && (bKTManagerChecked == 0))
+	{
+		alert("Please select at least one authorized view for this node.")
+		return;
+	}
+		
+	if (iType == 1)
+	{
+		
+		if ( document.forms[0].elements["SET.CAPTION"].value != sCaption)
+		{
+			document.forms[0].elements["SET.KT_KS_CAPTION"].value = document.forms[0].elements["SET.CAPTION"].value;
+		}
+	}
+	else if (iType == 2)
+	{	
+		if ( document.forms[0].elements["SET.KT_KS_CAPTION"].value != sKSCaption)
+		{
+			document.forms[0].elements["SET.CAPTION"].value = document.forms[0].elements["SET.KT_KS_CAPTION"].value;
+		}
+	}
+	
+	// run original onsubmit handler if any
+    if (typeof admin_tree_orig_onsubmit != "undefined" && 
+	admin_tree_orig_onsubmit != "")
+	  return admin_tree_orig_onsubmit();
+	return true;
+	
+}
+function close()
+{
+	ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+function trim(argvalue)
+{
+	while (1)
+	{
+		if (argvalue.substring(0, 1) != " ")
+			break;
+		argvalue = argvalue.substring(1, argvalue.length);
+	}
+	return argvalue;
+}
+function check_caption(fld_obj)
+{
+    if (typeof fld_obj == "undefined")
+	return true;
+    var caption = fld_obj.value;
+    if (!check_label(caption)) 
+    {
+	detailReportValidation( fld_obj, 1, msgtext("Bad_character_in_node_name.__P"));
+	return false;
+    }
+    else 
+    {
+	detailReportValidation(fld_obj,0);
+	return true;
+    }
+}       
+</SCRIPT>
+</HEAD>
+<BODY onLoad="loadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="kcat" header=no>
+<SCRIPT>
+	
+<PDM_MACRO name=dtlForm factory=ADMIN_TREE>
+<PDM_MACRO name=dtlStart>
+	if (typeof window.document.main_form.onsubmit != "undefined" && 
+	    window.document.main_form.onsubmit != "")
+	{
+	    admin_tree_orig_onsubmit = window.document.main_form.onsubmit;
+	} 
+		
+	window.document.main_form.onsubmit = checkBeforeSave; 
+	
+</SCRIPT>
+<CENTER>
+<SCRIPT>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.KT_KS_FLAG" != "1">
+<PDM_MACRO name=dtlTextbox hdr="Nazwa węzła" attr=CAPTION colspan=2 evt="onChange='check_caption(this)'" rows=1 size=80>
+	iType = 0;
+<PDM_ELIF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=dtlTextbox hdr="Nazwa węzła" attr=CAPTION colspan=2 evt="onChange='check_caption(this)'" rows=1 size=80>
+	docWrite("<INPUT TYPE=HIDDEN NAME=SET.KT_KS_CAPTION VALUE='$args.KT_KS_CAPTION'>");
+	iType = 1;
+<PDM_ELSE>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa węzła" attr=KT_KS_CAPTION colspan=2 evt="onChange='check_caption(this)'" rows=1 size=80>
+	docWrite("<INPUT TYPE=HIDDEN NAME=SET.CAPTION VALUE='$args.CAPTION'>");
+	iType = 2;
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=DESCRIPTION colspan=2 rows=6 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zasób" attr=RESOURCE colspan=2 rows=1 size=80>
+<PDM_MACRO name=dtlStartRow>
+detailRowHdr("Authorized View", 2);
+detailSetRowData("");
+detailWriteRow();
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Administrator systemu Service Desk" attr=SD_ADMIN colspan=2 off="" on=X>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "env.NX_CMDB" != "STANDALONE">
+<PDM_MACRO name=dtlCheckbox hdr="Administrator systemu bazy wiedzy" attr=KT_ADMIN colspan=1 off="" on=X>
+<PDM_MACRO name=dtlCheckbox hdr="Menadżer bazy wiedzy" attr=KT_MANAGER colspan=1 off="" on=X>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_ADMIN_TREE.htmpl,v 1.4 2007/01/04 22:57:44 tuach01 Exp $;
+</PDM_IF>
+<PDM_WSP>

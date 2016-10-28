@@ -1,0 +1,71 @@
+<PDM_IF 0>
+cnt_notif_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Contact 
+INTENT:
+    Display a notebook page for cnt notification.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=cnt_notif_tab" factory=cnt>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+<PDM_MACRO name=tabBanner title="Powiadomienia">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlTextbox hdr="Numer telefonu" attr=phone_number>
+<PDM_MACRO name=dtlTextbox hdr="Numer faksu" attr=fax_phone>
+<PDM_MACRO name=dtlTextbox hdr="Numer pagera" attr=beeper_phone>
+<PDM_MACRO name=dtlTextbox hdr="Alternatywny numer telefonu" attr=alt_phone>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Adres e-mail" attr=email_address colspan=2 size=35>
+//<PDM_MACRO name=dtlTextbox hdr="Adres e-mail pagera" attr=pemail_address colspan=2 size=35>
+<PDM_MACRO name=dtlStartRow class=tab>
+_dtl.fieldTitle = " "; // Kludge to turn off <label> on next header
+detailRowHdr("Powiadomienia");
+var styleClass = "class=title2text";
+if ( _dtl.edit )
+  styleClass = "class='title3text gn_text_small'";
+detailSetRowData("<span " + styleClass + ">Metoda</span>");
+<PDM_MACRO name=dtlDropdown hdr="Niski" attr=notify_method1 lookup=no title="Metoda dla notyfikacji niskiego poziomu">
+<PDM_MACRO name=dtlDropdown hdr="Normalny" attr=notify_method2 lookup=no title="Metoda dla notyfikacji normalnego poziomu">
+<PDM_MACRO name=dtlDropdown hdr="Wysoki" attr=notify_method3 lookup=no title="Metoda dla notyfikacji wysokiego poziomu">
+<PDM_MACRO name=dtlDropdown hdr="Krytyczny" attr=notify_method4 lookup=no title="Metoda dla notyfikacji krytycznego poziomu">
+
+var saveUsingScreenReader = ahdtop.cstUsingScreenReader;
+ahdtop.cstUsingScreenReader = false;
+<PDM_MACRO name=dtlStartRow>
+ahdtop.cstUsingScreenReader = saveUsingScreenReader;
+_dtl.fieldTitle = " "; // Kludge to turn off <label> on next header
+detailRowHdr("");
+detailSetRowData("<span " + styleClass + ">Kalendarze dla metod notyfikacji</span>");
+<PDM_MACRO name=dtlDropdown hdr="" attr=notify_ws1 lookup=no title="Kalendarz dla notyfikacji niskiego poziomu">
+<PDM_MACRO name=dtlDropdown hdr="" attr=notify_ws2 lookup=no title="Kalendarz dla notyfikacji normalnego poziomu">
+<PDM_MACRO name=dtlDropdown hdr="" attr=notify_ws3 lookup=no title="Kalendarz dla notyfikacji wysokiego poziomu">
+<PDM_MACRO name=dtlDropdown hdr="" attr=notify_ws4 lookup=no title="Kalendarz dla notyfikacji krytycznego poziomu">
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: cnt_notif_tab.htmpl ASPEN.5 2010/12/08 12:30:36 pstso01 Exp $
+</PDM_IF>

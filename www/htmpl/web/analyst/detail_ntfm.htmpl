@@ -1,0 +1,131 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of the Message Template
+</PDM_IF>
+
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Detail $args.sym Message Template"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update $args.sym Message Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Message Template"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>   
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+var pass_val_to_menubar ="$args.obj_type";
+function copy_from_parent()
+{}
+var autoRefreshWindows = new Object();
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Message Template" key="$args.name">
+
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+	
+<PDM_MACRO name=dtlForm factory=ntfm>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Znak" attr="sym" colspan=2 size=80>
+<PDM_IF "$prop.form_name_3" == "edit" && "$Context" == "initial">
+<PDM_IF "$args.KEEP.CREATE_NEW_NTFM_FROM_POPUP" == "1">
+<PDM_IF "$args.obj_type" == "cr">
+			detailTextboxReadonly("Object Type","obj_type",1,
+				"Request/Incident/Problem", "");
+		
+<PDM_ELSE>
+				detailTextboxReadonly("Object Type","obj_type",1,"$args.KEEP.obj_type_sym", "");
+		
+</PDM_IF>
+<PDM_ELSE> 
+				detailDropdown("Object Type","obj_type","ntfm_prod_list",1,20, 
+				"1","","$args.obj_type","yes","name","","","","no","0","","",
+				"Request/Incident/Problem","cr",
+				"Change Order","chg",
+				"Issue","iss",
+				"Issue Workflow Task","iss_wf",
+				"Workflow Task","wf",
+				"Knowledge Document","KD",
+				"Knowledge Document Comment","O_COMMENTS",
+				"Knowledge Report Card","KT_REPORT_CARD",
+				"Assistance Session","sa_notif",
+                "Contact","cnt",
+                "Configuration Item","nr");
+	
+</PDM_IF>
+<PDM_ELSE> // edit form presented if not create new screen. RO form also uses the code below	
+
+	
+<PDM_IF "$args.obj_type" == "cr">
+		detailTextboxReadonly("Object Type","obj_type",1,"Request/Incident/Problem", "");
+	
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ obiektu" attr=obj_type>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr="delete_flag" lookup=no>
+<PDM_MACRO name=dtlCheckbox hdr="Auto powiadomienie" attr=notify_flag off=No on=Yes>
+<PDM_MACRO name=dtlDropdown hdr="Poziom powiadomienia" attr=notify_level lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł wiadomości powiadomienia" attr=notify_msg_title colspan=4 size=40>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Treść wiadomości powiadomienia" attr=notify_msg_body colspan=4 keeplinks=yes rows=8 size=180>
+	 // Don't display HTML field for Manual Notify
+	
+<PDM_IF "$args.persistent_id" != "ntfm:1045" && "$args.persistent_id" != "ntfm:1046" && "$args.persistent_id" != "ntfm:1047" >
+<PDM_IF "$prop.form_name_3" != "edit">
+		detailEndRow();
+		docWriteln("<TABLE cellpadding=1 cellspacing=5 WIDTH='90%'>");
+		docWriteln("<TR VALIGN=TOP>");
+		docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro></TH>");
+		docWriteln("</TR>");
+		docWriteln("<TR VALIGN=TOP>");
+		docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro>HTML message details</TH>");
+		docWriteln("</TR>");
+		docWriteln("<TR VALIGN=TOP>");
+		docWriteln("<TH COLSPAN=5 ALIGN=middle VALIGN=baseline CLASS=detailro></TH>");
+		docWriteln("</TR>");
+		docWriteln("</TABLE>");
+		
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlHTMLEditBox hdr="Wiadomość HTML" attr=notify_msg_body_html colspan=4 escape=JS2 preview="yes" rows=8 size=180 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</PDM_IF>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+"@(#)$Id: detail_ntfm.htmpl ASPEN.3 2012/06/12 14:46:17 debbi01 Exp $";
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,173 @@
+<PDM_IF 0>
+@(#)$Id: detail_doc_rep.htmpl ANDERSON.4 2009/11/11 00:19:58 gurig01 Exp $
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/attmnt_lib.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.sym</PDM_FMT>';
+var hdrTitleUpd = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.sym</PDM_FMT>';
+var hdrTitleNew = "Create New Repository";
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT>
+var rep_type = $args.repository_type;
+var server_old = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.server</PDM_FMT>';
+var upload_path_old = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.upload_path</PDM_FMT>';
+var archive_path_old = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.archive_path</PDM_FMT>';
+var argRepId = "$args.id";
+var argSym = '<PDM_FMT ESC_STYLE=C KEEPTAGS=YES>$args.sym</PDM_FMT>';
+var old_prohibited_types;
+var copyFromParent = "$args.KEEP.MAKE_COPY";
+
+function preSaveTrigger()
+{
+	if(argRepId != "0")
+	{
+		var frm = document.main_form
+		if(frm.elements["SET.server"].value != server_old ||
+			frm.elements["SET.upload_path"].value != upload_path_old ||
+			frm.elements["SET.archive_path"].value != archive_path_old)
+		{
+			var res = confirm(msgtext("You_have_modified_one_or_more_"));
+			if(!res)
+				return false;
+
+		}
+	}		
+	return true;
+}
+
+function preCancelTrigger()
+{
+	if ( !ahdtop.cstReducePopups )	// continue cancel
+		return true;
+		
+	BackToRep();	// Return to repository list
+	return false;	// don't continue cancel
+}
+</script>
+
+</HEAD>
+<BODY onload="loadDocRepActions();copy_from_parent();">
+<PDM_INCLUDE FILE=kt_tbl_cache.htmpl DOC_REP=1> 
+<PDM_INCLUDE FILE=std_body.htmpl filename="doc_rep" header=no>
+<script>
+<PDM_MACRO name=dtlForm button=true factory=doc_rep>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym colspan=4 rows=1 size=105>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=4 rows=3 size=105>
+<PDM_MACRO name=dtlStartRow>
+
+
+var rep_type_text = "$args.repository_type";
+if (! _dtl.edit )   
+{
+	switch(rep_type_text)
+	{
+		case "0":
+			rep_type_text = "Service Desk Attachments";
+			break;
+		case "2":
+			rep_type_text = "Knowledge Attachments";
+			break;
+		case "3":
+			rep_type_text = "Images";
+			break;					
+	}
+}
+detailSetEventHandler("onChange='reptype_click(this)'");
+detailDropdown("Repository Type","repository_type","doc_rep",1,40, 
+true,"",rep_type_text,
+"no","",rep_type_text,
+"","","no","","","Service Desk Attachments",
+"Service Desk Attachments","0","Knowledge Attachments","2","Images","3");
+
+
+<PDM_MACRO name=dtlTextbox hdr="Nazwa serwera" attr=server rows=1 size=20> 
+if (! _dtl.edit )   
+{
+		var isDefault = "No";
+		if("$args.default_rep" == "1")
+			isDefault = "Yes"
+		detailTextboxReadonly("Default","default_rep",1,isDefault);
+}
+else
+{
+	
+<PDM_MACRO name=dtlCheckbox hdr="Domyślnie" attr=default_rep>
+}
+
+if (! _dtl.edit )   
+{
+		var	size_byte = Number("$args.file_limit_size") * 1024;
+		if(size_byte == 0)
+			size_txt = "Unlimited";
+		else		
+			var size_txt = GetSizeText(size_byte.toString());
+		detailTextboxReadonly("File Limit Size","file_limit_size",1,size_txt);
+}
+else
+{
+	
+<PDM_MACRO name=dtlTextbox hdr="Limit wielkości pliku (KB)" attr=file_limit_size rows=1 size=17>
+}
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ścieżka zapisu" attr=upload_path colspan=4 rows=1 size=105>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Ścieżka Servletu" attr=servlet_path colspan=4 rows=1 size=105>
+<PDM_MACRO name=dtlStartRow>
+
+var archive_type = "$args.archive_type";
+
+if (archive_type == "")
+{
+	archive_type = "0";
+}
+
+if (! _dtl.edit )   
+{
+	switch(archive_type)
+	{
+		case "0":
+			archive_type = "None";
+			break;
+		case "1":
+			archive_type = "Archive and Purge";
+			break;
+		case "2":
+			archive_type = "Purge only";
+			break;					
+	}
+}
+
+detailDropdown("Archive Type","archive_type","doc_rep",1,30, 
+true,"",archive_type,
+"no","",archive_type,
+"","","no","","","Archive and Purge",
+"None","0","Archive and Purge","1","Purge only","2"); 
+
+<PDM_MACRO name=dtlTextbox hdr="Ścieżka archiwum" attr=archive_path colspan=3 rows=1 size=62>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zabropnione typy plików" attr=prohibited_file_ext colspan=4 rows=4 size=105>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt" colspan=2>
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by" colspan=2>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+
+<PDM_WSP>

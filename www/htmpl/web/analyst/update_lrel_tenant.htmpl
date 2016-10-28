@@ -1,0 +1,252 @@
+<PDM_IF 0>
+update_lrel_tenant.htmpl
+WHEN PRESENTED:
+    When we need to display lrel update screen for tenants.
+    Called from the Tenant Groups detail.
+INTENT:
+    Display the lrel update screen. 
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+    string	direct_index An index of pages you can jump to.
+Note: This form is only for collecting the search result. The code in this 
+      form will be replaced with the HTML code for the lrel update screen 
+      in the run-time. Please see update_lrel.js for detail.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview=no>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+var p = parent.opener;
+var label2 = p.lrel_label2.replace(/\<br\>/ig," ");
+if (p.search_lrel_form == 0)
+    form_title = label2 + " - Update";
+else
+    form_title = label2 + " - Search";
+
+label2 = label2.substring(0, 20) + "...";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl wm=no wm=no>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+show_header = 0;
+p.reset_pick_list();
+p.set_lrel_list(<PDM_FMT ESC_STYLE=C>"$LREL_LIST"</PDM_FMT>, 80);
+
+<PDM_IF "$args.KEEP.ForChild" == "1">
+<PDM_LIST SOURCE=list SORT=$sort START=$start LENGTH=$length ESC_STYLE=c>
+p.set_left_vals('$list.persistent_id', '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C WIDTH=80>$list.COMMON_NAME</PDM_FMT>', '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C WIDTH=80>$list.COMMON_NAME, $list.status.sym, $list.summary</PDM_FMT>'); 
+</PDM_LIST>
+<PDM_ELSE>
+<PDM_LIST SOURCE=list SORT=$sort START=$start LENGTH=$length ESC_STYLE=c>
+p.set_left_vals('$list.persistent_id', '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C WIDTH=80>$list.COMMON_NAME</PDM_FMT>', '<PDM_FMT JUSTIFY=TRUNCATE ESC_STYLE=C WIDTH=80>$list.COMMON_NAME</PDM_FMT>');
+</PDM_LIST>
+</PDM_IF>
+
+// For hidding selection boxes because on IE, the drop-down menu 
+// can't display on top of the selection boxes.
+var TimeoutID = 0;
+function showLeftLrelList(bShow)
+{
+    var e = document.getElementById("lrel_list");
+    if (typeof e != "object")
+    {
+	if (TimeoutID)
+	{
+	    window.clearTimeout(TimeoutID);
+	    TimeoutID = 0;	    
+	}
+	return;
+    }
+    if ((typeof bShow == "boolean") &&
+	bShow)
+	e.style.display = "";	
+    else 
+	e.style.display = "none";
+}
+function updateLrelSetTimeout(interval)
+{
+    if ((typeof interval != "number") || 
+	!interval)
+	interval = 500;
+    if (TimeoutID)
+	updateLrelClearTimeout();
+    TimeoutID = window.setTimeout("showLeftLrelList();", interval);
+}
+
+function updateLrelClearTimeout()
+{
+    if (TimeoutID)
+    {
+	window.clearTimeout(TimeoutID);
+	TimeoutID = 0;
+    }
+    showLeftLrelList(true);
+}
+
+function FocusOnFirstField()
+{
+var mlrel_label1 = document.main_form.lhs;
+mlrel_label1.focus() ;
+}
+
+function unloadActions()
+{
+unload_check();
+}
+
+function loadActions()
+{
+FocusOnFirstField();
+parent.opener.set_child(window);
+parent.opener.set_checkout();
+parent.opener.setSelectBoxTitles();
+}
+
+</SCRIPT>
+</HEAD>
+
+
+<BODY class=list onLoad="loadActions()" onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM name=main_form>
+<SCRIPT LANGUAGE="JavaScript">
+update_lrel_buttons('$args.KEEP.backfill_form', '$args.KEEP.backfill_field');
+document.writeln('<TABLE class=multi_list_selection CELLSPACING=0 WIDTH=90% summary="' + form_title + '">');
+</SCRIPT>
+<TR>
+<TH WIDTH=45% class=detailro ALIGN=CENTER VALIGN=TOP>
+    <SCRIPT>document.write(p.lrel_label1)</SCRIPT><BR>$record_count<PDM_IF $record_count == 1> Match<PDM_ELSE> Matches</PDM_IF><PDM_IF $total \> 1><BR>$current of $total</PDM_IF>
+</TH>
+<th id="midLabel" class="detailro" width="10%" align="center" valign="top">&#160;</th>
+<TH id=rhsLabel WIDTH=45% class=detailro ALIGN=CENTER VALIGN=MIDDLE>
+</TH>
+</TR>
+<TR ID="lrel_list">
+<TD ALIGN=CENTER>
+<SCRIPT>
+document.writeln("<SELECT MULTIPLE id=lhs NAME=lhs SIZE=" + p.sel_box_size + 
+                 " onFocus=\"this.className='focusField'\"" +
+                 " onBlur=\"this.className=''\">");
+for ( var i = 0; i < p.pick_list.length; i++)
+{
+    if (i == 0)
+	document.write("<OPTION SELECTED VALUE=\"" + p.pick_list[i].common_name + "\">");
+    else 
+	document.write("<OPTION VALUE=\"" + p.pick_list[i].common_name + "\">");
+    document.writeln(p.pick_list[i].disp_val + "</OPTION>");
+}
+document.writeln("</SELECT>");
+</SCRIPT>
+</TD>
+<TD>
+<SCRIPT>
+ImgBtnCreate("btn002", ">>[>]", "parent.opener.add_entry()", true, 0, msgtext("Add_to_selection"));
+document.write('<BR>');
+ImgBtnCreate("btn003", "<<[<]", "parent.opener.remove_entry()", true, 0, msgtext("Remove_from_selection"));
+</SCRIPT>
+</TD>
+<TD ALIGN=CENTER>
+<SCRIPT>
+document.writeln("<SELECT MULTIPLE id=rhs NAME=rhs SIZE=" + p.sel_box_size + 
+                 " onFocus=\"this.className='focusField'\"" +
+                 " onBlur=\"this.className=''\">");
+// Adding a new entry to the selection list, for netscape, doesn't 
+// readjust the size of the selection box. Add a dummy entry to 
+// set its size and then delete the dummy entry right away. 
+if (_browser.supportsLayers)
+{
+    document.writeln("<OPTION VALUE='dummy'>----&gt;Loading...&lt;----</OPTION>");
+}
+else 
+{
+    for ( i = 0; i < p.new_list.length; i++)
+    {
+	document.write("<OPTION VALUE=\"" + p.new_list[i].common_name);
+	document.writeln("\">" + p.new_list[i].common_name + "</OPTION>");
+    }
+}
+document.writeln("</SELECT>");
+if (_browser.supportsLayers)
+{
+    var opts = document.main_form.rhs.options;
+    if (!p.new_list.length)
+    {
+	opts[0] = null;
+    }
+    else 
+    {
+	var aname;
+	var new_opt;
+	for ( i = 0; i < p.new_list.length; i++)
+	{
+	    aname = p.new_list[i].common_name;
+	    new_opt = new Option(aname, aname, false, false);
+	    opts[i] = new_opt;
+	}
+    }
+}
+</SCRIPT>
+</TD>
+</TR>
+<TR><TD class="detailro">
+<PDM_IF $total \> 1><CENTER>$direct_index</CENTER></PDM_IF>
+</TD>
+<TD>&#160;</TD>
+<TD ALIGN=CENTER>&#160;</TD>
+</TR>
+<TR>
+<TD ALIGN=CENTER>
+<SCRIPT>
+ImgBtnCreate("btn004", "Clear_Selection[l]", "parent.opener.unsel1()", true, 0, msgtext("Clear_selection_in_source_list"));
+</SCRIPT>
+</TD>
+<TD>&#160;</TD>
+<TD ALIGN=CENTER>
+<SCRIPT>
+ImgBtnCreate("btn005", "Clear_Selection[t]", "parent.opener.unsel2()", true, 0, msgtext("Clear_selection_in_selected_li"));
+</SCRIPT>
+
+
+</TD>
+</TR>
+</TABLE><BR><BR>
+<SCRIPT>
+if ( ! ahdtop.cstUsingScreenReader )
+  document.writeln('<A HREF="javascript:void(0)" onFocus="document.main_form.lhs.focus()"></A>');
+</SCRIPT>
+</PDM_FORM>
+
+<PDM_FORM NAME=update_lrel_form OP=UPDATE_LREL>
+<INPUT TYPE=hidden NAME=HTMPL VALUE="show_main_detail.htmpl">
+<INPUT TYPE=hidden NAME=FACTORY>
+<INPUT TYPE=hidden NAME=PERSID>
+<INPUT TYPE=hidden NAME=KEEP.lrel_factory>
+<INPUT TYPE=hidden NAME=KEEP.lrel_add_persids>
+<INPUT TYPE=hidden NAME=KEEP.lrel_remove_persids>
+</PDM_FORM>
+
+</CENTER>
+
+<SCRIPT>
+var fid = window.document.forms["main_form"].elements["FID"].value;
+p.set_child_fid(fid);
+</SCRIPT>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: update_lrel_tenant.htmpl ASPEN.8 2012/04/09 18:08:28 gadab01 Exp $
+</PDM_IF>

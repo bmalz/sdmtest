@@ -1,0 +1,241 @@
+<PDM_IF 0>
+
+upload_file.htmpl
+
+WHEN PRESENTED:
+    When the app needs input to upload file. 
+
+INTENT:
+    Capture user input and upload a file when submitted. 
+
+VARIABLES:
+    string      image       The location of the image directory as
+                            specified in the config file.
+    int         logged_in   A flag to say we have a user login object.
+    object cst  cst         A cst object (customer) that is the logged in user.
+
+</PDM_IF>
+
+<html lang="en"><head><PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview=no>
+<script type="text/javascript">
+var myopname = "GETSESS_" + window.name;
+var server = '$args.KEEP.server';
+var ahdframeset;
+var ahdframe;
+var nMaxFileSize = ${args.KEEP.max_filesz:};
+
+function get_ahdtop()
+{
+    // get ahdtop from opener
+    if (typeof opener == "object" && 
+        typeof opener.ahdtop == "object" && 
+        opener.ahdtop != null &&
+        ! opener.ahdtop.closed )
+    {
+        var ahdtop = opener.ahdtop;
+        return ahdtop;
+    }
+    
+    return void(0);
+}
+var ahdtop = get_ahdtop();
+
+if ( typeof ahdtop != "object" )
+   alert("Can't find ahdtop in upload_file.htmpl");
+else {
+   ahdframe = window;
+   ahdframeset = window.opener.ahdframeset;
+   }
+
+function get_session() { 
+ 	 if ( window.opener.start_upload() ) { 
+	  
+ 	    var href_str = window.document.location.href;
+	    var start_pos = href_str.indexOf("://", 0) + "://".length;
+	    var end_pos = href_str.indexOf("/", start_pos);
+	    sFileName = window.document.forms[0].elements["file_name"].value;
+	    
+	    var loc = sFileName.lastIndexOf(".");
+	    var sExt = sFileName.substr(loc+1);
+	
+	    if(sExt.toLowerCase() == "gz" || sExt.toLowerCase() == "zip")
+	    		window.opener.document.forms["main_form"].elements["SET.zip_flag"].value = 0;	
+	    	else
+	    		window.opener.document.forms["main_form"].elements["SET.zip_flag"].value = 1;	
+	    	
+	    window.opener.document.forms["main_form"].elements["SET.file_type"].value = sExt;
+            var target_url = href_str.substring(0, end_pos) + cfgCgi + 
+ 			"?SID="+cfgSID+
+			"+FID="+fid_generator()+
+			"+OP=SD_OPEN_REP_SESSION"+
+			"+Host=" + '$args.KEEP.server' +
+			"+FileName=" + nx_escape(sFileName) +
+			"+RepId=" + '$args.KEEP.rep_id' + 
+			"+CALLBACK=callservlet(response)" + 
+			"+POPUP_NAME=" + '$args.KEEP.POPUP_NAME' +
+			"+KEEP.POPUP_NAME=" + '$args.KEEP.POPUP_NAME'; 
+			
+			
+	    	    
+	    ahdframeset = window.opener.ahdframeset;
+	    
+	    	
+	    	       	    
+	    ahdframeset.workframe.location.href = target_url;
+	    return 1;
+	    }
+}
+
+function callservlet(response) {
+	
+	if (typeof response.errresp != "undefined" && 
+			response.errresp != null && response.errresp != "" ) {
+		// We got an error attempting to get a session 
+		
+		var url = document.getElementById('ret_url').value;
+		url += "+Error_Msg=" +  response.errmsg;
+        display_new_page(url);
+        return;
+	}
+	// set relative file path and file name
+	window.opener.document.getElementById("rel_file_path").value = response.arg2;
+	window.opener.document.getElementById("file_name").value = response.arg1;
+	
+	
+	// Now get the session and call the servlet
+	frmUpload = document.frm001;
+	frmUpload.elements["inpBpsid"].value = response.arg0;
+	frmUpload.elements["inpMaxFileSize"].value = nMaxFileSize;
+	frmUpload.elements["inpAttmntId"].value = '$args.KEEP.rep_id' ;
+	document.getElementById("imgUpload").style.display="";
+	frmUpload.submit();
+	return;
+}
+	    
+ 	    
+</script>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script>
+setWindowTitle("Upload File");
+</script>
+</head>
+<body class="editform" onload="window.opener.init_status()" onunload="deregister_window()">
+<div>
+<script>
+document.writeln(generate_basic_form_header_html());
+</script>
+</div>	
+<PDM_INCLUDE FILE=std_body.htmpl filename="attmnt_info" header=no>
+<table cellspacing="0" cellpadding="0" width="100%" class="page_header">
+<tr height="25">
+<td align="left" width="99%">Upload File</td>
+<td align="right" width="1%">
+<script>
+<PDM_IF "${args.KEEP.protocol:http}" != "servlet" >
+<PDM_MACRO NAME=button 
+    id="btn001" 
+    caption="OK[k]" 
+    func="pdm_submit('frm001', '')" 
+    hotkey_name="OK[k]" 
+    newrow=yes >
+<PDM_ELSE>
+<PDM_MACRO NAME=button 
+    id="btn001" 
+    caption="OK[k]" 
+    func="get_session('frm001')" 
+    hotkey_name="OK[k]" 
+    newrow=yes >
+</PDM_IF>
+<PDM_MACRO NAME=button 
+    id="btncncl" 
+    caption="Cancel[n]" 
+    func="window.close()" 
+    hotkey_name="Cancel[n]" 
+    btnType=negative
+    endrow=yes >
+</script>
+</td>
+</tr>
+</table>
+<script type="text/javascript">
+activateActionKeys();
+// _dtl = new DetailForm("$prop.factory","${args.id:0}","${args.NEXT_PERSID:}", false);
+<PDM_MACRO NAME=dtlForm button=false>;
+
+<PDM_MACRO NAME=dtlStart>
+</script>
+
+<PDM_IF "${args.KEEP.protocol:http}" != "servlet" >
+<form name="frm001" enctype="multipart/form-data" onsubmit="return window.opener.start_upload()" method="POST" action="$args.KEEP.url_path">
+<PDM_ELSE>
+<form name="frm001" enctype="multipart/form-data" onsubmit="return 1" method="POST" action="$args.KEEP.cgi_path">
+</PDM_IF>
+<table cellpadding="0" cellspacing="0" class="gn_container_no_border">
+<tr>
+	<td align="center" colspan="2" height="30px" width="100%">
+		<div id="imgUpload" style="display:none"><img  height="30px" src="$CAisd/img/uploading.gif"></div>
+	</td>
+</tr>
+</table>
+<table>
+<tr>
+        <td valign="left" class="title3text"><br></td>
+	<td align="left" colspan="2" width="100%">
+	<span class="requiredlabeltext">File</span>
+	</td>
+</tr>
+
+<tr>
+    <td valign="left" class="title3text"><br></td>
+    <td align="left" colspan="2" width="100%"><input type="file" size="30" name="upfile"></td>
+</tr>
+<tr>
+<td>&nbsp</td>
+</tr>
+<tr>
+    <td valign="left" class="title3text"><br></td>
+    <td valign="left" class="title3text">Server Name<br><span class="bodytext">$args.KEEP.server</span></td>
+    <td valign="left" class="title3text">Servlet Path<br><span class="bodytext">$args.KEEP.cgi_path</span></td>
+    <td valign="left" class="title3text">Storage Path<br><span class="bodytext">$args.KEEP.upload_path</span></td>
+</tr>
+<tr>
+<td valign="left" colspan="3">
+    <input type="hidden" name="dob_id" value="$args.KEEP.dob_id">
+    <input type="hidden" name="file_name" value="">
+    <input type="hidden" name="directory" value="$args.KEEP.upload_path">
+    <input type="hidden" name="inpAttmntId" value="$args.KEEP.dob_id">
+    <input type="hidden" name="inpRepId" value="$args.KEEP.rep_id">
+    <input type="hidden" name="inpDescription" value=""> 
+    <input type="hidden" name="inpServerName" value="$args.KEEP.server">
+    <input type="hidden" name="inpMaxFileSize" value="">
+    <input type="hidden" name="inpBpsid">
+<script>
+    var href_str = window.document.location.href;
+    var start_pos = href_str.indexOf("://", 0) + "://".length;
+    var end_pos = href_str.indexOf("/", start_pos);
+    var ret_url = href_str.substring(0, end_pos) + cfgCgi;
+    ret_url = ret_url + "?OP=DISPLAY_FORM+HTMPL=upload_success.htmpl"; 
+    ret_url = ret_url + "+SID=" + cfgSID + "+FID=" + fid_generator();
+    ret_url = ret_url + "+KEEP.POPUP_NAME=" + '$args.KEEP.POPUP_NAME';
+    document.writeln('<input type="hidden" id="ret_url" name="ret_url" value="' + ret_url + '">');
+    document.writeln('<input type="hidden" id="inpRetURL" name="inpRetURL" value="' + ret_url + '">');
+</script>
+    <input type="hidden" name="image" value="' + cfgCAISD + '/img">
+    <!-- <input type=file name=upfile><br><br> -->
+    <input type="hidden" name="attach_web_file" value="no">
+</td>
+</tr>
+</table>
+<PDM_MACRO NAME=dtlEnd>
+</form>
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: upload_file.htmpl ASPEN.3 2010/11/18 13:40:12 saima01 Exp $
+</PDM_IF>

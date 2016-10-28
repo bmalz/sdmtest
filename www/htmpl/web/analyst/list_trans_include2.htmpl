@@ -1,0 +1,21 @@
+<PDM_IF 0>
+list_trans_include2.htmpl
+WHEN PRESENTED:
+	Must move one of the lsStart block into a separate file because only 1 can exist in any physical file (for WSP)
+	Input properties:
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP preview="NBTAB=list_trans_includes2" factory=cr_trans>
+<!-- BEGIN -->
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="tenant2 = \"@{list.new_status.tenant}\"">
+<PDM_MACRO name=lsCol hdr="Nowy status" attr=new_status fmtfunc=display_T_value2 link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr=is_default exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_MACRO name=lsCol hdr="Wymaga komentarza" attr=must_comment exportfmt=YesNo fmtfunc=display_YN_value sort=no>
+<PDM_IF "$prop.transFactory" == "in_trans" || "$prop.transFactory" == "cr_trans">
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=t_type>
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Opis statusu" attr=description>
+<PDM_MACRO name=lsCol hdr="Aktywne" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+<!-- END -->

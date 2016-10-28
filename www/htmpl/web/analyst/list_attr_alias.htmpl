@@ -1,0 +1,58 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+	When we need to display a list of Attribute Aliases
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Attribute Alias Search";
+var hdrTitleList = "Attribute Alias List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart factory=attr_alias>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Nazwa obiektu" attr="obj.TABLE_NAME" factory=OA_TABLES>
+<PDM_MACRO name=sfTextbox attr=alias_name>
+<PDM_MACRO name=sfDropdown attr=delete_flag>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox attr=alias_value colspan=3 size=40>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox attr=desc colspan=3 size=60>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Attribute Aliases found";
+var msgFound1 = "1 Attribute Alias found";
+var msgFound = "%1 Attribute Aliases found";
+var msgFoundMore = "%1 Attribute Aliases found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Attribute Alias";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=obj exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=alias_name exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=alias_value>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=desc>
+<PDM_MACRO name=lsCol hdr=DISPLAY_NAME attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_attr_alias.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

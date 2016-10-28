@@ -1,0 +1,158 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+     When we need to display a list of Functional Access to Role records. 
+     This form can be displayed either the Role or Functional Access detail forms.
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Functional Access to Role Search";
+var hdrTitleList = "Functional Access to Role List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName;
+var cfgCurrent = '$current';
+var cfgIsPopup = '$args.KEEP.IsPopUp';
+var cfgCanView = false;
+var cfgCanEdit = false;
+var cfgCanEditInList = true;
+var cfgUseTemplate = "";
+var parentForm = "$args.KEEP.parent_form";
+var faccessType = "$args.QBE.EQ.func_access.type";
+
+var faccessTypeWhere = " ";
+if (faccessType != "") {
+	faccessTypeWhere = "type=" + faccessType;
+}
+
+var countOfTypes = 0;
+var defaultType  = 10001; // type = Object
+
+<PDM_LIST PREFIX=listx FACTORY=func_access_type WHERE=" " > 
+defaultType = "$listx.id";
+countOfTypes++;
+</PDM_LIST>
+
+
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/date_helper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory="func_access_role">
+
+if (parentForm == "role") {
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.role"				VALUE="$args.QBE.EQ.role">');
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.func_access.type"   VALUE="$args.QBE.EQ.func_access.type">');
+} 
+
+if (parentForm == "faccess") {
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.func_access"        VALUE="$args.QBE.EQ.func_access">');
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.func_access.type"   VALUE="$args.QBE.EQ.func_access.type">');
+}
+
+<PDM_MACRO name=sfStartRow>
+
+if (parentForm != "role") {
+<PDM_MACRO name=sfLookup hdr="Rola" attr="role">
+}
+
+if (parentForm != "faccess") {
+<PDM_MACRO name=sfDropdown hdr="Funkcja" attr="func_access">
+}
+<PDM_IF "$args.QBE.EQ.func_access.type" != "">
+searchFilterDropdown("Access Level", "access_level", "" 
+<PDM_LIST prefix=lvl FACTORY=func_access_level WHERE="type=$args.QBE.EQ.func_access.type">
+	,"$lvl.COMMON_NAME","$lvl.REL_ATTR"
+</PDM_LIST>
+	, 1);
+<PDM_ELSE>
+<PDM_MACRO name=sfDropdown hdr="Poziom dostępu" attr="access_level" lookup="no">
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Komentarze" attr="description" colspan=3 size=60>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<SCRIPT LANGUAGE="JavaScript">
+<pdm_jscript file=list_edit.js>
+startListEdit(__search_filter);
+listEditStartRow();
+if (faccessType != "")
+{
+	// limit levels to access type
+	listEditField("access_level", "Access Level", 1, 20, "+ADDITIONAL_WHERE=type=" + faccessType );
+} else {
+	listEditField("access_level", "Access Level");
+}
+listEditField("description", "Comments");
+
+if (parentForm != "faccess")
+{
+	listEditReadonly("func_access","Function");
+} 
+else if (parentForm != "role")
+{
+	listEditReadonly("role","Role");
+} else {
+	listEditReadonly("role","Role");
+	listEditReadonly("func_access","Function");
+}
+
+
+listEditEndRow();
+endListEdit();
+ </SCRIPT>
+
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone;
+  var msgFound;
+  var msgFoundMore;
+
+  if (parentForm == "role") {
+    msgFoundNone = "No Functional Access to Role found";
+    msgFound = "%1 Functional Access to Role found";
+    msgFoundMore = "%1 Functional Access to Role found.  Displaying %2 through %3";
+  } else {
+    msgFoundNone = "No Functional Access to Roles found";
+    msgFound = "%1 Functional Access to Roles found";
+    msgFoundMore = "%1 Functional Access to Roles found.  Displaying %2 through %3";
+  }
+  
+  var msgFound1 = "1 Functional Access to Role found";
+  var msgSelect = "Click to select desired Functional Access to Role";
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite both=yes text="if (parentForm != \"role\") {">
+<PDM_MACRO name=lsCol hdr="Rola" attr=role justify=left>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="if (parentForm != \"faccess\") {">
+<PDM_MACRO name=lsCol hdr="Funkcja" attr=func_access justify=left>
+<PDM_MACRO name=lsWrite both=yes text="if (countOfTypes > 1) {">
+<PDM_MACRO name=lsCol hdr="Typ" attr=func_access.type justify=left>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsCol hdr="Kod" attr=func_access.code justify=left>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsCol hdr="Poziom dostępu" attr=access_level justify=left>
+<PDM_MACRO name=lsCol hdr="Komentarze" attr=description justify=left>
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

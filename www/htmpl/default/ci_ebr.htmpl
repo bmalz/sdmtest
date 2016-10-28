@@ -1,0 +1,102 @@
+<PDM_IF 0>
+ci_ebr.htmpl
+WHEN PRESENTED:
+    When java client wants to start Knowledge tools.  This page assembles and
+	escapes the URL and immediately posts.   
+INTENT:
+    Use the strings passed from javascript to construct 
+    the URL and then send the URL to the CIEBR web server.
+VARIABLES:
+    string      image       The location of the image directory as
+                            specified in the config file.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/fid_gen.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+<!--
+// <PDM_IF 0>
+// Our url needs to be of the form:
+//	CI_path?BOPSID=<bopsid>&ACTION=AHD_CI_SEARCH&
+//	CATEGORY=<chgcat>&PRODUCT=<prod>&ITEM=<ALLItems>&DESCRIPTION=<desc>
+//	&EXTERNAL_DATA=<StandardExtData>&REFNUM=<refnum>&CUSTOM1=cust1&CUSTOM2=cust2&CUSTOM3=cust3...
+// </PDM_IF>
+
+var is_netscape = !navigator.appName.indexOf("Netscape");
+
+function send_url()
+{
+   
+   document.ci_submit.submit();
+}
+
+// -->
+</script>
+
+</head>
+
+<body class="detailro" onload="send_url()">
+
+<form name="ci_submit" action="$SESSION.CIEBRURL" method="POST">
+<input type="hidden" name="EXTERNAL_DATA" value="$args.ExternalData">
+<input type="hidden" name="ACTION" value="$args.ci_action">
+<input type="hidden" name="BOPSID" value="$args.bopsid">
+<input type="hidden" name="REFNUM" value=<PDM_FMT ESC_STYLE=HTML>"$args.refnum"</PDM_FMT>>
+
+<pdm_if "$args.ci_action" == "AHD_CI_DOCUMENT">
+	<input type="hidden" name="ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.ci_id:}"</PDM_FMT>>
+	<input type="hidden" name="SESSION_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.session_id:}"</PDM_FMT>>
+</pdm_if>
+
+
+<pdm_if "$args.ci_action" == "AHD_CI_SEARCH">
+
+	<input type="hidden" name="DESCRIPTION" value=<PDM_FMT ESC_STYLE=HTML>"$args.desc"</PDM_FMT>>
+
+	<pdm_if "$CI_Filter" == "1">
+		<input type="hidden" name="CATEGORY" value=<PDM_FMT ESC_STYLE=HTML>"${args.category:}"</PDM_FMT>>
+		<input type="hidden" name="PRODUCT" value=<PDM_FMT ESC_STYLE=HTML>"${args.product:}"</PDM_FMT>>
+		<input type="hidden" name="SD_PRODUCT_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.product_id:}"</PDM_FMT>>
+		<input type="hidden" name="ITEM" value=<PDM_FMT ESC_STYLE=HTML>"${args.item:}"</PDM_FMT>>
+		<input type="hidden" name="SD_ASSET_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.item_id:}"</PDM_FMT>>
+	</pdm_if>
+	
+</pdm_if>
+
+
+<pdm_if "$args.ci_action" == "AHD_CI_SUBMIT_KNOWLEDGE">
+	<input type="hidden" name="SUMMARY" value=<PDM_FMT ESC_STYLE=HTML>"$args.summary"</PDM_FMT>>
+	<input type="hidden" name="DESCRIPTION" value=<PDM_FMT ESC_STYLE=HTML>"$args.desc"</PDM_FMT>>
+	<input type="hidden" name="SOLUTION" value='<PDM_FMT ESC_STYLE=HTML>${args.solution:}</PDM_FMT>'>
+	<input type="hidden" name="CATEGORY" value=<PDM_FMT ESC_STYLE=HTML>"${args.category:}"</PDM_FMT>>
+	<input type="hidden" name="PRODUCT" value=<PDM_FMT ESC_STYLE=HTML>"${args.product:}"</PDM_FMT>>
+	<input type="hidden" name="SD_PRODUCT_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.product_id:}"</PDM_FMT>>
+	<input type="hidden" name="ITEM" value=<PDM_FMT ESC_STYLE=HTML>"${args.item:}"</PDM_FMT>>
+	<input type="hidden" name="SD_ASSET_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.item_id:}"</PDM_FMT>>
+	<input type="hidden" name="SD_ROOTCAUSE" value=<PDM_FMT ESC_STYLE=HTML>"${args.rootcause:}"</PDM_FMT>>
+	<input type="hidden" name="SD_ROOTCAUSE_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.rootcause_id:}"</PDM_FMT>>
+	<input type="hidden" name="SD_SEVERITY_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.sev_id:}"</PDM_FMT>>
+	<input type="hidden" name="SD_PRIORITY_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.pri_id:}"</PDM_FMT>>
+	<input type="hidden" name="SD_URGENCY_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.urg_id:}"</PDM_FMT>>
+	<input type="hidden" name="SD_IMPACT_ID" value=<PDM_FMT ESC_STYLE=HTML>"${args.imp_id:}"</PDM_FMT>>
+</pdm_if>
+
+
+</form>
+
+<div style='text-align: center'>
+<form name="frm001">
+<span class="messagetext">Loading Knowledge...</span>
+<br>
+</form>
+</div>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: ci_ebr.htmpl ASPEN.2 2010/11/16 13:07:57 saima01 Exp $
+</PDM_IF>

@@ -1,0 +1,177 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE="std_head.htmpl">
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/jquery.tablesorter.min.js"></SCRIPT>
+<script>
+jq(document).ready(function () {
+	SendUserItemsRequest();
+});
+
+function SetTableClickable() {
+	jq("#ResultTable tr:gt(0)").click(function () {
+		jq('#ResultTable tr:gt(0)').each(function() {
+			jq(this).removeClass('TelecentrumDataSelected');
+		});
+
+		if(parent.Selected_Application != jq(this).attr('value')) {
+			jq(this).toggleClass('TelecentrumDataSelected');
+			parent.Selected_Application = jq(this).attr('value');
+			SetCategory(jq(this).attr('catsym'),
+				jq(this).attr('cattype'),
+				jq(this).attr('catid'),
+				jq(this).attr('catgroup'),
+				jq(this).attr('ref'));
+		} else {
+			parent.Selected_Application = "";
+			SetCategory("",	"",	"",	"",	"");
+		}
+	});
+}
+
+function SetCategory(ss_sym, type, id, group, ref) {
+	if (type == "R") {
+		parent.CategoryType = "cr";
+	}
+	else if(type == "I") {
+		parent.CategoryType = "in";
+	} else {
+		parent.CategoryType = "";
+	}
+
+	parent.CategoryID = id;
+	parent.CategoryGroup = group;
+	parent.CategorySym = ss_sym;
+
+	parent.categories.SetCategoryLabel();
+
+	var TitleText = "Dotyczny zgłoszenia nr " + ref;
+	var SymSplitted = ss_sym.split('.');
+	if (SymSplitted.length > 1)
+		TitleText += " w kategorii " + SymSplitted[SymSplitted.length-2] + " " + SymSplitted[SymSplitted.length-1];
+	parent.details.document.getElementById("title").value = TitleText;
+}
+
+var numberOf = 0;
+
+function ShowDetail(cr_id) {
+	popup_window('RequestDetail',
+		'SHOW_DETAIL',
+		0, 
+		0, 
+		'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+		'FACTORY=cr', 
+		'HTMPL=detail_cr.htmpl', 
+		'PERSID=cr:' + cr_id + '');
+}
+
+function ClearTable() {
+	jq("#ResultTable").find("tr:gt(0)").remove();
+}
+
+function GetUserItems(items) {
+	PrintItemsList(items);
+}
+
+function PrintItemsList(AllItems) {
+	ClearTable();
+	var itemsTable = jq("#ResultTable");
+
+	if(AllItems.length > 0) {
+		for (var i = 0; i < AllItems.length; i++) {
+			itemsTable.append(
+					'<tr class="TelecentrumData" value=' + AllItems[i][0] + ' catsym="' + AllItems[i][2] + '" cattype="' + AllItems[i][3] + '" catid="' + AllItems[i][4] + '" catgroup="' + AllItems[i][5] + '" ref="' + AllItems[i][6] + '">' +
+					'<td style="padding-left:5px;">' +
+					'<a href="javascript:ShowDetail(' + AllItems[i][0] + ')">'+ AllItems[i][6] +'</a>' +
+					'</td>' +
+					'<td>' + AllItems[i][8] + '</td><td>' + AllItems[i][1] + '</td>' +
+					'<td>' + AllItems[i][7] + '</td>' +
+					'<td>' + AllItems[i][9] + '</td></tr>'
+				);
+		}
+
+		SetTableClickable();
+		itemsTable.tablesorter();
+	} else {
+		jq('#ResultWarning').html('<span class="labeltext">Brak zgłoszeń</span>');
+	}
+
+	jq("#LoadingContent").hide();
+}
+
+function SendUserItemsRequest() {
+	ClearTable();
+	jq("#LoadingContent").show();
+
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+		"+OP=SEARCH+FACTORY=cr+SKIPLIST=1+HTMPL=exim_cr_getuseritems.htmpl"+
+		"+id=$args.USERID" +
+		"+KEEP.area=" + encodeURIComponent("$args.KEEP.area");
+
+	jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		if ( status == "error" ) {
+			var msg = "Sorry but there was an error: ";
+			alert( msg + xhr.status + " " + xhr.statusText );
+		}
+	});
+}
+
+function SendGlobalItemsRequest() {
+	ClearTable();
+	jq("#LoadingContent").show();
+
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+		"+OP=SEARCH+FACTORY=cr+SKIPLIST=1+HTMPL=exim_cr_getuseritems.htmpl"+
+		"+id=" +
+		"+KEEP.area=";
+
+	jq("#HiddenDiv").load(url, function(response, status, xhr) {
+		if ( status == "error" ) {
+			var msg = "Sorry but there was an error: ";
+			alert( msg + xhr.status + " " + xhr.statusText );
+		}
+	});
+}
+
+</script>
+</HEAD>
+
+<BODY>
+<table cellspacing=0 cellpadding=0 width='100%' class='page_header'>
+	<tr>
+		<td align='left' width='99%'><h2 style='margin: 0px; font-size: 11px;'>Zgłoszenia <a href="javascript:SendUserItemsRequest();">użytkownika</a> / <a href="javascript:SendGlobalItemsRequest();">globalne</a></h2></td>
+		<td align='right' width='1%'></td>
+	</tr>
+</table>
+<table id="ResultTable" class="ResultTable tablesorter" style="width: 100%">
+	<thead>
+		<tr class="TelecentrumDataHead">
+			<th>#</th>
+			<th>Opis</th>
+			<th>Klasyfikacja</th>
+			<th>Typ</th>
+			<th>Status</th>
+		</tr>
+	</thead>
+</table>
+
+<div id="LoadingContent" style="width: 100%; text-align:center; padding: 20px; font-size: 10px; color: gray;"><img src="$CAisd/sitemods/img/favourite_loading.gif"><br />Ładuje wnioski...</div>
+
+<div style="width:100%; text-align:center; margin-top: 10px;" id="ResultWarning" />
+
+<div style="display: none;" id="HiddenDiv"></div>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

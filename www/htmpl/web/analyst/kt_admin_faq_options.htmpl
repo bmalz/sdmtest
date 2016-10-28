@@ -1,0 +1,211 @@
+<PDM_IF 0>
+kt_admin_faq_options.htmpl
+WHEN PRESENTED:
+    When we need to display the FAQ Options admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES table
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+
+var iDefValue = new Array(0,0,0,0,0,0,0,0);  //Database Defult Value
+var iRealValue = new Array(0,0,0,0,0,0,0,0); //Database Value display on the page
+var strDBID = new Array("","","","","","","",""); //Database ID
+
+<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+	<PDM_IF "$ciProps.PROPERTY_NAME" == "BU_LAST_TIME">
+		iRealValue[0] = "$ciProps.PROPERTY_VALUE";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BU_WHEN_TO_RUN">
+		strDBID[1] = "$ciProps.id";
+		iRealValue[1] = "$ciProps.PROPERTY_VALUE";
+		iDefValue[1] = "$ciProps.PROPERTY_DEFAULT";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BU_WHEN_TO_STOP">
+		strDBID[2] = "$ciProps.id";
+		iRealValue[2] = "$ciProps.PROPERTY_VALUE";
+		iDefValue[2] = "$ciProps.PROPERTY_DEFAULT";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BU_INTERVAL">
+		strDBID[3] = "$ciProps.id";
+		iRealValue[3]= "$ciProps.PROPERTY_VALUE";
+		iDefValue[3] = "$ciProps.PROPERTY_DEFAULT";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BU_AGING">
+		strDBID[4] = "$ciProps.id";
+		iRealValue[4] = "$ciProps.PROPERTY_VALUE";
+		iDefValue[4] = "$ciProps.PROPERTY_DEFAULT";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BU_DAYS_NEW">
+		strDBID[5] = "$ciProps.id";
+		iRealValue[5] = "$ciProps.PROPERTY_VALUE";
+		iDefValue[5] = "$ciProps.PROPERTY_DEFAULT";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BU_NO_VOTE_RATING">
+		strDBID[6] = "$ciProps.id";
+		iRealValue[6] = "$ciProps.PROPERTY_VALUE";
+		iDefValue[6] = "$ciProps.PROPERTY_DEFAULT";
+	<PDM_ELIF "$ciProps.PROPERTY_NAME" == "BU_RUN_FAQ_SERVICE">
+		strDBID[7] = "$ciProps.id";
+		iRealValue[7] = "$ciProps.PROPERTY_VALUE";
+		iDefValue[7] = "$ciProps.PROPERTY_DEFAULT";
+	</PDM_IF>	
+</PDM_LIST>
+</script>
+</head>
+
+<body class=detailro onload='frmFAQOptionsOnLoad();' onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<form>
+<table cellSpacing=0 cellPadding=0 width='100%' class='page_header gn_container_no_border'>
+	<tr>
+		<td align=left width='99%'>Solution Survey
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmFAQOptions')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmFAQOptions')",true, "" ,msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table width="100%" cellspacing="0" cellpadding="0" class='gn_container_no_border'>
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center"><span  class="page_section_header_text" >FAQ Settings</span></td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class="page_section gn_text_normal">
+			<span class=label>&bull;&nbsp;Last Updated:</span>
+<br>
+			<input tabindex=100 type="checkbox" id="cbRunFAQService" title="Last Updated: Run the FAQ Rating Service" name="cbRunFAQService" class="clsTextBlackWithHand" onclick="cbRunFAQService_click()" DBID= iDisplay=>
+			<span class=data>Run the FAQ Rating Service</span><JH>
+<br>
+			&nbsp;&nbsp;
+			<script language="JavaScript">
+				document.write("<span class='data'>The FAQ Rating was last updated on ");
+				var dtLastUpdate = date_to_string(iRealValue[0], 1);
+				document.write(".</span>");
+			</script>
+
+<p>
+			<span class=label>&bull;&nbsp;Schedule:</li></span>
+<br>
+			<span class="data">Perform the FAQ calculation every</span>
+		
+              <select tabindex=100 id='slctInterval' title="Schedule: Perform the FAQ calculation every" name='slctInterval' onchange='bDirty=true;'>
+                <option value='1'>1 day</option>
+                <option value='3'>3 days</option>
+                <option value='7'>1 week</option>
+                <option value='14'>2 weeks</option>
+                <option value='21'>3 weeks</option>
+                <option value='30'>1 month</option>
+                <option value='90'>3 months</option>
+              </select>
+              <span class='data'> from </span>
+              <select tabindex=100 id='slctStartRating' name='slctStartRating' title="Schedule: Time of day to start FAQ calculations" onchange='bDirty=true;'>
+			
+			<script>
+				var strIndex;
+				for(i = 0; i <24; i++)
+				{
+					if (i < 10)
+					{
+						strIndex = "0" + i;
+					}
+					else
+					{
+						strIndex = i;
+					}		
+					document.write("<option value=" + strIndex + ":00>" + strIndex + ":00</option>");
+					document.write("<option value=" + strIndex + ":30>" + strIndex + ":30</option>");
+				}
+			</script>
+
+				</select>
+				<span class='data'> to </span>
+				<select tabindex=100 id='slctStopRating' name='slctStopRating' title="Schedule: Time of day to stop FAQ calculations" onchange='bDirty=true;'>
+			
+			<script>
+				var strIndex;
+				for(i = 0; i <24; i++)
+				{
+					if (i < 10)
+					{
+						strIndex = "0" + i;
+					}
+					else
+					{
+						strIndex = i;
+					}		
+					document.write("<option value=" + strIndex + ":00>" + strIndex + ":00</option>");
+					document.write("<option value=" + strIndex + ":30>" + strIndex + ":30</option>");
+				}
+			</script>
+				</select>
+
+<p>
+			<span class=label>&bull;&nbsp;Aging:</span>
+<br>
+			<span class="data">Each time the FAQ calculation is performed a document's ratings will degrade by a factor of 1 /</span>
+			<input tabindex=100 type="text" class="kt_adm_faq_aging" id="txtAging" title="Aging: Each time the FAQ calculation is performed a document's ratings will degrade by a factor of 1 /" name="txtAging" size="10"  DBID= DefValue= RealValue=>
+<br>
+			<span class="inline_error">(e.g. If a document is given a rating of 4 (very helpful) and the aging factor is set to 180 then after the next FAQ calculation</span>
+<br>
+			<span class="inline_error">this rating will become 3.977 ( 4 - (4 * (1/180)) ). After 180 calculations have been performed this rating will have degraded to 0.)</span>
+
+<p>
+			<span class=label>&bull;&nbsp;Days New:</span>
+<br>
+			<span class="data">Select the number of days a new document displays in the 'New Documents' folder:</span><JH>
+			<select tabindex=100 id='slctDaysNew' title="Days New: Select the number of days a new document displays in the 'New Documents' folder:" name='slctDaysNew' onchange='bDirty=true;'>
+				<option value='1'>1 day</option>
+				<option value='3'>3 days</option>
+				<option value='5'>5 days</option>
+				<option value='7'>1 week</option>
+				<option value='14'>2 weeks</option>
+				<option value='30'>1 month</option>
+				<option value='90'>3 months</option>
+				<option value='180'>6 months</option>
+			</select>
+
+<p>
+			<span class=label>&bull;&nbsp;Rating:</span>
+<br>
+			<span class="data">Apply the following rating to documents that have been opened but not rated:</span><JH>
+			<select tabindex=100 id='slctRating' title="Rating: Apply the following rating to documents that have been opened but not rated:" name='slctRating' onchange='bDirty=true;'>
+				<option value='0'>Not helpful at all</option>
+				<option value='2'>Somewhat helpful</option>
+				<option value='4'>Very helpful</option>
+			</select>
+</div>
+<script>
+	endScrollbar();
+</script>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

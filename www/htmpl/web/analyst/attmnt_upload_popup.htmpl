@@ -1,0 +1,42 @@
+<PDM_IF 0>
+@(#)$Id: attmnt_upload_popup.htmpl ASPEN.5 2010/10/28 10:26:37 laivi02 Exp $
+</PDM_IF>
+<html lang="pl"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+<PDM_IF "$args.AttmntId" == "0" || "$args.AttmntId" == "undefined" || "$args.AttmntId" == "">
+	var form_title = "Dodaj plik";
+<PDM_ELSE>
+	var form_title = "Zamień plik";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</script>
+<script language="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attmnt_name"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.attmnt_name"</PDM_FMT>;
+var hdrTitleNew = "Utwórz Załącznik";
+var argAttmntParent = "${args.KEEP.attmnt_parent:}";
+var argAttmntId = "${args.AttmntId:0}";
+var argPopupName = "${args.KEEP.POPUP_NAME:}";
+</script>
+</head>
+<body onload="LoadUploadActions();" topmargin=0 class="detailro">
+<PDM_INCLUDE FILE=std_body.htmpl filename="" header="no">
+<script>
+<PDM_MACRO name=dtlForm button=false factory="USP_PROPERTIES">
+<PDM_MACRO name=button Caption="Wgraj[U]" Func="Submit()" hotkey_name="Wgraj[U]" ID="btnUpload" NewRow="yes">
+<PDM_MACRO name=button Caption="Zamknij[o]" EndRow="yes" Func="top.close()" hotkey_name="Zamknij[o]" ID="btnClose">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=attmnt_upload.htmpl Size=50 Tenant="$args.Tenant" View="Upload" ShowImgStatus="$args.ShowImgStatus" ShowRepList="$args.ShowRepList" RepType="$args.RepType" ShowFields="$args.ShowFields" RepId="$args.RepId" FolderId="$args.FolderId" AttmntId="$args.AttmntId" AttmntParent="${args.KEEP.attmnt_parent:}">
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP>

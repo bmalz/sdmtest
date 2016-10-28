@@ -1,0 +1,262 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2005 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  self_service_include.htmpl
+// Created: 08/07/07
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//             Used to mange suggest knowledge and ticket avoidance
+//
+//
+////////////////////////////////////////////////////////////////////////////
+//"@(#)$Id: self_service_include.htmpl ASPEN.1 2010/05/11 10:39:26 bohda01 Exp $";
+</PDM_IF>
+
+<PDM_IF "$prop.page" == "AHDTOP">
+<script>
+	var ticketObj = new ticketAvoid();
+	ticketObj.setPolicy("$prop.SUGGEST_KNOWLEDGE_NO_OPEN_TCKT_AVOID", 
+						"$prop.SUGGEST_KNOWLEDGE_OPEN_CREDIT_KD", 
+						"$prop.SUGGEST_KNOWLEDGE_ACCEPT_CREDIT_KD", 
+						"$prop.SUGGEST_KNOWLEDGE_OPEN_TCKT_AVOID", 
+						"$prop.SUGGEST_KNOWLEDGE_ACCEPT_TCKT_AVOID",
+						"$prop.SUGGEST_KNOWLEDGE_SEARCH_CREDIT_KD");
+						
+	ticketObj.setDefaultTicketStatus("$prop.CR_AVOID_STS",
+								"$prop.ISS_AVOID_STS");
+</script>
+<PDM_ELSE>
+	<iframe id=suggest_knowledge_frame name=suggest_knowledge_frame frameborder="0" style="width:1px;height:1px;"></iframe>
+	<pdm_form name=suggest_knowledge_form target=suggest_knowledge_frame>
+	</pdm_form>
+
+	<pdm_form name=save_ticket_form>
+	</pdm_form>
+
+	<script>
+		if(typeof ahdtop.ticketObj == "object"&& ahdtop.ticketObj.isActive) // if self service is on
+		{
+			if("$prop.page" == "AHDTOP")
+			{
+				var ticketObj = new ticketAvoid();
+				ticketObj.setPolicy("$prop.SUGGEST_KNOWLEDGE_NO_OPEN_TCKT_AVOID", 
+									"$prop.SUGGEST_KNOWLEDGE_OPEN_CREDIT_KD", 
+									"$prop.SUGGEST_KNOWLEDGE_ACCEPT_CREDIT_KD", 
+									"$prop.SUGGEST_KNOWLEDGE_OPEN_TCKT_AVOID", 
+									"$prop.SUGGEST_KNOWLEDGE_ACCEPT_TCKT_AVOID",
+									"$prop.SUGGEST_KNOWLEDGE_SEARCH_CREDIT_KD");
+									
+				ticketObj.setDefaultTicketStatus("$prop.CR_AVOID_STS",
+									"$prop.ISS_AVOID_STS");
+			}
+				
+			if("$prop.page" == "KDLIST")
+			{
+				ahdtop.ticketObj.isVisited = 1;
+				ahdtop.ticketObj.updateTicketField("KEEP.suggest_knowledge", 0);
+				//Setting the suggest knowledge flag
+				if ( ahdtop.ticketObj.ref_num != "" )
+					ahdtop.ticketObj.wasKnowledgeSuggested = 1;
+				//
+				//Passing the new dob ref - while the create ticket and suggest knowledge process
+				if ( "${args.suggest_dob_ref:}" != "" )
+				{
+					ahdtop.ticketObj.dobRef = "$args.suggest_dob_ref";
+				}
+				//Passing the init_alg ref
+				if ( "${args.suggest_init_alg_ref:}" != "" )
+				{
+					ahdtop.ticketObj.alg_init_Ref = "$args.suggest_init_alg_ref";
+				}				
+				//Passing the init_gl ref
+				if ( "${args.suggest_init_alg_ref:}" != "" )
+				{
+					ahdtop.ticketObj.suggest_gl = "$args.suggest_gl";
+				}				
+				//Update ticket avoided value in the future potential ticket record:
+				if (ahdtop.ticketObj.status == 0){
+					ahdtop.ticketObj.status = 10;
+				}				
+			}
+
+			if(ahdtop.ticketObj.isTicketOpened)
+				ahdtop.ticketObj.SuggestKnowledgeHeader(window, "$prop.page");
+			
+			if("$prop.ticket_factory" != "") {
+				ahdtop.ticketObj.factory = "$prop.ticket_factory";
+				//Adding ITIL Information when needed
+				if ( ahdtop.ticketObj.factory == "cr" )
+					ahdtop.ticketObj.ITIL_Type = "${args.type:}";
+				//
+				//Setting the ref num of the ticket
+				ahdtop.ticketObj.ref_num = "${args.ref_num:}";
+			}
+				
+			var frmObj = document.forms["suggest_knowledge_form"];
+			if(typeof frmObj == "object")
+				ahdtop.ticketObj.setTicketForm(document,frmObj);
+				
+			var frmSaveObj = document.forms["save_ticket_form"];
+			if(typeof frmSaveObj == "object")
+				ahdtop.ticketObj.setSaveTicketForm(frmSaveObj);	
+		}
+		
+		
+		function cacheTicket()
+		{
+			if(typeof ahdtop.ticketObj == "object")
+			{
+				ahdtop.ticketObj.cacheTicketFields(document.main_form);
+			}
+		} 
+
+		function SuggestKnowledge()
+		{
+			window.document.forms["main_form"].elements["KEEP.suggest_knowledge"].value = 1;
+			cacheTicket();
+			detailSave();
+		}
+		
+		function cancelTicket()
+		{
+			ahdtop.ticketObj.resetTicket();
+		}
+			
+		function onLoadTicket()
+		{	
+		
+			if ("$args.id" == "0")
+			{
+				if(typeof ahdtop.ticketObj == "object")
+				{
+					ahdtop.ticketObj.isTicketOpened = 1;
+					ahdtop.ticketObj.loadTicketFields(1 ,document.main_form, document);
+				}
+			} 	
+			<PDM_IF "$args.force_suggest_knowledge" != "">
+				//Forcing suggest knowledge before save, show the category sym and enable the suggest knowledge button
+				var sPcatText = document.forms["main_form"].elements["KEY.category"];
+				if (typeof sPcatText != "undefined"){
+					sPcatText.value = '<PDM_FMT PAD=NO ESC_STYLE=C>$args.force_suggest_knowledge</PDM_FMT>';
+				}
+				ImgBtnEnableButton("btnSave", false);
+				ImgBtnEnableButton("btnCont", true);			
+			</PDM_IF>
+			
+			if(ahdtop.ticketObj.wasKnowledgeSuggested)
+					ImgBtnEnableButton("btnCont", true);		
+			
+			//Init the description of the new ticket with last search text, if available.
+			if ("$args.id" == "0" && ahdtop.m_sLastSearchText != "")
+			{
+				var descriptionTextbox = document.main_form.elements["SET.description"];
+				if (typeof descriptionTextbox  == "object")
+					if (descriptionTextbox.value == "")
+						descriptionTextbox.value = ahdtop.m_sLastSearchText;	
+				ahdtop.m_sLastSearchText = ""; // reset last search	
+			}				
+		}
+
+		function change_category_func(factory)
+		{	
+			<PDM_IF "$args.id" == "0">
+		    
+				var suggestKnowledgeForRequest = "$prop.SUGGEST_KNOWLEDGE_FOR_REQUEST_AREAS";
+				var suggestKnowledgeForIssue = "$prop.SUGGEST_KNOWLEDGE_FOR_ISSUE_CATS";
+				var bDoNotSuggest=false;    
+				if(ahdtop.cfgNX_KT != "Yes" || factory == "cr" && suggestKnowledgeForRequest == "-1")
+					bDoNotSuggest = true;
+				if(ahdtop.cfgNX_KT != "Yes" || factory == "iss" && suggestKnowledgeForIssue == "-1")
+					bDoNotSuggest = true;		
+				if(ahdtop.ticketObj.wasKnowledgeSuggested)
+					bDoNotSuggest = true;;
+					    
+				//Enable Disable the suggest knowledge and the save buttons
+				var sPcat = document.forms["main_form"].elements["SET.category"].value;
+				
+				if (factory=="cr")
+					var url=  cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=KT_GET_CAT_SUGGEST_KNOWLEDGE" +
+					  "+FACTORY=pcat+Category=" + sPcat;
+				if (factory=="iss")
+					var url=  cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=KT_GET_CAT_SUGGEST_KNOWLEDGE" +
+					  "+FACTORY=isscat+Category=" + sPcat;
+				if (!bDoNotSuggest && typeof url != "undefined") {	
+					var retVal = SyncAjaxCall(url);
+					cat_callback(retVal);
+				}
+							
+			</PDM_IF>    
+			sink.show_error("");
+			sink.handleEvent();    
+		}
+
+				
+		function cat_callback(req)
+		{		
+			var bSuggets = false;//Default value
+			var resp = rtrim_nonchar(req);
+			
+			var cat_suggest_knowledge = resp;
+				
+				//if (cat_suggest_knowledge.match(/1/)){
+				if (cat_suggest_knowledge == "1") {
+						bSuggets = true;
+				}
+				//else if (!cat_suggest_knowledge.match(/0/)){
+				//else if (cat_suggest_knowledge!="0")
+				//		show_response(msgtext("Failed_to_find_suggest_knowledge"));
+				//}
+				
+				
+				ImgBtnEnableButton("btnSave", !bSuggets);
+				ImgBtnEnableButton("btnCont", bSuggets);	
+
+		}
+        
+		//this function is called from incident employee view,when incident area is changed
+		function emp_change_category_func(factory)
+		{	
+			//sink.handleEvent();
+			<PDM_IF "$args.id" == "0">
+		        
+				var suggestKnowledgeForRequest = "$prop.SUGGEST_KNOWLEDGE_FOR_REQUEST_AREAS";
+				var suggestKnowledgeForIssue = "$prop.SUGGEST_KNOWLEDGE_FOR_ISSUE_CATS";
+				    
+				if(ahdtop.cfgNX_KT != "Yes" || factory == "cr" && suggestKnowledgeForRequest == "-1")
+					return;
+				if(ahdtop.cfgNX_KT != "Yes" || factory == "iss" && suggestKnowledgeForIssue == "-1")
+					return;				
+				if(ahdtop.ticketObj.wasKnowledgeSuggested)
+					return;
+					    
+				//Enable Disable the suggest knowledge and the save buttons
+				var sPcat = document.forms["main_form"].elements["SET.category"].value;
+				var bSuggets = false;//Default value
+				if (factory=="cr")
+					var url=  cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=KT_GET_CAT_SUGGEST_KNOWLEDGE" +
+					  "+FACTORY=pcat+Category=" + sPcat;
+				if (factory=="iss")
+					var url=  cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=KT_GET_CAT_SUGGEST_KNOWLEDGE" +
+					  "+FACTORY=isscat+Category=" + sPcat;
+				if (typeof url != "undefined") {	
+					var retVal = SyncAjaxCall(url);
+					cat_callback(retVal);
+				}			
+			    
+			</PDM_IF>        
+		}					
+	</script>
+</PDM_IF>

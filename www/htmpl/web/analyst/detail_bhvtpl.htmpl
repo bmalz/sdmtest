@@ -1,0 +1,116 @@
+<PDM_IF 0>
+detail_bhvtpl.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Behavior Template
+INTENT:
+    Display the detail info for Behavior Template
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.tsk_name Behavior Template Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.tsk_name Update Behavior Template"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Behavior Template"</PDM_FMT>;
+</script>
+
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<SCRIPT LANGUAGE="JavaScript" src="$CAisd/scripts/spellcheck.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/nr_ops.js"></script>
+
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+var argID = "$args.id";
+<PDM_IF "$args.id" == "0">
+var the_parent_persid='wftpl'+ ':'+'$args.KEEP.wftpl_id';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+<PDM_ELSE>
+var the_parent_persid='wftpl'+':'+'$args.object_id';
+ahdframeset.top_splash.next_persid = the_parent_persid;
+</PDM_IF>
+
+
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</script>
+
+</HEAD>
+
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Behavior Template" key="$args.sym">
+<CENTER>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory=bhvtpl>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.id" == 0>
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_type VALUE='wftpl'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.object_id VALUE='$args.KEEP.wftpl_id'>");
+if ("$args.KEEP.fac" == "chg")
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.context_type VALUE='wf'>");
+else if("$args.KEEP.fac" == "iss")
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.context_type VALUE='iss_wf'>");
+docWriteln("<INPUT TYPE=HIDDEN NAME=SET.context_attrname VALUE='status'>");
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro" && "$args.id" != 0>
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.CO_PARENT\" VALUE=\"1\">");
+docWriteln("<INPUT TYPE=HIDDEN NAME=\"KEEP.PARENT_PERSID\" VALUE="+the_parent_persid+">");
+</PDM_IF>
+
+// close this form and give focus on the main form
+if ( _dtl.edit ) 
+{
+docWriteln("<INPUT TYPE=hidden NAME=HTMPL VALUE='show_main_detail.htmpl'>");
+if (_dtl && _dtl.next_persid == "")
+    _dtl.next_persid = 'show_main_detail.htmpl';
+    
+} 
+
+<PDM_MACRO name=dtlStartRow>
+detailTextboxReadonly("Workflow Task","",1,'<PDM_FMT ESC_STYLE=C PAD=NO>$args.KEEP.tsk_name</PDM_FMT>');
+
+<PDM_IF "$prop.form_name_3" == "edit" || $args.id == 0>
+
+	detailDropdown("Status", "context_attrval","tskstat", 1, 20,
+               "0", "", "${args.context_attrval:0}",
+                "no", "", "${args.context_attrval:0}",
+               "", "", "no", "","0",""
+	<PDM_LIST PREFIX=list WHERE=" " FACTORY=tskstat>
+	<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.id"</PDM_FMT></PDM_LIST>);
+
+<PDM_ELSE>
+
+	<PDM_LIST PREFIX=list FACTORY=tskstat WHERE="id=${args.context_attrval:0}" ESC_STYLE=C>
+	detailTextboxReadonly("Status","",1,"$list.COMMON_NAME");
+	</PDM_LIST>	
+
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Aktywne" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr="wftpl_nb">
+<PDM_MACRO name=TAB title="To Do" file="bhvtpl_todo_tab.htmpl">
+<PDM_MACRO name=TAB title="Transition Information" file="bhvtpl_trans_info_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_bhvtpl.htmpl ASPEN.2 2010/10/13 16:21:32 manmu01 Exp $;
+</PDM_IF>
+
+<PDM_WSP>

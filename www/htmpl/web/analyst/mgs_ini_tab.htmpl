@@ -1,0 +1,57 @@
+<PDM_IF 0>
+mgs_ini_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Managed Survey 
+INTENT:
+    Display a notebook page for Initial Message for a Managed Survey.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=mgs_ini_tab" factory=mgs>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+<PDM_OBJECT>
+var tabButtonAuth = 1;  // Display buttons to users with readonly auth
+function add_button_to_tab_banner(){
+<PDM_IF "$prop.form_name_3" != "edit" && "$args.initial_msgbody" != "" && "args.initial_method" >0>
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Send Initial Notification" func="ProcessNotification('$args.persistent_id', 0)" hotkey_name="Send Initial Notification" id="notify" width=210>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+}
+</PDM_OBJECT>
+<PDM_MACRO name=tabBanner title="Initial Message" add_btns=true>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlDropdown hdr="Metoda powiadomienia" attr=initial_method>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł wiadomości inicjalnej" attr=initial_msgtitle colspan=3 keeplinks=yes rows=1 size=100 spellchk=no>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlTextbox hdr="Treść wiadomości inicjalnej" attr=initial_msgbody colspan=3 keeplinks=yes rows=8 size=100 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: mgs_ini_tab.htmpl ASPEN.1 2010/11/05 16:59:56 saima01 Exp $
+</PDM_IF>

@@ -1,0 +1,95 @@
+<PDM_IF 0>
+quiesce_pending.htmpl
+WHEN PRESENTED:
+    When the server is scheduled for shutdown
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var form_title = "Server Shutdown Scheduled";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+var shutdownTime = "$SESSION.SHUTDOWN_TIME" - 0;
+var dateString = "<PDM_FMT ESC_STYLE=C>at %1</PDM_FMT>";
+var timeString = "<PDM_FMT ESC_STYLE=C>(%1 from now)</PDM_FMT>";
+var nowString = "<PDM_FMT ESC_STYLE=C>NOW!</PDM_FMT>";
+function setQuiesceTime()
+{
+  var e = document.getElementById("shutdownTime");
+  if ( e != null && shutdownTime > 0 ) {
+    e.innerHTML = dateString.replace("%1",date_to_string( shutdownTime, 0));
+    shutdownTime *= 1000;
+    formatTime(true);
+  }
+}
+
+// formatTime
+//   Show the time remaining in hh:mm:ss format, turning it to red when
+//   less than 60 seconds remain
+function formatTime(doFocus)
+{
+  e = document.getElementById("timeRemaining");
+  if ( e != null ) {
+    var now = (new Date()).getTime();
+    if ( now >= shutdownTime ) {
+      e.innerHTML = "";
+      e = document.getElementById("shutdownTime");
+      if ( e != null ) {
+        e.innerHTML = nowString;
+        e.style.fontWeight = "bold";
+        e.style.color = "red";
+      }
+    }
+    else {
+      var interval = new Date( shutdownTime - now );
+      var utcString = interval.toUTCString();
+      var secsRemaining = Math.round( interval.getTime()/1000 );
+      if ( utcString.match(/(\d\d:\d\d:\d\d)/) ) 
+        e.innerHTML = timeString.replace("%1",RegExp.\$1);
+      else
+        e.innerHTML = timeString.replace("%1",secsRemaining);
+
+      // Refocus the window when exactly 5, 4, 3, 2, 1, 0.5 minutes remain
+
+      switch( secsRemaining ) {
+        case 300:
+        case 240:
+        case 180:
+        case 120:
+        case 60:
+        case 30:
+          window.focus();
+          break;
+
+        default:
+          if ( typeof doFocus == "boolean" && doFocus )
+            window.focus();
+          break;
+      }
+      if ( secsRemaining <= 60 ) {
+        e.style.fontWeight = "bold";
+        e.style.color = "red";
+      }
+      window.setTimeout("formatTime()", 1000);
+    }
+  }
+}
+</script>
+</head>
+<body onload="setQuiesceTime()">
+<h1>Server Shutdown Scheduled</h1>
+<br>
+This $ProductName server is scheduled to shut down for maintenance <span id="shutdownTime"></span>&nbsp;<span id="timeRemaining"></span>. To prevent interruption of your work from the shutdown, please logoff and log back in again. For further information, please contact your CA Service Desk administrator.
+<br>
+<br>
+<center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: quiesce_pending.htmpl ASPEN.1 2010/11/16 23:00:30 saima01 Exp $
+</PDM_IF>

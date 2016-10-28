@@ -1,0 +1,84 @@
+<PDM_IF 0>
+kt_admin_survey_settings.htmpl
+WHEN PRESENTED:
+    When we need to display the Survey Settings admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES table
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Solution Survey";
+var hdrTitleList = "Solution Survey";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript">
+	var iDefValue = new Array(0,0,0,0,0,0,0,0);  //Database Defult Value
+	var iRealValue = new Array(0,0,0,0,0,0,0,0); //Database Value display on the page
+	var strDBID = new Array("","","","","","","",""); //Database ID
+	
+	<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "SOL_SURV_HOW_HELPFUL">
+			strDBID[0] = "$ciProps.id";
+			iRealValue[0] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[0] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "SOL_SURV_DID_DOC_SOLVE">
+			strDBID[1] = "$ciProps.id";
+			iRealValue[1] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[1] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "SOL_SURV_VOTE_SUMMARY">
+			strDBID[2] = "$ciProps.id";
+			iRealValue[2] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[2] = "$ciProps.PROPERTY_DEFAULT";
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "SOL_SURV_FORCE_VOTE">
+			strDBID[3] = "$ciProps.id";
+			iRealValue[3] = "$ciProps.PROPERTY_VALUE";
+			iDefValue[3] = "$ciProps.PROPERTY_DEFAULT";
+		</PDM_IF>	
+	</PDM_LIST>
+
+</script>
+</head>
+
+<body class=detailro onload="frmSurveySettingsOnLoad();" onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<script>
+var edit_form = 1;
+<PDM_MACRO name=dtlForm button=false factory=USP_PROPERTIES>
+if ( ahdtop.canEditAdminKT_MT() )
+{
+    
+<PDM_MACRO name=button caption="Save[S]" func="cmdOK_Click('frmSurveySettings')" hotkey_name="Save[S]" id="btnSave" newrow="yes">
+<PDM_MACRO name=button caption="Reset Defaults[R]" endrow="yes" func="cmdResetDef_Click('frmSurveySettings')" hotkey_name="Reset Defaults[R]" id="btnResetDefault">
+}
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlShowtext dataclass=pageHeader value="Survey Settings">
+<PDM_MACRO name=dtlStartRow class="'page_section width_100'">
+<PDM_MACRO name=dtlShowtext dataclass="label" value="&bull;&nbsp;Document Solution Survey Settings:">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="" attr="chkHelpful" desc="<span class=data><label for='chkHelpful'>Display 'How helpful was this document?'</label></span>" evt="onclick='chkHelpful_click()'" id="chkHelpful" padding=1 samecol=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="" attr="chkSolve" desc="<span class=data><label for='chkSolve'>Display 'Did this document solve your problem?'</label></span>" evt="onclick='chkHelpful_click()'" id="chkSolve" padding=1 samecol=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="" attr="chkVote" desc="<span class=data><label for='chkVote'>Display 'Voting Summary'</label></span>" id="chkVote" padding=1 samecol=true>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckboxWithDesc hdr="" attr="chkForceVote" desc="<span class=data><label for='chkForceVote'>Display a Solution Survey popup if the user did not vote</label></span>" id="chkForceVote" padding=1 samecol=true> 
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

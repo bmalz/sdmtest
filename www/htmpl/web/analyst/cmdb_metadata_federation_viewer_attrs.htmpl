@@ -1,0 +1,38 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+// File:    cmdb_metadata_federation_viewer_attrs.htmpl
+//
+// Purpose: CMDBf Federation Viewer internal use only CMDB attribute metadata 
+//
+//
+// 22-Jul-2009 tomjo02 SCO 26226 - CMDBf Federation Viewer - Initial version 
+/////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////
+// Below are attributes displayed in the CMDBf federation viewer detail form that are not 
+// defined in the predefined out-of-the-box CMDB metadata. 
+////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=cmdbMetadata category="Classification" attr="last_mod" heading="Last Modified Date" help="The date the CI was last modified">
+
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////////////////
+// Below are CMDB attributes we want to hide in the CMDBf federation viewer detail form, 
+// use regular expression ".*" to hide all attributes for all MDR providers.
+////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<PDM_MACRO name=cmdbMetadata provider_attr="linked_usp_owned_resource"  provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="asset_source_uuid"          provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="is_selected"                provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="ufam"                       provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="last_mod_dt"                provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="ambiguity_last_update_date" provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="linked_ci_ambiguity_ci"     provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="linked_ci_superseded"       provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="superseded_last_update_date" provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="superseded_last_update_user" provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="audit_usercombo_name"        provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="web_url" 		             provider_name_regexp=".*" hide_provider_attr="YES" >
+<PDM_MACRO name=cmdbMetadata provider_attr="ambiguous_ci_where"          provider_name_regexp=".*" hide_provider_attr="YES" >

@@ -1,0 +1,146 @@
+<PDM_IF 0>
+detail_sa_security_group.htmpl
+WHEN PRESENTED:
+    When we need to display details of a particular Factory
+INTENT:
+    Web Screen Painter Template file for detail screens
+</PDM_IF>
+
+<HTML>
+
+<HEAD>
+	<PDM_PRAGMA RELEASE=110>
+	<PDM_INCLUDE FILE=styles.htmpl>
+	<SCRIPT LANGUAGE="JavaScript">
+		var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Page Layout Configuration"</PDM_FMT>;
+		var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Update Page Layout Configuration"</PDM_FMT>;
+		var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Page Layout Configuration"</PDM_FMT>;
+	</SCRIPT>
+	<PDM_INCLUDE FILE=std_head.htmpl>
+
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+	<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+
+	<SCRIPT LANGUAGE="JavaScript">
+	  var pageURLFldNum;
+	  var queueFldNum;
+	  var wasLastURLMandatory = false;
+	  var initialPageType;
+	
+		argPersistentID = "$args.persistent_id";
+
+		function preSaveTrigger()
+		{
+			return true;
+		}
+		
+		function unloadActions()
+		{
+   			if ( _dtl.edit )
+      			unload_check();
+		}
+	</SCRIPT>
+</HEAD>
+
+<BODY class="list" onUnload="unloadActions()" onload="onloadActions()">
+	<PDM_INCLUDE FILE=std_body.htmpl>
+	<CENTER>
+
+	<SCRIPT LANGUAGE="JavaScript">
+	  function onloadActions() {
+	     updateFieldsByPageType(initialPageType);
+    }
+	
+	  /*
+	   * Purpose of thi method if to disable queue field for pages which are not queue related. Second for Post-Logout page we allow
+	   * empty URL to be able to disable this page.	   
+	   *
+	   * Page types are as follows:
+	   *   0 - Wait page
+	   *   1 - End User Post-Launch page
+	   *   2 - In Session
+	   *   3 - Post Logout Page     	   
+	   *   4 - Exit Survey Page
+	   *   6 - Closed Page     
+	   *   8 - Tech Post-Launch page
+	   *   9 - Self Service Automation Launched Page                     	   
+	   *
+	   */     	   
+	  function updateFieldsByPageType(selectedValue) {
+	     //If this is called for non-edit page, could throw Exceptions, but there is no harm
+	     try {
+  	     //If post logout page then make page URL required
+  	     pageURLFld = findFieldAndLabelFromTable("waitURL",1);
+  	     	     
+  	     if (selectedValue == '3' || selectedValue == '4' || selectedValue == "") {
+  	       _dtl.fieldToValidate[pageURLFldNum].is_required = 0;
+  	       pageURLFld[1].className="labeltext";
+  	       pageURLFld[1].innerHTML = pageURLFld[1].innerHTML.replace("&nbsp;" + ahdtop.cfgIndRequired,"");
+  	       //It might be error class - then it will be wrong indication
+  	       document.main_form.elements["SET.waitURL"].className="";
+  	       wasLastURLMandatory = false;
+         } else {
+           pageURLFld[1].className="requiredlabeltext"; 
+           _dtl.fieldToValidate[pageURLFldNum].is_required = 1;
+           if (wasLastURLMandatory == false) {
+              pageURLFld[1].innerHTML = pageURLFld[1].innerHTML.replace(/&nbsp;/g,"") + "&nbsp;" + ahdtop.cfgIndRequired;
+           }
+           wasLastURLMandatory = true;
+         }
+  	   
+  	     /* Allowed page types are not queue sensitive in the moment
+         
+         queueFld = findFieldAndLabelFromTable("queueID",1);   
+            
+  	     if (selectedValue == '6' || selectedValue == '8' || selectedValue == '9') {
+  	       queueFld[0].style.display='none';
+  	       queueFld[1].style.display='none';
+  	       
+  	       document.main_form.elements["SET.queueID"].value = '';
+  	       document.main_form.elements["KEY.queueID"].value = '';
+         } else {
+           queueFld[0].style.display='';
+  	       queueFld[1].style.display='';
+         }
+         */
+       } catch (err) {
+          //alert(err);
+       }
+    }
+	
+		
+<PDM_MACRO name=dtlForm factory="sa_wait_component">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+		  
+      initialPageType = "$args.pageType";
+      	
+			
+<PDM_IF "$args.id" == "0" >
+<PDM_MACRO name=dtlDropdown hdr="Typ strony" attr="pageType" evt="onchange=\\\"updateFieldsByPageType(this.value);\\\"" lookup="no" make_required=yes size="60">
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Typ strony" attr="pageType">
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="URL strony" attr="waitURL" size="60">
+					pageURLFldNum = _dtl.fieldToValidate.length - 1;
+				  
+<PDM_MACRO name=dtlCheckbox hdr="Zewnętrzny URL" attr="isExternal">
+<PDM_IF  "$args.queueID" != "" || "$args.id" == "0" >
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Kolejka" attr="queueID">
+					 queueFldNum = _dtl.fieldToValidate.length - 1;
+				
+</PDM_IF>
+	</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

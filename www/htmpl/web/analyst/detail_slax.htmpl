@@ -1,0 +1,17 @@
+<PDM_IF 0>
+detail_slax.htmpl
+Purpose:
+    Display the detail of a Service Level Agreement CI.
+    See cmdb_detail.htmpl for  more details.
+
+History:
+       22-Jun-2009 aliab01 - SCO # 22074 - Standardization of nr_cmdb_<extn-family>_tab.htmpl  & detail_<extn-family>.htmpl files
+</PDM_IF>
+
+<PDM_INCLUDE FILE="cmdb_detail.htmpl"   extension="slax" 
+                                        SHOW_SERIAL_NUMBER="NO" 
+                                        SHOW_SYSTEM_NAME="NO" 
+                                        SHOW_DNS_NAME="NO" 
+                                        SHOW_MAC_ADDRESS="NO">
+
+<PDM_WSP where="family.extension_name='slax'" factory=nr design=no>

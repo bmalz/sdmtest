@@ -1,0 +1,382 @@
+////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 1997, 1995 Computer Associates International, Inc
+//
+// Copyright (C) 1991 - 1993 NetWorx, Incorporated.  All Rights Reserved.
+//
+// Copyright (C) 1994, 1995 Legent Software, Inc., as an
+// unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Legent
+// Corporation or its subsidiaries or affiliates (together referred to
+// as "LEGENT"), and which may not be reproduced, used, sold or
+// transferred to any third party without LEGENT's prior written consent.
+//
+// All Rights Reserved.
+//
+// RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:      cr_sla.spl
+// Created:     20-oct-1997
+////////////////////////////////////////////////////////////////////////////
+
+//  Dummy function, just so RCS Id is embedded in compiled spell file...
+string cr_sla_spl_RCSID() { return "@(#)$Id: cr_sla.spl ANDERSON.1 2009/07/22 14:12:57 xiewe01 Exp $"; }
+
+// Set interpreter option that all variables must be explicitly declared
+#define SYNTAX STRICT
+
+// Description:
+//
+//      BOP config file for Service Level Agreement Support for
+//      Call Management.  
+//
+////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////
+// Method:      cr.customer::calculate_sla()
+//
+// Description: triggered when the customer field of a call request
+//   is modified. determines the best support level.
+//
+// Input
+//   customer	attrname=argv[0], old=argv[2], new=argv[3]
+//
+// Return
+//   None
+////////////////////////////////////////////////////////////////////////
+cr.customer::calculate_sla(...)
+{
+	// SDT 5357
+	// This code may seem lengthy, but it is fairly simple.  We first get the new service types
+	// for the customer and his/her org.  If any of those service types are no good (i.e. empty or
+	// inactive or matches current service type), we set a flag.  At the end, we call _determine_best_service()
+	// depending on the flags. If both service types are 'good', we must do a little bit of rank
+	// calculation.  All this is to cope with the fact _determine_best_service can only handle comparing
+	// 1 service type.  It also sets the service type, so we don't want to call it more than once.
+
+    if ( ! is_null(argv[3]) ) {
+
+
+		// Choose legacy behavior or downgrade option
+		string do_downgrade;
+		do_downgrade = getenv("NX_CR_ALLOW_SLA_DOWNGRADE");
+		if (!is_empty(do_downgrade) && downcase(do_downgrade) == "yes") {
+
+			send_wait(0, top_object(), "call_attr", "sdsc", "best_service_with_downgrade",
+						"cr", this, "support_lev",
+						"customer.service_type",
+						"customer.organization.service_type",
+						"priority.service_type",
+						"affected_resource.service_type", 
+						"category.service_type");
+
+			if (msg_error()) {
+				set_error(msg_error());
+				set_return_data(msg[0]);
+			}
+			return;
+		}
+
+		send_wait( 0, this, "get_attr_vals",
+			5, "support_lev",
+			"customer.service_type",
+			"customer.organization.service_type",
+			"customer.service_type.delete_flag",
+			"customer.organization.service_type.delete_flag");
+		
+
+		if ( ! msg_error() ) {
+			string curr_svc_code, new_svc_code, new_svc_code2;
+			int new_inactive, new_inactive2, new_code_no_good, new_code_2_no_good;
+
+			curr_svc_code = msg[3];
+			new_svc_code = msg[6];
+			new_svc_code2 = msg[9];
+			new_inactive = msg[12];
+			new_inactive2 = msg[15];
+
+			new_code_no_good = 0; new_code_2_no_good = 0;
+ 		
+			// SDT 5357 - Must be really sure which codes to pass to _determine_best_service()!
+			//	If a service type is inactive, do not consider it!
+			if ( is_empty(new_svc_code2) || new_svc_code2 == curr_svc_code || 1 == new_inactive2) {
+				new_code_2_no_good = 1;
+			}
+			
+			if ( is_empty(new_svc_code) || new_svc_code == curr_svc_code || 1 == new_inactive) {
+				new_code_no_good = 1;
+			}
+		
+			if (1 == new_code_2_no_good && 1 == new_code_no_good) return;
+
+			if (0 == new_code_no_good && 0 == new_code_2_no_good) {
+
+				// Both service codes available - use the one with lower rank
+				int rank1, rank2;
+				rank1 = (int)expand(format("&{'%s' = sdsc.code->rank}",
+					new_svc_code));
+				rank2 = (int)expand(format("&{'%s' = sdsc.code->rank}",
+					new_svc_code2));
+				if ( rank2 < rank1 )
+					new_svc_code = new_svc_code2;
+
+				cr::_determine_best_service( curr_svc_code, new_svc_code );
+
+			} else {
+				if (1 == new_code_no_good) {
+					cr::_determine_best_service( curr_svc_code, new_svc_code2 );
+				} else {
+					cr::_determine_best_service( curr_svc_code, new_svc_code );
+				}
+			}
+		}
+    }
+}
+
+////////////////////////////////////////////////////////////////////////
+// Method:      cr.priority::calculate_sla()
+//
+// Description: triggered when the priority field of a call request
+//   is modified. determines the best support level.
+//
+// Input
+//   priority	attrname=argv[0], old=argv[2], new=argv[3]
+//
+// Return
+//   None
+////////////////////////////////////////////////////////////////////////
+cr.priority::calculate_sla(...)
+{
+    if ( ! is_null(argv[3]) ) {
+
+		// Choose legacy behavior or downgrade option
+		string do_downgrade, override;
+
+		override = expand("$NX_CRSLA_OVERRIDE");
+		do_downgrade = getenv("NX_CR_ALLOW_SLA_DOWNGRADE");
+
+		if (sindex(override,"priority") == -1 && !is_empty(do_downgrade) && downcase(do_downgrade) == "yes") {
+
+			send_wait(0, top_object(), "call_attr", "sdsc", "best_service_with_downgrade",
+						"cr", this, "support_lev",
+						"customer.service_type",
+						"customer.organization.service_type",
+						"priority.service_type",
+						"affected_resource.service_type", 
+						"category.service_type");
+
+			if (msg_error()) {
+				set_error(msg_error());
+				set_return_data(msg[0]);
+			}
+			return;
+		}
+
+		send_wait( 0, this, "get_attr_vals", 3, "support_lev", "priority.service_type",
+						"priority.service_type.delete_flag");
+
+		if ( ! msg_error() ) {
+			string curr_svc_code, new_svc_code;
+			int inactive_f;
+
+			curr_svc_code = msg[3];
+			new_svc_code = msg[6];
+			inactive_f = msg[9];
+
+			if (!inactive_f) {
+				if ( sindex(override,"priority") != -1 )
+					this.support_lev = new_svc_code;
+				else
+					cr::_determine_best_service( curr_svc_code, new_svc_code );
+			}
+		}
+    }
+}
+
+////////////////////////////////////////////////////////////////////////
+// Method:      cr.affected_resource::calculate_sla()
+//
+// Description: triggered when the affected asset field of a call request
+//   is modified. determines the best support level.
+//
+// Input
+//   affected_resource	attrname=argv[0], old=argv[2], new=argv[3]
+//
+// Return
+//   None
+////////////////////////////////////////////////////////////////////////
+cr.affected_resource::calculate_sla(...)
+{
+    if ( ! is_null(argv[3]) ) {
+
+		// Choose legacy behavior or downgrade option
+		string do_downgrade;
+		do_downgrade = getenv("NX_CR_ALLOW_SLA_DOWNGRADE");
+		if (!is_empty(do_downgrade) && downcase(do_downgrade) == "yes") {
+
+			send_wait(0, top_object(), "call_attr", "sdsc", "best_service_with_downgrade",
+						"cr", this, "support_lev",
+						"customer.service_type",
+						"customer.organization.service_type",
+						"priority.service_type",
+						"affected_resource.service_type", 
+						"category.service_type");
+
+			if (msg_error()) {
+				set_error(msg_error());
+				set_return_data(msg[0]);
+			}
+			return;
+		}
+
+       send_wait( 0, this, "get_attr_vals",
+		  3, "support_lev", "affected_resource.service_type", 
+		  "affected_resource.service_type.delete_flag" );
+
+       if ( ! msg_error() ) {
+          string curr_svc_code, new_svc_code;
+		  int inactive_f;
+
+          curr_svc_code = msg[3];
+          new_svc_code = msg[6];
+		  inactive_f = msg[9];
+
+	  if ( ! is_empty(new_svc_code) && !inactive_f)
+	     cr::_determine_best_service( curr_svc_code, new_svc_code );
+       }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////
+// Method:      cr.category::calculate_sla()
+//
+// Description: triggered when the call area field of a call request
+//   is modified. determines the best support level.
+//
+// Input
+//   category	attrname=argv[0], old=argv[2], new=argv[3]
+//
+// Return
+//   None
+////////////////////////////////////////////////////////////////////////
+cr.category::calculate_sla(...)
+{
+    if ( ! is_null(argv[3]) ) {
+
+		// Choose legacy behavior or downgrade option
+		string do_downgrade;
+		do_downgrade = getenv("NX_CR_ALLOW_SLA_DOWNGRADE");
+		if (!is_empty(do_downgrade) && downcase(do_downgrade) == "yes") {
+
+			send_wait(0, top_object(), "call_attr", "sdsc", "best_service_with_downgrade",
+						"cr", this, "support_lev",
+						"customer.service_type",
+						"customer.organization.service_type",
+						"priority.service_type",
+						"affected_resource.service_type", 
+						"category.service_type");
+
+			if (msg_error()) {
+				set_error(msg_error());
+				set_return_data(msg[0]);
+			}
+			return;
+		}
+
+       send_wait( 0, this, "get_attr_vals",
+		  3, "support_lev", "category.service_type",
+		   "category.service_type.delete_flag");
+       if ( ! msg_error() ) {
+          string curr_svc_code, new_svc_code;
+		  int inactive_f;
+
+          curr_svc_code = msg[3];
+          new_svc_code = msg[6];
+		  inactive_f = msg[9];
+
+	  if ( ! is_empty(new_svc_code) && !inactive_f)
+	     cr::_determine_best_service( curr_svc_code, new_svc_code );
+       }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////
+// Method:      cr::_determine_best_service()
+//
+// Description: sets the service level of the call request based
+//   on its current rank and the new rank.  The smaller rank wins.
+//
+//	
+// Input
+//   new_service_type	service type to set the call request to.  Must be active
+//						(delete_flag = 0)
+//
+// Return
+//   None
+////////////////////////////////////////////////////////////////////////
+cr::_determine_best_service(string curr_service_type, string new_service_type)
+{
+
+	// Insanity check
+	string classic_enabled;
+	classic_enabled = getenv("NX_CLASSIC_SLA_PROCESSING");
+	if (is_empty(classic_enabled) || downcase(classic_enabled) == "no")
+	{
+		logf(ERROR, find_msg(5, 251));
+	}
+
+     if (is_empty(new_service_type))
+	return;
+
+     if ( new_service_type == curr_service_type )
+	return;
+
+     if ( is_empty(curr_service_type) ) {
+	// if we had no service type to begin with, stick in new one
+	this.support_lev = new_service_type;
+	return;
+     }
+     
+     int curr_rank;
+     curr_rank = this.support_lev.rank;
+
+     // Get the rank of the new service type
+
+     string snew_rank;
+	 int snew_inactive;
+
+     snew_rank = expand(format("&{'%s' = sdsc.code->rank}", new_service_type));
+	
+     //printf("Ranks: %s = %d %s = %s\n", curr_service_type, curr_rank, new_service_type, snew_rank );
+
+     if (! is_empty(snew_rank)) {
+		 int new_rank;
+		 new_rank = (int)snew_rank;
+
+		 // SDT 2263:  if ranks tie, use id as tiebreaker!
+
+		 if (new_rank != curr_rank) {
+
+			if ( new_rank < curr_rank && new_rank > 0 ) {
+				 //printf("New has higher rank - setting support_lev %s\n", new_service_type);
+				this.support_lev = new_service_type;
+			}
+
+		 } else {
+			 // Use id as tiebreaker
+			 int curr_id, new_id;
+			 curr_id = this.support_lev.id;
+			 new_id = (int) expand(format("&{'%s' = sdsc.code->id}", new_service_type));
+
+			 if (new_id < curr_id) {
+				 this.support_lev = new_service_type;
+			 }
+		 }
+     }
+}
+
+
+	

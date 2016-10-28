@@ -1,0 +1,86 @@
+<PDM_IF 0>
+kt_report_card_init.htmpl
+WHEN PRESENTED:
+    When we need to display the knowledge report card statistics screen
+INTENT:
+    Display the Knowledge report card statistics
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/convert_date.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">		
+	var screenDef = ahdtop.GetUSPPreferences("KT_REPORT_CARD_SCREEN_DEFAULT");
+	var past_days = ahdtop.GetUSPPreferences("KT_REPORT_CARD_PAST_DAYS");
+	var date_obj = new Date();
+	var today=Math.round(date_obj.getTime()/ 1000);
+	if (screenDef == "2")//We need to make sure the contact is still assigned to categories
+	{
+		var bFoundKCat = false;
+		<PDM_LIST PREFIX=kcat WHERE="OWNER_ID=U'$cst.id'" FACTORY="KCAT">
+			var bFoundKCat = true;
+			var ID = '$kcat.id';
+		</PDM_LIST>
+		if (!bFoundKCat)
+		{
+			screenDef = "1";
+		}
+	}
+	
+	if (screenDef == "3")//We need to make sure the contact is still assigned to categories
+	{
+		var bFoundEmp = false;
+		<PDM_LIST FACTORY="cnt" PREFIX=user WHERE="supervisor_contact_uuid=U'$cst.id'">
+			var bFoundEmp = true;
+			var ID = '$user.id';
+		</PDM_LIST>
+	
+		if (!bFoundEmp)
+		{
+			screenDef = "1";
+		}
+	}
+	var managerFlag = "0";
+	var categoryOwnerFlag = "0";	
+	if (screenDef == "2")	// My Category screen default
+		categoryOwnerFlag = "1";
+	else if (screenDef == "3")	// My Organization screen default
+		managerFlag = "1";
+						
+	var url = cfgCgi + 
+				"?SID="+cfgSID +
+				"+FID="+fid_generator() +
+				"&OP=SEARCH&FACTORY=KD&DOMSET=KRC_list_web&KEEP.cur_sort_key=id" +
+				"&QBE.EQ.AUTHOR_ID=$cst.id" +
+				"&QBE.NE.ACTIVE_STATE=2" +		// don't show Retired KD's
+				"&QBE.EQ.REWORK_VER=0";			// don't show Reworked KD's
+	if (past_days != "-1")
+	{
+		var qbe_date = today - (past_days * 86400);
+		url += "&QBE.GT.CREATION_DATE=" + date_to_string(qbe_date,0);			
+	}	
+	var overall_id = "ALL_ORG";
+	if ("$prop.MultiTenancy" != "off" && "$cst.tenant" != "")
+	{
+		overall_id = "tnt:$cst.tenant";
+	}
+	url += "&HTMPL=list_kt_report_card.htmpl" +
+				"&KEEP.KRC_TYPE=" + screenDef + 
+				"&KEEP.MANAGER_FLAG=" + managerFlag +
+				"&KEEP.CATEGORY_OWNER_FLAG=" + categoryOwnerFlag +
+				"&KEEP.PAST_DAYS=" + past_days + 
+				"&KEEP.ID=$cst.id" + 
+				"&KEEP.OVERALL_ID=" + overall_id +
+				"&KEEP.VIEW_DOCS=0" + //filter doc list by submitted documents for past_days
+				"&KEEP.PERSID=cnt:$cst.id";
+	display_new_page(url);
+</SCRIPT>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: kt_report_card_init.htmpl ANDERSON.1 2009/10/28 17:13:37 gurig01 Exp $
+</PDM_IF>

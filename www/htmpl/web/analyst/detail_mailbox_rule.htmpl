@@ -1,0 +1,164 @@
+<PDM_IF 0>
+detail_mailbox_rule.htmpl
+WHEN PRESENTED:
+    When we need to display a details of a single mailbox rule
+INTENT:
+    Display the detail and edit info for the mailbox rule
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object  mailbox_rule  args	The mailbox_rule object we are displaying.
+                        See $NX_ROOT/bopcfg/majic/cm.maj for the
+                        definition of attributes for 'OBJECT mailbox_rule'
+    integer UserAuth    Variable containing the logged-in user's maximum
+                        authorization for this table in the database. 
+                            0   No Access
+                            1   View-only
+                            2   Modify
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Mailbox Rule Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Mailbox Rule"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Mailbox Rule $args.name"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+
+<script type="text/javascript">
+
+<PDM_IF "$args.KEEP.ForMailbox" == "1">
+<PDM_IF "$args.id" == "0">
+var the_parent_persid ='mailbox'+ ':'+'$args.KEEP.id';
+ahdframeset.top_splash.next_persid =the_parent_persid;
+<PDM_ELSE>
+var the_parent_persid='mailbox'+ ':'+'$args.dom_id';
+ahdframeset.top_splash.next_persid =the_parent_persid;
+</PDM_IF>
+</PDM_IF>
+
+argPersistentID = "$args.persistent_id";
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+function check_action_object_before_save()
+{	
+  // clear the previous message
+    clearAlertMsg(window.parent);    
+    AlertMsg=""; // reset the AlertMsg
+	if (window.document.main_form.elements["SET.action_operation"].value != ""){	 
+			if (window.document.main_form.elements["SET.action_operation"].value == "3" ||
+			window.document.main_form.elements["SET.action_operation"].value == "4" ){
+				if (window.document.main_form.elements["SET.action_object"].value == ""){
+				    showAlertMsg("Action Object is required when 'Create/Update Object' or 'Update Object' Action is selected");
+				    return;
+				  }
+			}		
+		}			 
+	detailSave();
+}
+</script>
+
+</head>
+
+<body class="detailro" onunload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="mailbox_rule" key="$args.name">
+<center>
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm button=false factory=mailbox_rule>
+<PDM_IF "$prop.form_name_3" == "edit">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Save[s]" func="check_action_object_before_save()" hotkey_name="Save[s]" id="btn001" width=120>
+<PDM_MACRO name=button caption="Cancel[n]" btntype="negative" func="cancel_update('$prop.form_name_2','$args.id','$args.NEXT_PERSID')" hotkey_name="Cancel[n]" id="btncncl" width=120>
+<PDM_MACRO name=button caption="Reset[r]" func="pdm_reset()" hotkey_name="Reset[r]" id="btn003" width=120>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+<PDM_IF "$prop.form_name_3" == "ro">
+<PDM_MACRO name=btnStartRow>
+<PDM_MACRO name=button caption="Edit[d]" func="pdm_submit('main_form','UPDATE')" hotkey_name="Edit[d]" id="btn001" width=120>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$args.KEEP.ForMailbox" == "1">
+<PDM_IF "$prop.form_name_3" == "ro">
+	docWriteln("<input type='hidden' name=\"KEEP.CO_PARENT\" value=\"1\">");
+	
+</PDM_IF>
+</PDM_IF> 
+
+// close this form and give focus on the main form
+	if ( _dtl.edit ) 
+	{
+	docWriteln("<input type='hidden' name=HTMPL value='show_main_detail.htmpl'>");
+	if (_dtl && _dtl.next_persid == "")
+ 	   _dtl.next_persid = 'show_main_detail.htmpl';
+  } 
+
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Kolejność" attr=sequence>
+
+if (<PDM_FMT PAD=NO ESC_STYLE=C>'$args.KEEP.mailbox_name'</PDM_FMT>!='')
+{
+docWriteln("<input type='hidden' name=SET.dom_id value='$args.KEEP.id'>");
+	detailTextboxReadonly("Mailbox","",1,<PDM_FMT PAD=NO ESC_STYLE=C>"$args.KEEP.mailbox_name"</PDM_FMT>); 
+}
+else {
+ 
+<PDM_MACRO name=dtlLookup hdr="Skrzynka e-mail" attr=mailbox>
+ }
+
+<PDM_MACRO name=dtlDropdown hdr="Aktywne" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Filtrq" attr=filter_type lookup=no>
+<PDM_MACRO name=dtlTextbox hdr="Filter String" attr=filter_string size=50>
+<PDM_MACRO name=dtlCheckbox hdr="Ignoruj wielkość liter" attr="filter_ignore_case" off="No" on="Yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Akcja" attr=action_operation lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Obiekt akcji" attr=action_object lookup=no>
+<PDM_MACRO name=dtlDropdown hdr="Typ minimalnego artefaktu" attr=filter_min_artifact_type lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Odpowiedź" attr=reply_method lookup=no>
+<PDM_MACRO name=dtlTextbox hdr="Temat odpowiedzi" attr=reply_subject colspan=2 size=50>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlCheckbox hdr="Zapisz w stdlog" attr="action_write_to_log" off="No" on="Yes">
+<PDM_MACRO name=dtlTextbox hdr="Prefix wpisu w dzienniku" attr=action_log_prefix size=50>
+<PDM_MACRO name=dtlDropdown hdr="Dodaj linię z tematem" attr=action_subject_handling lookup=no>
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Domyślne ustawienia TextAPI" attr=text_api_defaults keeplinks=no rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlTextbox hdr="TextAPI ignoruje przychodzące" attr=text_api_ignore_incoming colspan=2 keeplinks=no rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Szczegóły" attr=description colspan=3 keeplinks=yes rows=4 size=80 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by" colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=startNotebook hdr="mailbox_rule_reply_tab">
+<PDM_MACRO name=TAB title="Reply Success" file="mailbox_rule_reply_success_tab.htmpl">
+<PDM_MACRO name=TAB title="Reply Failure" file="mailbox_rule_reply_failure_tab.htmpl">
+<PDM_MACRO name=endNotebook>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_IF 0>
+@(#)$Id: detail_mailbox_rule.htmpl ASPEN.3 2010/11/17 23:42:16 saima01 Exp $
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,147 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    To capture a simple comment for the UI.
+    
+    The comment is passed back via a callback on window.opener; set
+    KEEP.comment_finished to the name of the callback function on the parent window.
+    We pass back a single real param, the value of the text field.
+    
+    Pass in KEEP.comment_title for the title.  Set KEEP.initial_comment to
+    preset the textarea.  Set KEEP.comment_required to require at least some text input.
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Reason for the delay/resumption of Service Type"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/backfill.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/spellcheck.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+
+</head>
+
+<body class="detailro" onload="document.getElementById('comment').focus();">
+<PDM_INCLUDE FILE=std_body.htmpl>
+<script>
+document.writeln(generate_basic_form_header_html());
+</script>
+<center>
+<script>
+// Return 1 if the window.opener exists, 0 if it's closed.
+function opener_there() {
+	if ( typeof window.opener == "object" &&
+		window.opener != null && !window.opener.closed) {
+	
+		return 1;
+	} else {
+		return 0;
+	}
+        
+}
+function finished() {
+
+	if (!opener_there()) window.close();
+	
+	var req = "$args.KEEP.comment_required";
+	var text = document.forms["comment_form"].elements["comment"].value;
+	if ("1" == req && text.length <= 0) {
+		alert(msgtext("Input_is_required"));
+		return;
+	}
+	
+	var func = "window.opener.$args.KEEP.comment_finished('" + nx_escape(text) + "')";
+	eval(func);
+	window.close();
+}
+
+function cancel_it() {
+
+	if (!opener_there()) window.close();
+	
+	var cancel_func = "$args.KEEP.comment_cancelled";
+	if (cancel_func.length > 0) {
+		cancel_func = "window.opener." + cancel_func + "()";
+		eval(cancel_func);
+	}
+	window.close();
+}
+
+if ( ! _browser.supportsLayers ) {
+   window.hiddenform = "spell_form";
+   do_hiddenfm('spell_form','comment_form');
+}
+
+</script>
+
+<form name="comment_form">
+<script type="text/javascript">
+document.writeln("<table cellspacing='0' cellpadding='0' width='100%' class='page_header'>");
+document.writeln("<tr height='25'>");
+document.writeln("<td align='left' width='100%'>" + "Reason for the delay/resumption of Service Type" +  "</td>");
+document.writeln("<td align='right' width='1%'>");
+ImgBtnSetDefaultTabIndex(110);
+<PDM_MACRO NAME=button                     
+    id="btn101"                            
+    caption="OK"  
+    func="finished()"
+    hotkey_name="OK"
+    newrow=yes>                           
+<PDM_MACRO NAME=button                     
+    id="btn103"                            
+    caption="Cancel[n]"  
+    func="cancel_it()"     
+    hotkey_name="Cancel[n]"
+    btntype=negative>
+<PDM_MACRO NAME=button                     
+    id="btn102"                            
+    caption="Reset[R]"  
+    func="document.comment_form.reset()"     
+    hotkey_name="Reset[R]"
+    endrow=yes>                           
+
+document.writeln("</td>");
+document.writeln("</tr>");
+document.writeln("</table>");
+</script>
+<br><br>
+<table>
+<tr>
+<th class="labeltext"><label for="comment">$args.KEEP.comment_title</label></th>
+<td>
+<script>
+<PDM_MACRO NAME=button                     
+    id="btn004"                            
+    caption="Spelling[p]"  
+    func="popup_spellchecker('spell_form','comment_form','comment')"     
+    disabled="defer"
+    hotkey_name="Spelling[p]">                           
+</script>
+</td>
+</tr>
+</table>
+<textarea tabindex="100" rows="6" cols="60" class="font_normal" name="comment" id="comment" onfocus="this.className='font_normal focusField';" onBlur="this.className='font_normal';">$args.KEEP.initial_comment</textarea>
+<br>
+
+</form>
+
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+
+<PDM_WSP mode=edit>
+
+<PDM_IF 0>
+@(#)$Id: get_comment.htmpl ASPEN.3 2010/11/19 14:49:02 tomjo02 Exp $;
+</PDM_IF>
+
+

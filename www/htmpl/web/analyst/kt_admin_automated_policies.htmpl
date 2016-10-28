@@ -1,0 +1,163 @@
+<PDM_IF 0>
+kt_admin_faq_options.htmpl
+WHEN PRESENTED:
+    When we need to display the Automated Policies admin screen
+VARIABLES:
+    
+    object  USP_PROPERTIES table
+    
+</PDM_IF>
+
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110 OVERRIDE=YES>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script>form_title = "Automated Policies Settings";</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/img_link.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_admin.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/html_editor.js"></script>
+<script language="JavaScript">
+	var sAutoPoliciesRunID = 0;
+	var lAutoPoliciesRun = 0;
+	var lAutoPoliciesRunDef = 0;
+	var lAutoPoliciesLastRun = 0;
+	var lAutoPoliciesNextRun = 0;
+	var lAutoPoliciesInterval = 0;
+	var dtCalcTimer = 0;
+	var dtCalcInterval = 0;
+
+	<PDM_LIST PREFIX=ciProps FACTORY=USP_PROPERTIES WHERE="id>0" ESC_STYLE=C>
+		<PDM_IF "$ciProps.PROPERTY_NAME" == "AUTO_POLICIES_RUN">
+			sAutoPoliciesRunID = "$ciProps.id";
+			lAutoPoliciesRun = $ciProps.PROPERTY_VALUE;
+			lAutoPoliciesRunDef = $ciProps.PROPERTY_DEFAULT;
+		<PDM_ELIF "$ciProps.PROPERTY_NAME" == "AUTO_POLICIES_LAST_RUN">
+			lAutoPoliciesLastRun = $ciProps.PROPERTY_VALUE;
+		</PDM_IF>	
+	</PDM_LIST>
+
+	<PDM_LIST PREFIX=rptAni FACTORY=ANI WHERE="name='KT_AUTOMATED_POLICIES'" ESC_STYLE=C>
+		dtCalcTimer = "$rptAni.timer";
+		dtCalcInterval = "$rptAni.delta";
+	</PDM_LIST>
+</script>
+</head>
+
+<body class=detailro onload="frmAutomatedPoliciesOnLoad();" onbeforeunload="return FormBeforeUnload();">
+<PDM_INCLUDE FILE=std_body.htmpl header=no>
+<table class='alertmsg gn_display_none' id=alertmsg width="100%">
+<TBODY><tr><td id=alertmsgText></td></tr></TBODY></table>
+<form name=main_form id=main_form>
+<table cellSpacing=0 cellPadding=0 width='100%' class='page_header gn_container_no_border'>
+	<tr>
+		<td align=left width='99%'>Automated Policies
+		</td>
+		<td align=left width='1%'>
+			<div align=right>
+				<script>
+                    ImgBtnSetDefaultTabIndex(110);
+					ImgBtnRow();
+					if ( ahdtop.canEditAdminKT_MT() )
+            		{
+						ImgBtnCreate("btnSave", "Save[S]", "cmdOK_Click('frmAutomatedPolicies')",true, "", msgtext("Save[S]"));
+						ImgBtnCreate("btnResetDefault", "Reset_Defaults", "cmdResetDef_Click('frmAutomatedPolicies')",true, "", msgtext("Reset_Defaults"));
+					}
+					ImgBtnEndRow();
+				</script>
+			</div>
+		</td>
+	</tr>
+</table>
+<script>
+	startScrollbar(true);
+</script>
+<table class="gn_container_no_border" width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="4" height="22" class="page_section_header_left"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></td>
+		<td class="page_section_header_center"><span  class="page_section_header_text" >Automated Policies</span></td>
+		<td width="4" height="22" class="page_section_header_right"><span class="page_section_header_right"><img src="$CAisd/img/spacer.png" width="4" height="22" alt=""></span></td>
+	</tr>
+</table>
+<div class=page_section>
+<table class='gn_container_no_border'  cellspacing=0 cellpadding=0 width="99%">	
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Last Updated:</span>
+		</td>
+	</tr>
+</table>
+<table class='gn_container_no_border' cellspacing=0 cellpadding=0 width="99%" summary="Automated Policies settings">	
+	<tr>
+		<td>
+			&nbsp;
+			<input tabindex=100 type="checkbox" id="cbRunPoliciesService" name="cbRunRTPService" class="" onclick="cbRunPoliciesService_click()" onfocus="this.className='focusField';" onblur="this.className='';" iDisplay=>
+			<span class=data><label for="cbRunPoliciesService">Run the Automated Policies calculation</label></span>
+			<br>
+			&nbsp;&nbsp;
+			<script language="JavaScript">
+				var dtLastUpdate = date_to_string(lAutoPoliciesLastRun, 0);
+				if(typeof dtLastUpdate != "undefined" && dtLastUpdate == "") {
+					document.write("<span class='data'>" + msgtext("The_Automated_Policies_calculation_has_not_been_run") + "</span>");
+				} else {
+					document.write("<span class='data'>" + msgtext("The_Automated_Policies_calculation_was_last_updated_on", dtLastUpdate) + "</span>");
+				}
+			</script>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+			<span class=label>&bull;&nbsp;Schedule:</span>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap >&nbsp;&nbsp;
+			<span class="data"><label for="nextRunDate">Automated Policies calculation will next run on </label></span>
+			<script>document.write(date_input_text("main_form", "", "SET.CAL_DATE", "", 20, " id=nextRunDate tabindex=100", "yes"));</script>
+			<a tabindex=-1 href='javascript:void(0)' title='Pop up calendar helper for next run date' onclick='krcadmin_date_helper("main_form", "SET.CAL_DATE", "yes")'>
+            <img id=dateImg1 name=dateImg1 width=12 height=12 class='border_0_margin_minus_5' src='$CAisd/img/lookup_cal.gif' alt='Pop up calendar helper for next run date' onfocus="this.border=1" onblur="this.border=0;"></a>
+	
+			<span class="data"><label for="slctServiceInterval">and will run every </label></span>
+			<select tabindex=100 id='slctServiceInterval' name='slctServiceInterval'>
+				<option value=1>1 day</option>
+				<option value=2>2 days</option>
+				<option value=3>3 days</option>
+				<option value=4>4 days</option>
+				<option value=5>5 days</option>
+				<option value=6>6 days</option>
+				<option value=7>1 week</option>
+				<option value=14>2 weeks</option>
+				<option value=28>4 weeks</option>
+				<option value=84>12 weeks</option>
+			</select
+		</td>
+	</tr>	
+	</table>
+</div>
+<script>
+	
+
+	endScrollbar();
+</script>
+</form>
+<form id=frmPost name=frmPost method=POST>
+	<input type=hidden id=SID name=SID>
+	<input type=hidden id=FID name=FID>
+	<input type=hidden id=OP name=OP>
+	<input type=hidden id=SERVICE_INTERVAL_ID name=AUTO_POLICIES_RUN_ID>
+	<input type=hidden id=AUTO_POLICIES_RUN name=AUTO_POLICIES_RUN>
+	<input type=hidden id=SERVICE_INTERVAL name=SERVICE_INTERVAL>
+	<input type=hidden id=START_RUNNING name=START_RUNNING>
+	<input type=hidden id=START_CALC_ID name=START_CALC_ID>
+	<input type=hidden id=START_CALC_VALUE name=START_CALC_VALUE>
+</form>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>

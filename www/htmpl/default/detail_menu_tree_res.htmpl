@@ -1,0 +1,76 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display details of a Menu Tree Resource 
+</PDM_IF>
+
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Menu Tree Resource Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.name Update Menu Tree Resource"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Menu Tree Resource $args.name"</PDM_FMT>;
+
+var saved_resource = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.resource"</PDM_FMT>;
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+argPersistentID = "$args.persistent_id";
+</script>
+</head>
+<body class="detailro">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Menu Tree Resource Name">
+<center>
+
+<script type="text/javascript">
+<PDM_MACRO name=dtlForm factory="menu_tree_res">
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr="name" size=20>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="delete_flag" size=20>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr="description" colspan=2 rows=3 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Zasób" attr="resource" colspan=2 rows=3 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+<script>
+var orig_onsubmit = null;
+if (typeof window.document.forms["main_form"].onsubmit != "undefined")
+    orig_onsubmit = window.document.forms["main_form"].onsubmit;
+function menu_tree_res_onsubmit ()
+{
+    var curr_resource = window.document.forms["main_form"].elements["SET.resource"].value;
+    if (curr_resource != saved_resource && 
+	typeof ahdtop.menuTreeObject != "undefined" &&
+	typeof ahdtop.menuTreeExecStr != "undefined")
+    {
+	var exec_str = ahdtop.menuTreeExecStr;
+	exec_str = exec_str.replace(/'[^']*'\);$/, "'" + curr_resource + "');");
+	ahdtop.menuTreeObject.eval(exec_str);
+    }
+    if (orig_onsubmit != null)
+	return orig_onsubmit();
+    else 
+	return true;
+}
+window.document.forms["main_form"].onsubmit = menu_tree_res_onsubmit; 
+</script>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: detail_menu_tree_res.htmpl ASPEN.1 2010/11/16 16:04:37 saima01 Exp $;
+</PDM_IF>
+<PDM_WSP>

@@ -1,0 +1,502 @@
+<PDM_IF 0>
+xx_stype_tab.htmpl
+WHEN PRESENTED:
+    On the request, issue, or change order detail form
+INTENT:
+    Display a notebook page for service type
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=xx_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="en">
+<head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=xx_stype_tab" factory=chg>
+<script type="text/javascript" src="$CAisd/scripts/popup.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/schedule.js"></script>
+
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script type="text/javascript">
+
+</script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO_ST">
+
+
+<script type="text/javascript">
+
+// specify event operation, handle and query string
+var attevt_option, attevt_button, attevnt_button_hotkey, btnFunc;
+var ss_query_str;
+
+var autoRefreshWindows = new Object();
+
+function show_tgt_action(tgt_persid , link_text, url_str) {
+
+	var base_string = url_str + "+PERSID=" + tgt_persid + "+OP=TARGET_SET_RESET";
+
+	aevt_link_id++;
+	var link_id = "\"attlnk10" + aevt_link_id + "\"";
+	var loc_str = "<a id=\"" + link_id + "\" name=\"" + link_id 
+	+ "\" href=\"javascript:target_set_reset('" + base_string + "')\""
+	+ ">" + link_text + "</a>";
+
+	return loc_str;
+}
+
+function target_set_reset(sourceURL) { 
+	var doc = SyncAjaxCall( sourceURL );
+	if ( doc.substring(0,2)=="OK" ) {
+		clear_response();
+		refreshForm();
+	}else{
+		show_response(doc);
+	}
+}
+
+var base_query_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" + 
+		"+FACTORY=$prop.factory+NEXT_PERSID=$args.persistent_id";
+
+var slas=new Array();
+var atevs=new Array();
+var tgts=new Array();
+
+// get attached_sla info
+<PDM_IF $args.attached_slas.length != 0>
+	<PDM_LIST SOURCE=args.attached_slas ESC_STYLE=C>
+		var sla=new Object();
+		sla.persistent_id="$args.attached_slas.persistent_id";
+		sla.map_sdsc_sym="$args.attached_slas.map_sdsc.sym";
+		if ("$args.attached_slas.zforfz" == 1)
+		sla.forFZ="TAK";
+		else	sla.forFZ="NIE";
+		sla.violation_cost="$args.attached_slas.map_sdsc.violation_cost";
+		sla.time_to_violation=Number("$args.attached_slas.time_to_violation_INT_DATE");
+		sla.last_ttv_upd=Number("$args.attached_slas.last_ttv_upd_INT_DATE");
+		sla.sla_viol_status="$args.attached_slas.sla_viol_status";
+		
+		if (sla.sla_viol_status > 0) {
+			sla.sla_viol_status_text= msgtext("Violated");
+		} else {
+			sla.sla_viol_status_text= msgtext("Not_Violated");
+		}
+
+		slas[slas.length]=sla;
+	</PDM_LIST>
+</PDM_IF>
+
+// add classic if there any
+<PDM_IF "$args.support_lev" != "" && "$prop.factory" != "wf" && "$prop.factory" != "iss_wf">
+		var sla=new Object();
+		sla.persistent_id="$args.support_lev.persistent_id";
+		sla.map_sdsc_sym="$args.support_lev.sym" + " (Set directly on ticket)";
+		sla.violation_cost="$args.support_lev.violation_cost";
+
+		// no attached_sla for these -- no violations
+		sla.time_to_violation="";		
+		sla.last_ttv_upd="";			
+		sla.sla_viol_status="";
+		sla.sla_viol_status_text="";
+		
+		slas[slas.length]=sla;
+</PDM_IF>
+
+// get atev info
+var delay_status_num=Number(0);
+var delay_status_text="";
+
+<PDM_IF $args.sla_events.length != 0>
+	<PDM_LIST SOURCE=args.sla_events ESC_STYLE=C>
+		var atev=new Object();
+		atev.persistent_id="$args.sla_events.persistent_id";
+		atev.event_tpl_sym="$args.sla_events.event_tmpl.sym";
+		atev.start_time=Number("$args.sla_events.start_time_INT_DATE");
+		atev.fire_time_int=Number("$args.sla_events.fire_time_INT_DATE");
+		atev.status_flag=Number("$args.sla_events.status_flag");
+		atev.status_text=aevt_get_attevt_status_text(atev.status_flag);
+
+		// determine delay status from event status
+		var aevt_delay_status=0;
+		aevt_set_delay_status(atev.status_flag);
+		atev.delay_status=aevt_delay_status;
+		atev.delay_status_text=aevt_get_delay_status_text();
+		if(aevt_delay_status > delay_status_num) {
+			delay_status_num=atev.status_flag;
+			delay_status_text=atev.delay_status_text;
+		}
+
+		atevs[atevs.length]=atev;
+	</PDM_LIST>
+</PDM_IF>
+
+// get tgt_times info
+<PDM_IF $args.target_times.length != 0>
+	<PDM_LIST SOURCE=args.target_times ESC_STYLE=C>
+		var tgt=new Object();
+		tgt.persistent_id="$args.target_times.persistent_id";
+		tgt.sym="$args.target_times.sym";
+		tgt.target_time=Number("$args.target_times.target_time_INT_DATE");
+		tgt.actual_time=Number("$args.target_times.actual_time_INT_DATE");
+		tgt.time_left="$args.target_times.time_left";
+		tgt.time_left_is_neg=false;
+		if(tgt.time_left.indexOf("-") >-1) {
+			tgt.time_left_is_neg=true;
+			tgt.time_left=tgt.time_left + "**";
+		}
+
+		tgt.cost="$args.target_times.cost";
+		tgt.set_actual="$args.target_times.set_actual";
+		tgt.reset_actual="$args.target_times.reset_actual";
+		tgts[tgts.length]=tgt;
+	</PDM_LIST>
+</PDM_IF>
+
+// build the html sections for the form
+
+// do service types
+var sla_html="";
+
+sla_html += "<table id='tbl601' class='tab' summary='Service Types In Effect'>";
+sla_html += "<tr><th scope='col' align='center' class='results'>Aktywne poziomy usług</th></tr>";
+sla_html += "</table>";
+sla_html
+sla_html += "<table id='tbl602' class='tab' summary='Service Types'>";
+sla_html += "<tr>";
+sla_html += "<th scope='col' align='left' class='results'>Poziom usługi</th>";
+sla_html += "<th scope='col' align='left' class='results'>Dla F-Z</th>";
+sla_html += "<th scope='col' align='left' class='results'>Status</th>";
+sla_html += "<th scope='col' align='left' class='results'>Status przekroczenia SLA</th>";
+sla_html += "<th scope='col' align='left' class='results'>Czas dodania</th>";
+sla_html += "</tr>";
+
+var row_cnt=0;
+
+for(var i=0; i<slas.length; i++) {
+	var sClass;
+
+	if(row_cnt%2) {
+		sClass = "results1";
+	} else {
+		sClass = "results0";
+	}
+
+	row_cnt++;
+
+	sla_html += "<tr class='" + sClass +  "'>";
+	sla_html += "<td valign='top' class='detailroTab'>" + slas[i].map_sdsc_sym + "</td>";
+	sla_html += "<td valign='top' class='detailroTab'>" + slas[i].forFZ + "</td>";
+	sla_html += "<td valign='top' class='detailroTab'>" + delay_status_text + "</td>";
+	sla_html += "<td valign='top' class='detailroTab'>" + slas[i].sla_viol_status_text + "</td>";
+	sla_html += "<td valign='top' class='detailroTab'>" + date_to_string(slas[i].last_ttv_upd, 0) + "</td>";
+	sla_html += "</tr>";
+}
+
+sla_html += "</table>";
+
+<PDM_IF 0>
+// 20131022 mch e-xim
+// do service targets
+var tgt_html="";
+
+tgt_html += "<table id='tbl603' class='tab' summary='Service Targets'>";
+tgt_html += "<tr><th scope='col' align='center' class='results'>Service Targets</th></tr>";
+tgt_html += "</table>";
+
+tgt_html += "<table id='tbl604' class='tab' summary='Service Targets'>";
+tgt_html += "<tr>";
+tgt_html += "<th scope='col' align='left' class='results'>Action</th>";
+tgt_html += "<th scope='col' align='left' class='results'>Target</th>";
+tgt_html += "<th scope='col' align='left' class='results'>Target Date/Time</th>";
+tgt_html += "<th scope='col' align='left' class='results'>Actual Date/Time</th>";
+tgt_html += "<th scope='col' align='left' class='results'>Time Left</th>";
+tgt_html += "<th scope='col' align='left' class='results'>Violation Cost</th>";
+tgt_html += "</tr>";
+
+var row_cnt=0;
+
+for(var i=0; i<tgts.length; i++) {
+	var sClass;
+
+	if(row_cnt%2) {
+		sClass = "results1";
+	} else {
+		sClass = "results0";
+	}
+
+	row_cnt++;
+
+	var tgt_action_label="";
+
+	if(tgts[i].set_actual=="1" && tgts[i].actual_time==0) tgt_action_label="Set Actual";
+	if(tgts[i].reset_actual=="1" && tgts[i].target_time==0) tgt_action_label="Reset Actual";
+
+	var tgt_action=tgt_action_label;
+
+	// don't allow action in edit because screen refresh loses form data
+	if($UserAuth \> 1 && !_dtl.edit) {
+		if(tgt_action_label!="") {
+			tgt_action=show_tgt_action(tgts[i].persistent_id , tgt_action_label, base_query_str);
+		}
+	}
+
+	// don't show actions if we're delayed
+	aevt_set_delay_status(delay_status_num);
+	if ( aevt_delay_status == 2 ) tgt_action="";
+
+	var tgt_link = "<a class='detailroTab' href=\"javascript:showDetailWithPersid('" + tgts[i].persistent_id + "')\"" 
+					+ getMOPreviewEventHtml( tgts[i].persistent_id ) + ">" + tgts[i].sym + "</a>"; 
+
+	tgt_html += "<tr class='" + sClass +  "'>";
+	tgt_html += "<td valign='top' class='detailroTab'>" + tgt_action + "</td>";
+	tgt_html += "<td valign='top' class='detailroTab'>" + tgt_link + "</td>";
+	tgt_html += "<td valign='top' class='detailroTab'>" + date_to_string(tgts[i].target_time, 0) + "</td>";
+	tgt_html += "<td valign='top' class='detailroTab'>" + date_to_string(tgts[i].actual_time, 0) + "</td>";
+	if(tgts[i].time_left_is_neg) {
+		tgt_html += "<td valign='top' class='negdur'>" + tgts[i].time_left + "</td>";
+	} else {
+		tgt_html += "<td valign='top' class='detailroTab'>" + tgts[i].time_left + "</td>";
+	}
+	tgt_html += "<td valign='top' class='detailroTab'>" + tgts[i].cost + "</td>";
+	tgt_html += "</tr>";
+}
+
+tgt_html += "</table>";
+</PDM_IF>
+// do service type events
+var atev_html="";
+
+atev_html += "<table id='tbl605' class='tab' summary='Attached Service Type Events'>";
+atev_html += "<tr><th scope='col' align='center' class='results'>Załączone zdarzenia poziomów usługi</th></tr>";
+atev_html += "</table>";
+
+atev_html += "<table id='tbl606' class='tab' summary='Attached Service Type Events'>";
+atev_html += "<tr>";
+atev_html += "<th scope='col' align='left' class='results'>Nazwa</th>";
+atev_html += "<th scope='col' align='left' class='results'>Status</th>";
+atev_html += "<th scope='col' align='left' class='results'>Czas rozpoczęcia</th>";
+atev_html += "<th scope='col' align='left' class='results'>Czas wygaśnięcia</th>";
+atev_html += "<th scope='col' align='left' class='results'>Pozostałe opóźnienie</th>";
+atev_html += "</tr>";
+$UserAuth \> 1
+var row_cnt=0;
+
+for(var i=0; i<atevs.length; i++) {
+	var sClass;
+
+	if(row_cnt%2) {
+		sClass = "results1";
+	} else {
+		sClass = "results0";
+	}
+
+	row_cnt++;
+
+	var atev_action=msgtext("Cancel");
+	var atev_link=atevs[i].event_tpl_sym;
+
+	// don't allow action in edit because screen refresh loses form data
+	if(!_dtl.edit && $UserAuth \> 1) {
+		if (atevs[i].status_flag > 1 && atevs[i].status_flag < 10) {
+			atev_action=aevt_show_att_evt_action(atevs[i].persistent_id, atevs[i].status_flag, base_query_str);
+			atev_link = "<a class='detailroTab' href=\"javascript:showDetailWithPersid('" + atevs[i].persistent_id + "')\""
+						+ getMOPreviewEventHtml( atevs[i].persistent_id ) + ">" + atevs[i].event_tpl_sym + "</a>" ; 
+		} else {
+			atev_action="";
+		}
+	}
+
+	var atev_fire="";
+	var atev_delay="";
+
+	if ( atevs[i].status_flag < 10) atev_fire=date_to_string(atevs[i].fire_time_int, 0);
+	if ( atevs[i].status_flag > 10) atev_delay=int_to_duration_string(atevs[i].fire_time_int);
+
+	atev_html += "<tr class='" + sClass +  "'>";
+	//atev_html += "<td valign='top' class='detailroTab'>" + atev_action + "</td>";
+	//atev_html += "<td valign='top' class='detailroTab'>" + atev_link + "</td>";
+	atev_html += "<td valign='top' class='detailroTab'>" + atevs[i].event_tpl_sym + "</td>";
+	atev_html += "<td valign='top' class='detailroTab'>" + atevs[i].status_text + "</td>";
+	atev_html += "<td valign='top' class='detailroTab'>" + date_to_string(atevs[i].start_time, 0) + "</td>";
+	atev_html += "<td valign='top' class='detailroTab'>" + atev_fire + "</td>";
+	atev_html += "<td valign='top' class='detailroTab'>" + atev_delay + "</td>";
+	atev_html += "</tr>";
+}
+
+atev_html += "</table>";
+
+if (typeof argID != "number")
+	argID = Number("$args.id");
+
+// Allow manual delay/resume of the SLA events when status.hold is not 1 and not in edit mode
+<PDM_IF "$prop.form_name_3" != "edit" && "$args.status.hold" != "1">
+    <PDM_SET args.disable_btns="no">
+<PDM_ELSE>
+    <PDM_SET args.disable_btns="yes">
+</PDM_IF>
+
+	
+function add_button_to_tab_banner(){	
+<PDM_IF $UserAuth \> 1 && "$prop.factory" != "iss_wf" && "$prop.factory" != "wf">
+<PDM_MACRO name=btnStartRow>
+if ( isNaN(argID) == false && argID != 0 ) {
+    btnFunc = "popup_window('', '" + 
+               cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+               "+FACTORY=$prop.factory" + "+FTYPE=xx" +
+               "+SET.id=" + argID + "+PERSID=" + argPersistentID +
+               "+ATTACH_STYPE_EVENT=1" +
+               "', 700, 500)";
+    
+<PDM_MACRO name=button caption="Załącz zdarzenie" disabled=$args.disable_btns func="\" + btnFunc + \"" hotkey_name="Attach Service Type Event[Y]" id="btn806">
+<PDM_IF 0>
+	<PDM_IF "$env.NX_CLASSIC_SLA_PROCESSING" != "Yes">
+				// Do not show Delay/Resume button if Status.hold = 1
+				if (delay_status_num > -1) {
+					aevt_set_delay_status(delay_status_num);
+					if ( aevt_delay_status ) { 
+						if ( aevt_delay_status == 2 ) {
+							attevt_option = "stop";
+							attevt_button = "Resume"; 
+							attevt_button_hotkey = "Resume"; 
+						}
+						else {
+							attevt_option = "start";
+							attevt_button = "Opóźnienie(X)"; //(X) was added to the text so that X can be used as action key
+							attevt_button_hotkey = "Opóźnienie(X)"; 
+						}
+						
+						// Possible to have atev but no attached sla.
+						// Here we pass "" for AST_IDS to indicate all attached SLAs
+						// should be delayed
+						
+						var s_ids = "";
+						//if (arr_ast_ids.length > 0) {
+						//	s_ids = arr_ast_ids.toString();
+						//}
+						ss_query_str = base_query_str + 
+							 "+PERSID=$args.persistent_id" +
+							 "+AST_IDS=" + s_ids;
+						
+				 
+					btnFunc = "popup_window('', 'get_comment.htmpl', popupWidth(SMALL_POPUP), popupHeight(SMALL_POPUP)," 
+							 + "'ahdmenu=no', 'KEEP.POPUP_NAME=getcomment', 'KEEP.comment_title=" + msgtext("Enter_a_reason_for_the_delay/r") + "',"  
+							 + "'KEEP.comment_finished=got_delay_comment', 'KEEP.comment_required=1')";
+					
+	<PDM_MACRO name=button caption="\" + attevt_button + \"" disabled=$args.disable_btns func="\" + btnFunc + \"" hotkey_name="\" + attevt_button_hotkey + \"" id="btn303" tooltip="Delay/Resume Attach Events">                              
+						
+					}
+				}
+	</PDM_IF>      
+</PDM_IF>
+}
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+
+}
+<PDM_MACRO name=tabBanner title="Lista poziomów usług" add_btns=true>
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_IF "$env.NX_CLASSIC_SLA_PROCESSING" == "Yes">
+<PDM_MACRO name=dtlDropdown hdr="Typ serwisowy" attr="support_lev">
+	detailRowHdr("Delay Status");
+	if (! _dtl.edit)
+	detailRowHdr("Service Type Event Delay");
+	
+<PDM_IF "$args.support_lev" != "0">
+	aevt_set_delay_status(delay_status_num);
+	detailSetReadonlyRowData("delay_status",aevt_get_delay_status_text());
+	</script>
+	</td>
+	<script type="text/javascript">	
+  	if (! _dtl.edit)
+        {	
+	docWriteln("<td valign='top' align='left'>");
+	if ( aevt_delay_status ) { 
+	if ( aevt_delay_status == 2 ) {
+		attevt_option = "stop";
+		attevt_button = "Resume";
+		attevt_button_hotkey = "Resume"; 
+	}
+	else {
+		attevt_option = "start";
+		attevt_button = "Opóźnienie(X)"; //(X) was added to the text so that X can be used as action key
+		attevt_button_hotkey = "Opóźnienie(X)"; 
+	}
+	ss_query_str = base_query_str + 
+		"+SUPPORT_LVL=$args.support_lev+PERSID=$args.persistent_id";
+	 
+	
+		
+<PDM_IF $UserAuth \> 1>
+		btnFunc = "popup_window('', 'get_comment.htmpl', popupWidth(SMALL_POPUP), popupHeight(SMALL_POPUP)," 
+					+ "'ahdmenu=no', 'KEEP.POPUP_NAME=getcomment', 'KEEP.comment_title=" + msgtext("Enter_a_reason_for_the_delay/r") + "',"  
+					+ "'KEEP.comment_finished=got_delay_comment', 'KEEP.comment_required=1')";
+		
+<PDM_MACRO name=button caption="\" + attevt_button + \"" disabled=$args.disable_btns func="\" + btnFunc + \"" hotkey_name="\" + attevt_button_hotkey + \"" id="btn303" tooltip="Delay/Resume Attach Events">
+</PDM_IF>
+	docWriteln("</td>");
+	}
+	}
+	
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+	</script>
+<PDM_ELSE>  <!-- classic_sla is disabled, do the new sla stuff -->
+
+	
+	// Careful - could be null!!
+	aevt_set_delay_status(delay_status_num);
+	var delay_status_str = aevt_get_delay_status_text();
+	
+<PDM_MACRO name=dtlEndTable>
+	</script>
+	</td>
+	
+	<script>
+		document.writeln(sla_html);
+		document.writeln(tgt_html);
+	</script>
+
+	<script>
+	//document.writeln(delay_status_str);
+	</script>
+	
+	<script>
+	//document.writeln(holdAST_HTML);
+	</script>
+</PDM_IF>
+
+<!--ST events - if we store pdm_list stuff in an array or something, we need only fetch it once-->
+<script>
+document.writeln(atev_html);
+//docWriteln(holdHTML);
+
+// This is the callback for get_comment.htmpl
+function got_delay_comment(desc) {
+	if ( ! _dtl.edit ) {
+		aevt_do_start_stop(attevt_option, ss_query_str, desc);
+	} else {
+		alert(msgtext("This_operation_can_only_be_per"));
+	}
+}
+</script>
+</PDM_FORM>
+
+
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: xx_stype_tab.htmpl ASPEN.3 2011/07/06 18:26:31 pstso01 Exp $
+</PDM_IF>

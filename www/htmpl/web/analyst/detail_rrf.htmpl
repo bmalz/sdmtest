@@ -1,0 +1,89 @@
+<PDM_IF 0>
+detail_rrf.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a Remote Reference
+INTENT:
+    Display the detail info for the Remote Reference
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Remote Reference Detail"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"$args.sym Update Remote Reference"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Create New Remote Reference $args.sym"</PDM_FMT>;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+argPersistentID = "$args.persistent_id";
+
+function copy_from_parent()
+{}
+function unloadActions()
+{
+   if ( _dtl.edit )
+      unload_check();
+}
+</SCRIPT>
+
+</HEAD>
+
+
+<BODY class=detailro onUnload="unloadActions()">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Remote Reference" key="$args.sym">
+<CENTER>
+
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm factory=rrf>
+<PDM_MACRO name=dtlStart>
+<PDM_IF '$args.KEEP.FORM_NAME' != 'MACRO'>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa" attr=sym size=60>
+<PDM_IF "$args.id" == "0">
+<PDM_MACRO name=dtlTextbox hdr="Kod" attr=code>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Kod" attr=code>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Status rekordu" attr=delete_flag lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=description colspan=3 keeplinks=yes rows=4 size=60 spellchk=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Funkcja dostępu" attr="function_group" factory=func_access>
+<PDM_IF "$prop.form_name_3" == "edit">
+detailDropdown("Architecture Type","arch_type","rrf",2,40, 
+1,"","$args.arch_type",
+"no","","$args.arch_type",
+"","","no","","","all",
+"all","all","unix","unix","win","win");
+<PDM_ELSE>
+if ("$args.arch_type" == "all" || "$args.arch_type" == "")
+detailTextboxReadonly("Architecture Type","",2,"all"); 
+else if ("$args.arch_type" == "unix")
+detailTextboxReadonly("Architecture Type","",2,"unix"); 
+else if ("$args.arch_type" == "win")
+detailTextboxReadonly("Architecture Type","",2,"win"); 
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="komenda Exec Serwera NT, Serwera UNIX lub klienta Unix" attr=exec_str colspan=4 rows=3 size=80>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Data ostatniej modyfikacji" attr="last_mod_dt">
+<PDM_MACRO name=dtlReadonly hdr="Ostatnio modyfikowany przez" attr="last_mod_by">
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: detail_rrf.htmpl ANDERSON.3 2010/02/05 14:40:31 sahra04 Exp $;
+</PDM_IF>
+<PDM_WSP>

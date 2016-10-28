@@ -1,0 +1,82 @@
+<PDM_IF 0>
+list_audlog.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Audit Logs.
+</PDM_IF>
+
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Audit Log Search";
+var hdrTitleList = "Audit Log List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("audlog.rpt", "audlog.rpt");
+var cfgCanEdit = false;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Audit Log">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=audlog>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa obiektu audytowanego" attr=audobj_name size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa atrybutu" attr=attr_name size=20>
+<PDM_MACRO name=sfTextbox hdr="ID obiektu audytowanego" attr=audobj_trkid size=20>
+<PDM_MACRO name=sfLookup hdr="Modyfikujący" attr=analyst factory=cnt>
+searchFilterDropdown("Operation","aud_opr","","Update","1","Delete","2","Insert","3")
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Wartość przed" attr=attr_before_val size=20>
+<PDM_MACRO name=sfTextbox hdr="Wartość po" attr=attr_after_val size=20>
+<PDM_MACRO name=sfDate hdr="Data rozpoczęcia" attr=change_date qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Data zakończenia" attr=change_date qbe_condition=LE>
+<PDM_MACRO name=sfTextbox hdr="" attr=id colspan=2 disabled=yes display_value="" qbe_condition="GE" size=20 value="1">
+<PDM_MACRO name=sfEnd>
+
+</SCRIPT>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Audit Logs found";
+var msgFound1 = "1 Audit Log found";
+var msgFound = "%1 Audit Logs found";
+var msgFoundMore = "%1 Audit Logs found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Audit Log";
+
+function showObject(value)
+{
+    var alghtml;
+    alghtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + obj_persid + "')\">" + value + "</A>" ;
+    
+    rs.data(alghtml);
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var obj_persid   = \"@{list.audobj_persid}\";">
+<PDM_MACRO name=lsCol hdr="Działanie" attr=operation exportfmt=ShowLink link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Nazwa obiektu audytowanego" attr=audobj_name>
+<PDM_MACRO name=lsCol hdr="ID obiektu audytowanego" attr=audobj_trkid fmtfunc=showObject link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Modyfikujący" attr=analyst>
+<PDM_MACRO name=lsCol hdr="Nazwa atrybutu" attr=attr_name>
+<PDM_MACRO name=lsCol hdr="Wartość przed" attr=attr_before_val>
+<PDM_MACRO name=lsCol hdr="Wartość po" attr=attr_after_val>
+<PDM_MACRO name=lsCol hdr="Data zmiany" attr=change_date sort=DESC>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: list_audlog.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+
+
+<PDM_WSP>

@@ -1,0 +1,61 @@
+<PDM_IF 0>
+hierload_pcat_cr_ss.htmpl
+WHEN PRESENTED:
+    Load a new level into a hierarchical search tree.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/browser.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/msgtext.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/window_manager.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+
+var argFactory = "pcat_cr_ss";
+var argIndex = "$args.KEEP.Index" - 0;
+var cai_main;
+if ( typeof parent.ahdframe == "object" )
+   cai_main = parent.ahdframe;
+
+if ( typeof cai_main == "object" && cai_main != null ) {
+   cai_main.HierSetCurrFolder(argIndex);
+   
+	// 20130920 bmalz @ e-xim
+	<PDM_IF "$args.KEEP.UserOwningContracts" != ''>
+	   <PDM_LIST PREFIX=list FACTORY=pcat_cr_ss WHERE="$args.KEEP.UserOwningContracts"
+				 HIER_KEY="$args.KEEP.HierKey" HIER_FILTER="$args.KEEP.HierFilter">
+	   cai_main.HierInsert( 
+				   '<PDM_FMT ESC_STYLE=JS>$list.HIER_level_name</PDM_FMT>',
+				   '<PDM_FMT ESC_STYLE=JS>$list.COMMON_NAME</PDM_FMT>',
+				   '<PDM_FMT ESC_STYLE=JS>$list.description</PDM_FMT>',
+				   "$list.REL_ATTR", "$list.persistent_id",
+				   '$list.HIER_is_node','$list.HIER_has_children'<PDM_IF "$prop.MultiTenancy" == "off">);<PDM_ELSE>,
+				   "$list.tenant", "$list.tenant.name");</PDM_IF>
+	   </PDM_LIST>
+	<PDM_ELSE>
+	  <PDM_LIST PREFIX=list FACTORY=pcat_cr_ss WHERE="${args.KEEP.HierWc:}"
+				 HIER_KEY="$args.KEEP.HierKey" HIER_FILTER="$args.KEEP.HierFilter">
+	   cai_main.HierInsert( 
+				   '<PDM_FMT ESC_STYLE=JS>$list.HIER_level_name</PDM_FMT>',
+				   '<PDM_FMT ESC_STYLE=JS>$list.COMMON_NAME</PDM_FMT>',
+				   '<PDM_FMT ESC_STYLE=JS>$list.description</PDM_FMT>',
+				   "$list.REL_ATTR", "$list.persistent_id",
+				   '$list.HIER_is_node','$list.HIER_has_children'<PDM_IF "$prop.MultiTenancy" == "off">);<PDM_ELSE>,
+				   "$list.tenant", "$list.tenant.name");</PDM_IF>
+	   </PDM_LIST>
+	</PDM_IF>
+	
+   cai_main.HierRedraw();
+}
+cai_main.set_action_in_progress(ACTN_COMPLETE);
+document.location.href="$CAisd/html/empty.html";
+</SCRIPT>
+</HEAD>
+<BODY>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: hierload_pcat_cr_ss.htmpl ANDERSON.0 2009/05/15 07:44:29 ralje02 Exp $
+</PDM_IF>

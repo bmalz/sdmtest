@@ -1,0 +1,611 @@
+<PDM_IF 0>
+nf.htmpl
+WHEN PRESENTED:
+    When the app performs a manual notification activity.
+INTENT:
+    Capture user input for a manual notification, create a Activity Log
+	and do the notification when submitted.  Used for cr, iss, and chg objects.
+VARIABLES:
+    string	image	    The location of the image directory as 
+			    specified in the config file.
+    object alg   args	    The arguments from the 'last' form
+                            See $NX_ROOT/bopcfg/majic/cm.maj for the
+                            definition of attributes for 'OBJECT alg'
+							(this could be 'chgalg' or 'issalg' depending on the parent persid)
+    int   	logged_in   A flag to say we have a user login object.
+    object cst	cst	    A cst object (customer) that is the logged in user.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript">
+<PDM_IF "$prop.factory" == "chg">
+var alg_factory = "chgalg";
+var argRefNum = "$args.chg_ref_num";
+var argChgRefNum = "$args.chg_ref_num";
+var form_title = "Ręczne powiadomienie dla zmiany $args.chg_ref_num";
+<PDM_ELSE>
+var argRefNum = "$args.ref_num";
+<PDM_IF "$prop.factory" == "iss">
+var alg_factory = "issalg";
+var form_title =  "Ręczne powiadomienie dla Issue $args.ref_num";
+<PDM_ELSE>
+var alg_factory = "alg";
+	<PDM_IF "$args.type" == "I">
+		var form_title = "Ręczne powiadomienie dla incydentu $args.ref_num";
+	<PDM_ELIF "$args.type" == "P">
+		var form_title = "Ręczne powiadomienie dla problemu $args.ref_num";
+	<PDM_ELSE>
+		var form_title = "Ręczne powiadomienie dla wniosku $args.ref_num";
+	</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+var edit_form = 1;
+var argPersistentID = "$args.persistent_id";
+var argCstID = "$cst.id";
+var argID = "$args.id";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl wm=no wm=no>
+<script>
+edit_form = 1;
+</script>
+<script type="text/javascript" src="$CAisd/scripts/arrow_button.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/check_submit.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/img_link.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/detail_form.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/update_lrel.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/spellcheck.js"></script>
+
+<script type="text/javascript">
+var autofill_return_time = 2000;	// assumme autofill takes 2 secs to return
+var resp_sym = new Array();
+var resp_ids = new Array();
+resp_sym[0] = "";
+resp_ids[0] = "";
+resp_field="KEEP.msgtxt";
+resp_persid='$args.persistent_id';
+
+<PDM_IF "$prop.factory" == "cr">
+<PDM_IF "$args.type" == "R" || "$args.type" == "">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND cr_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+<PDM_ELIF "$args.type" == "I">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND in_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+<PDM_ELIF "$args.type" == "P">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND pr_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+</PDM_IF>
+<PDM_ELIF "$prop.factory" == "chg">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND chg_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+<PDM_ELIF "$prop.factory" == "iss">
+	<PDM_LIST ESC_STYLE=JS2 prefix=list factory=response where="delete_flag=0 AND (response_owner IS NULL or response_owner = U'$cst.id') AND iss_flag=1">
+		resp_sym[resp_sym.length] = decodeURIComponent('$list.sym');
+		resp_ids[resp_ids.length] = '$list.id';
+	</PDM_LIST>
+</PDM_IF>
+
+	function show_alert(added, not, names) {
+		var rec_str1;
+		var rec_str2;
+		if (not > 0)
+		{
+			if ( added == 1 )
+				alertmsg("1_item_was_added._%1_already_in_the_li", not, names);	// 1 item was added. %1 already in the list: %2
+			else
+				alertmsg("%1_items_were_added._%2_already_in_the_li", added, not, names);	// %1 items were added. %2 already in the list: %3
+		}
+		else if (added > 0)
+		{		
+			if ( ahdtop.cstUsingScreenReader )
+			{
+				if ( added == 1 )
+					alertmsg("1_item_was_added.");	// 1 item was added.
+				else
+					alertmsg("%1_items_were_added.", added);	// %1 items were added.
+			}
+		}
+	}
+
+	// Remove a contact from the selection list.
+	function remove_cnt() {
+		if (!document.main_form.notify_list.options.length)
+			return;
+		if (document.main_form.notify_list.selectedIndex >= 0) {
+			var list = document.main_form.notify_list;
+			for (var i = list.length - 1; i >= 0; --i) {
+				if (list[i].selected) {
+					var doomed_id = list[i].value;
+					var id_list = document.main_form.elements["KEEP.the_notify_list"].value;
+					document.main_form.elements["KEEP.the_notify_list"].value = id_list.replace(doomed_id, "");
+					list.remove(list[i].index);
+				}
+			}
+			document.getElementById("counter").innerHTML = document.main_form.notify_list.options.length;
+		}
+		else {
+			alert("Select one of the recipients first");
+		}
+	}
+
+	// formLoad event handler.
+	// Add any initial contacts for notification as well
+	// as any default message text.
+	function initNames() {
+		// Clear notify list since recipient list is being cleared after pressing F5
+		document.main_form.elements["KEEP.the_notify_list"].value = "";
+		document.main_form.elements["KEEP.msgtxt"].value = document.main_form.initial_msgtxt.value;
+<PDM_IF "$env.NX_NOTIFICATION_PREPOPULATE_STAKEHOLDERS" == "Yes">
+		if (stake_index >= 0) {
+			// Pre-populate stakeholders list
+			var selname = arr_names[stake_index];
+			var selid = arr_persids[stake_index];
+			var arrNames = selname.split("##");
+			var arrIds = selid.split("##");
+			for (var j = 0; j < arrNames.length; j++) {
+				add_to_list(arrNames[j], arrIds[j], false);
+			}
+			sort_options(document.main_form.notify_list);
+		}
+</PDM_IF>
+		document.getElementById("counter").innerHTML = document.main_form.notify_list.options.length;
+	}
+
+	// Simply resets the notification message text
+	function clear_msg() {
+		document.main_form.elements["KEEP.msgtxt"].value = "";
+		document.main_form.elements["KEEP.msgtitle"].value = "";
+	}
+
+	// Handles clicks on '>>' button, i.e. Add recipients
+	function addEntries(entry) {
+
+		if (entry == 1) {
+			// Add selected Available Recipients
+			if (!document.main_form.lhs.options.length)
+				return;
+
+			var sep = "";
+			var not_added_count = 0;
+			var rec_not_added = "";
+			var items_count = 0;
+
+			if (document.main_form.lhs.selectedIndex >= 0) {
+				var list = document.main_form.lhs;
+				for (var i = 0; i < list.length; i++) {
+					if (list[i].selected) {
+						var selname = arr_names[list[i].index];
+						var selid = arr_persids[list[i].index];
+
+						if (list[i].index == stake_index) {
+							// Populate stakeholders list
+							var arrNames = selname.split("##");
+							var arrIds = selid.split("##");
+							items_count += arrNames.length;
+							for (var j = 0; j < arrNames.length; j++) {
+								if (!add_to_list(arrNames[j], arrIds[j], false)) {
+									not_added_count++;
+									rec_not_added += sep + arrNames[j];
+									sep = ", ";
+								}
+							}
+						}
+						else if (selid.match(/##/)) {
+							// Populate multiple entries
+							var arrNames = selname.split("##");
+							var arrIds = selid.split("##");
+							items_count += arrNames.length;
+							for (var j = 0; j < arrNames.length; j++) {
+								if (!add_to_list(arrNames[j], arrIds[j], false)) {
+									not_added_count++;
+									rec_not_added += sep + arrNames[j];
+									sep = ", ";
+								}
+							}
+						}
+						else  if (selname != "") {
+							items_count++;
+							if (!add_to_list(selname, selid, false)) {
+								not_added_count++;
+								rec_not_added += sep + selname;
+								sep = ", ";
+							}
+						}
+					}
+				}
+				sort_options(document.main_form.notify_list);
+				document.getElementById("counter").innerHTML = document.main_form.notify_list.options.length;
+				if (rec_not_added != "")
+					show_alert(items_count - not_added_count, not_added_count, rec_not_added);
+				else
+					show_alert(items_count, 0, "");
+			}
+			else {
+				alert("Select one of the recipients first");
+			}
+		}
+
+		else if (entry == 2) {
+			// Add Contact textfield entry
+			var selname = document.main_form.elements["recip_combo_name"].value;
+			var selid = document.main_form.elements["SET.recip"].value;
+			if ( selid == "" && autofill_in_progress) {
+				// stop processing until autofill is done, resume on backfill function
+				clicked_add = true;
+				setTimeout("clicked_add = false", autofill_return_time);
+				return;
+			}
+			document.main_form.elements["SET.recip"].value = "";
+			document.main_form.elements["KEY.recip"].value = "";
+			document.main_form.elements["recip_combo_name"].value = "";
+			if (!add_to_list(selname, selid, false))
+				show_alert(0, 1, selname);
+			else {
+				sort_options(document.main_form.notify_list);
+				document.getElementById("counter").innerHTML = document.main_form.notify_list.options.length;
+				if (selname != "")
+					show_alert(1, 0, "");
+			}
+		}
+
+		else if (entry == 3) {
+			// Add Email Address entries
+			var selemail = document.main_form.elements["selemail"].value;
+			var arrEmails = selemail.split(/\s*;\s*/);	// semicolon and spaces around it
+			var invalids = "";
+			var sep = "";
+			var esep = "";
+			var not_added_count = 0;
+			var added_count = 0;
+			var emails_not_added = "";
+
+			for (var i = 0; i < arrEmails.length; i++) {
+				var item = arrEmails[i];
+				if (item == "") continue;
+
+				// basic check for email address
+				if (item.match(/@/) && !item.match(/@.*@/)) {
+					if (!add_to_list(item, item, true)) {
+						not_added_count++;
+						emails_not_added += sep + item;
+						sep = ", ";
+					}
+					else
+						added_count++;
+				}
+				else {
+					invalids += esep + item;
+					esep = "; ";
+				}
+			}
+			sort_options(document.main_form.notify_list);
+			document.getElementById("counter").innerHTML = document.main_form.notify_list.options.length;
+			if (invalids != "")
+				alert("Invalid email address: " + invalids);
+			document.main_form.elements["selemail"].value = invalids;
+			if (emails_not_added != "")
+				show_alert(added_count, not_added_count, emails_not_added);
+			else
+				show_alert(added_count, 0, "");
+		}
+	}
+
+	// Add combo name/persid value to recipients list
+	// Return false if item is already on the list
+	function add_to_list(name, id, smtp) {
+		if (id != "" && name != "") {
+			if (smtp) {
+				if (id.search("smtp:") == -1)
+					id="smtp:" + id;
+			}
+			else {
+				if (id.search("cnt:") == -1)
+					id = "cnt:" + id;
+			}
+
+			var cnts = document.main_form.elements["KEEP.the_notify_list"].value;
+			// do not allow dupes
+			if (cnts.search(id) != -1)
+				return false;
+
+			var new_opt = new Option(name, id);
+			var new_idx;
+			if (document.main_form.notify_list.options.length)
+				new_idx = document.main_form.notify_list.options.length;
+			else
+				new_idx = 0;
+			document.main_form.notify_list.options[new_idx] = new_opt;
+
+			// Keep a space-sep list reflecting the notify list.
+			// This is passed back to the webengine for processing.
+			document.main_form.elements["KEEP.the_notify_list"].value += id + " ";
+			return true;
+		}
+		return true;
+	}
+
+	function sort_options(sel) {
+		if (sel.options.length <= 1)
+			return;
+
+		var arrOptions = new Array();
+		for (var i = 0; i < sel.options.length; i++) {
+			arrOptions[i] = sel[i].text + "&&&" + sel[i].value;
+		}
+
+		arrOptions.sort(sortSDLexical);
+
+		for (var i = 0; i < sel.options.length; i++) {
+			var arrItem = arrOptions[i].split("&&&");
+			sel.options[i].text = arrItem[0];
+			sel.options[i].value = arrItem[1];
+		}
+	}
+
+	var ignore_click = false;	// flag used to ignore click on Lookup link while focus was on Contact textfield (i.e. avoid double execution)
+	var clicked_add = false;	// flag used to delay the execution of the Add Contact button while focus was on Contact textfield (i.e. wait for autofill)
+	var autofill_in_progress = false;	// flag used to check if the backfill is coming from an autofill or the list screen
+
+	// When Notify button is clicked, verify supports_smtp for Preferred Method
+	function verify_notify() {
+		var selmethod = document.main_form.elements["KEEP.pref_method"].value;
+		var cnts = document.main_form.elements["KEEP.the_notify_list"].value;
+
+		if ((cnts.search(/smtp:/) != -1) && (selmethod == "" || arrMethods[selmethod] == "0"))
+			alertmsg("Require_Method_Supports_SMTP");
+		else
+			detailSave();
+	}
+</script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body onunload="unload_check()" onload="initNames()" class="editform">
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<script type="text/javascript">
+ahdframeset.top_splash.next_persid = "$args.persistent_id";
+<PDM_MACRO NAME=dtlForm  button=false>
+<PDM_MACRO NAME=btnStartRow>
+<PDM_MACRO NAME=button caption="Wyślij" hotkey_name="Powiadom" id="btn001" width=120
+    func="verify_notify()">
+<PDM_MACRO NAME=button caption="Anuluj[n]" hotkey_name="Anuluj[n]" id="btncncl" btnType="negative" width=120
+    func="cancel_update('$prop.factory',${args.id:0},'show_main_detail.htmpl')">
+<PDM_MACRO NAME=button caption="Wyczyść treść" hotkey_name="Wyczyść tekst" id="CLEAR_TEXT" width=120
+    func="clear_msg()">
+<PDM_MACRO NAME=btnEndRow>
+<PDM_MACRO NAME=dtlStart>
+</script>
+<input type="hidden" name=HTMPL value='show_main_detail.htmpl'>
+<input type="hidden" name=KEEP.IsModified value='1'>
+<input type="hidden" name=FACTORY value=$prop.factory>
+<PDM_IF "$prop.factory" == "chg">
+<input type="hidden" name=SET.chgalg.change_id value=$args.chgalg.change_id>
+<input type="hidden" name=SET.chgalg.analyst value=$cst.id>
+<PDM_ELIF "$args.factory" == "iss">
+<input type="hidden" name=SET.issalg.issue_id value=$args.issalg.issue_id>
+<input type="hidden" name=SET.issalg.analyst value=$cst.id>
+<PDM_ELSE>
+<input type="hidden" name=SET.alg.call_req_id value=$args.alg.call_req_id>
+<input type="hidden" name=SET.alg.analyst value=$cst.id>
+</PDM_IF>
+<input type="hidden" name="KEEP.the_notify_list" value="">
+<script type="text/javascript">
+var txt = '<PDM_FMT ESC_STYLE=JS2>$args.KEEP.initial_msgtxt</PDM_FMT>';
+txt = txt.replace(/%22/g,"&quot;");
+document.write('<input type="hidden" name=initial_msgtxt value="' + nx_unescape(txt) + '">');
+document.writeln('<center><br><table cellspacing=0 width=90% SUMMARY="' + form_title + '">');
+</script>
+
+<tr>
+	<th width=45% class="detailro" align="center">Dodaj odbiorców</th>
+	<td width=10%>&#160;</td>
+	<th width=45% class='detailro requiredlabeltext gn_attribute_header_background' align="center">Odbiorcy *<br><span id="counter"></span></th>
+</tr>
+<tr>
+<td class=multi_list_selection valign="top">
+<table>
+<tr>
+	<th align="center" valign="baseline" class="labeltext">Dostępni odbiorcy</th>
+</tr>
+
+<script>
+// Create Available Recipients list
+document.writeln("<tr><td align='center'>");
+document.writeln("<select multiple='multiple' name=lhs size=10 tabindex=100 title='Available Recipients'" +
+                 " onfocus=\"this.className='focusField'\"" +
+                 " onblur=\"this.className=''\">");
+
+var qp_labels = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$args.KEEP.qp_labels</PDM_FMT>');
+var qp_persids = '<PDM_FMT ESC_STYLE=JS2>$args.KEEP.qp_persids</PDM_FMT>';
+var qp_names = nx_unescape('<PDM_FMT ESC_STYLE=JS2>$args.KEEP.qp_names</PDM_FMT>');
+qp_labels = ltrim(rtrim(qp_labels));
+qp_persids = ltrim(rtrim(qp_persids));
+qp_names = ltrim(rtrim(qp_names));
+var arr_labels = qp_labels.split("::");
+var arr_persids = qp_persids.split("::");
+var arr_names = qp_names.split("::");
+var stake_index = -1;
+
+for ( var i = 0; i < arr_names.length; i++) {
+	if (i == 0)
+		document.write("<option selected='selected' value='" + arr_persids[i] + "'>");
+	else
+		document.write("<option value='" + arr_persids[i] + "'>");
+	if (arr_labels[i].match(/^\[.+\]$/)) {	// contact object
+		if (arr_labels[i] == "[\$%USP_STAKEHOLDERS_LIST%]") {
+			document.writeln("[Stakeholders List]</option>");
+			stake_index = i;
+		}
+		else if (arr_persids[i].match(/##/)) {	// multiple entries
+			document.writeln(arr_labels[i] + "</option>");
+		}
+		else
+			document.writeln(arr_labels[i] + " -- " + arr_names[i] + "</option>");
+	}
+	else	// contact record
+		document.writeln(arr_labels[i] + "</option>");
+}
+
+document.writeln("</select></td><td>");
+<PDM_MACRO NAME=button caption="Dodaj odbiorców[!ar]" hotkey_name="Dodaj odbiorców[!ar]" id="btn003" width=0
+    Tooltip="Dodaj do wybranych"
+    func="addEntries(1)">
+document.writeln("</td></tr>");
+
+// Begin Add Contact lookup and button.
+document.writeln("<tr>");
+document.writeln("<td align=\"left\">");
+<PDM_MACRO NAME=dtlStartRow>
+<PDM_MACRO NAME=dtlLookup hdr="Kontakt" attr=recip size=30>
+<PDM_MACRO NAME=dtlEndTable>
+document.writeln("</td>");
+
+document.writeln("<td>");
+<PDM_MACRO NAME=button caption="Dodaj kontakt" hotkey_name="Dodaj kontakt" id="btn004" width=0
+    Tooltip="Dodaj do wybranych"
+    func="addEntries(2)">
+document.writeln("</td>");
+document.writeln("</tr>");
+// End Add Contact lookup and button.
+</script>
+
+<PDM_IF "$env.NX_NOTIFICATION_ALLOW_TEMP_ADDRESS" == "Yes">
+<tr><td class="labeltext">&#160;</td></tr>
+<tr>
+	<td class="labeltext" align="left" valign="baseline"><B>Adresy email:</B>(oddzielone ;)</td>
+</tr>
+<tr valign="bottom">
+	<td align="left">
+		<input type=TEXT name=selemail size=30 onblur="return detailBlur(this);" onfocus="return detailFocus(this);" tabindex=100>
+	</td>
+	<td align="left">
+		<script>
+<PDM_MACRO NAME=button caption="Dodaj email" hotkey_name="Dodaj email" id="btn005" width=0
+    Tooltip="Dodaj do wybranych"
+    func="addEntries(3)">
+		</script>
+	</td>
+</tr>
+</PDM_IF>
+</table>	<!-- End left table side -->
+</td>	<!-- End left side -->
+
+<td>	<!-- middle column empty -->
+</td>
+
+<td class=multi_list_selection align="center" valign="top">
+<table>
+<tr>
+	<script>detailRowHdr("Wybrani odbiorcy");</script>
+</tr>
+	<script>
+	// Create Recipients list
+	var title_str = 'Wybrani odbiorcy';
+	if (ahdtop.cstUsingScreenReader)
+	{
+		title_str = 'Odbiorcy (wymagani)';
+	}
+	document.writeln("<tr><td align='center'>");
+	document.writeln("<select" + detailNextID() + 
+					 " name=notify_list multiple='multiple' size=10 title='" + title_str + "'" +
+					 " onfocus=\"this.className='focusField'\"" +
+					 " onblur=\"this.className=''\"></select>");
+	detailSetValidate("Recipients", true);
+	document.writeln("</td></tr>");
+	document.writeln("<tr><td class='labeltext'>&#160;</td></tr>");
+	document.writeln("<tr><td align='center'>");
+<PDM_MACRO NAME=button caption="Usuń" hotkey_name="Usuń" id="REMOVE_RECIPIENT" width=0
+    Tooltip="Usuń z wybranych"
+    func="remove_cnt()">
+	document.writeln("</td></tr>");
+	</script>
+</table>
+</td>	<!-- End right side -->
+
+</tr>
+
+</table>	<!-- End global table -->
+<br>
+
+<script type="text/javascript">
+detailStartRow("");
+detailDropdown("Pilność", "KEEP.urg","noturg", 1, 20,
+               false, "", 
+               <PDM_IF "$args.KEEP.initial_urg" != "">
+                "$args.KEEP.initial_urg"
+                <PDM_ELSE>
+                "2"
+                </PDM_IF>, "no", "", "",
+               "", "", "no", "","",""
+<PDM_LIST PREFIX=list WHERE=" " FACTORY=noturg>
+<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);
+detailDropdown("Preferowana metoda", "KEEP.pref_method","cmth", 1, 20,
+               false, "", "1800", "", "", "",
+               "", "", false, "","",""
+<PDM_LIST PREFIX=list WHERE=" " FACTORY=cmth>
+<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);
+var arrMethods = new Array();
+<PDM_LIST PREFIX=list WHERE=" " FACTORY=cmth>
+<PDM_FMT PAD=NO ESC_STYLE=C>arrMethods["$list.REL_ATTR"] = "$list.supports_smtp";</PDM_FMT></PDM_LIST>
+<PDM_IF 1 == $prop.view_internal>
+<PDM_IF "$prop.factory" == "cr">
+<PDM_MACRO NAME=dtlCheckbox hdr="Wewnętrzne?" attr=alg.internal>
+<PDM_ELIF "$prop.factory" == "iss">
+<PDM_MACRO NAME=dtlCheckbox hdr="Wewnętrzne?" attr=issalg.internal>
+<PDM_ELSE>
+<PDM_MACRO NAME=dtlCheckbox hdr="Wewnętrzne?" attr=chgalg.internal>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO NAME=dtlEndTable>
+
+</script>
+<script type="text/javascript">
+
+<PDM_MACRO NAME=dtlStartRow>
+detailTextbox("Temat wiadomości", "KEEP.msgtitle", 4, 1, 60, true, 0,
+              '<PDM_FMT ESC_STYLE=C>$args.KEEP.initial_msgtitle</PDM_FMT>');
+
+<PDM_MACRO NAME=dtlStartRow>				 
+detailTextbox("Treść wiadomości", "KEEP.msgtxt", 4, 8, 80, true, 4000,
+              '<PDM_FMT ESC_STYLE=C>$args.KEEP.msgtxt</PDM_FMT>',"no");
+
+if (resp_ids.length > 1)
+{
+<PDM_MACRO NAME=dtlStartRow>
+detailRowHdr("Spersonalizowana odpowiedź",1,0);
+docWriteln('<tr><td align="left">');
+_dtl.eventHandler = "onblur='add_response(selectedIndex)' onchange='reset_resp_on_blur_flag()'";
+docWriteln('<select' + detailNextID(true) + '>');
+for (var i = 0; i < resp_ids.length; i++)
+{
+	docWrite('<option value="' + resp_ids[i] + '" ');
+	docWriteln('>' + resp_sym[i] +'</option>');
+}
+docWriteln('</select></td></tr>');
+}
+
+</script>
+<PDM_MACRO NAME=dtlEnd>
+
+<!-- KEEP.initial_msgtxt is supplied by the webengine - it's usually the
+expanded message template as defined in the log's Activity Type -->
+<!-- ntf_names is a '::' separated list of contact names from the object's
+	notify_list LREL.  ntf_ids contains the respective contact ids.  We use these
+	to initally populate the recipient list -->
+</center>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: nf.htmpl ASPEN.9 2012/05/08 16:58:44 upeha01 Exp $
+</PDM_IF>

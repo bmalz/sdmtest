@@ -1,0 +1,132 @@
+<PDM_IF 0>
+terms_of_usage.htmpl
+
+INTENT:
+    Display the Terms of Usage page.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/browser.js"></script>
+<PDM_INCLUDE FILE=styles.htmpl>
+<title>Terms of Usage</title>
+<script type="text/javascript">
+var cfgCAISD = "$CAisd";
+std_head_setup();
+</script>
+<PDM_INCLUDE FILE=ahdtop.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/msgtext.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/imgbutton.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+<script>
+var propFormName = "$prop.form_name";
+var propFormName1 = "$prop.form_name_1";
+var propFormName3 = "$prop.form_name_3";
+
+function unload_and_close_win()
+{
+    window.close();
+}
+
+function accept_reject_tou(act) {
+	var e=document.getElementById("TOU_OP");
+	e.value=act;
+	var f=document.forms["TOU"];
+	f.submit();
+}
+
+disable_right_click();
+activateActionKeys();
+</script>
+</head>
+
+<body>
+
+<PDM_FORM NAME=TOU>
+<input type="hidden" name="OP" id="TOU_OP" value=""> 
+</PDM_FORM>
+
+<div>
+<table width="100%" cellspacing="0" cellpadding="0" >
+<tr>
+    <td>
+	<script type="text/javascript">
+		  document.writeln(generate_basic_form_header_html());
+	</script>
+    </td>
+</tr>
+<tr>
+<td>
+<center>
+    <table class="page_header_main">
+	<tr class="page_header_row">
+	    <td class="page_header_title_container">Terms of Usage</td>
+	</tr>
+    </table>
+</center>
+</td>
+</tr>
+</table>
+</div>
+
+<div width="100%">
+<table class="generic_table">
+<tbody>
+<tr>
+<td width="50%">
+    <table class="terms_of_usage_content_area" align="center">
+    <tbody>
+	<tr>
+	<td class="page_section">
+         <div class="footer_text">$TERMS_OF_USAGE.terms_of_usage_text</div>
+	</td>
+	</tr>
+    </tbody>
+    </table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<center>
+    <table>
+	<tr>
+	    <td class="gn_content_center">
+		<script type="text/javascript">
+		<PDM_MACRO NAME=button                    
+		    id="btn001"                           
+		    caption="Accept"  
+		    func="accept_reject_tou('MENU')"          
+		    hotkey_name="Accept"                   
+		    width=100                   
+		    newrow=yes >                          
+		</script>
+	    </td>
+	    <td class="gn_content_center">
+		<script type="text/javascript">
+		<PDM_MACRO NAME=button                    
+		    id="btn002"                           
+		    caption="Reject"  
+		    func="accept_reject_tou('LOGOUT')"          
+		    hotkey_name="Reject"                   
+		    width=100                   
+		    btnType=negative 
+		    endrow=yes >                          
+		</script>
+	    </td>
+	</tr>
+    </table>
+</center>
+
+
+<div class="gn_content_center">
+<img src="$CAisd/img/blue.png"  class="terms_of_usage_image" alt="">
+</div>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: terms_of_usage.htmpl ASPEN.3 2010/11/17 01:48:45 saima01 Exp $
+</PDM_IF>
+

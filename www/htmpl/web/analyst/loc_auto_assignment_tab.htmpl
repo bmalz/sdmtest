@@ -1,0 +1,52 @@
+<PDM_IF 0>
+loc_auto_assignment_tab.htmpl
+
+INTENT:
+    Display auto assignment notebook page for Location.
+
+</script>
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=loc_auto_assignment_tab" factory=loc>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<PDM_IF "" != "$ext_args.ERROR_MSG">
+<body class="detailro" onunload="cancel_any_lrel_update()" onload="alert('$ext_args.ERROR_MSG')">
+<PDM_ELSE>
+<body class="detailro" onunload="cancel_any_lrel_update()" >
+</PDM_IF>
+<PDM_INCLUDE FILE=std_body.htmpl filename="" key="$args.name">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_OBJECT>
+function add_button_to_tab_banner(){
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=button caption="Update Request Areas" func="update_lrel('loc', '$args.persistent_id', 'pcat', 'service_pcat',  'Request Areas Available', 'Request Areas Assigned', '')" hotkey_name="Update Request Areas" id=UPDATE_LREL newrow=yes>
+<PDM_MACRO name=button caption="Update Change Categories" func="update_lrel('loc', '$args.persistent_id', 'chgcat', 'service_chgcat',  'Change Categories Available', 'Change Categories Assigned', '')" hotkey_name="Update Change Categories" id=UPDATE_LREL>
+<PDM_MACRO name=button caption="Update Issue Categories" func="update_lrel('loc', '$args.persistent_id', 'isscat', 'service_isscat',  'Issue Categories Available', 'Issue Categories Assigned', '')" hotkey_name="Update Issue Categories" id=UPDATE_LREL>
+<PDM_MACRO name=button caption="Update Groups" endrow=yes func="update_loc_grp('loc', '$args.persistent_id', 'cnt', 'service_groups',  'Groups Available', 'Groups Assigned', '')" hotkey_name="Update Groups" id=UPDATE_LREL>
+</PDM_IF>
+}
+</PDM_OBJECT>
+<PDM_MACRO name=tabBanner title="Auto Assignment List" add_btns=true>
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Request Area List." height=180 src="OP=SEARCH+FACTORY=pcat+QBE.EQ.service_locs.loc.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Change Category List." height=180 src="OP=SEARCH+FACTORY=chgcat+QBE.EQ.service_locs.loc.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Issue Category List." height=180 src="OP=SEARCH+FACTORY=isscat+QBE.EQ.service_locs.loc.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList btntitle="Load Auto Assignment Group List." height=180 src="OP=SEARCH+FACTORY=cnt+QBE.EQ.service_locs.loc.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.type.id=2308+KEEP.noSFBtns=1">
+<PDM_MACRO name=dtlEndTable>
+
+</script>
+</PDM_FORM>
+</BODY>
+</html>
+<PDM_IF 0>
+@(#)$Id: loc_auto_assignment_tab.htmpl ASPEN.3 2012/05/08 17:05:59 putsr02 Exp $;
+</PDM_IF>

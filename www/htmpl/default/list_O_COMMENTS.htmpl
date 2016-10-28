@@ -1,0 +1,209 @@
+<PDM_IF 0>
+$Id: list_O_COMMENTS.htmpl,v 1.7 2007/01/04 23:14:23 tuach01 Exp $
+WHEN PRESENTED:
+	When we need to display a list of comment.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Comment Search";
+var hdrTitleList = "Comment List";
+<PDM_IF "$env.NX_KT" == "Yes">
+	var cfgCanEdit = true;
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script>
+var argSkeletonId = "$args.SkeletonId";
+var cstComboName = "$cst.combo_name";
+var cstEmailAddress = "$cst.email_address";
+</script>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<LINK REL="stylesheet" TYPE="text/css" HREF="$CAisd/css/KT_Styles.css">
+<script language="JavaScript" src="$CAisd/scripts/date_helper.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/comboname.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kt_system.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/kd_tabs.js"></script>
+</head>
+<body  class="list gn_left_top_margin_0" onload="LoadActions('list_O_COMMENTS.htmpl')">
+<PDM_INCLUDE FILE=std_body.htmpl filename="comments" header=no>
+<script>
+	
+<PDM_IF "$args.QBE.EQ.DOC_ID" != "">
+		var cfgExtraButton=new Array("Create_New", "AddComment()");
+	
+</PDM_IF>	
+</script>
+<PDM_IF "$args.opener" == "kt_document_template">
+	<table cellSpacing="0" cellPadding="0" width="100%" class="page_header gn_container_no_border">
+	<tr>
+		<td align="left" width="100%">Comment List: '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.doc_title</PDM_FMT>'</td>
+	</tr>
+	</table>
+</PDM_IF>
+<script>
+<PDM_IF "$args.opener" != "kt_document_template">
+<PDM_MACRO name=sfStart create=false factory=O_COMMENTS>
+	document.writeln("<input type='hidden' name='QBE.EQ.DOC_ID' id='QBE.EQ.DOC_ID' value='$args.SkeletonId'>");
+	
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Modyfikujący" attr=last_mod_by>
+<PDM_MACRO name=sfLookup hdr="Zgłaszający" attr=USER_ID>
+<PDM_MACRO name=sfDropdown hdr="Typ dostępu zgłaszającego" attr=USER_ID.access_type.sym factory=acctyp>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfLookup hdr="Przypisany" attr=ASSIGNEE factory="agt">
+	    searchFilterDate("Earliest Target Date","DEADLINE_DATE","QBE.GE");
+	    searchFilterDate("Latest Target Date","DEADLINE_DATE","QBE.LE");
+	    
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDropdown hdr="Status" attr=FLG_STATUS>
+<PDM_MACRO name=sfDropdown hdr="Typ komentarza" attr=FLG_TYPE>
+	    searchFilterDropdown("Has Follow-Up","","",
+	    "Yes","(FLG_TYPE.FOLLOW_UP=1)",
+	    "No","(FLG_TYPE.FOLLOW_UP=0)",	2);
+	
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Komentarz" attr=COMMENT_TEXT colspan=3 size=50>
+<PDM_IF "$env.NX_KT" == "Yes">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Odpowiedź" attr=CLOSE_DESC colspan=3 size=50>
+</PDM_IF>
+<PDM_MACRO name=sfEnd>
+<PDM_IF "$env.NX_KT" == "Yes">
+	    var edit_field_count = 0;
+	    <pdm_jscript file=list_edit.js>
+		
+<PDM_MACRO name=elsStartEdit search_filter="__search_filter">
+<PDM_MACRO name=elsEditField attr_name="ASSIGNEE" startrow="yes">
+		calcEditFieldCount();
+		
+<PDM_MACRO name=elsEditField attr_name="DEADLINE_DATE" header="Target Date">
+		calcEditFieldCount();
+		
+<PDM_MACRO name=elsEditField attr_name="FLG_STATUS">
+		calcEditFieldCount();
+		
+<PDM_MACRO name=elsEditField attr_name="CLOSE_DESC" colspan="2" header="Reply" startrow="yes">
+		calcEditFieldCount();
+		
+<PDM_MACRO name=elsEndEdit>
+</PDM_IF>
+</PDM_IF>
+function calcEditFieldCount()
+{
+	edit_field_count++;
+	if(edit_field_count>=4)
+	{
+		listEditEndRow();
+		listEditStartRow();
+		edit_field_count=0;
+	}
+}
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var msgFoundNone = "No comments found";
+var msgFound1 = "1 comment found";
+var msgFound = "%1 comments found";
+var msgFoundMore = "%1 comments found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired comments";
+var msgSelectAlg = "Click to select desired comments and add a %1 activity log";
+var msgSelectTempl = "Click to select desired comments template";
+
+function CreateDocLink(value)
+{
+	var html = "<a class=\"record\" href='javascript:OpenDoc(" + doc_id + ")'>" + value + "</a>";
+	rs.data(html);
+	return;
+}
+function OpenDoc(doc_id)
+{
+	var persid = "KD:" + doc_id;
+	var features="directories=no"+
+		",location=no"+
+		",height=" + popupHeight(LARGE_POPUP) +
+		",width=" + popupWidth(LARGE_POPUP)+
+		",status=no";
+	popup_window(persid,'SHOW_DETAIL', 0, 0, features, 'PERSID=' + persid);
+}
+function docSummary(value)
+{
+  rs.data(value);
+  return;
+}
+// getEdit() function is in the detail_KD.htmpl page
+var editMode = ( typeof parent.getEdit != "undefined" &&
+                 parent.getEdit() != 0); // if the document is in edit mode
+editMode = true;	// Permit adding comments in view mode
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="var doc_id = '@{list.DOC_ID.id}'">
+<PDM_MACRO name=lsWrite both=yes text="if (ahdtop.cfgNX_KT == 'Yes') {">
+<PDM_IF 0>Note!!! link should be on comment type and not on the comment text b/c of MT code that 
+		adds the tenant column, also it better to link on a shorter field</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Typ komentarza" attr=FLG_TYPE exportfmt=ShowLink link=yes nowrap=yes>
+<PDM_IF "$args.QBE.EQ.DOC_ID" == "">
+<PDM_MACRO name=lsWrite text="pdm_if '@{args.QBE.EQ.DOC_ID:}' == ''">
+<PDM_MACRO name=lsCol hdr="Tytuł dokumentu" attr=DOC_ID.TITLE export=no fmtfunc=CreateDocLink nowrap=yes>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Data wpisania" attr=COMMENT_TIMESTAMP nowrap=yes>
+<PDM_MACRO name=lsCol hdr="Status" attr=FLG_STATUS nowrap=yes>
+<PDM_MACRO name=lsCol hdr="Data docelowa" attr=DEADLINE_DATE nowrap=yes>
+<PDM_MACRO name=lsCol hdr="Kontakty" attr="last_mod_by" label="Modified By" nowrap=yes>
+<PDM_MACRO name=lsCol label="Comment" attr="COMMENT_TEXT" colspan=4 disp_entities=yes startrow=yes width=255>
+<PDM_MACRO name=lsCol label="Submitter" attr="USER_ID" nowrap=yes>
+<PDM_MACRO name=lsCol label="Reply" attr="CLOSE_DESC" colspan=4 disp_entities=yes startrow=yes width=255>
+<PDM_MACRO name=lsCol label="Assignee" attr="ASSIGNEE">
+<PDM_MACRO name=lsWrite text="pdm_if '@{args.QBE.EQ.DOC_ID:}' == ''">
+<PDM_MACRO name=lsCol label="Document Summary" attr=DOC_ID.SUMMARY colspan=4 export=no fmtfunc=docSummary nowrap=yes sort=no startrow=yes width=255>
+<PDM_MACRO name=lsCol label="Document ID" attr=DOC_ID.id>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite both=yes text="} else {">
+<PDM_MACRO name=lsWrite both=yes text="if (editMode) {">
+<PDM_MACRO name=lsCol label="Comment" attr=COMMENT_TEXT colspan=3 exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite both=yes text="else {">
+<PDM_MACRO name=lsCol label="Comment" attr=COMMENT_TEXT colspan=3>
+<PDM_MACRO name=lsWrite both=yes text="}">
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.USER_ID.id:0}' != '8F273A972A45E44C9FF0079259E2A60E'">
+<PDM_MACRO name=lsCol label="Submitter" attr=USER_ID.userid startrow=yes>
+<PDM_MACRO name=lsWrite text="pdm_if '@{list.EMAIL_ADDRESS:}' != ''">
+<PDM_MACRO name=lsCol label="Email" attr=EMAIL_ADDRESS>
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsCol label="Email" attr=USER_ID.email_address>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsWrite text="pdm_else">
+<PDM_MACRO name=lsCol label="Submitter" attr=USER_NAME startrow=yes>
+<PDM_MACRO name=lsCol label="Email" attr=EMAIL_ADDRESS>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol label="Date Logged" attr=COMMENT_TIMESTAMP>
+<PDM_MACRO name=lsWrite both=yes text="} ">
+<PDM_MACRO name=lsEnd factory=O_COMMENTS>
+
+rs.setLinkOnclick(function(){EditComment(self.activePersid)});
+//rs.overrideMenu=true;
+
+if (editMode) //check if the document is in edit mode
+{
+	var ctxMenu=new ContextMenu("idMenuTabComments");
+	ctxMenu.addItem("View", "ViewComment(self.activePersid);");
+	ctxMenu.addItem("Edit", "EditComment(self.activePersid);");
+	ctxMenu.addItem("Delete", "DeleteComment(self.activePersid);");
+	ctxMenu.finish();
+}
+
+</script>
+</PDM_IF>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_WSP>

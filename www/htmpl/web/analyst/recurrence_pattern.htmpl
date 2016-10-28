@@ -1,0 +1,134 @@
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+
+<PDM_INCLUDE FILE=styles.htmpl>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+
+<PDM_INCLUDE FILE=std_head.htmpl>
+<PDM_FORM NAME="frmDTLRO" id="frmDTLRO">
+<script type="text/javascript">
+var form_title = "Recurrence Pattern";
+var dateHTML;
+var divContent;
+var targetDiv;
+var recurs;
+var recurrence_interval;
+var occurence;
+var weekDay;
+var selected;
+var weekDayArray = new Array(7);
+var CalendarMonths = new Array("January", "February", "March", "April", "May", "June", 
+						"July", "August", "September", "October", "November", "December");
+var weeks = new Array("First", "Second", "Third", "Fourth", "Last");
+
+var dayNames = new Array("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday");
+
+var flag = true;
+var start_date = "$args.start_date";
+<PDM_IF "$args.id" != "0">
+start_date = string_to_date("",setToTimezone(start_date),"");
+</PDM_IF>
+<PDM_IF "$args.id" != "0">
+<PDM_LIST FACTORY=window where="id =$args.id" PREFIX=current DOMSET="window_list">
+recurs = '$current.recurs';
+recurrence_interval = '$current.recurrence_interval';
+occurence = '$current.occurrence';
+weekDayArray[0] = '$current.sunday';
+weekDayArray[1] = '$current.monday';
+weekDayArray[2] = '$current.tuesday';
+weekDayArray[3] = '$current.wednesday';
+weekDayArray[4] = '$current.thursday';
+weekDayArray[5] = '$current.friday';
+weekDayArray[6] = '$current.saturday'; 
+</PDM_LIST>
+</PDM_IF>
+
+function getInnerHTML(p_id)
+{
+	var dateInfo = document.getElementById(p_id);
+	dateHTML = dateInfo.innerHTML;
+	dateInfo.innerHTML="";
+}
+
+</SCRIPT>
+
+<BODY xonload="">
+
+<TABLE ID=tbl201 CLASS=tab>
+	<tr valign=top align=left>
+		<td width=125 class=detailro>
+				<div name=first id=first>
+					<input type="radio" name="recurrence" id="none" onclick="setNone(0)" value="None" checked="true">None<br><br>
+					<input type="radio" name="recurrence" id="daily" onclick="setDailyForm(1)" value="Daily">Daily<br><br>
+					<input type="radio" name="recurrence" id="weekly" onclick="setWeeklyForm(2)" value="Weekly">Weekly<br><br>
+					<input type="radio" name="recurrence" id="monthly" onclick="setMonthlyForm(3)" value="Monthly">Monthly<br><br>
+					<input type="radio" name="recurrence" id="yearly" onclick="setYearlyForm(4)" value="Yearly">Yearly<br>
+				</div>
+		</td>
+		<td id=second>		
+			<div name=third id=third>
+				<SCRIPT LANGUAGE="JavaScript">
+					<PDM_MACRO NAME=dtlStartRow class=tab>
+						<PDM_IF "$prop.form_name_3" == "edit">
+							<PDM_MACRO NAME=dtlDate hdr="End by" attr="final_end_date">
+						<PDM_ELSE>
+							<PDM_MACRO NAME=dtlReadonly hdr="End by" attr="final_end_date" fmtfunc=setToTimezone>
+						</PDM_IF>
+					<PDM_MACRO NAME=dtlEndTable>
+				</SCRIPT>
+			</div>			
+			<SCRIPT>
+				getInnerHTML('third');
+			</SCRIPT>
+		</td>
+	</tr>
+</table>
+
+<SCRIPT LANGUAGE="JavaScript">							
+	<PDM_MACRO NAME=dtlStartRow class=tab>
+		</SCRIPT>	
+			<INPUT TYPE="hidden" NAME="SET.recurs" value=$args.recurs>	
+			<INPUT TYPE="hidden" NAME="SET.recurrence_interval" value=$args.recurrence_interval>
+			<INPUT TYPE="hidden" NAME="SET.occurrence" value=$args.occurence>
+			<INPUT TYPE="hidden" NAME="SET.sunday" value=$args.sunday>
+			<INPUT TYPE="hidden" NAME="SET.monday" value=$args.monday>
+			<INPUT TYPE="hidden" NAME="SET.tuesday" value=$args.tuesday>
+			<INPUT TYPE="hidden" NAME="SET.wednesday" value=$args.wednesday>
+			<INPUT TYPE="hidden" NAME="SET.thursday" value=$args.thursday>
+			<INPUT TYPE="hidden" NAME="SET.friday" value=$args.friday>
+			<INPUT TYPE="hidden" NAME="SET.saturday" value=$args.saturday>
+		<script>
+	<PDM_MACRO NAME=dtlEndTable>
+			
+	var grp = document.getElementsByName("recurrence");
+	if(!_dtl.edit){
+		for ( var i = 0; i < grp.length; i++)
+			grp[i].disabled = true;
+	}				
+	<PDM_IF "$args.id" != "0">				
+		if ( recurs != "")
+			grp[recurs].checked = true;
+		if (recurs == "1")
+			setDailyForm(1);
+		if (recurs == "2")
+			setWeeklyForm(2);
+		if (recurs == "3")
+			setMonthlyForm(3);
+		if (recurs == "4")
+			setYearlyForm(4);
+		if (recurs == "" || recurs == "0")
+		{
+			setNone(0);
+			grp[0].checked = true;
+		}
+	<PDM_ELSE>
+		setNone(0);
+		grp[0].checked = true;
+	</PDM_IF>		
+</SCRIPT>
+	
+</PDM_FORM>
+</BODY>
+</HTML>

@@ -1,0 +1,24 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////////////////////////////
+ File:    cmdb_metadata_site_families.htmpl
+
+ Purpose: List user-defined family metadata files 
+
+
+Step 1) Add an PDM_INCLUDE statement at the end of this file to import metadata for the custom family.
+
+        Copy and paste the following macro line to the end of the this file.
+        PDM_INCLUDE FILE=cmdb_metadata_***EXTENSION***.htmpl>
+        
+        NOTE: Add the "<" character to the beginning of the PDM_INCLUDE statement
+        
+Step 2) Replace ***EXTENSION*** with the custom family extension table name.
+
+////////////////////////////////////////////////////////////////////////////////////////
+</PDM_IF>
+<!-- ------------------------------------------------------------------------ -->
+<!-- INSERT PDM_INCLUDE STATEMENTS FOR USER DEFINED METADATA FILES BELOW HERE -->
+<!-- ------------------------------------------------------------------------ -->
+
+
+

@@ -1,0 +1,251 @@
+<PDM_IF 0>
+$Id: list_ci_window.htmpl ANDERSON.0 2009/06/10 08:36:05 pstso01 Exp $
+list_window_lrel.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Associated Maintenance Windows.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Maintenance Windows Search";
+var hdrTitleList = "Maintenance Windows List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<script language="JavaScript">
+var cfgCanEdit = true;
+var persis_id;
+persis_id = '$args.KEEP.nr_id';
+var cfgExtraButton;
+cfgExtraButton=new Array("Update Maintenance Windows", "update_mwindows()");
+var schedTzInfo = new Array();	
+var window_id = "";
+</script>
+
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+</head>
+
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Maintenance Windows List">
+
+<script language="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=ci_window>
+<PDM_IF $args.KEEP.id == "0">
+document.write('<input type="hidden" name="QBE.EQ.window" value="$args.KEEP.id">');
+<PDM_ELSE>
+document.write('<input type="hidden" name="QBE.EQ.nr" value="$args.KEEP.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=window.sym>
+<PDM_MACRO name=sfDropdown hdr="Status" attr="window.delete_flag" default="Active">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Data rozpoczęcia" attr="window.start_date">
+<PDM_MACRO name=sfDate hdr="Data zakończenia" attr="window.end_date">
+<PDM_MACRO name=sfDate hdr="Finalna data zakończenia" attr="window.final_end_date">
+<PDM_MACRO name=sfEnd>
+
+function update_mwindows()
+{
+	update_with_lrel_style("nr", "$args.KEEP.nr_id", 'window', 'window', 'Maintenance Windows', 'Associated to CI', ''); 
+}
+
+function displayRecurrence( recur )
+{
+	switch ( parseInt(recur) ) { 
+		case 0 : 
+			rs.data ("None");
+			break;
+		case 1 :
+			rs.data ("Daily");
+			break;
+		case 2 :
+			rs.data ("Weekly");
+			break;
+		case 3 :
+			rs.data ("Monthly");
+			break;
+		case 4 :
+			rs.data ("Yearly");
+			break;
+		default :
+			break;
+	    }
+}
+
+function displayRecurrenceExp()
+{
+	return "LIST_LOOKUP: 0," + msgtext("None") + ",1," + msgtext("Daily") + ",2," + msgtext("Weekly") + ",3," + msgtext("Monthly") + ",4," + msgtext("Yearly");
+}
+
+function displayWindow( value )
+{
+	var reshtml;
+	reshtml = "<a class='record' href=\"javascript:showDetailWithPersid('window:' + '" + window_id + "')\">" + value + "</a>" ; 
+	rs.data(reshtml);
+}
+
+// adjustStartDate() - adjusts the startDate to corresponding date in selected timezone 
+function adjustStartDate ()
+{
+	translatedDate = adjustToTz(startDate, prevValue);
+	rs.data( translatedDate);
+}
+
+// adjustEndDate() - adjusts the startDate to corresponding date in selected timezone 
+function adjustEndDate ()
+{
+	translatedDate = adjustToTz(endDate,  prevValue);
+	rs.data( translatedDate);
+}
+
+// adjustFinalEndDate() - adjusts the startDate to corresponding date in selected timezone 
+function adjustFinalEndDate ()
+{
+	translatedDate = adjustToTz(finalEndDate,  prevValue);
+	rs.data( translatedDate);
+}
+
+// adjustToTz() - Translates the date coming from database to appropriate date in selected timezone
+// value - date ticks
+// tz - selected timezone
+function adjustToTz( value, tz )
+{
+	var dstAdjReq;
+	var ticks=value*1000;
+	var schedTzInfo=new Array();
+	schedTzInfo=getTzInfo(tz);
+	tzDate=new Date(ticks+1000*schedTzInfo[1]);
+	browserGMT_delta = parseInt((new Date(value*1000).getTimezoneOffset()*60));
+	if ( -browserGMT_delta == parseInt(schedTzInfo[1])  ||
+		 -(browserGMT_delta+parseInt(schedTzInfo[2])) == parseInt(schedTzInfo[1]))
+		dstAdjReq=DSTrequired(schedTzInfo,ticks);
+	else { 
+		if (parseInt(schedTzInfo[1]) == 0)
+			dstAdjReq=DSTrequired(schedTzInfo,ticks-1000*(-(browserGMT_delta)));
+		else
+			dstAdjReq=DSTrequired(schedTzInfo,ticks+1000*schedTzInfo[1]);
+		}
+	if(dstAdjReq)  
+		tzDate.setTime(tzDate.getTime()+schedTzInfo[2]*1000);
+	var lclDate=new Date(tzDate.getUTCFullYear(),
+	tzDate.getUTCMonth(),
+	tzDate.getUTCDate(),
+	tzDate.getUTCHours(),
+	tzDate.getUTCMinutes(),
+	tzDate.getUTCSeconds());
+	value=date_to_string(lclDate.getTime()/1000, 0, false, "yes");
+	return(value);
+}
+
+function getTzInfo( tz )
+{
+	<PDM_LIST FACTORY=tz where="delete_flag = 0" PREFIX=current>
+	if ('$current.code'== tz)
+		{
+		 schedTzInfo[1] = "$current.gmt_delta";
+	     schedTzInfo[2] = "$current.dst_delta";
+	     schedTzInfo[3] = "$current.start_day";
+	     schedTzInfo[4] = "$current.start_mon";
+	     schedTzInfo[5] = "$current.start_pos";
+	     schedTzInfo[6] = "$current.start_abs_date";
+	     schedTzInfo[7] = "$current.end_day";
+	     schedTzInfo[8] = "$current.end_mon";
+	     schedTzInfo[9] = "$current.end_pos";
+	     schedTzInfo[10] = "$current.end_abs_date";
+		}
+	</PDM_LIST>
+	return (schedTzInfo);
+}
+
+// DSTrequired() - check if there is DST
+// schedTzInfo - array containing information about the selected timezone
+// ticks - date ticks
+function DSTrequired( schedTzInfo, ticks)
+{
+	if ( typeof schedTzInfo == "object" && schedTzInfo.length == 11 ) {
+    var day, wday, tzDate = new Date(ticks);
+	if ( schedTzInfo[2] != 0 ) {
+	  // DST may be there
+      var dstStartMonth = parseInt(schedTzInfo[4]);
+      var dstEndMonth = parseInt(schedTzInfo[8]);
+      var eventMonth = parseInt(tzDate.getMonth());
+      var dstAdjReq = false;
+      if ( eventMonth == dstStartMonth  ||
+           eventMonth == dstEndMonth ) { 
+        // We're in the start or end month - must check the weekday
+        var ix = ( eventMonth == dstStartMonth ? 3 : 7 );
+        var checkDate = new Date(ticks);
+        
+		checkDate.setDate(1);
+		var wday = parseInt(checkDate.getDay());
+        var tgtWday = parseInt(schedTzInfo[ix]);
+        var tgtPosn = parseInt(schedTzInfo[ix+2]);
+        if ( tgtWday >= wday ) { 
+          checkDate.setDate(7 * tgtPosn + tgtWday - wday - 6 ); 
+		  }
+        else { 
+          checkDate.setDate(7 * tgtPosn + tgtWday - wday + 1 );
+		  }
+        if ( eventMonth == dstStartMonth ) { 
+          if ( tzDate.getTime() >= checkDate.getTime() ) { 
+            dstAdjReq = true;}
+        }
+        else if ( tzDate.getTime() < checkDate.getTime() ) {
+          dstAdjReq = true;}
+      }
+      else if ( dstStartMonth < dstEndMonth ) {
+        // Northern hemisphere
+        if ( eventMonth > dstStartMonth &&
+             eventMonth < dstEndMonth ) { 
+          dstAdjReq = true;}
+      }
+      else if ( dstStartMonth > dstEndMonth)  { 
+        // Southern hemisphere
+        if ( eventMonth > dstStartMonth ||
+             eventMonth < dstEndMonth )
+          dstAdjReq = true;
+      }
+    }
+  }
+  return (dstAdjReq);
+}
+
+</script>
+
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<script language="JavaScript">
+var msgFoundNone = "No Maintenance Windows found";
+var msgFound1 = "1 Maintenance Window found";
+var msgFound = "%1 Maintenance Windows found";
+var msgFoundMore = "%1 Maintenance Windows found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Maintenance Window";
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="window_id = \"@{list.window.id}\"">
+<PDM_MACRO name=lsWrite text="var prevValue = \"@{list.window.timezone}\";">
+<PDM_MACRO name=lsWrite text="var startDate = \"@{list.window.start_date_INT_DATE}\";">
+<PDM_MACRO name=lsWrite text="var endDate = \"@{list.window.end_date_INT_DATE}\";">
+<PDM_MACRO name=lsWrite text="var finalEndDate = \"@{list.window.final_end_date_INT_DATE}\";">
+<PDM_MACRO name=lsCol hdr="Okno serwisowe" attr=window fmtfunc=displayWindow justify=left link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Data rozpoczęcia" attr=window.start_date fmtfunc=adjustStartDate justify=left>
+<PDM_MACRO name=lsCol hdr="Data zakończenia" attr=window.end_date fmtfunc=adjustEndDate justify=left>
+<PDM_MACRO name=lsCol hdr="Finalna data zakończenia" attr=window.final_end_date fmtfunc=adjustFinalEndDate justify=left>
+<PDM_MACRO name=lsCol hdr="Strefa czasowa" attr=window.timezone justify=left>
+<PDM_MACRO name=lsCol hdr="Powtarzalność" attr=window.recurs exportfmt=displayRecurrenceExp fmtfunc=displayRecurrence justify=left sort=no>
+<PDM_MACRO name=lsEnd>
+ctxMenu = new ContextMenu("ciWindowMenu");
+ctxMenu.addItem( "View", "rsShowDetailPopup('window:' + '" + window_id + "')" );
+ctxMenu.addItem( "Edit", "showEdit('window:' + '" + window_id + "')" );
+ctxMenu.addItem( msgtext("Print_Form%1...", " " + window.propFormName), "CAisdPrint();"); 
+ctxMenu.addItem( msgtext("Help_on_This_Window..."), "help_on_form('"+window.propFormName+"')");
+ctxMenu.finish();
+</script>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_WSP>

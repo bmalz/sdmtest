@@ -1,0 +1,7 @@
+  
+OBJECT ldap LDAP {
+    ATTRIBUTES LDAP_Entry{
+		zNRE NRE STRING;
+		whenCreated whenCreated STRING ;
+    } ;
+} ;

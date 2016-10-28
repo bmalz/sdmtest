@@ -1,0 +1,1039 @@
+<PDM_IF 0>
+@(#)$Id: kt_document_options.htmpl ASPEN.5 2011/08/26 17:52:07 mckpe04 Exp $
+WHEN PRESENTED:
+    When we need to display the document options of a single Knowledge Document
+</PDM_IF>
+<script language=javascript>
+var page_opener = "$args.opener";
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION EditReworkDocument
+// This function is relevant when rework version exists, it opens it in edit mode
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      
+function EditReworkDocument()
+{
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+		"+OP=UPDATE+FACTORY=$prop.factory+SET.id=$args.VER_CROSS_REF_ID" +
+		"+KEEP.edit_from_viewer=1+KEEP.opener=$args.opener+open_mode=$args.open_mode+KEEP.BUID=" + m_lBUID;
+	<PDM_IF "$args.DOC_TYPE_ID" == 2>
+		parent.replace_page(url);
+	<PDM_ELSE>
+		replace_page(url);
+	</PDM_IF>
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION ViewAvailDocument
+// This function is relevant when displayibng a rework version, it opens the document viwer with the aviable version
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function ViewAvailDocument()
+{
+	//All we need to to replace the FID and persid with new values
+	//We'll split the URL, replace the persid parameters and join it again
+	//
+	var doc_type_id="$args.DOC_TYPE_ID";
+	
+	// decision trees have an embedded frameset, so get the correct url
+	if(doc_type_id==2) {
+		var url = parent.document.location.href;			// decision tree
+	} else {
+		var url = document.location.href;
+	}
+	var arrURL = url.split("?");
+	var bReplacedPersID = false; //Flag to specify if the page was reloaded in user view, 
+								 //note that it does not available all times, like after clicking on user view 
+								 // from detail_KD.htmpl that's in edit mode
+								 //in these cases we switch to Document editor instead
+	if ( arrURL.length > 1 ) {// ? exists
+		var sURLParams = arrURL[1];
+		var arrURLParams = sURLParams.split("+");
+		for (var i = 0; i < arrURLParams.length; i++)
+		{
+			var param = arrURLParams[i];
+			var arrParam = arrURLParams[i].split("=");
+			if (arrParam [0] == "PERSID")
+			{
+				bReplacedPersID = true;
+				arrURLParams[i] = "PERSID=KD:$args.VER_CROSS_REF_ID";
+			}	
+			else if (arrParam [0] == "FID")
+			{
+				arrURLParams[i] == "FID=" + fid_generator();
+			}
+		}
+		if ( bReplacedPersID ) {
+			sURLParams = arrURLParams.join("+");
+			var newUrl = arrURL[0] + "?" + sURLParams;
+
+			// if this is a decision tree, change the parent's url
+			if(doc_type_id==2) {
+				window.ahdframeset.arrNodes=null;				// clear decision tree so it will load the new one
+				parent.document.location.href=newUrl;
+			} else {
+				document.location.href=newUrl;
+			}
+
+			return;
+		}
+	}
+	if ( !bReplacedPersID ){
+		EditDocument($args.VER_CROSS_REF_ID);
+	}
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION EditDocument
+// This function opens the selected document in Document Editor mode
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////        
+function EditDocument(lDocIDP)
+{
+	var lDocID = $args.id;
+	if ( typeof lDocIDP != "undefined" ){
+		lDocID = lDocIDP;
+	}
+    m_bEditClicked = true;
+    <pdm_if "$cst.type" == "2307" || "${ANY_CONTACT:0}" == "1">
+		<pdm_if 0>
+			since ANY_CONTACT is installed the 'Edit' option should display for a 
+			customer or employee, however, there is currently no UI that allows this 
+		</pdm_if>
+		<pdm_if "$cst.type" != "2305" && "$cst.type" != "2310"> 
+			<PDM_IF "$args.ACTIVE_STATE" == 0 && "$prop.WORKFLOW_EDIT_AFTER_PUBLISH" == "0">
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+					"+OP=SHOW_DETAIL+PERSID=KD:" + lDocID + "+STATUS_ID=$args.STATUS_ID" +
+					"+KEEP.edit_from_viewer=1+KEEP.opener=$args.opener+open_mode=$args.open_mode+KEEP.BUID=" + m_lBUID;
+			<PDM_ELSE>
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+					"+OP=UPDATE+FACTORY=KD+SET.id=" + lDocID +
+					"+KEEP.edit_from_viewer=1+KEEP.opener=$args.opener+open_mode=$args.open_mode+RELOAD_WIN=0+KEEP.BUID=" + m_lBUID;
+			</PDM_IF>
+		</pdm_if>	
+	</PDM_IF>	
+	<PDM_IF "$args.DOC_TYPE_ID" == 2>
+		parent.replace_page(url);
+	<PDM_ELSE>
+		// check if the edit form is alraedy open in other window before loading it
+		/*var w_name = popup_window_name('KD:'+ lDocID);
+		if ( w_name.length > 0  &&    typeof ahdtop.AHD_Windows[w_name] == "object" &&
+		w_name != ahdframeset.name) // edit form is alraedy open so focus on it
+		{
+			var features="directories=no"+
+				",location=no"+
+				",menubar=no"+
+				",status=no";
+			preparePopup(url,'KD:'+ lDocID ,features,0,0,'');
+		}
+		else  
+		{
+			replace_page(url);
+		}*/
+		
+		replace_page(url);
+	</PDM_IF>
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION BookmarkDocument
+// This function adds/removes a bookmark to the document based on caption Add/Remove Bookmark
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+function BookmarkDocument()
+{
+	if( !m_bAllow_Bookmark)
+		return;
+	//disable bookmarks in KWS
+	if ( ahdtop.cfgNX_KT != "Yes" ) 
+		return false;
+	//need to localize bookmark captions
+	if(m_sBookmarkCaption == msgtext("Add_Bookmark"))
+		{
+			var url=cfgCgi+
+				"?SID="+cfgSID+
+				"+FID="+fid_generator()+
+				"+KD_ID="+"$args.id"+
+				"+TITLE="+nx_escape('<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>$args.TITLE</PDM_FMT>')+
+				"+VER_COUNT=$args.VER_COUNT"+
+				"+OP=KT_ADD_BOOKMARK"+
+				"+SD_LAUNCHED="+m_sArgsSD_LAUNCHED;
+			m_iFrameLoaded+=2;	
+			if(ahdframeset.workframe.location.href = url)	
+			{
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Bookmark_was_successfully_"),false);//false to eliminate double message in cust/emp users
+			}
+			else 
+			{
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Bookmark_was_not_successfully_"),false);//false to eliminate double message in cust/emp users
+			}
+
+		}
+	if(m_sBookmarkCaption == msgtext("Remove_Bookmark"))
+		{
+		if(m_iBookmarkID == 0)//bookmark was added previously so we don't have the id
+		{
+		<PDM_LIST FACTORY=CI_BOOKMARKS PREFIX=list WHERE="USER_ID=U'$cst.id'">
+			if($list.DOCUMENT_ID==$args.id)
+				m_iBookmarkID = $list.id;	
+		</PDM_LIST>
+		}
+			var url=cfgCgi+
+				"?SID="+cfgSID+
+				"+FID="+fid_generator()+
+				"+BOOKMARK_ID="+m_iBookmarkID+
+				"+OP=KT_REMOVE_BOOKMARK";
+			m_iFrameLoaded+=2;	
+			if(ahdframeset.workframe.location.href = url)	
+			{
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Bookmark_was_successfully_0"),false);//false to eliminate double message in cust/emp users
+			}
+			else 
+			{
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Bookmark_was_not_successfully_0"),false);//false to eliminate double message in cust/emp users
+			}
+
+		}
+	                                           
+ 	
+}
+    
+    
+function GetBookmarkCaption()
+{
+	m_sBookmarkCaption = msgtext("Add_Bookmark");
+	<PDM_LIST FACTORY=CI_BOOKMARKS PREFIX=list WHERE="USER_ID=U'$cst.id'">
+		if($list.DOCUMENT_ID==$args.id)
+			m_sBookmarkCaption = msgtext("Remove_Bookmark");	
+	</PDM_LIST>
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION EmailDocument
+// This function opens the Email Document window
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////     
+function EmailDocument()
+{
+	var sTicketPersID = '$args.SD_LAUNCHED';
+	var sTicketFactory = "";
+	if (sTicketPersID != '')
+	{
+		var arrtmp= sTicketPersID.split(":");
+		if (arrtmp.length > 0)
+		{
+			sTicketFactory = arrtmp[0];
+		}	
+	}
+	var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+	            "+OP=DISPLAY_FORM+HTMPL=kt_email_document.htmpl+RELOAD_WIN=0+KEEP.OPENER=" + argPopupName + 
+	            "+KEEP.DOC_ID=" + "$args.id" + "+KEEP.DOC_TYPE=" + "$args.DOC_TYPE_ID" + 
+	            "+KEEP.ACTIVE_STATE=" + "$args.ACTIVE_STATE" + 
+				"+SD_LAUNCHED=" + nx_escape('$args.SD_LAUNCHED') + 
+	            "+SD_TICKET_FACTORY=" + sTicketFactory;
+	            //
+	var features="directories=no"+
+			",location=no"+
+			",menubar=no"+
+			",status=no";
+			
+	//make the width as a negative number so that it can be popup window all the time
+	var width = -(ahdtop.GetUSPPreferences("WEB_POPUP2_WIDTH"));
+	var height = ahdtop.GetUSPPreferences("WEB_POPUP3_HEIGHT");
+	preparePopup(url, "EMAIL_WIN"+"$args.id", features, width, height, 'GOBUTTON=no');	   
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION SubscribeToDocument
+// This function adds a subscription for the user and the button toggles between Subscribe & Unsubscribe 
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function SubscribeToDocument()
+{
+	if ( ahdtop.cfgNX_KT != "Yes" ) 
+		return false;	
+	if(m_sSubscribeCaption == msgtext("Subscribe"))
+	{
+			var url=cfgCgi+
+				"?SID="+cfgSID+
+				"+FID="+fid_generator()+
+				"+KD_ID="+"$args.id"+
+				"+ANALYST_ID=" + "$cst.id" + 
+				"+ACTIVITY_TYPE=1" + 
+				"+OP=KT_ADD_NOTIFICATION";
+			m_iFrameLoaded+=2;	
+			if(ahdframeset.workframe.location.href = url)	
+			{
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Subscribe_was_successful"),false);//false to eliminate double message in cust/emp users
+			}
+			else 
+			{
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Subscribe_was_not_successful"),false);//false to eliminate double message in cust/emp users
+			}
+	}
+	if(m_sSubscribeCaption == msgtext("Unsubscribe"))
+	{
+		if(m_iNotificationID == 0)//notification was added previously so we don't have the id
+		{
+			<PDM_LIST FACTORY=NOTIFICATION PREFIX=list WHERE="ANALYST_ID=U'$cst.id'">
+				if($list.DOC_ID==$args.id)
+					m_iNotificationID = $list.id;	
+			</PDM_LIST>
+		}
+			var url=cfgCgi+
+				"?SID="+cfgSID+
+				"+FID="+fid_generator()+
+				"+NOTIFICATION_ID="+m_iNotificationID+
+				"+OP=KT_NOTIFICATION_DELETE";
+			
+			m_iFrameLoaded+=2;
+			
+			if(ahdframeset.workframe.location.href = url)	
+			{	
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Unsubscribe_was_successful"),false);//false to eliminate double message in cust/emp users
+			}
+			else 
+			{
+				AlertMsg = ""; 		
+				showAlertMsg(msgtext("Unsubscribe_was_not_successful"),false);//false to eliminate double message in cust/emp users
+			}
+	}
+						
+}
+function GetSubscribeCaption()
+{
+	m_sSubscribeCaption = msgtext("Subscribe");
+	<PDM_LIST FACTORY=NOTIFICATION PREFIX=list WHERE="ANALYST_ID=U'$cst.id'">
+		if($list.DOC_ID==$args.id)
+			m_sSubscribeCaption = msgtext("Unsubscribe");	
+	</PDM_LIST>
+}    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS CreateTicket & CreateTicketBasedOnDoc
+// These function create a new ticket using the CreateNewTicket function in kt_viewer_sd_integ.js
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function CreateTicket(sReqType)
+{	
+	m_bCreateTicket = true;			
+	m_bCreateTicketBasedOnKD = false;
+	if ( typeof sReqType == "undefined" || sReqType == "I" )
+		CreateNewTicket("I");
+	else 
+		CreateNewTicket("R");
+}
+function CreateTicketBasedOnDoc(sReqType)
+{	
+	m_bCreateTicket = false;			
+	m_bCreateTicketBasedOnKD = true;
+	if ( typeof sReqType == "undefined" || sReqType == "I" )
+		CreateNewTicket("I");
+	else 
+		CreateNewTicket("R");
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION CreateQA
+// This function creates a new forum
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function CreateQA()
+{
+	var url=ahdtop.cfgCgi+
+		"?SID="+ahdtop.cfgSID+
+		"+FID="+fid_generator().toString()+
+		"+OP=CREATE_NEW" +
+		"+FACTORY=KD_QA" +
+		"+PRESET=PRIMARY_INDEX:" + m_sPrimaryCategoryId;
+
+	var strFeatures="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no";
+	
+	var width = ahdtop.GetUSPPreferences("WEB_POPUP1_WIDTH");
+	var height = ahdtop.GetUSPPreferences("WEB_POPUP1_HEIGHT");		
+	preparePopup(url, "", strFeatures, width, height, '');	
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION PrintDocument
+// This function prints a document
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function PrintDocument()
+{
+	CAisdPrint();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION OpenPrintVersion
+// This function opens a printable version of a document
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function OpenPrintVersion()
+{
+	b_Print_Version = true;
+	OpenDocumentViewer($args.id, 2, "", undefined, 0, undefined, undefined, undefined, undefined, "PROF_BRWS_USER=$args.PROF_BRWS_USER", "BUID=$args.BUID");		
+	//for original version of the document
+	b_Print_Version = false;
+	
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION ReplyToQAThread
+// This function creates a reply to a forum
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function ReplyToQAThread()
+{
+	var url=ahdtop.cfgCgi+
+		"?SID="+ahdtop.cfgSID+
+		"+FID="+fid_generator().toString()+
+		"+OP=CREATE_NEW" +
+		"+FACTORY=LONG_TEXTS" +
+		"+PRESET=QA_KD:" + $args.id + 
+		"+PRESET=KD:" + $args.id + 
+		"+PRESET=REF_PERSID:KD:" + $args.id + 
+		"+PRESET=THREAD_STATUS:" + $args.QA_STATUS +
+		"+KEEP.OPENER=" + argPopupName;
+		
+		if ( ahdtop.cfgMultiTenancy != "off" )
+			url+= "+PRESET=tenant:" + "$args.tenant";
+		
+	var strFeatures="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no"+
+		",ahdmenu=no"+
+		",modal=yes";
+	
+	var width = ahdtop.GetUSPPreferences("WEB_POPUP2_WIDTH");
+	var height = ahdtop.GetUSPPreferences("WEB_POPUP2_HEIGHT");		
+	preparePopup(url, "", strFeatures, width, height, '');	
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION UpdateQAThreadStatus
+// This function updates the status of a forum
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function UpdateQAThreadStatus()
+{
+	var url=ahdtop.cfgCgi+
+		"?SID="+ahdtop.cfgSID+
+		"+FID="+fid_generator().toString()+
+		"+OP=CREATE_NEW" +
+		"+FACTORY=LONG_TEXTS" +
+		"+PRESET=QA_KD:" + $args.id +
+		"+PRESET=KD:" + $args.id + 
+		"+PRESET=REF_PERSID:KD:" + $args.id + 
+		"+PRESET=RESP_TYPE:3" + 
+		"+PRESET=THREAD_STATUS:" + $args.QA_STATUS +
+		"+KEEP.OPENER=" + argPopupName;
+		
+		if ( ahdtop.cfgMultiTenancy != "off" )
+			url+= "+PRESET=tenant:" + "$args.tenant";
+			
+	var strFeatures="directories=no"+
+		",location=no"+
+		",menubar=no"+
+		",status=no";
+	
+	var width = ahdtop.GetUSPPreferences("WEB_POPUP2_WIDTH");
+	var height = ahdtop.GetUSPPreferences("WEB_POPUP2_HEIGHT");		
+	preparePopup(url, "", strFeatures, width, height, '');	
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION CreateKDBasedOnQAThread
+// This function create a new Knowledge Document based on a forum
+// using the kt daemon method: convert_to_document
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function CreateKDBasedOnQAThread()
+{
+	if (!action_in_progress())
+	{
+		if ("$prop.form_name_3" == "edit")
+		{
+			if (confirm(msgtext("Converting_this_Forum_to_a_Knowledge_Document_is_allowed_only_after_saving_changes")))
+			{
+				detailSave();
+			}
+			return;
+		}	
+		if (confirm(msgtext("Are_you_sure_you_want_to_convert_this_Forum")))
+		{
+			var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=CONVERT_TO_DOCUMENT" + 
+					"+KD_ID=$args.id" + 
+					"+IS_QA_THREAD=1";
+			set_action_in_progress(ACTN_SAVE);
+			var odivData = document.getElementById("divData");	
+			odivData.innerHTML = "<iframe id=QAData name=QAData title='" + msgtext("Hidden_frame_-_do_not_navigate") + "' src='" + url + "'></iframe>";
+		}
+	}
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION ReturnToList
+// This function returns the URL to the list from which the document was app
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function ReturnToList()
+{
+	if (typeof ahdtop.cfgListUrl!="undefined" && ahdtop.cfgListUrl!=null && ahdtop.cfgListUrl!="")
+		document.location.href = ahdtop.cfgListUrl;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTION AcceptAsSolution
+// This function sets the current KD as a solution to a ticket when opened from a ticket
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function AcceptAsSolution()
+{
+	var rate_disabled = document.getElementById("solved_problem1").disabled;
+	// to accept doc as solution after adding comment on the document. 
+	if(rate_disabled)
+	{
+	   document.getElementById("solved_problem1").disabled = false;
+	}
+	document.getElementById("solved_problem1").click();
+	comment_onsubmit();
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+</script>
+<table width=100% class='gn_container_no_border' cellpadding=0 cellspacing=0>
+	<tr>
+		<td width=100%>
+			<table width=100% class='gn_container_no_border' cellspacing=0 cellpadding=0>
+				<tr>
+					<td width=4 height=22 class=portlet_header_left><img src="$CAisd/img/spacer.png" alt='' width=4 height=22></td>
+					<td width='100%' class=portlet_header_center><h3 class='portlet_title page_header_title'><span id=spnPageOpt></span></h3></td>
+					<td width=4 height=22 class=portlet_header_right><img src="$CAisd/img/spacer.png" alt='' width=4 height=22></td>
+				</tr>
+				<tr>	
+					<td colspan=3>
+						<table width="100%" cellspacing="0" cellpadding="0" class="portlet_container">
+							<tr valign="top"> 
+								<td>
+									<table class='table gn_container_no_border' cellspacing=1 cellpadding=5 width="100%">
+										<pdm_if 0>
+											allow "Accept as solution" if user is an analyst or ANY_CONTACT installed
+											Available only when opened from a ticket
+										</pdm_if>
+										<PDM_IF "$args.SD_LAUNCHED" != "" && "$args.SOLUTION_OF" == "" && "$env.NX_KT" == "Yes"> 
+											<tr>																	
+												<td class=table_banded_row> 																					
+													<span class="table_control_label">
+														&bull;
+													</span>
+												</td>
+												<td class=table_banded_row> 	
+													<a 
+														<PDM_IF "$prop.user_type" == "employee">
+															class=emp 
+														<PDM_ELIF "$prop.user_type" == "customer">
+															class=cst
+														<PDM_ELSE>	
+															class=table_control_link
+														</PDM_IF> 
+															id=ancSolution href="javascript:AcceptAsSolution()">Accept as Solution</a><br>
+												</td>
+											</tr>																		
+										</pdm_if>
+											
+
+										
+										
+										<pdm_if 0>
+											Reply to forum
+										</pdm_if>
+										<PDM_IF  "$args.ACTIVE_STATE" == "200" && "$env.NX_KT_DISALLOW_FORUMS" != "Yes">
+											<script>
+											if (ahdtop.CanUserPerformAction("ROLE_FORUM_ANSWER") && cfgUserAuth > 1)
+											{
+												document.writeln("<tr>");																	
+													document.writeln("<td class=table_banded_row>"); 																					
+														document.writeln("<span class='table_control_label'>");
+															document.writeln("&bull;");
+														document.writeln("</span>");
+													document.writeln("</td>");
+													document.writeln("<td class=table_banded_row>"); 	
+														document.writeln("<a ");
+														<PDM_IF "$prop.user_type" == "employee">
+															document.writeln("class=emp");
+														<PDM_ELIF "$prop.user_type" == "customer">
+															document.writeln("class=cst");
+														<PDM_ELSE>	
+															document.writeln("class=table_control_link");
+														</PDM_IF>
+														document.writeln(" id=ancReply href='javascript:ReplyToQAThread()'>Reply</a><br>");
+													document.writeln("</td>");
+												document.writeln("</tr>");
+											}
+											if (ahdtop.CanUserPerformAction("ROLE_FORUM_CLOSE") && cfgUserAuth > 1)
+											{
+												document.writeln("<tr>");																	
+													document.writeln("<td class=table_banded_row>"); 																					
+														document.writeln("<span class='table_control_label'>");
+															document.writeln("&bull;");
+														document.writeln("</span>");
+													document.writeln("</td>");
+													document.writeln("<td class=table_banded_row>"); 	
+														document.writeln("<a ");
+														<PDM_IF "$prop.user_type" == "employee">
+															document.writeln("class=emp");
+														<PDM_ELIF "$prop.user_type" == "customer">
+															document.writeln("class=cst");
+														<PDM_ELSE>	
+															document.writeln("class=table_control_link");
+														</PDM_IF>
+														document.writeln(" href='javascript:EditDocument()'>Edytuj</a><br>");														
+													document.writeln("</td>");
+												document.writeln("</tr>");
+											}
+											</script>
+										</PDM_IF>
+										<pdm_if 0>
+											allow "Edit" if user is an analyst interface
+										</pdm_if>
+										<pdm_if "$args.KEEP.show_edit" != "false" && "$prop.guest_user" != "1" && "$args.ACTIVE_STATE" != "200" && "$prop.user_type" == "analyst" > 
+											<pdm_if "$cst.type" == "2307" || "${ANY_CONTACT:0}" == "1">
+												<pdm_if 0>
+												since ANY_CONTACT is installed the 'Edit' option should display for a 
+												customer or employee, however, there is currently no UI that allows this 
+												</pdm_if>
+												<pdm_if "$cst.type" != "2305" && "$cst.type" != "2310"> 
+												<script>
+												//If this is a knowledge file make sure the user has the ROLE_FILE_EDIT permissions
+												if ( "$args.ACTIVE_STATE" == "100" && !ahdtop.CanUserPerformAction("ROLE_FILE_EDIT"))
+												{
+													cfgUserAuth = 1;
+												}
+												if ( cfgUserAuth > 1 )
+												{
+													
+														document.writeln("<tr>");																	
+														document.writeln("<td class=table_banded_row>"); 																					
+														document.writeln("<span class='table_control_label'>");
+														document.writeln("&bull;");
+														document.writeln("</span>");
+														document.writeln("</td>");
+														document.writeln("<td class=table_banded_row> ");	
+														document.writeln("<a ");
+													<PDM_IF "$prop.user_type" == "employee">
+														document.writeln("class=emp ");
+													<PDM_ELIF "$prop.user_type" == "customer">
+														document.writeln("class=cst ");
+													<PDM_ELSE>	
+														document.writeln("class=table_control_link ");
+													</PDM_IF> 
+													document.writeln("id=ancEdit href='javascript:EditDocument()'>Edit</a><br>");
+													document.writeln("</td>");
+													document.writeln("</tr>");
+													
+												}
+												</script>
+												</pdm_if> 		
+											</pdm_if> 
+										</pdm_if>
+										<pdm_if 0>
+											allow "View Rework" if user is an analyst or ANY_CONTACT installed
+											Available only when a rework version exists
+										</pdm_if>
+										<pdm_if "$args.VER_CROSS_REF_ID" != "0" && "$args.REWORK_VER" == "0" && "$args.ACTIVE_STATE" != "200"> 
+											<pdm_if "$args.KEEP.show_edit" != "false" && "$prop.guest_user" != "1"> 
+												<pdm_if "$cst.type" == "2307" || "${ANY_CONTACT:0}" == "1">
+													<tr>																	
+														<td class=table_banded_row> 																					
+															<span class="table_control_label">
+																&bull;
+															</span>
+														</td>
+														<td class=table_banded_row> 	
+															<a 
+															<PDM_IF "$prop.user_type" == "employee">
+																class=emp 
+															<PDM_ELIF "$prop.user_type" == "customer">
+																class=cst
+															<PDM_ELSE>	
+																class=table_control_link
+															</PDM_IF> 
+															id=ancRework href="javascript:ViewAvailDocument()">View Rework</a><br>
+														</td>
+													</tr>																		
+												</pdm_if>
+											</pdm_if>
+										</pdm_if>
+										<pdm_if 0>
+											Allow "View Available Version" when viewing a rework version
+										</pdm_if>
+										<pdm_if "$args.REWORK_VER" == "1" && "$args.ACTIVE_STATE" != "200"> 
+											<tr>																	
+												<td class=table_banded_row> 																					
+													<span class="table_control_label">
+														&bull;
+													</span>
+												</td>
+												<td class=table_banded_row> 	
+													<a 
+													<PDM_IF "$prop.user_type" == "employee">
+														class=emp 
+													<PDM_ELIF "$prop.user_type" == "customer">
+														class=cst
+													<PDM_ELSE>	
+														class=table_control_link
+													</PDM_IF> 
+													id=ancAvail href="javascript:ViewAvailDocument()">View Available Version</a><br>
+												</td>
+											</tr>																		
+										</pdm_if>										
+										<PDM_IF "$prop.guest_user" != "1" && "$env.NX_KT" == "Yes">
+											<script type="text/javascript">
+											<PDM_IF  "$args.ACTIVE_STATE" != "200" >
+												if(m_bAllow_Bookmark)
+												{
+													document.writeln("<tr>");
+													document.writeln("<td nowrap class=table_banded_row>");
+													document.writeln("<span class='table_control_label'>");
+													document.writeln("&bull;");
+													document.writeln("</span>");
+													document.writeln("</td><td class=table_banded_row><a ");
+													<PDM_IF "$prop.user_type" == "employee">
+														document.writeln("class=emp ");
+													<PDM_ELIF "$prop.user_type" == "customer">
+														document.writeln("class=cst ");
+													<PDM_ELSE>	
+														document.writeln("class=table_control_link ");
+													</PDM_IF> 
+													document.writeln(" id=ancBookmark href=\"javascript:BookmarkDocument()\"><span id=bookmarkCaption>Bookmark</span></a>");
+													document.writeln("</td>");
+													document.writeln("</tr>");
+												}
+											</PDM_IF>	
+											document.writeln("<tr>");
+											document.writeln("<td class=table_banded_row>");
+											document.writeln("<span class='table_control_label'>");
+											document.writeln("&bull;");
+											document.writeln("</span>");
+											document.writeln("</td><td class=table_banded_row><a ");
+											<PDM_IF "$prop.user_type" == "employee">
+												document.writeln("class=emp ");
+											<PDM_ELIF "$prop.user_type" == "customer">
+												document.writeln("class=cst ");
+											<PDM_ELSE>	
+												document.writeln("class=table_control_link ");
+											</PDM_IF> 
+											document.writeln(" id=ancSubscribe href=\"javascript:SubscribeToDocument()\"><span id=subscribeCaption>Subscribe</span></a>");
+											document.writeln("</td>");
+											document.writeln("</tr>");
+											</script>
+										</PDM_IF>	
+										<pdm_if 0>
+											Allow "Update Status" only when forums are allowed 
+										</pdm_if>
+										<PDM_IF  "$args.ACTIVE_STATE" == "200" && "$env.NX_KT_DISALLOW_FORUMS" != "Yes">
+											<script>
+											if (ahdtop.CanUserPerformAction("ROLE_FORUM_CLOSE") && cfgUserAuth > 1)
+											{
+												document.writeln("<tr>");
+													document.writeln("<td class=table_banded_row>"); 																					
+														document.writeln("<span class='table_control_label'>");
+															document.writeln("&bull;");
+														document.writeln("</span>");
+													document.writeln("</td>");
+													document.writeln("<td class=table_banded_row>"); 	
+														document.writeln("<a ");
+														<PDM_IF "$prop.user_type" == "employee">
+															document.writeln("class=emp");
+														<PDM_ELIF "$prop.user_type" == "customer">
+															document.writeln("class=cst");
+														<PDM_ELSE>	
+															document.writeln("class=table_control_link");
+														</PDM_IF>
+														document.writeln(" id=ancUpdateStatus href='javascript:UpdateQAThreadStatus()'>Update Status</a><br>");
+													document.writeln("</td>");
+												document.writeln("</tr>");
+											}
+											</script>
+										</PDM_IF>
+										<pdm_if 0>
+											allow Rate & Comment for all users
+										</pdm_if>		
+										<script>
+										if (typeof bTenantCanComment != "undefined" && bTenantCanComment)		
+										{
+											document.writeln("<tr>");																	
+												document.writeln("<td class=table_banded_row>"); 																					
+													document.writeln("<span class='table_control_label'>");
+														document.writeln("&bull;");
+													document.writeln("</span>");
+												document.writeln("</td>");
+												document.writeln("<td class=table_banded_row>"); 	
+													document.writeln("<a ");
+													 <PDM_IF "$prop.user_type" == "employee">
+															document.writeln("class=emp");
+													<PDM_ELIF "$prop.user_type" == "customer">
+															document.writeln("class=cst");
+													<PDM_ELSE>	
+															document.writeln("class=table_control_link");
+													</PDM_IF>
+													document.writeln(" id=ancRateComment href=\"javascript:ScrollIntoView('BottomOfPage')\"><span id=RateCommentCaption>Rate & Comment</span></a><br>");
+												document.writeln("</td>");
+											document.writeln("</tr>");
+										}
+										</script>
+										<pdm_if 0>
+											allow "Email Doc" for full KT if user is an analyst or ANY_CONTACT installed
+										</pdm_if>
+										<pdm_if "$env.NX_KT" == "Yes" && "$prop.guest_user" != "1" && "$prop.user_type" == "analyst">
+											<pdm_if "$cst.type" == "2307" || "${ANY_CONTACT:0}" == "1"> 
+												<tr>																	
+													<td class=table_banded_row> 																					
+														<span class="table_control_label">
+															&bull;
+														</span>
+													</td>
+													<td class=table_banded_row> 	
+														<a 
+														<PDM_IF "$prop.user_type" == "employee">
+															class=emp 
+														<PDM_ELIF "$prop.user_type" == "customer">
+															class=cst
+														<PDM_ELSE>	
+															class=table_control_link
+														</PDM_IF> 
+														id=ancEmail href="javascript:EmailDocument()">Email</a><br>
+													</td>
+												</tr>
+											</pdm_if>
+										</pdm_if>
+										<pdm_if 0>
+											allow "Add Bookmark" and "Subscribe" for full KT, all users (with correct permissions) except guests 
+										</pdm_if>
+										<pdm_if 0>
+											allow "New Forum" for full KT if forums are allowed
+										</pdm_if>
+										<pdm_if "$env.NX_KT" == "Yes" && "$env.NX_KT_DISALLOW_FORUMS" != "Yes" && "$args.ACTIVE_STATE" != "200"
+											&& "$prop.user_type" == "analyst" && "$args.PRIMARY_INDEX.ALLOW_QA" == "1">
+											<script>
+											if (ahdtop.CanUserPerformAction("ROLE_FORUM_SUBMIT"))
+											{
+												document.writeln("<tr>");
+													document.writeln("<td class=table_banded_row>");
+														document.writeln("<span class=table_control_label>");
+															document.writeln("&bull;");
+														document.writeln("</span>");
+													document.writeln("</td>");
+													document.writeln("<td class=table_banded_row>");
+														document.writeln("<a ");
+														<PDM_IF "$prop.user_type" == "employee">
+															document.writeln("class=emp");
+														<PDM_ELIF "$prop.user_type" == "customer">
+															document.writeln("class=cst");
+														<PDM_ELSE>
+															document.writeln("class=table_control_link");
+														</PDM_IF>
+														document.writeln(" id=ancSubmitQuestion href='javascript:CreateQA()'><span id=SubmitQuestionCaption>Nowe Forum</span></a><br>");
+													document.writeln("</td>");
+												document.writeln("</tr>");
+											}
+											</script>
+										</pdm_if>		
+										<pdm_if 0>
+											allow "Create Ticket" and "Create Ticket based on Doc" for full KT when not launched from SD, for all users (with permissions)
+										</pdm_if>
+									<PDM_IF "$args.SD_LAUNCHED" == "" && "$env.NX_KT" == "Yes" && "$args.ACTIVE_STATE" != "200">
+											<script type="text/javascript">
+											//If not during suggest knowledge and create ticket link is swallowed show it
+											if(m_bAllow_OpenTicket && (typeof ahdtop.ticketObj == "undefined" || !ahdtop.ticketObj.isTicketOpened) )
+											{
+												document.writeln("<tr>");
+												document.writeln("<td class=table_banded_row>");
+												document.writeln("<span class='table_control_label'>");
+												document.writeln("&bull;");
+												document.writeln("</span>");
+												document.writeln("</td><td class=table_banded_row><a ");
+												<PDM_IF "$prop.user_type" == "employee">
+													document.writeln("class=emp ");
+												<PDM_ELIF "$prop.user_type" == "customer">
+													document.writeln("class=cst ");
+												<PDM_ELSE>	
+													document.writeln("class=table_control_link ");
+												</PDM_IF>
+												document.writeln(" id=ancCreateTicket href=\"javascript:CreateTicket(m_n_Ticket_Type)\"><span id=spnCreateTicket>");
+												document.writeln(m_OpenTicketText);
+												document.writeln("</span></a>");
+										
+												document.writeln("</td>");
+												document.writeln("</tr>");	
+											}
+											//If not during suggest knowledge and link is swallowed show it
+											if(m_bAllow_TicketBasedOnDoc && (typeof ahdtop.ticketObj == "undefined" || !ahdtop.ticketObj.isTicketOpened) )
+											{
+												document.writeln("<tr>");
+												document.writeln("<td class=table_banded_row>");
+												document.writeln("<span class='table_control_label'>");
+												document.writeln("&bull;");
+												document.writeln("</span>");
+												document.writeln("</td><td class=table_banded_row><a ");
+												<PDM_IF "$prop.user_type" == "employee">
+													document.writeln("class=emp ");
+												<PDM_ELIF "$prop.user_type" == "customer">
+													document.writeln("class=cst ");
+												<PDM_ELSE>	
+													document.writeln("class=table_control_link ");
+												</PDM_IF> 
+												document.writeln(" id=ancCreateTicketOnDoc href=\"javascript:CreateTicketBasedOnDoc(m_n_Ticket_Type)\"><span id=spnCreateTicketBasedOnDoc>");
+												document.writeln(m_OpenTicketBasedOnDocText);
+												document.writeln("</span></a>");
+										
+												document.writeln("</td>");
+												document.writeln("</tr>");	
+											}	
+											
+											if(m_bBoth_Req_Tickets)
+											{
+												//If not during suggest knowledge and create ticket link is swallowed show it
+												if(m_bAllow_OpenTicket && (typeof ahdtop.ticketObj == "undefined" || !ahdtop.ticketObj.isTicketOpened) )
+												{
+													document.writeln("<tr>");
+													document.writeln("<td class=table_banded_row>");
+													document.writeln("<span class='table_control_label'>");
+													document.writeln("&bull;");
+													document.writeln("</span>");
+													document.writeln("</td><td class=table_banded_row><a ");
+													<PDM_IF "$prop.user_type" == "employee">
+														document.writeln("class=emp ");
+													<PDM_ELIF "$prop.user_type" == "customer">
+														document.writeln("class=cst ");
+													<PDM_ELSE>	
+														document.writeln("class=table_control_link ");
+													</PDM_IF> 
+													document.writeln(" id=ancCreateTicket2 href=\"javascript:CreateTicket('R')\"><span id=spnCreateTicket2>");
+													document.writeln(m_OpenTicketText2);
+													document.writeln("</span></a>");
+													document.writeln("</td>");
+													document.writeln("</tr>");	
+												}
+											//If not during suggest knowledge and link is swallowed show it
+											if(m_bAllow_TicketBasedOnDoc && (typeof ahdtop.ticketObj == "undefined" || !ahdtop.ticketObj.isTicketOpened) )
+												{
+													document.writeln("<tr>");
+													document.writeln("<td class=table_banded_row>");
+													document.writeln("<span class='table_control_label'>");
+													document.writeln("&bull;");
+													document.writeln("</span>");
+													document.writeln("</td><td class=table_banded_row><a ");
+													<PDM_IF "$prop.user_type" == "employee">
+														document.writeln("class=emp ");
+													<PDM_ELIF "$prop.user_type" == "customer">
+														document.writeln("class=cst ");
+													<PDM_ELSE>	
+														document.writeln("class=table_control_link ");
+													</PDM_IF> 
+													document.writeln(" id=ancCreateTicketOnDoc2 href=\"javascript:CreateTicketBasedOnDoc('R')\"><span id=spnCreateTicketBasedOnDoc2>");
+													document.writeln(m_OpenTicketBasedOnDocText2);
+													document.writeln("</span></a>");
+													document.writeln("</td>");
+													document.writeln("</tr>");	
+												}
+											}
+											
+											</script>
+										
+										</PDM_IF>
+										<pdm_if 0>
+											Forum Create KD
+										</pdm_if>		
+										<PDM_IF  "$args.ACTIVE_STATE" == "200">
+											<script>
+											if (ahdtop.CanUserPerformAction("ROLE_FORUM_CLOSE") && cfgUserAuth > 1)
+											{
+												document.writeln("<tr>");																
+													document.writeln("<td class=table_banded_row>"); 																					
+														document.writeln("<span class='table_control_label'>");
+															document.writeln("&bull;");
+														document.writeln("</span>");
+													document.writeln("</td>");
+													document.writeln("<td class=table_banded_row>");
+														document.writeln("<a ");
+														<PDM_IF "$prop.user_type" == "employee">
+															document.writeln("class=emp");
+														<PDM_ELIF "$prop.user_type" == "customer">
+															document.writeln("class=cst");
+														<PDM_ELSE>	
+															document.writeln("class=table_control_link");
+														</PDM_IF>
+														document.writeln(" id=ancCreateDoc href='javascript:CreateKDBasedOnQAThread()'>Convert to Knowledge Document</a><br>");
+													document.writeln("</td>");
+												document.writeln("</tr>");
+											}
+											</script>
+										</PDM_IF>
+
+										<pdm_if 0>
+											end forum view options
+										</pdm_if>		
+										<pdm_if 0>
+											allow Print for all users
+										</pdm_if>		
+										<tr>																	
+											<td class=table_banded_row> 																					
+												<span class="table_control_label">
+													&bull;
+												</span>
+											</td>
+											<td class=table_banded_row> 	
+												<a <PDM_IF "$prop.user_type" == "employee">
+														class=emp
+													<PDM_ELIF "$prop.user_type" == "customer">
+														class=cst
+													<PDM_ELSE>	
+														class=table_control_link
+													</PDM_IF>
+													<PDM_IF "$args.DOC_TYPE_ID" == "2" || "$env.NX_KT" != "Yes">   													
+														id=ancPrint href="javascript:PrintDocument()">Drukuj&nbsp         </a><br>
+													<PDM_ELSE>	
+														id=ancPrint href="javascript:OpenPrintVersion()">Prosty widok</a><br>
+											</td>	</PDM_IF>
+										</tr>
+										<PDM_IF 0>
+											Add 'Return to List' link which was removed between revisions 1.138 & 1.139 for SDT 57562.
+											IF the user entered this screen from a list (i.e. open_mode = 1) then display a 'Return to List' link
+										</PDM_IF>
+										<PDM_IF "$args.open_mode" == "1" || "$args.simple_list" == "1">
+											<tr>																	
+												<td class=table_banded_row> 																					
+													<span class="table_control_label">
+														&bull;
+													</span>
+												</td>
+												<td class=table_banded_row> 
+													<a <PDM_IF "$prop.user_type" == "employee">
+															class=emp
+														<PDM_ELIF "$prop.user_type" == "customer">
+															class=cst
+														<PDM_ELSE>
+															class=table_control_link									        
+														</PDM_IF>
+														  id=ancBackToList href="javascript: ReturnToList()">Powrót do listy</a>
+												</td>
+											</tr>	
+										</PDM_IF>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>											
+</table>
+				

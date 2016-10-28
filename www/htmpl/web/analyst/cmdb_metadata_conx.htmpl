@@ -1,0 +1,45 @@
+<PDM_IF 0>
+/////////////////////////////////////////////////////////
+// Date   : 2008/01/29
+// Title  : cmdb_metadata_conx.htmpl (family specific attributes)
+// author : sahpr01
+// 03-Feb-2009 tomjo02 SCO 20837 Replaced standardcivalue/currencivalues/common with new cmdbMetadata macro "extension" argument
+//                     to fix issue with currencivalue not being set correctly and macro simplification improvements.
+// 2009/02/23 aliab01 SCO 21488, added help attribute for r12.1 release
+/////////////////////////////////////////////////////////
+</PDM_IF>
+
+<PDM_INCLUDE file=cmdb_metadata_header.htmpl>
+
+<PDM_INCLUDE file=cmdb_metadata_common.htmpl>
+
+////////////////////////////////////////////////////////
+//category="Attribute" file="nr_cmdb_conx_tab.htmpl"
+////////////////////////////////////////////////////////
+
+<PDM_IF 0>
+// ************************************************************************
+To add a new extension table attribute perform the following.
+
+Step 1) Copy and paste the following macro line to the end of the current attribute list in this file.
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="***EXTENSION***" attr="***ATTRIBUTE***" heading="***HEADING***" help="***HELP***">
+
+Step 2) Substitute each keyword in the line with the following:
+        ***EXTENSION*** => Extension table name associated with a family.
+        ***ATTRIBUTE*** => Extension object attribute name
+        ***HEADING***   => Heading label for attribute, displayed in Versioning detail view.
+	***HELP***      => Brief description of the attribute. 
+// ************************************************************************
+</PDM_IF>
+
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="proj_code"        heading="Project Code" help="The ID or other unique identifier for the project to which a CI is assigned">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="con_num"          heading="Contract Number" help="The unique identifier for a legal contract covering the purchase, lease, warranty, maintenance, and so on, of a CI or group of CIs">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="con_ref"          heading="Contract Reference" help="The name or number of another document that is related to a specified contract">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="con_type"         heading="Type" help="A description of the kind of Application, Contract, Document, Service, or SLA CI">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="con_start_date"   heading="Start Date" help="The date on which a contract, document, service, or SLA becomes active">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="con_end_date"     heading="End Date" help="The date on which a contract, warranty, or other legal agreement expires">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="con_renewal_date" heading="Renewal Date" help="The date on which an existing contract, warranty, or other legal agreement is put into effect for an additional period of time">
+<PDM_MACRO name=cmdbMetadata category="Attributes" extension="conx" attr="con_comments"     heading="Comments" help="Free-form text to more fully describe the particular CI">
+
+<PDM_INCLUDE file=cmdb_metadata_trailer.htmpl>

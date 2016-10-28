@@ -1,0 +1,121 @@
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 1999 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CAs prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  Area_Defaults.spl
+// Created: A while back
+////////////////////////////////////////////////////////////////////////////
+//  Dummy function, just so RCS Id is embedded in compiled spell file...
+string Area_Defaults_spl_RCSID() { return "@(#)$Id: Area_Defaults.spl ANDERSON.1 2009/07/22 14:10:10 xiewe01 Exp $"; }
+// Description:
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// $Log: Area_Defaults.spl,v $
+//
+////////////////////////////////////////////////////////////////////////////
+// $Header: Area_Defaults.spl ANDERSON.1 2009/07/22 14:10:10 xiewe01  Exp $
+
+// Set interpreter option that all variables must be explicitly declared
+#define SYNTAX STRICT
+
+cr.category::assign_default_values(...)
+{
+
+    send_wait(0, this, "get_attr_vals",
+              2, "category.group", "category.assignee");
+    if ( msg_error() ) {
+       logf( ERROR, "cr.category::assign_default_values error");
+       set_error(1);
+       return;
+    }
+
+    // Stash the results from get_attr_vals into local variables.
+    // We need to do this because each send_wait() below replaces msg[]
+
+    uuid new_group, new_assignee;
+    if ( !is_null(msg[3]) )
+       new_group = msg[3];
+
+    if ( !is_null(msg[6]) )
+       new_assignee = msg[6];
+
+    if ( !is_null(new_group)) {
+        send_wait(0, top_object(), "call_attr", "grp",
+               "sync_fetch", "RLIST_STATIC",
+               "id = ? AND delete_flag = 0",
+               -1, 1, new_group);
+        if ( msg_error() ) {
+           set_error(1);
+           set_return_data(msg[0]);
+           return;
+        }
+
+        // Set our default values from any non-null items from the category.
+        // We suppress triggers because we are setting both values
+
+        if (msg[1] != 0) { 
+            send_wait(0, this, "call_attr",
+                 "group", "set_val", new_group, "SUPPRESS_TRIGGERS" );
+        }
+    }
+
+    if ( !is_null(new_assignee)) {
+        send_wait(0, top_object(), "call_attr", "agt",
+               "sync_fetch", "RLIST_STATIC",
+               "id = ? AND delete_flag = 0",
+               -1, 1, new_assignee);
+        if ( msg_error() ) {
+           set_error(1);
+           set_return_data(msg[0]);
+           return;
+        }
+
+        if (msg[1] != 0) { 
+            send_wait(0, this, "call_attr",
+                 "assignee", "set_val", new_assignee, "SUPPRESS_TRIGGERS" );
+        }
+    }
+
+  // Get the environment variable NX_CHECK_ASSIGNEE_IN_AREA_DEFAULTS to see if 
+  // it allows to check whether the assignee is a member of group while 
+  // Area_Defaults option had been installed. 
+  string env;
+  env = getenv("NX_CHECK_ASSIGNEE_IN_AREA_DEFAULTS");
+  
+  if(!is_empty(env) && (upcase(env) == "YES")) 
+  {   
+    if (!is_null(this.assignee) && !is_null(this.group)) {
+
+          send_wait(0, top_object(), "call_attr", "grpmem",
+              "sync_fetch", "RLIST_STATIC",
+              format("group = U'%s' AND member = U'%s'", this.group, this.assignee),
+              -1, 0);
+
+          if ( msg_error() ) {
+             logf( ERROR, "fetching assignee and group error");
+             set_error(1);
+             return;
+          }
+
+          if ( msg[1] == 0 ) { // Not a member
+             send_wait(0, this, "call_attr",
+                       "assignee", "set_val", NULL, "SURE_SET");
+          }          
+    }
+  }
+}
+

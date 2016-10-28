@@ -1,0 +1,137 @@
+<PDM_IF 0>
+20130916 bmalz @ e-xim
+LastMod: 20131003
+</PDM_IF>
+<HTML lang="pl">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Wyszukiwarka korespondencji wychodzącej";
+var hdrTitleList = "Lista korespondencji wychodzącej";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl> 
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("zCorrespondanceOucomesum.rpt", "zCorrespondanceOucomedtl.rpt");
+var cfgCanEdit = true;
+if(typeof ahdtop != "undefined" && typeof ahdtop.toolbarTab != "undefined" && ahdtop.toolbarTab[ahdtop.toolbarCurrentTab].code=='sd')
+	var cfgCanCopy = false;
+else
+	var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+
+<PDM_IF "$args.KEEP.forCrtoCorr" == "1">
+    var cfgCanEdit = false;
+    var cfgCanCopy = false;
+
+	var enableExtraBtn = true;
+    cfgExtraButton = new Array("Aktualizuj korespondencje", "UpdateCorrespondenceOutcome()", enableExtraBtn);
+
+    function UpdateCorrespondenceOutcome() {
+        update_with_lrel_style("cr", "$args.KEEP.CR_PERID", "zCorrespondanceOucome", "zCorrespondenceOutcomeRef", "Korespondencja wychodząca", "Korespondencja powiązana", "", "KEEP.forCrtoCorr=0");
+    }
+</PDM_IF>
+
+// 20131016 bmalz @ e-xim
+<PDM_IF "$args.KEEP.CanAdd" == "1">
+  var enableExtraBtn = true;
+  cfgExtraButton = new Array("Dodaj", "AddCorrespondence()", enableExtraBtn);
+
+  function AddCorrespondence() {
+    popup_window('RequestDetail', 'CREATE_NEW', 0, 0, 
+    'ahdmenu=yes,register=yes,resizable=yes,scrollbars=yes',
+    'FACTORY=zCorrespondanceOucome', 
+    '', 
+    'PRESET=cr:$args.KEEP.CrId');
+  }
+</PDM_IF>
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/update_lrel.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/comboname.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<PDM_IF "$args.KEEP.noPrintBtn" != "1">
+	<SCRIPT>
+		function PrintList() {
+			//rs.records[0].relAttr - last element id
+			var url = "/SDMFav/GenDocs.ashx?";
+			url += "OP=korespondencja";
+	        url += "&SelectedItem=" + rs.records[0].relAttr;
+	
+			if (confirm('Czy chcesz teraz wygenerować listę ostatniej korespondencji wychodzącej?')) { 
+				display_new_page(url,ahdframeset.workframe_2);
+			}
+		}
+		
+		jq(function() {
+			var BuildButton = '<a id="imgBtn5" name="imgBtn5" class="button enabledattr buttonEnabled" tabindex="101" ondragstart="return false" onclick="PrintList();" onmouseover="return ImgBtnMouseOver(5);" onmouseout="window.status = window.defaultStatus;return true;" href="#"><span>Drukuj</span></a>';
+		  	jq('.tablecenter tr').append('<td>' + BuildButton + '</td>');
+		});
+	</SCRIPT>
+</PDM_IF>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=sfStart factory="zCorrespondanceOucome">
+<PDM_IF "$args.KEEP.forCrtoCorr" == "1">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.zCorrespondanceOucome.id" value="$args.QBE.EQ.zCorrespondanceOucome.id">');
+</PDM_IF>
+<PDM_IF "$args.KEEP.ForLrel" == "1">
+	document.write('<INPUT TYPE=hidden NAME=HTMPL VALUE=update_lrel_org.htmpl>');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_IF 0>
+	<PDM_MACRO name=sfLookup hdr="Nadawca" attr="SenderEmployee">
+	<PDM_MACRO name=sfLookup hdr="Organizacja" attr="SenderOrganization">
+</PDM_IF>
+<PDM_MACRO name=sfLookup hdr="Adresat" attr="Recipient">
+<PDM_MACRO name=sfLookup hdr="Rodzaj przesyłki" attr="CorrespondanceLetterType">
+<PDM_MACRO name=sfTextbox hdr="Data" attr="OutcomeDate" size=20>
+<PDM_MACRO name=sfLookup hdr="Wniosek" attr="cr" size=20>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="Description" size=20>
+<PDM_IF "zCorrespondanceOucome" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO NAME=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nie znaleziono korespondencji wychodzącej";
+  var msgFound1 = "Znaleziono 1 korespondencje wychodzącą";
+  var msgFound = "Znaleziono %1 korespondencji wychodzącej";
+  var msgFoundMore = "Znaleziono %1 korespondencji wychodzącej.  Wyświetlono %2 z %3";
+  var msgSelect = "Kliknij aby wybrać żądany element";
+ 
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Numer" attr="ref_num" exportFmt=ShowLink link=yes>
+<PDM_IF 0>
+	<PDM_MACRO name=lsCol hdr="Nadawca" attr="SenderEmployee">
+	<PDM_MACRO name=lsCol hdr="Organizacja" attr="SenderOrganization">
+</PDM_IF>
+<PDM_MACRO name=lsCol hdr="Adresat" attr="Recipient">
+<PDM_MACRO name=lsCol hdr="Rodzaj przesyłki" attr="CorrespondanceLetterType">
+<PDM_MACRO name=lsCol hdr="Data" attr="OutcomeDate">
+<PDM_MACRO name=lsCol hdr="Wniosek" attr="cr">
+<PDM_MACRO name=lsCol hdr="Opis" attr="Description">
+<PDM_MACRO name=lsEnd>
+<PDM_IF "$args.KEEP.forCrtoCorr" == "1">
+
+</PDM_IF>
+// 20131016 bmalz @ e-xim
+ImgBtnHideButton("btnShowHide");
+ImgBtnHideButton("btndflt");
+ImgBtnHideButton("btnClear");
+ImgBtnHideButton("btnExport");
+<PDM_IF "$args.KEEP.CanAdd" == "1" || "$args.KEEP.forCrtoCorr" == "1">
+	ImgBtnHideButton("btnNew");
+</PDM_IF>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

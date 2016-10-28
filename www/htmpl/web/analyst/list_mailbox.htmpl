@@ -1,0 +1,65 @@
+<PDM_IF 0>
+list_mailbox.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Mailboxes.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Mailbox Search";
+var hdrTitleList = "Mailbox List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanEdit = true;
+var cfgCanCopy = true;  //'Copy' entry in right click context menu of list page
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="mailbox">
+<SCRIPT LANGUAGE="JavaScript">
+
+<PDM_MACRO name=sfStart factory=mailbox>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="name" colspan=2 size=40>
+searchFilterDropdown("Email Type","email_type","","IMAP4",
+"IMAP","NONE","NONE","POP3","POP3",1);
+<PDM_MACRO name=sfDropdown hdr="Aktywne" attr="delete_flag">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa hosta" attr="host_name" colspan=2 size=40>
+searchFilterDropdown("Attachment Repository","attmnt_repository",""
+<PDM_LIST PREFIX=list FACTORY=doc_rep  WHERE="server LIKE '$env.NX_LOCAL_HOST' AND repository_type = 0" ESC_STYLE=JS2>,
+"$list.COMMON_NAME","$list.REL_ATTR"
+</PDM_LIST>);
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var msgFoundNone = "No Mailbox found";
+var msgFound1 = "1 Mailbox found";
+var msgFound = "%1 Mailboxes found";
+var msgFoundMore = "%1 Mailboxes found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Mailbox";
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=name exportfmt=ShowLink link=yes>
+<PDM_MACRO name=lsCol hdr="Typ e-mail" attr=email_type>
+<PDM_MACRO name=lsCol hdr="Nazwa hosta" attr=host_name>
+<PDM_MACRO name=lsCol hdr="Repozytorium załączników" attr=attmnt_repository>
+<PDM_MACRO name=lsCol hdr="Status" attr=delete_flag>
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_IF 0>
+@(#)$Id: list_mailbox.htmpl ASPEN.1 2011/10/20 17:37:23 visan03 Exp $
+</PDM_IF>
+<PDM_WSP>

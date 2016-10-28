@@ -1,0 +1,109 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+// This file is required by CMDB for common logic in detail_nr.htmpl.
+////////////////////////////////////////////////////////////////////////////
+@(#)$Id: cmdb_launch_visualizer.htmpl ASPEN.3 2010/08/31 17:22:15 tomjo02 Exp $
+</PDM_IF>
+<script type="text/javascript">
+var CMDBVisualizerURL = "";
+var CMDBViewer = "no";
+<PDM_IF 0>
+//
+	<PDM_LIST PREFIX="car" FACTORY=ca_application_registration WHERE="id=2018">
+	if ($car.id) {
+	var CMDBViewer = "yes";
+	var CMDBVisualizerURL = "$car.product_data";
+	}
+	</PDM_LIST>
+</PDM_IF>
+
+<PDM_IF $env.NX_CMDB_VISUALIZER != "">
+CMDBViewer = "yes";
+CMDBVisualizerURL = "$env.NX_CMDB_VISUALIZER";
+</PDM_IF>
+var uuidCI = "$args.id";
+//SCO 21151 - retain special characters in userid.
+//var userId = "$cst.userid";
+var userId = '<PDM_FMT PAD=NO ESC_STYLE=C>$cst.userid</PDM_FMT>';
+var sessionId = "$SESSION.SID";
+//By Default filter id. is being set to NULL which signifies "No Filter" to Visualizer
+var filterId = "NULL";
+</script>
+
+<script type="text/javascript">
+//Launches Visualizer in context of a CI. 
+function openCmdbViz()
+{
+	index = document.getElementById("CmdbVizLaunchFilterSelect").selectedIndex;
+	filterId = document.getElementById("CmdbVizLaunchFilterSelect").options[index].value;
+	var	e_userId = nx_escape( userId );
+
+	var cmdbviz_url = CMDBVisualizerURL + "/externallaunch.do?sid=NULL&uuid=" + uuidCI + "&loginusername=" + e_userId
+				+ "&filter_id=" + filterId +"&bopsid=%bopsid";
+			
+	popup_window( '', 'LINK_WITH_BOPSID', 0, 0, 
+		      'ahdmenu=no,register=no,resizable=yes,menubar=no,toolbar=no,location=no,scrollbars=yes,status=yes','SHARE_SESSION=1',
+		      'URL='+ cmdbviz_url);
+
+}
+
+</script>
+<PDM_IF $prop.form_name_3 != "edit">
+<td>
+<table class="table_groove_border_1" >
+<tr>
+<td>
+<table>
+<tr>
+<td>
+<form name="CmdbVizLaunch">
+<script type="text/javascript">
+if (CMDBViewer == "yes")
+{
+   docWriteln('<select name="CmdbVizLaunchFilterSelect" id="CmdbVizLaunchFilterSelect" size="1" tabindex="100">');
+}
+else
+{
+   docWriteln('<select name="CmdbVizLaunchFilterSelect" id="CmdbVizLaunchFilterSelect" size="1" disabled="yes">');
+}
+</script>
+<PDM_LIST PREFIX="filter" FACTORY=vis_object_store_master 
+    WHERE="(inactive=0) AND ((object_sub_type=0 OR object_sub_type=3) OR (object_sub_type=1 AND creation_user.userid IN '$cst.userid'))" 
+    ORDER_BY="id ASC">
+       <option value="$filter.id">$filter.object_name</option>
+</PDM_LIST>
+</select>
+<script type="text/javascript">
+if (CMDBViewer == "yes")
+{
+     	<PDM_MACRO NAME=button 
+	caption="Visualizer" 
+	id=buttonCMDBViz
+	disabled=no
+	func="openCmdbViz()"	 
+	tooltip="Use this button to launch the CMDB Visualizer in context of this configuration item and selected filter" 
+	hotkey_name="Visualizer">
+}
+else
+{
+     	<PDM_MACRO NAME=button 
+	caption="Visualizer" 
+	id=buttonCMDBViz
+	disabled=yes
+	func="openCmdbViz()"	 
+	tooltip="Use this button to launch the CMDB Visualizer in context of this configuration item and selected filter" 
+	hotkey_name="Visualizer">
+}
+</script>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</form>
+</td>
+</PDM_IF>
+
+
+

@@ -1,0 +1,317 @@
+<html lang="en"><PDM_IF 0>
+profile_menu.htmpl
+WHEN PRESENTED:
+    As required
+VARIABLES:
+    string	cgi     The URL of the Paradigm/AHD CGI executable, pdmcgi
+    object  SESSION This object has one member, SID, which is the
+                        session identifier.  The session identifier is
+                        needed so that users do not have to log in every
+                        time they want to see a new page.
+</PDM_IF>
+<head>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp mode=general factory=cnt preview="profile_browser.htmpl+PERSID={cnt:}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript">
+
+function InviteEndUser()
+{
+	if (typeof ahdtop.pb_args == "undefined" || typeof ahdtop.pb_args.call_req_id == "undefined" || ahdtop.pb_args.call_req_id == "") {
+		alert("To invite this contact in to an assistance session: Create a new ticket or open an existing ticket and click Live Assistance from the ticket page.");
+		return;
+	}
+
+	var ticketPersId = ahdtop.pb_args.call_req_id;
+
+	ahdtop.inviteEndUser (ticketPersId);
+}
+
+<PDM_IF "$prop.MultiTenancy" == "off" || "$ACCESS.Tenant_Restriction" == "1" || "${dobref.tenant.name:}" == "">
+var form_title = "Kontakt";
+<PDM_ELIF "$prop.MultiTenancy" == "on"> 
+var form_title = "Tenant: ${dobref.tenant.name:}";
+<PDM_ELIF "${cst.tenant:}" == "$prop.SERVICE_PROVIDER_UUID" && "$ACCESS.admin" != "0">
+var form_title = "Tenant: ${dobref.tenant.name:}";
+<PDM_ELSE>
+var form_title = "Kontakt";
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript">
+<PDM_IF "$prop.MultiTenancy" == "off"> 
+var argFactoryTenancy = '0';
+<PDM_ELSE>
+  <PDM_IF "${cst.tenant:}" != "$prop.SERVICE_PROVIDER_UUID" || "$ACCESS.admin" == "0">
+  var argFactoryTenancy = '0';
+  <PDM_ELSE>
+  var argFactoryTenancy = '$dobref.TENANCY';
+  var argTenant = '${dobref.tenant.name:}';
+  var argTenantId = '${dobref.tenant:}';
+  var argTenantLogo = '${dobref.tenant.logo:}';
+  var argTenantLogoAlt = '${dobref.tenant.name:}';
+  var logoImg;
+  try {
+    if ( typeof argTenantLogo == "string" && argTenantLogo.length > 0 ) {
+      logoImg = top.gobtn.document.getElementById("logoImg");
+      if ( logoImg != null ) {
+        logoImg.src = argTenantLogo;
+        logoImg.alt = argTenantLogoAlt;
+      }
+    }
+  }
+  catch(logoImg) {}
+  </PDM_IF>
+  <PDM_IF "$prop.MultiTenancy" != "setup">
+    <PDM_IF "$prop.SERVICE_PROVIDER_UUID" != "00">
+      <PDM_IF "$UserAuth" \> "1">
+        <PDM_IF "$dobref.tenant" != "">
+          <PDM_SET UserAuth=PdmCanUpdateTenant($dobref.tenant)>
+          var tenantUserAuth = $UserAuth;
+          <PDM_IF "$UserAuth" == "1">
+            cfgUserAuth = 1;
+            <PDM_SET UserAuth="1">
+          </PDM_IF>
+        </PDM_IF>
+      </PDM_IF>
+    </PDM_IF>
+  </PDM_IF>
+</PDM_IF>
+var loaded = false;
+var linkno = 0;
+var id = "$dobref.id";
+var persid = "$dobref.persistent_id";
+var combo_name = '<PDM_FMT ESC_STYLE=C>$dobref.combo_name</PDM_FMT>';
+var first_name = '<PDM_FMT ESC_STYLE=C>$dobref.first_name</PDM_FMT>';
+var middle_name = '<PDM_FMT ESC_STYLE=C>$dobref.middle_name</PDM_FMT>';
+var last_name = '<PDM_FMT ESC_STYLE=C>$dobref.last_name</PDM_FMT>';
+var organization = '<PDM_FMT ESC_STYLE=C>$dobref.organization.name</PDM_FMT>';
+var org_id = "$dobref.organization";
+var org_active = "$dobref.organization.delete_flag";
+var org_contract  = "$dobref.organization.owning_contract";
+var org_contract_active = "$dobref.organization.owning_contract.delete_flag";
+
+var call_type = "$pref_doc";
+<PDM_SET args.call_type="$pref_doc">
+if (typeof call_type == "undefined")
+    call_type = "$DEFAULT_ROLE.pref_doc";
+<PDM_IF "${args.call_type:}" == "">
+    <PDM_SET args.call_type="$DEFAULT_ROLE.pref_doc">
+</PDM_IF>
+
+if ( call_type != "1" &&
+     call_type != "2" &&
+     call_type != "3" &&
+     call_type != "4" ) {
+   // This should never happen...
+   call_type = "1";
+}
+<PDM_IF "$args.call_type" != "1" &&
+        "$args.call_type" != "2" &&
+        "$args.call_type" != "3" &&
+        "$args.call_type" != "4">
+    <PDM_SET args.call_type="1">
+</PDM_IF>
+<PDM_IF 0>
+  Build where clause for reading quick templates
+</PDM_IF>
+<PDM_IF "$args.call_type" == "2">
+<PDM_SET args.curr_fac="iss">
+<PDM_SET args.cust_attr="requestor">
+<PDM_SET args.qt_wc="template_name.quick_tmpl_type <> 0 AND template_name.delete_flag = 0">
+<PDM_ELIF "$args.call_type" == "3">
+<PDM_SET args.curr_fac="cr">
+<PDM_SET args.cust_attr="customer">
+<PDM_SET args.qt_wc="template_name.quick_tmpl_type <> 0 AND type='I' AND template_name.delete_flag = 0">
+<PDM_ELIF "$args.call_type" == "4">
+<PDM_SET args.curr_fac="cr">
+<PDM_SET args.cust_attr="customer">
+<PDM_SET args.qt_wc="template_name.quick_tmpl_type <> 0 AND type='P' AND template_name.delete_flag = 0">
+<PDM_ELSE>
+<PDM_SET args.curr_fac="cr">
+<PDM_SET args.cust_attr="customer">
+<PDM_SET args.qt_wc="template_name.quick_tmpl_type <> 0 AND (type = 'R' OR type = '' OR type IS NULL) AND template_name.delete_flag = 0">
+</PDM_IF>
+<PDM_IF "$env.NX_CLASSIC_SLA_PROCESSING" : "[Yy][Ee][Ss]">
+<PDM_ELIF "$env.NX_FILTER_TEMPLATE_SEARCH" : "[Yy][Ee][Ss]">
+<PDM_IF "$dobref.id" != "">
+<PDM_IF "$dobref.organization" == "">
+<PDM_SET args.qt_wc+=" AND ${args.cust_attr}.organization IS NULL">
+<PDM_ELSE>
+<PDM_SET args.qt_wc+=" AND ${args.cust_attr}.organization = U'$dobref.organization'">
+</PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_IF "$prop.MultiTenancy" == "on" && "${dobref.tenant:}" != ""> 
+<PDM_SET args.qt_wc+=" AND tenant = U'$dobref.tenant'">
+</PDM_IF>
+var qt_selections = new Array();
+<PDM_IF "$args.curr_fac" == "cr">
+<PDM_LIST FACTORY=cr PREFIX=list WHERE="$args.qt_wc" SORT=template_name>
+qt_selections[qt_selections.length] = new Array("$list.persistent_id;$list.template_name.quick_tmpl_type","$list.template_name","$list.open_date"<PDM_IF "$list.template_name.quick_tmpl_type" == "2">+" [R]"</PDM_IF>);
+</PDM_LIST>
+<PDM_ELSE>
+<PDM_LIST FACTORY=iss PREFIX=list WHERE="$args.qt_wc" SORT=template_name>
+qt_selections[qt_selections.length] = new Array("$list.persistent_id;$list.template_name.quick_tmpl_type","$list.template_name","$list.open_date"<PDM_IF "$list.template_name.quick_tmpl_type" == "2">+" [R]"</PDM_IF>);
+</PDM_LIST>
+</PDM_IF>
+setTempKeyDownHandler(pb_keydown);
+</script>
+<title>profile_menu.htmpl</title>
+<script type="text/javascript" src="$CAisd/scripts/convert_date.js"></script>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="detailro" onload="loaded=true;pb_focus('pbfld0')">
+<PDM_INCLUDE FILE=std_body.htmpl filename="" logo=no menubar=no>
+<table id="tbl001" cellspacing=0 cellpadding=0 class="detailro" width="100%">
+
+<tr>
+<td class=binleftlabels align="left" colspan=2>
+&nbsp;$dobref.combo_name
+</td>
+</tr>
+
+<script type="text/javascript">
+insertTabToFrameLink('scratchpad');
+pb_link("Informacje", "profile_infocnt" );
+pb_link("Środowisko", "list_nr", "nr", "QBE.EQ.cntref.cnt.id=$dobref.id+QBE.EQ.delete_flag=0+KEEP.forCntQP=1+KEEP.noCreateBtn=1" );
+if($ACCESS.FAC_iss > 0 && 0) {
+    pb_link("Issue_History", "profile_histcnt_iss", "iss", "QBE.EQ.requestor=$dobref.id" );
+}
+if($ACCESS.FAC_cr > 0) {
+	pb_link("Request_History", "profile_histcnt_cr", "cr", "QBE.EQ.customer=$dobref.id+QBE.EQ.type=R" );
+	if($ACCESS.FAC_in > 0)
+		pb_link("Incident_History", "profile_histcnt_in", "in", "QBE.EQ.customer=$dobref.id" );
+	if($ACCESS.FAC_pr > 0 && 0)
+		pb_link("Problem_History", "profile_histcnt_pr", "pr", "QBE.EQ.customer=$dobref.id" );
+}
+if($ACCESS.FAC_chg > 0) {
+    pb_linklast("Change_Order_History", "profile_histcnt_chg", "chg", "QBE.EQ.affected_contact=$dobref.id" );
+}
+</script>
+
+<PDM_IF 0>
+<PDM_IF "$dobref.organization" != "">
+<tr><th height=8></th></tr>
+<tr>
+<th class="detailro" colspan=4 height=22>
+Organization
+</th>
+</tr>
+
+<tr>
+<td class=binleftlabels align="left" colspan=2>
+&nbsp;<PDM_FMT ESC_STYLE=HTML>$dobref.organization.name</PDM_FMT>
+</td>
+</tr>
+
+<script type="text/javascript">
+pb_link("Informacje", "profile_infoorg" );
+pb_link("Środowisko", "list_nr", "nr", "QBE.EQ.orgref.org.id=$dobref.organization.id+QBE.EQ.delete_flag=0+KEEP.ORG_ID=$dobref.organization.id+KEEP.forOrgQP=1+KEEP.noCreateBtn=1" );
+if($ACCESS.FAC_iss > 0 && 0) {
+    pb_link("Issue_History", "profile_historg_iss", "iss", "QBE.EQ.requestor.organization=$dobref.organization" );
+}
+if($ACCESS.FAC_cr > 0) {
+	pb_link("Request_History", "profile_historg_cr", "cr", "QBE.EQ.customer.organization=$dobref.organization+QBE.EQ.type=R" );
+	if($ACCESS.FAC_in > 0)
+		pb_link("Incident_History", "profile_historg_in", "in", "QBE.EQ.customer.organization=$dobref.organization" );
+	if($ACCESS.FAC_pr > 0 && 0)
+		pb_link("Problem_History", "profile_historg_pr", "pr", "QBE.EQ.customer.organization=$dobref.organization" );
+}
+if($ACCESS.FAC_chg > 0) {
+    pb_linklast("Change_Order_History", "profile_historg_chg", "chg", "QBE.EQ.affected_contact.organization=$dobref.organization" );
+}
+</script>
+</PDM_IF>
+</PDM_IF>
+</table>
+
+<center>
+<table cellspacing=0 cellpadding=0 width=100%>
+
+<tr><td align="center" valign="center" height=30>
+<script type="text/javascript">
+var contact_type="$dobref.type";
+
+if((contact_type == "2308" && $ACCESS.FAC_grpmem >1) ||
+   (contact_type != "2308" && $ACCESS.FAC_cnt > 1))
+   {
+      <PDM_MACRO NAME=button caption="Edytuj kontakt[!etc]" hotkey_name="Edytuj kontakt[!etc]" id="btn001" width=0
+        func="popup_window('','UPDATE',0,0,'','FACTORY=cnt','SET.id=$dobref.id')">
+   }
+else
+{
+      <PDM_MACRO NAME=button caption="Edytuj kontakt[!etc]" hotkey_name="Edytuj kontakt[!etc]" id="btn001" width=0
+        func="popup_window('','UPDATE',0,0,'','FACTORY=cnt','SET.id=$dobref.id')" Disabled="yes">
+}
+</script>
+</td></tr>
+
+<tr><td align="center" valign="center" height=30>
+<script type="text/javascript">
+var sUUID = '$dobref.id';
+var sContactCriteria = "QBE.EQ.session.contact=" + sUUID;
+//
+var MINUTE = 60 * 1000;
+var HOUR = MINUTE * 60;
+var DAY = HOUR * 24;
+var today = (new Date()).getTime();
+var lNXRecentDays = '$env.NX_RECENT_ACT_DAYS';
+if (lNXRecentDays  == '')
+{
+	lNXRecentDays = 30;
+}
+var RecentDate = new Date(today - (lNXRecentDays * DAY));
+RecentDate = RecentDate/1000; // Remove the milliseconds
+var RecentDateStr = date_to_string(RecentDate, false, false, "no"); // Remove time
+var RecentDateInt = string_to_date("", RecentDateStr, ""); // convert back to integer date
+var sRecentCrit = "QBE.GE.log_time_INT_DATE=" + RecentDateInt;
+<PDM_MACRO NAME=button caption="Ostatnie zdarzenia[!ea]" hotkey_name="Ostatnie zdarzenia[!ea]" id="btn005" width=0
+    func="popup_window('','SEARCH', 0, 0, '','FACTORY=event_log', sContactCriteria, sRecentCrit)">
+</script>
+</td></tr><tr><td align="center" valign="center" height=40>
+<input type="hidden" name="KEY.profile_search">
+<script type="text/javascript">
+<PDM_MACRO NAME=button caption="Wybierz nowy kontakt[t]" hotkey_name="Wybierz nowy kontakt[t]" id="btn002" width=0
+    func="profile_search()">
+</script>
+</td></tr><tr><td align="center" valign="center" height=30>
+<script type="text/javascript">
+if ( typeof ahdtop == "object" &&
+     typeof ahdtop.edit_profile_browser_opener == "object" &&
+     ! ahdtop.edit_profile_browser_opener.closed ) {
+	
+	var editwin = ahdtop.edit_profile_browser_opener;    
+	
+	<PDM_MACRO NAME=button caption="Skopiuj do furmularza edycji[y]" hotkey_name="Copy To Edit Form[y]" id="btn003" 
+		width=0 func="pb_copy_to_edit(true)">
+	
+	if ( typeof editwin.autoset_caller_name == "boolean" &&
+       editwin.autoset_caller_name ) {
+		pb_copy_to_edit(false);
+		editwin.autoset_caller_name = false;
+	}
+}
+else {
+	<PDM_MACRO NAME=button caption="Skopiuj do furmularza edycji[y]" hotkey_name="Copy To Edit Form[y]" id="btn003" 
+		width=0 disabled="yes" func="pb_copy_to_edit(true)">
+}
+
+
+if(ahdtop.canDisplayLiveAssistanceLink())
+{
+docWriteln("</td></tr><tr><td align='center' valign='center' height=30>");
+<PDM_MACRO NAME=button caption="Live Assistance" hotkey_name="Live Assistance" id="btnSB" width=0
+    func="InviteEndUser()">
+docWriteln("</td></tr>"); 		
+} 		
+insertTabToFrameLink('page','scratchpad');
+</script>
+</td></tr></table>
+</center>
+</span>
+<script type="text/javascript">endScrollbar();</script>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>

@@ -1,0 +1,186 @@
+<PDM_IF 0>
+xx_prop_tab.htmpl
+WHEN PRESENTED:
+    On the request, issue, or change order detail form
+INTENT:
+    Display a notebook page for properties.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=xx_alg_tab.htmpl
+</SCRIPT>
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=xx_prop_tab" factory=chg>
+<html lang="pl"><BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frm301">
+<SCRIPT LANGUAGE="JavaScript">
+tab_banner("Właściwości");
+docWriteln("<DIV ID=propertyDiv>");
+<PDM_MACRO name=dtlStartRow class=tab>
+detailReadonlyFormRowHdr("Nazwa");
+detailReadonlyFormRowHdr("Wartość");
+detailReadonlyFormRowHdr("Przykład");
+detailEndHdrRow();
+var n = 0;
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_IF "$prop.form_name_2" == "cr" || "$prop.form_name_2" == "in" || "$prop.form_name_2" == "pr">
+<PDM_LIST SOURCE=args.properties>
+detailWriteProperty(n++, "$args.properties.required",
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$args.properties.label</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$args.properties.value</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$args.properties.sample</PDM_FMT>');
+</PDM_LIST>
+<PDM_ELSE>
+<PDM_LIST SOURCE=args.property_list>
+detailWriteProperty(n++, "$args.property_list.required",
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$args.property_list.label</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$args.property_list.value</PDM_FMT>',
+          '<PDM_FMT ESC_STYLE=C PAD=NO>$args.property_list.sample</PDM_FMT>');
+</PDM_LIST>
+</PDM_IF>
+if ( n == 0 )
+   detailNoProperties();
+<PDM_ELSE>
+<PDM_IF "" == "$args.prop0.id">
+   detailNoProperties();
+<PDM_ELSE>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop0.label" make_required="prop0.required" propNum=0 sample="prop0.sample" validation_rule=prop0.validation_rule.id validation_type="prop0.validation_type" value="prop0.value">
+<PDM_IF "" != "$args.prop1.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop1.label" make_required="prop1.required" propNum=1 sample="prop1.sample" validation_rule=prop1.validation_rule.id validation_type="prop1.validation_type" value="prop1.value">
+<PDM_IF "" != "$args.prop2.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop2.label" make_required="prop2.required" propNum=2 sample="prop2.sample" validation_rule=prop2.validation_rule.id validation_type="prop2.validation_type" value="prop2.value">
+<PDM_IF "" != "$args.prop3.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop3.label" make_required="prop3.required" propNum=3 sample="prop3.sample" validation_rule=prop3.validation_rule.id validation_type="prop3.validation_type" value="prop3.value">
+<PDM_IF "" != "$args.prop4.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop4.label" make_required="prop4.required" propNum=4 sample="prop4.sample" validation_rule=prop4.validation_rule.id validation_type="prop4.validation_type" value="prop4.value">
+<PDM_IF "" != "$args.prop5.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop5.label" make_required="prop5.required" propNum=5 sample="prop5.sample" validation_rule=prop5.validation_rule.id validation_type="prop5.validation_type" value="prop5.value">
+<PDM_IF "" != "$args.prop6.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop6.label" make_required="prop6.required" propNum=6 sample="prop6.sample" validation_rule=prop6.validation_rule.id validation_type="prop6.validation_type" value="prop6.value">
+<PDM_IF "" != "$args.prop7.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop7.label" make_required="prop7.required" propNum=7 sample="prop7.sample" validation_rule=prop7.validation_rule.id validation_type="prop7.validation_type" value="prop7.value">
+<PDM_IF "" != "$args.prop8.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop8.label" make_required="prop8.required" propNum=8 sample="prop8.sample" validation_rule=prop8.validation_rule.id validation_type="prop8.validation_type" value="prop8.value">
+<PDM_IF "" != "$args.prop9.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop9.label" make_required="prop9.required" propNum=9 sample="prop9.sample" validation_rule=prop9.validation_rule.id validation_type="prop9.validation_type" value="prop9.value">
+<PDM_IF "" != "$args.prop10.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop10.label" make_required="prop10.required" propNum=10 sample="prop10.sample" validation_rule=prop10.validation_rule.id validation_type="prop10.validation_type" value="prop10.value">
+<PDM_IF "" != "$args.prop11.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop11.label" make_required="prop11.required" propNum=11 sample="prop11.sample" validation_rule=prop11.validation_rule.id validation_type="prop11.validation_type" value="prop11.value">
+<PDM_IF "" != "$args.prop12.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop12.label" make_required="prop12.required" propNum=12 sample="prop12.sample" validation_rule=prop12.validation_rule.id validation_type="prop12.validation_type" value="prop12.value">
+<PDM_IF "" != "$args.prop13.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop13.label" make_required="prop13.required" propNum=13 sample="prop13.sample" validation_rule=prop13.validation_rule.id validation_type="prop13.validation_type" value="prop13.value">
+<PDM_IF "" != "$args.prop14.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop14.label" make_required="prop14.required" propNum=14 sample="prop14.sample" validation_rule=prop14.validation_rule.id validation_type="prop14.validation_type" value="prop14.value">
+<PDM_IF "" != "$args.prop15.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop15.label" make_required="prop15.required" propNum=15 sample="prop15.sample" validation_rule=prop15.validation_rule.id validation_type="prop15.validation_type" value="prop15.value">
+<PDM_IF "" != "$args.prop16.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop16.label" make_required="prop16.required" propNum=16 sample="prop16.sample" validation_rule=prop16.validation_rule.id validation_type="prop16.validation_type" value="prop16.value">
+<PDM_IF "" != "$args.prop17.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop17.label" make_required="prop17.required" propNum=17 sample="prop17.sample" validation_rule=prop17.validation_rule.id validation_type="prop17.validation_type" value="prop17.value">
+<PDM_IF "" != "$args.prop18.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop18.label" make_required="prop18.required" propNum=18 sample="prop18.sample" validation_rule=prop18.validation_rule.id validation_type="prop18.validation_type" value="prop18.value">
+<PDM_IF "" != "$args.prop19.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop19.label" make_required="prop19.required" propNum=19 sample="prop19.sample" validation_rule=prop19.validation_rule.id validation_type="prop19.validation_type" value="prop19.value">
+<PDM_IF "" != "$args.prop20.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop20.label" make_required="prop20.required" propNum=20 sample="prop20.sample" validation_rule=prop20.validation_rule.id validation_type="prop20.validation_type" value="prop20.value">
+<PDM_IF "" != "$args.prop21.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop21.label" make_required="prop21.required" propNum=21 sample="prop21.sample" validation_rule=prop21.validation_rule.id validation_type="prop21.validation_type" value="prop21.value">
+<PDM_IF "" != "$args.prop22.id">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlWriteproperty label="prop22.label" make_required="prop22.required" propNum=22 sample="prop22.sample" validation_rule=prop22.validation_rule.id validation_type="prop22.validation_type" value="prop22.value">
+<PDM_IF 0><!-- Prop22 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop21 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop20 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop19 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop18 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop17 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop16 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop15 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop14 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop13 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop12 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop11 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop10 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop9 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop8 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop7 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop6 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop5 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop4 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop3 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop2 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop1 --></PDM_IF>
+</PDM_IF>
+<PDM_IF 0><!-- Prop0 --></PDM_IF>
+</PDM_IF>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+docWrite("</DIV>");
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_IF "$prop.form_name_2" == "iss">
+<PDM_MACRO name=dtlTextbox hdr="Uwagi" attr=justification colspan=4 rows=2 size=80 spellchk=no>
+</PDM_IF>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: xx_prop_tab.htmpl ASPEN.1 2010/09/13 10:57:11 putsr02 Exp $
+</PDM_IF>

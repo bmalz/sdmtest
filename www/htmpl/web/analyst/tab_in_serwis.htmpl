@@ -1,0 +1,103 @@
+<PDM_IF 0>
+</PDM_IF>
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="detail_xx.htmpl" factory=in>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+
+
+<SCRIPT LANGUAGE="JavaScript">
+
+// 20131023 bmalz @ e-xim
+function SetZfz() {
+	if (typeof document.main_form.elements["SET.zfz"].value != "undefined" && document.main_form.elements["SET.zfz"].value.length > 1
+		&& typeof document.main_form.elements['SET.category'].value != "undefined" && document.main_form.elements['SET.category'].value.length > 1) {
+		var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid_generator() +
+			"+OP=SEARCH+FACTORY=pcat+SKIPLIST=1+HTMPL=exim_pcat_getzfzsdsc.htmpl"+
+			"+QBE.EQ.id=" + encodeURIComponent(document.main_form.elements['SET.category'].value.replace("pcat:", ""));
+
+		jq("#HiddenDiv").load(url, function(response, status, xhr) {
+			if (status == "error") {
+				var msg = "Sorry but there was an error: ";
+				alert( msg + xhr.status + " " + xhr.statusText );
+			}
+		});
+	}
+}
+
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Firma zewnętrzna" attr="zfz" extraURL="ADDITIONAL_WHERE=name='$args.category.owning_contract.zfz.name' AND zfz=1">
+<PDM_IF 0>
+	<PDM_MACRO name=dtlDropdown hdr="Status FZ" attr=zfzstatus factory=tskstat lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Status FZ" attr=zfzstatus>
+<PDM_MACRO name=dtlTextbox hdr="Więcej" attr="zuwagifz" rows="3" value="">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF 0>
+	<PDM_MACRO name=dtlLookup hdr="F-Z Umowa SLA" attr=zfzsla extraURL="ADDITIONAL_WHERE=usluga=$args.category.owning_contract AND forfz=1">
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="F-Z Umowa SLA" attr=zfzsla>
+<PDM_MACRO name=dtlReadonly hdr="F-Z Poziom usług" attr="zfzsdsc">
+<PDM_MACRO name=dtlDateReadonly hdr="F-Z termin realizacji" attr="zfztermin_realizacji">
+<PDM_MACRO NAME=dtlEndTable>
+
+
+function SetZFOnChangeEvent() {
+	<PDM_IF "$prop.form_name_3" == "edit">
+		if (typeof FZId != "undefined" &&  FZId.length > 0) {
+			jq('input[pdmqa=zfz]').removeAttr("onchange");
+			// jq('input[pdmqa=zfz]')[0].setAttribute("onchange", "detailAutofill(this,'org',false,'name',false,'ADDITIONAL_WHERE=name=%27" + encodeURIComponent(FZId) + "%27 AND zfz=1');");
+			//jq('input[pdmqa=zfz]')[0].setAttribute("onchange", "alert('kielbasa');");
+
+			jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a').removeAttr("onclick");
+			jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a').unbind("click");
+			jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a').click(function() {
+				popup_search('org','KEY.zfz','main_form', 'ADDITIONAL_WHERE=name=%27' + encodeURIComponent(FZId) + '%27 AND zfz=1',0,'name');
+			});
+
+			jq('input[pdmqa=zfz]').change(function() {
+				detailAutofill(this,'org',false,'name',false,'ADDITIONAL_WHERE=name=%27' + encodeURIComponent(FZId) + '%27 AND zfz=1');
+			});
+			//jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a')[0].setAttribute("onclick", "popup_search('org','KEY.zfz','main_form', 'ADDITIONAL_WHERE=name=%27" + encodeURIComponent(FZId) + "%27 AND zfz=1',0,'name')");
+		} else {
+			jq('input[pdmqa=zfz]').removeAttr("onchange");
+			// jq('input[pdmqa=zfz]')[0].setAttribute("onchange", "detailAutofill(this,'org',false,'name',false,'ADDITIONAL_WHERE=zfz=1');");
+
+			jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a').removeAttr("onclick");
+			jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a').unbind("click");
+			jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a').click(function() {
+				popup_search('org','KEY.zfz','main_form', 'ADDITIONAL_WHERE=zfz=1',0,'name');
+			});
+
+			jq('input[pdmqa=zfz]').change(function() {
+				detailAutofill(this,'org',false,'name',false,'ADDITIONAL_WHERE=zfz=1');
+			});
+			// jq('input[pdmqa=zfz]').closest('tr').prev().find('th:eq(0)').find('a')[0].setAttribute("onclick", "popup_search('org','KEY.zfz','main_form', 'ADDITIONAL_WHERE=zfz=1',0,'name')");
+		}
+	</PDM_IF>
+}
+
+jq(document).ready(function() {
+	<PDM_IF 0>
+		SetZFOnChangeEvent();
+		jq('input[pdmqa=zfz]').change(function() {
+			SetZfz();
+		});
+
+		jq('input[pdmqa=zfz]').blur(function() {
+			SetZfz();
+		});
+	</PDM_IF>
+});
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+

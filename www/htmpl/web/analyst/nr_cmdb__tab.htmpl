@@ -1,0 +1,31 @@
+<PDM_IF 0>
+
+  nr_cmdb__tab.htmpl
+
+  Displays the CMDB Attributes tab for CI's with no extension
+  tables - tab displayed on detail_nr.htmpl
+
+  NOTE: A temporary file is provided with Service Desk due to the
+        PDM_TAB requirements for non-deferred notebook tabs.
+        The CMDB overrides the Service Desk temporary file to provided
+        MDR support and CMDB specific tab content.
+
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit factory=nr preview="NBTAB=nr_cmdb__tab">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<PDM_INCLUDE FILE=cmdb_nofamily_tab_content.htmpl>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: nr_cmdb__tab.htmpl ASPEN.1 2010/09/08 15:03:35 youra01 Exp $
+</PDM_IF>
+

@@ -1,0 +1,93 @@
+<html lang="en"><PDM_IF 0>
+load_wait.htmpl
+WHEN PRESENTED:
+    A friendly "Loading! Please Wait!" message to display while something is loading
+	on the server (say the PDM_SCOREBOARD tag...).  Display this before loading
+	any htmpl that may take a while.
+
+	Pass in the htmpl to process in KEEP.new_htmpl and a message to 
+	display in KEEP.wait_msg.  If KEEP.wait_msg is a pure number, it is used to
+	reference a string in the message catalog.  If not, KEEP.wait_msg is treated
+	as the message to display.  In that case, any underscores ('_') in KEEP.wait_msg are 
+	replaced with space characters - makes it easier to pass wait_msg in a URL.
+	If KEEP.wait_msg isn't passed, a generic message is shown.
+
+	An example URL for displaying this form:
+	 var z = cfgCgi + "?OP=DISPLAY_FORM+SID=" + cfgSID + "+FID=" + fid_generator() + "+HTMPL=load_wait.htmpl+KEEP.new_htmpl=my_intense_htmpl.htmpl+KEEP.wait_msg=Loading_Stuff";
+	or
+	 var z = cfgCgi + "?OP=DISPLAY_FORM+SID=" + cfgSID + "+FID=" + fid_generator() + "+HTMPL=load_wait.htmpl+KEEP.new_htmpl=my_intense_htmpl.htmpl+KEEP.wait_msg=553";
+	or
+	 var z = cfgCgi + "?OP=DISPLAY_FORM+SID=" + cfgSID + "+FID=" + fid_generator() + "+HTMPL=load_wait.htmpl+KEEP.new_htmpl=my_intense_htmpl.htmpl";
+	window.document.location.replace(z);
+</PDM_IF>	
+
+
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script type="text/javascript" src="$CAisd/scripts/window_manager.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCAISD = "$CAisd"
+var cfgCgi = "$cgi"
+var cfgSID = "$SESSION.SID"
+var cfgProductName = "$ProductName"
+var cfgFormTitle = "$prop.FormTitle";
+var cfgProductID = "$ProductID"
+var cfgIsCS = ( cfgProductID == "cs" || cfgProductID == "htcs" );
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/fid_gen.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+function loadIt() {
+	// Redirect to a scoreboard tree.  Pass along the target htmpl (containing the tree)
+	// in 
+	
+	var newHtmpl = "$args.KEEP.new_htmpl";
+	var cfgAutoUpdate = "$env.NX_WEB_AUTO_UPDATE" - 0;
+	if (newHtmpl.toString().length <= 0) {
+		alert("No form to load!");
+		return;
+	}
+	var q = "$cgi?OP=DISPLAY_FORM+SID=$SESSION.SID+FID=" +
+                fid_generator() + "+HTMPL=" + newHtmpl +
+		// I know it is bad to add this piece for only USQ, but I will keep it 
+		// this way for now.  Pass along cstm_scbd_id for customizing Access Types
+		// From other interfaces.
+		"+KEEP.cstm_scbd_id=$args.KEEP.cstm_scbd_id+KEEP.USQ_OWNER=$args.KEEP.USQ_OWNER+KEEP.USQ_OWNER_SYM="+nx_escape("$args.KEEP.USQ_OWNER_SYM");
+
+	// Append the appropriate parameters if the htmpl is kt_faq_tree.htmpl	
+	if (newHtmpl == "kt_faq_tree.htmpl")
+		q += "+FAQ_WINDOW_NAME=$args.KEEP.FAQ_WINDOW_NAME+KCAT_ID=$args.KEEP.KCAT_ID+KCAT_REL_ID=$args.KEEP.KCAT_REL_ID+TargetKCATRelID=$args.KEEP.TargetKCATRelID"+
+		"+KCAT_REL_PATH=$args.KEEP.KCAT_REL_PATH+SD_LAUNCHED=$args.KEEP.SD_LAUNCHED+LAUNCHED_ITIL=$args.KEEP.LAUNCHED_ITIL+KEEP.IsPopUp=$args.KEEP.IsPopUp+KEEP.POPUP_NAME=$args.KEEP.POPUP_NAME";
+			
+	// It's very important to use replace() - otherwise browser will sometimes
+	// try to reuse without reloading and we get old data.
+	if (typeof cfgAutoUpdate == "number" && cfgAutoUpdate > 0) 
+	    q += "+BKGD=1";
+	window.location.replace(q);
+}
+</script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+
+<BODY class='scbd font_normal' onLoad="loadIt()">
+<center>
+<H1>
+<script>
+var theMsg;
+<PDM_IF $args.KEEP.wait_msg : "[0-9]">
+theMsg = msgtext($args.KEEP.wait_msg);
+<PDM_ELIF $args.KEEP.wait_msg : "[a-zA-Z0-9._ ]">
+theMsg = String("$args.KEEP.wait_msg").replace(/_/g, " ");
+<PDM_ELSE>
+theMsg = msgtext("Loading");
+</PDM_IF>
+document.writeln(theMsg);
+</script>
+</H1>
+<H3>
+This may take a moment...
+</h3>
+</center>
+</BODY>
+</HTML>
+

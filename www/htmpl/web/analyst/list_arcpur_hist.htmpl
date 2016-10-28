@@ -1,0 +1,103 @@
+<PDM_IF 0>
+$Id: list_arcpur_hist.htmpl,v 1.4 2007/01/04 22:54:00 tuach01 Exp $
+list_arcpur_hist.htmpl
+WHEN PRESENTED:
+	When we need to display a list of Archive and Purge history.
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Archive and Purge History Search";
+var hdrTitleList = "Archive and Purge History List";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("no", "no");
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Archive and Purge History">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=arcpur_hist>
+docWriteln('<INPUT TYPE=HIDDEN NAME="QBE.EQ.delete_flag" VALUE="0">');
+<PDM_MACRO name=sfStartRow>
+
+searchFilterDropdown("Rule Name","rule_name",""
+<PDM_LIST PREFIX=list DOMSET="MLIST_STATIC" WHERE=" " FACTORY=arcpur_rule>
+<PDM_FMT PAD=NO ESC_STYLE=C>,"$list.COMMON_NAME","$list.REL_ATTR"</PDM_FMT></PDM_LIST>);
+
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data rozpoczęcia" attr=start_time qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data rozpoczęcia" attr=start_time qbe_condition=LE>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Najwcześniejsza data zakończenia" attr=end_time qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Najpóźniejsza data zakończenia" attr=end_time qbe_condition=LE>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+var cfgCanView = false;
+var cfgCanEdit = false;
+var cfgCanViewMOPreview = true;
+var msgFoundNone = "No Archive and Purge History found";
+var msgFound1 = "1 Archive and Purge History found";
+var msgFound = "%1 Archive and Purge History found";
+var msgFoundMore = "%1 Archive and Purge History found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired Archive and Purge History";
+var store_rule_name;
+var the_sym = new Object();
+	ctxMenu1 = new ContextMenu("arcpur_hist");	
+	ctxMenu1.addItem(msgtext("View"),"view_arcpur_rule();");
+	ctxMenu1.addItem(msgtext("Edit"),"edit_arcpur_rule();");
+	ctxMenu1.addItem( msgtext("Print_Form%1...", " " + window.propFormName),"CAisdPrint();");  
+	ctxMenu1.addItem( msgtext("Help_on_This_Window..."),"help_on_form('"+window.propFormName+"')"); 
+	ctxMenu1.finish();
+	
+function view_arcpur_rule()
+{	
+rsShowDetailPopup(the_sym[self.activePersid]);
+}
+
+
+function edit_arcpur_rule()
+{	
+showEdit(the_sym[self.activePersid]);
+}
+
+function RuleLink(value)
+{
+var arc_pur_html;
+arc_pur_html = "<A CLASS=record  HREF='javascript:rsShowDetailPopup(\"";
+arc_pur_html += store_rule_name;
+if(ahdtop.mouseoverMenus)
+{
+arc_pur_html += "\")' ONMOUSEOVER=' return showRecordMenu(event,"+(rs.records.length-1)+");' ONMOUSEOUT='if (typeof ctxMenu==\"object\")ctxMenu.hide();return true;'>\n";
+}
+else 
+arc_pur_html += "\")'>\n";
+		arc_pur_html += value;
+    		arc_pur_html += "</A>\n";
+rs.data(arc_pur_html);
+}
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="store_rule_name = \"@{list.rule_name:}\";">
+<PDM_MACRO name=lsWrite text=" the_sym[\"@{list.persistent_id:}\"] = \"@{list.rule_name:}\";">
+<PDM_MACRO name=lsCol hdr="Nazwa reguły" attr=rule_name export=no fmtfunc=RuleLink sort=no>
+<PDM_MACRO name=lsCol hdr="Czas ropzoczęcia" attr=start_time sort=DESC>
+<PDM_MACRO name=lsCol hdr="Data zakończenia" attr=end_time>
+<PDM_MACRO name=lsCol hdr="Główne obiekty wyczyszczone" attr=obj_deleted>
+<PDM_MACRO name=lsCol hdr="Podrzędne obiekty wyczyszczone" attr=chd_obj_deleted>
+<PDM_MACRO name=lsEnd>
+ctxMenu = ctxMenu1;
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,0 +1,197 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2005 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  detail_sa_user_route_invite_end_user.htmpl
+//
+////////////////////////////////////////////////////////////////////////////
+// Description: This detail page enables launching SA Analyst UI in direct session mode
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////
+
+</PDM_IF>	
+<html lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = <PDM_FMT PAD=NO ESC_STYLE=C>"Support Automation Invite End User"</PDM_FMT>;
+var hdrTitleUpd = <PDM_FMT PAD=NO ESC_STYLE=C>"Support Automation Invite End User"</PDM_FMT>;
+var hdrTitleNew = <PDM_FMT PAD=NO ESC_STYLE=C>"Support Automation Invite End User" </PDM_FMT>;
+
+
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/val_type.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/check_submit.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/detail_form.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/img_link.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+<script language="JavaScript" src="$CAisd/scripts/cst_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/attmnt_upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/upload.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/cst_catitem.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/change_cat.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/resultset.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/check_submit.js"></script>
+
+<script language="JavaScript">
+
+argPersistentID = "$args.persistent_id";
+
+if ( ! _browser.supportsLayers )
+   document.writeln('<scr' + 'ipt language="JavaScript" src="$CAisd/scripts/spellcheck.js"></scr' + 'ipt>');
+
+function call_save()
+{
+    if (!hasUserWriteAccessToTicket()) {
+        show_response("No write access for this ticket");
+        return;
+    }
+    window.setTimeout("detailSave()", 500);
+}
+
+function loadActions()
+{
+	<PDM_IF "$args.id" != "0">
+		//when we have the id of the corresponding sa_user_route record forward it to the SA JSP
+		call_sa();
+	</PDM_IF>
+}
+
+function call_sa()
+{ 
+    if( ahdtop.cfgNX_SUPPORTAUTOMATION_URL != "")
+    {
+        var routeID = "$args.id";
+        var locID = ahdtop.saAnalystUILocalization;
+        if (typeof locID == "undefined" || locID == "") {
+            locID = -1;
+        }
+        var sb_url=ahdtop.cfgNX_SUPPORTAUTOMATION_URL+"/jsp/assistanceSession/forceLogin.jsp?BOPSID=%bopsid&roleID="+ahdtop.cfgCurrentRoleID+"&lID="+locID+"&routeID="+routeID;
+
+		
+        var url = ahdtop.cfgCgi + "?SID=" + ahdtop.cfgSID +
+ 	            "+FID=" + ahdframe.cfgFID +
+	            "+OP=LINK_WITH_BOPSID" +  
+	            "+URL=" + nx_escape(sb_url);
+
+        startSAInHiddenFrame(url);
+
+    } 
+}
+
+function startSAInHiddenFrame(url) 
+{
+    var mainFrameSet = window.top.document.getElementsByTagName("frameset")[0];
+
+    var saFrame = window.top.document.createElement("frame"); 
+    saFrame.setAttribute("name","SA");
+    saFrame.setAttribute("border",0);
+    saFrame.setAttribute("frameborder","NO");
+    saFrame.setAttribute("marginwidth",0);
+    saFrame.setAttribute("marginheight",0);
+    saFrame.setAttribute("noresize","NORESIZE");
+
+    mainFrameSet.appendChild(saFrame);
+    
+    saFrame.src = url;
+}
+
+function close_window()
+{
+    ahdframeset.close();
+}
+
+function hasUserWriteAccessToTicket() 
+{
+    if ("$prop.MultiTenancy" != "on") return true; // Multi tenancy off
+    
+    if(ahdtop.cfgAccessTenantWriteRestriction == 0) return true; // Write access to all tenants 
+
+    var ticketTenantId = ("${args.tenant:n/a}" != "n/a") ? "$args.tenant.id" : "";
+    if (typeof(ahdtop.cfgAccessUpdatableTenantUuids) == "object") {
+        ticketTenantId = ticketTenantId.toLowerCase(); 
+        // as IE6 doesn't support Array.indexOf we need to iterate the array manually 
+        for (var i=0; i < ahdtop.cfgAccessUpdatableTenantUuids.length; i++) {
+            if (ticketTenantId  == ahdtop.cfgAccessUpdatableTenantUuids[i]) {
+                return true;  // User has a write access to this ticket
+            }
+        }
+    }
+    return false;
+}
+
+
+</script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</HEAD>
+
+<BODY class=detailro onload="loadActions()">
+<PDM_INCLUDE FILE="std_body.htmpl">
+
+<CENTER>
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=sa_user_route>
+
+ImgBtnRow();
+	
+<PDM_IF  "$args.id" == "0">
+<PDM_MACRO name=button caption="Launch" disabled="defer" func="call_save();" hotkey_name="Launch" id=btnSave>
+</PDM_IF>
+ImgBtnEndRow();	
+
+<PDM_MACRO name=dtlStart>
+</SCRIPT>
+	<input type=hidden name=SET.login_session_id value="$SESSION.SID">
+	<input type=hidden name=SET.userID value="$cst.id">
+	
+<SCRIPT>
+	
+	document.writeln("<INPUT TYPE=hidden NAME=SET.launch_type VALUE=4>");
+	document.writeln("<INPUT TYPE=hidden NAME=SET.queue_id VALUE=100004>");
+	
+	document.writeln("<INPUT TYPE=hidden NAME=SET.summary VALUE=$args.summary>");
+	document.writeln("<INPUT TYPE=hidden NAME=SET.presetToPublic VALUE=1>"); // to keep tenant field read-only 
+	
+	document.writeln("<INPUT TYPE=hidden NAME=SET.pcat_rel VALUE=$args.pcat_rel>");
+	document.writeln("<INPUT TYPE=hidden NAME=SET.isscat_rel VALUE=$args.isscat_rel>");
+	document.writeln("<INPUT TYPE=hidden NAME=SET.sdm_web_addrs VALUE="+location.protocol+"//"+ location.host+location.pathname+">");
+
+</SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+	
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Podsumowanie" attr="summary">
+<PDM_MACRO name=dtlLookupReadonly hdr="Dotknięty użytkownik" attr="endUserID">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Wiadomość osobista" attr="user_description" keeplinks=yes make_required=yes rows=6 size=100 spellchk=no>
+<PDM_MACRO name=dtlEndTable>	
+
+</SCRIPT>
+
+<PDM_MACRO name=dtlEnd>
+</CENTER>
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</BODY>
+</HTML>
+<PDM_WSP>

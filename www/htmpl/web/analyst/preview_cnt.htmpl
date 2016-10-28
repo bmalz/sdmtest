@@ -1,0 +1,82 @@
+<PDM_IF 0>
+preview_cnt.htmpl
+WHEN PRESENTED:
+   Mouseover Preview form for contacts.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+<PDM_IF "$args.type" == "2305">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Użytkownik $args.combo_name</PDM_FMT>';
+<PDM_ELIF "$args.type" == "2307">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Analityk $args.combo_name</PDM_FMT>';
+<PDM_ELIF "$args.type" == "2308">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Grupa $args.combo_name</PDM_FMT>';
+<PDM_ELIF "$args.type" == "2310">
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Klient $args.combo_name</PDM_FMT>';
+<PDM_ELSE>
+var hdrTitle = '<PDM_FMT ESC_STYLE=C>Kontakt $args.combo_name</PDM_FMT>';
+</PDM_IF>
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</script>
+<script language="JavaScript" SRC="$CAisd/scripts/arrow_button.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/check_submit.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/detail_form.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/val_type.js"></script>
+<script language="JavaScript" SRC="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl>
+<center>
+<script language="JavaScript">
+<PDM_MACRO name=dtlForm button=false factory=cnt>
+<PDM_MACRO name=dtlStart>
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type.id" == "2308">
+<PDM_MACRO name=dtlReadonly hdr="Nazwa grupy" attr="last_name" colspan=3>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="Nazwisko" attr="last_name">
+<PDM_MACRO name=dtlReadonly hdr="Imię" attr="first_name">
+<PDM_MACRO name=dtlReadonly hdr="Drugie imię" attr="middle_name">
+</PDM_IF>
+<PDM_MACRO name=dtlReadonly hdr="Status" attr="delete_flag">
+<PDM_MACRO name=dtlStartRow>
+<PDM_IF "$args.type.id" == "2308" >
+<PDM_MACRO name=dtlReadonly hdr="Kod grupy" attr="userid" colspan=2>
+<PDM_MACRO name=dtlReadonly attr="timezone" colspan=2>
+<PDM_ELSE>
+<PDM_MACRO name=dtlReadonly hdr="ID użytkownika" attr="userid">
+<PDM_MACRO name=dtlReadonly hdr="Typ kontaktu" attr="type">
+<PDM_MACRO name=dtlReadonly hdr="Typ dostępu" attr=access_type>
+<PDM_MACRO name=dtlReadonly hdr="NRE" attr=zNRE>
+</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Numer telefonu" attr="phone_number" colspan=2>
+<PDM_MACRO name=dtlReadonly hdr="Alternatywny numer telefonu" attr="alt_phone" colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Adres email" attr="email_address" colspan=4>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Lokalizacja" attr="location">
+<PDM_MACRO name=dtlReadonly hdr="Organizacja" attr="organization">
+<PDM_MACRO name=dtlReadonly attr="dept" colspan=2>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Miasto" attr="location.city">
+<PDM_MACRO name=dtlReadonly hdr="Województwo" attr="location.state">
+<PDM_MACRO name=dtlReadonly hdr="Państwo" attr="location.country.name" colspan=2>
+<PDM_MACRO name=dtlEndTable>
+</script>
+
+<PDM_MACRO name=dtlEnd>
+
+<PDM_INCLUDE FILE=std_footer.htmpl>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: preview_cnt.htmpl ASPEN.1 2010/10/01 15:23:46 ralje02 Exp $
+</PDM_IF>
+
+<PDM_WSP>

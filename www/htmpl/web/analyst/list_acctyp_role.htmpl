@@ -1,0 +1,133 @@
+<PDM_IF 0>
+list_acctyp_role.htmpl
+WHEN PRESENTED:
+	When we need to display a list of an access type's roles.
+</PDM_IF>
+<html lang="en"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<script language="JavaScript">
+var hdrTitle = "Attached Role Search";
+var hdrTitleList = "Attached Role List";
+</script>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/update_lrel.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/role.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+<script language="JavaScript">
+// Get the acctyp_role default data from its parent frame.
+var rdefs = parent.rdefs;
+
+// Save the default role id in rdefs as the initial and current default.
+<PDM_LIST PREFIX=list WHERE="access_type.id=$args.KEEP.ACCTYP_ID AND is_default=1" FACTORY=acctyp_role>
+    rdefs.set_init_def_flags("$list.id");
+</PDM_LIST>
+
+// Reset rdefs if the user does a Search.
+function OnBeforeSearchFilterValidate ()
+{
+   rdefs.reset("acctyp:$args.KEEP.ACCTYP_ID");
+   return true;
+}
+</script>
+</head>
+<body class="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Attached Role">
+<script language="JavaScript">
+<PDM_MACRO name=sfStart create=false factory=acctyp_role>
+<PDM_IF "$args.QBE.EQ.access_type.id" != "">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.access_type.id" value="$args.QBE.EQ.access_type.id">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr=role_obj.name>
+<PDM_MACRO name=sfDropdown hdr="Domyślnie" attr="is_default" codename="dft">
+<PDM_MACRO name=sfDropdown hdr="Status" attr="role_obj.delete_flag" default="Active">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Opis" attr="role_obj.description" colspan=2 size=40>
+<PDM_MACRO name=sfEnd>
+
+</script>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<script language="JavaScript">
+var msgFoundNone = "No roles found";
+var msgFound1 = "1 role found";
+var msgFound = "%1 roles found";
+var msgFoundMore = "%1 roles found.  Displaying %2 through %3";
+var msgSelect = "Click to select desired role";
+
+function create_name_link(value)
+{
+    var val_str = "<a class='record' href=\"javascript:showDetailWithPersid('" + 
+		  role_persid + "')\">" + value + "&nbsp</a>";
+    rs.data(val_str);
+}
+
+// Display the default as radio buttons in readonly mode
+// or as Yes / No in edit mode (or if the role is inactive).
+function disp_def(value)
+{
+   var acctyp_updatable = false;
+<PDM_IF $ACCESS.FAC_acctyp \> 1>
+   acctyp_updatable = true;
+</PDM_IF>
+<PDM_IF $args.KEEP.acctypUserAuth \< 2>
+   acctyp_updatable = false;
+</PDM_IF>
+   if (role_del_flag == "1") {
+      acctyp_updatable = false;
+   }
+   var val_str;
+   if ( typeof parent._dtl != "undefined" && 
+        ! parent._dtl.edit &&
+        acctyp_updatable )
+   {
+      val_str = "<input type='RADIO' ";
+      if (rdefs.is_default(acctyp_role_id)) {
+         val_str += "checked ";
+      }
+      val_str += "name='DEF_FLAGS' value=" + acctyp_role_id + 
+                 " onclick='rdefs.change_curr_flag(this.value)'" + 
+                 " title='Default flag - click Set Default button to save changes'>";
+   }
+   else 
+   {
+      if ( value == "1" ) {
+         val_str = "Yes";
+      }
+      else {
+         val_str = "No";
+      }
+   }
+   rs.data(val_str);
+}
+
+var acctyp_role_id, role_persid, role_del_flag;
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="acctyp_role_id = '@{list.id}';">
+<PDM_MACRO name=lsWrite text="role_persid = '@{list.role_obj.persistent_id}';">
+<PDM_MACRO name=lsWrite text="role_del_flag = '@{list.role_obj.delete_flag}';">
+<PDM_MACRO name=lsCol hdr="Domyślnie" attr=is_default exportfmt=YesNo fmtfunc=disp_def sort=no>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr=role_obj.name fmtfunc="create_name_link">
+<PDM_MACRO name=lsCol hdr="Opis" attr=role_obj.description sort=no>
+<PDM_MACRO name=lsCol hdr="Status" attr=role_obj.delete_flag>
+<PDM_MACRO name=lsEnd>
+
+// If it's in a tab, disable ctxMenu
+if (parent.name == "cai_main")
+{
+    // Create a new ctxMenu with no menu item. 
+    ctxMenu = new ContextMenu("no_menu");
+}
+</script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: list_acctyp_role.htmpl ASPEN.2 2011/10/20 17:37:23 visan03 Exp $;
+</PDM_IF>
+<PDM_WSP>

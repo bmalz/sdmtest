@@ -1,0 +1,51 @@
+<PDM_IF 0>
+@(#)$Id: kd_qa_content_tab.htmpl ASPEN.2 2012/04/13 18:56:48 pitva01 Exp $"
+</PDM_IF>
+<html lang="en"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=kd_qa_content_tab" factory=KD_QA>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<SCRIPT LANGUAGE="JavaScript">
+var argPersistentID = "$args.persistent_id";
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="Content Tab">
+<PDM_FORM NAME="frmDTLRO">
+<INPUT TYPE=HIDDEN NAME="STAY_EDIT" NAME="STAY_EDIT" VALUE="0">
+<INPUT TYPE=HIDDEN NAME="HIDDEN_SPELL" ID="HIDDEN_SPELL">
+<INPUT TYPE=HIDDEN NAME="KD_UNPUBLISH" ID="KD_UNPUBLISH">
+
+<SCRIPT>
+<PDM_MACRO name=tabBanner title="Content">
+</SCRIPT>
+<SCRIPT>
+	
+<PDM_IF "$prop.form_name_3" == "edit">	
+		ImgBtnSetDefaultTabIndex(_dtl.tabIndex+10);
+<PDM_MACRO name=btnStartRow centered=true>
+<PDM_MACRO name=button caption="Spell Check All Fields" func="SpellCheckContent()" hotkey_name="Spell Check All Fields" id="btnSpellcheck" tooltip="Check spelling of Title, Summary, Problem, Resolution and Notes fields" width=0>
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+
+</SCRIPT>
+<SCRIPT>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Status" attr="QA_STATUS" lookup=no make_required="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Tytuł" attr="TITLE" make_required="yes" size=90>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Pytanie" attr="PROBLEM" make_required="yes" rows=3 size=90>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Klasyfikacja" attr="PRIMARY_INDEX.INDEX_PATH">
+<PDM_MACRO name=dtlEndTable>
+
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: 
+</PDM_IF>

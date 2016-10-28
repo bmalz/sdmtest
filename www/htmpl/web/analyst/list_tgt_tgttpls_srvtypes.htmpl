@@ -1,0 +1,78 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<html lang="en">
+<HEAD>
+    <PDM_PRAGMA RELEASE=110>
+    <PDM_INCLUDE FILE=styles.htmpl>
+    <SCRIPT LANGUAGE="JavaScript">
+    var hdrTitle = "Linked Service Target Template Search";
+    var hdrTitleList = "Linked Service Target Template List";
+    </SCRIPT>
+    <PDM_INCLUDE FILE=std_head.htmpl >
+    <SCRIPT LANGUAGE="JavaScript">
+    var autoRefreshWindows = new Object();
+    var cfgCanEdit = !("$args.KEEP.edit" == "edit"); // If the parent sdsc is being edited, then it is not valid to add or remove service target template links.
+    var cfgAccessFac_tgt_tgttpls_srvtypes=Number("$ACCESS.FAC_tgt_tgttpls_srvtypes");
+    if(cfgAccessFac_tgt_tgttpls_srvtypes < 2) cfgCanEdit=false;
+    if (cfgCanEdit) {
+        cfgExtraButton=new Array("Link_Service_Target_Template", "link_tgttpl()");
+    }
+    function link_tgttpl() {
+	    create_new("tgt_tgttpls_srvtypes", false, "", "", "PRESET=sdsc:$args.KEEP.code", "KEEP.object_type=$args.KEEP.object_type", "KEEP.objectTenant=$args.KEEP.objectTenant");
+    }
+    </SCRIPT>
+    <PDM_INCLUDE FILE=std_list_include.htmpl>
+    <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+    <PDM_INCLUDE FILE=std_body.htmpl filename="tgt_tgttpls_srvtypes">
+    <SCRIPT LANGUAGE="JavaScript">
+    
+<PDM_MACRO name=sfStart button=false export=no factory="tgt_tgttpls_srvtypes">
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.tgt_time_tpl.object_type" VALUE="$args.QBE.EQ.tgt_time_tpl.object_type">');
+    document.write('<INPUT TYPE=hidden NAME="QBE.EQ.tgt_time_tpl.srvtypes.sdsc" VALUE="$args.QBE.EQ.tgt_time_tpl.srvtypes.sdsc">');
+    document.write('<INPUT TYPE=hidden NAME="KEEP.type_common_name" VALUE="$args.KEEP.type_common_name">');
+    document.write('<INPUT TYPE=hidden NAME="KEEP.object_type" VALUE="$args.KEEP.object_type">');
+    document.write('<INPUT TYPE=hidden NAME="KEEP.code" VALUE="$args.KEEP.code">');
+    document.write('<INPUT TYPE=hidden NAME="KEEP.edit" VALUE="$args.KEEP.edit">');
+    
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Nazwa" attr="sym" size=20>
+<PDM_MACRO name=sfTextbox hdr="Nazwa szablonu" attr="tgt_time_tpl.sym" size=20>
+<PDM_MACRO name=sfEnd>
+    </SCRIPT>
+    <PDM_FORM NAME="frmFID">
+    </PDM_FORM>
+    
+<PDM_IF "$args.id:$args.KEEP.edit" == ":edit">
+        <center><b>Service Type needs to be saved first before a Service Target Template can be linked to it.</b><br/><br/></center>
+    
+<PDM_ELIF "${current:n/a}" != "n/a">
+        <script language="JavaScript">
+        var msgFoundNone = "No Service Target Templates found";
+        var msgFound1 = "1 Service Target Template found";
+        var msgFound = "%1 Service Target Templates found";
+        var msgFoundMore = "%1 Service Target Templates found.  Displaying %2 through %3";
+        var msgSelect = "Click to select desired Service Target Template";
+        
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Nazwa" attr="sym" link=yes>
+<PDM_MACRO name=lsCol hdr="Czas trwania" attr="target_duration">
+<PDM_MACRO name=lsCol hdr="Warunek" attr="tgt_time_tpl.condition">
+<PDM_MACRO name=lsCol hdr="Wymagany rezultat" attr="tgt_time_tpl.condition_outcome">
+<PDM_MACRO name=lsCol hdr="Ustal aktualny" attr="set_actual">
+<PDM_MACRO name=lsCol hdr="Zresetuj aktualny" attr="reset_actual">
+<PDM_MACRO name=lsCol hdr="Koszt" attr="cost">
+<PDM_MACRO name=lsEnd>
+        </script>
+    
+</PDM_IF>
+    
+    <PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

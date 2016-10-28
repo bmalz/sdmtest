@@ -1,0 +1,72 @@
+<PDM_IF 0>
+xx_template_tab.htmpl
+WHEN PRESENTED:
+    On the request, issue, or change order detail form
+INTENT:
+    Display a notebook page for template
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=xx_alg_tab.htmpl
+</SCRIPT>
+</PDM_IF>
+<html lang="pl"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=xx_template_tab" factory=chg>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/popup.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/ahdmenus.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<SCRIPT LANGUAGE="JavaScript">
+// If the hosting form has a cross validation function, call it (IE detail_in)
+function onchange_template_name(elem)
+{
+    if (elem == document.main_form.elements["SET.template_name"])
+    {
+        if (typeof (this.crossval_tempate_name_major_incident) == "function")
+        {
+            this.crossval_tempate_name_major_incident(elem);
+        }
+    }
+    else
+        alert("Implementation error: event handler must be associated with template_name field");
+    return;
+}
+<PDM_MACRO name=tabBanner title="Szablon">
+<PDM_MACRO name=dtlStartRow class=generic_table>
+if ( '<PDM_FMT ESC_STYLE=C PAD=NO>$args.template_name</PDM_FMT>' == "" )
+	
+<PDM_MACRO name=dtlShowtext dataclass=alertmsg_center value="Podaj nazwę szablonu, aby zapisać obiekt $prop.filename jako Szablon">
+else
+	
+<PDM_MACRO name=dtlShowtext dataclass=alertmsg_center value="Obiekt $prop.filename zapisany jako szablon">
+<PDM_MACRO name=dtlStartRow class=tab>
+<PDM_MACRO name=dtlTextbox hdr="Nazwa szablonu" attr=template_name evt="onChange=\\\"onchange_template_name(this)\\\"" maxlength=30>
+<PDM_MACRO name=dtlTextbox hdr="Klasa szablonu" attr=template_name.template_class size=12>
+<PDM_IF "$prop.factory" != "chg">
+<PDM_MACRO name=dtlDropdown hdr="Typ Szablonu" attr=template_name.quick_tmpl_type default="None" lookup=no>
+</PDM_IF>
+<PDM_MACRO name=dtlDropdown hdr="Szablon aktywny" attr=template_name.delete_flag default="Active" lookup=no>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Opis" attr=template_name.description colspan=4 keeplinks=yes rows=4 size=80 spellchk=no>
+<PDM_MACRO name=dtlEndTable>
+</SCRIPT>
+</PDM_FORM>
+</BODY>
+</HTML>
+<PDM_IF 0>
+@(#)$Id: xx_template_tab.htmpl ASPEN.4 2010/10/26 14:40:01 saima01 Exp $
+</PDM_IF>

@@ -1,0 +1,149 @@
+<PDM_IF 0>
+$Id: kd_action_publish.htmpl,v 1.4 2007/01/04 23:11:52 tuach01 Exp $
+kd_action_publish.htmpl
+WHEN PRESENTED:
+	When we need to display a publish window for the document editor
+</PDM_IF>
+<html lang="en"><head>
+<script language="JavaScript">
+	var hdrTitle = "Publish Document ID: $args.KEEP.DOC_ID";
+</script>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=general preview="kd_action_publish.htmpl+KEEP.DOC_ID={KD}">
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl>
+<script language="JavaScript" src="$CAisd/scripts/spellcheck.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>
+<script>
+var strWinName = "$args.KEEP.POPUP_NAME";
+var iByPass = "$args.KEEP.BYPASS";
+var argPersistentID = "$args.persistent_id";
+var doc;
+var w;
+//Get the parent window reference
+var sKDPersID = "KD:$args.KEEP.DOC_ID";
+w = ahdtop.detailForms[sKDPersID].ahdframe;
+var sTenantID = "";
+var sTenantName = "";
+function dtlReadonlyTitle() {
+  return nx_escape(w.hdrTitle);
+}
+function get_extra_url() {
+  var extraURL = "+KEEP.backfillPersid=KD:$args.KEEP.DOC_ID+KEEP.backfillFactory=KD+KEEP.objectTenant=" + sTenantID + 
+                 "+KEEP.objectTenantName=" + nx_escape(sTenantName);
+  if (extraURL != "") {
+    return extraURL;
+  }
+  return "";
+}
+</script>
+</head>
+<body onLoad="frmPublishOnLoad();" class=detailro>
+<PDM_INCLUDE FILE=std_body.htmpl header=no logo=no >
+<script>
+var edit_form = 1;
+<PDM_MACRO name=dtlForm button=false factory="USP_PROPERTIES">
+<PDM_MACRO name=button caption="OK[O]" disabled="defer" func="ok()" hotkey_name="OK[O]" id="btnOK" newrow="yes">
+<PDM_MACRO name=button caption="Cancel[a]" disabled="defer" endrow="yes" func="cancel()" hotkey_name="Cancel[a]" id="btnCancel">
+<PDM_MACRO name=dtlStart>
+<PDM_IF "$prop.MultiTenancy" == "on">
+		<PDM_LIST PREFIX=kdMT factory="KD" WHERE="id=$args.KEEP.DOC_ID">
+			sTenantID = "${kdMT.tenant:}"
+			if ( sTenantID == "" )
+			{
+				sTenantID = "n/a";
+			}
+			else
+			{
+				sTenantName = '<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=C>${kdMT.tenant.name:}</PDM_FMT>';
+			}
+		</PDM_LIST>
+	
+</PDM_IF>
+    argFactoryTenancy = 0;<PDM_IF 0>Added here b/c the form does not match the standard</PDM_IF>
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlReadonly hdr="Tytuł" attr="n/a" fmtfunc=dtlReadonlyTitle inline="yes">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookup hdr="Właściciel" attr="OWNER_ID" common_name_attr="combo_name" extraurl="javascript:get_extra_url();" factory="agt">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlTextbox hdr="Komentarz" attr="txtComment" maxlength=255 rows=5 size=50>
+<PDM_MACRO name=dtlEndTable>
+</script>
+<PDM_MACRO name=dtlEnd>
+<script>
+function ok()
+{
+	if (action_in_progress())
+	{
+		return; 
+	}
+
+    ahdtop.saveKTAckMsgNum = 2224; // - %1 published
+
+	if (!checkLength())
+	{
+		return;
+	}
+	
+	var sAssignee = doc["OWNER_ID_combo_name"].value;
+	var sAssigneeID = doc["SET.OWNER_ID"].value;
+	var sComment = doc["SET.txtComment"].value
+	
+	
+	if ( sAssignee.length == 0 || sAssigneeID.length == 0 )
+	{
+		alertmsg("Please_select_an_owner_before_0"); //"Please select an owner before publishing this document.";
+		doc["OWNER_ID_combo_name"].focus();
+		return;
+	}
+
+	if (iByPass == 1)
+	{
+		w.Publish(sAssigneeID, sAssignee, sComment,1)	
+	}
+	else
+	{ 
+		w.Forward(sAssigneeID, sAssignee, sComment,1); //The Forward() is in the detail_KD.htmpl	
+	}	
+}
+function cancel()
+{
+	ahdtop.AHD_Windows['$args.KEEP.POPUP_NAME'].close();
+}
+function checkLength()
+{	
+	if (doc["SET.txtComment"].value.length > 255)
+	{
+		alertmsg("Comment_field_cannot_exceed_25");//("Comment field cannot exceed 255 characters.");
+		doc["SET.txtComment"].focus();
+		return false;
+	}
+	return true;
+}
+function frmPublishOnLoad()
+{
+	doc = document.main_form.elements;
+	var ownerName = "$args.KEEP.OWNER_COMBO_NAME";
+	if ( ownerName.match(/^([^,]*),([^,]*),(.*)$/) )  //come inside the if loop only if there is a match
+	{                                                 //otherwise chrome and safari are having some junk values in RegExp
+		ownerName=RegExp.\$1;                    
+		if(RegExp.\$2.length>0&&RegExp.\$3.length>0)
+			ownerName+=", "+RegExp.\$2+", "+RegExp.\$3;
+		else if(RegExp.\$2.length>0||RegExp.\$3.length>0)
+			ownerName+=", "+RegExp.\$2+RegExp.\$3;
+	}
+	doc["OWNER_ID_combo_name"].value = ownerName;
+	doc["SET.OWNER_ID"].value = "$args.KEEP.OWNER_ID";
+	passWinName(); //Pass the forward window name to document editor
+	argFactoryTenancy = 1;<PDM_IF 0>Added here b/c the form does not match the standard</PDM_IF>
+
+}
+
+function passWinName()
+{
+	w.getWinName(strWinName, 5); //The getWinName() is in the detail_js.htmpl		
+}
+</script>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</body>
+</html>
