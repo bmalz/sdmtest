@@ -484,6 +484,7 @@ function showEmail(value)
 <PDM_MACRO name=lsCol hdr="e-mail" attr=email_address fmtfunc=showEmail startrow="no">
 </PDM_IF>
 <PDM_MACRO name=lsCol hdr="Status" attr=delete_flag startrow="no">
+<PDM_MACRO name=lsCol hdr="Id" attr=id>
 <PDM_MACRO name=lsEnd>
 </script>
 </PDM_IF>
